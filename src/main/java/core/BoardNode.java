@@ -45,8 +45,10 @@ public class BoardNode {
      */
     public boolean addNeighbour(BoardNode neighbour) {
         if (neighbours.size() <= maxNeighbours || maxNeighbours == -1) {
-            neighbours.add(neighbour);
-            return true;
+            if (!(neighbours.contains(neighbour))) {
+                neighbours.add(neighbour);
+                return true;
+            }
         }
         return false;
     }
@@ -73,9 +75,11 @@ public class BoardNode {
      */
     public boolean addNeighbour(BoardNode neighbour, int side) {
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
-            neighbours.add(neighbour);
-            neighbourSideMapping.put(neighbour, side);
-            return true;
+            if (!(neighbours.contains(neighbour)) && !(neighbourSideMapping.containsKey(neighbour))) {
+                neighbours.add(neighbour);
+                neighbourSideMapping.put(neighbour, side);
+                return true;
+            }
         }
         return false;
     }
@@ -87,6 +91,7 @@ public class BoardNode {
     public BoardNode copy() {
         BoardNode copy = new BoardNode(maxNeighbours, name, color);
         copy.id = id;
+        idCounter--;  // This increases automatically in constructor, but we don't need that if we're copying the ID
         copy.neighbours = new HashSet<>(neighbours);
         copy.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
 

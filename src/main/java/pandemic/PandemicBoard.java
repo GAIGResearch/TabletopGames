@@ -2,7 +2,6 @@ package pandemic;
 
 import core.Board;
 import core.BoardNode;
-import core.Utils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -59,18 +58,6 @@ public class PandemicBoard extends Board {
     }
 
     /**
-     * Returns the node in the list which matches the given name
-     * @param name - name of node to search for.
-     * @return - node matching name.
-     */
-    private BoardNode getNodeByName(String name) {
-        for (BoardNode n : boardNodes) {
-            if (n.getName().equals(name)) return n;
-        }
-        return null;
-    }
-
-    /**
      * Returns a hashset of neighbour names from a JSON object
      * @param city - JSON object representing a Pandemic city.
      * @return - hashset of the city's neighbours.
@@ -96,6 +83,8 @@ public class PandemicBoard extends Board {
     public static void main(String[] args) {
         PandemicBoard pb = new PandemicBoard();
         pb.loadBoard(dataPath);
-        System.out.println(pb.boardNodes.toString());
+        for (BoardNode b : pb.boardNodes) {
+            System.out.println(b);
+        }
     }
 }

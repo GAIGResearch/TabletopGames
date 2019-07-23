@@ -60,6 +60,30 @@ public abstract class Board {
     }
 
     /**
+     * Returns the node in the list which matches the given name
+     * @param name - name of node to search for.
+     * @return - node matching name.
+     */
+    protected BoardNode getNodeByName(String name) {
+        for (BoardNode n : boardNodes) {
+            if (n.getName().equals(name)) return n;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the node in the list which matches the given ID
+     * @param id - ID of node to search for.
+     * @return - node matching ID.
+     */
+    protected BoardNode getNodeByID(int id) {
+        for (BoardNode n : boardNodes) {
+            if (n.getId() == id) return n;
+        }
+        return null;
+    }
+
+    /**
      * Copy method, to be implemented by all subclasses.
      * @return - a new instance of this Board, deep copy.
      */
