@@ -28,7 +28,7 @@ public class Token {
         copy.owner = (HashSet)owner.clone();
         copy.value = value;
         copy.occurenceLimit = occurenceLimit;
-        return copy();
+        return copy;
     }
 
     public String getType() {
