@@ -33,5 +33,210 @@
     "name": "London",
     "color": "blue",
     "neighbours": ["New York", "Madrid", "Paris", "Essen"]
+  },
+  {
+    "name": "Madrid",
+    "color": "blue",
+    "neighbours": ["New York", "London", "Paris", "Algiers", "Sao Paolo"]
+  },
+  {
+    "name": "Paris",
+    "color": "blue",
+    "neighbours": ["London", "Madrid", "Milan", "Essen", "Algiers"]
+  },
+  {
+    "name": "Essen",
+    "color": "blue",
+    "neighbours": ["London", "Milan", "Paris", "St Petersburg"]
+  },
+  {
+    "name": "Milan",
+    "color": "blue",
+    "neighbours": ["Paris", "Essen", "Algiers", "Istanbul"]
+  },
+  {
+    "name": "St Petersburg",
+    "color": "blue",
+    "neighbours": ["Essen", "Moscow", "Istanbul"]
+  },
+  {
+    "name": "Algiers",
+    "color": "black",
+    "neighbours": ["Madrid", "Paris", "Istanbul", "Cairo"]
+  },
+  {
+    "name": "Cairo",
+    "color": "black",
+    "neighbours": ["Algiers", "Baghdad", "Istanbul", "Riyadh", "Khartoum"]
+  },
+  {
+    "name": "Istanbul",
+    "color": "black",
+    "neighbours": ["Algiers", "Baghdad", "Cairo", "Moscow", "Milan", "St Petersburg"]
+  },
+  {
+    "name": "Moscow",
+    "color": "black",
+    "neighbours": ["St Petersburg", "Tehran", "Istanbul"]
+  },
+  {
+    "name": "Tehran",
+    "color": "black",
+    "neighbours": ["Moscow", "Baghdad", "Karachi", "Delhi"]
+  },
+  {
+    "name": "Baghdad",
+    "color": "black",
+    "neighbours": ["Karachi", "Cairo", "Istanbul", "Riyadh", "Tehran"]
+  },
+  {
+    "name": "Riyadh",
+    "color": "black",
+    "neighbours": ["Cairo", "Karachi", "Baghdad"]
+  },
+  {
+    "name": "Karachi",
+    "color": "black",
+    "neighbours": ["Tehran", "Baghdad", "Delhi", "Riyadh", "Mumbai"]
+  },
+  {
+    "name": "Delhi",
+    "color": "black",
+    "neighbours": ["Tehran", "Karachi", "Kolkata", "Mumbai", "Chennai"]
+  },
+  {
+    "name": "Mumbai",
+    "color": "black",
+    "neighbours": ["Karachi", "Delhi", "Chennai"]
+  },
+  {
+    "name": "Kolkata",
+    "color": "black",
+    "neighbours": ["Delhi", "Chennai", "Bangkok", "Hong Kong"]
+  },
+  {
+    "name": "Chennai",
+    "color": "black",
+    "neighbours": ["Mumbai", "Delhi", "Kolkata", "Bangkok", "Jakarta"]
+  },
+  {
+    "name": "Beijing",
+    "color": "red",
+    "neighbours": ["Shanghai", "Seoul"]
+  },
+  {
+    "name": "Seoul",
+    "color": "red",
+    "neighbours": ["Beijing", "Shanghai", "Tokyo"]
+  },
+  {
+    "name": "Shanghai",
+    "color": "red",
+    "neighbours": ["Hong Kong", "Taipei", "Tokyo", "Seoul", "Beijing"]
+  },
+  {
+    "name": "Tokyo",
+    "color": "red",
+    "neighbours": ["Osaka", "Seoul", "San Francisco", "Shanghai"]
+  },
+  {
+    "name": "Osaka",
+    "color": "red",
+    "neighbours": ["Taipei", "Tokyo"]
+  },
+  {
+    "name": "Taipei",
+    "color": "red",
+    "neighbours": ["Hong Kong", "Manila", "Osaka", "Shanghai"]
+  },
+  {
+    "name": "Hong Kong",
+    "color": "red",
+    "neighbours": ["Bangkok", "Kolkata", "Shanghai", "Taipei", "Manila", "Ho Chi Minh City"]
+  },
+  {
+    "name": "Bangkok",
+    "color": "red",
+    "neighbours": ["Ho Chi Minh City", "Jakarta", "Chennai", "Kolkata", "Hong Kong"]
+  },
+  {
+    "name": "Ho Chi Minh City",
+    "color": "red",
+    "neighbours": ["Jakarta", "Bangkok", "Hong Kong", "Manila"]
+  },
+  {
+    "name": "Manila",
+    "color": "red",
+    "neighbours": ["Sydney", "Ho Chi Minh City", "Hong Kong", "Taipei", "San Francisco"]
+  },
+  {
+    "name": "Sydney",
+    "color": "red",
+    "neighbours": ["Jakarta", "Manila", "Los Angeles"]
+  },
+  {
+    "name": "Jakarta",
+    "color": "red",
+    "neighbours": ["Chennai", "Sydney", "Ho Chi Minh City", "Bangkok"]
+  },
+  {
+    "name": "Khartoum",
+    "color": "yellow",
+    "neighbours": ["Lagos", "Johannesburg", "Cairo"]
+  },
+  {
+    "name": "Lagos",
+    "color": "yellow",
+    "neighbours": ["Kinshasa", "Khartoum", "Sao Paolo"]
+  },
+  {
+    "name": "Johannesburg",
+    "color": "yellow",
+    "neighbours": ["Kinshasa", "Khartoum"]
+  },
+  {
+    "name": "Kinshasa",
+    "color": "yellow",
+    "neighbours": ["Lagos", "Johannesburg", "Khartoum"]
+  },
+  {
+    "name": "Sao Paolo",
+    "color": "yellow",
+    "neighbours": ["Buenos Aires", "Bogota", "Lagos", "Madrid"]
+  },
+  {
+    "name": "Bogota",
+    "color": "yellow",
+    "neighbours": ["Buenos Aires", "Lima", "Sao Paolo", "Miami", "Mexico City"]
+  },
+  {
+    "name": "Miami",
+    "color": "yellow",
+    "neighbours": ["Atlanta", "Washington", "Mexico City", "Bogota"]
+  },
+  {
+    "name": "Mexico City",
+    "color": "yellow",
+    "neighbours": ["Los Angeles", "Lima", "Chicago", "Miami", "Bogota"]
+  },
+  {
+    "name": "Los Angeles",
+    "color": "yellow",
+    "neighbours": ["San Francisco", "Chicago", "Mexico City", "Sydney"]
+  },
+  {
+    "name": "Lima",
+    "color": "yellow",
+    "neighbours": ["Santiago", "Bogota", "Mexico City"]
+  },
+  {
+    "name": "Santiago",
+    "color": "yellow",
+    "neighbours": ["Lima"]
+  },
+  {
+    "name": "Buenos Aires",
+    "color": "yellow",
+    "neighbours": ["Sao Paolo", "Bogota"]
   }
 ]
