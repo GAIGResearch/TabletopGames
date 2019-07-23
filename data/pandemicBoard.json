@@ -8,5 +8,30 @@
     "name": "Washington",
     "color": "blue",
     "neighbours": ["Atlanta", "Miami", "New York", "Montreal"]
+  },
+  {
+    "name": "San Francisco",
+    "color": "blue",
+    "neighbours": ["Los Angeles", "Chicago", "Tokyo", "Manila"]
+  },
+  {
+    "name": "Chicago",
+    "color": "blue",
+    "neighbours": ["San Francisco", "Los Angeles", "Atlanta", "Mexico City", "Montreal"]
+  },
+  {
+    "name": "Montreal",
+    "color": "blue",
+    "neighbours": ["New York", "Washington", "Chicago"]
+  },
+  {
+    "name": "New York",
+    "color": "blue",
+    "neighbours": ["Montreal", "Washington", "London", "Madrid"]
+  },
+  {
+    "name": "London",
+    "color": "blue",
+    "neighbours": ["New York", "Madrid", "Paris", "Essen"]
   }
 ]
