@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Atlanta",
+    "color": "blue",
+    "neighbours": ["Miami", "Washington", "Chicago"]
+  },
+  {
+    "name": "Washington",
+    "color": "blue",
+    "neighbours": ["Atlanta", "Miami", "New York", "Montreal"]
+  }
+]
