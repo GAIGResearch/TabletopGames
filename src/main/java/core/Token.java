@@ -1,3 +1,5 @@
+package core;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;

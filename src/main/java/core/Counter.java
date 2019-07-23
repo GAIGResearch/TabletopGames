@@ -1,3 +1,5 @@
+package core;
+
 public class Counter {
     private int count;
     private int minimum;
