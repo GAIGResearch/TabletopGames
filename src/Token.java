@@ -1,3 +1,4 @@
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.util.HashSet;
 
@@ -7,7 +8,6 @@ public class Token {
     private String type;            // string type or name
     private Color colour;           // colour
     private HashSet<Integer> owner; // owner
-    private String shape;           // shape
     private int value;              // value
     private int occurenceLimit;     // occurence limit
 
@@ -25,7 +25,6 @@ public class Token {
         copy.type = new String(type);
         copy.colour = new Color(colour.getRGB());
         copy.owner = (HashSet)owner.clone();
-        copy.shape = new String(shape);
         copy.value = value;
         copy.occurenceLimit = occurenceLimit;
         return copy();
@@ -55,13 +54,6 @@ public class Token {
         this.owner = owner;
     }
 
-    public String getShape() {
-        return shape;
-    }
-
-    public void setShape(String shape) {
-        this.shape = shape;
-    }
 
     public int getValue() {
         return value;
@@ -86,5 +78,14 @@ public class Token {
     public int getPosition() {
 
         return position;
+    }
+
+    public static void main(String[] args) {
+        Token pawn = new Token("pawn");
+        Token diseaseCubes = new Token("diseaseCube");
+        diseaseCubes.setColour(Color.BLUE);
+        Token cureMarker = new Token("cureMarker");
+        Token researchStation = new Token("researchStation");
+
     }
 }
