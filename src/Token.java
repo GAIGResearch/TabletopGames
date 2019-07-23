@@ -1,6 +1,9 @@
 import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+
+import static java.awt.Color.*;
 
 public class Token {
     // position should be reference to a graph
@@ -81,11 +84,27 @@ public class Token {
     }
 
     public static void main(String[] args) {
-        Token pawn = new Token("pawn");
-        Token diseaseCubes = new Token("diseaseCube");
-        diseaseCubes.setColour(Color.BLUE);
-        Token cureMarker = new Token("cureMarker");
-        Token researchStation = new Token("researchStation");
-
+        // Example token setup for Pandemic
+        Color[] colours = {Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED};
+        ArrayList<Token> pawns = new ArrayList<>();
+        for (int i = 0; i < 7; i++){
+            pawns.add(new Token("pawn"));
+        }
+        ArrayList<Token> disaseCubes = new ArrayList<>();
+        for (int i = 0; i < 4; i++){
+            for (int j = 0; j < 24; j++){
+                Token disaseCube = new Token("disaseCube");
+                disaseCube.setColour(colours[i]);
+                disaseCubes.add(disaseCube);
+            }
+        }
+        ArrayList<Token> cureMarkers = new ArrayList<>();
+        for (int i =0 ; i < 4; i ++){
+            cureMarkers.add(new Token("cureMarker"));
+        }
+        ArrayList<Token> researchStations = new ArrayList<>();
+        for (int i = 0 ; i < 6; i++){
+            researchStations.add(new Token("researchStation"));
+        }
     }
 }
