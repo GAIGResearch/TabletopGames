@@ -1,5 +1,7 @@
 package core;
 
+import utilities.Vector2D;
+
 import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +13,7 @@ public class BoardNode {
     private int id;  // unique id of this board node
     private String name;  // name of this board node
     private Color color;  // color of this board node
+    private Vector2D position;  // physical position of this board node
 
     private HashSet<BoardNode> neighbours;  // neighbours of this board node
     private HashMap<BoardNode, Integer> neighbourSideMapping;  // neighbours mapping to a side of this board node
@@ -20,6 +23,7 @@ public class BoardNode {
         this.name = "";
         this.color = Color.GRAY;
         this.id = idCounter;
+        this.position = new Vector2D();
         this.maxNeighbours = -1;
         this.neighbours = new HashSet<>();
         this.neighbourSideMapping = new HashMap<>();
@@ -27,10 +31,11 @@ public class BoardNode {
         idCounter++;
     }
 
-    public BoardNode(int maxNeighbours, String name, Color color) {
+    public BoardNode(int maxNeighbours, String name, Color color, Vector2D position) {
         this.name = name;
         this.color = color;
         this.id = idCounter;
+        this.position = position;
         this.maxNeighbours = maxNeighbours;
         this.neighbours = new HashSet<>();
         this.neighbourSideMapping = new HashMap<>();
@@ -89,7 +94,7 @@ public class BoardNode {
      * @return - a new instance of this node.
      */
     public BoardNode copy() {
-        BoardNode copy = new BoardNode(maxNeighbours, name, color);
+        BoardNode copy = new BoardNode(maxNeighbours, name, color, position.copy());
         copy.id = id;
         idCounter--;  // This increases automatically in constructor, but we don't need that if we're copying the ID
         copy.neighbours = new HashSet<>(neighbours);
@@ -131,6 +136,13 @@ public class BoardNode {
      */
     public HashMap<BoardNode, Integer> getNeighbourSideMapping() {
         return neighbourSideMapping;
+    }
+
+    /**
+     * @return the physical position of this board node
+     */
+    public Vector2D getPosition() {
+        return position;
     }
 
     /**
