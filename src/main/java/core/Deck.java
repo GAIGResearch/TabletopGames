@@ -1,3 +1,5 @@
+package core;
+
 import java.util.*;
 
 public class Deck implements IDeck {

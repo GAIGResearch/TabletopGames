@@ -1,3 +1,5 @@
+package core;
+
 /**
  * Class for a deck of cards.
  * A deck is defined as a "group of cards". Examples of decks are:
