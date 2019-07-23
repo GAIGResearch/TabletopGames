@@ -80,11 +80,16 @@ public class PandemicBoard extends Board {
     /**
      * Main method for testing.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         PandemicBoard pb = new PandemicBoard();
         pb.loadBoard(dataPath);
-        for (BoardNode b : pb.boardNodes) {
-            System.out.println(b);
+//        for (BoardNode b : pb.boardNodes) {
+//            System.out.println(b);
+//        }
+        PandemicGUI gui = new PandemicGUI(pb);
+        while (true) {
+            gui.repaint();
+            Thread.sleep(100);
         }
     }
 }

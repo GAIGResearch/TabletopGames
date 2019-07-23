@@ -2,241 +2,289 @@
   {
     "name": "Atlanta",
     "color": "blue",
-    "neighbours": ["Miami", "Washington", "Chicago"]
+    "neighbours": ["Miami", "Washington", "Chicago"],
+    "coordinates": [236, 325]
   },
   {
     "name": "Washington",
     "color": "blue",
-    "neighbours": ["Atlanta", "Miami", "New York", "Montreal"]
+    "neighbours": ["Atlanta", "Miami", "New York", "Montreal"],
+    "coordinates": [324, 321]
   },
   {
     "name": "San Francisco",
     "color": "blue",
-    "neighbours": ["Los Angeles", "Chicago", "Tokyo", "Manila"]
+    "neighbours": ["Los Angeles", "Chicago", "Tokyo", "Manila"],
+    "coordinates": [100, 295]
   },
   {
     "name": "Chicago",
     "color": "blue",
-    "neighbours": ["San Francisco", "Los Angeles", "Atlanta", "Mexico City", "Montreal"]
+    "neighbours": ["San Francisco", "Los Angeles", "Atlanta", "Mexico City", "Montreal"],
+    "coordinates": [205, 265]
   },
   {
     "name": "Montreal",
     "color": "blue",
-    "neighbours": ["New York", "Washington", "Chicago"]
+    "neighbours": ["New York", "Washington", "Chicago"],
+    "coordinates": [288, 262]
   },
   {
     "name": "New York",
     "color": "blue",
-    "neighbours": ["Montreal", "Washington", "London", "Madrid"]
+    "neighbours": ["Montreal", "Washington", "London", "Madrid"],
+    "coordinates": [352, 271]
   },
   {
     "name": "London",
     "color": "blue",
-    "neighbours": ["New York", "Madrid", "Paris", "Essen"]
+    "neighbours": ["New York", "Madrid", "Paris", "Essen"],
+    "coordinates": [506, 222]
   },
   {
     "name": "Madrid",
     "color": "blue",
-    "neighbours": ["New York", "London", "Paris", "Algiers", "Sao Paolo"]
+    "neighbours": ["New York", "London", "Paris", "Algiers", "Sao Paolo"],
+    "coordinates": [494, 303]
   },
   {
     "name": "Paris",
     "color": "blue",
-    "neighbours": ["London", "Madrid", "Milan", "Essen", "Algiers"]
+    "neighbours": ["London", "Madrid", "Milan", "Essen", "Algiers"],
+    "coordinates": [568, 263]
   },
   {
     "name": "Essen",
     "color": "blue",
-    "neighbours": ["London", "Milan", "Paris", "St Petersburg"]
+    "neighbours": ["London", "Milan", "Paris", "St Petersburg"],
+    "coordinates": [588, 207]
   },
   {
     "name": "Milan",
     "color": "blue",
-    "neighbours": ["Paris", "Essen", "Algiers", "Istanbul"]
+    "neighbours": ["Paris", "Essen", "Algiers", "Istanbul"],
+    "coordinates": [622, 247]
   },
   {
     "name": "St Petersburg",
     "color": "blue",
-    "neighbours": ["Essen", "Moscow", "Istanbul"]
+    "neighbours": ["Essen", "Moscow", "Istanbul"],
+    "coordinates": [680, 190]
   },
   {
     "name": "Algiers",
     "color": "black",
-    "neighbours": ["Madrid", "Paris", "Istanbul", "Cairo"]
+    "neighbours": ["Madrid", "Paris", "Istanbul", "Cairo"],
+    "coordinates": [585, 350]
   },
   {
     "name": "Cairo",
     "color": "black",
-    "neighbours": ["Algiers", "Baghdad", "Istanbul", "Riyadh", "Khartoum"]
+    "neighbours": ["Algiers", "Baghdad", "Istanbul", "Riyadh", "Khartoum"],
+    "coordinates": [648, 365]
   },
   {
     "name": "Istanbul",
     "color": "black",
-    "neighbours": ["Algiers", "Baghdad", "Cairo", "Moscow", "Milan", "St Petersburg"]
+    "neighbours": ["Algiers", "Baghdad", "Cairo", "Moscow", "Milan", "St Petersburg"],
+    "coordinates": [660, 295]
   },
   {
     "name": "Moscow",
     "color": "black",
-    "neighbours": ["St Petersburg", "Tehran", "Istanbul"]
+    "neighbours": ["St Petersburg", "Tehran", "Istanbul"],
+    "coordinates": [725, 245]
   },
   {
     "name": "Tehran",
     "color": "black",
-    "neighbours": ["Moscow", "Baghdad", "Karachi", "Delhi"]
+    "neighbours": ["Moscow", "Baghdad", "Karachi", "Delhi"],
+    "coordinates": [781, 286]
   },
   {
     "name": "Baghdad",
     "color": "black",
-    "neighbours": ["Karachi", "Cairo", "Istanbul", "Riyadh", "Tehran"]
+    "neighbours": ["Karachi", "Cairo", "Istanbul", "Riyadh", "Tehran"],
+    "coordinates": [718, 337]
   },
   {
     "name": "Riyadh",
     "color": "black",
-    "neighbours": ["Cairo", "Karachi", "Baghdad"]
+    "neighbours": ["Cairo", "Karachi", "Baghdad"],
+    "coordinates": [728, 412]
   },
   {
     "name": "Karachi",
     "color": "black",
-    "neighbours": ["Tehran", "Baghdad", "Delhi", "Riyadh", "Mumbai"]
+    "neighbours": ["Tehran", "Baghdad", "Delhi", "Riyadh", "Mumbai"],
+    "coordinates": [797, 364]
   },
   {
     "name": "Delhi",
     "color": "black",
-    "neighbours": ["Tehran", "Karachi", "Kolkata", "Mumbai", "Chennai"]
+    "neighbours": ["Tehran", "Karachi", "Kolkata", "Mumbai", "Chennai"],
+    "coordinates": [858, 341]
   },
   {
     "name": "Mumbai",
     "color": "black",
-    "neighbours": ["Karachi", "Delhi", "Chennai"]
+    "neighbours": ["Karachi", "Delhi", "Chennai"],
+    "coordinates": [805, 425]
   },
   {
     "name": "Kolkata",
     "color": "black",
-    "neighbours": ["Delhi", "Chennai", "Bangkok", "Hong Kong"]
+    "neighbours": ["Delhi", "Chennai", "Bangkok", "Hong Kong"],
+    "coordinates": [916, 361]
   },
   {
     "name": "Chennai",
     "color": "black",
-    "neighbours": ["Mumbai", "Delhi", "Kolkata", "Bangkok", "Jakarta"]
+    "neighbours": ["Mumbai", "Delhi", "Kolkata", "Bangkok", "Jakarta"],
+    "coordinates": [870, 470]
   },
   {
     "name": "Beijing",
     "color": "red",
-    "neighbours": ["Shanghai", "Seoul"]
+    "neighbours": ["Shanghai", "Seoul"],
+    "coordinates": [963, 266]
   },
   {
     "name": "Seoul",
     "color": "red",
-    "neighbours": ["Beijing", "Shanghai", "Tokyo"]
+    "neighbours": ["Beijing", "Shanghai", "Tokyo"],
+    "coordinates": [1037, 263]
   },
   {
     "name": "Shanghai",
     "color": "red",
-    "neighbours": ["Hong Kong", "Taipei", "Tokyo", "Seoul", "Beijing"]
+    "neighbours": ["Hong Kong", "Taipei", "Tokyo", "Seoul", "Beijing"],
+    "coordinates": [968, 325]
   },
   {
     "name": "Tokyo",
     "color": "red",
-    "neighbours": ["Osaka", "Seoul", "San Francisco", "Shanghai"]
+    "neighbours": ["Osaka", "Seoul", "San Francisco", "Shanghai"],
+    "coordinates": [1094, 296]
   },
   {
     "name": "Osaka",
     "color": "red",
-    "neighbours": ["Taipei", "Tokyo"]
+    "neighbours": ["Taipei", "Tokyo"],
+    "coordinates": [1102, 359]
   },
   {
     "name": "Taipei",
     "color": "red",
-    "neighbours": ["Hong Kong", "Manila", "Osaka", "Shanghai"]
+    "neighbours": ["Hong Kong", "Manila", "Osaka", "Shanghai"],
+    "coordinates": [1042, 383]
   },
   {
     "name": "Hong Kong",
     "color": "red",
-    "neighbours": ["Bangkok", "Kolkata", "Shanghai", "Taipei", "Manila", "Ho Chi Minh City"]
+    "neighbours": ["Bangkok", "Kolkata", "Shanghai", "Taipei", "Manila", "Ho Chi Minh City"],
+    "coordinates": [976, 394]
   },
   {
     "name": "Bangkok",
     "color": "red",
-    "neighbours": ["Ho Chi Minh City", "Jakarta", "Chennai", "Kolkata", "Hong Kong"]
+    "neighbours": ["Ho Chi Minh City", "Jakarta", "Chennai", "Kolkata", "Hong Kong"],
+    "coordinates": [928, 431]
   },
   {
     "name": "Ho Chi Minh City",
     "color": "red",
-    "neighbours": ["Jakarta", "Bangkok", "Hong Kong", "Manila"]
+    "neighbours": ["Jakarta", "Bangkok", "Hong Kong", "Manila"],
+    "coordinates": [979, 490]
   },
   {
     "name": "Manila",
     "color": "red",
-    "neighbours": ["Sydney", "Ho Chi Minh City", "Hong Kong", "Taipei", "San Francisco"]
+    "neighbours": ["Sydney", "Ho Chi Minh City", "Hong Kong", "Taipei", "San Francisco"],
+    "coordinates": [1060, 485]
   },
   {
     "name": "Sydney",
     "color": "red",
-    "neighbours": ["Jakarta", "Manila", "Los Angeles"]
+    "neighbours": ["Jakarta", "Manila", "Los Angeles"],
+    "coordinates": [1108, 655]
   },
   {
     "name": "Jakarta",
     "color": "red",
-    "neighbours": ["Chennai", "Sydney", "Ho Chi Minh City", "Bangkok"]
+    "neighbours": ["Chennai", "Sydney", "Ho Chi Minh City", "Bangkok"],
+    "coordinates": [928, 543]
   },
   {
     "name": "Khartoum",
     "color": "yellow",
-    "neighbours": ["Lagos", "Johannesburg", "Cairo"]
+    "neighbours": ["Lagos", "Johannesburg", "Cairo"],
+    "coordinates": [665, 447]
   },
   {
     "name": "Lagos",
     "color": "yellow",
-    "neighbours": ["Kinshasa", "Khartoum", "Sao Paolo"]
+    "neighbours": ["Kinshasa", "Khartoum", "Sao Paolo"],
+    "coordinates": [559, 462]
   },
   {
     "name": "Johannesburg",
     "color": "yellow",
-    "neighbours": ["Kinshasa", "Khartoum"]
+    "neighbours": ["Kinshasa", "Khartoum"],
+    "coordinates": [659, 603]
   },
   {
     "name": "Kinshasa",
     "color": "yellow",
-    "neighbours": ["Lagos", "Johannesburg", "Khartoum"]
+    "neighbours": ["Lagos", "Johannesburg", "Khartoum"],
+    "coordinates": [612, 520]
   },
   {
     "name": "Sao Paolo",
     "color": "yellow",
-    "neighbours": ["Buenos Aires", "Bogota", "Lagos", "Madrid"]
+    "neighbours": ["Buenos Aires", "Bogota", "Lagos", "Madrid"],
+    "coordinates": [399, 579]
   },
   {
     "name": "Bogota",
     "color": "yellow",
-    "neighbours": ["Buenos Aires", "Lima", "Sao Paolo", "Miami", "Mexico City"]
+    "neighbours": ["Buenos Aires", "Lima", "Sao Paolo", "Miami", "Mexico City"],
+    "coordinates": [282, 477]
   },
   {
     "name": "Miami",
     "color": "yellow",
-    "neighbours": ["Atlanta", "Washington", "Mexico City", "Bogota"]
+    "neighbours": ["Atlanta", "Washington", "Mexico City", "Bogota"],
+    "coordinates": [289, 393]
   },
   {
     "name": "Mexico City",
     "color": "yellow",
-    "neighbours": ["Los Angeles", "Lima", "Chicago", "Miami", "Bogota"]
+    "neighbours": ["Los Angeles", "Lima", "Chicago", "Miami", "Bogota"],
+    "coordinates": [194, 406]
   },
   {
     "name": "Los Angeles",
     "color": "yellow",
-    "neighbours": ["San Francisco", "Chicago", "Mexico City", "Sydney"]
+    "neighbours": ["San Francisco", "Chicago", "Mexico City", "Sydney"],
+    "coordinates": [117, 379]
   },
   {
     "name": "Lima",
     "color": "yellow",
-    "neighbours": ["Santiago", "Bogota", "Mexico City"]
+    "neighbours": ["Santiago", "Bogota", "Mexico City"],
+    "coordinates": [253, 566]
   },
   {
     "name": "Santiago",
     "color": "yellow",
-    "neighbours": ["Lima"]
+    "neighbours": ["Lima"],
+    "coordinates": [264, 658]
   },
   {
     "name": "Buenos Aires",
     "color": "yellow",
-    "neighbours": ["Sao Paolo", "Bogota"]
+    "neighbours": ["Sao Paolo", "Bogota"],
+    "coordinates": [350, 642]
   }
 ]

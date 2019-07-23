@@ -4,6 +4,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Utils;
+import utilities.Vector2D;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -55,8 +57,10 @@ public abstract class Board {
         try {
             maxNeighbours = (int) obj.get("maxNeighbours");
         } catch (Exception ignored) {}
+        JSONArray coords = (JSONArray) obj.get("coordinates");
+        Vector2D position = new Vector2D((int)((long)coords.get(0)), (int)((long)coords.get(1)));
 
-        return new BoardNode(maxNeighbours, name, Utils.stringToColor(color));
+        return new BoardNode(maxNeighbours, name, Utils.stringToColor(color), position);
     }
 
     /**
