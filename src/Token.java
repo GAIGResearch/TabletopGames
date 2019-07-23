@@ -1,9 +1,7 @@
-import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static java.awt.Color.*;
 
 public class Token {
     // position should be reference to a graph
