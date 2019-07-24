@@ -74,7 +74,7 @@ public class PandemicBoard extends Board {
     public Board copy() {
         Board copy = new PandemicBoard();
         super.copyTo(copy);
-        return null;
+        return copy;
     }
 
     /**
