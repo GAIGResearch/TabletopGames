@@ -1,11 +1,14 @@
 package components;
 
+import utilities.Utils.ComponentType;
+
 public class Counter extends Component {
     private int count;
     private int minimum;
     private int maximum;
 
     public Counter(int minimum, int maximum, int initial_value) {
+        super.type = ComponentType.COUNTER;
         this.minimum = minimum;
         this.maximum = maximum;
         this.count   = initial_value;

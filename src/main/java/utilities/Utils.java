@@ -16,10 +16,11 @@ public abstract class Utils {
     }
 
     public enum ComponentType {
-        DECK,
-        COUNTER,
-        TOKEN,
         BOARD,
-        DICE
+        DECK,
+        CARD,
+        COUNTER,
+        DICE,
+        TOKEN;
     }
 }

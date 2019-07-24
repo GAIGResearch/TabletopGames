@@ -6,13 +6,14 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Utils;
 import utilities.Vector2D;
+import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Board {
+public abstract class Board extends Component{
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;
@@ -107,5 +108,12 @@ public abstract class Board {
      */
     private void setBoardNodes(List<BoardNode> boardNodes) {
         this.boardNodes = boardNodes;
+    }
+
+    /**
+     * Sets the correct type to the component
+     */
+    public void setType(){
+        super.type = ComponentType.BOARD;
     }
 }
