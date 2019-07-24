@@ -1,6 +1,6 @@
 package core;
 
-public class Counter {
+public class Counter extends Component {
     private int count;
     private int minimum;
     private int maximum;
