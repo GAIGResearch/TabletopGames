@@ -1,4 +1,4 @@
-package core;
+package components;
 
 import content.Property;
 import utilities.Vector2D;

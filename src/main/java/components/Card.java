@@ -1,9 +1,10 @@
-package core;
+package components;
 
 import java.awt.*;
+import utilities.Utils.ComponentType;
 
-public class Card {
-    private int type;
+public class Card extends Component {
+    private int cardType;
     private String name;
     private Color colour;
     private String text;
@@ -11,20 +12,25 @@ public class Card {
 
     /* Constructors */
 
-    public Card(){}
+    public Card(){
+        super.type = ComponentType.CARD;
+    }
 
     public Card(String name){
+        super.type = ComponentType.CARD;
         this.name = name;
     }
 
-    public Card(String name, int type){
+    public Card(String name, int cardType){
+        super.type = ComponentType.CARD;
         this.name = name;
-        this.type = type;
+        this.cardType = cardType;
     }
 
-    public Card(String name, int type, String text, int occurenceCount){
+    public Card(String name, int cardType, String text, int occurenceCount){
+        super.type = ComponentType.CARD;
         this.name = name;
-        this.type = type;
+        this.cardType = cardType;
         this.text = text;
         this.occurenceCount = occurenceCount;
     }
@@ -33,6 +39,7 @@ public class Card {
         Card copy = new Card();
         copy.name = new String(this.name);
         copy.type = type;
+        copy.cardType = cardType;
         copy.text = new String(text);
         copy.occurenceCount = occurenceCount;
         copy.colour = new Color(this.colour.getRGB());
@@ -41,12 +48,12 @@ public class Card {
 
     /* Getters and Setters */
 
-    public int getType() {
-        return type;
+    public int getCardType() {
+        return cardType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setCardType(int cardType) {
+        this.cardType = cardType;
     }
 
     public String getName() {

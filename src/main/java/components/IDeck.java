@@ -1,4 +1,4 @@
-package core;
+package components;
 
 /**
  * Class for a deck of cards.

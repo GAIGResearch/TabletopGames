@@ -1,4 +1,4 @@
-package core;
+package components;
 
 import content.*;
 import org.json.simple.JSONArray;
@@ -6,13 +6,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Hash;
+import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Board {
+public class Board extends Component{
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;
@@ -173,6 +174,7 @@ public class Board {
         this.boardNodes = boardNodes;
     }
 
+
     /**
      * Main method for testing.
      */
@@ -184,6 +186,12 @@ public class Board {
         for (BoardNode b : pb.boardNodes) {
             System.out.println(b);
         }
+    }
 
+    /**
+     * Sets the correct type to the component
+     */
+    public void setType(){
+        super.type = ComponentType.BOARD;
     }
 }
