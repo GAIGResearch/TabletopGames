@@ -14,7 +14,7 @@ public class Dice {
         return new Dice(this.number_of_sides);
     }
 
-    public int row() {
+    public int roll() {
         Random r = new Random();
         return r.nextInt(this.number_of_sides) + 1;
     }
@@ -34,20 +34,20 @@ public class Dice {
         // Row several times the 6 sides dice
         System.out.println("Row several times a 6 sides dice");
         for (int i=0; i< n_times; i++) {
-            System.out.println(dice_6_sides.row());
+            System.out.println(dice_6_sides.roll());
         }
 
         // Row several times the 12 sides dice
         System.out.println("Row several times a 8 sides dice");
         for (int i=0; i< n_times; i++) {
-            System.out.println(dice_8_sides.row());
+            System.out.println(dice_8_sides.roll());
         }
 
 
         // Row several times the 12 sides dice
         System.out.println("Row several times a 12 sides dice");
         for (int i=0; i< n_times; i++) {
-            System.out.println(dice_12_sides.row());
+            System.out.println(dice_12_sides.roll());
         }
 
 
