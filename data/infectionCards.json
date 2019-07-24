@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Atlanta",
+    "color": "blue",
+    "country": "United States"
+  },
+  {
+    "name": "Washington",
+    "color": "blue",
+    "country": "United States"
+  },
+  {
+    "name": "San Francisco",
+    "color": "blue",
+    "country": "United States"
+  },
+  {
+    "name": "Chicago",
+    "color": "blue",
+    "country": "United States"
+  },
+  {
+    "name": "Montreal",
+    "color": "blue",
+    "country": "Canada"
+  },
+  {
+    "name": "New York",
+    "color": "blue",
+    "country": "United States"
+  },
+  {
+    "name": "London",
+    "color": "blue",
+    "country": "United Kingdom"
+  },
+  {
+    "name": "Madrid",
+    "color": "blue",
+    "country": "Spain"
+  },
+  {
+    "name": "Paris",
+    "color": "blue",
+    "country": "France"
+  },
+  {
+    "name": "Essen",
+    "color": "blue",
+    "country": "Germany"
+  },
+  {
+    "name": "Milan",
+    "color": "blue",
+    "country": "Italy"
+  },
+  {
+    "name": "St Petersburg",
+    "color": "blue",
+    "country": "Russia"
+  },
+  {
+    "name": "Algiers",
+    "color": "black",
+    "country": "Algeria"
+  },
+  {
+    "name": "Cairo",
+    "color": "black",
+    "country": "Egypt"
+  },
+  {
+    "name": "Istanbul",
+    "color": "black",
+    "country": "Turkey"
+  },
+  {
+    "name": "Moscow",
+    "color": "black",
+    "country": "Russia"
+  },
+  {
+    "name": "Tehran",
+    "color": "black",
+    "country": "Iran"
+  },
+  {
+    "name": "Baghdad",
+    "color": "black",
+    "country": "Iran"
+  },
+  {
+    "name": "Riyadh",
+    "color": "black",
+    "country": "Saudi Arabia"
+  },
+  {
+    "name": "Karachi",
+    "color": "black",
+    "country": "Pakistan"
+  },
+  {
+    "name": "Delhi",
+    "color": "black",
+    "country": "India"
+  },
+  {
+    "name": "Mumbai",
+    "color": "black",
+    "country": "India"
+  },
+  {
+    "name": "Kolkata",
+    "color": "black",
+    "country": "India"
+  },
+  {
+    "name": "Chennai",
+    "color": "black",
+    "country": "India"
+  },
+  {
+    "name": "Beijing",
+    "color": "red",
+    "country": "People's Republic of China"
+  },
+  {
+    "name": "Seoul",
+    "color": "red",
+    "country": "South Korea"
+  },
+  {
+    "name": "Shanghai",
+    "color": "red",
+    "country": "People's Republic of China"
+  },
+  {
+    "name": "Tokyo",
+    "color": "red",
+    "country": "Japan"
+  },
+  {
+    "name": "Osaka",
+    "color": "red",
+    "country": "Japan"
+  },
+  {
+    "name": "Taipei",
+    "color": "red",
+    "country": "Taiwan"
+  },
+  {
+    "name": "Hong Kong",
+    "color": "red",
+    "country": "People's Republic of China"
+  },
+  {
+    "name": "Bangkok",
+    "color": "red",
+    "country": "Thailand"
+  },
+  {
+    "name": "Ho Chi Minh City",
+    "color": "red",
+    "country": "Vietnam"
+  },
+  {
+    "name": "Manila",
+    "color": "red",
+    "country": "Philippines"
+  },
+  {
+    "name": "Sydney",
+    "color": "red",
+    "country": "Australia"
+  },
+  {
+    "name": "Jakarta",
+    "color": "red",
+    "country": "Indonesia"
+  },
+  {
+    "name": "Khartoum",
+    "color": "yellow",
+    "country": "Sudan"
+  },
+  {
+    "name": "Lagos",
+    "color": "yellow",
+    "country": "Nigeria"
+  },
+  {
+    "name": "Johannesburg",
+    "color": "yellow",
+    "country": "South Africa"
+  },
+  {
+    "name": "Kinshasa",
+    "color": "yellow",
+    "country": "Dem. Republic of the Congo"
+  },
+  {
+    "name": "Sao Paolo",
+    "color": "yellow",
+    "country": "Brazil"
+  },
+  {
+    "name": "Bogota",
+    "color": "yellow",
+    "country": "Colombia"
+  },
+  {
+    "name": "Miami",
+    "color": "yellow",
+    "country": "United States"
+  },
+  {
+    "name": "Mexico City",
+    "color": "yellow",
+    "country": "Mexico"
+  },
+  {
+    "name": "Los Angeles",
+    "color": "yellow",
+    "country": "United States"
+  },
+  {
+    "name": "Lima",
+    "color": "yellow",
+    "country": "Peru"
+  },
+  {
+    "name": "Santiago",
+    "color": "yellow",
+    "country": "Chile"
+  },
+  {
+    "name": "Buenos Aires",
+    "color": "yellow",
+    "country": "Argentina"
+  }
+]
