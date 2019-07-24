@@ -2,10 +2,18 @@ package core;
 
 import java.util.Random;
 
-public class Dice {
+public class Dice extends Component {
     private int number_of_sides;
 
-    public Dice(int number_of_sides) { this.number_of_sides = number_of_sides; }
+    public Dice() {
+        super.type = ComponentType.DICE;
+        this.number_of_sides = 0;
+    }
+
+    public Dice(int number_of_sides) {
+        super.type = ComponentType.DICE;
+        this.number_of_sides = number_of_sides;
+    }
 
     public int  getNumberOfSides()                    { return this.number_of_sides;            }
     public void setNumberOfSides(int number_of_sides) { this.number_of_sides = number_of_sides; }
@@ -49,10 +57,5 @@ public class Dice {
         for (int i=0; i< n_times; i++) {
             System.out.println(dice_12_sides.row());
         }
-
-
-
-
-
     }
 }

@@ -1,122 +1,39 @@
 package core;
 
-import java.util.HashSet;
+import java.util.HashMap;
 
+/**
+ * An Area is a collection of components as Decks, Token, Dices, Cards and Boards.
+ */
 public class Area {
-    protected HashSet<Component> components;
+    protected HashMap<Integer, Component> components;
+    protected int owner;   // -1 for all
 
 
     public Area() {
-        components = new HashSet<Component>();
+        this.components = new HashMap<Integer, Component>();
+        this.owner = -1;
     }
 
-    public Area(HashSet<Component> components) {
-        this.components = new HashSet<Component>();
-        for (Component old_component:components)
-            this.components.add(old_component);
+    public Area(int owner, HashMap<Integer, Component> components) {
+        this.components = new HashMap<Integer, Component>();
+        this.components.putAll(components);
+        this.owner = owner;
     }
 
     public Area copy() {
         Area new_area = new Area();
-        new_area.components = new HashSet<Component>();
-        for (Component old_component:this.components)
-            new_area.components.add(old_component);
+        new_area.components = new HashMap<Integer, Component>();
+        new_area.components.putAll(this.components);
+        new_area.owner = this.owner;
+
         return new_area;
     }
 
-    /**
-     * get all components
-     */
-    public HashSet<Component> getComponents() { return components; }
+    public int getOwner()           { return this.owner;  }
+    public void setOwner(int owner) { this.owner = owner; }
 
-
-    /**
-     * get only one type
-     */
-    public HashSet<Component> getComponentsOfType(ComponentType type) {
-        HashSet<Component> new_components = new HashSet<Component>();
-        for (Component component:components) {
-            if (component.getType() == type)
-                new_components.add(component);
-        }
-        return new_components;
-    }
-
-    /**
-     * get only boards
-     */
-    public HashSet<Board> getBoard() {
-        HashSet<Board> boards = new HashSet<Board>();
-        for (Component component:components) {
-            if (component.getType() == ComponentType.BOARD)
-                boards.add((Board) component);
-        }
-        return boards;
-    }
-
-    /**
-     * get only decks
-     */
-    public HashSet<Deck> getDecks() {
-        HashSet<Deck> decks = new HashSet<Deck>();
-        for (Component component:components) {
-            if (component.getType() == ComponentType.DECK)
-                decks.add((Deck) component);
-        }
-        return decks;
-    }
-
-    /**
-     * get only tokens
-     */
-    public HashSet<Token> getTokens()
-    {
-        HashSet<Token> tokens = new HashSet<Token>();
-        for (Component component:components) {
-            if (component.getType() == ComponentType.TOKEN)
-                tokens.add((Token) component);
-        }
-        return tokens;
-    }
-
-    /**
-     * get only counters
-     */
-    public HashSet<Counter> getCounters() {
-        HashSet<Counter> counters = new HashSet<Counter>();
-        for (Component component:components) {
-            if (component.getType() == ComponentType.COUNTER)
-                counters.add((Counter) component);
-        }
-        return counters;
-    }
-
-    /**
-     * add new token
-     */
-    public void addToken(Token token) {
-        token.setType(ComponentType.TOKEN);
-        components.add(token);
-    }
-
-    /**
-     * add new counter
-     */
-    public void addCounter(Counter counter) {
-        counter.setType(ComponentType.COUNTER);
-        components.add(counter);
-    }
-
-    /**
-     * add new deck
-     */
-    public void addDeck(Deck deck) {
-        deck.setType(ComponentType.DECK);
-        components.add(deck);
-    }
-
-    public void addBoard(Deck board) {
-        board.setType(ComponentType.BOARD);
-        components.add(board);
-    }
+    public HashMap<Integer, Component> getComponents()                                { return this.components;              }
+    public Component                   getComponent(Integer key)                      { return this.components.get(key);     }
+    public void                        addComponent(Integer key, Component component) { this.components.put(key, component); }
 }
