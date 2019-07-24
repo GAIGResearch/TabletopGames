@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Board {
+public abstract class Board extends Component{
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;

@@ -43,6 +43,18 @@ public class Area {
     }
 
     /**
+     * get only boards
+     */
+    public HashSet<Board> getBoard() {
+        HashSet<Board> boards = new HashSet<Board>();
+        for (Component component:components) {
+            if (component.getType() == ComponentType.BOARD)
+                boards.add((Board) component);
+        }
+        return boards;
+    }
+
+    /**
      * get only decks
      */
     public HashSet<Deck> getDecks() {
@@ -101,5 +113,10 @@ public class Area {
     public void addDeck(Deck deck) {
         deck.setType(ComponentType.DECK);
         components.add(deck);
+    }
+
+    public void addBoard(Deck board) {
+        board.setType(ComponentType.BOARD);
+        components.add(board);
     }
 }
