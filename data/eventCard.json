@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Resilient Population",
+    "effect": "Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic."
+  },
+  {
+    "name": "Airlift",
+    "effect": "Move any 1 pawn to any city. Get permission before moving another player's pawn."
+  },
+  {
+    "name": "Government Grant",
+    "effect": "Add 1 research station to any city (no City card needed)."
+  },
+  {
+    "name": "One quiet night",
+    "effect": "Skip the next Infect Cities step (do not flip over any Infection cards)."
+  },
+  {
+    "name": "Forecast",
+    "effect": "Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top."
+  }
+]
