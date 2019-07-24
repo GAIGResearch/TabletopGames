@@ -1,4 +1,4 @@
-package core;
+package components;
 
 import utilities.Vector2D;
 

@@ -14,4 +14,12 @@ public abstract class Utils {
             default: return null;
         }
     }
+
+    public enum ComponentType {
+        DECK,
+        COUNTER,
+        TOKEN,
+        BOARD,
+        DICE
+    }
 }

@@ -1,7 +1,7 @@
 package pandemic;
 
-import core.Board;
-import core.BoardNode;
+import components.Board;
+import components.BoardNode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

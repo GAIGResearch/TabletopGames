@@ -1,4 +1,4 @@
-package core;
+package components;
 
 public class Counter extends Component {
     private int count;

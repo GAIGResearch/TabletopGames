@@ -1,7 +1,7 @@
 package utilities;
 
-import core.Board;
-import core.BoardNode;
+import components.Board;
+import components.BoardNode;
 
 import javax.swing.*;
 import java.awt.*;

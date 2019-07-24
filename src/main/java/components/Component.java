@@ -1,4 +1,6 @@
-package core;
+package components;
+
+import utilities.Utils.ComponentType;
 
 public abstract class Component {
     protected ComponentType type;
