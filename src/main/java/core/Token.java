@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 
-public class Token {
+public class Token extends Component {
     // position should be reference to a graph
     private int position;           // todo graph
-    private String type;            // string type or name
+    private String token_type;            // string type or name
     private Color colour;           // colour
     private HashSet<Integer> owner; // owner
     private int value;              // value
@@ -18,14 +18,14 @@ public class Token {
 
     }
 
-    public Token(String type){
-        this.type = type;
+    public Token(String token_type){
+        this.token_type = token_type;
     }
 
     public Token copy(){
         Token copy = new Token();
         copy.position = position;
-        copy.type = new String(type);
+        copy.token_type = new String(token_type);
         copy.colour = new Color(colour.getRGB());
         copy.owner = (HashSet)owner.clone();
         copy.value = value;
@@ -33,12 +33,12 @@ public class Token {
         return copy;
     }
 
-    public String getType() {
-        return type;
+    public String getTokenType() {
+        return token_type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTokenType(String token_type) {
+        this.token_type = token_type;
     }
 
     public Color getColour() {
