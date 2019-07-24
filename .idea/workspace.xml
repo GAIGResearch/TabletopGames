@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0f23b22f-c81c-4ee1-9a63-05b5f118ac6e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/core/Area.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/core/Component.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/core/ComponentType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/core/Counter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Counter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/core/Deck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Deck.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/core/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Token.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Area.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Area.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Board.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/ComponentType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/ComponentType.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -35,15 +31,28 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/core/Area.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1290">
-              <caret line="86" column="23" lean-forward="true" selection-start-line="86" selection-start-column="23" selection-end-line="86" selection-end-column="23" />
+            <state relative-caret-position="209">
+              <caret line="47" column="24" selection-start-line="47" selection-start-column="24" selection-end-line="47" selection-end-column="24" />
               <folding>
                 <element signature="e#131#132#0" expanded="true" />
                 <element signature="e#184#185#0" expanded="true" />
                 <element signature="e#374#385#0" expanded="true" />
+                <element signature="e#1246#1253#0" expanded="true" />
                 <element signature="e#407#413#0" expanded="true" />
                 <element signature="e#698#705#0" expanded="true" />
                 <element signature="e#985#994#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/core/Board.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -61,8 +70,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/core/ComponentType.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+            <state relative-caret-position="45">
+              <caret line="3" column="10" selection-start-line="3" selection-start-column="10" selection-end-line="3" selection-end-column="10" />
             </state>
           </provider>
         </entry>
@@ -90,11 +99,12 @@
         <option value="$PROJECT_DIR$/src/Dice.java" />
         <option value="$PROJECT_DIR$/src/Counter.java" />
         <option value="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoard.java" />
-        <option value="$PROJECT_DIR$/src/main/java/core/ComponentType.java" />
         <option value="$PROJECT_DIR$/src/main/java/core/Component.java" />
         <option value="$PROJECT_DIR$/src/main/java/core/Deck.java" />
         <option value="$PROJECT_DIR$/src/main/java/core/Counter.java" />
         <option value="$PROJECT_DIR$/src/main/java/core/Token.java" />
+        <option value="$PROJECT_DIR$/src/main/java/core/ComponentType.java" />
+        <option value="$PROJECT_DIR$/src/main/java/core/Board.java" />
         <option value="$PROJECT_DIR$/src/main/java/core/Area.java" />
       </list>
     </option>
@@ -216,12 +226,12 @@
       <option name="presentableId" value="Default" />
       <updated>1563886313595</updated>
       <workItem from="1563886318081" duration="5335000" />
-      <workItem from="1563958971310" duration="6748000" />
+      <workItem from="1563958971310" duration="7194000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12083000" />
+    <option name="totallyTimeSpent" value="12529000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="877" extended-state="6" />
@@ -339,16 +349,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/core/Board.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="31" lean-forward="true" selection-start-line="17" selection-end-line="18" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/pandemic/PandemicBoard.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
@@ -393,19 +393,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/core/ComponentType.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        <state relative-caret-position="45">
+          <caret line="3" column="10" selection-start-line="3" selection-start-column="10" selection-end-line="3" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/core/Board.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/core/Area.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1290">
-          <caret line="86" column="23" lean-forward="true" selection-start-line="86" selection-start-column="23" selection-end-line="86" selection-end-column="23" />
+        <state relative-caret-position="209">
+          <caret line="47" column="24" selection-start-line="47" selection-start-column="24" selection-end-line="47" selection-end-column="24" />
           <folding>
             <element signature="e#131#132#0" expanded="true" />
             <element signature="e#184#185#0" expanded="true" />
             <element signature="e#374#385#0" expanded="true" />
+            <element signature="e#1246#1253#0" expanded="true" />
             <element signature="e#407#413#0" expanded="true" />
             <element signature="e#698#705#0" expanded="true" />
             <element signature="e#985#994#0" expanded="true" />
