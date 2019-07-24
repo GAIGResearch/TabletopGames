@@ -2,7 +2,7 @@ package core;
 
 import java.util.*;
 
-public class Deck implements IDeck {
+public class Deck extends Component implements IDeck {
 
     protected int capacity;
 
