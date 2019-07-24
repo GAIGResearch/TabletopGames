@@ -1,0 +1,338 @@
+[
+  {
+    "name": "Atlanta",
+    "color": "blue",
+    "country": "United States",
+    "population":  4715000,
+    "density": 700
+  },
+  {
+    "name": "Washington",
+    "color": "blue",
+    "country": "United States",
+    "population": 4679000,
+    "density": 1400
+  },
+  {
+    "name": "San Francisco",
+    "color": "blue",
+    "country": "United States",
+    "population": 5864000,
+    "density": 2100
+  },
+  {
+    "name": "Chicago",
+    "color": "blue",
+    "country": "United States",
+    "population": 9121000,
+    "density": 1300
+  },
+  {
+    "name": "Montreal",
+    "color": "blue",
+    "country": "Canda",
+    "population": 3429000,
+    "density": 2200
+  },
+  {
+    "name": "New York",
+    "color": "blue",
+    "country": "United States",
+    "population": 20464000,
+    "density": 1800
+  },
+  {
+    "name": "London",
+    "color": "blue",
+    "country": "United Kingdom",
+    "population": 8586000,
+    "density": 5300
+  },
+  {
+    "name": "Madrid",
+    "color": "blue",
+    "country": "Spain",
+    "population": 5427000,
+    "density": 5700
+  },
+  {
+    "name": "Paris",
+    "color": "blue",
+    "country": "France",
+    "population": 10755000,
+    "density": 3800
+  },
+  {
+    "name": "Essen",
+    "color": "blue",
+    "country": "Germany",
+    "population": 575000,
+    "density": 2800
+  },
+  {
+    "name": "Milan",
+    "color": "blue",
+    "country": "Italy",
+    "population": 5232000,
+    "density": 2800
+  },
+  {
+    "name": "St Petersburg",
+    "color": "blue",
+    "country": "Russia",
+    "population": 4879000,
+    "density": 4100
+  },
+  {
+    "name": "Algiers",
+    "color": "black",
+    "country": "Algeria",
+    "population": 2946000,
+    "density": 6500
+  },
+  {
+    "name": "Cairo",
+    "color": "black",
+    "country": "Egypt",
+    "population": 14718000,
+    "density": 8900
+  },
+  {
+    "name": "Istanbul",
+    "color": "black",
+    "country": "Turkey",
+    "population": 13576000,
+    "density": 9700
+  },
+  {
+    "name": "Moscow",
+    "color": "black",
+    "country": "Russia",
+    "population": 15512000,
+    "density": 3500
+  },
+  {
+    "name": "Tehran",
+    "color": "black",
+    "country": "Iran",
+    "population": 7419000,
+    "density": 9500
+  },
+  {
+    "name": "Baghdad",
+    "color": "black",
+    "country": "Iraq",
+    "population": 6204000,
+    "density": 10400
+  },
+  {
+    "name": "Riyadh",
+    "color": "black",
+    "country": "Saudi Arabia",
+    "population": 5037000,
+    "density": 3400
+  },
+  {
+    "name": "Karachi",
+    "color": "black",
+    "country": "Pakistan",
+    "population": 20711000,
+    "density": 25800
+  },
+  {
+    "name": "Delhi",
+    "color": "black",
+    "country": "India",
+    "population": 22242000,
+    "density": 11500
+  },
+  {
+    "name": "Mumbai",
+    "color": "black",
+    "country": "India",
+    "population": 16910000,
+    "density": 30900
+  },
+  {
+    "name": "Kolkata",
+    "color": "black",
+    "country": "India",
+    "population": 14374000,
+    "density": 11900
+  },
+  {
+    "name": "Chennai",
+    "color": "black",
+    "country": "India",
+    "population": 8865000,
+    "density": 14600
+  },
+  {
+    "name": "Beijing",
+    "color": "red",
+    "country": "People's Republic of China",
+    "population": 17311000,
+    "density": 5000
+  },
+  {
+    "name": "Seoul",
+    "color": "red",
+    "country": "South Korea",
+    "population": 22537000,
+    "density": 10400
+  },
+  {
+    "name": "Shanghai",
+    "color": "red",
+    "country": "People's Republic of China",
+    "population": 13482000,
+    "density": 2200
+  },
+  {
+    "name": "Tokyo",
+    "color": "red",
+    "country": "Japan",
+    "population": 13189000,
+    "density": 6030
+  },
+  {
+    "name": "Osaka",
+    "color": "red",
+    "country": "Japan",
+    "population": 2871000,
+    "density": 13000
+  },
+  {
+    "name": "Taipei",
+    "color": "red",
+    "country": "Taiwan",
+    "population": 8338000,
+    "density": 7300
+  },
+  {
+    "name": "Hong Kong",
+    "color": "red",
+    "country": "People's Republic of China",
+    "population": 7106000,
+    "density": 25900
+  },
+  {
+    "name": "Bangkok",
+    "color": "red",
+    "country": "Thailand",
+    "population": 7151000,
+    "density": 3200
+  },
+  {
+    "name": "Ho Chi Minh City",
+    "color": "red",
+    "country": "Vietnam",
+    "population": 8314000,
+    "density": 9900
+  },
+  {
+    "name": "Manila",
+    "color": "red",
+    "country": "Philippines",
+    "population": 20767000,
+    "density": 14400
+  },
+  {
+    "name": "Sydney",
+    "color": "red",
+    "country": "Australia",
+    "population": 3785000,
+    "density": 2100
+  },
+  {
+    "name": "Jakarta",
+    "color": "red",
+    "country": "Indonesia",
+    "population": 26063000,
+    "density": 9400
+  },
+  {
+    "name": "Khartoum",
+    "color": "yellow",
+    "country": "Sudan",
+    "population": 4887000,
+    "density": 4500
+  },
+  {
+    "name": "Lagos",
+    "color": "yellow",
+    "country": "Nigeria",
+    "population": 11547000,
+    "density": 12700
+  },
+  {
+    "name": "Johannesburg",
+    "color": "yellow",
+    "country": "South Africa",
+    "population": 3888000,
+    "density": 2400
+  },
+  {
+    "name": "Kinshasa",
+    "color": "yellow",
+    "country": "Democratic Republic of the Congo",
+    "population": 9046000,
+    "density": 15500
+  },
+  {
+    "name": "Sao Paolo",
+    "color": "yellow",
+    "country": "Brazil",
+    "population": 20186000,
+    "density": 6400
+  },
+  {
+    "name": "Bogota",
+    "color": "yellow",
+    "country": "Colombia",
+    "population": 8702000,
+    "density": 21000
+  },
+  {
+    "name": "Miami",
+    "color": "yellow",
+    "country": "United States",
+    "population": 558200,
+    "density": 1700
+  },
+  {
+    "name": "Mexico City",
+    "color": "yellow",
+    "country": "Mexico",
+    "population": 19463000,
+    "density": 9500
+  },
+  {
+    "name": "Los Angeles",
+    "color": "yellow",
+    "country": "United States",
+    "population": 14900000,
+    "density": 2400
+  },
+  {
+    "name": "Lima",
+    "color": "yellow",
+    "country": "Peru",
+    "population": 9121000,
+    "density": 14100
+  },
+  {
+    "name": "Santiago",
+    "color": "yellow",
+    "country": "Chile",
+    "population": 6015000,
+    "density": 6500
+  },
+  {
+    "name": "Buenos Aires",
+    "color": "yellow",
+    "country": "Argentina",
+    "population": 13639000,
+    "density": 5200
+  }
+]
