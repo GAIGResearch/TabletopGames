@@ -15,10 +15,11 @@ public class Token extends Component {
     private int occurenceLimit;     // occurence limit
 
     public Token(){
-
+        super.type = ComponentType.TOKEN;
     }
 
     public Token(String token_type){
+        super.type = ComponentType.TOKEN;
         this.token_type = token_type;
     }
 

@@ -12,12 +12,14 @@ public class Deck extends Component implements IDeck {
 
     protected Deck()
     {
+        super.type = ComponentType.DECK;
         cards = new ArrayList<>();
         rnd = new Random();
     }
 
     protected Deck(Random rnd, int capacity)
     {
+        super.type = ComponentType.DECK;
         cards = new ArrayList<>();
         this.rnd = rnd;
         this.capacity = capacity;
