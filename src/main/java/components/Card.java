@@ -1,6 +1,7 @@
-package core;
+package components;
 
 import java.awt.*;
+import utilities.Utils.ComponentType;
 
 public class Card extends Component {
     private int cardType;

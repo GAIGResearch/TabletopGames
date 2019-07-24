@@ -1,6 +1,7 @@
-package core;
+package components;
 
 import java.util.Random;
+import utilities.Utils.ComponentType;
 
 public class Dice extends Component {
     private int number_of_sides;

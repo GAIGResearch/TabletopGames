@@ -1,6 +1,7 @@
-package core;
+package components;
 
 import java.util.*;
+import utilities.Utils.ComponentType;
 
 public class Deck extends Component implements IDeck {
 

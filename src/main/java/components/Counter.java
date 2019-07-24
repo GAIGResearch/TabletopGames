@@ -1,4 +1,6 @@
-package core;
+package components;
+
+import utilities.Utils.ComponentType;
 
 public class Counter extends Component {
     private int count;

@@ -1,5 +1,6 @@
 package core;
 
+import components.*;
 import java.util.HashMap;
 
 /**
@@ -9,21 +10,20 @@ public class Area {
     protected HashMap<Integer, Component> components;
     protected int owner;   // -1 for all
 
-
     public Area() {
-        this.components = new HashMap<Integer, Component>();
+        this.components = new HashMap<>();
         this.owner = -1;
     }
 
     public Area(int owner, HashMap<Integer, Component> components) {
-        this.components = new HashMap<Integer, Component>();
+        this.components = new HashMap<>();
         this.components.putAll(components);
         this.owner = owner;
     }
 
     public Area copy() {
         Area new_area = new Area();
-        new_area.components = new HashMap<Integer, Component>();
+        new_area.components = new HashMap<>();
         new_area.components.putAll(this.components);
         new_area.owner = this.owner;
 

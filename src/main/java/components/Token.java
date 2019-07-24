@@ -1,7 +1,8 @@
-package core;
+package components;
 
 import java.awt.*;
 import java.util.ArrayList;
+import utilities.Utils.ComponentType;
 import java.util.HashSet;
 
 
