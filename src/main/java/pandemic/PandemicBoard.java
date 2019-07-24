@@ -1,11 +1,16 @@
 package pandemic;
 
+import content.Property;
+import content.PropertyColor;
+import content.PropertyString;
 import core.Board;
 import core.BoardNode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Hash;
+import utilities.Vector2D;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,6 +18,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class PandemicBoard extends Board {
+
+    private int _hashid_boardnode_name;
+    private int _hashid_boardnode_color;
+
     private static String dataPath = "data/pandemicBoard.json";  // Path to json data file describing the pandemic board
 
     public PandemicBoard() {
@@ -37,12 +46,12 @@ public class PandemicBoard extends Board {
             // 2. Assign neighbours when all boardNodes created.
             for (Object o: cityList) {
                 JSONObject city = (JSONObject)o;
-                String name = (String) city.get("name");
-                BoardNode bn = getNodeByName(name);
+                String name = (String) city.get("BoardNode.name");
+                BoardNode bn = getNodeByProperty(_hashid_boardnode_name, new PropertyString(name));
                 if (bn != null) {
                     HashSet<String> neighbours = getNeighbours(city);
                     for (BoardNode n : boardNodes) {
-                        if (neighbours.contains(n.getName())) {
+                        if (neighbours.contains(n.getProperty(_hashid_boardnode_name).toString())) {
                             bn.addNeighbour(n);
                             n.addNeighbour(bn);
                         }
@@ -55,6 +64,33 @@ public class PandemicBoard extends Board {
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    protected BoardNode parseNode(JSONObject obj) {
+
+        int maxNeighbours = -1;
+        try {
+            maxNeighbours = (int) obj.get("maxNeighbours");
+        } catch (Exception ignored) {}
+
+        JSONArray coords = (JSONArray) obj.get("coordinates");
+        Vector2D position = new Vector2D((int)((long)coords.get(0)), (int)((long)coords.get(1)));
+
+
+        BoardNode bn = new BoardNode(maxNeighbours, position);
+
+        String name = (String) obj.get("BoardNode.name");
+        Property pName = new PropertyString("BoardNode.name", name);
+        _hashid_boardnode_name = pName.getHashKey();
+
+        String color = (String) obj.get("BoardNode.color");
+        Property pColor = new PropertyColor("BoardNode.color", color);
+        _hashid_boardnode_color =  pColor.getHashKey();
+
+        bn.addProperty(_hashid_boardnode_name, pName);
+        bn.addProperty(_hashid_boardnode_color, pColor);
+
+        return bn;
     }
 
     /**

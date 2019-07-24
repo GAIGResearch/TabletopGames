@@ -1,5 +1,6 @@
 package core;
 
+import content.Property;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -11,8 +12,9 @@ public class BoardNode {
     public static int idCounter = 0;  // Used to set unique ids for all nodes added.
 
     private int id;  // unique id of this board node
-    private String name;  // name of this board node
-    private Color color;  // color of this board node
+
+    private HashMap<Integer, Property> properties; //Extra properties for this node.
+
     private Vector2D position;  // physical position of this board node
 
     private HashSet<BoardNode> neighbours;  // neighbours of this board node
@@ -20,8 +22,7 @@ public class BoardNode {
     private int maxNeighbours;  // maximum number of neighbours for this board node
 
     public BoardNode() {
-        this.name = "";
-        this.color = Color.GRAY;
+        this.properties = new HashMap<>();
         this.id = idCounter;
         this.position = new Vector2D();
         this.maxNeighbours = -1;
@@ -31,9 +32,8 @@ public class BoardNode {
         idCounter++;
     }
 
-    public BoardNode(int maxNeighbours, String name, Color color, Vector2D position) {
-        this.name = name;
-        this.color = color;
+    public BoardNode(int maxNeighbours, Vector2D position) {
+        this.properties = new HashMap<>();
         this.id = idCounter;
         this.position = position;
         this.maxNeighbours = maxNeighbours;
@@ -41,6 +41,16 @@ public class BoardNode {
         this.neighbourSideMapping = new HashMap<>();
 
         idCounter++;
+    }
+
+    public void addProperty(int propId, Property prop)
+    {
+        properties.put(propId, prop);
+    }
+
+    public int getNumProperties()
+    {
+        return properties.size();
     }
 
     /**
@@ -94,11 +104,17 @@ public class BoardNode {
      * @return - a new instance of this node.
      */
     public BoardNode copy() {
-        BoardNode copy = new BoardNode(maxNeighbours, name, color, position.copy());
+        BoardNode copy = new BoardNode(maxNeighbours, position.copy());
         copy.id = id;
         idCounter--;  // This increases automatically in constructor, but we don't need that if we're copying the ID
         copy.neighbours = new HashSet<>(neighbours);
         copy.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
+
+        for(int prop_key : properties.keySet())
+        {
+            Property newProp = properties.get(prop_key).copy();
+            copy.addProperty(prop_key, newProp);
+        }
 
         return copy;
     }
@@ -111,17 +127,13 @@ public class BoardNode {
     }
 
     /**
-     * @return the color of this node
+     * Gets a property from the node properties.
+     * @param propId id of the property to look for
+     * @return the property value. Null if it doesn't exist.
      */
-    public Color getColor() {
-        return color;
-    }
-
-    /**
-     * @return the name of this node
-     */
-    public String getName() {
-        return name;
+    public Property getProperty(int propId)
+    {
+        return properties.get(propId);
     }
 
     /**
@@ -157,23 +169,51 @@ public class BoardNode {
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof BoardNode)) return false;
-        for (BoardNode n: ((BoardNode) obj).neighbours) {
+
+        BoardNode otherBoardNode = (BoardNode) obj;
+
+        if(otherBoardNode.id != id)
+            return false;
+
+        for (BoardNode n: otherBoardNode.neighbours) {
             if (!(neighbours.contains(n))) {
                 return false;
             }
         }
-        return ((BoardNode) obj).id == id && ((BoardNode) obj).color == color && ((BoardNode) obj).name.equals(name);
+
+        if(properties.size() != otherBoardNode.getNumProperties())
+            return false;
+
+        for(int prop_key : properties.keySet())
+        {
+            Property prop = properties.get(prop_key);
+            Property otherProp = otherBoardNode.getProperty(prop_key);
+
+            if(!prop.equals(otherProp))
+                return false;
+        }
+
+        return true;
     }
 
     @Override
     public String toString() {
-        String[] neighbourNames = new String[neighbours.size()];
-        int i = 0;
-        for (BoardNode b: neighbours) {
-            neighbourNames[i] = b.getName();
-            i++;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("{id: " + id + "; maxNeighbours: " + maxNeighbours + "; ");
+        for(int prop_key : properties.keySet()) {
+            Property prop = properties.get(prop_key);
+            sb.append(prop.getHashString() + ": " +  prop.toString() + "; ");
         }
-        return "{id: " + id + "; name: " + name + "; color: " + color + "; neighbours: " + Arrays.toString(neighbourNames) +
-                "; maxNeighbours: " + maxNeighbours + "}";
+
+        sb.append("neighbours: [");
+
+        for (BoardNode b: neighbours) {
+            sb.append(b.getId()+",");
+        }
+        sb.append("]");
+        return sb.toString();
     }
+
+
 }

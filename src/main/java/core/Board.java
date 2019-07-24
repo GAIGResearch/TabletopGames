@@ -1,5 +1,6 @@
 package core;
 
+import content.Property;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -46,31 +47,28 @@ public abstract class Board {
     }
 
     /**
-     * Parses a BoardNode object from a JSON object.
+     * Parses a BoardNode object from a JSON object. It needs to be implemented for each game.
      * @param obj - JSON object to parse.
      * @return new BoardNode object with properties as defined in JSON.
      */
-    private BoardNode parseNode(JSONObject obj) {
-        String name = (String) obj.get("name");
-        String color = (String) obj.get("color");
-        int maxNeighbours = -1;
-        try {
-            maxNeighbours = (int) obj.get("maxNeighbours");
-        } catch (Exception ignored) {}
-        JSONArray coords = (JSONArray) obj.get("coordinates");
-        Vector2D position = new Vector2D((int)((long)coords.get(0)), (int)((long)coords.get(1)));
-
-        return new BoardNode(maxNeighbours, name, Utils.stringToColor(color), position);
-    }
+    protected abstract BoardNode parseNode(JSONObject obj);
 
     /**
      * Returns the node in the list which matches the given name
-     * @param name - name of node to search for.
+     * @param prop_id - ID of the property to look for.
+     * @param p - Property that has the value to look for.
      * @return - node matching name.
      */
-    protected BoardNode getNodeByName(String name) {
+    protected BoardNode getNodeByProperty(int prop_id, Property p) {
         for (BoardNode n : boardNodes) {
-            if (n.getName().equals(name)) return n;
+            Property prop = n.getProperty(prop_id);
+            if(prop != null)
+            {
+                if(prop.equals(p))
+                    return n;
+            }
+
+            //if (n.getName().equals(name)) return n;
         }
         return null;
     }
