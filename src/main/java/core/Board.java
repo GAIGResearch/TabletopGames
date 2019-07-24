@@ -108,4 +108,11 @@ public abstract class Board extends Component{
     private void setBoardNodes(List<BoardNode> boardNodes) {
         this.boardNodes = boardNodes;
     }
+
+    /**
+     * Sets the correct type to the component
+     */
+    public void setType(){
+        super.type = ComponentType.BOARD;
+    }
 }
