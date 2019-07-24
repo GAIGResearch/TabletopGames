@@ -1,6 +1,6 @@
 package pandemic;
 
-import core.Board;
+import components.Board;
 import utilities.BoardView;
 import javax.swing.*;
 
