@@ -1,290 +1,298 @@
-[
-  {
-    "name": ["string","Atlanta"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["Miami", "Washington", "Chicago"]],
-    "coordinates": ["vector2d",[236, 325]]
-  },
-  {
-    "name": ["string","Washington"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["Atlanta", "Miami", "New York", "Montreal"]],
-    "coordinates": ["vector2d",[324, 321]]
-  },
-  {
-    "name": ["string","San Francisco"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["Los Angeles", "Chicago", "Tokyo", "Manila"]],
-    "coordinates": ["vector2d",[100, 295]]
-  },
-  {
-    "name": ["string","Chicago"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["San Francisco", "Los Angeles", "Atlanta", "Mexico City", "Montreal"]],
-    "coordinates": ["vector2d",[205, 265]]
-  },
-  {
-    "name": ["string","Montreal"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["New York", "Washington", "Chicago"]],
-    "coordinates": ["vector2d",[288, 262]]
-  },
-  {
-    "name": ["string","New York"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["Montreal", "Washington", "London", "Madrid"]],
-    "coordinates": ["vector2d",[352, 271]]
-  },
-  {
-    "name": ["string","London"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["New York", "Madrid", "Paris", "Essen"]],
-    "coordinates": ["vector2d",[506, 222]]
-  },
-  {
-    "name": ["string","Madrid"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["New York", "London", "Paris", "Algiers", "Sao Paolo"]],
-    "coordinates": ["vector2d",[494, 303]]
-  },
-  {
-    "name": ["string","Paris"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["London", "Madrid", "Milan", "Essen", "Algiers"]],
-    "coordinates": ["vector2d",[568, 263]]
-  },
-  {
-    "name": ["string","Essen"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["London", "Milan", "Paris", "St Petersburg"]],
-    "coordinates": ["vector2d",[588, 207]]
-  },
-  {
-    "name": ["string","Milan"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["Paris", "Essen", "Algiers", "Istanbul"]],
-    "coordinates": ["vector2d",[622, 247]]
-  },
-  {
-    "name": ["string","St Petersburg"],
-    "color": ["color","blue"],
-    "neighbours": ["list string",["Essen", "Moscow", "Istanbul"]],
-    "coordinates": ["vector2d",[680, 190]]
-  },
-  {
-    "name": ["string","Algiers"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Madrid", "Paris", "Istanbul", "Cairo"]],
-    "coordinates": ["vector2d",[585, 350]]
-  },
-  {
-    "name": ["string","Cairo"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Algiers", "Baghdad", "Istanbul", "Riyadh", "Khartoum"]],
-    "coordinates": ["vector2d",[648, 365]]
-  },
-  {
-    "name": ["string","Istanbul"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Algiers", "Baghdad", "Cairo", "Moscow", "Milan", "St Petersburg"]],
-    "coordinates": ["vector2d",[660, 295]]
-  },
-  {
-    "name": ["string","Moscow"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["St Petersburg", "Tehran", "Istanbul"]],
-    "coordinates": ["vector2d",[725, 245]]
-  },
-  {
-    "name": ["string","Tehran"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Moscow", "Baghdad", "Karachi", "Delhi"]],
-    "coordinates": ["vector2d",[781, 286]]
-  },
-  {
-    "name": ["string","Baghdad"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Karachi", "Cairo", "Istanbul", "Riyadh", "Tehran"]],
-    "coordinates": ["vector2d",[718, 337]]
-  },
-  {
-    "name": ["string","Riyadh"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Cairo", "Karachi", "Baghdad"]],
-    "coordinates": ["vector2d",[728, 412]]
-  },
-  {
-    "name": ["string","Karachi"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Tehran", "Baghdad", "Delhi", "Riyadh", "Mumbai"]],
-    "coordinates": ["vector2d",[797, 364]]
-  },
-  {
-    "name": ["string","Delhi"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Tehran", "Karachi", "Kolkata", "Mumbai", "Chennai"]],
-    "coordinates": ["vector2d",[858, 341]]
-  },
-  {
-    "name": ["string","Mumbai"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Karachi", "Delhi", "Chennai"]],
-    "coordinates": ["vector2d",[805, 425]]
-  },
-  {
-    "name": ["string","Kolkata"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Delhi", "Chennai", "Bangkok", "Hong Kong"]],
-    "coordinates": ["vector2d",[916, 361]]
-  },
-  {
-    "name": ["string","Chennai"],
-    "color": ["color","black"],
-    "neighbours": ["list string",["Mumbai", "Delhi", "Kolkata", "Bangkok", "Jakarta"]],
-    "coordinates": ["vector2d",[870, 470]]
-  },
-  {
-    "name": ["string","Beijing"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Shanghai", "Seoul"]],
-    "coordinates": ["vector2d",[963, 266]]
-  },
-  {
-    "name": ["string","Seoul"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Beijing", "Shanghai", "Tokyo"]],
-    "coordinates": ["vector2d",[1037, 263]]
-  },
-  {
-    "name": ["string","Shanghai"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Hong Kong", "Taipei", "Tokyo", "Seoul", "Beijing"]],
-    "coordinates": ["vector2d",[968, 325]]
-  },
-  {
-    "name": ["string","Tokyo"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Osaka", "Seoul", "San Francisco", "Shanghai"]],
-    "coordinates": ["vector2d",[1094, 296]]
-  },
-  {
-    "name": ["string","Osaka"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Taipei", "Tokyo"]],
-    "coordinates": ["vector2d",[1102, 359]]
-  },
-  {
-    "name": ["string","Taipei"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Hong Kong", "Manila", "Osaka", "Shanghai"]],
-    "coordinates": ["vector2d",[1042, 383]]
-  },
-  {
-    "name": ["string","Hong Kong"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Bangkok", "Kolkata", "Shanghai", "Taipei", "Manila", "Ho Chi Minh City"]],
-    "coordinates": ["vector2d",[976, 394]]
-  },
-  {
-    "name": ["string","Bangkok"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Ho Chi Minh City", "Jakarta", "Chennai", "Kolkata", "Hong Kong"]],
-    "coordinates": ["vector2d",[928, 431]]
-  },
-  {
-    "name": ["string","Ho Chi Minh City"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Jakarta", "Bangkok", "Hong Kong", "Manila"]],
-    "coordinates": ["vector2d",[979, 490]]
-  },
-  {
-    "name": ["string","Manila"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Sydney", "Ho Chi Minh City", "Hong Kong", "Taipei", "San Francisco"]],
-    "coordinates": ["vector2d",[1060, 485]]
-  },
-  {
-    "name": ["string","Sydney"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Jakarta", "Manila", "Los Angeles"]],
-    "coordinates": ["vector2d",[1108, 655]]
-  },
-  {
-    "name": ["string","Jakarta"],
-    "color": ["color","red"],
-    "neighbours": ["list string",["Chennai", "Sydney", "Ho Chi Minh City", "Bangkok"]],
-    "coordinates": ["vector2d",[928, 543]]
-  },
-  {
-    "name": ["string","Khartoum"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Lagos", "Johannesburg", "Cairo"]],
-    "coordinates": ["vector2d",[665, 447]]
-  },
-  {
-    "name": ["string","Lagos"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Kinshasa", "Khartoum", "Sao Paolo"]],
-    "coordinates": ["vector2d",[559, 462]]
-  },
-  {
-    "name": ["string","Johannesburg"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Kinshasa", "Khartoum"]],
-    "coordinates": ["vector2d",[659, 603]]
-  },
-  {
-    "name": ["string","Kinshasa"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Lagos", "Johannesburg", "Khartoum"]],
-    "coordinates": ["vector2d",[612, 520]]
-  },
-  {
-    "name": ["string","Sao Paolo"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Buenos Aires", "Bogota", "Lagos", "Madrid"]],
-    "coordinates": ["vector2d",[399, 579]]
-  },
-  {
-    "name": ["string","Bogota"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Buenos Aires", "Lima", "Sao Paolo", "Miami", "Mexico City"]],
-    "coordinates": ["vector2d",[282, 477]]
-  },
-  {
-    "name": ["string","Miami"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Atlanta", "Washington", "Mexico City", "Bogota"]],
-    "coordinates": ["vector2d",[289, 393]]
-  },
-  {
-    "name": ["string","Mexico City"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Los Angeles", "Lima", "Chicago", "Miami", "Bogota"]],
-    "coordinates": ["vector2d",[194, 406]]
-  },
-  {
-    "name": ["string","Los Angeles"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["San Francisco", "Chicago", "Mexico City", "Sydney"]],
-    "coordinates": ["vector2d",[117, 379]]
-  },
-  {
-    "name": ["string","Lima"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Santiago", "Bogota", "Mexico City"]],
-    "coordinates": ["vector2d",[253, 566]]
-  },
-  {
-    "name": ["string","Santiago"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Lima"]],
-    "coordinates": ["vector2d",[264, 658]]
-  },
-  {
-    "name": ["string","Buenos Aires"],
-    "color": ["color","yellow"],
-    "neighbours": ["list string",["Sao Paolo", "Bogota"]],
-    "coordinates": ["vector2d",[350, 642]]
-  }
-]
+{
+  "type": "graph",
+  "verticesKey": "name",
+  "neighboursKey": "neighbours",
+  "maxNeighbours": -1,
+  "nodes" :
+      [
+        {
+          "name": ["String","Atlanta"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["Miami", "Washington", "Chicago"]],
+          "coordinates": ["Vector2D",[236, 325]]
+        },
+        {
+          "name": ["String","Washington"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["Atlanta", "Miami", "New York", "Montreal"]],
+          "coordinates": ["Vector2D",[324, 321]]
+        },
+        {
+          "name": ["String","San Francisco"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["Los Angeles", "Chicago", "Tokyo", "Manila"]],
+          "coordinates": ["Vector2D",[100, 295]]
+        },
+        {
+          "name": ["String","Chicago"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["San Francisco", "Los Angeles", "Atlanta", "Mexico City", "Montreal"]],
+          "coordinates": ["Vector2D",[205, 265]]
+        },
+        {
+          "name": ["String","Montreal"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["New York", "Washington", "Chicago"]],
+          "coordinates": ["Vector2D",[288, 262]]
+        },
+        {
+          "name": ["String","New York"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["Montreal", "Washington", "London", "Madrid"]],
+          "coordinates": ["Vector2D",[352, 271]]
+        },
+        {
+          "name": ["String","London"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["New York", "Madrid", "Paris", "Essen"]],
+          "coordinates": ["Vector2D",[506, 222]]
+        },
+        {
+          "name": ["String","Madrid"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["New York", "London", "Paris", "Algiers", "Sao Paolo"]],
+          "coordinates": ["Vector2D",[494, 303]]
+        },
+        {
+          "name": ["String","Paris"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["London", "Madrid", "Milan", "Essen", "Algiers"]],
+          "coordinates": ["Vector2D",[568, 263]]
+        },
+        {
+          "name": ["String","Essen"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["London", "Milan", "Paris", "St Petersburg"]],
+          "coordinates": ["Vector2D",[588, 207]]
+        },
+        {
+          "name": ["String","Milan"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["Paris", "Essen", "Algiers", "Istanbul"]],
+          "coordinates": ["Vector2D",[622, 247]]
+        },
+        {
+          "name": ["String","St Petersburg"],
+          "Color": ["Color","blue"],
+          "neighbours": ["String[]",["Essen", "Moscow", "Istanbul"]],
+          "coordinates": ["Vector2D",[680, 190]]
+        },
+        {
+          "name": ["String","Algiers"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Madrid", "Paris", "Istanbul", "Cairo"]],
+          "coordinates": ["Vector2D",[585, 350]]
+        },
+        {
+          "name": ["String","Cairo"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Algiers", "Baghdad", "Istanbul", "Riyadh", "Khartoum"]],
+          "coordinates": ["Vector2D",[648, 365]]
+        },
+        {
+          "name": ["String","Istanbul"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Algiers", "Baghdad", "Cairo", "Moscow", "Milan", "St Petersburg"]],
+          "coordinates": ["Vector2D",[660, 295]]
+        },
+        {
+          "name": ["String","Moscow"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["St Petersburg", "Tehran", "Istanbul"]],
+          "coordinates": ["Vector2D",[725, 245]]
+        },
+        {
+          "name": ["String","Tehran"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Moscow", "Baghdad", "Karachi", "Delhi"]],
+          "coordinates": ["Vector2D",[781, 286]]
+        },
+        {
+          "name": ["String","Baghdad"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Karachi", "Cairo", "Istanbul", "Riyadh", "Tehran"]],
+          "coordinates": ["Vector2D",[718, 337]]
+        },
+        {
+          "name": ["String","Riyadh"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Cairo", "Karachi", "Baghdad"]],
+          "coordinates": ["Vector2D",[728, 412]]
+        },
+        {
+          "name": ["String","Karachi"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Tehran", "Baghdad", "Delhi", "Riyadh", "Mumbai"]],
+          "coordinates": ["Vector2D",[797, 364]]
+        },
+        {
+          "name": ["String","Delhi"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Tehran", "Karachi", "Kolkata", "Mumbai", "Chennai"]],
+          "coordinates": ["Vector2D",[858, 341]]
+        },
+        {
+          "name": ["String","Mumbai"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Karachi", "Delhi", "Chennai"]],
+          "coordinates": ["Vector2D",[805, 425]]
+        },
+        {
+          "name": ["String","Kolkata"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Delhi", "Chennai", "Bangkok", "Hong Kong"]],
+          "coordinates": ["Vector2D",[916, 361]]
+        },
+        {
+          "name": ["String","Chennai"],
+          "Color": ["Color","black"],
+          "neighbours": ["String[]",["Mumbai", "Delhi", "Kolkata", "Bangkok", "Jakarta"]],
+          "coordinates": ["Vector2D",[870, 470]]
+        },
+        {
+          "name": ["String","Beijing"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Shanghai", "Seoul"]],
+          "coordinates": ["Vector2D",[963, 266]]
+        },
+        {
+          "name": ["String","Seoul"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Beijing", "Shanghai", "Tokyo"]],
+          "coordinates": ["Vector2D",[1037, 263]]
+        },
+        {
+          "name": ["String","Shanghai"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Hong Kong", "Taipei", "Tokyo", "Seoul", "Beijing"]],
+          "coordinates": ["Vector2D",[968, 325]]
+        },
+        {
+          "name": ["String","Tokyo"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Osaka", "Seoul", "San Francisco", "Shanghai"]],
+          "coordinates": ["Vector2D",[1094, 296]]
+        },
+        {
+          "name": ["String","Osaka"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Taipei", "Tokyo"]],
+          "coordinates": ["Vector2D",[1102, 359]]
+        },
+        {
+          "name": ["String","Taipei"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Hong Kong", "Manila", "Osaka", "Shanghai"]],
+          "coordinates": ["Vector2D",[1042, 383]]
+        },
+        {
+          "name": ["String","Hong Kong"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Bangkok", "Kolkata", "Shanghai", "Taipei", "Manila", "Ho Chi Minh City"]],
+          "coordinates": ["Vector2D",[976, 394]]
+        },
+        {
+          "name": ["String","Bangkok"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Ho Chi Minh City", "Jakarta", "Chennai", "Kolkata", "Hong Kong"]],
+          "coordinates": ["Vector2D",[928, 431]]
+        },
+        {
+          "name": ["String","Ho Chi Minh City"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Jakarta", "Bangkok", "Hong Kong", "Manila"]],
+          "coordinates": ["Vector2D",[979, 490]]
+        },
+        {
+          "name": ["String","Manila"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Sydney", "Ho Chi Minh City", "Hong Kong", "Taipei", "San Francisco"]],
+          "coordinates": ["Vector2D",[1060, 485]]
+        },
+        {
+          "name": ["String","Sydney"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Jakarta", "Manila", "Los Angeles"]],
+          "coordinates": ["Vector2D",[1108, 655]]
+        },
+        {
+          "name": ["String","Jakarta"],
+          "Color": ["Color","red"],
+          "neighbours": ["String[]",["Chennai", "Sydney", "Ho Chi Minh City", "Bangkok"]],
+          "coordinates": ["Vector2D",[928, 543]]
+        },
+        {
+          "name": ["String","Khartoum"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Lagos", "Johannesburg", "Cairo"]],
+          "coordinates": ["Vector2D",[665, 447]]
+        },
+        {
+          "name": ["String","Lagos"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Kinshasa", "Khartoum", "Sao Paolo"]],
+          "coordinates": ["Vector2D",[559, 462]]
+        },
+        {
+          "name": ["String","Johannesburg"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Kinshasa", "Khartoum"]],
+          "coordinates": ["Vector2D",[659, 603]]
+        },
+        {
+          "name": ["String","Kinshasa"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Lagos", "Johannesburg", "Khartoum"]],
+          "coordinates": ["Vector2D",[612, 520]]
+        },
+        {
+          "name": ["String","Sao Paolo"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Buenos Aires", "Bogota", "Lagos", "Madrid"]],
+          "coordinates": ["Vector2D",[399, 579]]
+        },
+        {
+          "name": ["String","Bogota"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Buenos Aires", "Lima", "Sao Paolo", "Miami", "Mexico City"]],
+          "coordinates": ["Vector2D",[282, 477]]
+        },
+        {
+          "name": ["String","Miami"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Atlanta", "Washington", "Mexico City", "Bogota"]],
+          "coordinates": ["Vector2D",[289, 393]]
+        },
+        {
+          "name": ["String","Mexico City"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Los Angeles", "Lima", "Chicago", "Miami", "Bogota"]],
+          "coordinates": ["Vector2D",[194, 406]]
+        },
+        {
+          "name": ["String","Los Angeles"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["San Francisco", "Chicago", "Mexico City", "Sydney"]],
+          "coordinates": ["Vector2D",[117, 379]]
+        },
+        {
+          "name": ["String","Lima"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Santiago", "Bogota", "Mexico City"]],
+          "coordinates": ["Vector2D",[253, 566]]
+        },
+        {
+          "name": ["String","Santiago"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Lima"]],
+          "coordinates": ["Vector2D",[264, 658]]
+        },
+        {
+          "name": ["String","Buenos Aires"],
+          "Color": ["Color","yellow"],
+          "neighbours": ["String[]",["Sao Paolo", "Bogota"]],
+          "coordinates": ["Vector2D",[350, 642]]
+        }
+
+      ]
+}

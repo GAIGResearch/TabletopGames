@@ -3,8 +3,6 @@ package core;
 import content.Property;
 import utilities.Vector2D;
 
-import java.awt.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -206,14 +204,11 @@ public class BoardNode {
             sb.append(prop.getHashString() + ": " +  prop.toString() + "; ");
         }
 
-        sb.append("neighbours: [");
-
-        for (BoardNode b: neighbours) {
-            sb.append(b.getId()+",");
-        }
-        sb.append("]");
         return sb.toString();
     }
 
 
+    public void setMaxNeighbours(int maxNeighbours) {
+        this.maxNeighbours = maxNeighbours;
+    }
 }

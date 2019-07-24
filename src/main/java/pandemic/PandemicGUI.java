@@ -1,11 +1,12 @@
 package pandemic;
 
+import core.Board;
 import utilities.BoardView;
 import javax.swing.*;
 
 class PandemicGUI extends JFrame {
 
-    PandemicGUI(PandemicBoard board) {
+    PandemicGUI(Board board) {
         JComponent comp = new BoardView(board, "data/pandemicBackground.jpg");
         getContentPane().add(comp);
 
