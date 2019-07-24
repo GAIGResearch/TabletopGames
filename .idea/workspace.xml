@@ -2,13 +2,36 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0f23b22f-c81c-4ee1-9a63-05b5f118ac6e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/data/cityCards.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/eventCard.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/infectionCards.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/playerRoleCards.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/tokens.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/components/Component.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/core/AIPlayer.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/java/core/Area.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/core/Component.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/core/ComponentType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/core/ForwardModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/core/Game.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/core/GameState.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGameState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/core/Counter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Counter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/core/Deck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Deck.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/core/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Token.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ModernBoardGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ModernBoardGame.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Test.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/components/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Board.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Board.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/BoardNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/BoardNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Card.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Counter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Counter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Deck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Deck.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Dice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Dice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/IDeck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/IDeck.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Token.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utilities/BoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utilities/BoardView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utilities/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utilities/Utils.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -22,41 +45,82 @@
     <option name="isMigrated" value="true" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data/pandemicBoard.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
+            <state relative-caret-position="120">
               <caret line="8" column="25" selection-start-line="8" selection-start-column="25" selection-end-line="8" selection-end-column="25" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/core/Area.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/components/Board.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" selection-start-line="3" selection-end-line="3" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/Test.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="19" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/pandemic/PandemicBoard.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1122">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
+            <state relative-caret-position="351">
+              <caret line="194" column="41" lean-forward="true" selection-start-line="194" selection-start-column="41" selection-end-line="194" selection-end-column="41" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#5831#5832#0" expanded="true" />
+                <element signature="e#5879#5880#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/content/PropertyVector2D.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="104">
+              <caret line="26" column="72" selection-start-line="26" selection-start-column="72" selection-end-line="26" selection-end-column="72" />
+              <folding>
+                <element signature="e#1083#1084#0" expanded="true" />
+                <element signature="e#1158#1159#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/content/PropertyColor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="16" column="31" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/content/Property.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="4" column="32" selection-start-line="4" selection-start-column="32" selection-end-line="4" selection-end-column="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/content/PropertyString.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="90">
+              <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/content/PropertyStringArray.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="434">
+              <caret line="41" selection-start-line="41" selection-end-line="41" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#1197#1198#0" expanded="true" />
+                <element signature="e#1226#1227#0" expanded="true" />
+                <element signature="e#1062#1063#0" expanded="true" />
+                <element signature="e#1101#1102#0" expanded="true" />
+                <element signature="e#1849#1850#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -65,23 +129,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
+            <state relative-caret-position="210">
+              <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
               <folding>
                 <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/utilities/BoardView.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="284">
-              <caret line="29" selection-start-line="29" selection-end-line="29" />
-              <folding>
-                <element signature="e#561#562#0" expanded="true" />
-                <element signature="e#602#603#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -120,6 +171,7 @@
         <option value="$PROJECT_DIR$/src/main/java/utilities/Utils.java" />
         <option value="$PROJECT_DIR$/src/main/java/components/Component.java" />
         <option value="$PROJECT_DIR$/src/main/java/core/Area.java" />
+        <option value="$PROJECT_DIR$/src/main/java/components/Board.java" />
       </list>
     </option>
   </component>
@@ -169,6 +221,30 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="components" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ModernBoardGame" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ModernBoardGame" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="content" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ModernBoardGame" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ModernBoardGame" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="core" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ModernBoardGame" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ModernBoardGame" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="pandemic" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -178,10 +254,6 @@
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="utilities" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ModernBoardGame" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
           </expand>
           <select />
@@ -195,6 +267,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1563984917041" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -252,10 +325,10 @@
     <option name="totallyTimeSpent" value="12640000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <frame x="0" y="23" width="1440" height="877" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25302014" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22889842" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -322,8 +395,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
+        <state relative-caret-position="210">
+          <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -332,7 +405,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/data/pandemicBoard.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
+        <state relative-caret-position="120">
           <caret line="8" column="25" selection-start-line="8" selection-start-column="25" selection-end-line="8" selection-end-column="25" />
         </state>
       </provider>
@@ -355,16 +428,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2210">
           <caret line="130" column="23" selection-start-line="130" selection-start-column="23" selection-end-line="130" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/components/Board.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="31" lean-forward="true" selection-start-line="17" selection-end-line="18" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -436,6 +499,18 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="51">
           <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/components/Board.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="194" column="41" lean-forward="true" selection-start-line="194" selection-start-column="41" selection-end-line="194" selection-end-column="41" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#5831#5832#0" expanded="true" />
+            <element signature="e#5879#5880#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

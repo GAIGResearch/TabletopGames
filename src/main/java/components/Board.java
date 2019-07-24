@@ -1,11 +1,11 @@
 package components;
 
+import content.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils;
-import utilities.Vector2D;
+import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
@@ -13,10 +13,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Board extends Component{
+public class Board extends Component{
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;
+
+
+    public Board()
+    {
+        boardNodes = new ArrayList<>();
+    }
 
     /**
      * @return the list of board nodes
@@ -33,12 +39,38 @@ public abstract class Board extends Component{
         JSONParser jsonParser = new JSONParser();
 
         try (FileReader reader = new FileReader(path)) {
-            JSONArray nodeList = (JSONArray) jsonParser.parse(reader);
+            JSONObject board = (JSONObject) jsonParser.parse(reader);
+            String boardType = (String) board.get("type"); //This could come in handy one day.
+            String verticesKey = (String) board.get("verticesKey");
+            String neighboursKey = (String) board.get("neighboursKey");
+            int maxNeighbours = (int) (long) board.get("maxNeighbours");
 
-            // Add nodes to board nodes
-            for (Object o: nodeList) {
-                JSONObject node = (JSONObject)o;
-                boardNodes.add(parseNode(node));
+
+            JSONArray nodeList = (JSONArray) board.get("nodes");
+            for(Object o : nodeList)
+            {
+                // Add nodes to board nodes
+                JSONObject node = (JSONObject) o;
+                BoardNode newBN = parseNode(node);
+                newBN.setMaxNeighbours(maxNeighbours);
+                boardNodes.add(newBN);
+            }
+
+            int _hash_neighbours_ = Hash.GetInstance().hash(neighboursKey);
+            int _hash_vertices_ = Hash.GetInstance().hash(verticesKey);
+
+            for (BoardNode bn : boardNodes) {
+                Property p = bn.getProperty(_hash_neighbours_);
+                if (p instanceof PropertyStringArray) {
+                    PropertyStringArray psa = (PropertyStringArray) p;
+                    for (String str : psa.getValues()) {
+                        BoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
+                        if (neigh != null) {
+                            bn.addNeighbour(neigh);
+                            neigh.addNeighbour(bn);
+                        }
+                    }
+                }
             }
 
         } catch (IOException | ParseException e) {
@@ -51,27 +83,62 @@ public abstract class Board extends Component{
      * @param obj - JSON object to parse.
      * @return new BoardNode object with properties as defined in JSON.
      */
-    private BoardNode parseNode(JSONObject obj) {
-        String name = (String) obj.get("name");
-        String color = (String) obj.get("color");
-        int maxNeighbours = -1;
-        try {
-            maxNeighbours = (int) obj.get("maxNeighbours");
-        } catch (Exception ignored) {}
-        JSONArray coords = (JSONArray) obj.get("coordinates");
-        Vector2D position = new Vector2D((int)((long)coords.get(0)), (int)((long)coords.get(1)));
+    protected BoardNode parseNode(JSONObject obj)
+    {
+        BoardNode bn = new BoardNode();
 
-        return new BoardNode(maxNeighbours, name, Utils.stringToColor(color), position);
+        for(Object o : obj.keySet())
+        {
+            String key = (String)o;
+            JSONArray value = (JSONArray) obj.get(key);
+            String type = (String) value.get(0);
+
+            Property prop = null;
+            if(type.contains("[]"))
+            {
+                JSONArray values = (JSONArray) value.get(1);
+
+                if(type.contains("String"))
+                {
+                    prop = new PropertyStringArray(key, values);
+
+
+                }
+                //More types of arrays to come.
+            }else
+            {
+                if(type.contains("String"))
+                {
+                    prop = new PropertyString(key, (String) value.get(1));
+                }else if (type.contains("Color")){
+                    prop = new PropertyColor(key, (String) value.get(1));
+                }else if (type.contains("Vector2D")){
+                    prop = new PropertyVector2D(key, (JSONArray) value.get(1));
+                }
+            }
+            bn.addProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+        }
+
+
+        return bn;
     }
 
     /**
      * Returns the node in the list which matches the given name
-     * @param name - name of node to search for.
+     * @param prop_id - ID of the property to look for.
+     * @param p - Property that has the value to look for.
      * @return - node matching name.
      */
-    protected BoardNode getNodeByName(String name) {
+    protected BoardNode getNodeByProperty(int prop_id, Property p) {
         for (BoardNode n : boardNodes) {
-            if (n.getName().equals(name)) return n;
+            Property prop = n.getProperty(prop_id);
+            if(prop != null)
+            {
+                if(prop.equals(p))
+                    return n;
+            }
+
+            //if (n.getName().equals(name)) return n;
         }
         return null;
     }
@@ -92,14 +159,11 @@ public abstract class Board extends Component{
      * Copy method, to be implemented by all subclasses.
      * @return - a new instance of this Board, deep copy.
      */
-    public abstract Board copy();
-
-    /**
-     * Copies super class parameters.
-     * @param b - board object to copy parameters for.
-     */
-    protected void copyTo(Board b) {
+    public Board copy()
+    {
+        Board b = new Board();
         b.setBoardNodes(new ArrayList<>(boardNodes));
+        return b;
     }
 
     /**
@@ -108,6 +172,20 @@ public abstract class Board extends Component{
      */
     private void setBoardNodes(List<BoardNode> boardNodes) {
         this.boardNodes = boardNodes;
+    }
+
+
+    /**
+     * Main method for testing.
+     */
+    public static void main(String[] args) throws InterruptedException {
+        Board pb = new Board();
+        String dataPath = "data/pandemicBoard.json";
+
+        pb.loadBoard(dataPath);
+        for (BoardNode b : pb.boardNodes) {
+            System.out.println(b);
+        }
     }
 
     /**
