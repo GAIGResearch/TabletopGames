@@ -1,5 +1,7 @@
 package core;
 
+import actions.Action;
+
 public interface AIPlayer {
-    int[] getActions(GameState gameState);
+    Action[] getActions(GameState gameState);
 }

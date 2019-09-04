@@ -1,5 +1,6 @@
 package pandemic;
 
+import actions.Action;
 import core.Game;
 
 import java.util.HashSet;
@@ -19,7 +20,7 @@ public class PandemicGame extends Game {
 
             // Get actions of current active player for their turn
             int activePlayer = gameState.getActivePlayer();
-            int[] actions = players.get(activePlayer).getActions(gameState);
+            Action[] actions = players.get(activePlayer).getActions(gameState);
 
             // Resolve actions and game rules for the turn
             forwardModel.next(gameState, actions);

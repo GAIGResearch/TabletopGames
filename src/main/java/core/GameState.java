@@ -1,5 +1,7 @@
 package core;
 
+import components.Deck;
+
 /**
  * Placeholder class. Will contain all game state information.
  */
@@ -16,5 +18,10 @@ public abstract class GameState {
 
     public int getActivePlayer() {
         return activePlayer;
+    }
+
+    public Deck findDeck(int deckFrom) {
+        // TODO: find deck by index?
+        return null;
     }
 }

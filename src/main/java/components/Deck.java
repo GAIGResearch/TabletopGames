@@ -84,6 +84,14 @@ public class Deck extends Component implements IDeck {
         return null;
     }
 
+    public boolean add(Card c) {
+        if (cards.size() < capacity) {
+            cards.add(0, c);
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     public IDeck copy()
@@ -106,4 +114,8 @@ public class Deck extends Component implements IDeck {
         dp.rnd = rnd;
     }
 
+    // TODO: check for visibility?
+    public ArrayList<Card> getCards() {
+        return cards;
+    }
 }
