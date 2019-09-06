@@ -23,4 +23,13 @@ public abstract class Utils {
         DICE,
         TOKEN;
     }
+
+    public static int indexOf (String[] array, String object) {
+        for (int i = 0; i < array.length; i++) {
+            if (object.equals(array[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

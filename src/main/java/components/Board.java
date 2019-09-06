@@ -94,18 +94,24 @@ public class Board extends Component{
             String type = (String) value.get(0);
 
             Property prop = null;
-            if(type.contains("[]"))
+            if(type.contains("[]"))  // Array
             {
                 JSONArray values = (JSONArray) value.get(1);
 
                 if(type.contains("String"))
                 {
                     prop = new PropertyStringArray(key, values);
-
-
+                } else if (type.contains("Integer")) {
+                    prop = new PropertyIntArray(key, values);
                 }
                 //More types of arrays to come.
-            }else
+            } else if (type.contains("<>")) {  // We've got a list!
+                JSONArray values = (JSONArray) value.get(1);
+
+                if (type.contains("Integer")) {
+                    prop = new PropertyIntArrayList(key, values);
+                }
+            } else
             {
                 if(type.contains("String"))
                 {
@@ -114,6 +120,10 @@ public class Board extends Component{
                     prop = new PropertyColor(key, (String) value.get(1));
                 }else if (type.contains("Vector2D")){
                     prop = new PropertyVector2D(key, (JSONArray) value.get(1));
+                } else if (type.contains("Boolean")){
+                    prop = new PropertyBoolean(key, (boolean) value.get(1));
+                } else if (type.contains("Integer")) {
+                    prop = new PropertyInt(key, (int) value.get(1));
                 }
             }
             bn.addProperty(Hash.GetInstance().hash(prop.getHashString()), prop);

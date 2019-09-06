@@ -2,6 +2,7 @@ package core;
 
 import components.Counter;
 import components.Deck;
+import content.PropertyString;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  */
 public abstract class GameState {
     protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
+    protected int nPlayers;  // TODO: initialize this
     protected HashMap<Integer, Area> areas;
 
     public abstract GameState copy();
@@ -37,5 +39,9 @@ public abstract class GameState {
     public Counter findCounter(int infectionCounterHash) {
         // TODO: do it
         return null;
+    }
+
+    public int nPlayers() {
+        return nPlayers;
     }
 }

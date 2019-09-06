@@ -1,6 +1,7 @@
 package pandemic;
 
 import components.*;
+import content.PropertyString;
 import core.Area;
 import core.GameState;
 import utilities.Hash;
@@ -10,23 +11,29 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PandemicGameState extends GameState {
+
     static int playerHandHash = Hash.GetInstance().hash("playerHand");
-    static int playerCardHash = Hash.GetInstance().hash("playerCard");
-    static int pandemicBoardHash = Hash.GetInstance().hash("pandemicBoard");
+    public static int playerCardHash = Hash.GetInstance().hash("playerCard");
+    public static int pandemicBoardHash = Hash.GetInstance().hash("pandemicBoard");
     static int infectionCounterHash = Hash.GetInstance().hash("infectionRate");
     static int outbreaksHash = Hash.GetInstance().hash("outbreaks");
     static int playerDeckHash = Hash.GetInstance().hash("playerDeck");
     static int playerDeckDiscardHash = Hash.GetInstance().hash("playerDeckDiscard");
+    static int playerCardDeckHash = Hash.GetInstance().hash("playerCardDeck");
     static int infectionDeckHash = Hash.GetInstance().hash("infectionDeck");
     static int infectionDeckDiscardHash = Hash.GetInstance().hash("infectionDeckDiscard");
-    static int researchStationCounterHash = Hash.GetInstance().hash("researchStationCounter");
-    static List<Integer> diseaseHash;
+    public static int researchStationCounterHash = Hash.GetInstance().hash("researchStationCounter");
+    public static List<Integer> diseaseHash;
+    public static List<Integer> diseaseCubeHash;
     static List<Integer> tokensHash;
+
+    public static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
     PandemicGameState(int nPlayers) {
         areas = new HashMap<>();  // Game State has areas! Initialize.
         diseaseHash = new ArrayList<>();
         tokensHash = new ArrayList<>();
+        diseaseCubeHash = new ArrayList<>();
 
         // load the board
         Board pb = new Board();
@@ -55,12 +62,16 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(outbreaksHash, outbreaks);
         gameArea.addComponent(researchStationCounterHash, new Counter(0, 7, 7));
 
-        int nDisease = 4;  // TODO json
-        for (int i = 0; i < nDisease; i++) {
+        for (String color : colors) {
             Counter diseaseC = new Counter(0, 2, 0);  // TODO json
-            int hash = Hash.GetInstance().hash("jsonDiseaseName");  // TODO json
+            int hash = Hash.GetInstance().hash("diseaseCounter" + color);  // TODO json
             diseaseHash.add(hash);
             gameArea.addComponent(hash, diseaseC);
+
+            Counter diseaseCubeCounter = new Counter(0, 24, 24);  // TODO json
+            hash = Hash.GetInstance().hash("diseaseCubeCounter" + color);  // TODO json
+            diseaseCubeHash.add(hash);
+            gameArea.addComponent(hash, diseaseCubeCounter);
         }
 
         // Set up decks
@@ -68,6 +79,7 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(playerDeckDiscardHash, new Deck());
         gameArea.addComponent(infectionDeckHash, new Deck());
         gameArea.addComponent(infectionDeckDiscardHash, new Deck());
+        gameArea.addComponent(playerCardDeckHash, new Deck());
 
         // Set up tokens
         List<Token> tokens = new ArrayList<>();  // TODO read from json, assuming list is already made
@@ -78,6 +90,18 @@ public class PandemicGameState extends GameState {
         }
 
         areas.put(-1, gameArea);
+    }
+
+    public BoardNode findBoardNode(String city) {
+        Board pb = (Board) getAreas().get(-1).getComponent(pandemicBoardHash);
+        for (BoardNode bn: pb.getBoardNodes()) {
+            PropertyString name = (PropertyString) bn.getProperty(Hash.GetInstance().hash("name"));
+            if (name.value.equals(city)) {
+                // It's this city!
+                return bn;
+            }
+        }
+        return null;
     }
 
     @Override

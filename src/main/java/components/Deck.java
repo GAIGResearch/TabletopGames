@@ -85,8 +85,12 @@ public class Deck extends Component implements IDeck {
     }
 
     public boolean add(Card c) {
+        return add(c, 0);
+    }
+
+    public boolean add(Card c, int index) {
         if (cards.size() < capacity) {
-            cards.add(0, c);
+            cards.add(index, c);
             return true;
         }
         return false;

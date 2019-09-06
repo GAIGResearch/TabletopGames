@@ -7,10 +7,9 @@ import java.util.HashSet;
 
 public class PandemicGame extends Game {
 
-    public PandemicGame() {
-        gameState = new PandemicGameState();
+    public PandemicGame(int nPlayers) {
+        gameState = new PandemicGameState(nPlayers);
         forwardModel = new PandemicForwardModel();
-        // TODO: load data from files
         forwardModel.setup(gameState);
     }
 

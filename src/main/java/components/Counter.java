@@ -85,4 +85,8 @@ public class Counter extends Component {
             }
         }System.out.println("");
     }
+
+    public void setValue(int i) {
+        this.count = i;
+    }
 }

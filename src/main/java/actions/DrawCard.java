@@ -5,20 +5,35 @@ import components.Deck;
 import core.GameState;
 
 public class DrawCard implements Action {
-    private int deckFrom;
-    private int deckTo;
+    private int deckIdFrom;
+    private int deckIdTo;
+
+    private Deck deckFrom;
+    private Deck deckTo;
 
     public DrawCard (int deckFrom, int deckTo) {
+        this.deckIdFrom = deckFrom;
+        this.deckIdTo = deckTo;
+    }
+
+    public DrawCard (Deck deckFrom, Deck deckTo) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
     }
 
     @Override
     public boolean execute(GameState gs) {
-        Deck from = gs.findDeck(deckFrom);
-        Deck to = gs.findDeck(deckTo);
-        Card c = from.draw();
+        if (deckFrom == null) {
+            deckFrom = gs.findDeck(deckIdFrom);
+        }
+        if (deckTo == null) {
+            deckTo = gs.findDeck(deckIdTo);
+        }
+        Card c = deckFrom.draw();
         if (c == null) return false;
-        return to.add(c);
+        return deckTo.add(c);
+
+        // TODO: if you can't draw cards, game over
+        // TODO: discard if too many / play event card
     }
 }

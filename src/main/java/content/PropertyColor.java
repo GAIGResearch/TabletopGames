@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class PropertyColor extends Property
 {
-    private String valueStr;
+    public String valueStr;
     private Color value;
 
     public PropertyColor (String hashKey, String valStr)

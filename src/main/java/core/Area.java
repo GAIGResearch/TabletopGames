@@ -36,4 +36,13 @@ public class Area {
     public HashMap<Integer, Component> getComponents()                                { return this.components;              }
     public Component                   getComponent(Integer key)                      { return this.components.get(key);     }
     public void                        addComponent(Integer key, Component component) { this.components.put(key, component); }
+
+    public boolean setComponent(int hash, Component c) {
+        Component old = components.get(hash);
+        if (old.getType().equals(c.getType())) {
+            components.put(hash, c);
+            return true;
+        }
+        return false;
+    }
 }
