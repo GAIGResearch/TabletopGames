@@ -6,16 +6,15 @@ import core.GameState;
 
 public class AddCardToDeck implements Action {
     private Card card;
-    private int deck;
+    private Deck deck;
 
-    AddCardToDeck(Card c, int deck) {
+    public AddCardToDeck(Card c, Deck deck) {
         this.card = c;
         this.deck = deck;
     }
 
     @Override
     public boolean execute(GameState gs) {
-        Deck d = gs.findDeck(deck);
-        return d.add(card);
+        return deck.add(card);
     }
 }

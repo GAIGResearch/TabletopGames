@@ -2,25 +2,25 @@ package content;
 
 import utilities.Hash;
 
-public class PropertyString extends Property
+public class PropertyBoolean extends Property
 {
-    public String value;
+    public Boolean value;
 
-    public PropertyString (String value)
+    public PropertyBoolean(boolean value)
     {
         this.hashString = "";
         this.hashKey = Hash.GetInstance().hash(hashString);
         this.value = value;
     }
 
-    public PropertyString (String key, String value)
+    public PropertyBoolean(String key, boolean value)
     {
         this.hashString = key;
         this.hashKey = Hash.GetInstance().hash(hashString);
         this.value = value;
     }
 
-    public PropertyString (String key, int hashKey, String value)
+    public PropertyBoolean(String key, int hashKey, boolean value)
     {
         this.hashString = key;
         this.hashKey = hashKey;
@@ -30,19 +30,19 @@ public class PropertyString extends Property
 
     @Override
     public String toString() {
-        return value;
+        return ""+value;
     }
 
     public boolean equals(Object other)
     {
-       if(other instanceof PropertyString)
-           return value.equals(((PropertyString)(other)).value);
+       if(other instanceof PropertyBoolean)
+           return value.equals(((PropertyBoolean)(other)).value);
        return false;
     }
 
     public Property copy()
     {
-        return new PropertyString(hashString, hashKey, value);
+        return new PropertyBoolean(hashString, hashKey, value);
     }
 
 }

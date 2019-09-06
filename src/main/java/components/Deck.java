@@ -11,7 +11,7 @@ public class Deck extends Component implements IDeck {
 
     protected Random rnd;
 
-    protected Deck()
+    public Deck()
     {
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
