@@ -92,8 +92,10 @@ public class PandemicForwardModel implements ForwardModel {
         int range = noCards / noEpidemicCards;
         for (int i = 0; i < noEpidemicCards; i++) {
             int index = i * range + i + new Random().nextInt(range);  // TODO seed
-            Card card = new Card("epidemic", epidemicCard);
-            new AddCardToDeck(card, playerDeck, index).execute(state);
+
+            //TODO We can't load cards like this.
+            //Card card = new Card("epidemic", epidemicCard);
+            //new AddCardToDeck(card, playerDeck, index).execute(state);
         }
 
         // Player with highest population starts
@@ -128,9 +130,13 @@ public class PandemicForwardModel implements ForwardModel {
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
-            if (c.getCardType() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
-                epidemic(currentState);
-            } else {  // Otherwise, give card to player
+
+            //TODO We can't check cards like this.
+//            if (c.getCardType() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
+//                epidemic(currentState);
+//            } else
+
+            {  // Otherwise, give card to player
                 Area area = currentState.getAreas().get(activePlayer);
                 Deck deck = (Deck) area.getComponent(playerHandHash);
                 if (deck != null) {

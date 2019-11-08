@@ -38,8 +38,8 @@ public class PandemicGameState extends GameState {
 
         // load the board
         Board pb = new Board();
-        String dataPath = "data/pandemicBoard.json";
-        pb.loadBoard(dataPath);
+        String dataPath = "data/boards.json";
+        pb.loadBoards(dataPath);
 
         // For each player, initialize their own areas: they get a player hand and a player card
         for (int i = 0; i < nPlayers; i++) {

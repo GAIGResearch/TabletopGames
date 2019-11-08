@@ -1,6 +1,17 @@
 package components;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
+
+import content.Property;
+import content.PropertyString;
+import content.PropertyStringArray;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 public class Deck extends Component implements IDeck {
@@ -16,6 +27,7 @@ public class Deck extends Component implements IDeck {
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
         rnd = new Random();
+        properties = new HashMap<>();
     }
 
     protected Deck(Random rnd, int capacity)
@@ -24,6 +36,7 @@ public class Deck extends Component implements IDeck {
         cards = new ArrayList<>();
         this.rnd = rnd;
         this.capacity = capacity;
+        properties = new HashMap<>();
     }
 
     protected void setCards(ArrayList<Card> cards) {this.cards = cards;}
@@ -122,4 +135,46 @@ public class Deck extends Component implements IDeck {
     public ArrayList<Card> getCards() {
         return cards;
     }
+
+    /**
+     * Loads cards for a deck from a JSON file.
+     * @param deck - deck to load in JSON format
+     */
+    public void loadDeck(JSONObject deck) {
+
+        String name = (String) ( (JSONArray) deck.get("name")).get(1);
+        properties.put(Hash.GetInstance().hash("name"), new PropertyString(name));
+
+        JSONArray deckCards = (JSONArray) deck.get("cards");
+
+        for(Object o : deckCards)
+        {
+            // Add nodes to board nodes
+            JSONObject jsonCard = (JSONObject) o;
+            Card newCard = (Card) parseComponent(new Card(), jsonCard);
+            cards.add(newCard);
+        }
+    }
+
+    public static List<Component> loadDecks(String filename)
+    {
+        JSONParser jsonParser = new JSONParser();
+        ArrayList<Component> decks = new ArrayList<>();
+
+        try (FileReader reader = new FileReader(filename)) {
+
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+            for(Object o : data) {
+                Deck newDeck = new Deck();
+                newDeck.loadDeck((JSONObject) o);
+                decks.add(newDeck);
+            }
+
+        }catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        return decks;
+    }
+
 }

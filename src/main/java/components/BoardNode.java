@@ -6,12 +6,11 @@ import utilities.Vector2D;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class BoardNode {
+public class BoardNode extends Component{
+
     public static int idCounter = 0;  // Used to set unique ids for all nodes added.
 
     private int id;  // unique id of this board node
-
-    private HashMap<Integer, Property> properties; //Extra properties for this node.
 
     private Vector2D position;  // physical position of this board node
 
@@ -42,10 +41,6 @@ public class BoardNode {
     }
 
 
-    public int getNumProperties()
-    {
-        return properties.size();
-    }
 
     /**
      * Adds a neighbour for this node.
@@ -104,11 +99,8 @@ public class BoardNode {
         copy.neighbours = new HashSet<>(neighbours);
         copy.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
 
-        for(int prop_key : properties.keySet())
-        {
-            Property newProp = properties.get(prop_key).copy();
-            copy.addProperty(prop_key, newProp);
-        }
+        //copy type and component.
+        copyComponent(copy);
 
         return copy;
     }
@@ -120,27 +112,6 @@ public class BoardNode {
         return id;
     }
 
-    /**
-     * Gets a property from the node properties.
-     * @param propId id of the property to look for
-     * @return the property value. Null if it doesn't exist.
-     * TODO: This is repeated in Card, Deck, Board, Dice, etc. Worth abstracting it in a superclass?
-     */
-    public Property getProperty(int propId)
-    {
-        return properties.get(propId);
-    }
-
-    /**
-     * Adds a property with an id and a Property object
-     * @param propId ID of the property
-     * @param prop property to add
-     * TODO: This is repeated in Card, Deck, Board, Dice, etc. Worth abstracting it in a superclass?
-     */
-    public void addProperty(int propId, Property prop)
-    {
-        properties.put(propId, prop);
-    }
 
     /**
      * @return the neighbours of this node

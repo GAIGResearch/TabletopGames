@@ -11,6 +11,7 @@ import utilities.Utils.ComponentType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Board extends Component{
@@ -22,6 +23,7 @@ public class Board extends Component{
     public Board()
     {
         boardNodes = new ArrayList<>();
+        properties = new HashMap<>();
     }
 
     /**
@@ -33,105 +35,46 @@ public class Board extends Component{
 
     /**
      * Loads board nodes from a JSON file.
-     * @param path - path to JSON file to load.
+     * @param board - board to load in JSON format
      */
-    public void loadBoard(String path) {
-        JSONParser jsonParser = new JSONParser();
+    public void loadBoard(JSONObject board) {
 
-        try (FileReader reader = new FileReader(path)) {
-            JSONObject board = (JSONObject) jsonParser.parse(reader);
-            String boardType = (String) board.get("type"); //This could come in handy one day.
-            String verticesKey = (String) board.get("verticesKey");
-            String neighboursKey = (String) board.get("neighboursKey");
-            int maxNeighbours = (int) (long) board.get("maxNeighbours");
+        String boardType = (String) board.get("type"); //This could come in handy one day.
+        String verticesKey = (String) board.get("verticesKey");
+        String neighboursKey = (String) board.get("neighboursKey");
+        int maxNeighbours = (int) (long) board.get("maxNeighbours");
 
+        String boardName = (String) board.get("name");
+        properties.put(Hash.GetInstance().hash("name"), new PropertyString(boardName));
 
-            JSONArray nodeList = (JSONArray) board.get("nodes");
-            for(Object o : nodeList)
-            {
-                // Add nodes to board nodes
-                JSONObject node = (JSONObject) o;
-                BoardNode newBN = parseNode(node);
-                newBN.setMaxNeighbours(maxNeighbours);
-                boardNodes.add(newBN);
-            }
+        JSONArray nodeList = (JSONArray) board.get("nodes");
+        for(Object o : nodeList)
+        {
+            // Add nodes to board nodes
+            JSONObject node = (JSONObject) o;
+            BoardNode newBN = (BoardNode) parseComponent(new BoardNode(), node);
+            newBN.setMaxNeighbours(maxNeighbours);
+            boardNodes.add(newBN);
+        }
 
-            int _hash_neighbours_ = Hash.GetInstance().hash(neighboursKey);
-            int _hash_vertices_ = Hash.GetInstance().hash(verticesKey);
+        int _hash_neighbours_ = Hash.GetInstance().hash(neighboursKey);
+        int _hash_vertices_ = Hash.GetInstance().hash(verticesKey);
 
-            for (BoardNode bn : boardNodes) {
-                Property p = bn.getProperty(_hash_neighbours_);
-                if (p instanceof PropertyStringArray) {
-                    PropertyStringArray psa = (PropertyStringArray) p;
-                    for (String str : psa.getValues()) {
-                        BoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
-                        if (neigh != null) {
-                            bn.addNeighbour(neigh);
-                            neigh.addNeighbour(bn);
-                        }
+        for (BoardNode bn : boardNodes) {
+            Property p = bn.getProperty(_hash_neighbours_);
+            if (p instanceof PropertyStringArray) {
+                PropertyStringArray psa = (PropertyStringArray) p;
+                for (String str : psa.getValues()) {
+                    BoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
+                    if (neigh != null) {
+                        bn.addNeighbour(neigh);
+                        neigh.addNeighbour(bn);
                     }
                 }
             }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
         }
     }
 
-    /**
-     * Parses a BoardNode object from a JSON object.
-     * @param obj - JSON object to parse.
-     * @return new BoardNode object with properties as defined in JSON.
-     */
-    protected BoardNode parseNode(JSONObject obj)
-    {
-        BoardNode bn = new BoardNode();
-
-        for(Object o : obj.keySet())
-        {
-            String key = (String)o;
-            JSONArray value = (JSONArray) obj.get(key);
-            String type = (String) value.get(0);
-
-            Property prop = null;
-            if(type.contains("[]"))  // Array
-            {
-                JSONArray values = (JSONArray) value.get(1);
-
-                if(type.contains("String"))
-                {
-                    prop = new PropertyStringArray(key, values);
-                } else if (type.contains("Integer")) {
-                    prop = new PropertyIntArray(key, values);
-                }
-                //More types of arrays to come.
-            } else if (type.contains("<>")) {  // We've got a list!
-                JSONArray values = (JSONArray) value.get(1);
-
-                if (type.contains("Integer")) {
-                    prop = new PropertyIntArrayList(key, values);
-                }
-            } else
-            {
-                if(type.contains("String"))
-                {
-                    prop = new PropertyString(key, (String) value.get(1));
-                }else if (type.contains("Color")){
-                    prop = new PropertyColor(key, (String) value.get(1));
-                }else if (type.contains("Vector2D")){
-                    prop = new PropertyVector2D(key, (JSONArray) value.get(1));
-                } else if (type.contains("Boolean")){
-                    prop = new PropertyBoolean(key, (boolean) value.get(1));
-                } else if (type.contains("Integer")) {
-                    prop = new PropertyInt(key, (int) value.get(1));
-                }
-            }
-            bn.addProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
-        }
-
-
-        return bn;
-    }
 
     /**
      * Returns the node in the list which matches the given name
@@ -186,22 +129,32 @@ public class Board extends Component{
 
 
     /**
-     * Main method for testing.
-     */
-    public static void main(String[] args) throws InterruptedException {
-        Board pb = new Board();
-        String dataPath = "data/pandemicBoard.json";
-
-        pb.loadBoard(dataPath);
-        for (BoardNode b : pb.boardNodes) {
-            System.out.println(b);
-        }
-    }
-
-    /**
      * Sets the correct type to the component
      */
     public void setType(){
         super.type = ComponentType.BOARD;
     }
+
+    public static List<Component> loadBoards(String filename)
+    {
+        JSONParser jsonParser = new JSONParser();
+        ArrayList<Component> boards = new ArrayList<>();
+
+        try (FileReader reader = new FileReader(filename)) {
+
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+            for(Object o : data) {
+                Board newBoard = new Board();
+                newBoard.loadBoard((JSONObject) o);
+                boards.add(newBoard);
+            }
+
+        }catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        return boards;
+    }
+
+
 }
