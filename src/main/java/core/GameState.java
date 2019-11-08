@@ -44,4 +44,12 @@ public abstract class GameState {
     public int nPlayers() {
         return nPlayers;
     }
+
+
+    //TODO: dummy functions for compilation
+    public int tempDeck() {return -1;}
+
+    //TODO: dummy functions for compilation
+    public void clearTemp() { }
+
 }

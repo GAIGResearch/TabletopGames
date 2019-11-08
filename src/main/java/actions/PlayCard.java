@@ -21,11 +21,11 @@ public class PlayCard implements Action {
     public boolean execute(GameState gs) {
         // TODO: execute effect of card
 
-        PropertyString country = card.getProperty(Hash.GetInstance().hash("country"));
+        PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
             // Tried to play a city card.
             int activePlayer = gs.getActivePlayer();
-            PropertyString name = card.getProperty(Hash.GetInstance().hash("name"));
+            PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
             PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(playerCardHash)).getProperty(playerLocationHash);
 
             if (name.equals(currentLocation)) {
@@ -39,7 +39,7 @@ public class PlayCard implements Action {
                 return true;
             }
         } else {
-            PropertyString effect = card.getProperty(Hash.GetInstance().hash("effect"));
+            PropertyString effect = (PropertyString) card.getProperty(Hash.GetInstance().hash("effect"));
             if (effect != null) {
                 // This is an event card!
                 // TODO: resolve effect and discard card

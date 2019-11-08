@@ -10,7 +10,7 @@ public class PandemicGame extends Game {
     public PandemicGame(int nPlayers) {
         gameState = new PandemicGameState(nPlayers);
         forwardModel = new PandemicForwardModel();
-        forwardModel.setup(gameState);
+        //forwardModel.setup(gameState); //At the moment this crashes.
     }
 
     @Override

@@ -26,7 +26,7 @@ public class PropertyIntArray extends Property
         this.values = new int[values.size()];
         for(int i =0; i< values.size(); ++i)
         {
-            this.values[i] = (int) values.get(i);
+            this.values[i] = ((Long) values.get(i)).intValue();
         }
 
     }

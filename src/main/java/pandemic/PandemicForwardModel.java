@@ -168,6 +168,7 @@ public class PandemicForwardModel implements ForwardModel {
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
             action.execute(currentState);
         }
+        Deck tempDeck = new Deck(); //TODO: This new deck object should be replaced by an actual, consisitent temp deck.
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
             new InfectCity(c, 1).execute(currentState);
             new AddCardToDeck(c, currentState.findDeck(infectionDeckDiscardHash)).execute(currentState);

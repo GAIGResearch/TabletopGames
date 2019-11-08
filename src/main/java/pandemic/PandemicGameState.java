@@ -12,6 +12,7 @@ import java.util.List;
 
 public class PandemicGameState extends GameState {
 
+    //TODO: remove 'static' from these?
     static int playerHandHash = Hash.GetInstance().hash("playerHand");
     public static int playerCardHash = Hash.GetInstance().hash("playerCard");
     public static int pandemicBoardHash = Hash.GetInstance().hash("pandemicBoard");

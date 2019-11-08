@@ -22,14 +22,14 @@ public class PlayCardFrom implements Action {
     public boolean execute(GameState gs) {
         // TODO: execute effect of card
 
-        PropertyString country = card.getProperty(Hash.GetInstance().hash("country"));
+        PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
             int activePlayer = gs.getActivePlayer();
 
             // Tried to play a city card. Moving from this city to the destination, only if current location matches
             // the card played.
 
-            PropertyString name = card.getProperty(Hash.GetInstance().hash("name"));
+            PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
             PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(playerCardHash)).getProperty(playerLocationHash);
 
             if (name.equals(currentLocation)) {

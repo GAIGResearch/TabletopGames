@@ -12,6 +12,7 @@ public class Test {
         List<AIPlayer> players = new ArrayList<>();
         // TODO: make players
         game.setPlayers(players);
-        game.run();
+
+        //game.run(); //At the moment this crashes.
     }
 }

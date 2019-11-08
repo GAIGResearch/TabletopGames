@@ -46,7 +46,7 @@ public class MovePlayer implements Action {
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
-        playerCard.setProperty(playerLocationHash, new PropertyString("Atlanta"));  // TODO: does this exist?
+        playerCard.addProperty(playerLocationHash, new PropertyString("Atlanta"));  // TODO: does this exist?
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
@@ -54,7 +54,7 @@ public class MovePlayer implements Action {
         prop.getValues().remove(playerIdx);
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
-        playerCard.setProperty(playerLocationHash, new PropertyString(null));
+        playerCard.addProperty(playerLocationHash, new PropertyString(null));
     }
 
     boolean checkNeighbours(BoardNode city1, BoardNode city2) {

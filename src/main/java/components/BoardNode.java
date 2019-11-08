@@ -41,10 +41,6 @@ public class BoardNode {
         idCounter++;
     }
 
-    public void addProperty(int propId, Property prop)
-    {
-        properties.put(propId, prop);
-    }
 
     public int getNumProperties()
     {
@@ -128,10 +124,22 @@ public class BoardNode {
      * Gets a property from the node properties.
      * @param propId id of the property to look for
      * @return the property value. Null if it doesn't exist.
+     * TODO: This is repeated in Card, Deck, Board, Dice, etc. Worth abstracting it in a superclass?
      */
     public Property getProperty(int propId)
     {
         return properties.get(propId);
+    }
+
+    /**
+     * Adds a property with an id and a Property object
+     * @param propId ID of the property
+     * @param prop property to add
+     * TODO: This is repeated in Card, Deck, Board, Dice, etc. Worth abstracting it in a superclass?
+     */
+    public void addProperty(int propId, Property prop)
+    {
+        properties.put(propId, prop);
     }
 
     /**

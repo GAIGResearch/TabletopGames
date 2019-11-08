@@ -27,8 +27,8 @@ public class InfectCity implements Action{
 
     @Override
     public boolean execute(GameState gs) {
-        PropertyColor color = (PropertyColor) infectingCard.getProperty("color");
-        PropertyString city = (PropertyColor) infectingCard.getProperty("name");
+        PropertyColor color = (PropertyColor) infectingCard.getProperty(Hash.GetInstance().hash("color"));
+        PropertyString city = (PropertyString) infectingCard.getProperty(Hash.GetInstance().hash("name"));
 
         BoardNode bn = ((PandemicGameState)gs).findBoardNode(city.value);
         if (bn != null) {
