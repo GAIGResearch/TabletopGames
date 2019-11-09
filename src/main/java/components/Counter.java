@@ -54,13 +54,13 @@ public class Counter extends Component {
     }
 
 
-    public void loadCounter(JSONObject token) {
+    public void loadCounter(JSONObject counter) {
 
-        this.minimum = ((Long) ( (JSONArray) token.get("min")).get(1)).intValue();
-        this.maximum = ((Long) ( (JSONArray) token.get("max")).get(1)).intValue();
+        this.minimum = ((Long) ( (JSONArray) counter.get("min")).get(1)).intValue();
+        this.maximum = ((Long) ( (JSONArray) counter.get("max")).get(1)).intValue();
         this.count = this.minimum;
 
-        parseComponent(this, token);
+        parseComponent(this, counter);
     }
 
     public static List<Component> loadCounters(String filename)
