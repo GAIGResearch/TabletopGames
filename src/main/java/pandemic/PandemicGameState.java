@@ -57,19 +57,19 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(pandemicBoardHash, pb);
 
         // Set up the counters TODO: read from JSON
-        Counter infection_rate = new Counter(0, 6, 0);
-        Counter outbreaks = new Counter(0, 8, 0);
+        Counter infection_rate = new Counter();
+        Counter outbreaks = new Counter();
         gameArea.addComponent(infectionCounterHash, infection_rate);
         gameArea.addComponent(outbreaksHash, outbreaks);
-        gameArea.addComponent(researchStationCounterHash, new Counter(0, 7, 7));
+        gameArea.addComponent(researchStationCounterHash, new Counter());
 
         for (String color : colors) {
-            Counter diseaseC = new Counter(0, 2, 0);  // TODO json
+            Counter diseaseC = new Counter();  // TODO json
             int hash = Hash.GetInstance().hash("diseaseCounter" + color);  // TODO json
             diseaseHash.add(hash);
             gameArea.addComponent(hash, diseaseC);
 
-            Counter diseaseCubeCounter = new Counter(0, 24, 24);  // TODO json
+            Counter diseaseCubeCounter = new Counter();  // TODO json
             hash = Hash.GetInstance().hash("diseaseCubeCounter" + color);  // TODO json
             diseaseCubeHash.add(hash);
             gameArea.addComponent(hash, diseaseCubeCounter);

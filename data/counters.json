@@ -1,0 +1,13 @@
+[
+  {
+    "name": ["String","Outbreaks"],
+    "min": ["Integer", 0],
+    "max": ["Integer", 8]
+  },
+  {
+    "name": ["String","Infection Rate"],
+    "min": ["Integer", 0],
+    "max": ["Integer", 6],
+    "values": ["Integer[]", [2, 2, 2, 3, 3, 4, 4]]
+  }
+]

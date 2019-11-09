@@ -45,11 +45,18 @@ public abstract class Game {
         return Token.loadTokens(filename);
     }
 
+
+    public static List<Component> loadCounters(String filename)
+    {
+        return Counter.loadCounters(filename);
+    }
+
     public static void main(String[] args)
     {
         List<Component> boards = Game.loadBoards("data/boards.json");
         List<Component> decks = Game.loadDecks("data/decks.json");
         List<Component> tokens = Game.loadTokens("data/tokens.json");
+        List<Component> counters = Game.loadCounters("data/counters.json");
         System.out.println("Done.");
     }
 

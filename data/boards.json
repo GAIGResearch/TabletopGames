@@ -1,5 +1,52 @@
 [
-  { "type": "graph",
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "name": "cured diseases",
+    "nodes" :
+    [
+      {
+        "name": ["String","Yellow Cured"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Yellow Erradicated"]]
+      },
+      {
+        "name": ["String","Red Cured"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Red Erradicated"]]
+      },
+      {
+        "name": ["String","Blue Cured"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Blue Erradicated"]]
+      },
+      {
+        "name": ["String","Black Cured"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Black Erradicated"]]
+      },
+      {
+        "name": ["String","Yellow Erradicated"],
+        "color": ["Color","yellow"]
+      },
+      {
+        "name": ["String","Red Erradicated"],
+        "color": ["Color","red"]
+      },
+      {
+        "name": ["String","Blue Erradicated"],
+        "color": ["Color","blue"]
+      },
+      {
+        "name": ["String","Black Erradicated"],
+        "color": ["Color","black"]
+      }
+    ]
+  },
+  {
+    "type": "graph",
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
