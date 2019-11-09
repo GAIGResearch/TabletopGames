@@ -100,7 +100,7 @@ public class BoardNode extends Component{
         copy.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
 
         //copy type and component.
-        copyComponent(copy);
+        copyComponentTo(copy);
 
         return copy;
     }

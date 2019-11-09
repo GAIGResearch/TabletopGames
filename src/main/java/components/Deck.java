@@ -4,9 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import content.Property;
 import content.PropertyString;
-import content.PropertyStringArray;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -129,6 +127,9 @@ public class Deck extends Component implements IDeck {
         dp.setCards(newCards);
         dp.capacity = capacity;
         dp.rnd = rnd;
+
+        //copy type and component.
+        copyComponentTo(dp);
     }
 
     // TODO: check for visibility?

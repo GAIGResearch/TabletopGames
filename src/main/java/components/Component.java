@@ -99,7 +99,7 @@ public abstract class Component {
         return c;
     }
 
-    public void copyComponent(Component copyTo)
+    public void copyComponentTo(Component copyTo)
     {
         for(int prop_key : this.properties.keySet())
         {

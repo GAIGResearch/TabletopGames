@@ -1,9 +1,6 @@
 package core;
 
-import components.Board;
-import components.Card;
-import components.Component;
-import components.Deck;
+import components.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,10 +39,17 @@ public abstract class Game {
         return Deck.loadDecks(filename);
     }
 
+
+    public static List<Component> loadTokens(String filename)
+    {
+        return Token.loadTokens(filename);
+    }
+
     public static void main(String[] args)
     {
         List<Component> boards = Game.loadBoards("data/boards.json");
         List<Component> decks = Game.loadDecks("data/decks.json");
+        List<Component> tokens = Game.loadTokens("data/tokens.json");
         System.out.println("Done.");
     }
 
