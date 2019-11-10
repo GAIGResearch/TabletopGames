@@ -30,8 +30,8 @@ public class MovePlayer implements Action {
     @Override
     public boolean execute(GameState gs) {
         PropertyString prop = (PropertyString) ((Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash)).getProperty(playerLocationHash);
-        BoardNode currentCity = ((PandemicGameState)gs).findBoardNode(prop.value);
-        BoardNode destinationCity = ((PandemicGameState)gs).findBoardNode(destination);
+        BoardNode currentCity = ((PandemicGameState)gs).world.getNode("name", prop.value);
+        BoardNode destinationCity = ((PandemicGameState)gs).world.getNode("name", destination);
 
         if (checkNeighbours(currentCity, destinationCity) || checkResearchStations(currentCity, destinationCity)) {
             removePlayer((PandemicGameState)gs, prop.value, playerIdx);
@@ -42,7 +42,8 @@ public class MovePlayer implements Action {
     }
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
-        PropertyIntArrayList prop = (PropertyIntArrayList) gs.findBoardNode(city).getProperty(playersBNHash);
+        BoardNode bn = gs.world.getNode("name", city);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersBNHash);
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
@@ -50,7 +51,8 @@ public class MovePlayer implements Action {
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
-        PropertyIntArrayList prop = (PropertyIntArrayList) gs.findBoardNode(city).getProperty(playersBNHash);
+        BoardNode bn = gs.world.getNode("name", city);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersBNHash);
         prop.getValues().remove(playerIdx);
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);

@@ -157,10 +157,10 @@ public class Deck extends Component implements IDeck {
         }
     }
 
-    public static List<Component> loadDecks(String filename)
+    public static List<Deck> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Component> decks = new ArrayList<>();
+        ArrayList<Deck> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

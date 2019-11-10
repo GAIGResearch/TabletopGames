@@ -38,10 +38,10 @@ public class Dice extends Component {
     }
 
 
-    public static List<Component> loadDice(String filename)
+    public static List<Dice> loadDice(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Component> dice = new ArrayList<>();
+        ArrayList<Dice> dice = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

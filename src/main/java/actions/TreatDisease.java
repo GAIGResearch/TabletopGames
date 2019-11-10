@@ -29,7 +29,7 @@ public class TreatDisease implements Action {
         PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(playerCardHash)).getProperty(playerLocationHash);
 
         // Find board node
-        BoardNode bn = ((PandemicGameState)gs).findBoardNode(currentLocation.value);
+        BoardNode bn = ((PandemicGameState)gs).world.getNode("name", currentLocation.value);
 
         // Find disease counter
         Counter diseaseCounter = gs.findCounter(diseaseHash.get(colorIdx));

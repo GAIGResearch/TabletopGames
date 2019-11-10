@@ -16,6 +16,7 @@ public class Counter extends Component {
     private int count;      //By default, counters go from min to max, and are initialized at min.
     private int minimum;
     private int maximum;
+    private String id;
 
     public Counter() {
         super.type = ComponentType.COUNTER;
@@ -58,15 +59,20 @@ public class Counter extends Component {
 
         this.minimum = ((Long) ( (JSONArray) counter.get("min")).get(1)).intValue();
         this.maximum = ((Long) ( (JSONArray) counter.get("max")).get(1)).intValue();
-        this.count = this.minimum;
+        this.id = (String) counter.get("id");
+
+        if(counter.get("count") == null)
+            this.count = this.minimum;
+        else
+            this.count = ((Long) ( (JSONArray) counter.get("count")).get(1)).intValue();
 
         parseComponent(this, counter);
     }
 
-    public static List<Component> loadCounters(String filename)
+    public static List<Counter> loadCounters(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Component> counters = new ArrayList<>();
+        ArrayList<Counter> counters = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
@@ -83,6 +89,10 @@ public class Counter extends Component {
         }
 
         return counters;
+    }
+
+    public String getID() {
+        return id;
     }
 
 }

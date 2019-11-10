@@ -4,7 +4,7 @@
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
-    "name": "cured diseases",
+    "id": "cured diseases",
     "nodes" :
     [
       {
@@ -50,7 +50,7 @@
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
-    "name": "cities",
+    "id": "cities",
     "nodes" :
     [
       {

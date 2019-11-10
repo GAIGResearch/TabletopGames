@@ -31,6 +31,15 @@ public abstract class GameState {
         return areas;
     }
 
+
+    public final void init()
+    {
+        areas = new HashMap<>();  // Game State has areas! Initialize.
+    }
+
+    public abstract void setup(Game game);
+
+
     public Deck findDeck(int deckFrom) {
         // TODO: find deck by index?
         return null;
@@ -51,5 +60,9 @@ public abstract class GameState {
 
     //TODO: dummy functions for compilation
     public void clearTemp() { }
+
+
+
+    public void setupAreas() {}
 
 }

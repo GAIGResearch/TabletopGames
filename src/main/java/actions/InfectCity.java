@@ -30,7 +30,7 @@ public class InfectCity implements Action{
         PropertyColor color = (PropertyColor) infectingCard.getProperty(Hash.GetInstance().hash("color"));
         PropertyString city = (PropertyString) infectingCard.getProperty(Hash.GetInstance().hash("name"));
 
-        BoardNode bn = ((PandemicGameState)gs).findBoardNode(city.value);
+        BoardNode bn = ((PandemicGameState)gs).world.getNode("name", city.value);
         if (bn != null) {
             PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(Hash.GetInstance().hash("infection"));
             int[] array = infectionArray.getValues();

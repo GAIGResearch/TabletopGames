@@ -24,7 +24,7 @@ public class Token extends Component {
     private HashSet<Integer> owner; // owner
 
     private String token_type;      // string type
-    private String name;            // name (id)
+    private String nameID;            // name (id)
     private int occurenceLimit;     // occurence limit
 
     public Token(){
@@ -47,7 +47,7 @@ public class Token extends Component {
 
     public void loadToken(JSONObject token) {
 
-        this.name = (String) ( (JSONArray) token.get("name")).get(1);
+        this.nameID = (String) token.get("id");
         this.token_type = (String) ( (JSONArray) token.get("type")).get(1);
         this.occurenceLimit = ((Long) ( (JSONArray) token.get("count")).get(1)).intValue();
 
@@ -55,10 +55,10 @@ public class Token extends Component {
     }
 
 
-    public static List<Component> loadTokens(String filename)
+    public static List<Token> loadTokens(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Component> tokens = new ArrayList<>();
+        ArrayList<Token> tokens = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
@@ -108,5 +108,9 @@ public class Token extends Component {
     public int getPosition() {
 
         return position;
+    }
+
+    public String getNameID() {
+        return nameID;
     }
 }

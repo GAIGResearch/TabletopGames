@@ -9,7 +9,6 @@ import pandemic.PandemicGameState;
 import utilities.Hash;
 
 import static pandemic.PandemicGameState.pandemicBoardHash;
-import static pandemic.PandemicGameState.researchStationCounterHash;
 
 public class AddResearchStation implements Action {
     private int researchStationHash = Hash.GetInstance().hash("researchStation");
@@ -21,10 +20,10 @@ public class AddResearchStation implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        BoardNode bn = ((PandemicGameState)gs).findBoardNode(city);
+        BoardNode bn = ((PandemicGameState)gs).world.getNode("name", city);
         if (bn != null) {
             bn.addProperty(researchStationHash, new PropertyBoolean(true));  // TODO: change the value
-            gs.findCounter(researchStationCounterHash).decrement(1); // We have one less research station
+            //gs.findCounter(researchStationCounterHash).decrement(1); // We have one less research station
             return true;
         }
         return false;

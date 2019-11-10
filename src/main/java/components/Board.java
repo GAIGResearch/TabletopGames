@@ -18,7 +18,7 @@ public class Board extends Component{
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;
-
+    protected String nameID;                //This is also in the properties hashmap, maybe remove from there?
 
     public Board()
     {
@@ -44,8 +44,8 @@ public class Board extends Component{
         String neighboursKey = (String) board.get("neighboursKey");
         int maxNeighbours = (int) (long) board.get("maxNeighbours");
 
-        String boardName = (String) board.get("name");
-        properties.put(Hash.GetInstance().hash("name"), new PropertyString(boardName));
+        nameID = (String) board.get("id");
+        properties.put(Hash.GetInstance().hash("id"), new PropertyString(nameID));
 
         JSONArray nodeList = (JSONArray) board.get("nodes");
         for(Object o : nodeList)
@@ -96,6 +96,13 @@ public class Board extends Component{
         return null;
     }
 
+
+    public BoardNode getNode(String key, String value)
+    {
+        return getNodeByProperty(Hash.GetInstance().hash(key), new PropertyString(value));
+    }
+
+
     /**
      * Returns the node in the list which matches the given ID
      * @param id - ID of node to search for.
@@ -116,6 +123,7 @@ public class Board extends Component{
     {
         Board b = new Board();
         b.setBoardNodes(new ArrayList<>(boardNodes));
+        b.nameID = nameID;
         return b;
     }
 
@@ -127,6 +135,9 @@ public class Board extends Component{
         this.boardNodes = boardNodes;
     }
 
+    public String getNameID() {
+        return nameID;
+    }
 
     /**
      * Sets the correct type to the component
@@ -135,10 +146,10 @@ public class Board extends Component{
         super.type = ComponentType.BOARD;
     }
 
-    public static List<Component> loadBoards(String filename)
+    public static List<Board> loadBoards(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Component> boards = new ArrayList<>();
+        ArrayList<Board> boards = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

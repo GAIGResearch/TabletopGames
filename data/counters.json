@@ -1,13 +1,58 @@
 [
   {
-    "name": ["String","Outbreaks"],
+    "id": "Outbreaks",
     "min": ["Integer", 0],
     "max": ["Integer", 8]
   },
   {
-    "name": ["String","Infection Rate"],
+    "id": "Infection Rate",
     "min": ["Integer", 0],
     "max": ["Integer", 6],
     "values": ["Integer[]", [2, 2, 2, 3, 3, 4, 4]]
+  },
+  {
+    "id": "Disease yellow",
+    "min": ["Integer", 0],
+    "max": ["Integer", 2]
+  },
+  {
+    "id": "Disease red",
+    "min": ["Integer", 0],
+    "max": ["Integer", 2]
+  },
+  {
+    "id": "Disease blue",
+    "min": ["Integer", 0],
+    "max": ["Integer", 2]
+  },
+  {
+    "id": "Disease black",
+    "min": ["Integer", 0],
+    "max": ["Integer", 2]
+  },
+
+  {
+    "id": "Disease Cube yellow",
+    "min": ["Integer", 0],
+    "max": ["Integer", 24],
+    "count": ["Integer", 24]
+  },
+  {
+    "id": "Disease Cube red",
+    "min": ["Integer", 0],
+    "max": ["Integer", 24],
+    "count": ["Integer", 24]
+  },
+  {
+    "id": "Disease Cube blue",
+    "min": ["Integer", 0],
+    "max": ["Integer", 24],
+    "count": ["Integer", 24]
+  },
+  {
+    "id": "Disease Cube black",
+    "min": ["Integer", 0],
+    "max": ["Integer", 24],
+    "count": ["Integer", 24]
   }
 ]

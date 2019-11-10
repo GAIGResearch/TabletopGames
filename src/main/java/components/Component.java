@@ -51,49 +51,49 @@ public abstract class Component {
         for(Object o : obj.keySet())
         {
             String key = (String)o;
-            JSONArray value = (JSONArray) obj.get(key);
-            String type = (String) value.get(0);
 
-            Property prop = null;
-            if(type.contains("[]"))  // Array
-            {
-                JSONArray values = (JSONArray) value.get(1);
+            if(obj.get(key) instanceof JSONArray) {
+                JSONArray value = (JSONArray) obj.get(key);
+                String type = (String) value.get(0);
 
-                if(type.contains("String"))
+                Property prop = null;
+                if (type.contains("[]"))  // Array
                 {
-                    prop = new PropertyStringArray(key, values);
-                } else if (type.contains("Integer")) {
-                    prop = new PropertyIntArray(key, values);
-                } else if (type.contains("Long")) {
-                    prop = new PropertyLongArray(key, values);
-                }
-                //More types of arrays to come.
-            } else if (type.contains("<>")) {  // We've got a list!
-                JSONArray values = (JSONArray) value.get(1);
+                    JSONArray values = (JSONArray) value.get(1);
 
-                if (type.contains("Integer")) {
-                    prop = new PropertyIntArrayList(key, values);
-                }else if (type.contains("Long")) {
-                    prop = new PropertyLongArrayList(key, values);
+                    if (type.contains("String")) {
+                        prop = new PropertyStringArray(key, values);
+                    } else if (type.contains("Integer")) {
+                        prop = new PropertyIntArray(key, values);
+                    } else if (type.contains("Long")) {
+                        prop = new PropertyLongArray(key, values);
+                    }
+                    //More types of arrays to come.
+                } else if (type.contains("<>")) {  // We've got a list!
+                    JSONArray values = (JSONArray) value.get(1);
+
+                    if (type.contains("Integer")) {
+                        prop = new PropertyIntArrayList(key, values);
+                    } else if (type.contains("Long")) {
+                        prop = new PropertyLongArrayList(key, values);
+                    }
+                } else {
+                    if (type.contains("String")) {
+                        prop = new PropertyString(key, (String) value.get(1));
+                    } else if (type.contains("Color")) {
+                        prop = new PropertyColor(key, (String) value.get(1));
+                    } else if (type.contains("Vector2D")) {
+                        prop = new PropertyVector2D(key, (JSONArray) value.get(1));
+                    } else if (type.contains("Boolean")) {
+                        prop = new PropertyBoolean(key, (boolean) value.get(1));
+                    } else if (type.contains("Integer")) {
+                        prop = new PropertyInt(key, ((Long) value.get(1)).intValue());
+                    } else if (type.contains("Long")) {
+                        prop = new PropertyLong(key, (long) value.get(1));
+                    }
                 }
-            } else
-            {
-                if(type.contains("String"))
-                {
-                    prop = new PropertyString(key, (String) value.get(1));
-                }else if (type.contains("Color")){
-                    prop = new PropertyColor(key, (String) value.get(1));
-                }else if (type.contains("Vector2D")){
-                    prop = new PropertyVector2D(key, (JSONArray) value.get(1));
-                } else if (type.contains("Boolean")){
-                    prop = new PropertyBoolean(key, (boolean) value.get(1));
-                } else if (type.contains("Integer")) {
-                    prop = new PropertyInt(key, ((Long) value.get(1)).intValue());
-                } else if (type.contains("Long")) {
-                    prop = new PropertyLong(key, (long) value.get(1));
-                }
+                c.addProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
             }
-            c.addProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
         }
 
         return c;

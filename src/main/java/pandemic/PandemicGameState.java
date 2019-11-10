@@ -3,6 +3,7 @@ package pandemic;
 import components.*;
 import content.PropertyString;
 import core.Area;
+import core.Game;
 import core.GameState;
 import utilities.Hash;
 
@@ -23,23 +24,18 @@ public class PandemicGameState extends GameState {
     static int playerCardDeckHash = Hash.GetInstance().hash("playerCardDeck");
     static int infectionDeckHash = Hash.GetInstance().hash("infectionDeck");
     static int infectionDeckDiscardHash = Hash.GetInstance().hash("infectionDeckDiscard");
-    public static int researchStationCounterHash = Hash.GetInstance().hash("researchStationCounter");
     public static List<Integer> diseaseHash;
     public static List<Integer> diseaseCubeHash;
     static List<Integer> tokensHash;
 
     public static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
-    PandemicGameState(int nPlayers) {
-        areas = new HashMap<>();  // Game State has areas! Initialize.
-        diseaseHash = new ArrayList<>();
-        tokensHash = new ArrayList<>();
-        diseaseCubeHash = new ArrayList<>();
+    public Board world;
 
-        // load the board
-        Board pb = new Board();
-        String dataPath = "data/boards.json";
-        pb.loadBoards(dataPath);
+    public void setupAreas()
+    {
+        //1. Library of area setups: game.setAreas();
+        //2. Like this:
 
         // For each player, initialize their own areas: they get a player hand and a player card
         for (int i = 0; i < nPlayers; i++) {
@@ -54,23 +50,38 @@ public class PandemicGameState extends GameState {
         // infection rate counter, outbreak counter, diseases x 4
         Area gameArea = new Area();
         gameArea.setOwner(-1);
-        gameArea.addComponent(pandemicBoardHash, pb);
+        gameArea.addComponent(pandemicBoardHash, world);
+        areas.put(-1, gameArea);
+    }
 
-        // Set up the counters TODO: read from JSON
-        Counter infection_rate = new Counter();
-        Counter outbreaks = new Counter();
+
+    public void setup(Game game)
+    {
+        diseaseHash = new ArrayList<>();
+        tokensHash = new ArrayList<>();
+        diseaseCubeHash = new ArrayList<>();
+
+        // load the board
+        world = game.findBoard("cities"); //world.getNode("name","Valencia");
+
+        setupAreas(); // TODO: This should be called from GameState.java
+
+        Area gameArea = areas.get(-1);
+
+        // Set up the counters
+        Counter infection_rate = game.findCounter("Infection Rate");
+        Counter outbreaks = game.findCounter("Outbreaks");
         gameArea.addComponent(infectionCounterHash, infection_rate);
         gameArea.addComponent(outbreaksHash, outbreaks);
-        gameArea.addComponent(researchStationCounterHash, new Counter());
 
         for (String color : colors) {
-            Counter diseaseC = new Counter();  // TODO json
-            int hash = Hash.GetInstance().hash("diseaseCounter" + color);  // TODO json
+            int hash = Hash.GetInstance().hash("Disease " + color);
+            Counter diseaseC = game.findCounter("Disease " + color);
             diseaseHash.add(hash);
             gameArea.addComponent(hash, diseaseC);
 
-            Counter diseaseCubeCounter = new Counter();  // TODO json
-            hash = Hash.GetInstance().hash("diseaseCubeCounter" + color);  // TODO json
+            hash = Hash.GetInstance().hash("Disease Cube " + color);
+            Counter diseaseCubeCounter = game.findCounter("Disease Cube " + color);
             diseaseCubeHash.add(hash);
             gameArea.addComponent(hash, diseaseCubeCounter);
         }
@@ -83,26 +94,13 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(playerCardDeckHash, new Deck());
 
         // Set up tokens
-        List<Token> tokens = new ArrayList<>();  // TODO read from json, assuming list is already made
-        for (Token t: tokens) {
-            int hash = Hash.GetInstance().hash(t.getTokenType());
-            tokensHash.add(hash);
-            gameArea.addComponent(hash, t);
-        }
+        Token research_stations = game.findToken("Research Stations");
+        int hash = Hash.GetInstance().hash("Research Stations");
+        tokensHash.add(hash);
+        gameArea.addComponent(hash, research_stations);
 
-        areas.put(-1, gameArea);
-    }
+        //TODO: add pawn tokens
 
-    public BoardNode findBoardNode(String city) {
-        Board pb = (Board) getAreas().get(-1).getComponent(pandemicBoardHash);
-        for (BoardNode bn: pb.getBoardNodes()) {
-            PropertyString name = (PropertyString) bn.getProperty(Hash.GetInstance().hash("name"));
-            if (name.value.equals(city)) {
-                // It's this city!
-                return bn;
-            }
-        }
-        return null;
     }
 
     @Override
