@@ -5,13 +5,13 @@ import components.Deck;
 import core.GameState;
 
 public class DrawCard implements Action {
-    private int deckIdFrom;
-    private int deckIdTo;
+    private String deckIdFrom;
+    private String deckIdTo;
 
     private Deck deckFrom;
     private Deck deckTo;
 
-    public DrawCard (int deckFrom, int deckTo) {
+    public DrawCard (String deckFrom, String deckTo) {
         this.deckIdFrom = deckFrom;
         this.deckIdTo = deckTo;
     }

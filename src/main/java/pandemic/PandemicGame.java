@@ -9,7 +9,9 @@ public class PandemicGame extends Game {
 
     @Override
     public void run() {
+        int turn = 0;
         while (!isEnded()) {
+            System.out.println(turn++);
 
             // Get actions of current active player for their turn
             int activePlayer = gameState.getActivePlayer();

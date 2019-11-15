@@ -32,10 +32,10 @@ public class TreatDisease implements Action {
         BoardNode bn = ((PandemicGameState)gs).world.getNode("name", currentLocation.value);
 
         // Find disease counter
-        Counter diseaseCounter = gs.findCounter(diseaseHash.get(colorIdx));
+        Counter diseaseCounter = gs.findCounter("Disease " + color);
 
         // Find cube counters
-        Counter cubeCounter = gs.findCounter(diseaseCubeHash.get(colorIdx));
+        Counter cubeCounter = gs.findCounter("Disease Cube " + color);
 
         // Find infection array to update
         int[] infection = ((PropertyIntArray) bn.getProperty(Hash.GetInstance().hash("infection"))).getValues();

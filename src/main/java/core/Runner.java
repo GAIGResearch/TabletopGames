@@ -12,7 +12,7 @@ public class Runner {
         game.gameState = gs;
         game.forwardModel = fm;
 
-        game.gameState.init();
+        game.gameState.init(g);
         game.setup(dataPath);
     }
 

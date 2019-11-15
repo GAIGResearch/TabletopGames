@@ -347,242 +347,242 @@
      [
        {
          "name": ["String", "Atlanta"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "Washington"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "San Francisco"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "Chicago"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "Montreal"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "Canada"]
        },
        {
          "name": ["String", "New York"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "London"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "United Kingdom"]
        },
        {
          "name": ["String", "Madrid"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "Spain"]
        },
        {
          "name": ["String", "Paris"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "France"]
        },
        {
          "name": ["String", "Essen"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "Germany"]
        },
        {
          "name": ["String", "Milan"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "Italy"]
        },
        {
          "name": ["String", "St Petersburg"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "country": ["String", "Russia"]
        },
        {
          "name": ["String", "Algiers"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Algeria"]
        },
        {
          "name": ["String", "Cairo"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Egypt"]
        },
        {
          "name": ["String", "Istanbul"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Turkey"]
        },
        {
          "name": ["String", "Moscow"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Russia"]
        },
        {
          "name": ["String", "Tehran"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Iran"]
        },
        {
          "name": ["String", "Baghdad"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Iran"]
        },
        {
          "name": ["String", "Riyadh"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Saudi Arabia"]
        },
        {
          "name": ["String", "Karachi"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "Pakistan"]
        },
        {
          "name": ["String", "Delhi"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "India"]
        },
        {
          "name": ["String", "Mumbai"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "India"]
        },
        {
          "name": ["String", "Kolkata"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "India"]
        },
        {
          "name": ["String", "Chennai"],
-         "color": ["String", "black"],
+         "color": ["Color", "black"],
          "country": ["String", "India"]
        },
        {
          "name": ["String", "Beijing"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "People's Republic of China"]
        },
        {
          "name": ["String", "Seoul"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "South Korea"]
        },
        {
          "name": ["String", "Shanghai"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "People's Republic of China"]
        },
        {
          "name": ["String", "Tokyo"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Japan"]
        },
        {
          "name": ["String", "Osaka"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Japan"]
        },
        {
          "name": ["String", "Taipei"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Taiwan"]
        },
        {
          "name": ["String", "Hong Kong"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "People's Republic of China"]
        },
        {
          "name": ["String", "Bangkok"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Thailand"]
        },
        {
          "name": ["String", "Ho Chi Minh City"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Vietnam"]
        },
        {
          "name": ["String", "Manila"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Philippines"]
        },
        {
          "name": ["String", "Sydney"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Australia"]
        },
        {
          "name": ["String", "Jakarta"],
-         "color": ["String", "red"],
+         "color": ["Color", "red"],
          "country": ["String", "Indonesia"]
        },
        {
          "name": ["String", "Khartoum"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Sudan"]
        },
        {
          "name": ["String", "Lagos"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Nigeria"]
        },
        {
          "name": ["String", "Johannesburg"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "South Africa"]
        },
        {
          "name": ["String", "Kinshasa"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Dem. Republic of the Congo"]
        },
        {
          "name": ["String", "Sao Paolo"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Brazil"]
        },
        {
          "name": ["String", "Bogota"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Colombia"]
        },
        {
          "name": ["String", "Miami"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "Mexico City"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Mexico"]
        },
        {
          "name": ["String", "Los Angeles"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "United States"]
        },
        {
          "name": ["String", "Lima"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Peru"]
        },
        {
          "name": ["String", "Santiago"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Chile"]
        },
        {
          "name": ["String", "Buenos Aires"],
-         "color": ["String", "yellow"],
+         "color": ["Color", "yellow"],
          "country": ["String", "Argentina"]
        }
      ]
@@ -619,37 +619,37 @@
      [
        {
          "name": ["String", "Scientist"],
-         "color": ["String", "white"],
+         "color": ["Color", "white"],
          "action": ["String", "You need only 4 cards of the same color to do the Discover a Cure action."]
        },
        {
          "name": ["String", "Quarantine Specialist"],
-         "color": ["String", "green"],
+         "color": ["Color", "green"],
          "action": ["String", "Prevent disease cube placements (and outbreaks) in the city you are in and all cities connected to it."]
        },
        {
          "name": ["String", "Researcher"],
-         "color": ["String", "brown"],
+         "color": ["Color", "brown"],
          "action": ["String", "As an action, you may give (or a player can take) any City card from your hand. You must both be in the same city. The card does not have to match the city you are in."]
        },
        {
          "name": ["String", "Dispatcher"],
-         "color": ["String", "pink"],
+         "color": ["Color", "pink"],
          "action": ["String", "Move another player's pawn as if it were yours. As an action, move any pawn to a city with another pawn. Get permission before moving another player's pawn"]
        },
        {
          "name": ["String", "Contingency Planner"],
-         "color": ["String", "blue"],
+         "color": ["Color", "blue"],
          "action": ["String", "As an action, take any discarded Event card and store it on this card. When you play the stored Event card, remove it from the game. Limit: 1 Event card on this card at a time, which is not part of your hand."]
        },
        {
          "name": ["String", "Medic"],
-         "color": ["String", "orange"],
+         "color": ["Color", "orange"],
          "action": ["String", "Remove all cubes of one color when doing Treat Disease. Automatically remove cubes of cured diseases from the city you are in (and prevent them from being placed there)."]
        },
        {
          "name": ["String", "Operations Expert"],
-         "color": ["String", "light green"],
+         "color": ["Color", "light green"],
          "action": ["String", "As an action, build a research station in the city you are in (no City card needed). Once per turn as an action, move from a research station to any city by discarding any City card."]
        }
      ]

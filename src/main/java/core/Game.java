@@ -26,26 +26,25 @@ public abstract class Game {
     protected List<Counter> counters;
     protected List<Dice> dice;
 
-
-    public void setPlayers(List<AIPlayer> players) {
-        this.players = players;
-    }
-
-    public List<AIPlayer> getPlayers() {
-        return players;
-    }
-
-
     public abstract void run();
     public abstract boolean isEnded();
     public abstract HashSet<Integer> winners();
 
-    public void setup(String dataPath)
-    {
+    public void setup(String dataPath) {
         load(dataPath);
+    }
 
+    public void setPlayers(List<AIPlayer> players) {
+        this.players = players;
+        gameState.nPlayers = players.size();
+
+        // Game set up after we have players
         gameState.setup(this);
-        forwardModel.setup(gameState);
+        forwardModel.setup(gameState, this);
+    }
+
+    public List<AIPlayer> getPlayers() {
+        return players;
     }
 
 
@@ -87,4 +86,28 @@ public abstract class Game {
         return null;
     }
 
+    public Deck findDeck(String name) {
+        for (Deck d: decks) {
+            if (name.equalsIgnoreCase(d.getID())) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    public String tempDeck() {
+        Deck temp = findDeck("tempDeck");
+        if (temp == null) {
+            temp = new Deck();
+            temp.setID("tempDeck");
+        } else {
+            temp.clear();
+        }
+        decks.add(temp);
+        return "tempDeck";
+    }
+
+    public void clearTempDeck() {
+        tempDeck();
+    }
 }

@@ -38,7 +38,7 @@ public class InfectCity implements Action{
             array[Utils.indexOf(colors, color.valueStr)] += count;  // TODO: check outbreak & max cubes on city
             // TODO: diseases eradicated?
             // Decrease the number of remaining cubes
-            gs.findCounter(Hash.GetInstance().hash("diseaseCubeCounter" + color.valueStr)).decrement(count);
+            gs.findCounter("Disease Cube " + color.valueStr).decrement(count);
             return true;
         }
         return false;

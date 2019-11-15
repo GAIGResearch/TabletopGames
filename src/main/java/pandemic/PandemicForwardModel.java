@@ -5,6 +5,7 @@ import components.*;
 import content.*;
 import core.Area;
 import core.ForwardModel;
+import core.Game;
 import core.GameState;
 import utilities.Hash;
 
@@ -24,22 +25,23 @@ public class PandemicForwardModel implements ForwardModel {
     }
 
     @Override
-    public void setup(GameState firstState) {
+    public void setup(GameState firstState, Game game) {
         PandemicGameState state = (PandemicGameState) firstState;
 
         // 1 research station in Atlanta
         new AddResearchStation("Atlanta").execute(state);  // TODO maybe static
 
         // init counters
-        state.findCounter(outbreaksHash).setValue(0);
-        state.findCounter(infectionCounterHash).setValue(0);
-        for (int hash: diseaseHash) {
-            state.findCounter(hash).setValue(0);
+        game.findCounter("Outbreaks").setValue(0);
+        game.findCounter("Infection Rate").setValue(0);
+        for (String color : colors) {
+            game.findCounter("Disease " + color).setValue(0);
+            int hash = Hash.GetInstance().hash("Disease " + color);
         }
 
         // infection
-        Deck infectionDeck = state.findDeck(infectionDeckHash);
-        Deck infectionDiscard = state.findDeck(infectionDeckDiscardHash);
+        Deck infectionDeck = game.findDeck("Infections");
+        Deck infectionDiscard = game.findDeck("Infection Discard");
         infectionDeck.shuffle();
         int nCards = 3;  // TODO json
         int nTimes = 3;  // TODO json
@@ -56,11 +58,12 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // give players cards
-        Deck playerCards = state.findDeck(playerCardDeckHash);
-        Deck playerDeck = state.findDeck(playerDeckHash);  // TODO: assuming contains city & event cards
+        String playerDeckStr = "Cities";  // TODO: combine cities + events
+        Deck playerCards = game.findDeck("Player Roles");
+        Deck playerDeck = game.findDeck(playerDeckStr);  // TODO: assuming contains city & event cards
         playerCards.shuffle();
         int nCardsPlayer = 6 - state.nPlayers();  // TODO: params
-        int maxPop = 0;
+        long maxPop = 0;
         int startingPlayer = -1;
 
         for (int i = 0; i < state.nPlayers(); i++) {
@@ -75,14 +78,15 @@ public class PandemicForwardModel implements ForwardModel {
             placePlayer(state, "Atlanta", i);
 
             // Give players cards
+            Deck playerHandDeck = (Deck) playerArea.getComponent(playerHandHash);
+
             playerDeck.shuffle();
             for (int j = 0; j < nCardsPlayer; j++) {
-                new DrawCard(state.findDeck(playerDeckHash), (Deck) playerArea.getComponent(playerHandHash)).execute(state);
+                new DrawCard(game.findDeck(playerDeckStr), playerHandDeck).execute(state);
             }
 
-            Deck playerHandDeck = (Deck) playerArea.getComponent(playerHandHash);
             for (Card card: playerHandDeck.getCards()) {
-                int pop = ((PropertyInt) card.getProperty(Hash.GetInstance().hash("population"))).value;
+                long pop = ((PropertyLong) card.getProperty(Hash.GetInstance().hash("population"))).value;
                 if (pop > maxPop) {
                     startingPlayer = i;
                     maxPop = pop;
@@ -93,14 +97,14 @@ public class PandemicForwardModel implements ForwardModel {
         // Epidemic cards
         playerDeck.shuffle();
         int noCards = playerDeck.getCards().size();
-        int noEpidemicCards = 4;  // TODO: json
+        int noEpidemicCards = 4;  // TODO: json or game params
         int range = noCards / noEpidemicCards;
         for (int i = 0; i < noEpidemicCards; i++) {
             int index = i * range + i + new Random().nextInt(range);  // TODO seed
 
-            //TODO We can't load cards like this.
-            //Card card = new Card("epidemic", epidemicCard);
-            //new AddCardToDeck(card, playerDeck, index).execute(state);
+            Card card = new Card();
+            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
+            new AddCardToDeck(card, playerDeck, index).execute(state);
         }
 
         // Player with highest population starts
@@ -114,11 +118,12 @@ public class PandemicForwardModel implements ForwardModel {
         infectCities(currentState);
     }
 
+    // TODO
     private void playerActions(GameState currentState, Action[] actions) {
-        int activePlayer = currentState.getActivePlayer();
-        for (Action a: actions) {
-            a.execute(currentState);
-        }
+//        int activePlayer = currentState.getActivePlayer();
+//        for (Action a: actions) {
+//            a.execute(currentState);
+//        }
     }
 
     // TODO: create new temporary decks, add to gamestate, remove afterwards.
@@ -128,8 +133,8 @@ public class PandemicForwardModel implements ForwardModel {
         int noCardsDrawn = 2;
         int activePlayer = currentState.getActivePlayer();
 
-        int tempDeckID = currentState.tempDeck();
-        DrawCard action = new DrawCard(playerDeckHash, tempDeckID);
+        String tempDeckID = currentState.tempDeck();
+        DrawCard action = new DrawCard("Cities", tempDeckID);  // TODO player deck
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
             action.execute(currentState);
         }
@@ -149,41 +154,41 @@ public class PandemicForwardModel implements ForwardModel {
                 }
             }
         }
-        currentState.clearTemp();
+        currentState.clearTempDeck();
     }
 
     private void epidemic(GameState currentState) {
         // 1. infection counter idx ++
-        currentState.findCounter(infectionCounterHash).increment(1);
+        currentState.findCounter("Infection Rate").increment(1);
 
         // 2. 3 cubes on bottom card in infection deck, then add this card on top of infection discard
-        Card c = currentState.findDeck(infectionDeckHash).pickLast();
+        Card c = currentState.findDeck("Infections").pickLast();
         new InfectCity(c, 3).execute(currentState);
-        new AddCardToDeck(c, currentState.findDeck(infectionDeckDiscardHash)).execute(currentState);
+        new AddCardToDeck(c, currentState.findDeck("Infection Discard")).execute(currentState);
 
         // TODO: wanna play event card?
 
         // 3. shuffle infection discard deck, add back on top of infection deck
-        Deck infectionDiscard = currentState.findDeck(infectionDeckDiscardHash);
+        Deck infectionDiscard = currentState.findDeck("Infection Discard");
         infectionDiscard.shuffle();
         for (Card card: infectionDiscard.getCards()) {
-            new AddCardToDeck(card, currentState.findDeck(infectionDeckHash)).execute(currentState);
+            new AddCardToDeck(card, currentState.findDeck("Infections")).execute(currentState);
         }
     }
 
     private void infectCities(GameState currentState) {
-        Counter infectionCounter = currentState.findCounter(infectionCounterHash);
+        Counter infectionCounter = currentState.findCounter("Infection Rate");
         int noCardsDrawn = infectionRate[infectionCounter.getCounter()];
-        int tempDeckID = currentState.tempDeck();
-        DrawCard action = new DrawCard(infectionDeckHash, tempDeckID);
+        String tempDeckID = currentState.tempDeck();
+        DrawCard action = new DrawCard("Infections", tempDeckID);
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
             action.execute(currentState);
         }
         Deck tempDeck = new Deck(); //TODO: This new deck object should be replaced by an actual, consisitent temp deck.
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
             new InfectCity(c, 1).execute(currentState);
-            new AddCardToDeck(c, currentState.findDeck(infectionDeckDiscardHash)).execute(currentState);
+            new AddCardToDeck(c, currentState.findDeck("Infection Discard")).execute(currentState);
         }
-        currentState.clearTemp();
+        currentState.clearTempDeck();
     }
 }

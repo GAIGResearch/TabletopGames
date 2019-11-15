@@ -15,6 +15,7 @@ public class PropertyColor extends Property
         this.hashString = hashKey;
         this.hashKey = Hash.GetInstance().hash(hashString);
         this.value = Utils.stringToColor(valStr);
+        this.valueStr = valStr;
     }
 
     public PropertyColor(String key, int hashKey, Color value)
@@ -22,6 +23,7 @@ public class PropertyColor extends Property
         this.hashString = key;
         this.hashKey = hashKey;
         this.value = value;
+        this.valueStr = value.toString();
     }
 
     @Override

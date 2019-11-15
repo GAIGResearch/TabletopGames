@@ -18,6 +18,7 @@ public class Deck extends Component implements IDeck {
 
     protected ArrayList<Card> cards;
 
+    private String id;
     protected Random rnd;
 
     public Deck()
@@ -33,6 +34,15 @@ public class Deck extends Component implements IDeck {
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
         this.rnd = rnd;
+        this.capacity = capacity;
+        properties = new HashMap<>();
+    }
+
+    public Deck(int capacity)
+    {
+        super.type = ComponentType.DECK;
+        cards = new ArrayList<>();
+        this.rnd = new Random();
         this.capacity = capacity;
         properties = new HashMap<>();
     }
@@ -137,14 +147,26 @@ public class Deck extends Component implements IDeck {
         return cards;
     }
 
+    public String getID() {
+        return id;
+    }
+
+    public void setID(String id) {
+        this.id = id;
+    }
+
+    public void clear() {
+        cards.clear();
+    }
+
     /**
      * Loads cards for a deck from a JSON file.
      * @param deck - deck to load in JSON format
      */
     public void loadDeck(JSONObject deck) {
 
-        String name = (String) ( (JSONArray) deck.get("name")).get(1);
-        properties.put(Hash.GetInstance().hash("name"), new PropertyString(name));
+        id = (String) ( (JSONArray) deck.get("name")).get(1);
+        properties.put(Hash.GetInstance().hash("name"), new PropertyString(id));
 
         JSONArray deckCards = (JSONArray) deck.get("cards");
 
