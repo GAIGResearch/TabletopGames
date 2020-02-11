@@ -112,14 +112,14 @@ public class PandemicForwardModel implements ForwardModel {
     }
 
     @Override
-    public void next(GameState currentState, Action[] actions) {
-        playerActions(currentState, actions);
+    public void next(GameState currentState, Action action) {
+        playerActions(currentState, action);
         drawCards(currentState);
         infectCities(currentState);
     }
 
     // TODO
-    private void playerActions(GameState currentState, Action[] actions) {
+    private void playerActions(GameState currentState, Action action) {
 //        int activePlayer = currentState.getActivePlayer();
 //        for (Action a: actions) {
 //            a.execute(currentState);

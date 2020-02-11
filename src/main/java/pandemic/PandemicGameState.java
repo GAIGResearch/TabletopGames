@@ -105,7 +105,7 @@ public class PandemicGameState extends GameState {
 
     @Override
     public List<Action> possibleActions() {
-        return null;  // TODO
+        return new ArrayList<>();  // TODO
     }
 
     void setActivePlayer(int activePlayer) {
