@@ -140,10 +140,9 @@ public class PandemicForwardModel implements ForwardModel {
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
-            //TODO We can't check cards like this.
-//            if (c.getCardType() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
-//                epidemic(currentState);
-//            } else
+            if (c.getProperty(Hash.GetInstance().hash("name")).getHashKey() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
+                epidemic(currentState);
+            } else
 
             {  // Otherwise, give card to player
                 Area area = currentState.getAreas().get(activePlayer);
