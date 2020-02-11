@@ -82,7 +82,7 @@ public class Board extends Component{
      * @param p - Property that has the value to look for.
      * @return - node matching name.
      */
-    protected BoardNode getNodeByProperty(int prop_id, Property p) {
+    public BoardNode getNodeByProperty(int prop_id, Property p) {
         for (BoardNode n : boardNodes) {
             Property prop = n.getProperty(prop_id);
             if(prop != null)

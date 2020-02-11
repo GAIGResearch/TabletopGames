@@ -2,7 +2,9 @@ package pandemic;
 
 import actions.Action;
 import actions.DoNothing;
+import actions.MovePlayer;
 import components.*;
+import content.Property;
 import content.PropertyString;
 import core.Area;
 import core.Game;
@@ -23,6 +25,7 @@ public class PandemicGameState extends GameState {
     public static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
     public Board world;
+    public int numAvailableActions = 0;
 
     public void setupAreas()
     {
@@ -101,13 +104,22 @@ public class PandemicGameState extends GameState {
 
     @Override
     public int nPossibleActions() {
-        return 1;  // TODO
+        return this.numAvailableActions;
     }
 
     @Override
     public List<Action> possibleActions() {
+        // get player's location
         ArrayList<Action> actions = new ArrayList<>();
+
+        Property playerLocation = this.areas.get(activePlayer).getComponent(playerCardHash).getProperty(Hash.GetInstance().hash("playerLocation"));
+        BoardNode cityNode = world.getNodeByProperty(Hash.GetInstance().hash("name"), playerLocation);
+        for (BoardNode otherCity : cityNode.getNeighbours()){
+            actions.add(new MovePlayer(activePlayer, ((PropertyString)otherCity.getProperty(Hash.GetInstance().hash("name"))).value));
+        }
+
         actions.add(new DoNothing());
+        this.numAvailableActions = actions.size();
         return actions;  // TODO
     }
 

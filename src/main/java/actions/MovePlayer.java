@@ -22,7 +22,7 @@ public class MovePlayer implements Action {
     int playerIdx;
     String destination;
 
-    MovePlayer(int playerIdx, String city) {
+    public MovePlayer(int playerIdx, String city) {
         this.playerIdx = playerIdx;
         this.destination = city;
     }
@@ -47,13 +47,13 @@ public class MovePlayer implements Action {
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
-        playerCard.addProperty(playerLocationHash, new PropertyString("Atlanta"));  // TODO: does this exist?
+        playerCard.addProperty(playerLocationHash, new PropertyString(city));  // TODO: does this exist?
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode("name", city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersBNHash);
-        prop.getValues().remove(playerIdx);
+        prop.getValues().remove(new Integer(playerIdx));
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
         playerCard.addProperty(playerLocationHash, new PropertyString(null));
