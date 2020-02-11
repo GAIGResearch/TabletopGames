@@ -22,11 +22,6 @@ public class PandemicGame extends Game {
             forwardModel.next(gameState, action);
             actionsPlayed++;
 
-            // Is it the next player's turn? In Pandemic, that's when someone played 4 actions
-            if (actionsPlayed == 4) {
-                ((PandemicGameState) gameState).setActivePlayer((activePlayer + 1) % players.size());
-                actionsPlayed = 0;
-            }
 
             // TODO: GUI
         }

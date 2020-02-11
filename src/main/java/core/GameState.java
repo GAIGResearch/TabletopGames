@@ -16,6 +16,7 @@ public abstract class GameState {
     protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
     protected int nPlayers;
     protected HashMap<Integer, Area> areas;
+    public int roundStep;
 
     public abstract GameState copy();
     public GameState copyTo(GameState gs) {

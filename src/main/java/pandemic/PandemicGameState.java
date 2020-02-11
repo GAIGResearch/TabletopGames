@@ -101,7 +101,7 @@ public class PandemicGameState extends GameState {
 
     @Override
     public int nPossibleActions() {
-        return 0;  // TODO
+        return 1;  // TODO
     }
 
     @Override

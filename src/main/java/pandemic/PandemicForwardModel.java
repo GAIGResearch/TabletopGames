@@ -109,16 +109,20 @@ public class PandemicForwardModel implements ForwardModel {
     @Override
     public void next(GameState currentState, Action action) {
         playerActions(currentState, action);
-        drawCards(currentState);
-        infectCities(currentState);
+        if (currentState.roundStep >= currentState.nInputActions()) {
+            currentState.roundStep = 0;
+            drawCards(currentState);
+            infectCities(currentState);
+
+            // Set the next player as active
+            ((PandemicGameState) currentState).setActivePlayer((currentState.getActivePlayer() + 1) % currentState.nPlayers());
+        }
     }
 
-    // TODO
     private void playerActions(GameState currentState, Action action) {
-//        int activePlayer = currentState.getActivePlayer();
-//        for (Action a: actions) {
-//            a.execute(currentState);
-//        }
+
+        currentState.roundStep += 1;
+        action.execute(currentState);
     }
 
     // TODO: create new temporary decks, add to gamestate, remove afterwards.
