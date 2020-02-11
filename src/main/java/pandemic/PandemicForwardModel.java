@@ -20,11 +20,6 @@ public class PandemicForwardModel implements ForwardModel {
     int[] infectionRate = new int[]{2, 2, 2, 3, 3, 4, 4};  // TODO: json
 
     @Override
-    public void init() {
-
-    }
-
-    @Override
     public void setup(GameState firstState, Game game) {
         PandemicGameState state = (PandemicGameState) firstState;
 

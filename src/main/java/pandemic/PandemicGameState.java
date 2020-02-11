@@ -1,6 +1,7 @@
 package pandemic;
 
 import actions.Action;
+import actions.DoNothing;
 import components.*;
 import content.PropertyString;
 import core.Area;
@@ -105,7 +106,9 @@ public class PandemicGameState extends GameState {
 
     @Override
     public List<Action> possibleActions() {
-        return new ArrayList<>();  // TODO
+        ArrayList<Action> actions = new ArrayList<>();
+        actions.add(new DoNothing());
+        return actions;  // TODO
     }
 
     void setActivePlayer(int activePlayer) {
