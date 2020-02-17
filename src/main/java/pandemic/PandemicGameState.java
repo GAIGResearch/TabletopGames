@@ -2,10 +2,7 @@ package pandemic;
 
 import actions.*;
 import components.*;
-import content.Property;
-import content.PropertyBoolean;
-import content.PropertyIntArray;
-import content.PropertyString;
+import content.*;
 import core.Area;
 import core.Game;
 import core.GameState;
@@ -141,8 +138,6 @@ public class PandemicGameState extends GameState {
             // get the city from the card
             if (playerLocation.equals(((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value)){
                 // add all the cities
-                System.out.println("Adding all the cities");
-
                 // iterate over all the cities in the world
                 for (BoardNode bn: this.world.getBoardNodes()) {
                     PropertyString destination = (PropertyString) bn.getProperty(Hash.GetInstance().hash("name"));
@@ -157,11 +152,9 @@ public class PandemicGameState extends GameState {
 
         // shuttle flight, move from city with research station to any other research station
         // get research stations from board
-        System.out.println("shuttle flight");
         ArrayList<PropertyString> researchStations = new ArrayList<>();
         boolean currentHasStation = false;
         for (BoardNode bn: this.world.getBoardNodes()){
-            System.out.println("shuttle flight");
             if (((PropertyBoolean)bn.getProperty(Hash.GetInstance().hash("researchStation"))).value == true){
                 if (bn.getProperty(Hash.GetInstance().hash("name")).equals(playerLocation)){
                     currentHasStation = true;
@@ -193,11 +186,9 @@ public class PandemicGameState extends GameState {
 
         // Treat disease
         // should check if city has disease
-        System.out.println("treating diseases");
         for (BoardNode bn: this.world.getBoardNodes()){
             if ((bn.getProperty(Hash.GetInstance().hash("name"))).equals(playerLocation)){
                 // bn is the node where player is standing
-                System.out.println("found node where player is standing");
                 // todo test with infections being present on the board
                 PropertyIntArray cityInfections = (PropertyIntArray)bn.getProperty(Hash.GetInstance().hash("infection"));
                 // remove one disease cube
@@ -213,9 +204,17 @@ public class PandemicGameState extends GameState {
 
         // todo share knowledge, give or take card, player can only have 7 cards
 
-
-        // todo discover a cure, 5 cards of the same colour at a research station
-
+        // discover a cure, 5 cards of the same colour at a research station
+        int[] colourCounter = new int[PandemicGameState.colors.length];
+        for (Card card: playerDeck.getCards()){
+            String color = ((PropertyString)card.getProperty(Hash.GetInstance().hash("color"))).value;
+            colourCounter[Utils.indexOf(PandemicGameState.colors, color)]++;
+        }
+        for (int i =0 ; i < colourCounter.length; i++){
+            if (colourCounter[i] >= 5){
+                actions.add(new TreatDisease(PandemicGameState.colors[i]));
+            }
+        }
 
 
         this.numAvailableActions = actions.size();
