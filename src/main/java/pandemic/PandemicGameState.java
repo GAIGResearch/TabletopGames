@@ -1,15 +1,16 @@
 package pandemic;
 
-import actions.Action;
-import actions.DoNothing;
-import actions.MovePlayer;
+import actions.*;
 import components.*;
 import content.Property;
+import content.PropertyBoolean;
+import content.PropertyIntArray;
 import content.PropertyString;
 import core.Area;
 import core.Game;
 import core.GameState;
 import utilities.Hash;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,12 +110,13 @@ public class PandemicGameState extends GameState {
 
     @Override
     public List<Action> possibleActions() {
+        // todo there are some repetitive iterations, could collect all the necessary information in a singel loop
+        // todo actions that require a card do not seem to remove the card
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
 
         // add do nothing action
         actions.add(new DoNothing());
-        this.numAvailableActions = actions.size();
 
         // Drive / Ferry add actions for travelling immediate cities
         Property playerLocation = this.areas.get(activePlayer).getComponent(playerCardHash).getProperty(Hash.GetInstance().hash("playerLocation"));
@@ -134,30 +136,89 @@ public class PandemicGameState extends GameState {
             actions.add(new MovePlayer(activePlayer, ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value));
         }
 
-        // todo charter flight, discard city that matches your card and travel to any city
+        // charter flight, discard city that matches your card and travel to any city
         for (Card card: playerDeck.getCards()){
             // get the city from the card
             if (playerLocation.equals(((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value)){
                 // add all the cities
-                System.out.println("need to add all the cities");
+                System.out.println("Adding all the cities");
+
+                // iterate over all the cities in the world
+                for (BoardNode bn: this.world.getBoardNodes()) {
+                    PropertyString destination = (PropertyString) bn.getProperty(Hash.GetInstance().hash("name"));
+
+                    // only add the ones that are different from the current location
+                    if (!destination.equals(playerLocation)) {
+                        actions.add(new MovePlayer(activePlayer, destination.value));
+                    }
+                }
             }
-//            actions.add(new MovePlayer(activePlayer, ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value));
+        }
+
+        // shuttle flight, move from city with research station to any other research station
+        // get research stations from board
+        System.out.println("shuttle flight");
+        ArrayList<PropertyString> researchStations = new ArrayList<>();
+        boolean currentHasStation = false;
+        for (BoardNode bn: this.world.getBoardNodes()){
+            System.out.println("shuttle flight");
+            if (((PropertyBoolean)bn.getProperty(Hash.GetInstance().hash("researchStation"))).value == true){
+                if (bn.getProperty(Hash.GetInstance().hash("name")).equals(playerLocation)){
+                    currentHasStation = true;
+                }
+                else {
+                    // researchStations do not contain the current station
+                    researchStations.add((PropertyString)bn.getProperty(Hash.GetInstance().hash("name")));
+                }
+            }
+        }
+        // if current city has research station, add every city that has research stations
+        if (currentHasStation){
+            for (PropertyString station: researchStations){
+                actions.add(new MovePlayer(activePlayer, station.value));
+            }
         }
 
 
-        // todo shuttle flight, move from city with research station to any other research station
+        // build research station, discard card with that city to build one, if 6 are used, then take one from board
+        // 1, check if player has the city in the hand
+        // 2, new AddResearchStation action with city name
+        for (Card card: playerDeck.getCards()){
+            Property cardName = card.getProperty(Hash.GetInstance().hash("name"));
+            if (cardName.equals(playerLocation)){
+                actions.add(new AddResearchStation(((PropertyString)cardName).value));
+            }
+            // todo removing 6th city is not in the list, so in that case the action would contain which city to be removed
+        }
 
-        // todo build research station, discard card with that city to build one, if 6 are used, then take one from board
+        // Treat disease
+        // should check if city has disease
+        System.out.println("treating diseases");
+        for (BoardNode bn: this.world.getBoardNodes()){
+            if ((bn.getProperty(Hash.GetInstance().hash("name"))).equals(playerLocation)){
+                // bn is the node where player is standing
+                System.out.println("found node where player is standing");
+                // todo test with infections being present on the board
+                PropertyIntArray cityInfections = (PropertyIntArray)bn.getProperty(Hash.GetInstance().hash("infection"));
+                // remove one disease cube
+                for (int i = 0; i < cityInfections.getValues().length; i++){
+                    if (cityInfections.getValues()[i] > 0){
+                        // todo test with actual diseases
+                        actions.add(new TreatDisease(PandemicGameState.colors[i]));
+                    }
+                }
+            }
+        }
 
-        // todo treat disease
 
         // todo share knowledge, give or take card, player can only have 7 cards
+
 
         // todo discover a cure, 5 cards of the same colour at a research station
 
 
 
-
+        this.numAvailableActions = actions.size();
 
         return actions;  // TODO
     }
