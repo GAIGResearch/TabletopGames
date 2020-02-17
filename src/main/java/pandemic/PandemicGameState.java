@@ -207,7 +207,7 @@ public class PandemicGameState extends GameState {
         // discover a cure, 5 cards of the same colour at a research station
         int[] colourCounter = new int[PandemicGameState.colors.length];
         for (Card card: playerDeck.getCards()){
-            String color = ((PropertyString)card.getProperty(Hash.GetInstance().hash("color"))).value;
+            String color = ((PropertyColor)card.getProperty(Hash.GetInstance().hash("color"))).valueStr;
             colourCounter[Utils.indexOf(PandemicGameState.colors, color)]++;
         }
         for (int i =0 ; i < colourCounter.length; i++){
