@@ -14,7 +14,7 @@ import utilities.Utils.ComponentType;
 
 public class Deck extends Component implements IDeck {
 
-    protected int capacity;
+    protected int capacity = -1;
 
     protected ArrayList<Card> cards;
 
@@ -110,7 +110,7 @@ public class Deck extends Component implements IDeck {
     }
 
     public boolean add(Card c, int index) {
-        if (cards.size() < capacity) {
+        if (cards.size() < capacity || capacity == -1) {
             cards.add(index, c);
             return true;
         }

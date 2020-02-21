@@ -30,7 +30,9 @@ public class DrawCard implements Action {
             deckTo = gs.findDeck(deckIdTo);
         }
         Card c = deckFrom.draw();
-        if (c == null) return false;
+        if (c == null) {
+            return false;
+        }
         return deckTo.add(c);
 
         // TODO: if you can't draw cards, game over

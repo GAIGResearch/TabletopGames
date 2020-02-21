@@ -32,13 +32,13 @@ public class PandemicGame extends Game {
 
     @Override
     public boolean isEnded() {
-        // TODO: check if game is over
-        return false;
+        return gameOver;
     }
 
     @Override
     public HashSet<Integer> winners() {
+        HashSet<Integer> winners = new HashSet<>();
         // TODO: all or nothing, check gamestate
-        return null;
+        return winners;
     }
 }

@@ -16,6 +16,8 @@ import java.util.List;
 
 public abstract class Game {
 
+    protected boolean gameOver = false;
+
     protected List<AIPlayer> players;
     protected GameState gameState;
     protected ForwardModel forwardModel;
@@ -98,6 +100,7 @@ public abstract class Game {
     public String tempDeck() {
         Deck temp = findDeck("tempDeck");
         if (temp == null) {
+            // todo get capacity
             temp = new Deck();
             temp.setID("tempDeck");
         } else {
@@ -109,5 +112,13 @@ public abstract class Game {
 
     public void clearTempDeck() {
         tempDeck();
+    }
+
+    public void addDeckToList(Deck deck){
+        this.decks.add(deck);
+    }
+
+    public void gameOver(){
+        gameOver = true;
     }
 }

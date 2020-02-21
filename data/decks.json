@@ -34,7 +34,7 @@
       {
         "name": ["String","Montreal"],
         "color": ["Color", "blue"],
-        "country": ["String", "Canda"],
+        "country": ["String", "Canada"],
         "population": ["Long", 3429000],
         "density": ["Integer", 2200]
       },
