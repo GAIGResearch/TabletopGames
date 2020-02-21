@@ -23,7 +23,8 @@ public class Test {
         tabletopEngine.setGame(new PandemicGame(), new PandemicGameState(), new PandemicForwardModel(), "data/");
         tabletopEngine.setPlayers(players);
 
-        tabletopEngine.run();
+//        tabletopEngine.run();
+        tabletopEngine.play();
 
     }
 }

@@ -1,6 +1,7 @@
 package pandemic;
 
 import actions.Action;
+import core.GUI;
 import core.Game;
 
 import java.util.HashSet;
@@ -8,7 +9,7 @@ import java.util.HashSet;
 public class PandemicGame extends Game {
 
     @Override
-    public void run() {
+    public void run(GUI gui) {
         int turn = 0;
         int actionsPlayed = 0;
         while (!isEnded()) {
@@ -23,7 +24,15 @@ public class PandemicGame extends Game {
             actionsPlayed++;
 
 
-            // TODO: GUI
+            if (gui != null) {
+                gui.update();
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    System.out.println("EXCEPTION " + e);
+                }
+            }
+
         }
 
         System.out.println("Game Over");

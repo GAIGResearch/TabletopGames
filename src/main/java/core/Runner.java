@@ -1,5 +1,7 @@
 package core;
 
+import pandemic.PandemicGUI;
+
 import java.util.List;
 
 public class Runner {
@@ -23,7 +25,13 @@ public class Runner {
 
     public void run()
     {
-        game.run();
+        game.run(null);
+    }
+
+    public void play()
+    {
+        PandemicGUI gui = new PandemicGUI(game);
+        game.run(gui);
     }
 
 }

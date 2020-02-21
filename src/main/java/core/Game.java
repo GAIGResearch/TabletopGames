@@ -1,16 +1,6 @@
 package core;
 
 import components.*;
-import content.PropertyString;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import utilities.Hash;
-
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -26,12 +16,16 @@ public abstract class Game {
     protected List<Counter> counters;
     protected List<Dice> dice;
 
-    public abstract void run();
+    public abstract void run(GUI gui);
     public abstract boolean isEnded();
     public abstract HashSet<Integer> winners();
 
     public void setup(String dataPath) {
         load(dataPath);
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 
     public void setPlayers(List<AIPlayer> players) {
