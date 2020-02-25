@@ -29,6 +29,15 @@ public class Deck extends Component implements IDeck {
         properties = new HashMap<>();
     }
 
+    public Deck(String name)
+    {
+        super.type = ComponentType.DECK;
+        this.id = name;
+        cards = new ArrayList<>();
+        rnd = new Random();
+        properties = new HashMap<>();
+    }
+
     protected Deck(Random rnd, int capacity)
     {
         super.type = ComponentType.DECK;
