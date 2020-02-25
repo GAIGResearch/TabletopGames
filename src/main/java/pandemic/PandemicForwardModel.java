@@ -18,10 +18,12 @@ public class PandemicForwardModel implements ForwardModel {
     int epidemicCard = Hash.GetInstance().hash("epidemic");
     public static int playersBNHash = Hash.GetInstance().hash("players");
     int[] infectionRate = new int[]{2, 2, 2, 3, 3, 4, 4};  // TODO: json
+    private Game game;
 
     @Override
     public void setup(GameState firstState, Game game) {
         PandemicGameState state = (PandemicGameState) firstState;
+        this.game = game;
 
         // 1 research station in Atlanta
         new AddResearchStation("Atlanta").execute(state);  // TODO maybe static
@@ -135,12 +137,15 @@ public class PandemicForwardModel implements ForwardModel {
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Cities", tempDeckID);  // TODO player deck
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            action.execute(currentState);
+            boolean canDraw = action.execute(currentState);
+            if (!canDraw){
+                game.gameOver();
+            }
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
-            if (c.getProperty(Hash.GetInstance().hash("name")).getHashKey() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
+            if (((PropertyString)c.getProperty(Hash.GetInstance().hash("name"))).value.hashCode() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
                 epidemic(currentState);
             } else
 
