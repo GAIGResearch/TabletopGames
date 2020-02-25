@@ -40,7 +40,7 @@ public class TreatDisease implements Action {
         // Find infection array to update
         int[] infection = ((PropertyIntArray) bn.getProperty(Hash.GetInstance().hash("infection"))).getValues();
 
-        if (diseaseCounter.getCounter() == 0) {
+        if (diseaseCounter.getValue() == 0) {
             if (infection[colorIdx] > 0) {
                 infection[colorIdx] -= 1;
                 cubeCounter.increment(1);

@@ -176,7 +176,7 @@ public class PandemicForwardModel implements ForwardModel {
 
     private void infectCities(GameState currentState) {
         Counter infectionCounter = currentState.findCounter("Infection Rate");
-        int noCardsDrawn = infectionRate[infectionCounter.getCounter()];
+        int noCardsDrawn = infectionRate[infectionCounter.getValue()];
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Infections", tempDeckID);
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck

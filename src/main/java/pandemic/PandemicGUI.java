@@ -1,12 +1,12 @@
 package pandemic;
 
 import components.Card;
+import components.Counter;
 import components.Deck;
 import core.GUI;
 import core.Game;
 import core.GameState;
-import utilities.BoardView;
-import utilities.CardView;
+import utilities.CounterView;
 import utilities.Hash;
 
 import javax.swing.*;
@@ -14,27 +14,46 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class PandemicGUI extends GUI {
-    CardView[] playerCards;
-    ArrayList<CardView>[] playerHands;
+    PandemicCardView[] playerCards;
+    ArrayList<PandemicCardView>[] playerHands;
+    JComponent boardView;
+
     Game game;
     GameState gs;
     int nPlayers, activePlayer;
 
     public PandemicGUI(Game game) {
-        JComponent boardView = new BoardView(game.findBoard("Cities"), "data/pandemicBackground.jpg");
-        JPanel playerCardsPanel = new JPanel();
-        JPanel playerHandPanel = new JPanel();
         this.game = game;
         gs = game.getGameState();
-        activePlayer = gs.getActivePlayer();
         nPlayers = game.getPlayers().size();
-        playerCards = new CardView[nPlayers];
+        activePlayer = gs.getActivePlayer();
+
+        boardView = new PandemicBoardView(game, "data/pandemicBackground.jpg");
+        JPanel playerAreas = createPlayerAreas();
+        JPanel counterArea = createCounterArea();
+
+        getContentPane().add(playerAreas, BorderLayout.EAST);
+        getContentPane().add(boardView, BorderLayout.CENTER);
+        getContentPane().add(counterArea, BorderLayout.SOUTH);
+
+        // Frame properties
+        pack();
+        this.setVisible(true);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        repaint();
+    }
+
+    private JPanel createPlayerAreas() {
+        JPanel playerCardsPanel = new JPanel();
+        JPanel playerHandPanel = new JPanel();
+        playerCards = new PandemicCardView[nPlayers];
         playerHands = new ArrayList[nPlayers];
 
         for (int i = 0; i < nPlayers; i++) {
             gs = game.getGameState();
             Card playerCard = (Card) gs.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerCard"));
-            CardView cv = new CardView(playerCard, null);
+            PandemicCardView cv = new PandemicCardView(playerCard, null);
             playerCards[i] = cv;
             playerCardsPanel.add(cv);
 
@@ -43,7 +62,7 @@ public class PandemicGUI extends GUI {
             Deck playerHand = (Deck) gs.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
             playerHands[i] = new ArrayList<>();
             for (Card c: playerHand.getCards()) {
-                CardView cv2 = new CardView(c, null);
+                PandemicCardView cv2 = new PandemicCardView(c, null);
                 playerHands[i].add(cv2);
                 hand.add(cv2);
             }
@@ -55,15 +74,26 @@ public class PandemicGUI extends GUI {
         playerAreas.add(playerCardsPanel);
         playerAreas.add(playerHandPanel);
 
-        getContentPane().add(playerAreas, BorderLayout.EAST);
-        getContentPane().add(boardView, BorderLayout.CENTER);
+        return playerAreas;
+    }
 
-        // Frame properties
-        pack();
-        this.setVisible(true);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        repaint();
+    private JPanel createCounterArea() {
+        JPanel counterArea = new JPanel();
+
+        Counter cnY = game.findCounter("Disease yellow");
+        JComponent cY = new CounterView(cnY, Color.yellow, null);
+        counterArea.add(cY);
+        Counter cnR = game.findCounter("Disease red");
+        JComponent cR = new CounterView(cnR, Color.red, null);
+        counterArea.add(cR);
+        Counter cnB = game.findCounter("Disease blue");
+        JComponent cB = new CounterView(cnB, Color.blue, null);
+        counterArea.add(cB);
+        Counter cnK = game.findCounter("Disease black");
+        JComponent cK = new CounterView(cnK, Color.black, null);
+        counterArea.add(cK);
+
+        return counterArea;
     }
 
     public void update() {
@@ -80,10 +110,11 @@ public class PandemicGUI extends GUI {
                 if (j < playerHands[i].size()) {
                     playerHands[i].get(j).update(c);
                 } else {
-                    CardView cv2 = new CardView(c, null);
+                    PandemicCardView cv2 = new PandemicCardView(c, null);
                     playerHands[i].add(cv2);
                 }
             }
         }
+        repaint();
     }
 }

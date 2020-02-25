@@ -34,7 +34,7 @@ public class Counter extends Component {
 
     public Boolean isMinimum()  { return this.count == this.minimum; }
     public Boolean isMaximum()  { return this.count == this.maximum; }
-    public int     getCounter() { return this.count;                 }
+    public int getValue() { return this.count;                 }
 
     public void increment(int value) {
         this.count += value;
