@@ -45,28 +45,30 @@ public class PandemicCardView extends JComponent {
             g.setColor(Color.black);
         }
 
-        Property name = card.getProperty(Hash.GetInstance().hash("name"));
-        Property color = card.getProperty(Hash.GetInstance().hash("color"));
+        if (card != null) {
+            Property name = card.getProperty(Hash.GetInstance().hash("name"));
+            Property color = card.getProperty(Hash.GetInstance().hash("color"));
 
 //        FontMetrics met = g.getFontMetrics();
-        int w = (width*2)/g.getFont().getSize();
-        String wrapped =
-                WordWrap.from(((PropertyString)name).value)
-                        .maxWidth(w)
-                        .insertHyphens(true) // true is the default
-                        .wrap();
-        String[] wraps = wrapped.split("\n");
-        int size = g.getFont().getSize();
-        int i = 0;
-        for (String s: wraps) {
-            g.drawString(s, x + 10, y + i*size + 20);
-            i++;
-        }
+            int w = (width * 2) / g.getFont().getSize();
+            String wrapped =
+                    WordWrap.from(((PropertyString) name).value)
+                            .maxWidth(w)
+                            .insertHyphens(true) // true is the default
+                            .wrap();
+            String[] wraps = wrapped.split("\n");
+            int size = g.getFont().getSize();
+            int i = 0;
+            for (String s : wraps) {
+                g.drawString(s, x + 10, y + i * size + 20);
+                i++;
+            }
 
-        if (color != null) {
-            g.setColor(Utils.stringToColor(((PropertyColor)color).valueStr));
+            if (color != null) {
+                g.setColor(Utils.stringToColor(((PropertyColor) color).valueStr));
+            }
+            g.drawRect(x, y, width - 1, height - 1);
         }
-        g.drawRect(x, y, width-1, height-1);
     }
 
     public void update(Card c) {

@@ -93,16 +93,16 @@ public class PandemicForwardModel implements ForwardModel {
 
         // Epidemic cards
         playerDeck.shuffle();
-        int noCards = playerDeck.getCards().size();
-        int noEpidemicCards = 4;  // TODO: json or game params
-        int range = noCards / noEpidemicCards;
-        for (int i = 0; i < noEpidemicCards; i++) {
-            int index = i * range + i + new Random().nextInt(range);  // TODO seed
-
-            Card card = new Card();
-            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
-            new AddCardToDeck(card, playerDeck, index).execute(state);
-        }
+//        int noCards = playerDeck.getCards().size();
+//        int noEpidemicCards = 4;  // TODO: json or game params
+//        int range = noCards / noEpidemicCards;
+//        for (int i = 0; i < noEpidemicCards; i++) {
+//            int index = i * range + i + new Random().nextInt(range);  // TODO seed
+//
+//            Card card = new Card();
+//            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
+//            new AddCardToDeck(card, playerDeck, index).execute(state);
+//        }
 
         // Player with highest population starts
         state.setActivePlayer(startingPlayer);

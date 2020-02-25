@@ -21,6 +21,7 @@ public class PandemicGUI extends GUI {
     Game game;
     GameState gs;
     int nPlayers, activePlayer;
+    int maxCards = 7;
 
     public PandemicGUI(Game game) {
         this.game = game;
@@ -61,7 +62,11 @@ public class PandemicGUI extends GUI {
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
             Deck playerHand = (Deck) gs.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
             playerHands[i] = new ArrayList<>();
-            for (Card c: playerHand.getCards()) {
+            for (int k = 0; k < maxCards; k++) {
+                Card c = null;
+                if (k < playerHand.getCards().size()) {
+                    c = playerHand.getCards().get(k);
+                }
                 PandemicCardView cv2 = new PandemicCardView(c, null);
                 playerHands[i].add(cv2);
                 hand.add(cv2);
@@ -104,7 +109,7 @@ public class PandemicGUI extends GUI {
             playerCards[i].repaint();
 
             Deck playerHand = (Deck) gs.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
-            playerHands[i].clear();
+//            playerHands[i].clear();
             for (int j = 0; j < playerHand.getCards().size(); j++) {
                 Card c = playerHand.getCards().get(j);
                 if (j < playerHands[i].size()) {

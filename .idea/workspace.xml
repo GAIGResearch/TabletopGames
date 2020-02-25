@@ -3,14 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="1ea7b80c-118b-4ec3-86e0-eb3d01e62727" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModernBoardGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ModernBoardGame.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/actions/TreatDisease.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/actions/TreatDisease.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/components/Counter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Counter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicCardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicCardView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/utilities/BoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoardView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/utilities/CardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicCardView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/utilities/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utilities/Utils.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,6 +109,7 @@
       <workItem from="1563886318081" duration="5335000" />
       <workItem from="1563958971310" duration="6748000" />
       <workItem from="1582636732536" duration="4805000" />
+      <workItem from="1582648163490" duration="1112000" />
     </task>
     <task id="LOCAL-00001" summary="Implemented the action that take the player from any location to the location listed on the player's cards">
       <created>1581692816788</created>
@@ -155,52 +151,52 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="1057" y="168" width="798" height="912" key="CommitChangelistDialog2/67.27.1853.1053@67.27.1853.1053" timestamp="1581948337016" />
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1582647886432">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.0.bottom" timestamp="1582649254114">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="218" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582302680988" />
+    <state width="1537" height="270" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582649254114" />
     <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
     <state width="1807" height="278" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449409" />
-    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1582647886432">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.0.center" timestamp="1582649254114">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="218" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1582302680988" />
+    <state width="1537" height="270" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1582649254114" />
     <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
     <state width="1807" height="278" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449408" />
-    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1582647886432">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.0.left" timestamp="1582649254114">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="218" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1582302680988" />
+    <state width="1537" height="270" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1582649254114" />
     <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
     <state width="1807" height="278" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449408" />
-    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1582647886432">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.0.right" timestamp="1582649254114">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="218" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1582302680988" />
+    <state width="1537" height="270" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1582649254114" />
     <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
     <state width="1807" height="278" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449409" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1582637448337">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.1.bottom" timestamp="1582649254115">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="270" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582300583528" />
+    <state width="1537" height="270" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582649254115" />
     <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448337" />
     <state width="1807" height="344" key="GridCell.Tab.1.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418636" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1582637448336">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.1.center" timestamp="1582649254115">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="270" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1582300583528" />
+    <state width="1537" height="270" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1582649254115" />
     <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448336" />
     <state width="1807" height="344" key="GridCell.Tab.1.center/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418636" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1582637448336">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.1.left" timestamp="1582649254114">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="270" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1582300583528" />
+    <state width="1537" height="270" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1582649254114" />
     <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448336" />
     <state width="1807" height="344" key="GridCell.Tab.1.left/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418635" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1582637448337">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1537" height="270" key="GridCell.Tab.1.right" timestamp="1582649254115">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1537" height="270" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1582300583528" />
+    <state width="1537" height="270" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1582649254115" />
     <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448337" />
     <state width="1807" height="344" key="GridCell.Tab.1.right/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418636" />
     <state x="588" y="277" width="800" height="551" key="Vcs.Push.Dialog.v2" timestamp="1581948338558">
@@ -223,5 +219,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1582298808877" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java</url>
+          <line>115</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java</url>
+          <line>113</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java</url>
+          <line>114</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
