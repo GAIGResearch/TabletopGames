@@ -50,7 +50,7 @@ public class PandemicForwardModel implements ForwardModel {
                 new InfectCity(c, nTimes - j).execute(state);
 
                 // Discard card
-                new AddCardToDeck(c, infectionDiscard);
+                new DrawCard(infectionDeck, infectionDiscard).execute(state);
             }
         }
 

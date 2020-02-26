@@ -10,7 +10,7 @@ public abstract class Utils {
             case "black": return Color.BLACK;
             case "yellow": return Color.YELLOW;
             case "red": return Color.RED;
-            case "green": return Color.GREEN;
+            case "green": return new Color(30, 108, 47);
             case "white": return Color.WHITE;
             case "brown": return new Color(69, 29, 26);
             case "pink": return Color.PINK;
