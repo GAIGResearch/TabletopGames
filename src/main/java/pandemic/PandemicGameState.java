@@ -113,10 +113,19 @@ public class PandemicGameState extends GameState {
 
     @Override
     public List<Action> possibleActions() {
-        // todo there are some repetitive iterations, could collect all the necessary information in a singel loop
+        // todo there are some repetitive iterations, could collect all the necessary information in a single loop
         // todo actions that require a card do not seem to remove the card
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
+        Deck playerDeck = ((Deck)this.areas.get(activePlayer).getComponent(playerHandHash));
+        if (playerDeck.isOverCapacity()){
+            // need to discard a card
+            for (int i = 0; i < playerDeck.getCards().size(); i++){
+                actions.add(new DiscardCard(playerDeck, i));
+            }
+            this.numAvailableActions = actions.size();
+            return actions;
+        }
 
         // add do nothing action
         actions.add(new DoNothing());
@@ -130,7 +139,6 @@ public class PandemicGameState extends GameState {
 
         // Direct Flight, discard city card and travel to that city
         // get player's cards and create actions that take from current location to those location
-        Deck playerDeck = ((Deck)this.areas.get(activePlayer).getComponent(playerHandHash));
         for (Card card: playerDeck.getCards()){
             // get the city from the card
 
@@ -182,6 +190,7 @@ public class PandemicGameState extends GameState {
         // build research station, discard card with that city to build one, if 6 are used, then take one from board
         // 1, check if player has the city in the hand
         // 2, new AddResearchStation action with city name
+        // todo check if city has research station or not
         for (Card card: playerDeck.getCards()){
             Property cardName = card.getProperty(Hash.GetInstance().hash("name"));
             if (cardName.equals(playerLocation)){
@@ -208,7 +217,25 @@ public class PandemicGameState extends GameState {
         }
 
 
-        // todo share knowledge, give or take card, player can only have 7 cards
+        //  share knowledge, give or take card, player can only have 7 cards
+        // can give any card to anyone
+        for (Card card: playerDeck.getCards()){
+            for (int i = 0; i < nPlayers; i++){
+                if (i != activePlayer){
+                    actions.add(new GiveCard(card, i));
+                }
+            }
+        }
+        // can take any card from anyone
+        for (int i = 0; i < nPlayers; i++){
+            if (i != activePlayer){
+                Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(playerHandHash);
+                for (Card card: otherDeck.getCards()){
+                    actions.add(new TakeCard(card, i));
+                }
+            }
+        }
+
 
         // discover a cure, 5 cards of the same colour at a research station
         int[] colourCounter = new int[PandemicGameState.colors.length];
@@ -227,6 +254,16 @@ public class PandemicGameState extends GameState {
         }
 
 
+        // TODO event cards don't count as action and can be played anytime
+        for (Card card: playerDeck.getCards()){
+            Property p  = card.getProperty(Hash.GetInstance().hash("color"));
+            if (p == null){
+                // Event card's don't have colour
+                actions.addAll(actionsFromEventCard(card));
+            }
+        }
+
+
         this.numAvailableActions = actions.size();
 
         return actions;  // TODO
@@ -234,5 +271,36 @@ public class PandemicGameState extends GameState {
 
     void setActivePlayer(int activePlayer) {
         this.activePlayer = activePlayer;
+    }
+
+    private List actionsFromEventCard(Card card){
+        // todo event cards get in here, but most actions are not created
+        ArrayList<Action> actions = new ArrayList<>();
+        String cardString = ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value;
+        if (cardString.equals("Resilient Population")){
+            System.out.println("Resilient Population");
+//            System.out.println("Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.");
+        } else if (cardString.equals("Airlift")){
+            System.out.println("Airlift");
+//            System.out.println("Move any 1 pawn to any city. Get permission before moving another player's pawn.");
+        }
+        else if (cardString.equals("Government Grant")){
+            System.out.println("Government Grant");
+//            System.out.println("Add 1 research station to any city (no City card needed).");
+            for (BoardNode bn: this.world.getBoardNodes()){
+                if (!((PropertyBoolean)bn.getProperty((Hash.GetInstance().hash("researchStation")))).value);
+                    actions.add(new AddResearchStation(((PropertyString)this.world.getBoardNodes().get(0).getProperty(Hash.GetInstance().hash("name"))).value));
+            }
+        }
+        else if (cardString.equals("One quiet night")){
+            System.out.println("One quiet night");
+//            System.out.println("Skip the next Infect Cities step (do not flip over any Infection cards).");
+        }
+        else if (cardString.equals("Forecast")){
+            System.out.println("Forecast");
+//            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
+        }
+
+        return actions;
     }
 }

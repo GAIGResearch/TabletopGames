@@ -63,6 +63,13 @@ public class Deck extends Component implements IDeck {
         return capacity;
     }
 
+    public boolean isOverCapacity(){
+        if (cards.size() > capacity){
+            return true;
+        }
+        return false;
+    }
+
     public void shuffle() {
         Collections.shuffle(cards, rnd);
     }
@@ -119,8 +126,14 @@ public class Deck extends Component implements IDeck {
     }
 
     public boolean add(Card c, int index) {
-        if (cards.size() < capacity || capacity == -1) {
-            cards.add(index, c);
+        // todo commented this area as it would be better to allow to get cards over the capacity
+        // returns true if below capacity and false otherwise
+//        if (cards.size() < capacity || capacity == -1) {
+//            cards.add(index, c);
+//            return true;
+//        }
+        cards.add(index, c);
+        if (cards.size() <= capacity){
             return true;
         }
         return false;

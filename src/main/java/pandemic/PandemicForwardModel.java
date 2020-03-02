@@ -84,10 +84,13 @@ public class PandemicForwardModel implements ForwardModel {
             }
 
             for (Card card: playerHandDeck.getCards()) {
-                long pop = ((PropertyLong) card.getProperty(Hash.GetInstance().hash("population"))).value;
-                if (pop > maxPop) {
-                    startingPlayer = i;
-                    maxPop = pop;
+                Property property = card.getProperty(Hash.GetInstance().hash("population"));
+                if (property != null){
+                    long pop = ((PropertyLong) property).value;
+                    if (pop > maxPop) {
+                        startingPlayer = i;
+                        maxPop = pop;
+                    }
                 }
             }
         }
@@ -103,6 +106,7 @@ public class PandemicForwardModel implements ForwardModel {
             Card card = new Card();
             card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
             new AddCardToDeck(card, playerDeck, index).execute(state);
+
         }
 
         // Player with highest population starts
@@ -138,10 +142,15 @@ public class PandemicForwardModel implements ForwardModel {
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Cities", tempDeckID);  // TODO player deck
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            boolean canDraw = action.execute(currentState);
+            Deck cityDeck = currentState.findDeck("Cities");
+            boolean canDraw = cityDeck.getCards().size() > 0;
+
+            // if player cannot draw it means that the deck is empty -> GAME OVER
             if (!canDraw){
                 game.gameOver();
             }
+            action.execute(currentState);
+
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
@@ -154,7 +163,12 @@ public class PandemicForwardModel implements ForwardModel {
                 Area area = currentState.getAreas().get(activePlayer);
                 Deck deck = (Deck) area.getComponent(playerHandHash);
                 if (deck != null) {
-                    new AddCardToDeck(c, deck).execute(currentState);
+                    // deck size doesn't go beyond 7
+//                    new AddCardToDeck(c, deck).execute(currentState);
+                    if (!new AddCardToDeck(c, deck).execute(currentState)){
+                        // player needs to discard a card
+                        game.getPlayers().get(activePlayer).getAction(currentState);
+                    }
                 }
             }
         }
