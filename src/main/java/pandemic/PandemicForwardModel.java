@@ -55,9 +55,10 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // give players cards
-        String playerDeckStr = "Cities";  // TODO: combine cities + events
+        String playerDeckStr = "Cities";
         Deck playerCards = game.findDeck("Player Roles");
-        Deck playerDeck = game.findDeck(playerDeckStr);  // TODO: assuming contains city & event cards
+        Deck playerDeck = game.findDeck(playerDeckStr);
+        playerDeck.add(game.findDeck("Events")); // contains city & event cards
         playerCards.shuffle();
         int nCardsPlayer = 6 - state.nPlayers();  // TODO: params
         long maxPop = 0;
@@ -93,16 +94,16 @@ public class PandemicForwardModel implements ForwardModel {
 
         // Epidemic cards
         playerDeck.shuffle();
-//        int noCards = playerDeck.getCards().size();
-//        int noEpidemicCards = 4;  // TODO: json or game params
-//        int range = noCards / noEpidemicCards;
-//        for (int i = 0; i < noEpidemicCards; i++) {
-//            int index = i * range + i + new Random().nextInt(range);  // TODO seed
-//
-//            Card card = new Card();
-//            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
-//            new AddCardToDeck(card, playerDeck, index).execute(state);
-//        }
+        int noCards = playerDeck.getCards().size();
+        int noEpidemicCards = 4;  // TODO: json or game params
+        int range = noCards / noEpidemicCards;
+        for (int i = 0; i < noEpidemicCards; i++) {
+            int index = i * range + i + new Random().nextInt(range);  // TODO seed
+
+            Card card = new Card();
+            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
+            new AddCardToDeck(card, playerDeck, index).execute(state);
+        }
 
         // Player with highest population starts
         state.setActivePlayer(startingPlayer);
@@ -166,6 +167,11 @@ public class PandemicForwardModel implements ForwardModel {
 
         // 2. 3 cubes on bottom card in infection deck, then add this card on top of infection discard
         Card c = currentState.findDeck("Infections").pickLast();
+        if (c == null){
+            // cannot draw card
+            game.gameOver();
+            return;
+        }
         new InfectCity(c, 3).execute(currentState);
         new AddCardToDeck(c, currentState.findDeck("Infection Discard")).execute(currentState);
 

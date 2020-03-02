@@ -95,8 +95,7 @@ public abstract class Game {
         Deck temp = findDeck("tempDeck");
         if (temp == null) {
             // todo get capacity
-            temp = new Deck();
-            temp.setID("tempDeck");
+            temp = new Deck("tempDeck");
         } else {
             temp.clear();
         }

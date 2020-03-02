@@ -126,6 +126,13 @@ public class Deck extends Component implements IDeck {
         return false;
     }
 
+    public boolean add(Deck d){
+        for (Card c: d.cards){
+            cards.add(c);
+        }
+        return true;
+    }
+
 
     @Override
     public IDeck copy()
