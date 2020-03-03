@@ -96,10 +96,11 @@ public abstract class Game {
         if (temp == null) {
             // todo get capacity
             temp = new Deck("tempDeck");
+            decks.add(temp);
         } else {
             temp.clear();
         }
-        decks.add(temp);
+//        decks.add(temp);
         return "tempDeck";
     }
 

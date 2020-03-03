@@ -77,14 +77,20 @@ public class PandemicGameState extends GameState {
         }
 
         // Set up decks
-        gameArea.addComponent(Hash.GetInstance().hash("Player Deck"), new Deck("Player Deck"));  // TODO: combine cities+events
-        gameArea.addComponent(Hash.GetInstance().hash("Player Deck Discard"), new Deck("Player Deck Discard"));
+        Deck playerDeck = new Deck("Player Deck");
+        Deck playerDiscard = new Deck("Player Deck Discard");
         Deck infDiscard = new Deck("Infection Discard");
+
+        gameArea.addComponent(Hash.GetInstance().hash("Player Deck"), playerDeck);  // TODO: combine cities+events
+        gameArea.addComponent(Hash.GetInstance().hash("Player Deck Discard"), playerDiscard);
         gameArea.addComponent(Hash.GetInstance().hash("Infection Discard"), infDiscard);
         gameArea.addComponent(Hash.GetInstance().hash("Infections"), game.findDeck("Infections"));
         gameArea.addComponent(Hash.GetInstance().hash("Player Roles"), game.findDeck("Player Roles"));
 
+        // add them to the list of decks, so they are accessible by the game.findDeck() function
+        game.addDeckToList(playerDeck);
         game.addDeckToList(infDiscard);
+        game.addDeckToList(playerDiscard);
 
         // Set up tokens
         Token research_stations = game.findToken("Research Stations");

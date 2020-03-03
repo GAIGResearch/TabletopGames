@@ -18,7 +18,7 @@ public class DiscardCard implements Action {
     public boolean execute(GameState gs) {
         Card c = deck.pick(cardIndex);
         // todo discardDeck == null at some point
-        Deck discardDeck = gs.findDeck("Player Discard Deck");
+        Deck discardDeck = gs.findDeck("Player Deck Discard");
         return discardDeck.add(c);
 
     }

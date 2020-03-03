@@ -33,10 +33,13 @@ public class MovePlayer implements Action {
         BoardNode currentCity = ((PandemicGameState)gs).world.getNode("name", prop.value);
         BoardNode destinationCity = ((PandemicGameState)gs).world.getNode("name", destination);
 
+        // todo there are more ways to move the player, when this function is called the player should already know if the move is legal or not
         if (checkNeighbours(currentCity, destinationCity) || checkResearchStations(currentCity, destinationCity)) {
             removePlayer((PandemicGameState)gs, prop.value, playerIdx);
             placePlayer((PandemicGameState)gs, destination, playerIdx);
         }
+//        removePlayer((PandemicGameState)gs, prop.value, playerIdx);
+//        placePlayer((PandemicGameState)gs, destination, playerIdx);
 
         return false;
     }
