@@ -140,6 +140,9 @@ public class PandemicGameState extends GameState {
         Property playerLocation = this.areas.get(activePlayer).getComponent(playerCardHash).getProperty(Hash.GetInstance().hash("playerLocation"));
         BoardNode cityNode = world.getNodeByProperty(Hash.GetInstance().hash("name"), playerLocation);
         for (BoardNode otherCity : cityNode.getNeighbours()){
+            if (((PropertyString)otherCity.getProperty(Hash.GetInstance().hash("name"))).value == null){
+                System.out.println("null");
+            }
             actions.add(new MovePlayer(activePlayer, ((PropertyString)otherCity.getProperty(Hash.GetInstance().hash("name"))).value));
         }
 
@@ -150,7 +153,11 @@ public class PandemicGameState extends GameState {
 
             // next line is the full way to get the first card in the player's hand
 //            ((Deck)this.areas.get(activePlayer).getComponent(playerHandHash)).getCards().get(0).getProperty(Hash.GetInstance().hash("name"));
-            actions.add(new MovePlayer(activePlayer, ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value));
+
+            //  check if card has country to determine if it is city card or not
+            if ((card.getProperty(Hash.GetInstance().hash("country"))) != null){
+                actions.add(new MovePlayer(activePlayer, ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value));
+            }
         }
 
         // charter flight, discard city that matches your card and travel to any city
@@ -200,6 +207,9 @@ public class PandemicGameState extends GameState {
         for (Card card: playerDeck.getCards()){
             Property cardName = card.getProperty(Hash.GetInstance().hash("name"));
             if (cardName.equals(playerLocation)){
+                if (((PropertyString)cardName).value == null){
+                    System.out.println("null");
+                }
                 actions.add(new AddResearchStation(((PropertyString)cardName).value));
             }
             // todo removing 6th city is not in the list, so in that case the action would contain which city to be removed

@@ -148,6 +148,7 @@ public class PandemicForwardModel implements ForwardModel {
             // if player cannot draw it means that the deck is empty -> GAME OVER
             if (!canDraw){
                 game.gameOver();
+                System.out.println("No more cards to draw");
             }
             action.execute(currentState);
 
@@ -184,6 +185,7 @@ public class PandemicForwardModel implements ForwardModel {
         if (c == null){
             // cannot draw card
             game.gameOver();
+            System.out.println("No more cards to draw");
             return;
         }
         new InfectCity(c, 3).execute(currentState);
