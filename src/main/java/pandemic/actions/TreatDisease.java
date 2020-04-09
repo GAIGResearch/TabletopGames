@@ -1,17 +1,16 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import components.BoardNode;
 import components.Card;
 import components.Counter;
 import content.PropertyIntArray;
 import content.PropertyString;
 import core.GameState;
+import pandemic.Constants;
 import pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
-
-import static actions.MovePlayer.playerLocationHash;
-import static pandemic.PandemicGameState.*;
 
 public class TreatDisease implements Action {
     String color;
@@ -26,7 +25,7 @@ public class TreatDisease implements Action {
 
         // Find player current location
         int activePlayer = gs.getActivePlayer();
-        PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(playerCardHash)).getProperty(playerLocationHash);
+        PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
 
         // Find board node
         BoardNode bn = ((PandemicGameState)gs).world.getNode("name", currentLocation.value);

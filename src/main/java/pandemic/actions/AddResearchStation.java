@@ -1,5 +1,6 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import components.BoardNode;
 import content.PropertyBoolean;
 import core.GameState;

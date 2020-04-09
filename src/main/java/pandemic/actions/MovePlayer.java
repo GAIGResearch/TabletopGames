@@ -1,5 +1,6 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import components.BoardNode;
 import components.Card;
 import content.PropertyBoolean;
@@ -9,15 +10,11 @@ import content.PropertyStringArray;
 import core.GameState;
 import pandemic.PandemicGameState;
 import utilities.Hash;
+import pandemic.Constants;
 
-import static pandemic.PandemicForwardModel.playersBNHash;
-import static pandemic.PandemicGameState.playerCardHash;
 
 public class MovePlayer implements Action {
-    static int playerLocationHash = Hash.GetInstance().hash("playerLocation");
-    static int neighboursHash = Hash.GetInstance().hash("neighbours");
-    static int nameHash = Hash.GetInstance().hash("name");
-    static int researchStationHash = Hash.GetInstance().hash("researchStation");
+
 
     int playerIdx;
     String destination;
@@ -29,7 +26,7 @@ public class MovePlayer implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        PropertyString prop = (PropertyString) ((Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash)).getProperty(playerLocationHash);
+        PropertyString prop = (PropertyString) ((Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
         BoardNode currentCity = ((PandemicGameState)gs).world.getNode("name", prop.value);
         BoardNode destinationCity = ((PandemicGameState)gs).world.getNode("name", destination);
 
@@ -46,25 +43,25 @@ public class MovePlayer implements Action {
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode("name", city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
         prop.getValues().add(playerIdx);
 
-        Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
-        playerCard.addProperty(playerLocationHash, new PropertyString(city));  // TODO: does this exist?
+        Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+        playerCard.addProperty(Constants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode("name", city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
         prop.getValues().remove(new Integer(playerIdx));
 
-        Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(playerCardHash);
-        playerCard.addProperty(playerLocationHash, new PropertyString(null));
+        Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+        playerCard.addProperty(Constants.playerLocationHash, new PropertyString(null));
     }
 
     boolean checkNeighbours(BoardNode city1, BoardNode city2) {
-        PropertyStringArray neighbours = (PropertyStringArray) city1.getProperty(neighboursHash);
-        PropertyString name = (PropertyString) city2.getProperty(nameHash);
+        PropertyStringArray neighbours = (PropertyStringArray) city1.getProperty(Constants.neighboursHash);
+        PropertyString name = (PropertyString) city2.getProperty(Constants.nameHash);
         for (String neighbour : neighbours.getValues()) {
             if (name.value.equals(neighbour)) {
                 return true;
@@ -74,8 +71,8 @@ public class MovePlayer implements Action {
     }
 
     boolean checkResearchStations(BoardNode city1, BoardNode city2) {
-        PropertyBoolean research1 = (PropertyBoolean) city1.getProperty(researchStationHash);
-        PropertyBoolean research2 = (PropertyBoolean) city2.getProperty(researchStationHash);
+        PropertyBoolean research1 = (PropertyBoolean) city1.getProperty(Constants.researchStationHash);
+        PropertyBoolean research2 = (PropertyBoolean) city2.getProperty(Constants.researchStationHash);
         return research1.value && research2.value;
     }
 }

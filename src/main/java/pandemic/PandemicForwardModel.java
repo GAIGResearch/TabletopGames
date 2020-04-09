@@ -7,16 +7,18 @@ import core.Area;
 import core.ForwardModel;
 import core.Game;
 import core.GameState;
+import pandemic.actions.AddCardToDeck;
+import pandemic.actions.AddResearchStation;
+import pandemic.actions.DrawCard;
+import pandemic.actions.InfectCity;
 import utilities.Hash;
 
 import java.util.Random;
 
-import static actions.MovePlayer.placePlayer;
+import static pandemic.actions.MovePlayer.placePlayer;
 import static pandemic.PandemicGameState.*;
 
 public class PandemicForwardModel implements ForwardModel {
-    int epidemicCard = Hash.GetInstance().hash("epidemic");
-    public static int playersBNHash = Hash.GetInstance().hash("players");
     int[] infectionRate = new int[]{2, 2, 2, 3, 3, 4, 4};  // TODO: json
     private Game game;
 
@@ -70,13 +72,13 @@ public class PandemicForwardModel implements ForwardModel {
 
             // Give the card to this player
             Area playerArea = state.getAreas().get(i);
-            playerArea.setComponent(playerCardHash, c);
+            playerArea.setComponent(Constants.playerCardHash, c);
 
             // Also add this player in Atlanta
             placePlayer(state, "Atlanta", i);
 
             // Give players cards
-            Deck playerHandDeck = (Deck) playerArea.getComponent(playerHandHash);
+            Deck playerHandDeck = (Deck) playerArea.getComponent(Constants.playerHandHash);
 
             playerDeck.shuffle();
             for (int j = 0; j < nCardsPlayer; j++) {
@@ -156,13 +158,13 @@ public class PandemicForwardModel implements ForwardModel {
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
-            if (((PropertyString)c.getProperty(Hash.GetInstance().hash("name"))).value.hashCode() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
+            if (((PropertyString)c.getProperty(Hash.GetInstance().hash("name"))).value.hashCode() == Constants.epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
                 epidemic(currentState);
             } else
 
             {  // Otherwise, give card to player
                 Area area = currentState.getAreas().get(activePlayer);
-                Deck deck = (Deck) area.getComponent(playerHandHash);
+                Deck deck = (Deck) area.getComponent(Constants.playerHandHash);
                 if (deck != null) {
                     // deck size doesn't go beyond 7
 //                    new AddCardToDeck(c, deck).execute(currentState);

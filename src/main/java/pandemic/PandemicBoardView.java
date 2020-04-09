@@ -15,7 +15,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import static pandemic.PandemicCardView.drawCard;
-import static pandemic.PandemicForwardModel.playersBNHash;
 
 public class PandemicBoardView extends JComponent {
     //TODO: images for tokens?
@@ -101,7 +100,7 @@ public class PandemicBoardView extends JComponent {
             }
 
             // Check if there are players here
-            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(playersBNHash);
+            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(Constants.playersBNHash);
             ArrayList<Integer> players = prop.getValues();
             for (int p: players) {
                 // This player is here, draw them just above the node

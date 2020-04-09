@@ -6,19 +6,15 @@ import content.*;
 import core.Area;
 import core.Game;
 import core.GameState;
+import pandemic.actions.*;
 import utilities.Hash;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-public class PandemicGameState extends GameState {
 
-    //TODO: remove 'static' from these?
-    static int playerHandHash = Hash.GetInstance().hash("playerHand");
-    public static int playerCardHash = Hash.GetInstance().hash("playerCard");
-    public static int pandemicBoardHash = Hash.GetInstance().hash("pandemicBoard");
+public class PandemicGameState extends GameState {
 
     public static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
@@ -34,8 +30,8 @@ public class PandemicGameState extends GameState {
         for (int i = 0; i < nPlayers; i++) {
             Area playerArea = new Area();
             playerArea.setOwner(i);
-            playerArea.addComponent(playerHandHash, new Deck(7));
-            playerArea.addComponent(playerCardHash, new Card());  // TODO: properties?
+            playerArea.addComponent(Constants.playerHandHash, new Deck(7));
+            playerArea.addComponent(Constants.playerCardHash, new Card());  // TODO: properties?
             areas.put(i, playerArea);
         }
 
@@ -43,7 +39,7 @@ public class PandemicGameState extends GameState {
         // infection rate counter, outbreak counter, diseases x 4
         Area gameArea = new Area();
         gameArea.setOwner(-1);
-        gameArea.addComponent(pandemicBoardHash, world);
+        gameArea.addComponent(Constants.pandemicBoardHash, world);
         areas.put(-1, gameArea);
     }
 
@@ -60,8 +56,8 @@ public class PandemicGameState extends GameState {
         // Set up the counters
         Counter infection_rate = game.findCounter("Infection Rate");
         Counter outbreaks = game.findCounter("Outbreaks");
-        gameArea.addComponent(Hash.GetInstance().hash("Infection Rate"), infection_rate);
-        gameArea.addComponent(Hash.GetInstance().hash("Outbreaks"), outbreaks);
+        gameArea.addComponent(Constants.infectionRateHash, infection_rate);
+        gameArea.addComponent(Constants.outbreaksHash, outbreaks);
 
         for (String color : colors) {
             // todo get countervalue from data
@@ -123,7 +119,7 @@ public class PandemicGameState extends GameState {
         // todo actions that require a card do not seem to remove the card
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
-        Deck playerDeck = ((Deck)this.areas.get(activePlayer).getComponent(playerHandHash));
+        Deck playerDeck = ((Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
         if (playerDeck.isOverCapacity()){
             // need to discard a card
             for (int i = 0; i < playerDeck.getCards().size(); i++){
@@ -137,7 +133,7 @@ public class PandemicGameState extends GameState {
         actions.add(new DoNothing());
 
         // Drive / Ferry add actions for travelling immediate cities
-        Property playerLocation = this.areas.get(activePlayer).getComponent(playerCardHash).getProperty(Hash.GetInstance().hash("playerLocation"));
+        Property playerLocation = this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Hash.GetInstance().hash("playerLocation"));
         BoardNode cityNode = world.getNodeByProperty(Hash.GetInstance().hash("name"), playerLocation);
         for (BoardNode otherCity : cityNode.getNeighbours()){
             if (((PropertyString)otherCity.getProperty(Hash.GetInstance().hash("name"))).value == null){
@@ -245,7 +241,7 @@ public class PandemicGameState extends GameState {
         // can take any card from anyone
         for (int i = 0; i < nPlayers; i++){
             if (i != activePlayer){
-                Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(playerHandHash);
+                Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash);
                 for (Card card: otherDeck.getCards()){
                     actions.add(new TakeCard(card, i));
                 }
