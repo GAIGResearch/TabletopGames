@@ -14,4 +14,13 @@ public class Constants {
     public final static int outbreaksHash = Hash.GetInstance().hash("Outbreaks");
     public final static int epidemicCard = Hash.GetInstance().hash("epidemic");
     public final static int playersBNHash = Hash.GetInstance().hash("players");
+    public final static int colorHash = Hash.GetInstance().hash("color");
+    public final static int infectionHash = Hash.GetInstance().hash("infection");
+    public final static int countryHash = Hash.GetInstance().hash("country");
+
+    // mostly for setup
+    public final static int playerDeckHash = Hash.GetInstance().hash("Player Deck");
+    public final static int playerDeckDiscardHash = Hash.GetInstance().hash("Player Deck Discard");
+    public final static int infectionDiscardHash = Hash.GetInstance().hash("Infection Discard");
+    public final static int playerRolesHash = Hash.GetInstance().hash("Player Roles");
 }

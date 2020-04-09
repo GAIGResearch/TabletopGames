@@ -77,11 +77,11 @@ public class PandemicGameState extends GameState {
         Deck playerDiscard = new Deck("Player Deck Discard");
         Deck infDiscard = new Deck("Infection Discard");
 
-        gameArea.addComponent(Hash.GetInstance().hash("Player Deck"), playerDeck);  // TODO: combine cities+events
-        gameArea.addComponent(Hash.GetInstance().hash("Player Deck Discard"), playerDiscard);
-        gameArea.addComponent(Hash.GetInstance().hash("Infection Discard"), infDiscard);
-        gameArea.addComponent(Hash.GetInstance().hash("Infections"), game.findDeck("Infections"));
-        gameArea.addComponent(Hash.GetInstance().hash("Player Roles"), game.findDeck("Player Roles"));
+        gameArea.addComponent(Constants.playerDeckHash, playerDeck);  // TODO: combine cities+events
+        gameArea.addComponent(Constants.playerDeckDiscardHash, playerDiscard);
+        gameArea.addComponent(Constants.infectionDiscardHash, infDiscard);
+        gameArea.addComponent(Constants.infectionHash, game.findDeck("Infections"));
+        gameArea.addComponent(Constants.playerRolesHash, game.findDeck("Player Roles"));
 
         // add them to the list of decks, so they are accessible by the game.findDeck() function
         game.addDeckToList(playerDeck);
@@ -90,8 +90,7 @@ public class PandemicGameState extends GameState {
 
         // Set up tokens
         Token research_stations = game.findToken("Research Stations");
-        int hash = Hash.GetInstance().hash("Research Stations");
-        gameArea.addComponent(hash, research_stations);
+        gameArea.addComponent(Constants.researchStationHash, research_stations);
 
         //TODO: add pawn tokens
 
@@ -133,13 +132,10 @@ public class PandemicGameState extends GameState {
         actions.add(new DoNothing());
 
         // Drive / Ferry add actions for travelling immediate cities
-        Property playerLocation = this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Hash.GetInstance().hash("playerLocation"));
-        BoardNode cityNode = world.getNodeByProperty(Hash.GetInstance().hash("name"), playerLocation);
+        Property playerLocation = this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
+        BoardNode cityNode = world.getNodeByProperty(Constants.nameHash, playerLocation);
         for (BoardNode otherCity : cityNode.getNeighbours()){
-            if (((PropertyString)otherCity.getProperty(Hash.GetInstance().hash("name"))).value == null){
-                System.out.println("null");
-            }
-            actions.add(new MovePlayer(activePlayer, ((PropertyString)otherCity.getProperty(Hash.GetInstance().hash("name"))).value));
+            actions.add(new MovePlayer(activePlayer, ((PropertyString)otherCity.getProperty(Constants.nameHash)).value));
         }
 
         // Direct Flight, discard city card and travel to that city
@@ -151,19 +147,19 @@ public class PandemicGameState extends GameState {
 //            ((Deck)this.areas.get(activePlayer).getComponent(playerHandHash)).getCards().get(0).getProperty(Hash.GetInstance().hash("name"));
 
             //  check if card has country to determine if it is city card or not
-            if ((card.getProperty(Hash.GetInstance().hash("country"))) != null){
-                actions.add(new MovePlayer(activePlayer, ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value));
+            if ((card.getProperty(Constants.countryHash)) != null){
+                actions.add(new MovePlayer(activePlayer, ((PropertyString)card.getProperty(Constants.nameHash)).value));
             }
         }
 
         // charter flight, discard city that matches your card and travel to any city
         for (Card card: playerDeck.getCards()){
             // get the city from the card
-            if (playerLocation.equals(((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value)){
+            if (playerLocation.equals(((PropertyString)card.getProperty(Constants.nameHash)).value)){
                 // add all the cities
                 // iterate over all the cities in the world
                 for (BoardNode bn: this.world.getBoardNodes()) {
-                    PropertyString destination = (PropertyString) bn.getProperty(Hash.GetInstance().hash("name"));
+                    PropertyString destination = (PropertyString) bn.getProperty(Constants.nameHash);
 
                     // only add the ones that are different from the current location
                     if (!destination.equals(playerLocation)) {
@@ -178,13 +174,13 @@ public class PandemicGameState extends GameState {
         ArrayList<PropertyString> researchStations = new ArrayList<>();
         boolean currentHasStation = false;
         for (BoardNode bn: this.world.getBoardNodes()){
-            if (((PropertyBoolean)bn.getProperty(Hash.GetInstance().hash("researchStation"))).value == true){
+            if (((PropertyBoolean)bn.getProperty(Constants.researchStationHash)).value == true){
                 if (bn.getProperty(Hash.GetInstance().hash("name")).equals(playerLocation)){
                     currentHasStation = true;
                 }
                 else {
                     // researchStations do not contain the current station
-                    researchStations.add((PropertyString)bn.getProperty(Hash.GetInstance().hash("name")));
+                    researchStations.add((PropertyString)bn.getProperty(Constants.nameHash));
                 }
             }
         }
@@ -201,11 +197,8 @@ public class PandemicGameState extends GameState {
         // 2, new AddResearchStation action with city name
         // todo check if city has research station or not
         for (Card card: playerDeck.getCards()){
-            Property cardName = card.getProperty(Hash.GetInstance().hash("name"));
+            Property cardName = card.getProperty(Constants.nameHash);
             if (cardName.equals(playerLocation)){
-                if (((PropertyString)cardName).value == null){
-                    System.out.println("null");
-                }
                 actions.add(new AddResearchStation(((PropertyString)cardName).value));
             }
             // todo removing 6th city is not in the list, so in that case the action would contain which city to be removed
@@ -214,10 +207,10 @@ public class PandemicGameState extends GameState {
         // Treat disease
         // should check if city has disease
         for (BoardNode bn: this.world.getBoardNodes()){
-            if ((bn.getProperty(Hash.GetInstance().hash("name"))).equals(playerLocation)){
+            if ((bn.getProperty(Constants.nameHash)).equals(playerLocation)){
                 // bn is the node where player is standing
                 // todo test with infections being present on the board
-                PropertyIntArray cityInfections = (PropertyIntArray)bn.getProperty(Hash.GetInstance().hash("infection"));
+                PropertyIntArray cityInfections = (PropertyIntArray)bn.getProperty(Constants.infectionHash);
                 // remove one disease cube
                 for (int i = 0; i < cityInfections.getValues().length; i++){
                     if (cityInfections.getValues()[i] > 0){
@@ -252,7 +245,7 @@ public class PandemicGameState extends GameState {
         // discover a cure, 5 cards of the same colour at a research station
         int[] colourCounter = new int[PandemicGameState.colors.length];
         for (Card card: playerDeck.getCards()){
-            Property p  = card.getProperty(Hash.GetInstance().hash("color"));
+            Property p  = card.getProperty(Constants.colorHash);
             if (p != null){
                 // Only city cards have colours, events don't
                 String color = ((PropertyColor)p).valueStr;
@@ -268,7 +261,7 @@ public class PandemicGameState extends GameState {
 
         // TODO event cards don't count as action and can be played anytime
         for (Card card: playerDeck.getCards()){
-            Property p  = card.getProperty(Hash.GetInstance().hash("color"));
+            Property p  = card.getProperty(Constants.colorHash);
             if (p == null){
                 // Event card's don't have colour
                 actions.addAll(actionsFromEventCard(card));
@@ -288,7 +281,7 @@ public class PandemicGameState extends GameState {
     private List actionsFromEventCard(Card card){
         // todo event cards get in here, but most actions are not created
         ArrayList<Action> actions = new ArrayList<>();
-        String cardString = ((PropertyString)card.getProperty(Hash.GetInstance().hash("name"))).value;
+        String cardString = ((PropertyString)card.getProperty(Constants.nameHash)).value;
         if (cardString.equals("Resilient Population")){
             System.out.println("Resilient Population");
 //            System.out.println("Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.");
@@ -300,7 +293,7 @@ public class PandemicGameState extends GameState {
             System.out.println("Government Grant");
 //            System.out.println("Add 1 research station to any city (no City card needed).");
             for (BoardNode bn: this.world.getBoardNodes()){
-                if (!((PropertyBoolean)bn.getProperty((Hash.GetInstance().hash("researchStation")))).value);
+                if (!((PropertyBoolean)bn.getProperty(Constants.researchStationHash)).value);
                     actions.add(new AddResearchStation(((PropertyString)this.world.getBoardNodes().get(0).getProperty(Hash.GetInstance().hash("name"))).value));
             }
         }
