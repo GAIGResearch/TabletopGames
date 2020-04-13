@@ -11,6 +11,7 @@ public abstract class Game {
     protected List<AIPlayer> players;
     protected GameState gameState;
     protected ForwardModel forwardModel;
+    protected GameParameters gameParameters;
 
     protected List<Board> boards;
     protected List<Deck> decks;
@@ -36,7 +37,7 @@ public abstract class Game {
 
         // Game set up after we have players
         gameState.setup(this);
-        forwardModel.setup(gameState, this);
+        forwardModel.setup(gameState, this, gameParameters);
     }
 
     public List<AIPlayer> getPlayers() {
@@ -50,7 +51,7 @@ public abstract class Game {
         decks = Deck.loadDecks(dataPath + "decks.json");
         tokens = Token.loadTokens(dataPath + "tokens.json");
         counters = Counter.loadCounters(dataPath + "counters.json");
-//        dice  = Dice.loadDice(dataPath + "dice.json");
+//        dice  = Dice.loadDice(dataPath + "dice.json");  // TODO
     }
 
 
@@ -115,4 +116,6 @@ public abstract class Game {
     public void gameOver(){
         gameOver = true;
     }
+
+    public GameParameters getGameParameters() { return gameParameters; }
 }

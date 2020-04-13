@@ -12,6 +12,8 @@ import pandemic.PandemicGameState;
 import utilities.Hash;
 import pandemic.Constants;
 
+import static pandemic.Constants.nameHash;
+
 
 public class MovePlayer implements Action {
 
@@ -27,8 +29,8 @@ public class MovePlayer implements Action {
     @Override
     public boolean execute(GameState gs) {
         PropertyString prop = (PropertyString) ((Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
-        BoardNode currentCity = ((PandemicGameState)gs).world.getNode("name", prop.value);
-        BoardNode destinationCity = ((PandemicGameState)gs).world.getNode("name", destination);
+        BoardNode currentCity = ((PandemicGameState)gs).world.getNode(nameHash, prop.value);
+        BoardNode destinationCity = ((PandemicGameState)gs).world.getNode(nameHash, destination);
 
         // todo there are more ways to move the player, when this function is called the player should already know if the move is legal or not
         if (checkNeighbours(currentCity, destinationCity) || checkResearchStations(currentCity, destinationCity)) {
@@ -42,7 +44,7 @@ public class MovePlayer implements Action {
     }
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
-        BoardNode bn = gs.world.getNode("name", city);
+        BoardNode bn = gs.world.getNode(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
         prop.getValues().add(playerIdx);
 
@@ -51,7 +53,7 @@ public class MovePlayer implements Action {
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
-        BoardNode bn = gs.world.getNode("name", city);
+        BoardNode bn = gs.world.getNode(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
         prop.getValues().remove(new Integer(playerIdx));
 
@@ -61,7 +63,7 @@ public class MovePlayer implements Action {
 
     boolean checkNeighbours(BoardNode city1, BoardNode city2) {
         PropertyStringArray neighbours = (PropertyStringArray) city1.getProperty(Constants.neighboursHash);
-        PropertyString name = (PropertyString) city2.getProperty(Constants.nameHash);
+        PropertyString name = (PropertyString) city2.getProperty(nameHash);
         for (String neighbour : neighbours.getValues()) {
             if (name.value.equals(neighbour)) {
                 return true;

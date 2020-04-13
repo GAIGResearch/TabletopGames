@@ -3,6 +3,9 @@ package pandemic;
 import utilities.Hash;
 
 public class Constants {
+
+    public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
+
     public final static int playerLocationHash = Hash.GetInstance().hash("playerLocation");
     public final static int neighboursHash = Hash.GetInstance().hash("neighbours");
     public final static int nameHash = Hash.GetInstance().hash("name");

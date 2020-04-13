@@ -49,7 +49,7 @@ public abstract class GameState {
     }
 
     public abstract void setup(Game game);
-    public void setupAreas() {}
+    public void setupAreas(GameParameters gp) {}
 
     public Deck findDeck(String name) {
         return game.findDeck(name);

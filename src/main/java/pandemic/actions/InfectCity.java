@@ -4,19 +4,21 @@ import actions.Action;
 import components.BoardNode;
 import components.Card;
 import content.*;
+import core.GameParameters;
 import core.GameState;
 import pandemic.PandemicGameState;
-import utilities.Hash;
+import pandemic.PandemicParameters;
 import utilities.Utils;
 
-import static pandemic.PandemicGameState.colors;
+import static pandemic.Constants.*;
 
 public class InfectCity implements Action {
 
+    GameParameters gp;
     Card infectingCard;
     int count;
 
-    public InfectCity(Card infectingCard, int count) {
+    public InfectCity(GameParameters gp, Card infectingCard, int count) {
         this.infectingCard = infectingCard;
         this.count = count;
     }
@@ -28,15 +30,19 @@ public class InfectCity implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        PropertyColor color = (PropertyColor) infectingCard.getProperty(Hash.GetInstance().hash("color"));
-        PropertyString city = (PropertyString) infectingCard.getProperty(Hash.GetInstance().hash("name"));
+        PropertyColor color = (PropertyColor) infectingCard.getProperty(colorHash);
+        int colorIdx = Utils.indexOf(colors, color.valueStr);
+        PropertyString city = (PropertyString) infectingCard.getProperty(nameHash);
 
-        BoardNode bn = ((PandemicGameState)gs).world.getNode("name", city.value);
+        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, city.value);
         if (bn != null) {
-            PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(Hash.GetInstance().hash("infection"));
+            PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(infectionHash);
             int[] array = infectionArray.getValues();
+
             // Add count cubes to this city
-            array[Utils.indexOf(colors, color.valueStr)] += count;  // TODO: check outbreak & max cubes on city
+            if (array[colorIdx] > ((PandemicParameters)gp).max_cubes_per_city)
+            array[colorIdx] += count;  // TODO: check outbreak & max cubes on city
+
             // TODO: diseases eradicated?
             // Decrease the number of remaining cubes
             gs.findCounter("Disease Cube " + color.valueStr).decrement(count);

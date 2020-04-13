@@ -5,6 +5,7 @@ import components.*;
 import content.*;
 import core.Area;
 import core.Game;
+import core.GameParameters;
 import core.GameState;
 import pandemic.actions.*;
 import utilities.Hash;
@@ -13,15 +14,11 @@ import utilities.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class PandemicGameState extends GameState {
-
-    public static String[] colors = new String[]{"yellow", "red", "blue", "black"};
-
     public Board world;
     public int numAvailableActions = 0;
 
-    public void setupAreas()
+    public void setupAreas(GameParameters gp)
     {
         //1. Library of area setups: game.setAreas();
         //2. Like this:
@@ -30,7 +27,7 @@ public class PandemicGameState extends GameState {
         for (int i = 0; i < nPlayers; i++) {
             Area playerArea = new Area();
             playerArea.setOwner(i);
-            playerArea.addComponent(Constants.playerHandHash, new Deck(7));
+            playerArea.addComponent(Constants.playerHandHash, new Deck(((PandemicParameters)gp).max_cards_per_player));
             playerArea.addComponent(Constants.playerCardHash, new Card());  // TODO: properties?
             areas.put(i, playerArea);
         }
@@ -49,7 +46,7 @@ public class PandemicGameState extends GameState {
         // load the board
         world = game.findBoard("cities"); //world.getNode("name","Valencia");
 
-        setupAreas(); // TODO: This should be called from GameState.java
+        setupAreas(game.getGameParameters()); // TODO: This should be called from GameState.java
 
         Area gameArea = areas.get(-1);
 
@@ -59,12 +56,10 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(Constants.infectionRateHash, infection_rate);
         gameArea.addComponent(Constants.outbreaksHash, outbreaks);
 
-        for (String color : colors) {
-            // todo get countervalue from data
-            int counterValue = 24;
+        for (String color : Constants.colors) {
             int hash = Hash.GetInstance().hash("Disease " + color);
             Counter diseaseC = game.findCounter("Disease " + color);
-            diseaseC.setValue(counterValue);
+            diseaseC.setValue(((PandemicParameters)game.getGameParameters()).n_initial_disease_cubes);
             gameArea.addComponent(hash, diseaseC);
 
             hash = Hash.GetInstance().hash("Disease Cube " + color);
@@ -215,7 +210,7 @@ public class PandemicGameState extends GameState {
                 for (int i = 0; i < cityInfections.getValues().length; i++){
                     if (cityInfections.getValues()[i] > 0){
                         // todo test with actual diseases
-                        actions.add(new TreatDisease(PandemicGameState.colors[i]));
+                        actions.add(new TreatDisease(Constants.colors[i]));
                     }
                 }
             }
@@ -243,18 +238,18 @@ public class PandemicGameState extends GameState {
 
 
         // discover a cure, 5 cards of the same colour at a research station
-        int[] colourCounter = new int[PandemicGameState.colors.length];
+        int[] colourCounter = new int[Constants.colors.length];
         for (Card card: playerDeck.getCards()){
             Property p  = card.getProperty(Constants.colorHash);
             if (p != null){
                 // Only city cards have colours, events don't
                 String color = ((PropertyColor)p).valueStr;
-                colourCounter[Utils.indexOf(PandemicGameState.colors, color)]++;
+                colourCounter[Utils.indexOf(Constants.colors, color)]++;
             }
         }
         for (int i =0 ; i < colourCounter.length; i++){
             if (colourCounter[i] >= 5){
-                actions.add(new TreatDisease(PandemicGameState.colors[i]));
+                actions.add(new TreatDisease(Constants.colors[i]));
             }
         }
 

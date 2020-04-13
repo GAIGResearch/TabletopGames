@@ -122,7 +122,7 @@ public class PandemicBoardView extends JComponent {
             int idx = 0;
             int maxX = pos.getX() + (total + diseaseCubeDistance) * diseaseCubeSize / 2;
             for (int cube: array) {
-                Color cubeColor = Utils.stringToColor(PandemicGameState.colors[cube]);
+                Color cubeColor = Utils.stringToColor(Constants.colors[cube]);
                 for (int i = 0; i < cube; i++) {
                     g.setColor(cubeColor);
                     g.fillRect(maxX - idx * (diseaseCubeSize + diseaseCubeDistance) - diseaseCubeSize /2, pos.getY() - diseaseCubeSize /2, diseaseCubeSize, diseaseCubeSize);
