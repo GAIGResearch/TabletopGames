@@ -7,6 +7,7 @@ import core.*;
 import pandemic.actions.*;
 import utilities.Hash;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import static pandemic.Constants.*;
@@ -138,8 +139,6 @@ public class PandemicForwardModel implements ForwardModel {
             // Set the next player as active
             pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.nPlayers());
         }
-
-        // TODO: wanna play event card?
     }
 
     private void playerActions(PandemicGameState currentState, Action action) {
@@ -208,8 +207,36 @@ public class PandemicForwardModel implements ForwardModel {
         new InfectCity(gameParameters, c, gameParameters.n_cubes_epidemic).execute(currentState);
         if (checkInfectionGameEnd(currentState, c)) return;
 
-        // 3. shuffle infection discard deck, add back on top of infection deck
+
+        // If any players have the "Resilient Population" event card, they should be asked if they want to play it here
         Deck infectionDiscard = currentState.findDeck("Infection Discard");
+        int nInfectDiscards = infectionDiscard.getCards().size();
+
+        int nPlayers = currentState.nPlayers();
+        for (int i = 0; i < nPlayers; i++) {
+            Deck ph = (Deck) currentState.getAreas().get(i).getComponent(playerHandHash);
+            int nCards = ph.getCards().size();
+            for (int cp = 0; cp < nCards; cp++) {
+                if (((PropertyString)ph.getCards().get(cp).getProperty(nameHash)).value.equals("Resilient Population")) {
+                    ArrayList<Action> acts = new ArrayList<>();
+                    acts.add(new DoNothing());
+                    for (int idx = 0; idx < nInfectDiscards; idx++) {
+                        acts.add(new DiscardCard(infectionDiscard, idx));
+                    }
+                    // Set discarding infection discarded cards (or do nothing) as the only options and ask player if they want to play their card
+                    currentState.possibleActions(acts);
+                    Action a = game.getPlayers().get(i).getAction(currentState);
+                    if (a != null && !(a instanceof DoNothing)) {
+                        a.execute(currentState);
+                        // Discard event card
+                        new DiscardCard(ph, cp).execute(currentState);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. shuffle infection discard deck, add back on top of infection deck
         infectionDiscard.shuffle();
         for (Card card: infectionDiscard.getCards()) {
             new AddCardToDeck(card, currentState.findDeck("Infections")).execute(currentState);

@@ -42,7 +42,7 @@ public abstract class GameState {
     }
     public abstract int nInputActions();  // How many actions are required by the game per player.
     public abstract int nPossibleActions();
-    public abstract List<Action> possibleActions();
+    public abstract List<Action> possibleActions(List<Action> preDetermined);
 
     public int getGameStatus() {
         return gameStatus;

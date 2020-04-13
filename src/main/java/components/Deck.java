@@ -17,7 +17,7 @@ public class Deck extends Component implements IDeck {
 
     protected int capacity = -1;
 
-    protected ArrayList<Card> cards;
+    protected List<Card> cards;
 
     private String id;
     protected Random rnd;
@@ -57,7 +57,7 @@ public class Deck extends Component implements IDeck {
         properties = new HashMap<>();
     }
 
-    protected void setCards(ArrayList<Card> cards) {this.cards = cards;}
+    public void setCards(List<Card> cards) { this.cards = cards; }
 
     @Override
     public int getCapacity() {
@@ -162,7 +162,7 @@ public class Deck extends Component implements IDeck {
     }
 
     // TODO: check for visibility?
-    public ArrayList<Card> getCards() {
+    public List<Card> getCards() {
         return cards;
     }
 

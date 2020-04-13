@@ -14,7 +14,7 @@ import utilities.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pandemic.Constants.nameHash;
+import static pandemic.Constants.*;
 
 public class PandemicGameState extends GameState {
     public Board world;
@@ -104,7 +104,12 @@ public class PandemicGameState extends GameState {
     }
 
     @Override
-    public List<Action> possibleActions() {
+    public List<Action> possibleActions(List<Action> preDetermined) {
+        if (preDetermined != null && preDetermined.size() > 0) {
+            numAvailableActions = preDetermined.size();
+            return preDetermined;
+        }
+
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
 
@@ -265,18 +270,22 @@ public class PandemicGameState extends GameState {
     }
 
     private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations){
-        // Todo event cards get in here, but most actions are not created
         ArrayList<Action> actions = new ArrayList<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
         switch (cardString) {
-            case "Resilient Population":
-//                System.out.println("Resilient Population");
-//            System.out.println("Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.");
-                break;
             case "Airlift":
 //                System.out.println("Airlift");
 //            System.out.println("Move any 1 pawn to any city. Get permission before moving another player's pawn.");
+                for (BoardNode bn: world.getBoardNodes()) {
+                    String cityName = ((PropertyString)bn.getProperty(nameHash)).value;
+                    for (int i = 0; i < nPlayers; i++) {
+                        // Check if player is already there
+                        String pLocation = ((PropertyString)areas.get(i).getComponent(playerCardHash).getProperty(playerLocationHash)).value;
+                        if (pLocation.equals(cityName)) continue;
+                        actions.add(new MovePlayerWithCard(i, cityName, card));
+                    }
+                }
                 break;
             case "Government Grant":
 //                System.out.println("Government Grant");
@@ -299,11 +308,25 @@ public class PandemicGameState extends GameState {
             case "One quiet night":
 //                System.out.println("One quiet night");
 //            System.out.println("Skip the next Infect Cities step (do not flip over any Infection cards).");
-                actions.add(new QuietNight());
+                actions.add(new QuietNight(card));
                 break;
             case "Forecast":
 //                System.out.println("Forecast");
 //            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
+                // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them
+                // generate all permutations
+                Deck infectionDiscard = findDeck("Infection Discard");
+                int nInfectDiscards = infectionDiscard.getCards().size();
+                int n = Math.max(nInfectDiscards, gp.n_forecast_cards);
+                ArrayList<int[]> permutations = new ArrayList<>();
+                int[] order = new int[n];
+                for (int i = 0; i < n; i++) {
+                    order[i] = i;
+                }
+                generatePermutations(n, order, permutations);
+                for (int[] perm: permutations) {
+                    actions.add(new RearrangeCardsWithCard("Infection Discard", perm, card));
+                }
                 break;
         }
 
@@ -316,5 +339,28 @@ public class PandemicGameState extends GameState {
 
     public boolean isQuietNight() {
         return quietNight;
+    }
+
+
+    private static void generatePermutations(int n, int[] elements, ArrayList<int[]> all) {
+        if (n == 1) {
+            all.add(elements.clone());
+        } else {
+            for(int i = 0; i < n-1; i++) {
+                generatePermutations(n - 1, elements, all);
+                if(n % 2 == 0) {
+                    swap(elements, i, n-1);
+                } else {
+                    swap(elements, 0, n-1);
+                }
+            }
+            generatePermutations(n - 1, elements, all);
+        }
+    }
+
+    private static void swap(int[] input, int a, int b) {
+        int tmp = input[a];
+        input[a] = input[b];
+        input[b] = tmp;
     }
 }

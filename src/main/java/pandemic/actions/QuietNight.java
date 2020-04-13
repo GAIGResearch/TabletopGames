@@ -1,13 +1,23 @@
 package pandemic.actions;
 
 import actions.Action;
+import components.Card;
+import components.Deck;
 import core.GameState;
 import pandemic.PandemicGameState;
 
-public class QuietNight implements Action {
+import static pandemic.Constants.playerHandHash;
 
-   @Override
+public class QuietNight implements Action {
+    Card card;
+    public QuietNight(Card c) {
+        this.card = c;
+    }
+
+    @Override
     public boolean execute(GameState gs) {
-       return true;
+        // Discards the card
+        ((Deck)gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash)).discard(card);
+        return true;
    }
 }

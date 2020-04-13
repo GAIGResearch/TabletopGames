@@ -35,8 +35,5 @@ public class DrawCard implements Action {
             return false;
         }
         return deckTo.add(c);
-
-        // TODO: if you can't draw cards, game over
-        // TODO: discard if too many / play event card
     }
 }

@@ -19,6 +19,7 @@ public class PandemicParameters extends GameParameters {
     public int n_cubes_infection = 1;
     public int n_initial_disease_cubes = 24;
     public int n_cards_for_cure = 5;
+    public int n_forecast_cards = 6;  // How many cards should be viewed and rearranged for the Forecast event card
 
     public int max_cards_per_player = 7;  // Max cards in hand per player
     public int n_cards_draw = 2;  // Number of cards players draw each turn
