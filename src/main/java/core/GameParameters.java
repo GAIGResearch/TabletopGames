@@ -1,4 +1,4 @@
 package core;
 
-public class GameParameters {
+public abstract class GameParameters {
 }

@@ -97,9 +97,9 @@ public class Board extends Component{
     }
 
 
-    public BoardNode getNode(String key, String value)
+    public BoardNode getNode(int hashID, String value)
     {
-        return getNodeByProperty(Hash.GetInstance().hash(key), new PropertyString(value));
+        return getNodeByProperty(hashID, new PropertyString(value));
     }
 
 
