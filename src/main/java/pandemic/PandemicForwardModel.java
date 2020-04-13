@@ -138,6 +138,8 @@ public class PandemicForwardModel implements ForwardModel {
             // Set the next player as active
             pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.nPlayers());
         }
+
+        // TODO: wanna play event card?
     }
 
     private void playerActions(PandemicGameState currentState, Action action) {

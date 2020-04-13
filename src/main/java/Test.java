@@ -1,14 +1,13 @@
 import core.AIPlayer;
-import core.Game;
 import core.Runner;
 import pandemic.PandemicForwardModel;
 import pandemic.PandemicGame;
 import pandemic.PandemicGameState;
+import pandemic.PandemicParameters;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Test {
     public static void main(String[] args) {
@@ -20,7 +19,8 @@ public class Test {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 
-        tabletopEngine.setGame(new PandemicGame(), new PandemicGameState(), new PandemicForwardModel(), "data/");
+        tabletopEngine.setGame(new PandemicGame(), new PandemicParameters(), new PandemicGameState(),
+                new PandemicForwardModel(), "data/");
         tabletopEngine.setPlayers(players);
 
 //        tabletopEngine.run();

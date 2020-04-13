@@ -2,19 +2,13 @@ package pandemic.actions;
 
 import actions.Action;
 import components.BoardNode;
-import components.Card;
 import components.Counter;
-import content.PropertyColor;
 import content.PropertyIntArray;
-import content.PropertyString;
 import core.GameParameters;
 import core.GameState;
 import pandemic.PandemicGameState;
 import pandemic.PandemicParameters;
 import utilities.Utils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 
 import static pandemic.Constants.*;
 

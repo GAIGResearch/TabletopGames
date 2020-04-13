@@ -8,9 +8,10 @@ public class Runner {
 
     private Game game;
 
-    public void setGame(Game g, GameState gs, ForwardModel fm, String dataPath)
+    public void setGame(Game g, GameParameters gp, GameState gs, ForwardModel fm, String dataPath)
     {
         game = g;
+        game.gameParameters = gp;
         game.gameState = gs;
         game.forwardModel = fm;
 
