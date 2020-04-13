@@ -19,8 +19,8 @@ public class AddResearchStation implements Action {
     public boolean execute(GameState gs) {
         BoardNode bn = ((PandemicGameState)gs).world.getNode("name", city);
         if (bn != null) {
-            bn.addProperty(researchStationHash, new PropertyBoolean(true));  // TODO: change the value
-            //gs.findCounter(researchStationCounterHash).decrement(1); // We have one less research station
+            bn.setProperty(researchStationHash, new PropertyBoolean(true));
+            gs.findCounter("Research Stations").decrement(1); // We have one less research station
             return true;
         }
         return false;

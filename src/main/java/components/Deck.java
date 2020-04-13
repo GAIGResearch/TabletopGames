@@ -229,4 +229,7 @@ public class Deck extends Component implements IDeck {
         return decks;
     }
 
+    public void discard(Card card) {
+        cards.remove(card);
+    }
 }

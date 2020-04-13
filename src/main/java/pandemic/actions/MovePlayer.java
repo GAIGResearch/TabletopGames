@@ -9,7 +9,6 @@ import content.PropertyString;
 import content.PropertyStringArray;
 import core.GameState;
 import pandemic.PandemicGameState;
-import utilities.Hash;
 import pandemic.Constants;
 
 
@@ -47,7 +46,7 @@ public class MovePlayer implements Action {
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
-        playerCard.addProperty(Constants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
+        playerCard.setProperty(Constants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
@@ -56,7 +55,7 @@ public class MovePlayer implements Action {
         prop.getValues().remove(new Integer(playerIdx));
 
         Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
-        playerCard.addProperty(Constants.playerLocationHash, new PropertyString(null));
+        playerCard.setProperty(Constants.playerLocationHash, new PropertyString(null));
     }
 
     boolean checkNeighbours(BoardNode city1, BoardNode city2) {
