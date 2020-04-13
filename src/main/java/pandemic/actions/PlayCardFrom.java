@@ -1,12 +1,12 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import components.Card;
 import content.PropertyString;
 import core.GameState;
 import utilities.Hash;
 
-import static actions.MovePlayer.playerLocationHash;
-import static pandemic.PandemicGameState.playerCardHash;
+import pandemic.Constants;
 
 public class PlayCardFrom implements Action {
 
@@ -30,7 +30,7 @@ public class PlayCardFrom implements Action {
             // the card played.
 
             PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
-            PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(playerCardHash)).getProperty(playerLocationHash);
+            PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
 
             if (name.equals(currentLocation)) {
                 new MovePlayer(activePlayer, destination).execute(gs);

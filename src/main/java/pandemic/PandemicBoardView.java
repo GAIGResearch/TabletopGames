@@ -15,7 +15,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import static pandemic.PandemicCardView.drawCard;
-import static pandemic.PandemicForwardModel.playersBNHash;
 
 public class PandemicBoardView extends JComponent {
     //TODO: images for tokens?
@@ -101,7 +100,7 @@ public class PandemicBoardView extends JComponent {
             }
 
             // Check if there are players here
-            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(playersBNHash);
+            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(Constants.playersBNHash);
             ArrayList<Integer> players = prop.getValues();
             for (int p: players) {
                 // This player is here, draw them just above the node
@@ -121,16 +120,19 @@ public class PandemicBoardView extends JComponent {
                 total += cube;
             }
             int idx = 0;
-            int maxX = pos.getX() + (total + diseaseCubeDistance) * diseaseCubeSize / 2;
-            for (int cube: array) {
-                Color cubeColor = Utils.stringToColor(pandemic.PandemicGameState.colors[cube]);
+            int maxX = pos.getX() + (total + diseaseCubeDistance) * diseaseCubeSize / 4;
+            for (int c = 0; c < array.length; c++) {
+                int cube = array[c];
+                Color cubeColor = Utils.stringToColor(Constants.colors[c]);
                 for (int i = 0; i < cube; i++) {
                     g.setColor(cubeColor);
-                    g.fillRect(maxX - idx * (diseaseCubeSize + diseaseCubeDistance) - diseaseCubeSize /2, pos.getY() - diseaseCubeSize /2, diseaseCubeSize, diseaseCubeSize);
-                    g.setColor(Color.black);
-                    g.drawRect(maxX - idx * (diseaseCubeSize + diseaseCubeDistance) - diseaseCubeSize /2, pos.getY() - diseaseCubeSize /2, diseaseCubeSize, diseaseCubeSize);
+                    g.fillRect(maxX - idx * (diseaseCubeSize + diseaseCubeDistance) - diseaseCubeSize/2, pos.getY() - diseaseCubeSize /2, diseaseCubeSize, diseaseCubeSize);
+                    g.setColor(Color.white);
+                    if (cubeColor != null && cubeColor.equals(Color.yellow)) g.setColor(Color.black);  // Contrasting outline
+                    g.drawRect(maxX - idx * (diseaseCubeSize + diseaseCubeDistance) - diseaseCubeSize/2, pos.getY() - diseaseCubeSize /2, diseaseCubeSize, diseaseCubeSize);
                     idx++;
                 }
+
             }
         }
 

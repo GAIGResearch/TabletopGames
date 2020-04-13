@@ -5,12 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 
 public abstract class Game {
-
-    protected boolean gameOver = false;
-
     protected List<AIPlayer> players;
     protected GameState gameState;
     protected ForwardModel forwardModel;
+    protected GameParameters gameParameters;
 
     protected List<Board> boards;
     protected List<Deck> decks;
@@ -35,8 +33,9 @@ public abstract class Game {
         gameState.nPlayers = players.size();
 
         // Game set up after we have players
+        gameState.setupAreas(gameParameters);
         gameState.setup(this);
-        forwardModel.setup(gameState, this);
+        forwardModel.setup(gameState, this, gameParameters);
     }
 
     public List<AIPlayer> getPlayers() {
@@ -50,7 +49,7 @@ public abstract class Game {
         decks = Deck.loadDecks(dataPath + "decks.json");
         tokens = Token.loadTokens(dataPath + "tokens.json");
         counters = Counter.loadCounters(dataPath + "counters.json");
-//        dice  = Dice.loadDice(dataPath + "dice.json");
+//        dice  = Dice.loadDice(dataPath + "dice.json");  // TODO
     }
 
 
@@ -94,13 +93,11 @@ public abstract class Game {
     public String tempDeck() {
         Deck temp = findDeck("tempDeck");
         if (temp == null) {
-            // todo get capacity
             temp = new Deck("tempDeck");
             decks.add(temp);
         } else {
             temp.clear();
         }
-//        decks.add(temp);
         return "tempDeck";
     }
 
@@ -112,7 +109,9 @@ public abstract class Game {
         this.decks.add(deck);
     }
 
-    public void gameOver(){
-        gameOver = true;
+    public void gameOver(int code){
+        gameState.gameStatus = code;
     }
+
+    public GameParameters getGameParameters() { return gameParameters; }
 }

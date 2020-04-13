@@ -12,6 +12,7 @@ import org.json.simple.parser.ParseException;
 import utilities.Hash;
 import utilities.Utils.ComponentType;
 
+// TODO: update IDeck interface from methods in this class
 public class Deck extends Component implements IDeck {
 
     protected int capacity = -1;
@@ -63,11 +64,12 @@ public class Deck extends Component implements IDeck {
         return capacity;
     }
 
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
     public boolean isOverCapacity(){
-        if (cards.size() > capacity){
-            return true;
-        }
-        return false;
+        return capacity != -1 && cards.size() > capacity;
     }
 
     public void shuffle() {
@@ -115,8 +117,7 @@ public class Deck extends Component implements IDeck {
     private Card peek(int idx)
     {
         if(cards.size() > 0 && idx < cards.size()) {
-            Card c = cards.get(idx);
-            return c;
+            return cards.get(idx);
         }
         return null;
     }
@@ -132,23 +133,12 @@ public class Deck extends Component implements IDeck {
     }
 
     public boolean add(Card c, int index) {
-        // todo commented this area as it would be better to allow to get cards over the capacity
-        // returns true if below capacity and false otherwise
-//        if (cards.size() < capacity || capacity == -1) {
-//            cards.add(index, c);
-//            return true;
-//        }
         cards.add(index, c);
-        if (cards.size() <= capacity){
-            return true;
-        }
-        return false;
+        return capacity == -1 || cards.size() <= capacity;
     }
 
     public boolean add(Deck d){
-        for (Card c: d.cards){
-            cards.add(c);
-        }
+        cards.addAll(d.cards);
         return true;
     }
 
@@ -235,4 +225,7 @@ public class Deck extends Component implements IDeck {
         return decks;
     }
 
+    public void discard(Card card) {
+        cards.remove(card);
+    }
 }

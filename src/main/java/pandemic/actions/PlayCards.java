@@ -1,5 +1,6 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import core.GameState;
 
 public class PlayCards implements Action {
