@@ -18,7 +18,7 @@ public class TestExplodingKittens {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 
-        tabletopEngine.setGame(new ExplodingKittensGame(), new ExplodingKittensGameState(), new ExplodingKittensForwardModel(), "data/");
+        tabletopEngine.setGame(new ExplodingKittensGame(), null, new ExplodingKittensGameState(), new ExplodingKittensForwardModel(), "data/");
         tabletopEngine.setPlayers(players);
 
         tabletopEngine.run();

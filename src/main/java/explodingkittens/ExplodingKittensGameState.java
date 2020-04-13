@@ -68,7 +68,7 @@ public class ExplodingKittensGameState extends GameState {
                 continue;
             for (int i = 0; i < entry.getValue(); i++) {
                 Card card = new Card();
-                card.addProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(entry.getKey()));
+                card.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(entry.getKey()));
                 deck.add(card);
             }
         }
@@ -85,7 +85,7 @@ public class ExplodingKittensGameState extends GameState {
 
             //add defuse card
             Card defuse =  new Card();
-            defuse.addProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.DEFUSE));
+            defuse.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.DEFUSE));
             playerCards.add(defuse);
 
             // add 7 random cards from the deck
@@ -99,12 +99,12 @@ public class ExplodingKittensGameState extends GameState {
         // add remaining defuse cards and exploding kitten cards to the deck and shuffle again
         for (int i = nPlayers; i < 6; i++){
             Card defuse = new Card();
-            defuse.addProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.DEFUSE));
+            defuse.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.DEFUSE));
             deck.add(defuse);
         }
         for (int i = 0; i < nPlayers-1; i++){
             Card explodingKitten = new Card();
-            explodingKitten.addProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.EXPLODING_KITTEN));
+            explodingKitten.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.EXPLODING_KITTEN));
             deck.add(explodingKitten);
         }
         deck.shuffle();

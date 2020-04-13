@@ -1,9 +1,6 @@
 import core.AIPlayer;
 import core.Runner;
-import pandemic.PandemicForwardModel;
-import pandemic.PandemicGUI;
-import pandemic.PandemicGame;
-import pandemic.PandemicGameState;
+import pandemic.*;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ public class TestPandemic {
         players.add(new RandomPlayer());
 
         PandemicGame game = new PandemicGame();
-        tabletopEngine.setGame(game, new PandemicGameState(), new PandemicForwardModel(), "data/");
+        tabletopEngine.setGame(game, new PandemicParameters(), new PandemicGameState(), new PandemicForwardModel(), "data/");
         tabletopEngine.setPlayers(players);
 
 //        tabletopEngine.run();

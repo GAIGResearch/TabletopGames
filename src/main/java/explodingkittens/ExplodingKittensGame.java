@@ -1,7 +1,6 @@
 package explodingkittens;
 
 import actions.Action;
-import actions.DrawCard;
 import core.GUI;
 import core.Game;
 
@@ -54,7 +53,7 @@ public class ExplodingKittensGame extends Game {
 
     @Override
     public boolean isEnded() {
-        return gameOver;
+        return ((ExplodingKittensGameState) gameState).isGameOver();
     }
 
     @Override

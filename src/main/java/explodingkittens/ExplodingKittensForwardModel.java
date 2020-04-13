@@ -3,12 +3,14 @@ package explodingkittens;
 import actions.*;
 import core.ForwardModel;
 import core.Game;
+import core.GameParameters;
 import core.GameState;
 import explodingkittens.actions.IsNope;
 import explodingkittens.actions.IsNopeable;
 
 import java.util.Iterator;
 import java.util.Stack;
+
 
 public class ExplodingKittensForwardModel implements ForwardModel {
 
@@ -18,7 +20,7 @@ public class ExplodingKittensForwardModel implements ForwardModel {
     private int initialPlayer;
 
     @Override
-    public void setup(GameState firstState, Game game) {
+    public void setup(GameState firstState, Game game, GameParameters gameParameters) {
     }
 
     @Override

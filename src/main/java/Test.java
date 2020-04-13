@@ -24,7 +24,7 @@ public class Test {
         tabletopEngine.setPlayers(players);
 
 //        tabletopEngine.run();
-        tabletopEngine.play();
+        tabletopEngine.play(null);
 
     }
 }
