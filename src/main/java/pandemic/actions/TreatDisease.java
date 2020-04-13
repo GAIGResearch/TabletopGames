@@ -2,57 +2,57 @@ package pandemic.actions;
 
 import actions.Action;
 import components.BoardNode;
-import components.Card;
 import components.Counter;
 import content.PropertyIntArray;
-import content.PropertyString;
+import core.GameParameters;
 import core.GameState;
-import pandemic.Constants;
 import pandemic.PandemicGameState;
-import utilities.Hash;
+import pandemic.PandemicParameters;
 import utilities.Utils;
 
-import static pandemic.Constants.nameHash;
+import static pandemic.Constants.*;
 
 public class TreatDisease implements Action {
-    String color;
 
-    public TreatDisease(String color) {
+    PandemicParameters gp;
+    String color;
+    String city;
+
+    public TreatDisease(GameParameters gp, String color, String city) {
+        this.gp = (PandemicParameters)gp;
         this.color = color;
+        this.city = city;
     }
 
     @Override
     public boolean execute(GameState gs) {
-        int colorIdx = Utils.indexOf(Constants.colors, color);
+        PandemicGameState pgs = (PandemicGameState) gs;
 
-        // Find player current location
-        int activePlayer = gs.getActivePlayer();
-        PropertyString currentLocation = (PropertyString) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
+        Counter diseaseToken = pgs.findCounter("Disease " + color);
+        Counter diseaseCubeCounter = gs.findCounter("Disease Cube " + color);
+        int colorIdx = Utils.indexOf(colors, color);
 
-        // Find board node
-        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, currentLocation.value);
+        BoardNode bn = pgs.world.getNode(nameHash, city);
+        if (bn != null) {
+            PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(infectionHash);
+            int[] array = infectionArray.getValues();
 
-        // Find disease counter
-        Counter diseaseCounter = gs.findCounter("Disease " + color);
-
-        // Find cube counters
-        Counter cubeCounter = gs.findCounter("Disease Cube " + color);
-
-        // Find infection array to update
-        int[] infection = ((PropertyIntArray) bn.getProperty(Hash.GetInstance().hash("infection"))).getValues();
-
-        if (diseaseCounter.getValue() == 0) {
-            if (infection[colorIdx] > 0) {
-                infection[colorIdx] -= 1;
-                cubeCounter.increment(1);
+            boolean disease_cured = diseaseToken.getValue() > 0;
+            if (!disease_cured) {  // Only remove 1 cube
+                diseaseCubeCounter.increment(Math.min(array[colorIdx], 1));
+                array[colorIdx] = Math.max(0, array[colorIdx] - 1);
+            } else {
+                diseaseCubeCounter.increment(array[colorIdx]);
+                array[colorIdx] = 0;
             }
-        } else {  // Disease cured or eradicated, remove all cubes
-            cubeCounter.increment(infection[colorIdx]);
-            infection[colorIdx] = 0;
+
+            // If disease cured and no more cubes of this color on the map, disease becomes eradicated
+            if (diseaseToken.getValue() == 1 && diseaseCubeCounter.getValue() == gp.n_initial_disease_cubes) {
+                diseaseToken.setValue(2);
+            }
+
+            return true;
         }
-
-
-
         return false;
     }
 }

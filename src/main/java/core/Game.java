@@ -33,6 +33,7 @@ public abstract class Game {
         gameState.nPlayers = players.size();
 
         // Game set up after we have players
+        gameState.setupAreas(gameParameters);
         gameState.setup(this);
         forwardModel.setup(gameState, this, gameParameters);
     }

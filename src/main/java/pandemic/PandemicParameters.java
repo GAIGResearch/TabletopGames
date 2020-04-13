@@ -18,6 +18,7 @@ public class PandemicParameters extends GameParameters {
     public int n_infections_setup = 3;
     public int n_cubes_infection = 1;
     public int n_initial_disease_cubes = 24;
+    public int n_cards_for_cure = 5;
 
     public int max_cards_per_player = 7;  // Max cards in hand per player
     public int n_cards_draw = 2;  // Number of cards players draw each turn
@@ -28,4 +29,5 @@ public class PandemicParameters extends GameParameters {
             put(4, 2);
         }
     };
+    public int n_actions_per_turn = 4;
 }

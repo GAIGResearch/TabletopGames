@@ -52,10 +52,8 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // give players cards
-        String playerDeckStr = "Cities";
         Deck playerCards = game.findDeck("Player Roles");
-        Deck playerDeck = game.findDeck(playerDeckStr);
-        playerDeck.add(game.findDeck("Events")); // contains city & event cards
+        Deck playerDeck = game.findDeck("Player Deck");
         playerCards.shuffle();
         int nCardsPlayer = this.gameParameters.n_cards_per_player.get(state.nPlayers());
         long maxPop = 0;
@@ -77,7 +75,7 @@ public class PandemicForwardModel implements ForwardModel {
 
             playerDeck.shuffle();
             for (int j = 0; j < nCardsPlayer; j++) {
-                new DrawCard(game.findDeck(playerDeckStr), playerHandDeck).execute(state);
+                new DrawCard(playerDeck, playerHandDeck).execute(state);
             }
 
             for (Card card: playerHandDeck.getCards()) {
@@ -102,7 +100,7 @@ public class PandemicForwardModel implements ForwardModel {
             int index = i * range + i + r.nextInt(range);
 
             Card card = new Card();
-            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
+            card.setProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
             new AddCardToDeck(card, playerDeck, index).execute(state);
 
         }
@@ -113,13 +111,14 @@ public class PandemicForwardModel implements ForwardModel {
 
     @Override
     public void next(GameState currentState, Action action) {
-        playerActions(currentState, action);
+        PandemicGameState pgs = (PandemicGameState)currentState;
+        playerActions(pgs, action);
 
-        if (action instanceof TreatDisease) {
+        if (action instanceof CureDisease) {
             // Check win condition
             boolean all_cured = true;
             for (String c : Constants.colors) {
-                if (currentState.findCounter("Disease " + c).getValue() < 1) all_cured = false;
+                if (pgs.findCounter("Disease " + c).getValue() < 1) all_cured = false;
             }
             if (all_cured) {
                 game.gameOver(GAME_WIN);
@@ -127,21 +126,28 @@ public class PandemicForwardModel implements ForwardModel {
             }
         }
 
-        if (currentState.roundStep >= currentState.nInputActions()) {
-            currentState.roundStep = 0;
-            drawCards(currentState);
-            infectCities(currentState);
+        if (pgs.roundStep >= pgs.nInputActions()) {
+            pgs.roundStep = 0;
+            drawCards(pgs);
+
+            if (!pgs.isQuietNight()) {
+                infectCities(pgs);
+                pgs.setQuietNight(false);
+            }
 
             // Set the next player as active
-            ((PandemicGameState) currentState).setActivePlayer((currentState.getActivePlayer() + 1) % currentState.nPlayers());
+            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.nPlayers());
         }
 
         // TODO: wanna play event card?
     }
 
-    private void playerActions(GameState currentState, Action action) {
+    private void playerActions(PandemicGameState currentState, Action action) {
         currentState.roundStep += 1;
         action.execute(currentState);
+        if (action instanceof QuietNight) {
+            currentState.setQuietNight(true);
+        }
     }
 
     private void drawCards(GameState currentState) {
@@ -149,9 +155,9 @@ public class PandemicForwardModel implements ForwardModel {
         int activePlayer = currentState.getActivePlayer();
 
         String tempDeckID = currentState.tempDeck();
-        DrawCard action = new DrawCard("Cities", tempDeckID);  // TODO player deck
+        DrawCard action = new DrawCard("Player Deck", tempDeckID);
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            Deck cityDeck = currentState.findDeck("Cities");
+            Deck cityDeck = currentState.findDeck("Player Deck");
             boolean canDraw = cityDeck.getCards().size() > 0;
 
             // if player cannot draw it means that the deck is empty -> GAME OVER

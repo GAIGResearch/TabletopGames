@@ -36,7 +36,7 @@ public abstract class Component {
      * @param propId ID of the property
      * @param prop property to add
      */
-    public void addProperty(int propId, Property prop)
+    public void setProperty(int propId, Property prop)
     {
         properties.put(propId, prop);
     }
@@ -92,7 +92,7 @@ public abstract class Component {
                         prop = new PropertyLong(key, (long) value.get(1));
                     }
                 }
-                c.addProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
             }
         }
 
@@ -104,7 +104,7 @@ public abstract class Component {
         for(int prop_key : this.properties.keySet())
         {
             Property newProp = this.properties.get(prop_key).copy();
-            copyTo.addProperty(prop_key, newProp);
+            copyTo.setProperty(prop_key, newProp);
         }
 
         copyTo.type = this.type;
