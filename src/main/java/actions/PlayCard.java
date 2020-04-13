@@ -10,7 +10,7 @@ import static pandemic.PandemicGameState.playerCardHash;
 
 public class PlayCard implements Action {
 
-    Card card;
+    public Card card;
 
     public PlayCard(Card c) {
         this.card = c;

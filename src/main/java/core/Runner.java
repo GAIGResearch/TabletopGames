@@ -28,9 +28,8 @@ public class Runner {
         game.run(null);
     }
 
-    public void play()
+    public void play(GUI gui)
     {
-        PandemicGUI gui = new PandemicGUI(game);
         game.run(gui);
     }
 

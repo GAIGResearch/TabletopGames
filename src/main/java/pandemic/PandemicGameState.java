@@ -226,7 +226,7 @@ public class PandemicGameState extends GameState {
                 for (int i = 0; i < cityInfections.getValues().length; i++){
                     if (cityInfections.getValues()[i] > 0){
                         // todo test with actual diseases
-                        actions.add(new TreatDisease(PandemicGameState.colors[i]));
+                        actions.add(new TreatDisease(pandemic.PandemicGameState.colors[i]));
                     }
                 }
             }
@@ -254,18 +254,18 @@ public class PandemicGameState extends GameState {
 
 
         // discover a cure, 5 cards of the same colour at a research station
-        int[] colourCounter = new int[PandemicGameState.colors.length];
+        int[] colourCounter = new int[pandemic.PandemicGameState.colors.length];
         for (Card card: playerDeck.getCards()){
             Property p  = card.getProperty(Hash.GetInstance().hash("color"));
             if (p != null){
                 // Only city cards have colours, events don't
                 String color = ((PropertyColor)p).valueStr;
-                colourCounter[Utils.indexOf(PandemicGameState.colors, color)]++;
+                colourCounter[Utils.indexOf(pandemic.PandemicGameState.colors, color)]++;
             }
         }
         for (int i =0 ; i < colourCounter.length; i++){
             if (colourCounter[i] >= 5){
-                actions.add(new TreatDisease(PandemicGameState.colors[i]));
+                actions.add(new TreatDisease(pandemic.PandemicGameState.colors[i]));
             }
         }
 

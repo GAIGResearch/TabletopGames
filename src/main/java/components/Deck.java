@@ -121,6 +121,12 @@ public class Deck extends Component implements IDeck {
         return null;
     }
 
+    public boolean remove(Card card)
+    {
+        return cards.remove(card);
+    }
+
+
     public boolean add(Card c) {
         return add(c, 0);
     }
@@ -222,7 +228,7 @@ public class Deck extends Component implements IDeck {
                 decks.add(newDeck);
             }
 
-        }catch (IOException | ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 

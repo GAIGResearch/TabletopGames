@@ -2,8 +2,36 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1ea7b80c-118b-4ec3-86e0-eb3d01e62727" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/TestPandemic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittenCard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittensBoardView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittensCardTypeProperty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittensCardView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittensForwardModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittensGUI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/ExplodingKittensGame.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/AttackAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/DrawExplodingKittenCard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/FavorAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/GiveCardAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/IsNope.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/IsNopeable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/NopeAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/PassAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/PlaceExplodingKittenAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/PlayCard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/SeeTheFutureAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/ShuffleAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/explodingkittens/actions/SkipAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TestExplodingKittens.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/actions/DoNothing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/actions/DoNothing.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/actions/PlayCard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/actions/PlayCard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/components/Deck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Deck.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Runner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Runner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoardView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGameState.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -17,6 +45,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -49,16 +78,24 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1573230576305" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/exploding-kittens" />
   </component>
   <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="explodingkittens.actions" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\alexa\OneDrive\Documents\Git Repositories\TabletopGames\src\main\java\exploding-kittens" />
+    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="" />
       <recent name="utilities" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Github\ModernBoardGame\data" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Test">
+  <component name="RunManager" selected="Application.TestExplodingKittens">
     <configuration name="PandemicBoard" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="pandemic.PandemicBoard" />
       <module name="ModernBoardGame" />
@@ -66,8 +103,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Test" />
+    <configuration name="TestExplodingKittens" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="TestExplodingKittens" />
       <module name="ModernBoardGame" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -75,11 +112,11 @@
     </configuration>
     <list>
       <item itemvalue="Application.PandemicBoard" />
-      <item itemvalue="Application.Test" />
+      <item itemvalue="Application.TestExplodingKittens" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Test" />
+        <item itemvalue="Application.TestExplodingKittens" />
       </list>
     </recent_temporary>
   </component>
@@ -136,11 +173,32 @@
     <option name="LAST_COMMIT_MESSAGE" value="Implemented most of the actions&#10;- to test we need to add diseases&#10;- knowledge exchange and discover a cure actions are missing" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="636" y="326" width="299" height="170" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1582296507671">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586528546226">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586528546226" />
+    <state x="672" y="323" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1586442581034">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="672" y="323" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1586442581034" />
+    <state x="765" y="229" key="#com.intellij.ide.util.MemberChooser" timestamp="1586785962575">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="765" y="229" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1586785962575" />
+    <state x="689" y="304" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1586528543203">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="689" y="304" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586528543203" />
+    <state x="795" y="411" width="299" height="170" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1586512770291">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="636" y="326" width="299" height="170" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1536.824@0.0.1536.824" timestamp="1582296507671" />
+    <state x="795" y="411" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586512770291" />
     <state x="834" y="444" width="308" height="216" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1581676221510" />
+    <state x="648" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1586782662396">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="648" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586782662396" />
     <state x="817" y="251" width="661" height="573" key="#xdebugger.evaluate" timestamp="1582299537959">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -150,53 +208,61 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="1057" y="168" width="798" height="912" key="CommitChangelistDialog2/67.27.1853.1053@67.27.1853.1053" timestamp="1581948337016" />
-    <state width="1537" height="270" key="GridCell.Tab.0.bottom" timestamp="1582649729072">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1586793589436">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582649729072" />
     <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1586793589436" />
     <state width="1807" height="278" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449409" />
-    <state width="1537" height="270" key="GridCell.Tab.0.center" timestamp="1582649729072">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1586793589436">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1582649729072" />
     <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1586793589436" />
     <state width="1807" height="278" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449408" />
-    <state width="1537" height="270" key="GridCell.Tab.0.left" timestamp="1582649729071">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1586793589436">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1582649729071" />
     <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1586793589436" />
     <state width="1807" height="278" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449408" />
-    <state width="1537" height="270" key="GridCell.Tab.0.right" timestamp="1582649729072">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1586793589436">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1582649729072" />
     <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582647886432" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1586793589436" />
     <state width="1807" height="278" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1581948449409" />
-    <state width="1537" height="270" key="GridCell.Tab.1.bottom" timestamp="1582649729723">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1586793572525">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582649729723" />
     <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448337" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1586793572525" />
     <state width="1807" height="344" key="GridCell.Tab.1.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418636" />
-    <state width="1537" height="270" key="GridCell.Tab.1.center" timestamp="1582649729723">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1586793572525">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1582649729723" />
     <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448336" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1586793572525" />
     <state width="1807" height="344" key="GridCell.Tab.1.center/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418636" />
-    <state width="1537" height="270" key="GridCell.Tab.1.left" timestamp="1582649729723">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1586793572525">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1582649729723" />
     <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448336" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1586793572525" />
     <state width="1807" height="344" key="GridCell.Tab.1.left/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418635" />
-    <state width="1537" height="270" key="GridCell.Tab.1.right" timestamp="1582649729723">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1586793572525">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1537" height="270" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1582649729723" />
     <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040/-1920.3.1920.1040@0.0.1920.1040" timestamp="1582637448337" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1586793572525" />
     <state width="1807" height="344" key="GridCell.Tab.1.right/67.27.1853.1053@67.27.1853.1053" timestamp="1581948418636" />
     <state x="588" y="277" width="800" height="551" key="Vcs.Push.Dialog.v2" timestamp="1581948338558">
       <screen x="67" y="27" width="1853" height="1053" />
@@ -214,9 +280,38 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="761" y="472" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/67.27.1853.1053@67.27.1853.1053" timestamp="1581937717746" />
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1582298808877">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state x="731" y="223" key="com.intellij.testIntegration.createTest.CreateTestDialog" timestamp="1586774386764">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="731" y="223" key="com.intellij.testIntegration.createTest.CreateTestDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586774386764" />
+    <state x="656" y="118" width="607" height="804" key="find.popup" timestamp="1586528605766">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="656" y="118" width="607" height="804" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1586528605766" />
+    <state x="616" y="240" key="run.anything.popup" timestamp="1586787816964">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="616" y="240" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1586787816964" />
+    <state x="539" y="183" width="840" height="856" key="search.everywhere.popup" timestamp="1586521868859">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1582298808877" />
+    <state x="539" y="183" width="840" height="856" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1586521868859" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/explodingkittens/actions/PlaceExplodingKittenAction.java</url>
+          <line>21</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="playerCards.cards" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

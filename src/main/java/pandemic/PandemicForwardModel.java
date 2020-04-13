@@ -31,7 +31,7 @@ public class PandemicForwardModel implements ForwardModel {
         // init counters
         game.findCounter("Outbreaks").setValue(0);
         game.findCounter("Infection Rate").setValue(0);
-        for (String color : colors) {
+        for (String color : PandemicGameState.colors) {
             game.findCounter("Disease " + color).setValue(0);
             int hash = Hash.GetInstance().hash("Disease " + color);
         }
@@ -122,7 +122,7 @@ public class PandemicForwardModel implements ForwardModel {
             infectCities(currentState);
 
             // Set the next player as active
-            ((PandemicGameState) currentState).setActivePlayer((currentState.getActivePlayer() + 1) % currentState.nPlayers());
+            ((pandemic.PandemicGameState) currentState).setActivePlayer((currentState.getActivePlayer() + 1) % currentState.nPlayers());
         }
     }
 
