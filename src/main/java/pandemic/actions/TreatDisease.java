@@ -12,6 +12,8 @@ import pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
+import static pandemic.Constants.nameHash;
+
 public class TreatDisease implements Action {
     String color;
 
@@ -21,14 +23,14 @@ public class TreatDisease implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        int colorIdx = Utils.indexOf(PandemicGameState.colors, color);
+        int colorIdx = Utils.indexOf(Constants.colors, color);
 
         // Find player current location
         int activePlayer = gs.getActivePlayer();
-        PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
+        PropertyString currentLocation = (PropertyString) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
 
         // Find board node
-        BoardNode bn = ((PandemicGameState)gs).world.getNode("name", currentLocation.value);
+        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, currentLocation.value);
 
         // Find disease counter
         Counter diseaseCounter = gs.findCounter("Disease " + color);

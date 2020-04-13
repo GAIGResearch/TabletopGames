@@ -6,6 +6,9 @@ import core.Game;
 
 import java.util.HashSet;
 
+import static pandemic.Constants.GAME_ONGOING;
+import static pandemic.Constants.GAME_WIN;
+
 public class PandemicGame extends Game {
 
     @Override
@@ -36,18 +39,24 @@ public class PandemicGame extends Game {
         }
 
         System.out.println("Game Over");
-        System.out.println(winners().toString());
+        if (gameState.getGameStatus() == GAME_WIN) {
+            System.out.println("Winners: " + winners().toString());
+        } else {
+            System.out.println("Lose");
+        }
     }
 
     @Override
     public boolean isEnded() {
-        return gameOver;
+        return gameState.getGameStatus() != GAME_ONGOING;
     }
 
     @Override
     public HashSet<Integer> winners() {
         HashSet<Integer> winners = new HashSet<>();
-        // TODO: all or nothing, check gamestate
+        if (gameState.getGameStatus() == GAME_WIN) {
+            for (int i = 0; i < players.size(); i++) winners.add(i);
+        }
         return winners;
     }
 }
