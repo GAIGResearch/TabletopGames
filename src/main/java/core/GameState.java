@@ -3,10 +3,11 @@ package core;
 import actions.Action;
 import components.Counter;
 import components.Deck;
-import content.PropertyString;
 
 import java.util.HashMap;
 import java.util.List;
+
+import static pandemic.Constants.GAME_ONGOING;
 
 /**
  * Placeholder class. Will contain all game state information.
@@ -17,6 +18,8 @@ public abstract class GameState {
     protected int nPlayers;
     protected HashMap<Integer, Area> areas;
     public int roundStep;
+
+    protected int gameStatus = GAME_ONGOING;
 
     public abstract GameState copy();
     public GameState copyTo(GameState gs) {
@@ -41,6 +44,9 @@ public abstract class GameState {
     public abstract int nPossibleActions();
     public abstract List<Action> possibleActions();
 
+    public int getGameStatus() {
+        return gameStatus;
+    }
 
     public final void init(Game game)
     {

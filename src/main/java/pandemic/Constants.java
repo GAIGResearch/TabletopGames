@@ -4,6 +4,10 @@ import utilities.Hash;
 
 public class Constants {
 
+    public final static int GAME_WIN = 1;
+    public final static int GAME_LOSE = 0;
+    public final static int GAME_ONGOING = -1;
+
     public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
     public final static int playerLocationHash = Hash.GetInstance().hash("playerLocation");

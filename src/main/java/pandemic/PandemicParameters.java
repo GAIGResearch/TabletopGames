@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 public class PandemicParameters extends GameParameters {
     public long game_seed = System.currentTimeMillis(); //0;
+    public int lose_max_outbreak = 8;
 
     public int max_cubes_per_city = 3;  // More cause outbreak
 
@@ -19,6 +20,7 @@ public class PandemicParameters extends GameParameters {
     public int n_initial_disease_cubes = 24;
 
     public int max_cards_per_player = 7;  // Max cards in hand per player
+    public int n_cards_draw = 2;  // Number of cards players draw each turn
     public HashMap<Integer, Integer> n_cards_per_player = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
         {
             put(2, 4);

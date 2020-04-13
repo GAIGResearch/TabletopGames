@@ -5,9 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 
 public abstract class Game {
-
-    protected boolean gameOver = false;
-
     protected List<AIPlayer> players;
     protected GameState gameState;
     protected ForwardModel forwardModel;
@@ -95,13 +92,11 @@ public abstract class Game {
     public String tempDeck() {
         Deck temp = findDeck("tempDeck");
         if (temp == null) {
-            // todo get capacity
             temp = new Deck("tempDeck");
             decks.add(temp);
         } else {
             temp.clear();
         }
-//        decks.add(temp);
         return "tempDeck";
     }
 
@@ -113,8 +108,8 @@ public abstract class Game {
         this.decks.add(deck);
     }
 
-    public void gameOver(){
-        gameOver = true;
+    public void gameOver(int code){
+        gameState.gameStatus = code;
     }
 
     public GameParameters getGameParameters() { return gameParameters; }

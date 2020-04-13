@@ -59,7 +59,7 @@ public class PandemicGameState extends GameState {
         for (String color : Constants.colors) {
             int hash = Hash.GetInstance().hash("Disease " + color);
             Counter diseaseC = game.findCounter("Disease " + color);
-            diseaseC.setValue(((PandemicParameters)game.getGameParameters()).n_initial_disease_cubes);
+            diseaseC.setValue(0);  // 0 - cure not discovered; 1 - cure discovered; 2 - eradicated
             gameArea.addComponent(hash, diseaseC);
 
             hash = Hash.GetInstance().hash("Disease Cube " + color);
