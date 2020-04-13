@@ -132,10 +132,10 @@ public abstract class GameState {
     public void setGameOver(int status){  this.gameStatus = status; }
     public int getActivePlayer() { return activePlayer; }
     public HashMap<Integer, Area> getAreas() { return areas; }
-    public int nPlayers() { return nPlayers; }
+    public int getNPlayers() { return nPlayers; }
+    public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }
 
     /* Methods to be implemented by subclass */
-    public abstract int nInputActions();  // How many actions are required by the game per player.
     public abstract int nPossibleActions();
     public abstract List<Action> possibleActions();
 

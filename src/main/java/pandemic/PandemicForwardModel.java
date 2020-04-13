@@ -59,11 +59,11 @@ public class PandemicForwardModel implements ForwardModel {
         Deck playerCards = firstState.findDeck("Player Roles");
         Deck playerDeck = firstState.findDeck("Player Deck");
         playerCards.shuffle(rnd);
-        int nCardsPlayer = gameParameters.n_cards_per_player.get(state.nPlayers());
+        int nCardsPlayer = gameParameters.n_cards_per_player.get(state.getNPlayers());
         long maxPop = 0;
         int startingPlayer = -1;
 
-        for (int i = 0; i < state.nPlayers(); i++) {
+        for (int i = 0; i < state.getNPlayers(); i++) {
             // Draw a player card
             Card c = playerCards.draw();
 
@@ -130,7 +130,7 @@ public class PandemicForwardModel implements ForwardModel {
             }
         }
 
-        if (pgs.roundStep >= pgs.nInputActions()) {
+        if (pgs.roundStep >= gameParameters.n_actions_per_turn) {
             pgs.roundStep = 0;
             drawCards(pgs, gameParameters);
 
@@ -140,7 +140,7 @@ public class PandemicForwardModel implements ForwardModel {
             }
 
             // Set the next player as active
-            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.nPlayers());
+            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.getNPlayers());
         }
 
         // TODO: wanna play event card?

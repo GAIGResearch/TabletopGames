@@ -39,12 +39,12 @@ public abstract class Game {
     /**
      * Sets the game in the initial state.
      * @param dataPath path to the directory that has all data files.
-     * @param players List of players for thsi game.
+     * @param players List of players for this game.
      */
     void setup(String dataPath, List<AIPlayer> players) {
         gameState.load(dataPath);
         this.players = players;
-        gameState.nPlayers = players.size();
+        gameState.setNPlayers(players.size());
         gameState.setComponents();
         gameState.getModel().setup(gameState);
     }

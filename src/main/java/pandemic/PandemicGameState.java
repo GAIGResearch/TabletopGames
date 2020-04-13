@@ -88,12 +88,6 @@ public class PandemicGameState extends GameState {
     }
 
     @Override
-    public int nInputActions() {
-        PandemicParameters pp = (PandemicParameters) this.gameParameters;
-        return pp.n_actions_per_turn;  // Pandemic requires up to 4 actions per player per turn.
-    }
-
-    @Override
     public int nPossibleActions() {
         return this.numAvailableActions;
     }
