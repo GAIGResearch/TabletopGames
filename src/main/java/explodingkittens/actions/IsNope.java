@@ -1,5 +1,5 @@
 package explodingkittens.actions;
 
-public interface NopeCard {
+public interface IsNope {
     public boolean isNope();
 }

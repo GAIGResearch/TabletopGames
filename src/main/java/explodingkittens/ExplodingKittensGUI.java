@@ -1,4 +1,7 @@
 package explodingkittens;
 
-public class ExplodingKittensGUI {
+import core.GUI;
+
+public class ExplodingKittensGUI extends GUI {
+
 }

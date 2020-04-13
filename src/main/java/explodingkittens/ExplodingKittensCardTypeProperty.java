@@ -1,51 +1,49 @@
-package content;
+package explodingkittens;
 
+import content.Property;
 import explodingkittens.ExplodingKittenCard;
-import explodingkittens.ExplodingKittenCards;
 import utilities.Hash;
 
-public class ExplodingKittensCardType extends Property {
+public class ExplodingKittensCardTypeProperty extends Property {
 
     public ExplodingKittenCard value;
 
-    public ExplodingKittensCardType(ExplodingKittenCard card_type)
+    public ExplodingKittensCardTypeProperty(ExplodingKittenCard card_type)
     {
-        this.hashString = "";
+        this.hashString = card_type.toString();
         this.hashKey = Hash.GetInstance().hash(hashString);
         this.value = card_type;
     }
 
-    public ExplodingKittensCardType(String key, int value)
+    public ExplodingKittensCardTypeProperty(String key, int value)
     {
         this.hashString = key;
         this.hashKey = Hash.GetInstance().hash(hashString);
-        this.value = value;
+        this.value = ExplodingKittenCard.valueOf(key);;
     }
 
-    public ExplodingKittensCardType(String key, int hashKey, int value)
+    public ExplodingKittensCardTypeProperty(String key, int hashkey, ExplodingKittenCard value)
     {
         this.hashString = key;
-        this.hashKey = hashKey;
-        this.value = value;
+        this.hashKey = hashkey;
+        this.value = ExplodingKittenCard.valueOf(key);;
     }
-
 
     @Override
     public String toString() {
-        return ""+value;
+        return value.toString();
     }
 
     public boolean equals(Object other)
     {
-        if(other instanceof PropertyInt)
-            return value == ((PropertyInt)(other)).value;
+        if (other instanceof ExplodingKittensCardTypeProperty)
+            return value == ((ExplodingKittensCardTypeProperty)(other)).value;
         return false;
     }
 
     public Property copy()
     {
-        return new PropertyInt(hashString, hashKey, value);
+        return new ExplodingKittensCardTypeProperty(hashString, hashKey, value);
     }
-
 
 }
