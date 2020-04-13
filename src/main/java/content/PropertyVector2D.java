@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class PropertyVector2D extends Property
 {
-    private Vector2D values;
+    public Vector2D values;
 
 //    public PropertyVector2D(String[] values)
 //    {

@@ -95,12 +95,12 @@ public abstract class Game {
         Deck temp = findDeck("tempDeck");
         if (temp == null) {
             // todo get capacity
-            temp = new Deck();
-            temp.setID("tempDeck");
+            temp = new Deck("tempDeck");
+            decks.add(temp);
         } else {
             temp.clear();
         }
-        decks.add(temp);
+//        decks.add(temp);
         return "tempDeck";
     }
 

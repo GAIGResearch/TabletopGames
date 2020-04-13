@@ -1,5 +1,6 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import components.Card;
 import components.Deck;
 import core.GameState;

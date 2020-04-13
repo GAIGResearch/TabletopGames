@@ -7,16 +7,18 @@ import core.Area;
 import core.ForwardModel;
 import core.Game;
 import core.GameState;
+import pandemic.actions.AddCardToDeck;
+import pandemic.actions.AddResearchStation;
+import pandemic.actions.DrawCard;
+import pandemic.actions.InfectCity;
 import utilities.Hash;
 
 import java.util.Random;
 
-import static actions.MovePlayer.placePlayer;
+import static pandemic.actions.MovePlayer.placePlayer;
 import static pandemic.PandemicGameState.*;
 
 public class PandemicForwardModel implements ForwardModel {
-    int epidemicCard = Hash.GetInstance().hash("epidemic");
-    public static int playersBNHash = Hash.GetInstance().hash("players");
     int[] infectionRate = new int[]{2, 2, 2, 3, 3, 4, 4};  // TODO: json
     private Game game;
 
@@ -50,14 +52,15 @@ public class PandemicForwardModel implements ForwardModel {
                 new InfectCity(c, nTimes - j).execute(state);
 
                 // Discard card
-                new AddCardToDeck(c, infectionDiscard);
+                new DrawCard(infectionDeck, infectionDiscard).execute(state);
             }
         }
 
         // give players cards
-        String playerDeckStr = "Cities";  // TODO: combine cities + events
+        String playerDeckStr = "Cities";
         Deck playerCards = game.findDeck("Player Roles");
-        Deck playerDeck = game.findDeck(playerDeckStr);  // TODO: assuming contains city & event cards
+        Deck playerDeck = game.findDeck(playerDeckStr);
+        playerDeck.add(game.findDeck("Events")); // contains city & event cards
         playerCards.shuffle();
         int nCardsPlayer = 6 - state.nPlayers();  // TODO: params
         long maxPop = 0;
@@ -69,13 +72,13 @@ public class PandemicForwardModel implements ForwardModel {
 
             // Give the card to this player
             Area playerArea = state.getAreas().get(i);
-            playerArea.setComponent(playerCardHash, c);
+            playerArea.setComponent(Constants.playerCardHash, c);
 
             // Also add this player in Atlanta
             placePlayer(state, "Atlanta", i);
 
             // Give players cards
-            Deck playerHandDeck = (Deck) playerArea.getComponent(playerHandHash);
+            Deck playerHandDeck = (Deck) playerArea.getComponent(Constants.playerHandHash);
 
             playerDeck.shuffle();
             for (int j = 0; j < nCardsPlayer; j++) {
@@ -83,26 +86,30 @@ public class PandemicForwardModel implements ForwardModel {
             }
 
             for (Card card: playerHandDeck.getCards()) {
-                long pop = ((PropertyLong) card.getProperty(Hash.GetInstance().hash("population"))).value;
-                if (pop > maxPop) {
-                    startingPlayer = i;
-                    maxPop = pop;
+                Property property = card.getProperty(Hash.GetInstance().hash("population"));
+                if (property != null){
+                    long pop = ((PropertyLong) property).value;
+                    if (pop > maxPop) {
+                        startingPlayer = i;
+                        maxPop = pop;
+                    }
                 }
             }
         }
 
         // Epidemic cards
         playerDeck.shuffle();
-//        int noCards = playerDeck.getCards().size();
-//        int noEpidemicCards = 4;  // TODO: json or game params
-//        int range = noCards / noEpidemicCards;
-//        for (int i = 0; i < noEpidemicCards; i++) {
-//            int index = i * range + i + new Random().nextInt(range);  // TODO seed
-//
-//            Card card = new Card();
-//            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
-//            new AddCardToDeck(card, playerDeck, index).execute(state);
-//        }
+        int noCards = playerDeck.getCards().size();
+        int noEpidemicCards = 4;  // TODO: json or game params
+        int range = noCards / noEpidemicCards;
+        for (int i = 0; i < noEpidemicCards; i++) {
+            int index = i * range + i + new Random().nextInt(range);  // TODO seed
+
+            Card card = new Card();
+            card.addProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
+            new AddCardToDeck(card, playerDeck, index).execute(state);
+
+        }
 
         // Player with highest population starts
         state.setActivePlayer(startingPlayer);
@@ -137,23 +144,34 @@ public class PandemicForwardModel implements ForwardModel {
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Cities", tempDeckID);  // TODO player deck
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            boolean canDraw = action.execute(currentState);
+            Deck cityDeck = currentState.findDeck("Cities");
+            boolean canDraw = cityDeck.getCards().size() > 0;
+
+            // if player cannot draw it means that the deck is empty -> GAME OVER
             if (!canDraw){
                 game.gameOver();
+                System.out.println("No more cards to draw");
             }
+            action.execute(currentState);
+
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
-            if (((PropertyString)c.getProperty(Hash.GetInstance().hash("name"))).value.hashCode() == epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
+            if (((PropertyString)c.getProperty(Hash.GetInstance().hash("name"))).value.hashCode() == Constants.epidemicCard) {  // If epidemic card, do epidemic  // TODO: if 2 in a row, reshuffle second
                 epidemic(currentState);
             } else
 
             {  // Otherwise, give card to player
                 Area area = currentState.getAreas().get(activePlayer);
-                Deck deck = (Deck) area.getComponent(playerHandHash);
+                Deck deck = (Deck) area.getComponent(Constants.playerHandHash);
                 if (deck != null) {
-                    new AddCardToDeck(c, deck).execute(currentState);
+                    // deck size doesn't go beyond 7
+//                    new AddCardToDeck(c, deck).execute(currentState);
+                    if (!new AddCardToDeck(c, deck).execute(currentState)){
+                        // player needs to discard a card
+                        game.getPlayers().get(activePlayer).getAction(currentState);
+                    }
                 }
             }
         }
@@ -166,6 +184,12 @@ public class PandemicForwardModel implements ForwardModel {
 
         // 2. 3 cubes on bottom card in infection deck, then add this card on top of infection discard
         Card c = currentState.findDeck("Infections").pickLast();
+        if (c == null){
+            // cannot draw card
+            game.gameOver();
+            System.out.println("No more cards to draw");
+            return;
+        }
         new InfectCity(c, 3).execute(currentState);
         new AddCardToDeck(c, currentState.findDeck("Infection Discard")).execute(currentState);
 

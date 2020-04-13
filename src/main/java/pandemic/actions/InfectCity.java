@@ -1,5 +1,6 @@
-package actions;
+package pandemic.actions;
 
+import actions.Action;
 import components.BoardNode;
 import components.Card;
 import content.*;
@@ -10,7 +11,7 @@ import utilities.Utils;
 
 import static pandemic.PandemicGameState.colors;
 
-public class InfectCity implements Action{
+public class InfectCity implements Action {
 
     Card infectingCard;
     int count;

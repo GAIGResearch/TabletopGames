@@ -1,14 +1,11 @@
-package actions;
+package pandemic.actions;
 
-import components.Board;
+import actions.Action;
 import components.BoardNode;
 import content.PropertyBoolean;
-import content.PropertyString;
 import core.GameState;
 import pandemic.PandemicGameState;
 import utilities.Hash;
-
-import static pandemic.PandemicGameState.pandemicBoardHash;
 
 public class AddResearchStation implements Action {
     private int researchStationHash = Hash.GetInstance().hash("researchStation");
