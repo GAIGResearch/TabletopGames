@@ -111,13 +111,14 @@ public class PandemicForwardModel implements ForwardModel {
 
     @Override
     public void next(GameState currentState, Action action) {
-        playerActions(currentState, action);
+        PandemicGameState pgs = (PandemicGameState)currentState;
+        playerActions(pgs, action);
 
         if (action instanceof CureDisease) {
             // Check win condition
             boolean all_cured = true;
             for (String c : Constants.colors) {
-                if (currentState.findCounter("Disease " + c).getValue() < 1) all_cured = false;
+                if (pgs.findCounter("Disease " + c).getValue() < 1) all_cured = false;
             }
             if (all_cured) {
                 game.gameOver(GAME_WIN);
@@ -125,25 +126,26 @@ public class PandemicForwardModel implements ForwardModel {
             }
         }
 
-        if (currentState.roundStep >= currentState.nInputActions()) {
-            currentState.roundStep = 0;
-            drawCards(currentState);
+        if (pgs.roundStep >= pgs.nInputActions()) {
+            pgs.roundStep = 0;
+            drawCards(pgs);
 
-            if (!currentState.isQuietNight()) {
-                infectCities(currentState);
-                currentState.setQuietNight(false);
+            if (!pgs.isQuietNight()) {
+                infectCities(pgs);
+                pgs.setQuietNight(false);
             }
 
             // Set the next player as active
-            ((PandemicGameState) currentState).setActivePlayer((currentState.getActivePlayer() + 1) % currentState.nPlayers());
+            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.nPlayers());
         }
-
-        // TODO: wanna play event card?
     }
 
-    private void playerActions(GameState currentState, Action action) {
+    private void playerActions(PandemicGameState currentState, Action action) {
         currentState.roundStep += 1;
         action.execute(currentState);
+        if (action instanceof QuietNight) {
+            currentState.setQuietNight(true);
+        }
     }
 
     private void drawCards(GameState currentState) {
