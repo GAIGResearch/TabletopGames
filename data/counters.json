@@ -32,6 +32,12 @@
   },
 
   {
+    "id": "Research Stations",
+    "min": ["Integer", 0],
+    "max": ["Integer", 6]
+  },
+
+  {
     "id": "Disease Cube yellow",
     "min": ["Integer", 0],
     "max": ["Integer", 24],

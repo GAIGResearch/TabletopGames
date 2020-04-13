@@ -27,10 +27,10 @@ public class PandemicForwardModel implements ForwardModel {
 
         // init counters
         game.findCounter("Outbreaks").setValue(0);
+        game.findCounter("Research Stations").setValue(this.gameParameters.n_research_stations);
         game.findCounter("Infection Rate").setValue(0);
         for (String color : Constants.colors) {
             game.findCounter("Disease " + color).setValue(0);
-//            int hash = Hash.GetInstance().hash("Disease " + color);
         }
 
         // infection

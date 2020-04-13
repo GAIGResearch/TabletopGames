@@ -229,12 +229,14 @@ public class PandemicGameState extends GameState {
 
         // Discover a cure, cards of the same colour at a research station
         ArrayList<Card>[] colourCounter = new ArrayList[Constants.colors.length];
+        for (int i = 0; i < colourCounter.length; i++) {
+            colourCounter[i] = new ArrayList<>();
+        }
         for (Card card: playerHand.getCards()){
             Property p  = card.getProperty(Constants.colorHash);
             if (p != null){
                 // Only city cards have colours, events don't
                 String color = ((PropertyColor)p).valueStr;
-                colourCounter[Utils.indexOf(Constants.colors, color)] = new ArrayList<>();
                 colourCounter[Utils.indexOf(Constants.colors, color)].add(card);
             }
         }
