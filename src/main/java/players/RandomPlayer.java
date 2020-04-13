@@ -8,8 +8,18 @@ import java.util.Random;
 
 public class RandomPlayer implements AIPlayer {
 
+    /**
+     * Random generator for this agent.
+     */
+    private Random rnd;
+
+    public RandomPlayer(Random rnd)
+    {
+        this.rnd = rnd;
+    }
+
     @Override
     public Action getAction(GameState gameState) {
-        return gameState.possibleActions().get(new Random().nextInt(gameState.nPossibleActions()));
+        return gameState.possibleActions().get(rnd.nextInt(gameState.nPossibleActions()));
     }
 }

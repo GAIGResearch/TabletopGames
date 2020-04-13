@@ -60,9 +60,7 @@ public class Dice extends Component {
         return dice;
     }
 
-
-    public int roll() {
-        Random r = new Random();
+    public int roll(Random r) {
         return r.nextInt(this.number_of_sides) + 1;
     }
 

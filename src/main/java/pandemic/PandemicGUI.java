@@ -85,16 +85,16 @@ public class PandemicGUI extends GUI {
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
-        Counter cnY = game.findCounter("Disease yellow");
+        Counter cnY = game.getGameState().findCounter("Disease yellow");
         JComponent cY = new CounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
-        Counter cnR = game.findCounter("Disease red");
+        Counter cnR = game.getGameState().findCounter("Disease red");
         JComponent cR = new CounterView(cnR, Color.red, null);
         counterArea.add(cR);
-        Counter cnB = game.findCounter("Disease blue");
+        Counter cnB = game.getGameState().findCounter("Disease blue");
         JComponent cB = new CounterView(cnB, Color.blue, null);
         counterArea.add(cB);
-        Counter cnK = game.findCounter("Disease black");
+        Counter cnK = game.getGameState().findCounter("Disease black");
         JComponent cK = new CounterView(cnK, Color.black, null);
         counterArea.add(cK);
 

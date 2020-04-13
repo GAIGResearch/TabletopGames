@@ -1,5 +1,7 @@
 package components;
 
+import java.util.Random;
+
 /**
  * Class for a deck of cards.
  * A deck is defined as a "group of cards". Examples of decks are:
@@ -18,7 +20,7 @@ public interface IDeck
     /**
      * Shuffles the deck
      */
-    void shuffle();
+    void shuffle(Random rnd);
 
     /**
      * Draws the first card of the deck

@@ -2,9 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1ea7b80c-118b-4ec3-86e0-eb3d01e62727" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ModernBoardGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ModernBoardGame.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Test.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/components/Deck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Deck.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/components/Dice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/Dice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/components/IDeck.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/IDeck.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/ForwardModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/ForwardModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/GameState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/core/Runner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/core/Runner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoardView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicBoardView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicForwardModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGame.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pandemic/PandemicGameState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/players/RandomPlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/players/RandomPlayer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +72,18 @@
       <recent name="E:\Github\ModernBoardGame\data" />
     </key>
   </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
   <component name="RunManager" selected="Application.Test">
     <configuration name="PandemicBoard" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="pandemic.PandemicBoard" />
@@ -82,18 +108,6 @@
         <item itemvalue="Application.Test" />
       </list>
     </recent_temporary>
-  </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView>
-          <treeState>
-            <expand />
-            <select />
-          </treeState>
-        </serviceView>
-      </list>
-    </option>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -129,6 +143,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Implemented the action that take the player from any location to the location listed on the player's cards" />

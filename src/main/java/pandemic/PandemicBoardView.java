@@ -62,7 +62,7 @@ public class PandemicBoardView extends JComponent {
     };
 
     public PandemicBoardView(Game g, String backgroundPath) {
-        this.board = g.findBoard("Cities");
+        this.board = g.getGameState().findBoard("Cities");
         this.game = g;
         this.background = ImageIO.GetInstance().getImage(backgroundPath);
         width = background.getWidth(null);
@@ -137,24 +137,24 @@ public class PandemicBoardView extends JComponent {
         }
 
         // Draw infection rate marker
-        Counter ir = game.findCounter("Infection Rate");
+        Counter ir = game.getGameState().findCounter("Infection Rate");
         Point2D pos = infectionPositions[ir.getValue()];
         g.drawImage(ImageIO.GetInstance().getImage("data/infectionRate.png"), (int)pos.getX(), (int)pos.getY(), null, null);
 
         // Draw outbreak marker
-        Counter ob = game.findCounter("Outbreaks");
+        Counter ob = game.getGameState().findCounter("Outbreaks");
         pos = outbreakPositions[ob.getValue()];
         g.drawImage(ImageIO.GetInstance().getImage("data/outbreakMarker.png"), (int)pos.getX(), (int)pos.getY(), null, null);
 
         // Discard piles
-        Deck pDiscard = game.findDeck("Player Deck Discard");
+        Deck pDiscard = game.getGameState().findDeck("Player Deck Discard");
         if (pDiscard != null) {
             Card cP = pDiscard.draw();
             if (cP != null) {
                 drawCard(g, 100, 50, cP, null, (int)playerDiscardPosition.getX(), (int)playerDiscardPosition.getY());
             }
         }
-        Deck iDiscard = game.findDeck("Infection Discard");
+        Deck iDiscard = game.getGameState().findDeck("Infection Discard");
         if (iDiscard != null) {
             Card cI = iDiscard.draw();
             if (cI != null) {
@@ -163,13 +163,13 @@ public class PandemicBoardView extends JComponent {
         }
 
         // Disease markers
-        int dmy = game.findCounter("Disease yellow").getValue();
+        int dmy = game.getGameState().findCounter("Disease yellow").getValue();
         drawCounter(g, dmy, Color.yellow, 0);
-        int dmr = game.findCounter("Disease red").getValue();
+        int dmr = game.getGameState().findCounter("Disease red").getValue();
         drawCounter(g, dmr, Color.red, 1);
-        int dmb = game.findCounter("Disease blue").getValue();
+        int dmb = game.getGameState().findCounter("Disease blue").getValue();
         drawCounter(g, dmb, Color.blue, 2);
-        int dmk = game.findCounter("Disease black").getValue();
+        int dmk = game.getGameState().findCounter("Disease black").getValue();
         drawCounter(g, dmk, Color.black, 3);
 
     }

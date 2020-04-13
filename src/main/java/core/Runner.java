@@ -3,25 +3,17 @@ package core;
 import pandemic.PandemicGUI;
 
 import java.util.List;
+import java.util.Random;
 
 public class Runner {
 
     private Game game;
 
-    public void setGame(Game g, GameParameters gp, GameState gs, ForwardModel fm, String dataPath)
+    public void setGame(Game g, GameParameters gp, GameState gs, ForwardModel fm, String dataPath, List<AIPlayer> players)
     {
         game = g;
-        game.gameParameters = gp;
-        game.gameState = gs;
-        game.forwardModel = fm;
-
-        game.gameState.init(g);
-        game.setup(dataPath);
-    }
-
-    public void setPlayers(List<AIPlayer> players)
-    {
-        game.setPlayers(players);
+        game.init(gp, gs, fm);
+        game.setup(dataPath, players);
     }
 
     public void run()
