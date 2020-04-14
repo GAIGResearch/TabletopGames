@@ -111,6 +111,8 @@ public class PandemicGameState extends GameState {
         ArrayList<Action> actions = new ArrayList<>();
 
         Deck playerHand = ((Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
+        Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));
+        String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
         if (playerHand.isOverCapacity()){
             // need to discard a card
             for (int i = 0; i < playerHand.getCards().size(); i++){
@@ -215,19 +217,30 @@ public class PandemicGameState extends GameState {
 
         // Share knowledge, give or take card, player can only have 7 cards
         // can give any card to anyone
-        for (Card card: playerHand.getCards()){
-            for (int i = 0; i < nPlayers; i++){
-                if (i != activePlayer){
-                    actions.add(new GiveCard(card, i));
-                }
-            }
+        if (roleString.equals("Researcher")){
+
         }
-        // can take any card from anyone
-        for (int i = 0; i < nPlayers; i++){
-            if (i != activePlayer){
-                Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash);
-                for (Card card: otherDeck.getCards()){
-                    actions.add(new TakeCard(card, i));
+        // both players have to be at the same city
+        List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(Constants.playersBNHash)).getValues();
+        for (int i : players) {
+            if (i != activePlayer) {
+                // give card
+                for (Card card : playerHand.getCards()) {
+                    // researcher can give any card, others only the card that matches the city name
+                    if (roleString.equals("Researcher") || (card.getProperty(Constants.nameHash)).equals(playerLocationName)) {
+                        actions.add(new GiveCard(card, i));
+                    }
+                }
+
+                // take card
+                Deck otherDeck = (Deck) this.areas.get(i).getComponent(Constants.playerHandHash);
+                Card otherPlayerCard = ((Card)this.areas.get(i).getComponent(Constants.playerCardHash));
+                String otherRoleString = ((PropertyString)otherPlayerCard.getProperty(nameHash)).value;
+                // can take any card from the researcher or the card that matches the city if the player is in that city
+                for (Card card : otherDeck.getCards()) {
+                    if (otherRoleString.equals("Researcher") || (card.getProperty(Constants.nameHash)).equals(playerLocationName)) {
+                        actions.add(new TakeCard(card, i));
+                    }
                 }
             }
         }
@@ -244,8 +257,13 @@ public class PandemicGameState extends GameState {
             }
         }
         for (int i = 0 ; i < colourCounter.length; i++){
-            if (colourCounter[i] != null && colourCounter[i].size() >= gp.n_cards_for_cure){
-                actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
+            if (colourCounter[i] != null){
+                if (roleString.equals("Scientist") && colourCounter[i].size() >= gp.n_cards_for_cure_reduced){
+                    actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
+
+                } else if (colourCounter[i].size() >= gp.n_cards_for_cure){
+                    actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
+                }
             }
         }
 
@@ -282,8 +300,13 @@ public class PandemicGameState extends GameState {
 
         switch (cardString){
             case "Contingency planner":
+                // The Contingency Planner may, as an action, take an
+                //Event card from anywhere in the Player Discard Pile
+                //and place it on his Role card. Only 1 Event card can be
+                //on his role card at a time. It does not count against his
+                //hand limit.
                 break;
-            case "Discpatcher":
+            case "Dispatcher":
                 break;
             case "Medic":
                 break;
