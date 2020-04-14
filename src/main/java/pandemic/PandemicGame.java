@@ -13,6 +13,7 @@ public class PandemicGame extends Game {
 
     @Override
     public void run(GUI gui) {
+
         int turn = 0;
         int actionsPlayed = 0;
         while (!isEnded()) {
@@ -23,12 +24,12 @@ public class PandemicGame extends Game {
             Action action = players.get(activePlayer).getAction(gameState);
 
             // Resolve actions and game rules for the turn
-            forwardModel.next(gameState, action);
+            gameState.next(action);
+//            forwardModel.next(gameState, action);
             actionsPlayed++;
 
-
             if (gui != null) {
-                gui.update();
+                gui.update(gameState);
                 try {
                     Thread.sleep(100);
                 } catch (Exception e) {
