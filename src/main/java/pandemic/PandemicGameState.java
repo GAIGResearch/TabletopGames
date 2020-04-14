@@ -107,6 +107,14 @@ public class PandemicGameState extends GameState {
     public List<Action> possibleActions() {
 
         // todo add player role actions
+        // 1, Contingency planner
+        // 2, Dispatcher
+        // 3, Medic
+        // 4, Operations Expert
+        // 5, Quarantine Specialist
+        // done  6, Researcher
+        // done  7, Scientist
+
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
 
@@ -124,9 +132,6 @@ public class PandemicGameState extends GameState {
 
         // add do nothing action
         actions.add(new DoNothing());
-
-        // add player role actions
-        actions.addAll(actionsFromRole());
 
         // Drive / Ferry add actions for travelling immediate cities
         PropertyString playerLocationName = (PropertyString) this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
@@ -184,6 +189,21 @@ public class PandemicGameState extends GameState {
         // Build research station, discard card with that city to build one,
         // Check if there is not already a research station there
         if (!((PropertyBoolean) playerLocationNode.getProperty(Constants.researchStationHash)).value) {
+            // check if role is operations expert
+            if (roleString.equals("Operations Expert")){
+                // can be a research station in the current city
+                if (game.findCounter("Research Stations").getValue() == 0) {
+                    // If all research stations are used, then take one from board
+                    for (PropertyString ps : researchStations) {
+                        actions.add(new AddResearchStationFrom(ps.value, playerLocationName.value));
+                    }
+                } else {
+                    // Otherwise can just build here
+                    actions.add(new AddResearchStation(playerLocationName.value));
+                }
+            }
+
+            // normal build research station logic
             // Check player has card in hand
             Card card_in_hand = null;
             for (Card card: playerHand.getCards()){
@@ -205,7 +225,22 @@ public class PandemicGameState extends GameState {
                     actions.add(new AddResearchStationWithCard(playerLocationName.value, card_in_hand));
                 }
             }
+        } else {
+            // Operations Expert can travel from any city with research station to any city by discarding any card
+            if (roleString.equals("Operations Expert")){
+                // list all the other nodes with combination of all the city cards in hand
+                for (BoardNode bn: this.world.getBoardNodes()) {
+                    for (Card c : playerHand.getCards()) {
+                        if (c.getProperty(Constants.colorHash) != null) {
+                            new MovePlayerWithCard(activePlayer, ((PropertyString) bn.getProperty(Constants.nameHash)).value, c);
+
+                        }
+                    }
+                }
+            }
         }
+
+
 
         // Treat disease
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(Constants.infectionHash);
@@ -216,10 +251,6 @@ public class PandemicGameState extends GameState {
         }
 
         // Share knowledge, give or take card, player can only have 7 cards
-        // can give any card to anyone
-        if (roleString.equals("Researcher")){
-
-        }
         // both players have to be at the same city
         List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(Constants.playersBNHash)).getValues();
         for (int i : players) {
@@ -285,42 +316,7 @@ public class PandemicGameState extends GameState {
         this.activePlayer = activePlayer;
     }
 
-    private List<Action> actionsFromRole(){
-        // 1, Contingency planner
-        // 2, Dispatcher
-        // 3, Medic
-        // 4, Operations Expert
-        // 5, Quarantine Specialist
-        // 6, Researcher
-        // 7, Scientist
-        ArrayList<Action> actions = new ArrayList<>();
 
-        Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));;
-        String cardString = ((PropertyString)playerCard.getProperty(nameHash)).value;
-
-        switch (cardString){
-            case "Contingency planner":
-                // The Contingency Planner may, as an action, take an
-                //Event card from anywhere in the Player Discard Pile
-                //and place it on his Role card. Only 1 Event card can be
-                //on his role card at a time. It does not count against his
-                //hand limit.
-                break;
-            case "Dispatcher":
-                break;
-            case "Medic":
-                break;
-            case "Operations Expert":
-                break;
-            case "Quarantine Specialist":
-                break;
-            case "Researcher":
-                break;
-            case "Scientist":
-                break;
-        }
-        return actions;
-    }
 
     private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations){
         ArrayList<Action> actions = new ArrayList<>();
