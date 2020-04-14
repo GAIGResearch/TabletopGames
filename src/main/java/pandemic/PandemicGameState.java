@@ -105,6 +105,8 @@ public class PandemicGameState extends GameState {
 
     @Override
     public List<Action> possibleActions() {
+
+        // todo add player role actions
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
 
@@ -120,6 +122,9 @@ public class PandemicGameState extends GameState {
 
         // add do nothing action
         actions.add(new DoNothing());
+
+        // add player role actions
+        actions.addAll(actionsFromRole());
 
         // Drive / Ferry add actions for travelling immediate cities
         PropertyString playerLocationName = (PropertyString) this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
@@ -239,7 +244,7 @@ public class PandemicGameState extends GameState {
             }
         }
         for (int i = 0 ; i < colourCounter.length; i++){
-            if (colourCounter[i].size() >= gp.n_cards_for_cure){
+            if (colourCounter[i] != null && colourCounter[i].size() >= gp.n_cards_for_cure){
                 actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
             }
         }
@@ -262,23 +267,59 @@ public class PandemicGameState extends GameState {
         this.activePlayer = activePlayer;
     }
 
+    private List<Action> actionsFromRole(){
+        // 1, Contingency planner
+        // 2, Dispatcher
+        // 3, Medic
+        // 4, Operations Expert
+        // 5, Quarantine Specialist
+        // 6, Researcher
+        // 7, Scientist
+        ArrayList<Action> actions = new ArrayList<>();
+
+        Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));;
+        String cardString = ((PropertyString)playerCard.getProperty(nameHash)).value;
+
+        switch (cardString){
+            case "Contingency planner":
+                break;
+            case "Discpatcher":
+                break;
+            case "Medic":
+                break;
+            case "Operations Expert":
+                break;
+            case "Quarantine Specialist":
+                break;
+            case "Researcher":
+                break;
+            case "Scientist":
+                break;
+        }
+        return actions;
+    }
+
     private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations){
-        // Todo event cards get in here, but most actions are not created
         ArrayList<Action> actions = new ArrayList<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
         switch (cardString) {
             case "Resilient Population":
-//                System.out.println("Resilient Population");
-//            System.out.println("Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.");
+                // Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.
+                Deck infectionDiscardDeck = game.findDeck("Infection Discard");
+                for (int i = 0; i < infectionDiscardDeck.getCards().size(); i++){
+                    actions.add(new DiscardCard(infectionDiscardDeck, i));
+                }
                 break;
             case "Airlift":
-//                System.out.println("Airlift");
-//            System.out.println("Move any 1 pawn to any city. Get permission before moving another player's pawn.");
+                // Move any 1 pawn to any city. Get permission before moving another player's pawn.
+                for (int i = 0; i < nPlayers; i++){
+                    for (BoardNode bn: world.getBoardNodes())
+                    actions.add(new MovePlayer(i, ((PropertyString)bn.getProperty(Constants.nameHash)).value));
+                }
                 break;
             case "Government Grant":
-//                System.out.println("Government Grant");
-//            System.out.println("Add 1 research station to any city (no City card needed).");
+                // "Add 1 research station to any city (no City card needed)."
                 for (BoardNode bn: world.getBoardNodes()) {
                     if (!((PropertyBoolean) bn.getProperty(Constants.researchStationHash)).value) {
                         String cityName = ((PropertyString) bn.getProperty(nameHash)).value;
@@ -295,13 +336,18 @@ public class PandemicGameState extends GameState {
                 }
                 break;
             case "One quiet night":
-//                System.out.println("One quiet night");
-//            System.out.println("Skip the next Infect Cities step (do not flip over any Infection cards).");
+                // Skip the next Infect Cities step (do not flip over any Infection cards)
                 actions.add(new QuietNight());
                 break;
             case "Forecast":
-//                System.out.println("Forecast");
-//            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
+                //"Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top."
+                Deck infDiscardDeck = game.findDeck("Infection Discard");
+                // remove up to 6 cards and put them back on top in random order
+                // todo list all combinations?
+//
+//                for (int i = 0; i < infDiscardDeck.getCards().size(); i++){
+//                    actions.add(new DiscardCard(infDiscardDeck, i));
+//                }
                 break;
         }
 

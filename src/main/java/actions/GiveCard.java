@@ -1,4 +1,4 @@
-package pandemic.actions;
+package actions;
 
 import actions.Action;
 import components.Card;
