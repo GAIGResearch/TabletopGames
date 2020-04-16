@@ -18,6 +18,7 @@ public class PandemicForwardModel implements ForwardModel {
      * Random generator for this game.
      */
     protected Random rnd;
+    private boolean interrupted;  // Flag notifying if a reaction interrupted the state update, so it'd continue from there
     
     @Override
     public void setup(GameState firstState) {
@@ -137,17 +138,25 @@ public class PandemicForwardModel implements ForwardModel {
 
         boolean reacted = currentState.removeReactivePlayer();  // Reaction (if any) done
 
-        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn) {
+        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn || reacted && interrupted) {
             pgs.roundStep = 0;
             drawCards(pgs, gameParameters);
 
-            if (!pgs.isQuietNight()) {
-                infectCities(pgs, gameParameters);
-                pgs.setQuietNight(false);
-            }
+            if (currentState.getReactivePlayers().size() == 0) {
+                // It's possible drawCards() method caused an interruption resulting in discard card reactions
+                interrupted = false;
+                if (!pgs.isQuietNight()) {
+                    // Only do this step if Quiet Night event card was not played
+                    infectCities(pgs, gameParameters);
+                    pgs.setQuietNight(false);
+                }
 
-            // Set the next player as active
-            pgs.nextPlayer();
+                // Set the next player as active
+                pgs.nextPlayer();
+
+            } else {
+                interrupted = true;
+            }
         }
 
         // TODO: wanna play event card?
