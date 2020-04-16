@@ -180,8 +180,10 @@ public class PandemicForwardModel implements ForwardModel {
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         boolean epidemic = false;
-        for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
+        Deck playerDeck = (Deck) currentState.getAreas().get(activePlayer).getComponent(Constants.playerHandHash);
+
+        for (Card c : tempDeck.getCards()) {  // Check the drawn cards
             // If epidemic card, do epidemic, only one per draw
             if (((PropertyString)c.getProperty(nameHash)).value.hashCode() == Constants.epidemicCard) {
                 if (!epidemic) {
@@ -189,18 +191,22 @@ public class PandemicForwardModel implements ForwardModel {
                     epidemic = true;
                 }
             } else {  // Otherwise, give card to player
-                Area area = currentState.getAreas().get(activePlayer);
-                Deck deck = (Deck) area.getComponent(Constants.playerHandHash);
-                if (deck != null) {
-                    // deck size doesn't go beyond 7  TODO: action list should only contain discard card action
-                    if (!new AddCardToDeck(c, deck).execute(currentState)){
-                        // player needs to discard a card
-                        currentState.addReactivePlayer(activePlayer);
-                    }
+                if (playerDeck != null) {
+                    // deck size doesn't go beyond 7
+                    new AddCardToDeck(c, playerDeck).execute(currentState);
                 }
             }
         }
         currentState.clearTempDeck();
+
+        // If player's deck size went over capacity, player needs to discard
+        if (playerDeck != null && playerDeck.isOverCapacity()){
+            // player needs to discard N cards TODO: action list should only contain discard card action
+            int nDiscards = playerDeck.getCards().size() - playerDeck.getCapacity();
+            for (int i = 0; i < nDiscards; i++) {
+                currentState.addReactivePlayer(activePlayer);
+            }
+        }
     }
 
     private void epidemic(GameState currentState, PandemicParameters gameParameters) {
