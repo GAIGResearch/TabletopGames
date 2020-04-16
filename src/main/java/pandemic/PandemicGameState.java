@@ -246,7 +246,7 @@ public class PandemicGameState extends GameState {
             Property p  = card.getProperty(Constants.colorHash);
             if (p == null){
                 // Event cards don't have colour
-                actions.addAll(actionsFromEventCard(card, researchStations));
+                actions.addAll(actionsFromEventCard(card, researchStations, pp));
             }
         }
 
@@ -259,7 +259,7 @@ public class PandemicGameState extends GameState {
         this.activePlayer = activePlayer;
     }
 
-    private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations){
+    private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations, PandemicParameters gp){
         ArrayList<Action> actions = new ArrayList<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
