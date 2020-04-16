@@ -18,7 +18,6 @@ public class PandemicForwardModel implements ForwardModel {
      * Random generator for this game.
      */
     protected Random rnd;
-    private boolean interrupted;  // Flag notifying if a reaction interrupted the state update, so it'd continue from there
     
     @Override
     public void setup(GameState firstState) {
@@ -118,9 +117,9 @@ public class PandemicForwardModel implements ForwardModel {
         PandemicGameState pgs = (PandemicGameState)currentState;
         PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
 
-        if (currentState.getReactivePlayers().size() == 0) {
+        if (pgs.getReactivePlayers().size() == 0) {
             // Only advance round step if no one is reacting
-            currentState.roundStep += 1;
+            pgs.roundStep += 1;
         }
         playerActions(pgs, action);
 
@@ -131,20 +130,20 @@ public class PandemicForwardModel implements ForwardModel {
                 if (pgs.findCounter("Disease " + c).getValue() < 1) all_cured = false;
             }
             if (all_cured) {
-                currentState.setGameOver(GAME_WIN);
+                pgs.setGameOver(GAME_WIN);
                 System.out.println("WIN!");
             }
         }
 
-        boolean reacted = currentState.removeReactivePlayer();  // Reaction (if any) done
+        boolean reacted = pgs.removeReactivePlayer();  // Reaction (if any) done
 
-        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn || reacted && interrupted) {
+        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn || reacted && pgs.wasModelInterrupted()) {
             pgs.roundStep = 0;
             drawCards(pgs, gameParameters);
 
-            if (currentState.getReactivePlayers().size() == 0) {
+            if (pgs.getReactivePlayers().size() == 0) {
                 // It's possible drawCards() method caused an interruption resulting in discard card reactions
-                interrupted = false;
+                pgs.setModelInterrupted(false);
                 if (!pgs.isQuietNight()) {
                     // Only do this step if Quiet Night event card was not played
                     infectCities(pgs, gameParameters);
@@ -155,7 +154,7 @@ public class PandemicForwardModel implements ForwardModel {
                 pgs.nextPlayer();
 
             } else {
-                interrupted = true;
+                pgs.setModelInterrupted(false);
             }
         }
 

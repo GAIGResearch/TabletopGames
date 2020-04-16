@@ -19,6 +19,7 @@ public class PandemicGameState extends GameState {
     public Board world;
     private int numAvailableActions = 0;
     private boolean quietNight;
+    private boolean modelInterrupted;  // Flag notifying if a reaction request interrupted the state update, so it'd continue from there
 
     public void setComponents()
     {
@@ -308,4 +309,7 @@ public class PandemicGameState extends GameState {
     public boolean isQuietNight() {
         return quietNight;
     }
+
+    public boolean wasModelInterrupted() { return modelInterrupted; }
+    public void setModelInterrupted(boolean b) { modelInterrupted = b; }
 }
