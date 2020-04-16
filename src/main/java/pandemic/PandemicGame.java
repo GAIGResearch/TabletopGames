@@ -4,6 +4,7 @@ import actions.Action;
 import core.GUI;
 import core.Game;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import static pandemic.Constants.GAME_ONGOING;
@@ -17,15 +18,21 @@ public class PandemicGame extends Game {
         int turn = 0;
         int actionsPlayed = 0;
         while (!isEnded()) {
-            System.out.println(turn++);
 
             // Get actions of current active player for their turn
-            int activePlayer = gameState.getActivePlayer();
-            Action action = players.get(activePlayer).getAction(gameState);
+            int player = gameState.getActivePlayer();
+            ArrayList<Integer> reactions = gameState.getReactivePlayers();
+            if (reactions.size() > 0) {
+                player = reactions.get(0);  // TODO: any specific constraints on game state for reaction?
+            } else {
+                System.out.println(turn++);
+            }
+
+            Action action = players.get(player).getAction(gameState);
 
             // Resolve actions and game rules for the turn
             gameState.next(action);
-//            forwardModel.next(gameState, action);
+            if (reactions.size() > 0) gameState.removeReactivePlayer();  // This reaction has been done
             actionsPlayed++;
 
             if (gui != null) {

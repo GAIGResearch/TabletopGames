@@ -147,7 +147,10 @@ public class PandemicForwardModel implements ForwardModel {
     }
 
     private void playerActions(PandemicGameState currentState, Action action) {
-        currentState.roundStep += 1;
+        if (currentState.getReactivePlayers().size() == 0) {
+            // Only advance round step if no one is reacting
+            currentState.roundStep += 1;
+        }
         action.execute(currentState);
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
@@ -186,15 +189,10 @@ public class PandemicForwardModel implements ForwardModel {
                 Area area = currentState.getAreas().get(activePlayer);
                 Deck deck = (Deck) area.getComponent(Constants.playerHandHash);
                 if (deck != null) {
-                    // deck size doesn't go beyond 7
+                    // deck size doesn't go beyond 7  TODO: action list should only contain discard card action
                     if (!new AddCardToDeck(c, deck).execute(currentState)){
                         // player needs to discard a card
-
-                        // TODO: This needs to be thought properly. In a forward model, other agents acting at this step
-                        //  would be part of the opponent model. Additionally, we don't have access to Game anymore, and
-                        //  it doesn't make much sense to have players in the game state (or we'd have to copy them)
-                        //  I think we need a system to handle imminent actions (that require decision making) triggered by other actions.
-                        //game.getPlayers().get(activePlayer).getAction(currentState);
+                        currentState.addReactivePlayer(activePlayer);
                     }
                 }
             }

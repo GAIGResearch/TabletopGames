@@ -4,8 +4,6 @@ import actions.*;
 import components.*;
 import content.*;
 import core.Area;
-import core.Game;
-import core.GameParameters;
 import core.GameState;
 import pandemic.actions.*;
 import utilities.Hash;

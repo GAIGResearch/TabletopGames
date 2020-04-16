@@ -3,9 +3,7 @@ package core;
 import actions.Action;
 import components.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static pandemic.Constants.GAME_ONGOING;
 
@@ -15,6 +13,7 @@ import static pandemic.Constants.GAME_ONGOING;
 public abstract class GameState {
 
     protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
+    protected ArrayList<Integer> reactivePlayers;
     protected int nPlayers;
     public int roundStep;
 
@@ -41,6 +40,7 @@ public abstract class GameState {
     public abstract GameState copy();
     public GameState copyTo(GameState gs) {
         gs.activePlayer = activePlayer;
+        gs.reactivePlayers = new ArrayList<>(reactivePlayers);
 
         // TODO: copy super game state objects
         return gs;
@@ -49,6 +49,7 @@ public abstract class GameState {
     public final void init()
     {
         areas = new HashMap<>();  // Game State has areas! Initialize.
+        reactivePlayers = new ArrayList<>();
     }
 
     public abstract void setComponents();
@@ -131,6 +132,9 @@ public abstract class GameState {
     void setGameParameters(GameParameters gp) { this.gameParameters = gp; }
     public void setGameOver(int status){  this.gameStatus = status; }
     public int getActivePlayer() { return activePlayer; }
+    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }
+    public void addReactivePlayer(int player) { reactivePlayers.add(player); }
+    public void removeReactivePlayer() { reactivePlayers.remove(0); }
     public HashMap<Integer, Area> getAreas() { return areas; }
     public int getNPlayers() { return nPlayers; }
     public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }
