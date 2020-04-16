@@ -3,14 +3,13 @@ package pandemic.actions;
 import actions.Action;
 import components.BoardNode;
 import components.Card;
-import content.PropertyBoolean;
-import content.PropertyIntArrayList;
-import content.PropertyString;
-import content.PropertyStringArray;
+import components.Counter;
+import content.*;
 import core.GameState;
 import pandemic.PandemicGameState;
 import pandemic.Constants;
 
+import static pandemic.Constants.infectionHash;
 import static pandemic.Constants.nameHash;
 
 
@@ -75,5 +74,9 @@ public class MovePlayer implements Action {
         PropertyBoolean research1 = (PropertyBoolean) city1.getProperty(Constants.researchStationHash);
         PropertyBoolean research2 = (PropertyBoolean) city2.getProperty(Constants.researchStationHash);
         return research1.value && research2.value;
+    }
+
+    public String getDestination(){
+        return destination;
     }
 }

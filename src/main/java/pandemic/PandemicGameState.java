@@ -246,7 +246,9 @@ public class PandemicGameState extends GameState {
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(Constants.infectionHash);
         for (int i = 0; i < cityInfections.getValues().length; i++){
             if (cityInfections.getValues()[i] > 0){
-                actions.add(new TreatDisease(gp, Constants.colors[i], playerLocationName.value));
+                boolean treatAll = false;
+                if (roleString.equals("Medic")) treatAll = true;
+                actions.add(new TreatDisease(gp, Constants.colors[i], playerLocationName.value, treatAll));
             }
         }
 
@@ -360,7 +362,11 @@ public class PandemicGameState extends GameState {
                 break;
             case "Forecast":
                 //"Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top."
-                Deck infDiscardDeck = game.findDeck("Infection Discard");
+//                Deck infDiscardDeck = game.findDeck("Infection Discard");
+//                Deck tmpDeck = game.findDeck(game.tempDeck());
+//                for (int i = 0; i < 6; i++){
+//                    new DrawCard(infDiscardDeck, tmpDeck).execute();
+//                }
                 // remove up to 6 cards and put them back on top in random order
                 // todo list all combinations?
 //

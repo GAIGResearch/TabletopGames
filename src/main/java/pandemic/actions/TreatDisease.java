@@ -17,11 +17,20 @@ public class TreatDisease implements Action {
     PandemicParameters gp;
     String color;
     String city;
+    boolean treatAll;
 
     public TreatDisease(GameParameters gp, String color, String city) {
         this.gp = (PandemicParameters)gp;
         this.color = color;
         this.city = city;
+        this.treatAll = false;
+    }
+
+    public TreatDisease(GameParameters gp, String color, String city, boolean treatAll) {
+        this.gp = (PandemicParameters)gp;
+        this.color = color;
+        this.city = city;
+        this.treatAll = treatAll;
     }
 
     @Override
@@ -38,7 +47,7 @@ public class TreatDisease implements Action {
             int[] array = infectionArray.getValues();
 
             boolean disease_cured = diseaseToken.getValue() > 0;
-            if (!disease_cured) {  // Only remove 1 cube
+            if (!disease_cured || !treatAll) {  // Only remove 1 cube
                 diseaseCubeCounter.increment(Math.min(array[colorIdx], 1));
                 array[colorIdx] = Math.max(0, array[colorIdx] - 1);
             } else {

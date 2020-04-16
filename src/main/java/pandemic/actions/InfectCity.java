@@ -30,6 +30,7 @@ public class InfectCity implements Action {
 
     @Override
     public boolean execute(GameState gs) {
+        // todo
         PandemicGameState pgs = (PandemicGameState)gs;
         PropertyColor color = (PropertyColor) infectingCard.getProperty(colorHash);
 
