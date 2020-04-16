@@ -131,10 +131,21 @@ public abstract class GameState {
     public GameParameters getGameParameters() { return this.gameParameters; }
     void setGameParameters(GameParameters gp) { this.gameParameters = gp; }
     public void setGameOver(int status){  this.gameStatus = status; }
-    public int getActivePlayer() { return activePlayer; }
-    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }
+    public int getActingPlayer() {  // Returns player taking an action (or possibly a reaction) next
+        if (reactivePlayers.size() == 0)
+            return activePlayer;
+        else return reactivePlayers.get(0);
+    }
+    public int getActivePlayer() { return activePlayer; }  // Returns the player whose turn it is, might not be active player
+    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }  // Returns players queued to react
     public void addReactivePlayer(int player) { reactivePlayers.add(player); }
-    public void removeReactivePlayer() { reactivePlayers.remove(0); }
+    public boolean removeReactivePlayer() {
+        if (reactivePlayers.size() > 0) {
+            reactivePlayers.remove(0);
+            return true;
+        }
+        return false;
+    }
     public HashMap<Integer, Area> getAreas() { return areas; }
     public int getNPlayers() { return nPlayers; }
     public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }

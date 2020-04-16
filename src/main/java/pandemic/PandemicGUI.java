@@ -25,8 +25,7 @@ public class PandemicGUI extends GUI {
     public PandemicGUI(Game game) {
         gameState = game.getGameState();
         nPlayers = game.getPlayers().size();
-        activePlayer = gameState.getActivePlayer();
-        if (gameState.getReactivePlayers().size() > 0) activePlayer = gameState.getReactivePlayers().get(0);
+        activePlayer = gameState.getActingPlayer();
 
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
         JPanel playerAreas = createPlayerAreas();

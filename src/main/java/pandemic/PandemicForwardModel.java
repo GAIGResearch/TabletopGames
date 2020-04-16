@@ -116,6 +116,11 @@ public class PandemicForwardModel implements ForwardModel {
     public void next(GameState currentState, Action action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
         PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
+
+        if (currentState.getReactivePlayers().size() == 0) {
+            // Only advance round step if no one is reacting
+            currentState.roundStep += 1;
+        }
         playerActions(pgs, action);
 
         if (action instanceof CureDisease) {
@@ -130,7 +135,9 @@ public class PandemicForwardModel implements ForwardModel {
             }
         }
 
-        if (pgs.roundStep >= gameParameters.n_actions_per_turn) {
+        boolean reacted = currentState.removeReactivePlayer();  // Reaction (if any) done
+
+        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn) {
             pgs.roundStep = 0;
             drawCards(pgs, gameParameters);
 
@@ -140,17 +147,13 @@ public class PandemicForwardModel implements ForwardModel {
             }
 
             // Set the next player as active
-            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.getNPlayers());
+            pgs.nextPlayer();
         }
 
         // TODO: wanna play event card?
     }
 
     private void playerActions(PandemicGameState currentState, Action action) {
-        if (currentState.getReactivePlayers().size() == 0) {
-            // Only advance round step if no one is reacting
-            currentState.roundStep += 1;
-        }
         action.execute(currentState);
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
@@ -159,7 +162,7 @@ public class PandemicForwardModel implements ForwardModel {
 
     private void drawCards(GameState currentState, PandemicParameters gameParameters) {
         int noCardsDrawn = gameParameters.n_cards_draw;
-        int activePlayer = currentState.getActivePlayer();
+        int activePlayer = currentState.getActingPlayer();
 
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Player Deck", tempDeckID);

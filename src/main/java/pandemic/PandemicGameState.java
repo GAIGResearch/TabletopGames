@@ -248,8 +248,11 @@ public class PandemicGameState extends GameState {
         return actions;
     }
 
-    void setActivePlayer(int activePlayer) {
-        this.activePlayer = activePlayer;
+    void nextPlayer() {
+        activePlayer = (activePlayer + 1) % nPlayers;
+    }
+    void setActivePlayer(int p) {
+        activePlayer = p;
     }
 
     private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations){

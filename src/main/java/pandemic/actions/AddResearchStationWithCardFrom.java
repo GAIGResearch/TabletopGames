@@ -27,7 +27,7 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
         boolean success = super.execute(gs);
 
         // Discard the card played
-        Deck playerHand = (Deck)gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash);
+        Deck playerHand = (Deck)gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
         playerHand.discard(card);
 
         // Remove research station from "fromCity" location
