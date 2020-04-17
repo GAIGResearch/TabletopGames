@@ -30,4 +30,8 @@ public class Constants {
     public final static int playerDeckDiscardHash = Hash.GetInstance().hash("Player Deck Discard");
     public final static int infectionDiscardHash = Hash.GetInstance().hash("Infection Discard");
     public final static int playerRolesHash = Hash.GetInstance().hash("Player Roles");
+
+    // for contingency planner
+    public final static int eventHash = Hash.GetInstance().hash("event");
+    public final static int plannerDeckHash = Hash.GetInstance().hash("plannerDeck");
 }
