@@ -56,6 +56,8 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // give players cards;
+        Deck playerCards = firstState.findDeck("Player Roles");
+        Deck playerDeck = firstState.findDeck("Player Deck");
         int nCardsPlayer = gameParameters.n_cards_per_player.get(state.getNPlayers());
         long maxPop = 0;
         int startingPlayer = -1;
@@ -146,6 +148,7 @@ public class PandemicForwardModel implements ForwardModel {
     private void playerActions(PandemicGameState currentState, Action action) {
         currentState.roundStep += 1;
         action.execute(currentState);
+        PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
         } else if (action instanceof MovePlayer){

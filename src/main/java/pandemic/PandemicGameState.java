@@ -91,9 +91,9 @@ public class PandemicGameState extends GameState {
         return this;
     }
 
-    @Override
+
     public int nInputActions() {
-        return gp.n_actions_per_turn;  // Pandemic requires up to 4 actions per player per turn.
+        return ((PandemicParameters) this.gameParameters).n_actions_per_turn;  // Pandemic requires up to 4 actions per player per turn.
     }
 
     public int nPossibleActions() {
@@ -143,7 +143,7 @@ public class PandemicGameState extends GameState {
             // check if role is operations expert
             if (roleString.equals("Operations Expert")){
                 // can be a research station in the current city
-                if (game.findCounter("Research Stations").getValue() == 0) {
+                if (findCounter("Research Stations").getValue() == 0) {
                     // If all research stations are used, then take one from board
                     for (String station : researchStations) {
                         actions.add(new AddResearchStationFrom(station, playerLocationName.value));
@@ -166,7 +166,7 @@ public class PandemicGameState extends GameState {
             }
             if (card_in_hand != null) {
                 // Check if any research station tokens left
-                if (game.findCounter("Research Stations").getValue() == 0) {
+                if (findCounter("Research Stations").getValue() == 0) {
                     // If all research stations are used, then take one from board
                     for (String station : researchStations) {
                         actions.add(new AddResearchStationWithCardFrom(station, playerLocationName.value, card_in_hand));
@@ -189,8 +189,7 @@ public class PandemicGameState extends GameState {
                     }
                 }
             }
-        }       
-                      
+        }
              
         // Treat disease
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(Constants.infectionHash);
@@ -198,7 +197,7 @@ public class PandemicGameState extends GameState {
             if (cityInfections.getValues()[i] > 0){
                 boolean treatAll = false;
                 if (roleString.equals("Medic")) treatAll = true;
-                actions.add(new TreatDisease(gp, Constants.colors[i], playerLocationName.value, treatAll));
+                actions.add(new TreatDisease(pp, Constants.colors[i], playerLocationName.value, treatAll));
             }
         }
       
@@ -241,10 +240,10 @@ public class PandemicGameState extends GameState {
                       
         for (int i = 0 ; i < colourCounter.length; i++){
             if (colourCounter[i] != null){
-                if (roleString.equals("Scientist") && colourCounter[i].size() >= gp.n_cards_for_cure_reduced){
+                if (roleString.equals("Scientist") && colourCounter[i].size() >= pp.n_cards_for_cure_reduced){
                     actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
 
-                } else if (colourCounter[i].size() >= gp.n_cards_for_cure){
+                } else if (colourCounter[i].size() >= pp.n_cards_for_cure){
                     actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
                 }
             }
@@ -253,12 +252,12 @@ public class PandemicGameState extends GameState {
         if (roleString.equals("Dispatcher")){
             //  move any pawn, if its owner agrees, to any city
             //containing another pawn,
-            String[] locations = new String[gp.n_players];
-            for (int i = 0; i < gp.n_players; i++){
+            String[] locations = new String[pp.n_players];
+            for (int i = 0; i < pp.n_players; i++){
                 locations[i] = ((PropertyString) this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash)).value;
             }
             for (String loc: locations){
-                for (int i = 0; i < gp.n_players; i++) {
+                for (int i = 0; i < pp.n_players; i++) {
                     // todo there are duplicates here
                     actions.add(new MovePlayer(i, loc));
                 }
@@ -266,7 +265,7 @@ public class PandemicGameState extends GameState {
 
             //  move another player’s pawn, if its owner agrees,
             //as if it were his own.
-            for (int i = 0; i < gp.n_players; i++){
+            for (int i = 0; i < pp.n_players; i++){
                 if (i != activePlayer){
                     actions.addAll(getMoveActions(i, playerHand, researchStations));
                 }
@@ -369,7 +368,7 @@ public class PandemicGameState extends GameState {
         switch (cardString) {
             case "Resilient Population":
                 // Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.
-                Deck infectionDiscardDeck = game.findDeck("Infection Discard");
+                Deck infectionDiscardDeck = findDeck("Infection Discard");
                 for (int i = 0; i < infectionDiscardDeck.getCards().size(); i++){
                     actions.add(new DiscardCard(infectionDiscardDeck, i));
                 }
@@ -386,7 +385,7 @@ public class PandemicGameState extends GameState {
                 for (BoardNode bn: world.getBoardNodes()) {
                     if (!((PropertyBoolean) bn.getProperty(Constants.researchStationHash)).value) {
                         String cityName = ((PropertyString) bn.getProperty(nameHash)).value;
-                        if (game.findCounter("Research Stations").getValue() == 0) {
+                        if (findCounter("Research Stations").getValue() == 0) {
                             // If all research stations are used, then take one from board
                             for (String stations : researchStations) {
                                 actions.add(new AddResearchStationWithCardFrom(stations, cityName, card));
