@@ -32,4 +32,5 @@ public class PandemicParameters extends GameParameters {
         }
     };
     public int n_actions_per_turn = 4;
+    public int n_research_stations = 6;
 }

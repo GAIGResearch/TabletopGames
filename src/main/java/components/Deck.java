@@ -20,13 +20,11 @@ public class Deck extends Component implements IDeck {
     protected ArrayList<Card> cards;
 
     private String id;
-    protected Random rnd;
 
     public Deck()
     {
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
-        rnd = new Random();
         properties = new HashMap<>();
     }
 
@@ -35,7 +33,6 @@ public class Deck extends Component implements IDeck {
         super.type = ComponentType.DECK;
         this.id = name;
         cards = new ArrayList<>();
-        rnd = new Random();
         properties = new HashMap<>();
     }
 
@@ -43,7 +40,6 @@ public class Deck extends Component implements IDeck {
     {
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
-        this.rnd = rnd;
         this.capacity = capacity;
         properties = new HashMap<>();
     }
@@ -52,7 +48,6 @@ public class Deck extends Component implements IDeck {
     {
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
-        this.rnd = new Random();
         this.capacity = capacity;
         properties = new HashMap<>();
     }
@@ -72,7 +67,7 @@ public class Deck extends Component implements IDeck {
         return capacity != -1 && cards.size() > capacity;
     }
 
-    public void shuffle() {
+    public void shuffle(Random rnd) {
         Collections.shuffle(cards, rnd);
     }
 
@@ -155,7 +150,6 @@ public class Deck extends Component implements IDeck {
         }
         dp.setCards(newCards);
         dp.capacity = capacity;
-        dp.rnd = rnd;
 
         //copy type and component.
         copyComponentTo(dp);
