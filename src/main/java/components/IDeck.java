@@ -63,7 +63,7 @@ public interface IDeck
     Card[] peek(int idx, int amount);
 
     /**
-     * Creates a copy of this obejct.
+     * Creates a copy of this object.
      * @return a copy of the IDeck.
      */
     IDeck copy();
