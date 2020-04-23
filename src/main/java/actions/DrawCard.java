@@ -1,4 +1,4 @@
-package pandemic.actions;
+package actions;
 
 import actions.Action;
 import components.Card;
@@ -12,9 +12,17 @@ public class DrawCard implements Action {
     private Deck deckFrom;
     private Deck deckTo;
 
+    private int index;
+
     public DrawCard (String deckFrom, String deckTo) {
         this.deckIdFrom = deckFrom;
         this.deckIdTo = deckTo;
+    }
+
+    public DrawCard (String deckFrom, String deckTo, int index) {
+        this.deckIdFrom = deckFrom;
+        this.deckIdTo = deckTo;
+        this.index = index;
     }
 
     public DrawCard (Deck deckFrom, Deck deckTo) {
@@ -24,17 +32,23 @@ public class DrawCard implements Action {
 
     @Override
     public boolean execute(GameState gs) {
+        Card card;
         if (deckFrom == null) {
             deckFrom = gs.findDeck(deckIdFrom);
         }
         if (deckTo == null) {
             deckTo = gs.findDeck(deckIdTo);
         }
-        Card c = deckFrom.draw();
-        if (c == null) {
+
+        if (index != -1){
+            card = deckFrom.pick(index);
+        } else {
+            card = deckFrom.draw();
+        }
+        if (card == null) {
             return false;
         }
-        return deckTo.add(c);
+        return deckTo.add(card);
 
         // TODO: if you can't draw cards, game over
         // TODO: discard if too many / play event card

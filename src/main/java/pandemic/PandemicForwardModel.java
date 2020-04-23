@@ -55,10 +55,9 @@ public class PandemicForwardModel implements ForwardModel {
             }
         }
 
-        // give players cards
+        // give players cards;
         Deck playerCards = firstState.findDeck("Player Roles");
         Deck playerDeck = firstState.findDeck("Player Deck");
-        playerCards.shuffle(rnd);
         int nCardsPlayer = gameParameters.n_cards_per_player.get(state.getNPlayers());
         long maxPop = 0;
         int startingPlayer = -1;
@@ -163,8 +162,26 @@ public class PandemicForwardModel implements ForwardModel {
 
     private void playerActions(PandemicGameState currentState, Action action) {
         action.execute(currentState);
+        PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
+        } else if (action instanceof MovePlayer){
+            // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
+            int playerIdx = currentState.getActivePlayer();
+            Card playerCard = (Card) currentState.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+            String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
+
+            if (roleString.equals("Medic")){
+                for (String color: Constants.colors){
+                    Counter diseaseToken = currentState.findCounter("Disease " + color);
+                    String city = ((MovePlayer)action).getDestination();
+
+                    boolean disease_cured = diseaseToken.getValue() > 0;
+                    if (disease_cured){
+                        new TreatDisease(gameParameters, color, city, true);
+                    }
+                }
+            }
         }
     }
 
