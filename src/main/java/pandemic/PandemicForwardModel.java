@@ -48,7 +48,7 @@ public class PandemicForwardModel implements ForwardModel {
                 Card c = infectionDeck.draw();
 
                 // Place matching color (nTimes - j) cubes and place on matching city
-                new InfectCity(gameParameters, c, nTimes - j).execute(state);
+                new InfectCity(gameParameters.max_cubes_per_city, c, nTimes - j).execute(state);
 
                 // Discard card
                 new DrawCard(infectionDeck, infectionDiscard).execute(state);
@@ -164,7 +164,7 @@ public class PandemicForwardModel implements ForwardModel {
 
                     boolean disease_cured = diseaseToken.getValue() > 0;
                     if (disease_cured){
-                        new TreatDisease(gameParameters, color, city, true);
+                        new TreatDisease(gameParameters.n_initial_disease_cubes, color, city, true);
                     }
                 }
             }
@@ -232,7 +232,7 @@ public class PandemicForwardModel implements ForwardModel {
             System.out.println("No more cards to draw");
             return;
         }
-        new InfectCity(gameParameters, c, gameParameters.n_cubes_epidemic).execute(currentState);
+        new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_epidemic).execute(currentState);
         if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
 
         // 3. shuffle infection discard deck, add back on top of infection deck
@@ -253,7 +253,7 @@ public class PandemicForwardModel implements ForwardModel {
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
-            new InfectCity(gameParameters, c, gameParameters.n_cubes_infection).execute(currentState);
+            new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_infection).execute(currentState);
             if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
         }
         currentState.clearTempDeck();

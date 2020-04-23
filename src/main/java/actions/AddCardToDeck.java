@@ -26,4 +26,16 @@ public class AddCardToDeck implements Action {
     public boolean execute(GameState gs) {
         return deck.add(card, index);
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof AddCardToDeck)
+        {
+            AddCardToDeck otherAction = (AddCardToDeck) other;
+            return index == otherAction.index && card.equals(otherAction.card) && deck.equals(otherAction.deck);
+
+        }else return false;
+    }
 }

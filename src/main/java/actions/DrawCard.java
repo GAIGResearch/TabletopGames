@@ -53,4 +53,17 @@ public class DrawCard implements Action {
         // TODO: if you can't draw cards, game over
         // TODO: discard if too many / play event card
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof DrawCard)
+        {
+            DrawCard otherAction = (DrawCard) other;
+            return deckIdFrom.equals(otherAction.deckIdFrom) && deckIdTo.equals(otherAction.deckIdTo) &&
+                    deckFrom.equals(otherAction.deckFrom) && deckTo.equals(otherAction.deckTo);
+
+        }else return false;
+    }
 }

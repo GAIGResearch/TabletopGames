@@ -197,7 +197,7 @@ public class PandemicGameState extends GameState {
             if (cityInfections.getValues()[i] > 0){
                 boolean treatAll = false;
                 if (roleString.equals("Medic")) treatAll = true;
-                actions.add(new TreatDisease(pp, Constants.colors[i], playerLocationName.value, treatAll));
+                actions.add(new TreatDisease(pp.n_initial_disease_cubes, Constants.colors[i], playerLocationName.value, treatAll));
             }
         }
       

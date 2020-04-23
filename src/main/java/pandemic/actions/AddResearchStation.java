@@ -24,4 +24,16 @@ public class AddResearchStation implements Action {
         }
         return false;
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof AddResearchStation)
+        {
+            AddResearchStation otherAction = (AddResearchStation) other;
+            return city.equals(otherAction.city);
+
+        }else return false;
+    }
 }

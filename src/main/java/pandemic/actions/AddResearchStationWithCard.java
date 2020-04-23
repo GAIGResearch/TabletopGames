@@ -10,7 +10,7 @@ import static pandemic.Constants.playerHandHash;
 
 public class AddResearchStationWithCard extends AddResearchStation implements Action {
 
-    Card card;
+    private Card card;
 
     public AddResearchStationWithCard(String city, Card c) {
         super(city);
@@ -26,5 +26,17 @@ public class AddResearchStationWithCard extends AddResearchStation implements Ac
         playerHand.discard(card);
 
         return false;
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof AddResearchStationWithCard)
+        {
+            AddResearchStationWithCard otherAction = (AddResearchStationWithCard) other;
+            return card.equals(otherAction.card);
+
+        }else return false;
     }
 }

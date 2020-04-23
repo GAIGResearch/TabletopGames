@@ -23,4 +23,16 @@ public class DiscardCard implements Action {
         return discardDeck.add(c);
 
     }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof DiscardCard)
+        {
+            DiscardCard otherAction = (DiscardCard) other;
+            return cardIndex == otherAction.cardIndex && deck.equals(otherAction.deck);
+
+        }else return false;
+    }
 }

@@ -10,8 +10,8 @@ import pandemic.Constants;
 
 public class PlayCardFrom implements Action {
 
-    Card card;
-    String destination;
+    private Card card;
+    private String destination;
 
     public PlayCardFrom(Card c, String destination) {
         this.card = c;
@@ -40,5 +40,18 @@ public class PlayCardFrom implements Action {
         }
 
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof PlayCardFrom)
+        {
+            PlayCardFrom otherAction = (PlayCardFrom) other;
+            return card.equals(otherAction.card) && destination.equals(otherAction.destination);
+
+        }else return false;
     }
 }

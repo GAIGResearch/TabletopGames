@@ -18,7 +18,7 @@ import static pandemic.Constants.playerHandHash;
 
 public class MovePlayerWithCard extends MovePlayer implements Action {
 
-    Card card;
+    private Card card;
 
     public MovePlayerWithCard(int playerIdx, String city, Card c) {
         super(playerIdx, city);
@@ -34,5 +34,18 @@ public class MovePlayerWithCard extends MovePlayer implements Action {
         playerHand.discard(card);
 
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof MovePlayerWithCard)
+        {
+            MovePlayerWithCard otherAction = (MovePlayerWithCard) other;
+            return card.equals(otherAction.card);
+
+        }else return false;
     }
 }
