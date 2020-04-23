@@ -1,15 +1,16 @@
+import carcassonne.CarcassonneForwardModel;
+import carcassonne.CarcassonneGameState;
+import carcassonne.CarcassonneGame;
+import carcassonne.CarcassonneParameters;
 import core.AIPlayer;
 import core.Runner;
-import explodingkittens.ExplodingKittensForwardModel;
-import explodingkittens.ExplodingKittensGame;
-import explodingkittens.ExplodingKittensGameState;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class TestExplodingKittens {
+public class TestCarcassonne {
     public static void main(String[] args) {
 
         Runner tabletopEngine = new Runner();
@@ -19,7 +20,7 @@ public class TestExplodingKittens {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
 
-        tabletopEngine.setGame(new ExplodingKittensGame(), null, new ExplodingKittensGameState(), new ExplodingKittensForwardModel(), "data/", players);
+        tabletopEngine.setGame(new CarcassonneGame(), new CarcassonneParameters(), new CarcassonneGameState(), new CarcassonneForwardModel(), "data/", players);
 
         tabletopEngine.run();
 //        tabletopEngine.play();

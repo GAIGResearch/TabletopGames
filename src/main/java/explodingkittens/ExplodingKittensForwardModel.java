@@ -20,7 +20,7 @@ public class ExplodingKittensForwardModel implements ForwardModel {
     private int initialPlayer;
 
     @Override
-    public void setup(GameState firstState, Game game, GameParameters gameParameters) {
+    public void setup(GameState firstState) {
     }
 
     @Override

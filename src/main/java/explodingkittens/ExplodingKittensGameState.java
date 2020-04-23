@@ -3,7 +3,6 @@ package explodingkittens;
 import actions.*;
 import components.*;
 import core.Area;
-import core.Game;
 import core.GameState;
 import explodingkittens.actions.*;
 import utilities.Hash;
@@ -55,8 +54,14 @@ public class ExplodingKittensGameState extends GameState {
         remainingDraws = 1;
     }
 
-    public void setup(Game game)
-    {
+    @Override
+    public GameState copy() {
+        //TODO: copy exploding kitten game state
+        return this;
+    }
+
+    @Override
+    public void setComponents() {
         playerActive = new boolean[nPlayers];
         for (int i = 0; i < nPlayers; i++) playerActive[i] = true;
         nPlayersActive = nPlayers;
@@ -81,7 +86,7 @@ public class ExplodingKittensGameState extends GameState {
             playerArea.setOwner(i);
             String deckname = "Player" + i + "HandCards";
             Deck playerCards = new Deck(deckname);
-            game.addDeckToList(playerCards);
+            addDeckToList(playerCards);
 
             //add defuse card
             Card defuse =  new Card();
@@ -122,25 +127,14 @@ public class ExplodingKittensGameState extends GameState {
         discardPile.addComponent(discardPileHash, discardDeck);
         areas.put(discardPileHash, discardPile);
 
-        game.addDeckToList(deck);
-        game.addDeckToList(discardDeck);
+        addDeckToList(deck);
+        addDeckToList(discardDeck);
 
         // add them to the list of decks, so they are accessible by the game.findDeck() function
         //game.addDeckToList(playerDeck);
         //game.addDeckToList(infDiscard);
         //game.addDeckToList(playerDiscard);
     }
-
-    @Override
-    public GameState copy() {
-        //TODO: copy exploding kitten game state
-        return this;
-    }
-
-    @Override
-    public int nInputActions() {
-        return 1;  // Exploding Kittens allows the player to repeatedly do actions until he played a card
-     }
 
     @Override
     public int nPossibleActions() {

@@ -1,13 +1,14 @@
-package explodingkittens;
+package carcassonne;
 
 import actions.Action;
 import core.GUI;
 import core.Game;
+import explodingkittens.ExplodingKittensGamePhase;
+import explodingkittens.ExplodingKittensGameState;
 
 import java.util.HashSet;
 
-public class ExplodingKittensGame extends Game {
-
+public class CarcassonneGame extends Game {
     @Override
     public void run(GUI gui) {
         int turn = 0;
@@ -45,13 +46,11 @@ public class ExplodingKittensGame extends Game {
 
     @Override
     public boolean isEnded() {
-        return ((ExplodingKittensGameState) gameState).isGameOver();
+        return false;
     }
 
     @Override
     public HashSet<Integer> winners() {
-        HashSet<Integer> winners = new HashSet<>();
-        // TODO: all or nothing, check gamestate
-        return winners;
+        return null;
     }
 }

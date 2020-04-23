@@ -71,6 +71,10 @@ public class Deck extends Component implements IDeck {
         Collections.shuffle(cards, rnd);
     }
 
+    public void shuffle() {
+        Collections.shuffle(cards, new Random());
+    }
+
     public Card draw() {
         return pick(0);
     }
