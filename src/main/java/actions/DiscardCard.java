@@ -3,13 +3,14 @@ package actions;
 import actions.Action;
 import components.Card;
 import components.Deck;
+import components.IDeck;
 import core.GameState;
 
 public class DiscardCard implements Action {
-    private Deck deck;
+    private IDeck deck;
     private int cardIndex;
 
-    public DiscardCard (Deck deck, int cardIndex) {
+    public DiscardCard (IDeck deck, int cardIndex) {
         this.deck = deck;
         this.cardIndex = cardIndex;
     }
@@ -19,7 +20,7 @@ public class DiscardCard implements Action {
     public boolean execute(GameState gs) {
         Card c = deck.pick(cardIndex);
         // todo discardDeck == null at some point
-        Deck discardDeck = gs.findDeck("Player Deck Discard");
+        IDeck discardDeck = gs.findDeck("Player Deck Discard");
         return discardDeck.add(c);
 
     }

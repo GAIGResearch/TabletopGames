@@ -38,8 +38,8 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // infection
-        Deck infectionDeck = firstState.findDeck("Infections");
-        Deck infectionDiscard = firstState.findDeck("Infection Discard");
+        Deck infectionDeck =  (Deck) firstState.findDeck("Infections");
+        Deck infectionDiscard =  (Deck) firstState.findDeck("Infection Discard");
         infectionDeck.shuffle(rnd);
         int nCards = gameParameters.n_infection_cards_setup;
         int nTimes = gameParameters.n_infections_setup;
@@ -56,8 +56,8 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // give players cards;
-        Deck playerCards = firstState.findDeck("Player Roles");
-        Deck playerDeck = firstState.findDeck("Player Deck");
+        Deck playerCards =  (Deck) firstState.findDeck("Player Roles");
+        Deck playerDeck =  (Deck) firstState.findDeck("Player Deck");
         int nCardsPlayer = gameParameters.n_cards_per_player.get(state.getNPlayers());
         long maxPop = 0;
         int startingPlayer = -1;
@@ -145,6 +145,13 @@ public class PandemicForwardModel implements ForwardModel {
         // TODO: wanna play event card?
     }
 
+    @Override
+    public ForwardModel copy() {
+        PandemicForwardModel fm = new PandemicForwardModel();
+        fm.rnd = rnd; //TODO: revisit this, we may not want the same random generator.
+        return fm;
+    }
+
     private void playerActions(PandemicGameState currentState, Action action) {
         currentState.roundStep += 1;
         action.execute(currentState);
@@ -178,7 +185,7 @@ public class PandemicForwardModel implements ForwardModel {
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Player Deck", tempDeckID);
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            Deck cityDeck = currentState.findDeck("Player Deck");
+            Deck cityDeck =  (Deck) currentState.findDeck("Player Deck");
             boolean canDraw = cityDeck.getCards().size() > 0;
 
             // if player cannot draw it means that the deck is empty -> GAME OVER
@@ -189,7 +196,7 @@ public class PandemicForwardModel implements ForwardModel {
             action.execute(currentState);
 
         }
-        Deck tempDeck = currentState.findDeck(tempDeckID);
+        Deck tempDeck =  (Deck) currentState.findDeck(tempDeckID);
         boolean epidemic = false;
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
@@ -236,7 +243,7 @@ public class PandemicForwardModel implements ForwardModel {
         if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
 
         // 3. shuffle infection discard deck, add back on top of infection deck
-        Deck infectionDiscard = currentState.findDeck("Infection Discard");
+        Deck infectionDiscard =  (Deck) currentState.findDeck("Infection Discard");
         infectionDiscard.shuffle(rnd);
         for (Card card: infectionDiscard.getCards()) {
             new AddCardToDeck(card, currentState.findDeck("Infections")).execute(currentState);
@@ -251,7 +258,7 @@ public class PandemicForwardModel implements ForwardModel {
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
             action.execute(currentState);
         }
-        Deck tempDeck = currentState.findDeck(tempDeckID);
+        Deck tempDeck = (Deck) currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
             new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_infection).execute(currentState);
             if (checkInfectionGameEnd(currentState, gameParameters, c)) return;

@@ -3,14 +3,15 @@ package actions;
 import actions.Action;
 import components.Card;
 import components.Deck;
+import components.IDeck;
 import core.GameState;
 
 public class DrawCard implements Action {
     private String deckIdFrom;
     private String deckIdTo;
 
-    private Deck deckFrom;
-    private Deck deckTo;
+    private IDeck deckFrom;
+    private IDeck deckTo;
 
     private int index;
 
@@ -25,7 +26,7 @@ public class DrawCard implements Action {
         this.index = index;
     }
 
-    public DrawCard (Deck deckFrom, Deck deckTo) {
+    public DrawCard (IDeck deckFrom, IDeck deckTo) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
     }
