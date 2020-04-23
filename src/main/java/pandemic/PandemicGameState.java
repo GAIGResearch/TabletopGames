@@ -86,8 +86,34 @@ public class PandemicGameState extends GameState {
     }
 
     @Override
-    public GameState _copy(int playerId) {
-        return null;
+    public GameState createNewGameState() {
+        return new PandemicGameState();
+    }
+
+    /**
+     * Creates a copy of the game state. Overwriting this method changes the
+     * way GameState copies the fields of the super GameState object.
+     * This method is called before copyTo().
+     * @param playerId id of the player the copy is being prepared for
+     * @return a copy of the game state.
+     */
+    protected GameState _copy(int playerId)
+    {
+        //Insert code here to change the way super.decks, etc are copied (i.e. for PO).
+
+        //This line below is the same as doing nothing, just here for demonstration purposes.
+        return new PandemicGameState()._copy(playerId);
+    }
+
+
+    @Override
+    public void copyTo(GameState dest, int playerId)
+    {
+        PandemicGameState gs = (PandemicGameState)dest;
+
+        gs.world = this.world.copy();
+        gs.numAvailableActions = numAvailableActions;
+        gs.quietNight = quietNight;
     }
 
     public int nInputActions() {

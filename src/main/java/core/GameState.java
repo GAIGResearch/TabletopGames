@@ -40,14 +40,15 @@ public abstract class GameState {
     protected int gameStatus = GAME_ONGOING;
 
     public GameState copy() {
-        return copy(-1);
+        GameState gsCopy = _copy(-1);
+        this.copyTo(gsCopy, -1);
+        return gsCopy;
     }
 
-    public GameState copy(int playerId)
+    protected GameState _copy(int playerId)
     {
-        GameState gsCopy = this._copy(playerId);
+        GameState gsCopy = this.createNewGameState();
 
-        // TODO: copy game state objects
         gsCopy.activePlayer = activePlayer;
         gsCopy.nPlayers = nPlayers;
         gsCopy.roundStep = roundStep;
@@ -83,13 +84,19 @@ public abstract class GameState {
 
 
     /**
+     * Creates a new GameState object.
+     * @return the new GameState object
+     */
+    public abstract GameState createNewGameState();
+
+    /**
      * Copies the game state objects defined in the subclass of this game state to a
      * new GameState object and returns it.
+     * @param dest      GameState where things need to be copied to.
      * @param playerId ID of the player for which this copy is being created (so observations can be
      *                 adapted for them). -1 indicates the game state should be copied at full.
-     * @return a copy of the game state
      */
-    public abstract GameState _copy(int playerId);
+    public abstract void copyTo(GameState dest, int playerId);
 
 
     public final void init()
