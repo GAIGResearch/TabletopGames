@@ -101,7 +101,7 @@ public class PandemicGameState extends GameState {
         //Insert code here to change the way super.decks, etc are copied (i.e. for PO).
 
         //This line below is the same as doing nothing, just here for demonstration purposes.
-        return new PandemicGameState()._copy(playerId);
+        return super._copy(playerId);
     }
 
 
