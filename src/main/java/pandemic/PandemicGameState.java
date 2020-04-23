@@ -25,7 +25,7 @@ public class PandemicGameState extends GameState {
     public void setComponents()
     {
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
-
+      
         // For each player, initialize their own areas: they get a player hand and a player card
         for (int i = 0; i < nPlayers; i++) {
             Area playerArea = new Area();
@@ -66,19 +66,23 @@ public class PandemicGameState extends GameState {
         Deck playerDeck = new Deck("Player Deck"); // contains city & event cards
         playerDeck.add(findDeck("Cities"));
         playerDeck.add(findDeck("Events"));
+
         Deck playerDiscard = new Deck("Player Deck Discard");
         Deck infDiscard = new Deck("Infection Discard");
+        Deck plannerDeck = new Deck("plannerDeck"); // deck to store extra card for the contingency planner
 
         gameArea.addComponent(Constants.playerDeckHash, playerDeck);
         gameArea.addComponent(Constants.playerDeckDiscardHash, playerDiscard);
         gameArea.addComponent(Constants.infectionDiscardHash, infDiscard);
+        gameArea.addComponent(Constants.plannerDeckHash, plannerDeck);
         gameArea.addComponent(Constants.infectionHash, findDeck("Infections"));
         gameArea.addComponent(Constants.playerRolesHash, findDeck("Player Roles"));
 
         // add them to the list of decks, so they are accessible by the findDeck() function
         addDeckToList(playerDeck);
-        addDeckToList(infDiscard);
         addDeckToList(playerDiscard);
+        addDeckToList(infDiscard);
+        addDeckToList(plannerDeck);
     }
 
     @Override
@@ -87,18 +91,38 @@ public class PandemicGameState extends GameState {
         return this;
     }
 
-    @Override
+
+    public int nInputActions() {
+        return ((PandemicParameters) this.gameParameters).n_actions_per_turn;  // Pandemic requires up to 4 actions per player per turn.
+    }
+
     public int nPossibleActions() {
         return this.numAvailableActions;
     }
 
     @Override
     public List<Action> possibleActions() {
+
         // Create a list for possible actions
         ArrayList<Action> actions = new ArrayList<>();
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
+        // get player's hand and role card
         Deck playerHand = ((Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
+        Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));
+        String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
+
+        PropertyString playerLocationName = (PropertyString) this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
+        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
+
+        // get research stations from board
+        ArrayList<String> researchStations = new ArrayList<>();
+        for (BoardNode bn: this.world.getBoardNodes()){
+            if (((PropertyBoolean) bn.getProperty(Constants.researchStationHash)).value){
+                researchStations.add(((PropertyString)bn.getProperty(nameHash)).value);
+            }
+        }
+
         if (playerHand.isOverCapacity()){
             // need to discard a card
             for (int i = 0; i < playerHand.getCards().size(); i++){
@@ -111,62 +135,26 @@ public class PandemicGameState extends GameState {
         // add do nothing action
         actions.add(new DoNothing());
 
-        // Drive / Ferry add actions for travelling immediate cities
-        PropertyString playerLocationName = (PropertyString) this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
-        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
-        for (BoardNode otherCity : playerLocationNode.getNeighbours()){
-            actions.add(new MovePlayer(activePlayer, ((PropertyString)otherCity.getProperty(nameHash)).value));
-        }
-
-        // Direct Flight, discard city card and travel to that city
-        for (Card card: playerHand.getCards()){
-            //  check if card has country to determine if it is city card or not
-            if ((card.getProperty(Constants.countryHash)) != null){
-                actions.add(new MovePlayerWithCard(activePlayer, ((PropertyString)card.getProperty(nameHash)).value, card));
-            }
-        }
-
-        // charter flight, discard card that matches your city and travel to any city
-        for (Card card: playerHand.getCards()){
-            // get the city from the card
-            if (playerLocationName.equals(card.getProperty(nameHash))){
-                // add all the cities
-                // iterate over all the cities in the world
-                for (BoardNode bn: this.world.getBoardNodes()) {
-                    PropertyString destination = (PropertyString) bn.getProperty(nameHash);
-
-                    // only add the ones that are different from the current location
-                    if (!destination.equals(playerLocationName)) {
-                        actions.add(new MovePlayerWithCard(activePlayer, destination.value, card));
-                    }
-                }
-            }
-        }
-
-        // shuttle flight, move from city with research station to any other research station
-        // get research stations from board
-        ArrayList<PropertyString> researchStations = new ArrayList<>();
-        boolean currentHasStation = false;
-        for (BoardNode bn: this.world.getBoardNodes()){
-            if (((PropertyBoolean) bn.getProperty(Constants.researchStationHash)).value){
-                if (bn.getProperty(nameHash).equals(playerLocationName)){
-                    currentHasStation = true;
-                } else {
-                    // researchStations do not contain the current station
-                    researchStations.add((PropertyString)bn.getProperty(nameHash));
-                }
-            }
-        }
-        // if current city has research station, add every city that has research stations
-        if (currentHasStation) {
-            for (PropertyString station: researchStations){
-                actions.add(new MovePlayer(activePlayer, station.value));
-            }
-        }
+        actions.addAll(getMoveActions(activePlayer, playerHand, researchStations));
 
         // Build research station, discard card with that city to build one,
         // Check if there is not already a research station there
         if (!((PropertyBoolean) playerLocationNode.getProperty(Constants.researchStationHash)).value) {
+            // check if role is operations expert
+            if (roleString.equals("Operations Expert")){
+                // can be a research station in the current city
+                if (findCounter("Research Stations").getValue() == 0) {
+                    // If all research stations are used, then take one from board
+                    for (String station : researchStations) {
+                        actions.add(new AddResearchStationFrom(station, playerLocationName.value));
+                    }
+                } else {
+                    // Otherwise can just build here
+                    actions.add(new AddResearchStation(playerLocationName.value));
+                }
+            }
+                
+            // normal build research station logic
             // Check player has card in hand
             Card card_in_hand = null;
             for (Card card: playerHand.getCards()){
@@ -180,59 +168,126 @@ public class PandemicGameState extends GameState {
                 // Check if any research station tokens left
                 if (findCounter("Research Stations").getValue() == 0) {
                     // If all research stations are used, then take one from board
-                    for (PropertyString ps : researchStations) {
-                        actions.add(new AddResearchStationWithCardFrom(ps.value, playerLocationName.value, card_in_hand));
+                    for (String station : researchStations) {
+                        actions.add(new AddResearchStationWithCardFrom(station, playerLocationName.value, card_in_hand));
                     }
                 } else {
                     // Otherwise can just build here
                     actions.add(new AddResearchStationWithCard(playerLocationName.value, card_in_hand));
                 }
             }
-        }
+        } else {
+            // Operations Expert can travel from any city with research station to any city by discarding any card
+            if (roleString.equals("Operations Expert")){
+                // list all the other nodes with combination of all the city cards in hand
+                for (BoardNode bn: this.world.getBoardNodes()) {
+                    for (Card c : playerHand.getCards()) {
+                        if (c.getProperty(Constants.colorHash) != null) {
+                            new MovePlayerWithCard(activePlayer, ((PropertyString) bn.getProperty(Constants.nameHash)).value, c);
 
+                        }
+                    }
+                }
+            }
+        }
+             
         // Treat disease
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(Constants.infectionHash);
         for (int i = 0; i < cityInfections.getValues().length; i++){
             if (cityInfections.getValues()[i] > 0){
-                actions.add(new TreatDisease(gameParameters, Constants.colors[i], playerLocationName.value));
+                boolean treatAll = false;
+                if (roleString.equals("Medic")) treatAll = true;
+                actions.add(new TreatDisease(pp, Constants.colors[i], playerLocationName.value, treatAll));
             }
         }
-
+      
         // Share knowledge, give or take card, player can only have 7 cards
-        // can give any card to anyone
-        for (Card card: playerHand.getCards()){
-            for (int i = 0; i < nPlayers; i++){
-                if (i != activePlayer){
-                    actions.add(new GiveCard(card, i));
+        // both players have to be at the same city
+        List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(Constants.playersBNHash)).getValues();
+        for (int i : players) {
+            if (i != activePlayer) {
+                // give card
+                for (Card card : playerHand.getCards()) {
+                    // researcher can give any card, others only the card that matches the city name
+                    if (roleString.equals("Researcher") || (card.getProperty(Constants.nameHash)).equals(playerLocationName)) {
+                        actions.add(new GiveCard(card, i));
+                    }
+                }
+                    
+                // take card
+                Deck otherDeck = (Deck) this.areas.get(i).getComponent(Constants.playerHandHash);
+                Card otherPlayerCard = ((Card)this.areas.get(i).getComponent(Constants.playerCardHash));
+                String otherRoleString = ((PropertyString)otherPlayerCard.getProperty(nameHash)).value;
+                // can take any card from the researcher or the card that matches the city if the player is in that city
+                for (Card card : otherDeck.getCards()) {
+                    if (otherRoleString.equals("Researcher") || (card.getProperty(Constants.nameHash)).equals(playerLocationName)) {
+                        actions.add(new TakeCard(card, i));
+                    }
                 }
             }
-        }
-        // can take any card from anyone
-        for (int i = 0; i < nPlayers; i++){
-            if (i != activePlayer){
-                Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash);
-                for (Card card: otherDeck.getCards()){
-                    actions.add(new TakeCard(card, i));
-                }
-            }
-        }
+             
+        }          
 
         // Discover a cure, cards of the same colour at a research station
         ArrayList<Card>[] colourCounter = new ArrayList[Constants.colors.length];
-        for (int i = 0; i < colourCounter.length; i++) {
-            colourCounter[i] = new ArrayList<>();
-        }
         for (Card card: playerHand.getCards()){
             Property p  = card.getProperty(Constants.colorHash);
             if (p != null){
                 // Only city cards have colours, events don't
                 String color = ((PropertyColor)p).valueStr;
-                colourCounter[Utils.indexOf(Constants.colors, color)].add(card);
             }
         }
+                      
         for (int i = 0 ; i < colourCounter.length; i++){
-            if (colourCounter[i].size() >= pp.n_cards_for_cure){
-                actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
+            if (colourCounter[i] != null){
+                if (roleString.equals("Scientist") && colourCounter[i].size() >= pp.n_cards_for_cure_reduced){
+                    actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
+
+                } else if (colourCounter[i].size() >= pp.n_cards_for_cure){
+                    actions.add(new CureDisease(Constants.colors[i], colourCounter[i]));
+                }
+            }
+        }
+
+        if (roleString.equals("Dispatcher")){
+            //  move any pawn, if its owner agrees, to any city
+            //containing another pawn,
+            String[] locations = new String[pp.n_players];
+            for (int i = 0; i < pp.n_players; i++){
+                locations[i] = ((PropertyString) this.areas.get(activePlayer).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash)).value;
+            }
+            for (String loc: locations){
+                for (int i = 0; i < pp.n_players; i++) {
+                    // todo there are duplicates here
+                    actions.add(new MovePlayer(i, loc));
+                }
+            }
+
+            //  move another player’s pawn, if its owner agrees,
+            //as if it were his own.
+            for (int i = 0; i < pp.n_players; i++){
+                if (i != activePlayer){
+                    actions.addAll(getMoveActions(i, playerHand, researchStations));
+                }
+            }
+        }
+
+        if (roleString.equals("Contingency Planner")){
+            if (findDeck("plannerDeck").getCards().size() != 0){
+                // then can pick up an event card
+                ArrayList<Card> infDiscard = findDeck("InfectionDiscard").getCards();
+                for (int i = 0; i < infDiscard.size(); i++){
+                    Card card = infDiscard.get(i);
+                    if (card.getProperty(Constants.colorHash) != null){
+                        actions.add(new DrawCard("InfectionDiscard", "plannerDeck", i));
+                    }
+                }
+            }
+            else {
+                Deck deck = findDeck("plannerDeck");
+                if (deck.getCards().size() > 0) {
+                    actions.addAll(actionsFromEventCard(deck.draw(), researchStations));
+                }
             }
         }
 
@@ -254,30 +309,86 @@ public class PandemicGameState extends GameState {
         this.activePlayer = activePlayer;
     }
 
-    private List<Action> actionsFromEventCard(Card card, ArrayList<PropertyString> researchStations){
-        // Todo event cards get in here, but most actions are not created
+
+    private List<Action> getMoveActions(int playerId, Deck playerHand, List<String> researchStations){
+        // playerID - for the player we want to move
+        // playerHand - the deck that we use for the movement
+        // researchStations - a list of String locations where research stations are present
+        ArrayList<Action> actions = new ArrayList<>();
+
+        PropertyString playerLocationName = (PropertyString) this.areas.get(playerId).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
+        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
+
+        // Drive / Ferry add actions for travelling immediate cities
+        for (BoardNode otherCity : playerLocationNode.getNeighbours()){
+            actions.add(new MovePlayer(playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
+        }
+
+        // Direct Flight, discard city card and travel to that city
+        for (Card card: playerHand.getCards()){
+            //  check if card has country to determine if it is city card or not
+            if ((card.getProperty(Constants.countryHash)) != null){
+                actions.add(new MovePlayerWithCard(playerId, ((PropertyString)card.getProperty(nameHash)).value, card));
+            }
+        }
+
+        // charter flight, discard card that matches your city and travel to any city
+        for (Card card: playerHand.getCards()){
+            // get the city from the card
+            if (playerLocationName.equals(card.getProperty(nameHash))){
+                // add all the cities
+                // iterate over all the cities in the world
+                for (BoardNode bn: this.world.getBoardNodes()) {
+                    PropertyString destination = (PropertyString) bn.getProperty(nameHash);
+
+                    // only add the ones that are different from the current location
+                    if (!destination.equals(playerLocationName)) {
+                        actions.add(new MovePlayerWithCard(playerId, destination.value, card));
+                    }
+                }
+            }
+        }
+
+        // shuttle flight, move from city with research station to any other research station
+
+        // if current city has research station, add every city that has research stations
+        if (((PropertyBoolean)playerLocationNode.getProperty(Constants.researchStationHash)).value) {
+            for (String station: researchStations){
+                actions.add(new MovePlayer(playerId, station));
+            }
+        }
+
+        return actions;
+    }
+
+    private List<Action> actionsFromEventCard(Card card, ArrayList<String> researchStations){
         ArrayList<Action> actions = new ArrayList<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
         switch (cardString) {
             case "Resilient Population":
-//                System.out.println("Resilient Population");
-//            System.out.println("Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.");
+                // Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.
+                Deck infectionDiscardDeck = findDeck("Infection Discard");
+                for (int i = 0; i < infectionDiscardDeck.getCards().size(); i++){
+                    actions.add(new DiscardCard(infectionDiscardDeck, i));
+                }
                 break;
             case "Airlift":
-//                System.out.println("Airlift");
-//            System.out.println("Move any 1 pawn to any city. Get permission before moving another player's pawn.");
+                // Move any 1 pawn to any city. Get permission before moving another player's pawn.
+                for (int i = 0; i < nPlayers; i++){
+                    for (BoardNode bn: world.getBoardNodes())
+                    actions.add(new MovePlayer(i, ((PropertyString)bn.getProperty(Constants.nameHash)).value));
+                }
                 break;
             case "Government Grant":
-//                System.out.println("Government Grant");
-//            System.out.println("Add 1 research station to any city (no City card needed).");
+                // "Add 1 research station to any city (no City card needed)."
                 for (BoardNode bn: world.getBoardNodes()) {
                     if (!((PropertyBoolean) bn.getProperty(Constants.researchStationHash)).value) {
                         String cityName = ((PropertyString) bn.getProperty(nameHash)).value;
                         if (findCounter("Research Stations").getValue() == 0) {
                             // If all research stations are used, then take one from board
-                            for (PropertyString ps : researchStations) {
-                                actions.add(new AddResearchStationWithCardFrom(ps.value, cityName, card));
+                            for (String stations : researchStations) {
+                                actions.add(new AddResearchStationWithCardFrom(stations, cityName, card));
                             }
                         } else {
                             // Otherwise can just build here
@@ -287,18 +398,28 @@ public class PandemicGameState extends GameState {
                 }
                 break;
             case "One quiet night":
-//                System.out.println("One quiet night");
-//            System.out.println("Skip the next Infect Cities step (do not flip over any Infection cards).");
+                // Skip the next Infect Cities step (do not flip over any Infection cards)
                 actions.add(new QuietNight());
                 break;
             case "Forecast":
-//                System.out.println("Forecast");
-//            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
+                //"Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top."
+//                Deck infDiscardDeck = game.findDeck("Infection Discard");
+//                Deck tmpDeck = game.findDeck(game.tempDeck());
+//                for (int i = 0; i < 6; i++){
+//                    new DrawCard(infDiscardDeck, tmpDeck).execute();
+//                }
+                // remove up to 6 cards and put them back on top in random order
+                // todo list all combinations?
+//
+//                for (int i = 0; i < infDiscardDeck.getCards().size(); i++){
+//                    actions.add(new DiscardCard(infDiscardDeck, i));
+//                }
                 break;
         }
 
         return actions;
     }
+
     
     protected void setQuietNight(boolean qn) {
         quietNight = qn;
