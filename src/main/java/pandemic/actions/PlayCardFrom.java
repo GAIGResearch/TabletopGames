@@ -24,7 +24,7 @@ public class PlayCardFrom implements Action {
 
         PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
-            int activePlayer = gs.getActivePlayer();
+            int activePlayer = gs.getActingPlayer();
 
             // Tried to play a city card. Moving from this city to the destination, only if current location matches
             // the card played.
