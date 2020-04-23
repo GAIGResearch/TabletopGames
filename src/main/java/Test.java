@@ -4,6 +4,7 @@ import pandemic.PandemicForwardModel;
 import pandemic.PandemicGame;
 import pandemic.PandemicGameState;
 import pandemic.PandemicParameters;
+import players.OSLA;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class Test {
         Runner tabletopEngine = new Runner();
 
         List<AIPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer(new Random()));
+        players.add(new OSLA());
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));

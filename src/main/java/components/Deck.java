@@ -216,4 +216,8 @@ public class Deck extends Component implements IDeck {
     public void discard(Card card) {
         cards.remove(card);
     }
+
+    public int size(){
+        return cards.size();
+    }
 }
