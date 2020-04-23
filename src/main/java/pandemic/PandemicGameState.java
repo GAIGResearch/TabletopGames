@@ -4,8 +4,6 @@ import actions.*;
 import components.*;
 import content.*;
 import core.Area;
-import core.Game;
-import core.GameParameters;
 import core.GameState;
 import pandemic.actions.*;
 import utilities.Hash;
@@ -21,6 +19,7 @@ public class PandemicGameState extends GameState {
     public Board world;
     private int numAvailableActions = 0;
     private boolean quietNight;
+    private boolean modelInterrupted;  // Flag notifying if a reaction request interrupted the state update, so it'd continue from there
 
     public void setComponents()
     {
@@ -329,8 +328,11 @@ public class PandemicGameState extends GameState {
         return actions;
     }
 
-    void setActivePlayer(int activePlayer) {
-        this.activePlayer = activePlayer;
+    void nextPlayer() {
+        activePlayer = (activePlayer + 1) % nPlayers;
+    }
+    void setActivePlayer(int p) {
+        activePlayer = p;
     }
 
 
@@ -452,4 +454,7 @@ public class PandemicGameState extends GameState {
     public boolean isQuietNight() {
         return quietNight;
     }
+
+    public boolean wasModelInterrupted() { return modelInterrupted; }
+    public void setModelInterrupted(boolean b) { modelInterrupted = b; }
 }
