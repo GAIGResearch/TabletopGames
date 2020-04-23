@@ -56,10 +56,9 @@ public class PandemicForwardModel implements ForwardModel {
             }
         }
 
-        // give players cards
+        // give players cards;
         Deck playerCards = firstState.findDeck("Player Roles");
         Deck playerDeck = firstState.findDeck("Player Deck");
-        playerCards.shuffle(rnd);
         int nCardsPlayer = gameParameters.n_cards_per_player.get(state.getNPlayers());
         long maxPop = 0;
         int startingPlayer = -1;
@@ -117,6 +116,11 @@ public class PandemicForwardModel implements ForwardModel {
     public void next(GameState currentState, Action action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
         PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
+
+        if (pgs.getReactivePlayers().size() == 0) {
+            // Only advance round step if no one is reacting
+            pgs.roundStep += 1;
+        }
         playerActions(pgs, action);
 
         if (action instanceof CureDisease) {
@@ -126,36 +130,60 @@ public class PandemicForwardModel implements ForwardModel {
                 if (pgs.findCounter("Disease " + c).getValue() < 1) all_cured = false;
             }
             if (all_cured) {
-                currentState.setGameOver(GAME_WIN);
+                pgs.setGameOver(GAME_WIN);
                 System.out.println("WIN!");
             }
         }
 
-        if (pgs.roundStep >= gameParameters.n_actions_per_turn) {
+        boolean reacted = pgs.removeReactivePlayer();  // Reaction (if any) done
+
+        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn || reacted && pgs.whereModelInterrupted().equals("drawCards")) {
             pgs.roundStep = 0;
             drawCards(pgs, gameParameters);
 
-            if (!pgs.isQuietNight()) {
-                infectCities(pgs, gameParameters);
-                pgs.setQuietNight(false);
-            }
+            if (pgs.getReactivePlayers().size() == 0) {
+                // It's possible drawCards() method caused an interruption resulting in discard card reactions
+                pgs.setModelInterrupted("");
+                if (!pgs.isQuietNight()) {
+                    // Only do this step if Quiet Night event card was not played
+                    infectCities(pgs, gameParameters);
+                    pgs.setQuietNight(false);
+                }
 
-            // Set the next player as active
-            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.getNPlayers());
+                // Set the next player as active
+                pgs.nextPlayer();
+
+            } else {
+                pgs.setModelInterrupted("");
+            }
         }
     }
 
     private void playerActions(PandemicGameState currentState, Action action) {
-        currentState.roundStep += 1;
         action.execute(currentState);
+        PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
+        } else if (action instanceof MovePlayer){
+            // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
+            int playerIdx = currentState.getActivePlayer();
+            Card playerCard = (Card) currentState.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+            String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
+
+            if (roleString.equals("Medic")){
+                for (String color: Constants.colors){
+                    String city = ((MovePlayer)action).getDestination();
+                    new TreatDisease(gameParameters, color, city, true).execute(currentState);
+                }
+            }
         }
     }
 
-    private void drawCards(GameState currentState, PandemicParameters gameParameters) {
+    // TODO: Easier if this is rewritten as player forced reactions to draw cards twice, and rules applied based on
+    // what the player draws
+    private void drawCards(PandemicGameState currentState, PandemicParameters gameParameters) {
         int noCardsDrawn = gameParameters.n_cards_draw;
-        int activePlayer = currentState.getActivePlayer();
+        int activePlayer = currentState.getActingPlayer();
 
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Player Deck", tempDeckID);
@@ -173,35 +201,43 @@ public class PandemicForwardModel implements ForwardModel {
         }
         Deck tempDeck = currentState.findDeck(tempDeckID);
         boolean epidemic = false;
-        for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
+        Deck playerDeck = (Deck) currentState.getAreas().get(activePlayer).getComponent(Constants.playerHandHash);
+        Deck playerDiscardDeck = currentState.findDeck("Player Deck Discard");
+
+        for (Card c : tempDeck.getCards()) {  // Check the drawn cards
             // If epidemic card, do epidemic, only one per draw
             if (((PropertyString)c.getProperty(nameHash)).value.hashCode() == Constants.epidemicCard) {
                 if (!epidemic) {
-                    epidemic(currentState, gameParameters);
+                    epidemic(currentState, gameParameters);  // TODO: continue from here if pgs interrupted in epidemic
                     epidemic = true;
                 }
             } else {  // Otherwise, give card to player
-                Area area = currentState.getAreas().get(activePlayer);
-                Deck deck = (Deck) area.getComponent(Constants.playerHandHash);
-                if (deck != null) {
+                if (playerDeck != null) {
                     // deck size doesn't go beyond 7
-                    if (!new AddCardToDeck(c, deck).execute(currentState)){
-                        // player needs to discard a card
-
-                        // TODO: This needs to be thought properly. In a forward model, other agents acting at this step
-                        //  would be part of the opponent model. Additionally, we don't have access to Game anymore, and
-                        //  it doesn't make much sense to have players in the game state (or we'd have to copy them)
-                        //  I think we need a system to handle imminent actions (that require decision making) triggered by other actions.
-                        //game.getPlayers().get(activePlayer).getAction(currentState);
-                    }
+                    new AddCardToDeck(c, playerDeck).execute(currentState);
                 }
             }
         }
         currentState.clearTempDeck();
+
+        // If player's deck size went over capacity, player needs to discard
+        if (playerDeck != null && playerDeck.isOverCapacity()){
+            // player needs to discard N cards
+            int nDiscards = playerDeck.getCards().size() - playerDeck.getCapacity();
+            ArrayList<Action> acts = new ArrayList<>();  // Only discard card actions available
+            for (int i = 0; i < playerDeck.getCards().size(); i++) {
+                acts.add(new DrawCard(playerDeck, playerDiscardDeck, i));  // adding card i from player deck to player discard deck
+            }
+            currentState.possibleActions(acts);
+            for (int i = 0; i < nDiscards; i++) {
+                currentState.addReactivePlayer(activePlayer);
+            }
+            currentState.setModelInterrupted("drawCards");
+        }
     }
 
-    private void epidemic(GameState currentState, PandemicParameters gameParameters) {
+    private void epidemic(PandemicGameState currentState, PandemicParameters gameParameters) {
 
         // 1. infection counter idx ++
         currentState.findCounter("Infection Rate").increment(1);
@@ -218,31 +254,28 @@ public class PandemicForwardModel implements ForwardModel {
         if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
 
 
-        // If any players have the "Resilient Population" event card, they should be asked if they want to play it here
-        // TODO: another case of forced action
         Deck infectionDiscard = currentState.findDeck("Infection Discard");
         int nInfectDiscards = infectionDiscard.getCards().size();
 
+        // TODO If any players have the "Resilient Population" event card, they should be asked if they want to play it here,
+        // but only once. Needs to keep track of FM state to be able to resume...
 //        int nPlayers = currentState.getNPlayers();
 //        for (int i = 0; i < nPlayers; i++) {
 //            Deck ph = (Deck) currentState.getAreas().get(i).getComponent(playerHandHash);
 //            int nCards = ph.getCards().size();
 //            for (int cp = 0; cp < nCards; cp++) {
-//                if (((PropertyString)ph.getCards().get(cp).getProperty(nameHash)).value.equals("Resilient Population")) {
+//                Card card = ph.getCards().get(cp);
+//                if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
 //                    ArrayList<Action> acts = new ArrayList<>();
 //                    acts.add(new DoNothing());
 //                    for (int idx = 0; idx < nInfectDiscards; idx++) {
-//                        acts.add(new DiscardCard(infectionDiscard, idx));
+//                        acts.add(new DiscardCardWithCard(infectionDiscard, idx, card));
 //                    }
 //                    // Set discarding infection discarded cards (or do nothing) as the only options and ask player if they want to play their card
 //                    currentState.possibleActions(acts);
-//                    Action a = game.getPlayers().get(i).getAction(currentState);
-//                    if (a != null && !(a instanceof DoNothing)) {
-//                        a.execute(currentState);
-//                        // Discard event card
-//                        new DiscardCard(ph, cp).execute(currentState);
-//                        break;
-//                    }
+//                    currentState.addReactivePlayer(i);
+//                    currentState.setModelInterrupted("epidemic");
+//                    return;  // TODO continue from here
 //                }
 //            }
 //        }

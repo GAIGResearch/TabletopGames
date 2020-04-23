@@ -1,6 +1,7 @@
 package utilities;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public abstract class Utils {
 
@@ -36,5 +37,27 @@ public abstract class Utils {
             }
         }
         return -1;
+    }
+
+    public static void generatePermutations(int n, int[] elements, ArrayList<int[]> all) {
+        if (n == 1) {
+            all.add(elements.clone());
+        } else {
+            for(int i = 0; i < n-1; i++) {
+                generatePermutations(n - 1, elements, all);
+                if(n % 2 == 0) {
+                    swap(elements, i, n-1);
+                } else {
+                    swap(elements, 0, n-1);
+                }
+            }
+            generatePermutations(n - 1, elements, all);
+        }
+    }
+
+    private static void swap(int[] input, int a, int b) {
+        int tmp = input[a];
+        input[a] = input[b];
+        input[b] = tmp;
     }
 }

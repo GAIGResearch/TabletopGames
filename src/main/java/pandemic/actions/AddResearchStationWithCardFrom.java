@@ -26,14 +26,20 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
     public boolean execute(GameState gs) {
         boolean success = super.execute(gs);
 
-        // Discard the card played
-        Deck playerHand = (Deck)gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash);
-        playerHand.discard(card);
+        if (success) {
+            // Remove research station from "fromCity" location
+            BoardNode bn = ((PandemicGameState) gs).world.getNode(nameHash, fromCity);
+            if (bn != null) {
+                bn.setProperty(researchStationHash, new PropertyBoolean(false));
 
-        // Remove research station from "fromCity" location
-        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, fromCity);
-        if (bn != null) {
-            bn.setProperty(researchStationHash, new PropertyBoolean(false));
+                // Discard the card played
+                Deck playerHand = (Deck) gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+                playerHand.discard(card);
+                Deck discardDeck = gs.findDeck("Player Deck Discard");
+                success = discardDeck.add(card);
+            } else {
+                success = false;
+            }
         }
 
         return success;

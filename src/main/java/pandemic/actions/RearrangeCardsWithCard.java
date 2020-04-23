@@ -29,9 +29,13 @@ public class RearrangeCardsWithCard implements Action {
         }
         Deck draws = new Deck();
         draws.setCards(Arrays.asList(cards));
-        deckFrom.add(draws);
+        boolean result = deckFrom.add(draws);
 
-        ((Deck)gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash)).discard(card);
-        return true;
+        if (result) {
+            ((Deck) gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash)).discard(card);
+            Deck discardDeck = gs.findDeck("Player Deck Discard");
+            result = discardDeck.add(card);
+        }
+        return result;
     }
 }

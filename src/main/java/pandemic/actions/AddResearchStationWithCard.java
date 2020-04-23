@@ -19,12 +19,15 @@ public class AddResearchStationWithCard extends AddResearchStation implements Ac
 
     @Override
     public boolean execute(GameState gs) {
-        super.execute(gs);
+        boolean result = super.execute(gs);
 
-        // Discard the card played
-        Deck playerHand = (Deck)gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash);
-        playerHand.discard(card);
-
-        return false;
+        if (result) {
+            // Discard the card played
+            Deck playerHand = (Deck) gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+            playerHand.discard(card);
+            Deck discardDeck = gs.findDeck("Player Deck Discard");
+            result = discardDeck.add(card);
+        }
+        return result;
     }
 }
