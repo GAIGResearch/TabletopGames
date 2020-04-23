@@ -14,6 +14,6 @@ public class DoNothing implements Action {
     public boolean equals(Object other)
     {
         if (this == other) return true;
-        return other instanceof DiscardCard;
+        return other instanceof DoNothing;
     }
 }

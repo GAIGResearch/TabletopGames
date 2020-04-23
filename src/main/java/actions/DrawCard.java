@@ -7,6 +7,8 @@ import components.IDeck;
 import core.GameState;
 
 public class DrawCard implements Action {
+
+    //TODO: turn this into IDs and do not use two ways of creating this action.
     private String deckIdFrom;
     private String deckIdTo;
 

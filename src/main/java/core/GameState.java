@@ -2,7 +2,6 @@ package core;
 
 import actions.Action;
 import components.*;
-
 import java.util.*;
 
 import static pandemic.Constants.GAME_ONGOING;
