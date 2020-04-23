@@ -23,7 +23,7 @@ public class PlayCard implements Action {
         PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
             // Tried to play a city card.
-            int activePlayer = gs.getActivePlayer();
+            int activePlayer = gs.getActingPlayer();
             PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
             PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
 

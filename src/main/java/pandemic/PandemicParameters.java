@@ -19,7 +19,9 @@ public class PandemicParameters extends GameParameters {
     public int n_cubes_infection = 1;
     public int n_initial_disease_cubes = 24;
     public int n_cards_for_cure = 5;
+    public int n_cards_for_cure_reduced = 4;
 
+    public int n_players = 4;
     public int max_cards_per_player = 7;  // Max cards in hand per player
     public int n_cards_draw = 2;  // Number of cards players draw each turn
     public HashMap<Integer, Integer> n_cards_per_player = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player

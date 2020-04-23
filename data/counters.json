@@ -60,5 +60,11 @@
     "min": ["Integer", 0],
     "max": ["Integer", 24],
     "count": ["Integer", 24]
+  },
+  {
+    "id": "Research Stations",
+    "min": ["Integer", 0],
+    "max": ["Integer", 6],
+    "count": ["Integer", 0]
   }
 ]
