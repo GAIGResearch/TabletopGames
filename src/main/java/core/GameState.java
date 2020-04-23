@@ -2,7 +2,6 @@ package core;
 
 import actions.Action;
 import components.*;
-
 import java.util.*;
 
 import static pandemic.Constants.GAME_ONGOING;
@@ -19,7 +18,7 @@ public abstract class GameState {
 
     protected HashMap<Integer, Area> areas;
     protected List<Board> boards;
-    protected List<Deck> decks;
+    protected List<IDeck> decks;
     protected List<Token> tokens;
     protected List<Counter> counters;
     protected List<Dice> dice;
@@ -37,14 +36,58 @@ public abstract class GameState {
 
     protected int gameStatus = GAME_ONGOING;
 
-    public abstract GameState copy();
-    public GameState copyTo(GameState gs) {
-        gs.activePlayer = activePlayer;
-        gs.reactivePlayers = new ArrayList<>(reactivePlayers);
-
-        // TODO: copy super game state objects
-        return gs;
+    public GameState copy() {
+        return copy(-1);
     }
+
+    public GameState copy(int playerId)
+    {
+        GameState gsCopy = this._copy(playerId);
+
+        // TODO: copy game state objects
+        gsCopy.activePlayer = activePlayer;
+        gsCopy.nPlayers = nPlayers;
+        gsCopy.roundStep = roundStep;
+
+        gsCopy.areas = new HashMap<>();
+        for(int key : areas.keySet())
+        {
+            Area a = areas.get(key);
+            gsCopy.areas.put(key, a.copy());
+        }
+
+        gsCopy.boards = new ArrayList<>();
+        for(Board b : boards) gsCopy.boards.add(b.copy());
+
+        gsCopy.decks = new ArrayList<>();
+        for(IDeck d : decks) gsCopy.decks.add(d.copy());
+
+        gsCopy.tokens = new ArrayList<>();
+        for(Token t : tokens) gsCopy.tokens.add(t.copy());
+
+        gsCopy.counters = new ArrayList<>();
+        for(Counter c : counters) gsCopy.counters.add(c.copy());
+
+        gsCopy.dice = new ArrayList<>();
+        for(Dice d : dice) gsCopy.dice.add(d.copy());
+
+        gsCopy.forwardModel = forwardModel.copy();
+        gsCopy.gameStatus = gameStatus;
+        gsCopy.gameParameters = gameParameters.copy();
+
+        return gsCopy;
+    }
+
+
+    /**
+     * Copies the game state objects defined in the subclass of this game state to a
+     * new GameState object and returns it.
+     * @param playerId ID of the player for which this copy is being created (so observations can be
+     *                 adapted for them). -1 indicates the game state should be copied at full.
+     * @return a copy of the game state
+     */
+    public abstract GameState _copy(int playerId);
+
 
     public final void init()
     {
@@ -100,8 +143,8 @@ public abstract class GameState {
         return null;
     }
 
-    public Deck findDeck(String name) {
-        for (Deck d: decks) {
+    public IDeck findDeck(String name) {
+        for (IDeck d: decks) {
             if (name.equalsIgnoreCase(d.getID())) {
                 return d;
             }
@@ -110,7 +153,7 @@ public abstract class GameState {
     }
 
     public String tempDeck() {
-        Deck temp = findDeck("tempDeck");
+        IDeck temp = findDeck("tempDeck");
         if (temp == null) {
             temp = new Deck("tempDeck");
             decks.add(temp);

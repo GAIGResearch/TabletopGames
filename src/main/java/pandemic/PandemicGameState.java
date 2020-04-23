@@ -63,8 +63,8 @@ public class PandemicGameState extends GameState {
 
         // Set up decks
         Deck playerDeck = new Deck("Player Deck"); // contains city & event cards
-        playerDeck.add(findDeck("Cities"));
-        playerDeck.add(findDeck("Events"));
+        playerDeck.add((Deck) findDeck("Cities"));
+        playerDeck.add((Deck) findDeck("Events"));
 
         Deck playerDiscard = new Deck("Player Deck Discard");
         Deck infDiscard = new Deck("Infection Discard");
@@ -74,8 +74,8 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(Constants.playerDeckDiscardHash, playerDiscard);
         gameArea.addComponent(Constants.infectionDiscardHash, infDiscard);
         gameArea.addComponent(Constants.plannerDeckHash, plannerDeck);
-        gameArea.addComponent(Constants.infectionHash, findDeck("Infections"));
-        gameArea.addComponent(Constants.playerRolesHash, findDeck("Player Roles"));
+        gameArea.addComponent(Constants.infectionHash, (Deck) findDeck("Infections"));
+        gameArea.addComponent(Constants.playerRolesHash, (Deck) findDeck("Player Roles"));
 
         // add them to the list of decks, so they are accessible by the findDeck() function
         addDeckToList(playerDeck);
@@ -85,11 +85,9 @@ public class PandemicGameState extends GameState {
     }
 
     @Override
-    public GameState copy() {
-        //TODO: copy pandemic game state
-        return this;
+    public GameState _copy(int playerId) {
+        return null;
     }
-
 
     public int nInputActions() {
         return ((PandemicParameters) this.gameParameters).n_actions_per_turn;  // Pandemic requires up to 4 actions per player per turn.
@@ -196,7 +194,7 @@ public class PandemicGameState extends GameState {
             if (cityInfections.getValues()[i] > 0){
                 boolean treatAll = false;
                 if (roleString.equals("Medic")) treatAll = true;
-                actions.add(new TreatDisease(pp, Constants.colors[i], playerLocationName.value, treatAll));
+                actions.add(new TreatDisease(pp.n_initial_disease_cubes, Constants.colors[i], playerLocationName.value, treatAll));
             }
         }
       
@@ -283,7 +281,7 @@ public class PandemicGameState extends GameState {
                 }
             }
             else {
-                Deck deck = findDeck("plannerDeck");
+                Deck deck = (Deck) findDeck("plannerDeck");
                 if (deck.getCards().size() > 0) {
                     actions.addAll(actionsFromEventCard(deck.draw(), researchStations));
                 }
@@ -370,7 +368,7 @@ public class PandemicGameState extends GameState {
         switch (cardString) {
             case "Resilient Population":
                 // Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.
-                Deck infectionDiscardDeck = findDeck("Infection Discard");
+                Deck infectionDiscardDeck = (Deck) findDeck("Infection Discard");
                 for (int i = 0; i < infectionDiscardDeck.getCards().size(); i++){
                     actions.add(new DiscardCard(infectionDiscardDeck, i));
                 }

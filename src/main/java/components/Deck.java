@@ -192,10 +192,10 @@ public class Deck extends Component implements IDeck {
         }
     }
 
-    public static List<Deck> loadDecks(String filename)
+    public static List<IDeck> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Deck> decks = new ArrayList<>();
+        ArrayList<IDeck> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

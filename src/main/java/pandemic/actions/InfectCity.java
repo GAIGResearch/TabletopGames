@@ -19,12 +19,12 @@ import static pandemic.Constants.*;
 
 public class InfectCity implements Action {
 
-    PandemicParameters gp;
-    Card infectingCard;
-    int count;
+    private Card infectingCard;
+    private int count;
+    private int maxCubesPerCity;
 
-    public InfectCity(GameParameters gp, Card infectingCard, int count) {
-        this.gp = (PandemicParameters)gp;
+    public InfectCity(int maxCubesPerCity, Card infectingCard, int count) {
+        this.maxCubesPerCity = maxCubesPerCity;
         this.infectingCard = infectingCard;
         this.count = count;
     }
@@ -59,13 +59,12 @@ public class InfectCity implements Action {
 
                 // Add count cubes to this city
                 array[colorIdx] += count;
-                int max_cubes = gp.max_cubes_per_city;
 
-                if (array[colorIdx] > max_cubes) {  // Outbreak!
+                if (array[colorIdx] > maxCubesPerCity) {  // Outbreak!
                     Counter outbreakCounter = pgs.findCounter("Outbreaks");
 
-                    diseaseCubeCounter.decrement(max_cubes - array[colorIdx]);
-                    array[colorIdx] = max_cubes;
+                    diseaseCubeCounter.decrement(maxCubesPerCity - array[colorIdx]);
+                    array[colorIdx] = maxCubesPerCity;
                     HashSet<BoardNode> allCityOutbreaks = new HashSet<>();  // Make sure we don't get stuck in loop
                     ArrayList<BoardNode> outbreaks = outbreak(bn, gs, colorIdx, diseaseCubeCounter, outbreakCounter);
                     while (outbreaks.size() > 0) {  // Chain reaction
@@ -107,7 +106,7 @@ public class InfectCity implements Action {
                     // Try to add a disease cube here
                     PropertyIntArray infectionArray = (PropertyIntArray) b2.getProperty(infectionHash);
                     int[] array = infectionArray.getValues();
-                    if (array[colorIdx] == gp.max_cubes_per_city) {
+                    if (array[colorIdx] == maxCubesPerCity) {
                         // Chain outbreak
                         outbreaks.add(b2);
                     } else {
@@ -119,5 +118,18 @@ public class InfectCity implements Action {
             }
         }
         return outbreaks;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof InfectCity)
+        {
+            InfectCity otherAction = (InfectCity) other;
+            return infectingCard == otherAction.infectingCard && count == otherAction.count && maxCubesPerCity == otherAction.maxCubesPerCity;
+
+        }else return false;
     }
 }

@@ -16,8 +16,8 @@ import static pandemic.Constants.nameHash;
 public class MovePlayer implements Action {
 
 
-    int playerIdx;
-    String destination;
+    private int playerIdx;
+    private String destination;
 
     public MovePlayer(int playerIdx, String city) {
         this.playerIdx = playerIdx;
@@ -78,5 +78,18 @@ public class MovePlayer implements Action {
 
     public String getDestination(){
         return destination;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof MovePlayer)
+        {
+            MovePlayer otherAction = (MovePlayer) other;
+            return destination.equals(otherAction.destination) && playerIdx == otherAction.playerIdx;
+
+        }else return false;
     }
 }
