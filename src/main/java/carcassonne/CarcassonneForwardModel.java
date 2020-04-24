@@ -19,4 +19,9 @@ public class CarcassonneForwardModel implements ForwardModel {
     public void next(GameState currentState, Action action) {
 
     }
+
+    @Override
+    public ForwardModel copy() {
+        return null;
+    }
 }

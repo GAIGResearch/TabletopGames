@@ -3,6 +3,7 @@ package explodingkittens.actions;
 import actions.Action;
 import components.Card;
 import components.Deck;
+import components.IDeck;
 import core.GameState;
 import explodingkittens.ExplodingKittenCard;
 import explodingkittens.ExplodingKittensCardTypeProperty;
@@ -12,10 +13,10 @@ import explodingkittens.ExplodingKittensGameState;
 public class DrawExplodingKittenCard implements Action{
 
     int playerID;
-    Deck<Card>  deckFrom;
-    Deck<Card>  deckTo;
+    IDeck<Card> deckFrom;
+    IDeck<Card>  deckTo;
 
-    public DrawExplodingKittenCard (int playerID, Deck<Card>  deckFrom, Deck<Card> deckTo) {
+    public DrawExplodingKittenCard (int playerID, IDeck<Card>  deckFrom, IDeck<Card> deckTo) {
         this.playerID = playerID;
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
@@ -40,7 +41,7 @@ public class DrawExplodingKittenCard implements Action{
             } else {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
-                Deck<Card> discardDeck = gs.findDeck("DiscardDeck");
+                IDeck<Card> discardDeck = gs.findDeck("DiscardDeck");
                 for (Card card : deckTo.getCards()){
                     discardDeck.add(card);
                 }

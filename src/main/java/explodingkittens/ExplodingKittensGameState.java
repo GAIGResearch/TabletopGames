@@ -61,6 +61,16 @@ public class ExplodingKittensGameState extends GameState {
     }
 
     @Override
+    public GameState createNewGameState() {
+        return null;
+    }
+
+    @Override
+    public void copyTo(GameState dest, int playerId) {
+
+    }
+
+    @Override
     public void setComponents() {
         playerActive = new boolean[nPlayers];
         for (int i = 0; i < nPlayers; i++) playerActive[i] = true;
@@ -143,8 +153,8 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> defuseActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
-        Deck<Card> drawDeck = findDeck("DrawDeck");
+        IDeck<Card> playerDeck = (IDeck<Card>) findDeck("Player"+activePlayer+"HandCards");
+        IDeck<Card> drawDeck = findDeck("DrawDeck");
 
         for (int i = 0; i <= drawDeck.getCards().size(); i++){
             actions.add(new PlaceExplodingKittenAction(activePlayer, playerDeck.peek(), i));
@@ -154,7 +164,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> nopeActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        IDeck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
         for (Card card : playerDeck.getCards()) {
             if (((ExplodingKittensCardTypeProperty) card.getProperty(cardTypeHash)).value == ExplodingKittenCard.NOPE) {
                 actions.add(new NopeAction(activePlayer, card));
@@ -167,7 +177,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> favorActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        IDeck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
         for (Card card : playerDeck.getCards()) {
             actions.add(new GiveCardAction(card, activePlayer, playerAskingForFavorID));
         }
@@ -176,7 +186,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> playerActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        IDeck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
 
         // todo: only add unique actions
         for (Card card : playerDeck.getCards()) {
@@ -241,7 +251,7 @@ public class ExplodingKittensGameState extends GameState {
         }*/
 
         // add end turn by drawing a card
-        actions.add(new DrawExplodingKittenCard(activePlayer, findDeck("DrawDeck"), playerDeck));
+        actions.add(new DrawExplodingKittenCard(activePlayer, (IDeck<Card>) findDeck("DrawDeck"), playerDeck));
         return actions;
     }
 

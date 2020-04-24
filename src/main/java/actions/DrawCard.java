@@ -2,14 +2,17 @@ package actions;
 
 import components.Card;
 import components.Deck;
+import components.IDeck;
 import core.GameState;
 
 public class DrawCard implements Action {
+
+    //TODO: turn this into IDs and do not use two ways of creating this action.
     private String deckIdFrom;
     private String deckIdTo;
 
-    private Deck<Card> deckFrom;
-    private Deck<Card> deckTo;
+    private IDeck<Card> deckFrom;
+    private IDeck<Card> deckTo;
 
     private int index;
 
@@ -24,7 +27,7 @@ public class DrawCard implements Action {
         this.index = index;
     }
 
-    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo) {
+    public DrawCard (IDeck<Card> deckFrom, IDeck<Card> deckTo) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
     }
@@ -33,10 +36,10 @@ public class DrawCard implements Action {
     public boolean execute(GameState gs) {
         Card card;
         if (deckFrom == null) {
-            deckFrom = gs.findDeck(deckIdFrom);
+            deckFrom = (IDeck<Card>)gs.findDeck(deckIdFrom);
         }
         if (deckTo == null) {
-            deckTo = gs.findDeck(deckIdTo);
+            deckTo = (IDeck<Card>)gs.findDeck(deckIdTo);
         }
 
         if (index != -1){
@@ -51,5 +54,18 @@ public class DrawCard implements Action {
 
         // TODO: if you can't draw cards, game over
         // TODO: discard if too many / play event card
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof DrawCard)
+        {
+            DrawCard otherAction = (DrawCard) other;
+            return deckIdFrom.equals(otherAction.deckIdFrom) && deckIdTo.equals(otherAction.deckIdTo) &&
+                    deckFrom.equals(otherAction.deckFrom) && deckTo.equals(otherAction.deckTo);
+
+        }else return false;
     }
 }

@@ -9,7 +9,7 @@ import utilities.Hash;
 
 public class PlayCard implements Action {
 
-    public Card card;
+    private Card card;
 
     public PlayCard(Card c) {
         this.card = c;
@@ -47,5 +47,18 @@ public class PlayCard implements Action {
         }
 
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof PlayCard)
+        {
+            PlayCard otherAction = (PlayCard) other;
+            return card.equals(otherAction.card);
+
+        }else return false;
     }
 }

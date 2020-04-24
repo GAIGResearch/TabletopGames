@@ -53,4 +53,9 @@ public class CarcassonneParameters extends GameParameters {
         }, 1);
 
     }
+
+    @Override
+    public GameParameters copy() {
+        return null;
+    }
 }

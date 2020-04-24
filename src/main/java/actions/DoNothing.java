@@ -9,4 +9,11 @@ public class DoNothing implements Action {
     public boolean execute(GameState gs) {
        return true;
    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        return other instanceof DoNothing;
+    }
 }

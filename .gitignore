@@ -23,6 +23,9 @@
 hs_err_pid*
 
 .idea/
+target/
 *.iml
+*.kotlin_module
+target/classes/META-INF/ModernBoardGame.kotlin_module
 
 out/production/ModernBoardGame/META-INF/

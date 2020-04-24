@@ -9,6 +9,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+
 public class CarcassonneGameState extends GameState {
 
     private int[] points;
@@ -21,6 +22,16 @@ public class CarcassonneGameState extends GameState {
     @Override
     public GameState copy() {
         return null;
+    }
+
+    @Override
+    public GameState createNewGameState() {
+        return null;
+    }
+
+    @Override
+    public void copyTo(GameState dest, int playerId) {
+
     }
 
     @Override

@@ -122,9 +122,9 @@ public class Deck<T> extends Component implements IDeck<T> {
         return null;
     }
 
-    public boolean remove(T card)
+    public boolean remove(T el)
     {
-        return cards.remove(card);
+        return cards.remove(el);
     }
 
 
@@ -208,10 +208,10 @@ public class Deck<T> extends Component implements IDeck<T> {
         return newDeck;
     }
 
-    public static List<Deck<Card>> loadDecks(String filename)
+    public static List<IDeck> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Deck<Card>> decks = new ArrayList<>();
+        ArrayList<IDeck> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

@@ -1,5 +1,6 @@
 package components;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -62,10 +63,50 @@ public interface IDeck<T>
     T[] peek(int idx, int amount);
 
     /**
-     * Creates a copy of this obejct.
+     * Creates a copy of this object.
      * @return a copy of the IDeck.
      */
     IDeck<T> copy();
 
+    /**
+     * Returns a unique ID for this deck.
+     * @return an ID of the IDeck.
+     */
+    String getID();
 
+    /**
+     * Removes the specified element from the deck
+     */
+    public boolean remove(T el);
+
+    /**
+     * Removes all the cards from the deck.
+     */
+    void clear();
+
+    /**
+     * Adds a card to a deck on the given index
+     * @param c card to add
+     * @param index where to add it
+     * @return true if it was correctly added.
+     */
+    boolean add(T c, int index);
+
+    /**
+     * Adds a card to a deck on the first position of the deck
+     * @param c card to add
+     * @return true if it was correctly added.
+     */
+    boolean add(T c);
+
+    /**
+     * Returns all the cards in this deck.
+     * @return all the cards in this deck.
+     */
+    ArrayList<T> getCards();
+
+    /**
+     * Shuffles the order of elements in the deck.
+     */
+    void shuffle();
 }

@@ -74,6 +74,11 @@ public class ExplodingKittensForwardModel implements ForwardModel {
         }
     }
 
+    @Override
+    public ForwardModel copy() {
+        return null;
+    }
+
     private void printActionStack(){
         System.out.print("Action Stack:");
         for (Iterator<Action> it = actionStack.iterator(); it.hasNext(); ) {

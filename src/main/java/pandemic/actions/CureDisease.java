@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import static pandemic.Constants.playerHandHash;
 
 public class CureDisease implements Action {
-    String color;
-    ArrayList<Card> cards;
+    private String color;
+    private ArrayList<Card> cards;
 
     public CureDisease(String color, ArrayList<Card> cards) {
         this.color = color;
@@ -36,5 +36,23 @@ public class CureDisease implements Action {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof CureDisease)
+        {
+            CureDisease otherAction = (CureDisease) other;
+            if(!color.equals(otherAction.color)) return false;
+            if(cards.size() != otherAction.cards.size()) return false;
+
+            for(Card c : cards)
+                if(!otherAction.cards.contains(c))  return false;
+
+            return true;
+
+        }else return false;
     }
 }
