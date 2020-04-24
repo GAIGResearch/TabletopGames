@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import utilities.Utils.ComponentType;
 
-public class Card extends Component {
+public class Card extends Component implements Cloneable{
 
     //private int occurenceCount; //This was here once. Not sure why?
 
@@ -13,7 +13,8 @@ public class Card extends Component {
         super.type = ComponentType.CARD;
     }
 
-    public Card copy(){
+    @Override
+    public Card clone(){
         Card copy = new Card();
         copy.type = type;
 

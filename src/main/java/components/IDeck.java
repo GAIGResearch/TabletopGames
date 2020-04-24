@@ -10,7 +10,7 @@ import java.util.Random;
  *   * Cards played on the player's area
  *   * Discard pile
  */
-public interface IDeck
+public interface IDeck<T>
 {
     /**
      * Maximum number of cards this deck may contain.
@@ -26,32 +26,32 @@ public interface IDeck
      * Draws the first card of the deck
      * @return the first card of the deck
      */
-    Card draw();
+    T draw();
 
     /**
      * Picks a random card from the IDeck
      * @return a random card from the IDeck
      */
-    Card pick();
+    T pick();
 
     /**
      * Picks the card in position idx from the deck
      * @param idx the index of the card in the deck
      * @return the card in position idx from the deck
      */
-    Card pick(int idx);
+    T pick(int idx);
 
     /**
      * Draws the last card of the deck
      * @return the last card of the deck
      */
-    Card pickLast();
+    T pickLast();
 
     /**
      * Peeks (without drawing) the first card of the deck
      * @return The card peeked.
      */
-    Card peek();
+    T peek();
 
     /**
      * Peeks (without drawing) amount cards of the deck starting from card idx
@@ -59,13 +59,13 @@ public interface IDeck
      * enough cards to be picked, the array will only contain those available. If no
      * cards are available, returns an empty array.
      */
-    Card[] peek(int idx, int amount);
+    T[] peek(int idx, int amount);
 
     /**
      * Creates a copy of this obejct.
      * @return a copy of the IDeck.
      */
-    IDeck copy();
+    IDeck<T> copy();
 
 
 }

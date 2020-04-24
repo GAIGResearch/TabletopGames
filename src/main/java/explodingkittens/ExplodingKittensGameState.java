@@ -143,8 +143,8 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> defuseActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck playerDeck = findDeck("Player"+activePlayer+"HandCards");
-        Deck drawDeck = findDeck("DrawDeck");
+        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> drawDeck = findDeck("DrawDeck");
 
         for (int i = 0; i <= drawDeck.getCards().size(); i++){
             actions.add(new PlaceExplodingKittenAction(activePlayer, playerDeck.peek(), i));
@@ -154,7 +154,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> nopeActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
         for (Card card : playerDeck.getCards()) {
             if (((ExplodingKittensCardTypeProperty) card.getProperty(cardTypeHash)).value == ExplodingKittenCard.NOPE) {
                 actions.add(new NopeAction(activePlayer, card));
@@ -167,7 +167,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> favorActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
         for (Card card : playerDeck.getCards()) {
             actions.add(new GiveCardAction(card, activePlayer, playerAskingForFavorID));
         }
@@ -176,7 +176,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> playerActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        Deck playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
 
         // todo: only add unique actions
         for (Card card : playerDeck.getCards()) {
@@ -306,21 +306,21 @@ public class ExplodingKittensGameState extends GameState {
         System.out.println("============================");
         for (int i = 0; i < nPlayers; i++){
             System.out.print("Player " + i + ":");
-            Deck playerDeck = ((Deck)this.areas.get(i).getComponent(playerHandHash));
+            Deck<Card> playerDeck = ((Deck<Card>)this.areas.get(i).getComponent(playerHandHash));
             printDeck(playerDeck);
         }
 
         System.out.print("DrawPile" + ":");
-        Deck drawPile = (Deck)this.areas.get(drawPileHash).getComponent(drawPileHash);
+        Deck<Card> drawPile = (Deck<Card>)this.areas.get(drawPileHash).getComponent(drawPileHash);
         printDeck(drawPile);
 
         System.out.print("DiscardPile" + ":");
-        Deck discardPile = (Deck)this.areas.get(discardPileHash).getComponent(discardPileHash);
+        Deck<Card> discardPile = (Deck<Card>)this.areas.get(discardPileHash).getComponent(discardPileHash);
         printDeck(discardPile);
         System.out.println("" + remainingDraws + " remaining draws");
     }
 
-    public void printDeck(Deck deck){
+    public void printDeck(Deck<Card> deck){
         StringBuilder sb = new StringBuilder();
         for (Card card : deck.getCards()){
             sb.append(((ExplodingKittensCardTypeProperty)card.getProperty(cardTypeHash)).value.toString());

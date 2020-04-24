@@ -19,7 +19,7 @@ public abstract class GameState {
 
     protected HashMap<Integer, Area> areas;
     protected List<Board> boards;
-    protected List<Deck> decks;
+    protected List<Deck<Card>> decks;
     protected List<Token> tokens;
     protected List<Counter> counters;
     protected List<Dice> dice;
@@ -100,8 +100,8 @@ public abstract class GameState {
         return null;
     }
 
-    public Deck findDeck(String name) {
-        for (Deck d: decks) {
+    public Deck<Card> findDeck(String name) {
+        for (Deck<Card> d: decks) {
             if (name.equalsIgnoreCase(d.getID())) {
                 return d;
             }

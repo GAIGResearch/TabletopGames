@@ -1,5 +1,6 @@
 package components;
 
+import java.io.Console;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -13,11 +14,11 @@ import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 // TODO: update IDeck interface from methods in this class
-public class Deck extends Component implements IDeck {
+public class Deck<T> extends Component implements IDeck<T> {
 
     protected int capacity = -1;
 
-    protected ArrayList<Card> cards;
+    protected ArrayList<T> cards;
 
     private String id;
 
@@ -52,7 +53,7 @@ public class Deck extends Component implements IDeck {
         properties = new HashMap<>();
     }
 
-    protected void setCards(ArrayList<Card> cards) {this.cards = cards;}
+    protected void setCards(ArrayList<T> cards) {this.cards = cards;}
 
     @Override
     public int getCapacity() {
@@ -75,45 +76,45 @@ public class Deck extends Component implements IDeck {
         Collections.shuffle(cards, new Random());
     }
 
-    public Card draw() {
+    public T draw() {
         return pick(0);
     }
 
-    public Card pick() {
+    public T pick() {
         return pick(0);
     }
 
-    public Card pick(int idx) {
+    public T pick(int idx) {
         if(cards.size() > 0 && idx < cards.size()) {
-            Card c = cards.get(idx);
+            T c = cards.get(idx);
             cards.remove(idx);
             return c;
         }
         return null;
     }
 
-    public Card pickLast() {
+    public T pickLast() {
         return pick(cards.size()-1);
     }
 
     @Override
-    public Card peek() {
+    public T peek() {
         return peek(0);
     }
 
     @Override
-    public Card[] peek(int idx, int amount) {
-        ArrayList<Card> cards = new ArrayList<>();
+    public T[] peek(int idx, int amount) {
+        ArrayList<T> cards = new ArrayList<>();
         for(int i = idx; i < idx+amount; ++i)
         {
-            Card c = peek(i);
+            T c = peek(i);
             if(c != null)
                 cards.add(c);
         }
-        return (Card[]) cards.toArray();
+        return (T[]) cards.toArray();
     }
 
-    private Card peek(int idx)
+    private T peek(int idx)
     {
         if(cards.size() > 0 && idx < cards.size()) {
             return cards.get(idx);
@@ -121,42 +122,46 @@ public class Deck extends Component implements IDeck {
         return null;
     }
 
-    public boolean remove(Card card)
+    public boolean remove(T card)
     {
         return cards.remove(card);
     }
 
 
-    public boolean add(Card c) {
+    public boolean add(T c) {
         return add(c, 0);
     }
 
-    public boolean add(Card c, int index) {
+    public boolean add(T c, int index) {
         cards.add(index, c);
         return capacity == -1 || cards.size() <= capacity;
     }
 
-    public boolean add(Deck d){
+    public boolean add(Deck<T> d){
         cards.addAll(d.cards);
         return true;
     }
 
 
     @Override
-    public IDeck copy()
+    public IDeck<T> copy()
     {
-        Deck dp = new Deck();
+        Deck<T> dp = new Deck<>();
         this.copyTo(dp);
         return dp;
     }
 
-    public void copyTo(IDeck target)
+    public void copyTo(IDeck<T> target)
     {
-        Deck dp = (Deck) target;
-        ArrayList<Card> newCards = new ArrayList<>();
-        for (Card c : dp.cards)
+        Deck<T> dp = (Deck<T>) target;
+        ArrayList<T> newCards = new ArrayList<>();
+        for (T c : dp.cards)
         {
-            newCards.add(c.copy());
+            try {
+                newCards.add((T) c.getClass().getMethod("clone").invoke(c));
+            } catch (Exception e) {
+                throw new RuntimeException("Objects in deck target do not implement the method 'clone'", e);
+            }
         }
         dp.setCards(newCards);
         dp.capacity = capacity;
@@ -166,7 +171,7 @@ public class Deck extends Component implements IDeck {
     }
 
     // TODO: check for visibility?
-    public ArrayList<Card> getCards() {
+    public ArrayList<T> getCards() {
         return cards;
     }
 
@@ -186,10 +191,10 @@ public class Deck extends Component implements IDeck {
      * Loads cards for a deck from a JSON file.
      * @param deck - deck to load in JSON format
      */
-    public void loadDeck(JSONObject deck) {
-
-        id = (String) ( (JSONArray) deck.get("name")).get(1);
-        properties.put(Hash.GetInstance().hash("name"), new PropertyString(id));
+    public static Deck<Card> loadDeck(JSONObject deck) {
+        Deck<Card> newDeck = new Deck<>();
+        newDeck.id = (String) ( (JSONArray) deck.get("name")).get(1);
+        newDeck.properties.put(Hash.GetInstance().hash("name"), new PropertyString(newDeck.id));
 
         JSONArray deckCards = (JSONArray) deck.get("cards");
 
@@ -198,21 +203,21 @@ public class Deck extends Component implements IDeck {
             // Add nodes to board nodes
             JSONObject jsonCard = (JSONObject) o;
             Card newCard = (Card) parseComponent(new Card(), jsonCard);
-            cards.add(newCard);
+            newDeck.cards.add(newCard);
         }
+        return newDeck;
     }
 
-    public static List<Deck> loadDecks(String filename)
+    public static List<Deck<Card>> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Deck> decks = new ArrayList<>();
+        ArrayList<Deck<Card>> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for(Object o : data) {
-                Deck newDeck = new Deck();
-                newDeck.loadDeck((JSONObject) o);
+                Deck<Card> newDeck = loadDeck((JSONObject) o);
                 decks.add(newDeck);
             }
 
@@ -223,7 +228,7 @@ public class Deck extends Component implements IDeck {
         return decks;
     }
 
-    public void discard(Card card) {
+    public void discard(T card) {
         cards.remove(card);
     }
 }

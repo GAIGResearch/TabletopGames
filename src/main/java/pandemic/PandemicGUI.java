@@ -57,7 +57,7 @@ public class PandemicGUI extends GUI {
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
-            Deck playerHand = (Deck) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
+            Deck<Card> playerHand = (Deck<Card>) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
@@ -106,7 +106,7 @@ public class PandemicGUI extends GUI {
             playerCards[i].update(playerCard);
             playerCards[i].repaint();
 
-            Deck playerHand = (Deck) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
+            Deck<Card> playerHand = (Deck<Card>) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
 //            playerHands[i].clear();
             for (int j = 0; j < playerHand.getCards().size(); j++) {
                 Card c = playerHand.getCards().get(j);

@@ -3,13 +3,11 @@ package pandemic.actions;
 import actions.Action;
 import components.BoardNode;
 import components.Card;
-import components.Counter;
 import content.*;
 import core.GameState;
 import pandemic.PandemicGameState;
 import pandemic.Constants;
 
-import static pandemic.Constants.infectionHash;
 import static pandemic.Constants.nameHash;
 
 

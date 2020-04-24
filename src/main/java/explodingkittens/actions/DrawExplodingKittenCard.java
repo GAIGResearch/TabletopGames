@@ -12,10 +12,10 @@ import explodingkittens.ExplodingKittensGameState;
 public class DrawExplodingKittenCard implements Action{
 
     int playerID;
-    Deck deckFrom;
-    Deck deckTo;
+    Deck<Card>  deckFrom;
+    Deck<Card>  deckTo;
 
-    public DrawExplodingKittenCard (int playerID, Deck deckFrom, Deck deckTo) {
+    public DrawExplodingKittenCard (int playerID, Deck<Card>  deckFrom, Deck<Card> deckTo) {
         this.playerID = playerID;
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
@@ -40,7 +40,7 @@ public class DrawExplodingKittenCard implements Action{
             } else {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
-                Deck discardDeck = gs.findDeck("DiscardDeck");
+                Deck<Card> discardDeck = gs.findDeck("DiscardDeck");
                 for (Card card : deckTo.getCards()){
                     discardDeck.add(card);
                 }

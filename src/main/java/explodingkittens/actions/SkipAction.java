@@ -1,6 +1,5 @@
 package explodingkittens.actions;
 
-import actions.Action;
 import components.Card;
 import core.GameState;
 import explodingkittens.ExplodingKittensGameState;

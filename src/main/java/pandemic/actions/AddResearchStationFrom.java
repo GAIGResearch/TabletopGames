@@ -2,8 +2,6 @@ package pandemic.actions;
 
 import actions.Action;
 import components.BoardNode;
-import components.Card;
-import components.Deck;
 import content.PropertyBoolean;
 import core.GameState;
 import pandemic.PandemicGameState;

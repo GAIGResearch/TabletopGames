@@ -5,7 +5,6 @@ import components.Card;
 import components.Deck;
 import core.GameState;
 
-import javax.swing.text.Position;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -31,10 +30,10 @@ public class CarcassonneGameState extends GameState {
         Arrays.fill(unusedMeeple, 7);
         gameBoard = new CarcassonneBoard();
 
-        Deck drawPile = new Deck();
+        Deck<CarcassonneTile> drawPile = new Deck<>();
 
 
-        drawPile.add(new CarcassonneTile());
+        //drawPile.add(new CarcassonneTile());
     }
 
     @Override
@@ -107,7 +106,7 @@ public class CarcassonneGameState extends GameState {
             return false;
         }
 
-        public String toString(){
+        public void print(){
             int minX = 0, maxX = 0, minY = 0, maxY = 0;
             for (Point p : placedTiles.keySet()){
                 if (p.x < minX)
@@ -119,14 +118,13 @@ public class CarcassonneGameState extends GameState {
                 if (p.y < maxY)
                     maxY = p.y;
             }
-            StringBuilder[] stringBuilders = new StringBuilder[maxY-maxY];
+            StringBuilder[] stringBuilders = new StringBuilder[maxY-minY];
             for (int i = 0; i < stringBuilders.length; i++)
                 stringBuilders[i] = new StringBuilder((maxX-minX)*3);
 
-            for (){
 
-            }
-
+            for (StringBuilder stringBuilder : stringBuilders)
+                System.out.println(stringBuilder.toString());
         }
     }
 
@@ -154,15 +152,16 @@ public class CarcassonneGameState extends GameState {
             fixedRotation = true;
         }
 
-        private boolean CanConnect(CarcassonneTile){
+        private boolean CanConnect(CarcassonneTile tile){
             return false;
         }
 
+        /*
         public String[] toString(){
             return new String[]{Arrays.toString(type[0]),
                     Arrays.toString(type[1]),
                     Arrays.toString(type[2])};
-        }
+        }*/
     }
 
     public enum CarcassonneType{

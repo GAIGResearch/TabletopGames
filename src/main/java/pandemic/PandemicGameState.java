@@ -7,7 +7,6 @@ import core.Area;
 import core.GameState;
 import pandemic.actions.*;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,13 +61,13 @@ public class PandemicGameState extends GameState {
         }
 
         // Set up decks
-        Deck playerDeck = new Deck("Player Deck"); // contains city & event cards
+        Deck<Card> playerDeck = new Deck("Player Deck"); // contains city & event cards
         playerDeck.add(findDeck("Cities"));
         playerDeck.add(findDeck("Events"));
 
-        Deck playerDiscard = new Deck("Player Deck Discard");
-        Deck infDiscard = new Deck("Infection Discard");
-        Deck plannerDeck = new Deck("plannerDeck"); // deck to store extra card for the contingency planner
+        Deck<Card>  playerDiscard = new Deck<> ("Player Deck Discard");
+        Deck<Card>  infDiscard = new Deck<> ("Infection Discard");
+        Deck<Card>  plannerDeck = new Deck<> ("plannerDeck"); // deck to store extra card for the contingency planner
 
         gameArea.addComponent(Constants.playerDeckHash, playerDeck);
         gameArea.addComponent(Constants.playerDeckDiscardHash, playerDiscard);
@@ -107,7 +106,7 @@ public class PandemicGameState extends GameState {
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
         // get player's hand and role card
-        Deck playerHand = ((Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
+        Deck<Card> playerHand = ((Deck<Card>)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
         Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));
         String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
@@ -214,7 +213,7 @@ public class PandemicGameState extends GameState {
                 }
                     
                 // take card
-                Deck otherDeck = (Deck) this.areas.get(i).getComponent(Constants.playerHandHash);
+                Deck<Card>  otherDeck = (Deck<Card>) this.areas.get(i).getComponent(Constants.playerHandHash);
                 Card otherPlayerCard = ((Card)this.areas.get(i).getComponent(Constants.playerCardHash));
                 String otherRoleString = ((PropertyString)otherPlayerCard.getProperty(nameHash)).value;
                 // can take any card from the researcher or the card that matches the city if the player is in that city
@@ -283,7 +282,7 @@ public class PandemicGameState extends GameState {
                 }
             }
             else {
-                Deck deck = findDeck("plannerDeck");
+                Deck<Card> deck = findDeck("plannerDeck");
                 if (deck.getCards().size() > 0) {
                     actions.addAll(actionsFromEventCard(deck.draw(), researchStations));
                 }
@@ -312,7 +311,7 @@ public class PandemicGameState extends GameState {
     }
 
 
-    private List<Action> getMoveActions(int playerId, Deck playerHand, List<String> researchStations){
+    private List<Action> getMoveActions(int playerId, Deck<Card> playerHand, List<String> researchStations){
         // playerID - for the player we want to move
         // playerHand - the deck that we use for the movement
         // researchStations - a list of String locations where research stations are present
