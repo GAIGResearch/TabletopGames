@@ -9,7 +9,7 @@ import utilities.Hash;
 
 public class PlayCard implements Action {
 
-    Card card;
+    private Card card;
 
     public PlayCard(Card c) {
         this.card = c;
@@ -23,7 +23,7 @@ public class PlayCard implements Action {
         PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
             // Tried to play a city card.
-            int activePlayer = gs.getActivePlayer();
+            int activePlayer = gs.getActingPlayer();
             PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
             PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
 
@@ -47,5 +47,18 @@ public class PlayCard implements Action {
         }
 
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof PlayCard)
+        {
+            PlayCard otherAction = (PlayCard) other;
+            return card.equals(otherAction.card);
+
+        }else return false;
     }
 }

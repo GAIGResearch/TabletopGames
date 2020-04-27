@@ -38,8 +38,8 @@ public class PandemicForwardModel implements ForwardModel {
         }
 
         // infection
-        Deck infectionDeck = firstState.findDeck("Infections");
-        Deck infectionDiscard = firstState.findDeck("Infection Discard");
+        IDeck infectionDeck =  firstState.findDeck("Infections");
+        IDeck infectionDiscard =  firstState.findDeck("Infection Discard");
         infectionDeck.shuffle(rnd);
         int nCards = gameParameters.n_infection_cards_setup;
         int nTimes = gameParameters.n_infections_setup;
@@ -48,17 +48,16 @@ public class PandemicForwardModel implements ForwardModel {
                 Card c = infectionDeck.draw();
 
                 // Place matching color (nTimes - j) cubes and place on matching city
-                new InfectCity(gameParameters, c, nTimes - j).execute(state);
+                new InfectCity(gameParameters.max_cubes_per_city, c, nTimes - j).execute(state);
 
                 // Discard card
                 new DrawCard(infectionDeck, infectionDiscard).execute(state);
             }
         }
 
-        // give players cards
-        Deck playerCards = firstState.findDeck("Player Roles");
-        Deck playerDeck = firstState.findDeck("Player Deck");
-        playerCards.shuffle(rnd);
+        // give players cards;
+        IDeck playerCards =  firstState.findDeck("Player Roles");
+        IDeck playerDeck = firstState.findDeck("Player Deck");
         int nCardsPlayer = gameParameters.n_cards_per_player.get(state.getNPlayers());
         long maxPop = 0;
         int startingPlayer = -1;
@@ -75,7 +74,7 @@ public class PandemicForwardModel implements ForwardModel {
             placePlayer(state, "Atlanta", i);
 
             // Give players cards
-            Deck playerHandDeck = (Deck) playerArea.getComponent(Constants.playerHandHash);
+            IDeck playerHandDeck = (IDeck) playerArea.getComponent(Constants.playerHandHash);
 
             playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {
@@ -116,6 +115,11 @@ public class PandemicForwardModel implements ForwardModel {
     public void next(GameState currentState, Action action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
         PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
+
+        if (pgs.getReactivePlayers().size() == 0) {
+            // Only advance round step if no one is reacting
+            pgs.roundStep += 1;
+        }
         playerActions(pgs, action);
 
         if (action instanceof CureDisease) {
@@ -125,43 +129,77 @@ public class PandemicForwardModel implements ForwardModel {
                 if (pgs.findCounter("Disease " + c).getValue() < 1) all_cured = false;
             }
             if (all_cured) {
-                currentState.setGameOver(GAME_WIN);
+                pgs.setGameOver(GAME_WIN);
                 System.out.println("WIN!");
             }
         }
 
-        if (pgs.roundStep >= gameParameters.n_actions_per_turn) {
+        boolean reacted = pgs.removeReactivePlayer();  // Reaction (if any) done
+
+        if (!reacted && pgs.roundStep >= gameParameters.n_actions_per_turn || reacted && pgs.wasModelInterrupted()) {
             pgs.roundStep = 0;
             drawCards(pgs, gameParameters);
 
-            if (!pgs.isQuietNight()) {
-                infectCities(pgs, gameParameters);
-                pgs.setQuietNight(false);
-            }
+            if (pgs.getReactivePlayers().size() == 0) {
+                // It's possible drawCards() method caused an interruption resulting in discard card reactions
+                pgs.setModelInterrupted(false);
+                if (!pgs.isQuietNight()) {
+                    // Only do this step if Quiet Night event card was not played
+                    infectCities(pgs, gameParameters);
+                    pgs.setQuietNight(false);
+                }
 
-            // Set the next player as active
-            pgs.setActivePlayer((pgs.getActivePlayer() + 1) % pgs.getNPlayers());
+                // Set the next player as active
+                pgs.nextPlayer();
+
+            } else {
+                pgs.setModelInterrupted(false);
+            }
         }
 
         // TODO: wanna play event card?
     }
 
+    @Override
+    public ForwardModel copy() {
+        PandemicForwardModel fm = new PandemicForwardModel();
+        fm.rnd = rnd; //TODO: revisit this, we may not want the same random generator.
+        return fm;
+    }
+
     private void playerActions(PandemicGameState currentState, Action action) {
-        currentState.roundStep += 1;
         action.execute(currentState);
+        PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
+        } else if (action instanceof MovePlayer){
+            // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
+            int playerIdx = currentState.getActivePlayer();
+            Card playerCard = (Card) currentState.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+            String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
+
+            if (roleString.equals("Medic")){
+                for (String color: Constants.colors){
+                    Counter diseaseToken = currentState.findCounter("Disease " + color);
+                    String city = ((MovePlayer)action).getDestination();
+
+                    boolean disease_cured = diseaseToken.getValue() > 0;
+                    if (disease_cured){
+                        new TreatDisease(gameParameters.n_initial_disease_cubes, color, city, true);
+                    }
+                }
+            }
         }
     }
 
     private void drawCards(GameState currentState, PandemicParameters gameParameters) {
         int noCardsDrawn = gameParameters.n_cards_draw;
-        int activePlayer = currentState.getActivePlayer();
+        int activePlayer = currentState.getActingPlayer();
 
         String tempDeckID = currentState.tempDeck();
         DrawCard action = new DrawCard("Player Deck", tempDeckID);
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            Deck cityDeck = currentState.findDeck("Player Deck");
+            IDeck cityDeck =  currentState.findDeck("Player Deck");
             boolean canDraw = cityDeck.getCards().size() > 0;
 
             // if player cannot draw it means that the deck is empty -> GAME OVER
@@ -172,10 +210,12 @@ public class PandemicForwardModel implements ForwardModel {
             action.execute(currentState);
 
         }
-        Deck tempDeck = currentState.findDeck(tempDeckID);
+        IDeck tempDeck = currentState.findDeck(tempDeckID);
         boolean epidemic = false;
-        for (Card c : tempDeck.getCards()) {  // Check the drawn cards
 
+        Deck playerDeck = (Deck) currentState.getAreas().get(activePlayer).getComponent(Constants.playerHandHash);
+
+        for (Card c : tempDeck.getCards()) {  // Check the drawn cards
             // If epidemic card, do epidemic, only one per draw
             if (((PropertyString)c.getProperty(nameHash)).value.hashCode() == Constants.epidemicCard) {
                 if (!epidemic) {
@@ -183,23 +223,22 @@ public class PandemicForwardModel implements ForwardModel {
                     epidemic = true;
                 }
             } else {  // Otherwise, give card to player
-                Area area = currentState.getAreas().get(activePlayer);
-                Deck deck = (Deck) area.getComponent(Constants.playerHandHash);
-                if (deck != null) {
+                if (playerDeck != null) {
                     // deck size doesn't go beyond 7
-                    if (!new AddCardToDeck(c, deck).execute(currentState)){
-                        // player needs to discard a card
-
-                        // TODO: This needs to be thought properly. In a forward model, other agents acting at this step
-                        //  would be part of the opponent model. Additionally, we don't have access to Game anymore, and
-                        //  it doesn't make much sense to have players in the game state (or we'd have to copy them)
-                        //  I think we need a system to handle imminent actions (that require decision making) triggered by other actions.
-                        //game.getPlayers().get(activePlayer).getAction(currentState);
-                    }
+                    new AddCardToDeck(c, playerDeck).execute(currentState);
                 }
             }
         }
         currentState.clearTempDeck();
+
+        // If player's deck size went over capacity, player needs to discard
+        if (playerDeck != null && playerDeck.isOverCapacity()){
+            // player needs to discard N cards TODO: action list should only contain discard card action
+            int nDiscards = playerDeck.getCards().size() - playerDeck.getCapacity();
+            for (int i = 0; i < nDiscards; i++) {
+                currentState.addReactivePlayer(activePlayer);
+            }
+        }
     }
 
     private void epidemic(GameState currentState, PandemicParameters gameParameters) {
@@ -215,11 +254,11 @@ public class PandemicForwardModel implements ForwardModel {
             System.out.println("No more cards to draw");
             return;
         }
-        new InfectCity(gameParameters, c, gameParameters.n_cubes_epidemic).execute(currentState);
+        new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_epidemic).execute(currentState);
         if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
 
         // 3. shuffle infection discard deck, add back on top of infection deck
-        Deck infectionDiscard = currentState.findDeck("Infection Discard");
+        IDeck infectionDiscard =  currentState.findDeck("Infection Discard");
         infectionDiscard.shuffle(rnd);
         for (Card card: infectionDiscard.getCards()) {
             new AddCardToDeck(card, currentState.findDeck("Infections")).execute(currentState);
@@ -234,9 +273,9 @@ public class PandemicForwardModel implements ForwardModel {
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
             action.execute(currentState);
         }
-        Deck tempDeck = currentState.findDeck(tempDeckID);
+        IDeck tempDeck = currentState.findDeck(tempDeckID);
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
-            new InfectCity(gameParameters, c, gameParameters.n_cubes_infection).execute(currentState);
+            new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_infection).execute(currentState);
             if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
         }
         currentState.clearTempDeck();

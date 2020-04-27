@@ -20,12 +20,11 @@ public class PandemicGame extends Game {
             System.out.println(turn++);
 
             // Get actions of current active player for their turn
-            int activePlayer = gameState.getActivePlayer();
+            int activePlayer = gameState.getActingPlayer(); // TODO: any specific constraints on game state for reaction?
             Action action = players.get(activePlayer).getAction(gameState);
 
             // Resolve actions and game rules for the turn
             gameState.next(action);
-//            forwardModel.next(gameState, action);
             actionsPlayed++;
 
             if (gui != null) {

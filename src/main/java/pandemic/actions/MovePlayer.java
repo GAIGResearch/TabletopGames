@@ -3,22 +3,21 @@ package pandemic.actions;
 import actions.Action;
 import components.BoardNode;
 import components.Card;
-import content.PropertyBoolean;
-import content.PropertyIntArrayList;
-import content.PropertyString;
-import content.PropertyStringArray;
+import components.Counter;
+import content.*;
 import core.GameState;
 import pandemic.PandemicGameState;
 import pandemic.Constants;
 
+import static pandemic.Constants.infectionHash;
 import static pandemic.Constants.nameHash;
 
 
 public class MovePlayer implements Action {
 
 
-    int playerIdx;
-    String destination;
+    private int playerIdx;
+    private String destination;
 
     public MovePlayer(int playerIdx, String city) {
         this.playerIdx = playerIdx;
@@ -32,12 +31,12 @@ public class MovePlayer implements Action {
         BoardNode destinationCity = ((PandemicGameState)gs).world.getNode(nameHash, destination);
 
         // todo there are more ways to move the player, when this function is called the player should already know if the move is legal or not
-        if (checkNeighbours(currentCity, destinationCity) || checkResearchStations(currentCity, destinationCity)) {
-            removePlayer((PandemicGameState)gs, prop.value, playerIdx);
-            placePlayer((PandemicGameState)gs, destination, playerIdx);
-        }
-//        removePlayer((PandemicGameState)gs, prop.value, playerIdx);
-//        placePlayer((PandemicGameState)gs, destination, playerIdx);
+//        if (checkNeighbours(currentCity, destinationCity) || checkResearchStations(currentCity, destinationCity)) {
+//            removePlayer((PandemicGameState)gs, prop.value, playerIdx);
+//            placePlayer((PandemicGameState)gs, destination, playerIdx);
+//        }
+        removePlayer((PandemicGameState)gs, prop.value, playerIdx);
+        placePlayer((PandemicGameState)gs, destination, playerIdx);
 
         return false;
     }
@@ -75,5 +74,22 @@ public class MovePlayer implements Action {
         PropertyBoolean research1 = (PropertyBoolean) city1.getProperty(Constants.researchStationHash);
         PropertyBoolean research2 = (PropertyBoolean) city2.getProperty(Constants.researchStationHash);
         return research1.value && research2.value;
+    }
+
+    public String getDestination(){
+        return destination;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof MovePlayer)
+        {
+            MovePlayer otherAction = (MovePlayer) other;
+            return destination.equals(otherAction.destination) && playerIdx == otherAction.playerIdx;
+
+        }else return false;
     }
 }

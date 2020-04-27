@@ -11,24 +11,18 @@ import pandemic.PandemicGameState;
 import static pandemic.Constants.*;
 
 
-public class AddResearchStationWithCardFrom extends AddResearchStation implements Action {
+public class AddResearchStationFrom extends AddResearchStation implements Action {
 
     private String fromCity;
-    private Card card;
 
-    public AddResearchStationWithCardFrom(String from, String to, Card c) {
+    public AddResearchStationFrom(String from, String to) {
         super(to);
         this.fromCity = from;
-        this.card = c;
     }
 
     @Override
     public boolean execute(GameState gs) {
         boolean success = super.execute(gs);
-
-        // Discard the card played
-        Deck playerHand = (Deck)gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
-        playerHand.discard(card);
 
         // Remove research station from "fromCity" location
         BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, fromCity);
@@ -44,10 +38,10 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
     public boolean equals(Object other)
     {
         if (this == other) return true;
-        if(other instanceof AddResearchStationWithCardFrom)
+        if(other instanceof AddResearchStationFrom)
         {
-            AddResearchStationWithCardFrom otherAction = (AddResearchStationWithCardFrom) other;
-            return fromCity.equals(otherAction.fromCity) &&  card.equals(otherAction.card);
+            AddResearchStationFrom otherAction = (AddResearchStationFrom) other;
+            return fromCity.equals(otherAction.fromCity);
 
         }else return false;
     }

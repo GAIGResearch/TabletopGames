@@ -10,8 +10,8 @@ import pandemic.Constants;
 
 public class PlayCardFrom implements Action {
 
-    Card card;
-    String destination;
+    private Card card;
+    private String destination;
 
     public PlayCardFrom(Card c, String destination) {
         this.card = c;
@@ -24,7 +24,7 @@ public class PlayCardFrom implements Action {
 
         PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
-            int activePlayer = gs.getActivePlayer();
+            int activePlayer = gs.getActingPlayer();
 
             // Tried to play a city card. Moving from this city to the destination, only if current location matches
             // the card played.
@@ -40,5 +40,18 @@ public class PlayCardFrom implements Action {
         }
 
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof PlayCardFrom)
+        {
+            PlayCardFrom otherAction = (PlayCardFrom) other;
+            return card.equals(otherAction.card) && destination.equals(otherAction.destination);
+
+        }else return false;
     }
 }
