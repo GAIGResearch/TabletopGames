@@ -1,9 +1,13 @@
-package updated_core.games.tictactoe;
+package updated_core.games.uno;
 
 import updated_core.ForwardModel;
 import updated_core.Game;
 import updated_core.actions.IAction;
 import updated_core.actions.IPrintable;
+import updated_core.games.tictactoe.TicTacToeForwardModel;
+import updated_core.games.tictactoe.TicTacToeGame;
+import updated_core.games.tictactoe.TicTacToeGameParameters;
+import updated_core.games.tictactoe.TicTacToeGameState;
 import updated_core.observations.Observation;
 import updated_core.players.AbstractPlayer;
 import updated_core.players.HumanConsolePlayer;
@@ -13,15 +17,15 @@ import updated_core.turn_order.TurnOrder;
 
 import java.util.*;
 
-public class TicTacToeGame extends Game {
+public class UnoGame extends Game {
 
     TurnOrder turnOrder;
-    ForwardModel forwardModel = new TicTacToeForwardModel();
+    ForwardModel forwardModel = new UnoForwardModel();
 
-    public TicTacToeGame(List<AbstractPlayer> agents)
+    public UnoGame(List<AbstractPlayer> agents)
     {
         turnOrder = new AlternatingTurnOrder(agents);
-        gameState = new TicTacToeGameState(new TicTacToeGameParameters(2));
+        gameState = new UnoGameState(new UnoGameParameters(2));
     }
 
     @Override
@@ -30,20 +34,21 @@ public class TicTacToeGame extends Game {
             AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer();
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
             Observation observation = gameState.getObservation(currentPlayer);
-            ((IPrintable) observation).PrintToConsole();
+            //((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
+
             forwardModel.next(gameState, turnOrder, actions.get(actionIdx));
             turnOrder.endPlayerTurn();
             System.out.println();
         }
 
-        ((IPrintable) gameState.getObservation(null)).PrintToConsole();
-        System.out.println(Arrays.toString(gameState.getPlayerResults()));
+        //((IPrintable) gameState.getObservation(null)).PrintToConsole();
+        //System.out.println(Arrays.toString(gameState.getPlayerResults()));
     }
 
     @Override
     public boolean isEnded() {
-        return gameState.isTerminal();
+        return false;
     }
 
     @Override
@@ -51,12 +56,14 @@ public class TicTacToeGame extends Game {
         return null;
     }
 
+
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomAIPlayer(0));
+        agents.add(new HumanConsolePlayer(0));
         agents.add(new HumanConsolePlayer(1));
 
-        TicTacToeGame game = new TicTacToeGame(agents);
+        UnoGame game = new UnoGame(agents);
         game.run();
     }
+
 }

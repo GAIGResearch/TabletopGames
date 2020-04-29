@@ -1,39 +1,32 @@
 package updated_core.games.tictactoe;
 
-import actions.Action;
 import updated_core.actions.IAction;
 import updated_core.actions.SetGridValueAction;
 import updated_core.components.Grid;
-import updated_core.gamestates.GameState;
+import updated_core.enums.PlayerResult;
+import updated_core.gamestates.AbstractGameState;
+import updated_core.gamestates.GridGameState;
+import updated_core.observations.GridObservation;
 import updated_core.observations.Observation;
 import updated_core.players.AbstractPlayer;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
 
-public class TicTacToeGameState extends GameState {
+public class TicTacToeGameState extends AbstractGameState implements GridGameState<Character> {
 
-    Grid<Character> grid = new Grid<>(3, 3, ' ');
-    ArrayList<Point> openPositions = new ArrayList<>();
+    private Grid<Character> grid = new Grid<>(3, 3, ' ');
+
     //HashMap<AbstractPlayer, Character> playerSymbols = new HashMap<>();
 
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters, TicTacToeForwardModel fm){
-        super(gameParameters, fm);
-        /*
-        for (int x = 0; x < grid.getWidth(); x++){
-
-            for (int y = 0; y < grid.getHeight(); y++){
-                openPositions.add(new Point(x, y));
-            }
-        }
-        */
+    public TicTacToeGameState(TicTacToeGameParameters gameParameters){
+        super(gameParameters);
     }
 
     @Override
     public Observation getObservation(AbstractPlayer player) {
-        return null;
+        return new GridObservation<>(grid.getGridValues());
     }
 
     @Override
@@ -43,24 +36,31 @@ public class TicTacToeGameState extends GameState {
         for (int x = 0; x < grid.getWidth(); x++){
             for (int y = 0; y < grid.getHeight(); y++) {
                 if (grid.getElement(x, y) == ' ')
-                    actions.add(new SetGridValueAction<Character>(grid, x, y, Integer.toString(player.playerID).charAt(0)));
+                    actions.add(new SetGridValueAction<>(grid, x, y, player.playerID == 0 ? 'x' : 'o'));
             }
         }
         return actions;
     }
 
     @Override
-    public void getWinner() {
-
+    public void endGame() {
+        terminalState = true;
+        Arrays.fill(playerResults, PlayerResult.Draw);
     }
 
     @Override
-    public int getNPlayers() {
-        return 0;
+    public Grid<Character> getGrid() {
+        return grid;
     }
 
-    @Override
-    public int getActivePlayer() {
-        return 0;
+    public void registerWinner(char winnerSymbol){
+        terminalState = true;
+        if (winnerSymbol == 'o'){
+            playerResults[1] = PlayerResult.Winner;
+            playerResults[0] = PlayerResult.Loser;
+        } else {
+            playerResults[0] = PlayerResult.Winner;
+            playerResults[1] = PlayerResult.Loser;
+        }
     }
 }

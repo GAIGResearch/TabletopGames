@@ -1,6 +1,6 @@
 package updated_core;
 
-import updated_core.gamestates.GameState;
+import updated_core.gamestates.AbstractGameState;
 import updated_core.players.AbstractPlayer;
 
 import java.util.HashSet;
@@ -16,7 +16,7 @@ public abstract class Game {
     /**
      * Real game state
      */
-    protected GameState gameState;
+    protected AbstractGameState gameState;
 
     /**
      * Inits the game. Simply wires the references between game state, parameters and forward models
@@ -34,7 +34,7 @@ public abstract class Game {
     void setup(String dataPath, List<AbstractPlayer> players) {
     }
 
-    public GameState getGameState() {  return gameState; }
+    public AbstractGameState getGameState() {  return gameState; }
     public List<AbstractPlayer> getPlayers() { return players; }
 
     /* List of functions to be implemented in a subclass */

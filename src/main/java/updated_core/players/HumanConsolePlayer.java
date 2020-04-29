@@ -1,10 +1,10 @@
 package updated_core.players;
 
 import updated_core.actions.IAction;
+import updated_core.actions.IPrintable;
 import updated_core.observations.Observation;
-import updated_core.observations.PrintableObservation;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -24,13 +24,16 @@ public class HumanConsolePlayer extends AbstractPlayer {
 
     }
 
-    public int getAction(Observation observation, ArrayList<IAction> actions) {
-        if (observation instanceof PrintableObservation)
-            ((PrintableObservation) observation).PrintToConsole();
+    @Override
+    public int getAction(Observation observation, List<IAction> actions) {
+        if (observation instanceof IPrintable)
+            ((IPrintable) observation).PrintToConsole();
 
         for (int i = 0; i < actions.size(); i++)
-            if (observation instanceof PrintableObservation)
-                ((PrintableObservation) observation).PrintToConsole();
+            if (actions.get(i) instanceof IPrintable) {
+                System.out.print("Action " + i + ": ");
+                ((IPrintable) actions.get(i)).PrintToConsole();
+            }
             else
                 System.out.println("action i: Action does not implement IPrintableAction");
 

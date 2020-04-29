@@ -4,6 +4,7 @@ import updated_core.actions.IAction;
 import updated_core.observations.Observation;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -25,7 +26,8 @@ public class RandomAIPlayer extends AbstractPlayer {
 
     }
 
-    public int getAction(Observation observation, ArrayList<IAction> actions) {
+    @Override
+    public int getAction(Observation observation, List<IAction> actions) {
         return rnd.nextInt(actions.size());
     }
 }

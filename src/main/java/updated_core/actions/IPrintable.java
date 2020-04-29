@@ -1,5 +1,5 @@
 package updated_core.actions;
 
-public interface IPrintableAction extends IAction {
+public interface IPrintable {
     void PrintToConsole();
 }
