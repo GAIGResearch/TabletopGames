@@ -27,13 +27,12 @@ public class TicTacToeGame extends Game {
     @Override
     public void run() {
         while (!isEnded()){
-            AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer();
+            AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
             Observation observation = gameState.getObservation(currentPlayer);
             ((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
             forwardModel.next(gameState, turnOrder, actions.get(actionIdx));
-            turnOrder.endPlayerTurn();
             System.out.println();
         }
 
@@ -56,7 +55,7 @@ public class TicTacToeGame extends Game {
         agents.add(new RandomAIPlayer(0));
         agents.add(new HumanConsolePlayer(1));
 
-        TicTacToeGame game = new TicTacToeGame(agents);
+        Game game = new TicTacToeGame(agents);
         game.run();
     }
 }

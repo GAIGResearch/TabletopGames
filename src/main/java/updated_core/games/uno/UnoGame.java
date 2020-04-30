@@ -31,14 +31,14 @@ public class UnoGame extends Game {
     @Override
     public void run() {
         while (!isEnded()){
-            AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer();
+            AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
             Observation observation = gameState.getObservation(currentPlayer);
             //((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
 
             forwardModel.next(gameState, turnOrder, actions.get(actionIdx));
-            turnOrder.endPlayerTurn();
+            turnOrder.endPlayerTurn(gameState);
             System.out.println();
         }
 
