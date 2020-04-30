@@ -21,8 +21,9 @@ public class Test {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
 
-        tabletopEngine.setGame(new PandemicGame(), new PandemicParameters(), new PandemicGameState(),
-                new PandemicForwardModel(), "data/", players);
+        PandemicParameters pp = new PandemicParameters();
+        tabletopEngine.setGame(new PandemicGame(), pp, new PandemicGameState(),
+                new PandemicForwardModel(pp), "data/", players);
 
 //        tabletopEngine.run();
         tabletopEngine.play();

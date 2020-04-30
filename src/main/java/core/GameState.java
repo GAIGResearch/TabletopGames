@@ -2,6 +2,8 @@ package core;
 
 import actions.Action;
 import components.*;
+import utilities.Pair;
+
 import java.util.*;
 
 import static pandemic.Constants.GAME_ONGOING;
@@ -12,7 +14,7 @@ import static pandemic.Constants.GAME_ONGOING;
 public abstract class GameState {
 
     protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
-    protected ArrayList<Integer> reactivePlayers;
+    protected ArrayList<Pair<Integer, List<Action>>> reactivePlayers;
     protected int nPlayers;
     public int roundStep;
 
@@ -180,14 +182,16 @@ public abstract class GameState {
     public GameParameters getGameParameters() { return this.gameParameters; }
     void setGameParameters(GameParameters gp) { this.gameParameters = gp; }
     public void setGameOver(int status){  this.gameStatus = status; }
-    public int getActingPlayer() {  // Returns player taking an action (or possibly a reaction) next
+    public Pair<Integer, List<Action>> getActingPlayer() {  // Returns player taking an action (or possibly a reaction) next
         if (reactivePlayers.size() == 0)
-            return activePlayer;
+            return new Pair<>(activePlayer, null);
         else return reactivePlayers.get(0);
     }
     public int getActivePlayer() { return activePlayer; }  // Returns the player whose turn it is, might not be active player
-    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }  // Returns players queued to react
-    public void addReactivePlayer(int player) { reactivePlayers.add(player); }
+    public ArrayList<Pair<Integer,List<Action>>> getReactivePlayers() { return reactivePlayers; }  // Returns players queued to react
+    public void addReactivePlayer(int player, List<Action> actionList) {
+        reactivePlayers.add(new Pair<>(player, actionList));
+    }
     public boolean removeReactivePlayer() {
         if (reactivePlayers.size() > 0) {
             reactivePlayers.remove(0);
@@ -201,6 +205,8 @@ public abstract class GameState {
 
     /* Methods to be implemented by subclass */
     public abstract int nPossibleActions();
-    public abstract List<Action> possibleActions(List<Action> preDetermined);
+    public abstract List<Action> possibleActions();
+    public abstract void computeAvailableActions();
+    public abstract void setAvailableActions(List<Action> actions);
 
 }

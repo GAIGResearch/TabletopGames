@@ -20,6 +20,6 @@ public class RandomPlayer implements AIPlayer {
 
     @Override
     public Action getAction(GameState gameState) {
-        return gameState.possibleActions(null).get(rnd.nextInt(gameState.nPossibleActions()));
+        return gameState.possibleActions().get(rnd.nextInt(gameState.nPossibleActions()));
     }
 }
