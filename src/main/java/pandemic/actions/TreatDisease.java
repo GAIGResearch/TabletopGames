@@ -8,6 +8,7 @@ import core.GameParameters;
 import core.GameState;
 import pandemic.PandemicGameState;
 import pandemic.PandemicParameters;
+import utilities.Hash;
 import utilities.Utils;
 
 import static pandemic.Constants.*;
@@ -38,8 +39,8 @@ public class TreatDisease implements Action {
     public boolean execute(GameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
 
-        Counter diseaseToken = pgs.findCounter("Disease " + color);
-        Counter diseaseCubeCounter = gs.findCounter("Disease Cube " + color);
+        Counter diseaseToken = (Counter) pgs.getAreas().get(-1).getComponent(Hash.GetInstance().hash("Disease " + color));
+        Counter diseaseCubeCounter = (Counter) pgs.getAreas().get(-1).getComponent(Hash.GetInstance().hash("Disease Cube " + color));
         int colorIdx = Utils.indexOf(colors, color);
 
         BoardNode bn = pgs.world.getNode(nameHash, city);

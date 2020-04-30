@@ -16,13 +16,6 @@ public abstract class GameState {
     protected int nPlayers;
     public int roundStep;
 
-    protected HashMap<Integer, Area> areas;
-    protected List<Board> boards;
-    protected List<IDeck> decks;
-    protected List<Token> tokens;
-    protected List<Counter> counters;
-    protected List<Dice> dice;
-
     /**
      * Forward model of this game. Logic and setup.
      */
@@ -50,28 +43,6 @@ public abstract class GameState {
         gsCopy.nPlayers = nPlayers;
         gsCopy.roundStep = roundStep;
 
-        gsCopy.areas = new HashMap<>();
-        for(int key : areas.keySet())
-        {
-            Area a = areas.get(key);
-            gsCopy.areas.put(key, a.copy());
-        }
-
-        gsCopy.boards = new ArrayList<>();
-        for(Board b : boards) gsCopy.boards.add(b.copy());
-
-        gsCopy.decks = new ArrayList<>();
-        for(IDeck d : decks) gsCopy.decks.add(d.copy());
-
-        gsCopy.tokens = new ArrayList<>();
-        for(Token t : tokens) gsCopy.tokens.add(t.copy());
-
-        gsCopy.counters = new ArrayList<>();
-        for(Counter c : counters) gsCopy.counters.add(c.copy());
-
-        gsCopy.dice = new ArrayList<>();
-        for(Dice d : dice) gsCopy.dice.add(d.copy());
-
         gsCopy.forwardModel = forwardModel.copy();
         gsCopy.gameStatus = gameStatus;
         gsCopy.gameParameters = gameParameters.copy();
@@ -98,81 +69,16 @@ public abstract class GameState {
 
     public final void init()
     {
-        areas = new HashMap<>();  // Game State has areas! Initialize.
         reactivePlayers = new ArrayList<>();
     }
 
-    public abstract void setComponents();
-
-    public void load(String dataPath)
-    {
-        boards = Board.loadBoards(dataPath + "boards.json");
-        decks = Deck.loadDecks(dataPath + "decks.json");
-        tokens = Token.loadTokens(dataPath + "tokens.json");
-        counters = Counter.loadCounters(dataPath + "counters.json");
-//        dice  = Dice.loadDice(dataPath + "dice.json");  // TODO
-    }
+    public abstract void setComponents(String dataPath);
 
 
     public void next(Action action) {
         forwardModel.next(this, action);
     }
 
-
-    public void addDeckToList(Deck deck){
-        this.decks.add(deck);
-    }
-
-    public Board findBoard(String name) {
-        for (Board c: boards) {
-            if (name.equalsIgnoreCase(c.getNameID())) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public Counter findCounter(String name) {
-        for (Counter c: counters) {
-            if (name.equalsIgnoreCase(c.getID())) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public Token findToken(String name) {
-        for (Token t: tokens) {
-            if (name.equalsIgnoreCase(t.getNameID())) {
-                return t;
-            }
-        }
-        return null;
-    }
-
-    public IDeck findDeck(String name) {
-        for (IDeck d: decks) {
-            if (name.equalsIgnoreCase(d.getID())) {
-                return d;
-            }
-        }
-        return null;
-    }
-
-    public String tempDeck() {
-        IDeck temp = findDeck("tempDeck");
-        if (temp == null) {
-            temp = new Deck("tempDeck");
-            decks.add(temp);
-        } else {
-            temp.clear();
-        }
-        return "tempDeck";
-    }
-
-    public void clearTempDeck() {
-        tempDeck();
-    }
 
     //Getters & setters
     public int getGameStatus() {  return gameStatus; }
@@ -196,7 +102,6 @@ public abstract class GameState {
         }
         return false;
     }
-    public HashMap<Integer, Area> getAreas() { return areas; }
     public int getNPlayers() { return nPlayers; }
     public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }
 

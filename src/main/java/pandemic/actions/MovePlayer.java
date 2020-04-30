@@ -24,7 +24,8 @@ public class MovePlayer implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        PropertyString prop = (PropertyString) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
+        PandemicGameState pgs = (PandemicGameState) gs;
+        PropertyString prop = (PropertyString) pgs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
         BoardNode currentCity = ((PandemicGameState)gs).world.getNode(nameHash, prop.value);
         BoardNode destinationCity = ((PandemicGameState)gs).world.getNode(nameHash, destination);
 

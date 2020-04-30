@@ -42,10 +42,9 @@ public abstract class Game {
      * @param players List of players for this game.
      */
     void setup(String dataPath, List<AIPlayer> players) {
-        gameState.load(dataPath);
         this.players = players;
         gameState.setNPlayers(players.size());
-        gameState.setComponents();
+        gameState.setComponents(dataPath);
         gameState.getModel().setup(gameState);
     }
 

@@ -25,9 +25,10 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
     @Override
     public boolean execute(GameState gs) {
         boolean success = super.execute(gs);
+        PandemicGameState pgs = (PandemicGameState)gs;
 
         // Discard the card played
-        Deck playerHand = (Deck)gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+        Deck playerHand = (Deck)pgs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
         playerHand.discard(card);
 
         // Remove research station from "fromCity" location

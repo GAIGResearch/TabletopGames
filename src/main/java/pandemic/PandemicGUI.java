@@ -18,12 +18,12 @@ public class PandemicGUI extends GUI {
     ArrayList<PandemicCardView>[] playerHands;
     JComponent boardView;
 
-    GameState gameState;
+    PandemicGameState gameState;
     int nPlayers, activePlayer;
     int maxCards = 7;
 
     public PandemicGUI(Game game) {
-        gameState = game.getGameState();
+        gameState = (PandemicGameState) game.getGameState();
         nPlayers = game.getPlayers().size();
         activePlayer = gameState.getActingPlayer();
 
@@ -82,24 +82,24 @@ public class PandemicGUI extends GUI {
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
-        Counter cnY = gameState.findCounter("Disease yellow");
+        Counter cnY = gameState.getData().findCounter("Disease yellow");
         JComponent cY = new CounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
-        Counter cnR = gameState.findCounter("Disease red");
+        Counter cnR = gameState.getData().findCounter("Disease red");
         JComponent cR = new CounterView(cnR, Color.red, null);
         counterArea.add(cR);
-        Counter cnB = gameState.findCounter("Disease blue");
+        Counter cnB = gameState.getData().findCounter("Disease blue");
         JComponent cB = new CounterView(cnB, Color.blue, null);
         counterArea.add(cB);
-        Counter cnK = gameState.findCounter("Disease black");
+        Counter cnK = gameState.getData().findCounter("Disease black");
         JComponent cK = new CounterView(cnK, Color.black, null);
         counterArea.add(cK);
 
         return counterArea;
     }
 
-    public void update(GameState gameState) {
-        this.gameState = gameState;
+    public void update(GameState gs) {
+        this.gameState = (PandemicGameState) gs;
         ((PandemicBoardView)boardView).gameState = gameState;
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerCard"));

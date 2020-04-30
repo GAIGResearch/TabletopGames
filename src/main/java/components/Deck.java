@@ -144,7 +144,7 @@ public class Deck<T> extends Component implements IDeck<T> {
 
 
     @Override
-    public IDeck<T> copy()
+    public Deck<T> copy()
     {
         Deck<T> dp = new Deck<>();
         this.copyTo(dp);
@@ -208,10 +208,10 @@ public class Deck<T> extends Component implements IDeck<T> {
         return newDeck;
     }
 
-    public static List<IDeck> loadDecks(String filename)
+    public static List<Deck> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<IDeck> decks = new ArrayList<>();
+        ArrayList<Deck> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

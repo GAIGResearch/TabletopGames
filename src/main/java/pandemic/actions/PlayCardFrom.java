@@ -4,6 +4,7 @@ import actions.Action;
 import components.Card;
 import content.PropertyString;
 import core.GameState;
+import pandemic.PandemicGameState;
 import utilities.Hash;
 
 import pandemic.Constants;
@@ -21,6 +22,7 @@ public class PlayCardFrom implements Action {
     @Override
     public boolean execute(GameState gs) {
         // TODO: execute effect of card
+        PandemicGameState pgs = (PandemicGameState)gs;
 
         PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
@@ -30,7 +32,7 @@ public class PlayCardFrom implements Action {
             // the card played.
 
             PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
-            PropertyString currentLocation = (PropertyString) ((Card) gs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
+            PropertyString currentLocation = (PropertyString) ((Card) pgs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
 
             if (name.equals(currentLocation)) {
                 new MovePlayer(activePlayer, destination).execute(gs);

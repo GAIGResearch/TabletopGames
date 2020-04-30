@@ -1,7 +1,7 @@
-import carcassonne.CarcassonneForwardModel;
-import carcassonne.CarcassonneGameState;
-import carcassonne.CarcassonneGame;
-import carcassonne.CarcassonneParameters;
+//import carcassonne.CarcassonneForwardModel;
+//import carcassonne.CarcassonneGameState;
+//import carcassonne.CarcassonneGame;
+//import carcassonne.CarcassonneParameters;
 import core.AIPlayer;
 import core.Runner;
 import players.RandomPlayer;
@@ -20,7 +20,7 @@ public class TestCarcassonne {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
 
-        tabletopEngine.setGame(new CarcassonneGame(), new CarcassonneParameters(), new CarcassonneGameState(), new CarcassonneForwardModel(), "data/", players);
+        //tabletopEngine.setGame(new CarcassonneGame(), new CarcassonneParameters(), new CarcassonneGameState(), new CarcassonneForwardModel(), "data/", players);
 
         tabletopEngine.run();
 //        tabletopEngine.play();

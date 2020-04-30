@@ -1,8 +1,8 @@
 import core.AIPlayer;
 import core.Runner;
-import explodingkittens.ExplodingKittensForwardModel;
-import explodingkittens.ExplodingKittensGame;
-import explodingkittens.ExplodingKittensGameState;
+//import explodingkittens.ExplodingKittensForwardModel;
+//import explodingkittens.ExplodingKittensGame;
+//import explodingkittens.ExplodingKittensGameState;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class TestExplodingKittens {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
 
-        tabletopEngine.setGame(new ExplodingKittensGame(), null, new ExplodingKittensGameState(), new ExplodingKittensForwardModel(), "data/", players);
+//        tabletopEngine.setGame(new ExplodingKittensGame(), null, new ExplodingKittensGameState(), new ExplodingKittensForwardModel(), "data/", players);
 
         tabletopEngine.run();
 //        tabletopEngine.play();

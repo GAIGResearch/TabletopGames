@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Board extends Component{
+public class Board extends Component implements IBoard {
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;
@@ -29,6 +29,7 @@ public class Board extends Component{
     /**
      * @return the list of board nodes
      */
+    @Override
     public List<BoardNode> getBoardNodes() {
         return boardNodes;
     }
@@ -60,12 +61,12 @@ public class Board extends Component{
         int _hash_neighbours_ = Hash.GetInstance().hash(neighboursKey);
         int _hash_vertices_ = Hash.GetInstance().hash(verticesKey);
 
-        for (BoardNode bn : boardNodes) {
-            Property p = bn.getProperty(_hash_neighbours_);
+        for (IBoardNode bn : boardNodes) {
+            Property p = ((BoardNode)bn).getProperty(_hash_neighbours_);
             if (p instanceof PropertyStringArray) {
                 PropertyStringArray psa = (PropertyStringArray) p;
                 for (String str : psa.getValues()) {
-                    BoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
+                    IBoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
                     if (neigh != null) {
                         bn.addNeighbour(neigh);
                         neigh.addNeighbour(bn);
@@ -82,9 +83,10 @@ public class Board extends Component{
      * @param p - Property that has the value to look for.
      * @return - node matching name.
      */
+    @Override
     public BoardNode getNodeByProperty(int prop_id, Property p) {
         for (BoardNode n : boardNodes) {
-            Property prop = n.getProperty(prop_id);
+            Property prop = ((BoardNode)n).getProperty(prop_id);
             if(prop != null)
             {
                 if(prop.equals(p))
@@ -97,6 +99,7 @@ public class Board extends Component{
     }
 
 
+    @Override
     public BoardNode getNode(int hashID, String value)
     {
         return getNodeByProperty(hashID, new PropertyString(value));
@@ -119,6 +122,7 @@ public class Board extends Component{
      * Copy method, to be implemented by all subclasses.
      * @return - a new instance of this Board, deep copy.
      */
+    @Override
     public Board copy()
     {
         Board b = new Board();
@@ -135,6 +139,7 @@ public class Board extends Component{
         this.boardNodes = boardNodes;
     }
 
+    @Override
     public String getNameID() {
         return nameID;
     }
@@ -142,6 +147,7 @@ public class Board extends Component{
     /**
      * Sets the correct type to the component
      */
+    @Override
     public void setType(){
         super.type = ComponentType.BOARD;
     }

@@ -13,7 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Utils.ComponentType;
 
-public class Dice extends Component {
+public class Dice extends Component implements IDice {
     private int number_of_sides;  //By default 1d6
 
     public Dice() {
@@ -22,9 +22,12 @@ public class Dice extends Component {
         this.properties = new HashMap<>();
     }
 
+    @Override
     public int  getNumberOfSides()                    { return this.number_of_sides;            }
+    @Override
     public void setNumberOfSides(int number_of_sides) { this.number_of_sides = number_of_sides; }
 
+    @Override
     public Dice copy() {
         Dice copy = new Dice();
         copy.number_of_sides = number_of_sides;
@@ -38,10 +41,10 @@ public class Dice extends Component {
     }
 
 
-    public static List<Dice> loadDice(String filename)
+    public static List<IDice> loadDice(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Dice> dice = new ArrayList<>();
+        ArrayList<IDice> dice = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
@@ -60,6 +63,7 @@ public class Dice extends Component {
         return dice;
     }
 
+    @Override
     public int roll(Random r) {
         return r.nextInt(this.number_of_sides) + 1;
     }
