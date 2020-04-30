@@ -30,3 +30,4 @@ target/classes/META-INF/ModernBoardGame.kotlin_module
 
 out/production/ModernBoardGame/META-INF/
 *.kotlin_module
+target/classes/META-INF/ModernBoardGame.kotlin_module
