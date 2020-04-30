@@ -5,10 +5,8 @@ import actions.DoNothing;
 import actions.RemoveCardWithCard;
 import components.Card;
 import components.Deck;
-import components.IDeck;
 import content.PropertyString;
 import core.GameState;
-import pandemic.engine.Node;
 
 import java.util.ArrayList;
 
@@ -16,9 +14,6 @@ import static pandemic.Constants.nameHash;
 import static pandemic.Constants.playerHandHash;
 
 public class ForceRPReaction extends RuleNode {
-    public ForceRPReaction(Node next) {
-        super(next);
-    }
 
     @Override
     protected boolean run(GameState gs) {

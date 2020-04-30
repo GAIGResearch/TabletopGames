@@ -34,38 +34,55 @@ public class PandemicForwardModel implements ForwardModel {
         GameOverCondition drawCardsLose = new GameOverDrawCards();
         GameOverCondition win = new GameOverDiseasesCured();
 
-        // Rules and conditions, starting from leaves
-        RuleNode infectCities = new InfectCities(pp.infection_rate, pp.max_cubes_per_city, pp.n_cubes_infection, null); // End of turn, next is null
+        // Rules
+        RuleNode infectCities = new InfectCities(pp.infection_rate, pp.max_cubes_per_city, pp.n_cubes_infection);
+        RuleNode forceDiscardReaction = new ForceDiscardReaction();
+        RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes);
+        RuleNode epidemic2 = new EpidemicIntensify(rnd);
+        RuleNode forceRPreaction = new ForceRPReaction();
+        RuleNode playerActionInterrupt1 = new PlayerAction(pp.n_initial_disease_cubes);
+        RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic);
+        RuleNode drawCards = new DrawCards();
+        RuleNode playerAction = new PlayerAction(pp.n_initial_disease_cubes);
+
+        // Conditions
+        ConditionNode playerHandOverCapacity = new PlayerHandOverCapacity();
+        ConditionNode playerHasRPCard = new HasRPCard();
+        ConditionNode enoughDraws = new EnoughDraws(pp.n_cards_draw);
+        ConditionNode firstEpidemic = new IsEpidemic();
+        ConditionNode enoughActions = new ActionsPerTurnPlayed(pp.n_actions_per_turn);
+
+        // Set up game over conditions in all rules
+        playerAction.addGameOverCondition(win);  // Can win after playing an action, but not reactions
+        drawCards.addGameOverCondition(drawCardsLose);
+        epidemic2.addGameOverCondition(infectLose);
+        epidemic2.addGameOverCondition(outbreakLose);
         infectCities.addGameOverCondition(infectLose);
         infectCities.addGameOverCondition(outbreakLose);
 
-        RuleNode discardReaction = new ForceDiscardReaction(null);
-        RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes, infectCities);
-        discardReaction.setNext(playerActionInterrupt2);
-        ConditionNode playerHandOverCapacity = new PlayerHandOverCapacity(discardReaction, infectCities);
-
-        RuleNode epidemic2 = new EpidemicIntensify(rnd, null);  // enoughDraws
-        epidemic2.addGameOverCondition(infectLose);
-        epidemic2.addGameOverCondition(outbreakLose);
-        RuleNode forceRPreaction = new ForceRPReaction(null);  // playerActionInterrupt1
-        ConditionNode playerHasRPCard = new HasRPCard(forceRPreaction, epidemic2);
-        RuleNode playerActionInterrupt1 = new PlayerAction(pp.n_initial_disease_cubes, playerHasRPCard);
-        forceRPreaction.setNext(playerActionInterrupt1);  // Another loop, give all players chance to play
-        RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic, playerHasRPCard);
-
-        RuleNode drawCards = new DrawCards(null);  // firstEpidemic
-        drawCards.addGameOverCondition(drawCardsLose);
-        ConditionNode enoughDraws = new EnoughDraws(pp.n_cards_draw, playerHandOverCapacity, drawCards);
-        ConditionNode firstEpidemic = new IsEpidemic(epidemic1, enoughDraws);
-        drawCards.setNext(firstEpidemic);  // Another loop
-        epidemic2.setNext(enoughDraws);  // Bigger loop
-
-        RuleNode playerAction = new PlayerAction(pp.n_initial_disease_cubes, null);  // actionsPlayed
-        playerAction.addGameOverCondition(win);  // Can win after playing an action
-        ConditionNode actionsPlayed = new ActionsPerTurnPlayed(pp.n_actions_per_turn, drawCards, playerAction);
-        playerAction.setNext(actionsPlayed);  // Loop, set separately
-
+        // Putting it all together to set up game turn flow
         root = playerAction;
+        playerAction.setNext(enoughActions);
+        enoughActions.setYes(drawCards);
+        enoughActions.setNo(playerAction);  // Loop
+        drawCards.setNext(firstEpidemic);
+        firstEpidemic.setYes(epidemic1);
+        firstEpidemic.setNo(enoughDraws);
+        epidemic1.setNext(playerHasRPCard);
+        playerHasRPCard.setYes(forceRPreaction);
+        playerHasRPCard.setNo(epidemic2);
+        forceRPreaction.setNext(playerActionInterrupt1);
+        playerActionInterrupt1.setNext(playerHasRPCard);  // Loop
+        epidemic2.setNext(enoughDraws);  // Loop
+        enoughDraws.setYes(playerHandOverCapacity);
+        enoughDraws.setNo(drawCards); // Loop
+        playerHandOverCapacity.setYes(forceDiscardReaction);
+        playerHandOverCapacity.setNo(infectCities);
+        forceDiscardReaction.setNext(playerActionInterrupt2);
+        playerActionInterrupt2.setNext(infectCities);
+        infectCities.setNext(null);  // End of turn
+
+        // Next rule to execute is root
         nextRule = root;
 
         // draw tree from root TODO
@@ -80,7 +97,7 @@ public class PandemicForwardModel implements ForwardModel {
                 nextRule.setAction(action);
                 action = null;
             }
-            lastRule = nextRule;  // TODO: this might mess up references
+            lastRule = nextRule;
             nextRule = nextRule.execute(currentState);
         } while (nextRule != null);
 

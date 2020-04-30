@@ -9,14 +9,10 @@ import content.PropertyString;
 import core.GameState;
 import pandemic.Constants;
 import pandemic.PandemicGameState;
-import pandemic.engine.Node;
 import static pandemic.Constants.nameHash;
+import static pandemic.Constants.playerDeckHash;
 
 public class DrawCards extends RuleNode {
-
-    public DrawCards(Node next) {
-        super(next);
-    }
 
     @Override
     public boolean run(GameState gs) {
@@ -24,21 +20,22 @@ public class DrawCards extends RuleNode {
         int activePlayer = gs.getActingPlayer().a;
 
         String tempDeckID = gs.tempDeck();
-        DrawCard action = new DrawCard("Player Deck", tempDeckID);
+        IDeck tempDeck = gs.findDeck(tempDeckID);
+
+        Deck playerDeck = (Deck) gs.getAreas().get(-1).getComponent(playerDeckHash);
+        DrawCard action = new DrawCard(playerDeck, tempDeck);
         boolean drawn = action.execute(gs);
 
         if (drawn) {
-            IDeck tempDeck = gs.findDeck(tempDeckID);
-            Deck playerDeck = (Deck) gs.getAreas().get(activePlayer).getComponent(Constants.playerHandHash);
+            Deck playerHand = (Deck) gs.getAreas().get(activePlayer).getComponent(Constants.playerHandHash);
 
             Card c = tempDeck.pick();  // Check the drawn card
             // If epidemic card, do epidemic, only one per draw
             if (((PropertyString) c.getProperty(nameHash)).value.hashCode() == Constants.epidemicCard) {
                 epidemic = true;
             } else {  // Otherwise, give card to player
-                if (playerDeck != null) {
-                    // deck size doesn't go beyond 7
-                    new AddCardToDeck(c, playerDeck).execute(gs);
+                if (playerHand != null) {
+                    new AddCardToDeck(c, playerHand).execute(gs);
                 }
             }
             ((PandemicGameState) gs).setEpidemic(epidemic);

@@ -4,15 +4,14 @@ import actions.AddCardToDeck;
 import components.Card;
 import components.IDeck;
 import core.GameState;
-import pandemic.engine.Node;
 
 import java.util.Random;
 
 public class EpidemicIntensify extends RuleNode {
     Random rnd;
 
-    public EpidemicIntensify(Random rnd, Node next) {
-        super(next);
+    public EpidemicIntensify(Random rnd) {
+        super();
         this.rnd = rnd;
     }
 

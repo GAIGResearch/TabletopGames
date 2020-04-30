@@ -6,12 +6,6 @@ import pandemic.engine.Node;
 public abstract class ConditionNode extends Node {
     Node childYes, childNo;
 
-    public ConditionNode(Node yes, Node no) {
-        super();
-        childNo = no;
-        childYes = yes;
-    }
-
     protected abstract boolean test(GameState gs);
 
     public final Node execute(GameState gs) {
@@ -22,4 +16,11 @@ public abstract class ConditionNode extends Node {
         return childYes;
     }
 
+    public final void setNo(Node childNo) {
+        this.childNo = childNo;
+    }
+
+    public final void setYes(Node childYes) {
+        this.childYes = childYes;
+    }
 }

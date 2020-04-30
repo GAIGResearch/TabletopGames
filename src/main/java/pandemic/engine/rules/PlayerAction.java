@@ -9,15 +9,14 @@ import pandemic.PandemicGameState;
 import pandemic.actions.MovePlayer;
 import pandemic.actions.QuietNight;
 import pandemic.actions.TreatDisease;
-import pandemic.engine.Node;
 
 import static pandemic.Constants.nameHash;
 
 public class PlayerAction extends RuleNode {
 
     int n_initial_disease_cubes;
-    public PlayerAction(int n_initial_disease_cubes, Node next) {
-        super(next, true);
+    public PlayerAction(int n_initial_disease_cubes) {
+        super(true);
         this.n_initial_disease_cubes = n_initial_disease_cubes;
     }
 

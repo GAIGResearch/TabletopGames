@@ -12,15 +12,13 @@ public abstract class RuleNode extends Node {
     Node childNext;
     private ArrayList<GameOverCondition> gameOverConditions;
 
-    public RuleNode(Node next) {
+    public RuleNode() {
         super();
-        childNext = next;
         gameOverConditions = new ArrayList<>();
     }
 
-    protected RuleNode(Node next, boolean actionNode) {
+    protected RuleNode(boolean actionNode) {
         super();
-        childNext = next;
         this.actionNode = actionNode;
         gameOverConditions = new ArrayList<>();
     }

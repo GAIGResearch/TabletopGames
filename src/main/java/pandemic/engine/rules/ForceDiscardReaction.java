@@ -5,14 +5,10 @@ import actions.DrawCard;
 import components.Deck;
 import core.GameState;
 import pandemic.Constants;
-import pandemic.engine.Node;
 
 import java.util.ArrayList;
 
 public class ForceDiscardReaction extends RuleNode {
-    public ForceDiscardReaction(Node next) {
-        super(next);
-    }
 
     @Override
     protected boolean run(GameState gs) {

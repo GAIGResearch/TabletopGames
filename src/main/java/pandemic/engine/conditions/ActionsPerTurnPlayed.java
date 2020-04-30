@@ -1,13 +1,12 @@
 package pandemic.engine.conditions;
 
 import core.GameState;
-import pandemic.engine.Node;
 
 public class ActionsPerTurnPlayed extends ConditionNode {
     int n_actions;
 
-    public ActionsPerTurnPlayed(int n_actions, Node yes, Node no) {
-        super(yes, no);
+    public ActionsPerTurnPlayed(int n_actions) {
+        super();
         this.n_actions = n_actions;
     }
 

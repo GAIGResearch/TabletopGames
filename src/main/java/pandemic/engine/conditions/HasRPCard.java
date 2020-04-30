@@ -4,16 +4,11 @@ import components.Card;
 import components.Deck;
 import content.PropertyString;
 import core.GameState;
-import pandemic.engine.Node;
 
 import static pandemic.Constants.nameHash;
 import static pandemic.Constants.playerHandHash;
 
 public class HasRPCard extends ConditionNode {
-
-    public HasRPCard(Node yes, Node no) {
-        super(yes, no);
-    }
 
     @Override
     protected boolean test(GameState gs) {

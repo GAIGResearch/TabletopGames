@@ -15,8 +15,8 @@ public class InfectCities extends RuleNode {
     int n_cubes_infection;
     int[] infection_rate;
 
-    public InfectCities(int[] infection_rate, int max_cubes_per_city, int n_cubes_infection, Node next) {
-        super(next);
+    public InfectCities(int[] infection_rate, int max_cubes_per_city, int n_cubes_infection) {
+        super();
         this.infection_rate = infection_rate;
         this.max_cubes_per_city = max_cubes_per_city;
         this.n_cubes_infection = n_cubes_infection;
