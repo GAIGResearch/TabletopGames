@@ -25,7 +25,7 @@ public class RemoveCardWithCard implements Action {
 
         // Discard other card from player hand
         IDeck discardDeck = gs.findDeck("Player Deck Discard");  // TODO: if this action is to be general, this could be another deck
-        Deck playerHand = (Deck) gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+        Deck playerHand = (Deck) gs.getAreas().get(gs.getActingPlayer().a).getComponent(playerHandHash);
         playerHand.discard(card);
         discardDeck.add(card);
         return true;

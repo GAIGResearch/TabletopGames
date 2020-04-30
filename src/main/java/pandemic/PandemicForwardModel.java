@@ -39,14 +39,18 @@ public class PandemicForwardModel implements ForwardModel {
         infectCities.addGameOverCondition(infectLose);
         infectCities.addGameOverCondition(outbreakLose);
 
-        RuleNode discardReaction = new ForceDiscardReaction(infectCities);
+        RuleNode discardReaction = new ForceDiscardReaction(null);
+        RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes, infectCities);
+        discardReaction.setNext(playerActionInterrupt2);
         ConditionNode playerHandOverCapacity = new PlayerHandOverCapacity(discardReaction, infectCities);
 
         RuleNode epidemic2 = new EpidemicIntensify(rnd, null);  // enoughDraws
         epidemic2.addGameOverCondition(infectLose);
         epidemic2.addGameOverCondition(outbreakLose);
-        RuleNode forceRPreaction = new ForceRPReaction(epidemic2);
+        RuleNode forceRPreaction = new ForceRPReaction(null);  // playerActionInterrupt1
         ConditionNode playerHasRPCard = new HasRPCard(forceRPreaction, epidemic2);
+        RuleNode playerActionInterrupt1 = new PlayerAction(pp.n_initial_disease_cubes, playerHasRPCard);
+        forceRPreaction.setNext(playerActionInterrupt1);  // Another loop, give all players chance to play
         RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic, playerHasRPCard);
 
         RuleNode drawCards = new DrawCards(null);  // firstEpidemic
@@ -68,7 +72,7 @@ public class PandemicForwardModel implements ForwardModel {
     }
 
     @Override
-    public void next(GameState currentState, Action action) { 
+    public void next(GameState currentState, Action action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
 
         do {

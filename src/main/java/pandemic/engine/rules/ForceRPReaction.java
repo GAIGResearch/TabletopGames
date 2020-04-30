@@ -39,9 +39,10 @@ public class ForceRPReaction extends RuleNode {
                     }
                     // Set discarding infection discarded cards (or do nothing) as the only options and ask player if they want to play their card
                     gs.addReactivePlayer(i, acts);
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
 }
