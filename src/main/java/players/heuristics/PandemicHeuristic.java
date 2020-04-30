@@ -29,21 +29,37 @@ public class PandemicHeuristic extends StateHeuristic {
 
     public static class BoardStats
     {
-        int curesDiscovered;
+        int nCuresDiscovered;
         int nDiseaseCubes;
         int nCardsInPile;
         int nCardsInHand;
         int nOutbreaks;
+        int nResearchStations;
 
-        double FACTOR_CURES = 0.5;
-        double FACTOR_CARDS_IN_HAND = 0.1;
+        double FACTOR_CURES = 0.3;
+        double FACTOR_CUBES = 0.2;
+        double FACTOR_CARDS_IN_PILE = 0.15;
+        double FACTOR_CARDS_IN_HAND = 0.15;
+        double FACTOR_OUTBREAKS = -0.2;
+        double FACTOR_RS = 0.2;
 
         BoardStats(GameState gs) {
             // iterate over the game state and get the value for the variables
 //            int counterValue = gs.findCounter("Disease counter").getValue();
+            nOutbreaks = gs.findCounter("Outbreaks").getValue();
+            nCardsInPile = gs.findDeck("Player Deck").getCards().size();
+            nCardsInHand = ((Deck)gs.getAreas().get(gs.getActingPlayer()).getComponent(Constants.playerHandHash)).size();
 
-            Deck playerHand = ((Deck)gs.getAreas().get(gs.getActingPlayer()).getComponent(Constants.playerHandHash));
-            nCardsInHand = playerHand.size();
+            // get disease cubes
+            for (int i = 0; i < 4; i++){
+                nDiseaseCubes += gs.findCounter("Disease cube " + Constants.colors[i]).getValue();
+                if (gs.findCounter("Disease " + Constants.colors[i]).getValue() > 0)
+                    nCuresDiscovered += 1;
+            }
+
+            nResearchStations = gs.findCounter("Research Stations").getValue();
+
+
         }
 
         /**
@@ -53,12 +69,19 @@ public class PandemicHeuristic extends StateHeuristic {
          */
         double score(BoardStats futureState)
         {
-            int diffCures = futureState.curesDiscovered - this.curesDiscovered;
+            int diffCures = futureState.nCuresDiscovered - this.nCuresDiscovered;
             int diffCardsInHand = futureState.nCardsInHand - this.nCardsInHand;
+            int diffCubes = futureState.nDiseaseCubes - this.nDiseaseCubes;
+            int diffCardsInPile = futureState.nCardsInPile - this.nCardsInPile;
+            int diffOutbreaks = futureState.nOutbreaks - this.nOutbreaks;
+            int diffResearchStations = futureState.nResearchStations - this.nResearchStations;
 
-            System.out.println("OSLA evaluated = " + (diffCures * FACTOR_CURES + diffCardsInHand * FACTOR_CARDS_IN_HAND));
+            double score = diffCures * FACTOR_CURES + diffCardsInHand * FACTOR_CARDS_IN_HAND + diffCubes * FACTOR_CUBES +
+                    diffCardsInPile * FACTOR_CARDS_IN_PILE + diffOutbreaks * FACTOR_OUTBREAKS + diffResearchStations * FACTOR_RS;
 
-            return diffCures * FACTOR_CURES + diffCardsInHand * FACTOR_CARDS_IN_HAND;
+//            System.out.println("OSLA evaluated = " + score);
+
+            return score;
         }
     }
 }
