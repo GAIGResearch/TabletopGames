@@ -22,7 +22,7 @@ public class AddResearchStation implements Action {
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(true));
-            Counter rStationCounter = (Counter) pgs.getAreas().get(-1).getComponent(Constants.researchStationHash);
+            Counter rStationCounter = (Counter) pgs.getComponent(Constants.researchStationHash);
             rStationCounter.decrement(1); // We have one less research station
             return true;
         }

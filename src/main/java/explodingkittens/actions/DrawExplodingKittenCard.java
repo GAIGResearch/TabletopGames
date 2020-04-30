@@ -5,10 +5,7 @@ import components.Card;
 import components.Deck;
 import components.IDeck;
 import core.GameState;
-import explodingkittens.ExplodingKittenCard;
-import explodingkittens.ExplodingKittensCardTypeProperty;
-import explodingkittens.ExplodingKittensGamePhase;
-import explodingkittens.ExplodingKittensGameState;
+import explodingkittens.*;
 
 public class DrawExplodingKittenCard implements Action{
 
@@ -24,6 +21,7 @@ public class DrawExplodingKittenCard implements Action{
 
     @Override
     public boolean execute(GameState gs) {
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         Card c = deckFrom.draw();
         ExplodingKittensCardTypeProperty type = (ExplodingKittensCardTypeProperty) c.getProperty(ExplodingKittensGameState.cardTypeHash);
         if (type.value == ExplodingKittenCard.EXPLODING_KITTEN) {
@@ -41,11 +39,12 @@ public class DrawExplodingKittenCard implements Action{
             } else {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
-                IDeck<Card> discardDeck = gs.findDeck("DiscardDeck");
+                IDeck<Card> discardDeck = ekgs.getDiscardDeck();
                 for (Card card : deckTo.getCards()){
                     discardDeck.add(card);
                 }
                 deckTo.clear();
+                discardDeck.add(c);
                 discardDeck.add(c);
                 ((ExplodingKittensGameState) gs).setActivePlayer(((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID));
                 ((ExplodingKittensGameState) gs).remainingDraws = 1;

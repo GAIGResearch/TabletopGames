@@ -25,7 +25,7 @@ public class MovePlayer implements Action {
     @Override
     public boolean execute(GameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
-        PropertyString prop = (PropertyString) pgs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
+        PropertyString prop = (PropertyString) pgs.getComponent(Constants.playerCardHash, playerIdx).getProperty(Constants.playerLocationHash);
         BoardNode currentCity = ((PandemicGameState)gs).world.getNode(nameHash, prop.value);
         BoardNode destinationCity = ((PandemicGameState)gs).world.getNode(nameHash, destination);
 
@@ -45,7 +45,7 @@ public class MovePlayer implements Action {
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
         prop.getValues().add(playerIdx);
 
-        Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+        Card playerCard = (Card) gs.getComponent(Constants.playerCardHash, playerIdx);
         playerCard.setProperty(Constants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
     }
 
@@ -54,7 +54,7 @@ public class MovePlayer implements Action {
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
         prop.getValues().remove(new Integer(playerIdx));
 
-        Card playerCard = (Card) gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+        Card playerCard = (Card) gs.getComponent(Constants.playerCardHash, playerIdx);
         playerCard.setProperty(Constants.playerLocationHash, new PropertyString(null));
     }
 

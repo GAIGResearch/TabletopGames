@@ -24,7 +24,7 @@ public class AddResearchStationWithCard extends AddResearchStation implements Ac
         PandemicGameState pgs = (PandemicGameState)gs;
 
         // Discard the card played
-        Deck playerHand = (Deck)pgs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+        Deck playerHand = (Deck)pgs.getComponent(playerHandHash, gs.getActingPlayer());
         playerHand.discard(card);
 
         return false;

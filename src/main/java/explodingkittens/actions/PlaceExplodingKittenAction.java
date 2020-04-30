@@ -15,17 +15,18 @@ public class PlaceExplodingKittenAction extends PlayCard {
 
     @Override
     public boolean execute(GameState gs) {
-        boolean succes = gs.findDeck("Player" + this.playerID + "HandCards").remove(card);
-        gs.findDeck("DrawDeck").add(card, targetIndex);
-        ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
-        int nextPlayer = ((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID);
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
+        boolean success = ekgs.getPlayerHand(this.playerID).remove(card);
+        ekgs.getDrawDeck().add(card, targetIndex);
+        ekgs.gamePhase = ExplodingKittensGamePhase.PlayerMove;
+        int nextPlayer = ekgs.nextPlayerToDraw(playerID);
         if (nextPlayer != playerID)
-            ((ExplodingKittensGameState) gs).remainingDraws = 1;
+            ekgs.remainingDraws = 1;
         else
-            ((ExplodingKittensGameState) gs).remainingDraws -= 1;
+            ekgs.remainingDraws -= 1;
 
-        ((ExplodingKittensGameState) gs).setActivePlayer(nextPlayer);
-        return succes;
+        ekgs.setActivePlayer(nextPlayer);
+        return success;
     }
 
     @Override

@@ -2,6 +2,7 @@ package explodingkittens.actions;
 
 import components.Card;
 import core.GameState;
+import explodingkittens.ExplodingKittensGameState;
 
 public class ShuffleAction extends PlayCard implements IsNopeable {
     public ShuffleAction(int playerID, Card card) {
@@ -10,7 +11,8 @@ public class ShuffleAction extends PlayCard implements IsNopeable {
 
     @Override
     public boolean execute(GameState gs) {
-        gs.findDeck("DrawDeck").shuffle();
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
+        ekgs.getDrawDeck().shuffle();
         return super.execute(gs);
     }
 

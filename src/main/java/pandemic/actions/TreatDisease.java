@@ -39,8 +39,8 @@ public class TreatDisease implements Action {
     public boolean execute(GameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
 
-        Counter diseaseToken = (Counter) pgs.getAreas().get(-1).getComponent(Hash.GetInstance().hash("Disease " + color));
-        Counter diseaseCubeCounter = (Counter) pgs.getAreas().get(-1).getComponent(Hash.GetInstance().hash("Disease Cube " + color));
+        Counter diseaseToken = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color));
+        Counter diseaseCubeCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color));
         int colorIdx = Utils.indexOf(colors, color);
 
         BoardNode bn = pgs.world.getNode(nameHash, city);

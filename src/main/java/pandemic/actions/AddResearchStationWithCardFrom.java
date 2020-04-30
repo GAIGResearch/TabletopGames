@@ -28,7 +28,7 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
         PandemicGameState pgs = (PandemicGameState)gs;
 
         // Discard the card played
-        Deck playerHand = (Deck)pgs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+        Deck playerHand = (Deck)pgs.getComponent(playerHandHash, gs.getActingPlayer());
         playerHand.discard(card);
 
         // Remove research station from "fromCity" location

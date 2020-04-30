@@ -27,6 +27,11 @@ public class ExplodingKittensGameState extends GameState {
     public boolean[] playerActive;
     public int nPlayersActive;
 
+    private Deck<Card> drawDeck, discardDeck;
+    private Deck<Card>[] playerHands;
+
+//    private HashMap<Integer, Area> areas;
+
     public ExplodingKittensGamePhase gamePhase = ExplodingKittensGamePhase.PlayerMove;
 
     HashMap<ExplodingKittenCard, Integer> cardCounts = new HashMap<ExplodingKittenCard, Integer>() {{
@@ -71,12 +76,14 @@ public class ExplodingKittensGameState extends GameState {
     }
 
     @Override
-    public void setComponents() {
+    public void setComponents(String dataPath) {
         playerActive = new boolean[nPlayers];
         for (int i = 0; i < nPlayers; i++) playerActive[i] = true;
         nPlayersActive = nPlayers;
+        playerHands = new Deck[nPlayersActive];
+//        areas = new HashMap<>();
 
-        Deck deck = new Deck("DrawDeck");
+        drawDeck = new Deck("DrawDeck");
         // add all cards and distribute 7 random cards to each player
         for (HashMap.Entry<ExplodingKittenCard, Integer> entry : cardCounts.entrySet()) {
             if (entry.getKey() == ExplodingKittenCard.DEFUSE || entry.getKey() == ExplodingKittenCard.EXPLODING_KITTEN)
@@ -84,10 +91,10 @@ public class ExplodingKittensGameState extends GameState {
             for (int i = 0; i < entry.getValue(); i++) {
                 Card card = new Card();
                 card.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(entry.getKey()));
-                deck.add(card);
+                drawDeck.add(card);
             }
         }
-        deck.shuffle();
+        drawDeck.shuffle();
 
         // For each player, initialize their own areas: they get a player hand and a player card
         // give each player a defuse card and seven random cards from the deck
@@ -95,8 +102,8 @@ public class ExplodingKittensGameState extends GameState {
             Area playerArea = new Area();
             playerArea.setOwner(i);
             String deckname = "Player" + i + "HandCards";
-            Deck playerCards = new Deck(deckname);
-            addDeckToList(playerCards);
+            Deck<Card> playerCards = new Deck(deckname);
+            playerHands[i] = playerCards;
 
             //add defuse card
             Card defuse =  new Card();
@@ -105,40 +112,35 @@ public class ExplodingKittensGameState extends GameState {
 
             // add 7 random cards from the deck
             for (int j = 0; j < 7; j++)
-                playerCards.add(deck.draw());
+                playerCards.add(drawDeck.draw());
 
             playerArea.addComponent(playerHandHash, playerCards); // there is not hand card limit
-            areas.put(i, playerArea);
         }
 
         // add remaining defuse cards and exploding kitten cards to the deck and shuffle again
         for (int i = nPlayers; i < 6; i++){
             Card defuse = new Card();
             defuse.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.DEFUSE));
-            deck.add(defuse);
+            drawDeck.add(defuse);
         }
         for (int i = 0; i < nPlayers-1; i++){
             Card explodingKitten = new Card();
             explodingKitten.setProperty(cardTypeHash, new ExplodingKittensCardTypeProperty(ExplodingKittenCard.EXPLODING_KITTEN));
-            deck.add(explodingKitten);
+            drawDeck.add(explodingKitten);
         }
-        deck.shuffle();
+        drawDeck.shuffle();
 
         // setup drawPile area
-        Area drawPile = new Area();
-        drawPile.setOwner(-1);
-        drawPile.addComponent(drawPileHash, deck);
-        areas.put(drawPileHash, drawPile);
+//        Area drawPile = new Area();
+//        drawPile.setOwner(-1);
+//        drawPile.addComponent(drawPileHash, drawDeck);
 
         // setup discardPile area
-        Area discardPile = new Area();
-        discardPile.setOwner(-1);
-        Deck discardDeck = new Deck("DiscardDeck");
-        discardPile.addComponent(discardPileHash, discardDeck);
-        areas.put(discardPileHash, discardPile);
+//        Area discardPile = new Area();
+//        discardPile.setOwner(-1);
+        discardDeck = new Deck<Card>("DiscardDeck");
+//        discardPile.addComponent(discardPileHash, discardDeck);
 
-        addDeckToList(deck);
-        addDeckToList(discardDeck);
 
         // add them to the list of decks, so they are accessible by the game.findDeck() function
         //game.addDeckToList(playerDeck);
@@ -153,18 +155,17 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> defuseActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        IDeck<Card> playerDeck = (IDeck<Card>) findDeck("Player"+activePlayer+"HandCards");
-        IDeck<Card> drawDeck = findDeck("DrawDeck");
+        Deck playerDeck = playerHands[activePlayer];
 
         for (int i = 0; i <= drawDeck.getCards().size(); i++){
-            actions.add(new PlaceExplodingKittenAction(activePlayer, playerDeck.peek(), i));
+            actions.add(new PlaceExplodingKittenAction(activePlayer, (Card) playerDeck.peek(), i));
         }
         return actions;
     }
 
     private ArrayList<Action> nopeActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        IDeck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> playerDeck = playerHands[activePlayer];
         for (Card card : playerDeck.getCards()) {
             if (((ExplodingKittensCardTypeProperty) card.getProperty(cardTypeHash)).value == ExplodingKittenCard.NOPE) {
                 actions.add(new NopeAction(activePlayer, card));
@@ -177,7 +178,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> favorActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        IDeck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> playerDeck = playerHands[activePlayer];
         for (Card card : playerDeck.getCards()) {
             actions.add(new GiveCardAction(card, activePlayer, playerAskingForFavorID));
         }
@@ -186,7 +187,7 @@ public class ExplodingKittensGameState extends GameState {
 
     private ArrayList<Action> playerActions(){
         ArrayList<Action> actions = new ArrayList<>();
-        IDeck<Card> playerDeck = findDeck("Player"+activePlayer+"HandCards");
+        Deck<Card> playerDeck = playerHands[activePlayer];
 
         // todo: only add unique actions
         for (Card card : playerDeck.getCards()) {
@@ -205,7 +206,7 @@ public class ExplodingKittensGameState extends GameState {
                     for (int player = 0; player < nPlayers; player++) {
                         if (player == activePlayer)
                             continue;
-                        if (findDeck("Player"+player+"HandCards").getCards().size() > 0)
+                        if (playerDeck.getCards().size() > 0)
                             actions.add(new FavorAction(activePlayer, card, player));
                     }
                     break;
@@ -251,7 +252,7 @@ public class ExplodingKittensGameState extends GameState {
         }*/
 
         // add end turn by drawing a card
-        actions.add(new DrawExplodingKittenCard(activePlayer, (IDeck<Card>) findDeck("DrawDeck"), playerDeck));
+        actions.add(new DrawExplodingKittenCard(activePlayer, drawDeck, playerDeck));
         return actions;
     }
 
@@ -316,17 +317,14 @@ public class ExplodingKittensGameState extends GameState {
         System.out.println("============================");
         for (int i = 0; i < nPlayers; i++){
             System.out.print("Player " + i + ":");
-            Deck<Card> playerDeck = ((Deck<Card>)this.areas.get(i).getComponent(playerHandHash));
-            printDeck(playerDeck);
+            printDeck(playerHands[activePlayer]);
         }
 
         System.out.print("DrawPile" + ":");
-        Deck<Card> drawPile = (Deck<Card>)this.areas.get(drawPileHash).getComponent(drawPileHash);
-        printDeck(drawPile);
+        printDeck(drawDeck);
 
         System.out.print("DiscardPile" + ":");
-        Deck<Card> discardPile = (Deck<Card>)this.areas.get(discardPileHash).getComponent(discardPileHash);
-        printDeck(discardPile);
+        printDeck(discardDeck);
         System.out.println("" + remainingDraws + " remaining draws");
     }
 
@@ -346,5 +344,21 @@ public class ExplodingKittensGameState extends GameState {
         for (int i = 0; i < nPlayers; i++)
             if (this.playerActive[i]) activePlayers += 1;
         return activePlayers <= 1;
+    }
+
+    public Deck<Card> getDrawDeck() {
+        return drawDeck;
+    }
+
+    public Deck<Card> getDiscardDeck() {
+        return discardDeck;
+    }
+
+    public Deck<Card>[] getPlayerHands() {
+        return playerHands;
+    }
+
+    public Deck<Card> getPlayerHand(int playerId) {
+        return playerHands[playerId];
     }
 }

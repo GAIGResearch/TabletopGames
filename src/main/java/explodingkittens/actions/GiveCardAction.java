@@ -21,9 +21,9 @@ public class GiveCardAction implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        gs.findDeck("Player"+giverID+"HandCards").remove(card);
-        gs.findDeck("Player"+receiverID+"HandCards").add(card);
-        ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
+        ekgs.getPlayerHand(giverID).remove(card);
+        ekgs.getPlayerHand(receiverID).add(card);
         ekgs.gamePhase = ExplodingKittensGamePhase.PlayerMove;
         ekgs.playerAskingForFavorID = -1;
         ekgs.setActivePlayer(receiverID);

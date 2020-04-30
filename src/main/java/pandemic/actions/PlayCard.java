@@ -27,7 +27,7 @@ public class PlayCard implements Action {
             // Tried to play a city card.
             int activePlayer = gs.getActingPlayer();
             PropertyString name = (PropertyString) card.getProperty(Hash.GetInstance().hash("name"));
-            PropertyString currentLocation = (PropertyString) ((Card) pgs.getAreas().get(activePlayer).getComponent(Constants.playerCardHash)).getProperty(Constants.playerLocationHash);
+            PropertyString currentLocation = (PropertyString) ((Card) pgs.getComponent(Constants.playerCardHash, activePlayer)).getProperty(Constants.playerLocationHash);
 
             if (name.equals(currentLocation)) {
                 // Trying to build a research station here.

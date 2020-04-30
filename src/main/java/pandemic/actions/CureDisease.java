@@ -25,12 +25,12 @@ public class CureDisease implements Action {
     public boolean execute(GameState gs) {
         // Find disease counter
         PandemicGameState pgs = (PandemicGameState)gs;
-        Counter diseaseCounter = (Counter) pgs.getAreas().get(-1).getComponent(Hash.GetInstance().hash("Disease " + color));
+        Counter diseaseCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color));
         if (diseaseCounter.getValue() == 0) {
             diseaseCounter.setValue(1);  // Set to cured
 
             // Discard cards from player hand
-            Deck playerHand = (Deck) pgs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+            Deck playerHand = (Deck) pgs.getComponent(playerHandHash, gs.getActingPlayer());
             for (Card c: cards) {
                 playerHand.discard(c);
             }

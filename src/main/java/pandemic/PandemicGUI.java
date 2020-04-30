@@ -50,14 +50,14 @@ public class PandemicGUI extends GUI {
         playerHands = new ArrayList[nPlayers];
 
         for (int i = 0; i < nPlayers; i++) {
-            Card playerCard = (Card) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerCard"));
+            Card playerCard = (Card) gameState.getComponent(Constants.playerCardHash, i);
             PandemicCardView cv = new PandemicCardView(playerCard, null);
             playerCards[i] = cv;
             playerCardsPanel.add(cv);
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
-            Deck<Card> playerHand = (Deck<Card>) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(Constants.playerHandHash, i);
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
@@ -102,11 +102,11 @@ public class PandemicGUI extends GUI {
         this.gameState = (PandemicGameState) gs;
         ((PandemicBoardView)boardView).gameState = gameState;
         for (int i = 0; i < nPlayers; i++) {
-            Card playerCard = (Card) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerCard"));
+            Card playerCard = (Card) gameState.getComponent(Constants.playerCardHash, i);
             playerCards[i].update(playerCard);
             playerCards[i].repaint();
 
-            Deck<Card> playerHand = (Deck<Card>) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(Constants.playerHandHash, i);
 //            playerHands[i].clear();
             for (int j = 0; j < playerHand.getCards().size(); j++) {
                 Card c = playerHand.getCards().get(j);

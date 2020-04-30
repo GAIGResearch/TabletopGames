@@ -16,7 +16,7 @@ import static pandemic.Constants.nameHash;
 
 public class PandemicGameState extends GameState {
 
-    protected HashMap<Integer, Area> areas;
+    private HashMap<Integer, Area> areas;
     public Board world;
     private int numAvailableActions = 0;
     private boolean quietNight;
@@ -145,6 +145,7 @@ public class PandemicGameState extends GameState {
 
         // get player's hand and role card
         Deck<Card> playerHand = ((Deck<Card>)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
+        Deck discardDeck = (Deck) areas.get(-1).getComponent(Constants.playerDeckDiscardHash);
         Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));
         String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
@@ -162,7 +163,7 @@ public class PandemicGameState extends GameState {
         if (playerHand.isOverCapacity()){
             // need to discard a card
             for (int i = 0; i < playerHand.getCards().size(); i++){
-                actions.add(new DiscardCard(playerHand, i));
+                actions.add(new DrawCard(playerHand, discardDeck, i));
             }
             this.numAvailableActions = actions.size();
             return actions;
@@ -418,8 +419,10 @@ public class PandemicGameState extends GameState {
             case "Resilient Population":
                 // Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.
                 Deck infDeck = (Deck) this.areas.get(-1).getComponent(Constants.infectionDiscardHash);
+                Deck discardDeck = (Deck) areas.get(-1).getComponent(Constants.playerDeckDiscardHash);
+
                 for (int i = 0; i < infDeck.getCards().size(); i++){
-                    actions.add(new DiscardCard(infDeck, i));
+                    actions.add(new DrawCard(infDeck, discardDeck, i));
                 }
                 break;
             case "Airlift":
@@ -470,6 +473,15 @@ public class PandemicGameState extends GameState {
         return actions;
     }
 
+    public Component getComponent(int componentId, int playerId)
+    {
+        return areas.get(playerId).getComponent(componentId);
+    }
+
+    public Component getComponent(int componentId)
+    {
+        return getComponent(componentId, -1);
+    }
     
     protected void setQuietNight(boolean qn) {
         quietNight = qn;
@@ -483,8 +495,8 @@ public class PandemicGameState extends GameState {
     public void setModelInterrupted(boolean b) { modelInterrupted = b; }
 
 
-    public HashMap<Integer, Area> getAreas() {
-        return areas;
+    Area getArea(int playerId) {
+        return areas.get(playerId);
     }
 
     public PandemicData getData() {

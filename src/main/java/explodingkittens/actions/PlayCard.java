@@ -3,6 +3,7 @@ package explodingkittens.actions;
 import actions.Action;
 import components.Card;
 import core.GameState;
+import explodingkittens.ExplodingKittensGameState;
 
 public class PlayCard implements Action {
 
@@ -16,8 +17,9 @@ public class PlayCard implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        boolean succes = gs.findDeck("Player" + this.playerID + "HandCards").remove(card);
-        gs.findDeck("DiscardDeck").add(card);
-        return succes;
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
+        boolean success = ekgs.getPlayerHand(playerID).remove(card);
+        ekgs.getDiscardDeck().add(card);
+        return success;
     }
 }
