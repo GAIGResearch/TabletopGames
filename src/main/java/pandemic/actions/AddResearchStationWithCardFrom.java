@@ -4,6 +4,7 @@ import actions.Action;
 import components.BoardNode;
 import components.Card;
 import components.Deck;
+import components.IDeck;
 import content.PropertyBoolean;
 import core.GameState;
 import pandemic.PandemicGameState;
@@ -13,8 +14,8 @@ import static pandemic.Constants.*;
 
 public class AddResearchStationWithCardFrom extends AddResearchStation implements Action {
 
-    String fromCity;
-    Card card;
+    private String fromCity;
+    private Card card;
 
     public AddResearchStationWithCardFrom(String from, String to, Card c) {
         super(to);
@@ -35,7 +36,7 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
                 // Discard the card played
                 Deck playerHand = (Deck) gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
                 playerHand.discard(card);
-                Deck discardDeck = gs.findDeck("Player Deck Discard");
+                IDeck discardDeck = gs.findDeck("Player Deck Discard");
                 success = discardDeck.add(card);
             } else {
                 success = false;
@@ -43,5 +44,18 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
         }
 
         return success;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof AddResearchStationWithCardFrom)
+        {
+            AddResearchStationWithCardFrom otherAction = (AddResearchStationWithCardFrom) other;
+            return fromCity.equals(otherAction.fromCity) &&  card.equals(otherAction.card);
+
+        }else return false;
     }
 }

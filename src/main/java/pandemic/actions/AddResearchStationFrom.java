@@ -13,7 +13,7 @@ import static pandemic.Constants.*;
 
 public class AddResearchStationFrom extends AddResearchStation implements Action {
 
-    String fromCity;
+    private String fromCity;
 
     public AddResearchStationFrom(String from, String to) {
         super(to);
@@ -31,5 +31,18 @@ public class AddResearchStationFrom extends AddResearchStation implements Action
         }
 
         return success;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof AddResearchStationFrom)
+        {
+            AddResearchStationFrom otherAction = (AddResearchStationFrom) other;
+            return fromCity.equals(otherAction.fromCity);
+
+        }else return false;
     }
 }

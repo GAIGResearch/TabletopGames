@@ -17,7 +17,7 @@ public class Deck extends Component implements IDeck {
 
     protected int capacity = -1;
 
-    protected List<Card> cards;
+    protected ArrayList<Card> cards;
 
     private String id;
 
@@ -52,7 +52,7 @@ public class Deck extends Component implements IDeck {
         properties = new HashMap<>();
     }
 
-    public void setCards(List<Card> cards) { this.cards = cards; }
+    public void setCards(ArrayList<Card> cards) { this.cards = cards; }
 
     @Override
     public int getCapacity() {
@@ -126,8 +126,8 @@ public class Deck extends Component implements IDeck {
         return capacity == -1 || cards.size() <= capacity;
     }
 
-    public boolean add(Deck d){
-        cards.addAll(d.cards);
+    public boolean add(IDeck d){
+        cards.addAll(d.getCards());
         return true;
     }
 
@@ -156,7 +156,7 @@ public class Deck extends Component implements IDeck {
     }
 
     // TODO: check for visibility?
-    public List<Card> getCards() {
+    public ArrayList<Card> getCards() {
         return cards;
     }
 
@@ -192,10 +192,10 @@ public class Deck extends Component implements IDeck {
         }
     }
 
-    public static List<Deck> loadDecks(String filename)
+    public static List<IDeck> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Deck> decks = new ArrayList<>();
+        ArrayList<IDeck> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 

@@ -14,20 +14,21 @@ import static pandemic.Constants.*;
 
 public class TreatDisease implements Action {
 
-    PandemicParameters gp;
-    String color;
-    String city;
-    boolean treatAll;
+    //PandemicParameters gp;
+    private int initialDiseaseCubes;
+    private String color;
+    private String city;
+    private boolean treatAll;
 
-    public TreatDisease(GameParameters gp, String color, String city) {
-        this.gp = (PandemicParameters)gp;
+    public TreatDisease(int initialDiseaseCubes, String color, String city) {
+        this.initialDiseaseCubes = initialDiseaseCubes;
         this.color = color;
         this.city = city;
         this.treatAll = false;
     }
 
-    public TreatDisease(GameParameters gp, String color, String city, boolean treatAll) {
-        this.gp = (PandemicParameters)gp;
+    public TreatDisease(int initialDiseaseCubes, String color, String city, boolean treatAll) {
+        this.initialDiseaseCubes = initialDiseaseCubes;
         this.color = color;
         this.city = city;
         this.treatAll = treatAll;
@@ -57,12 +58,26 @@ public class TreatDisease implements Action {
             }
 
             // If disease cured and no more cubes of this color on the map, disease becomes eradicated
-            if (diseaseToken.getValue() == 1 && diseaseCubeCounter.getValue() == gp.n_initial_disease_cubes) {
+            if (diseaseToken.getValue() == 1 && diseaseCubeCounter.getValue() == initialDiseaseCubes) {
                 diseaseToken.setValue(2);
             }
 
             return true;
         }
         return false;
+    }
+
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        if(other instanceof TreatDisease)
+        {
+            TreatDisease otherAction = (TreatDisease) other;
+            return color.equals(otherAction.color) && city.equals(otherAction.city) &&
+                    initialDiseaseCubes == otherAction.initialDiseaseCubes && treatAll == otherAction.treatAll;
+
+        }else return false;
     }
 }

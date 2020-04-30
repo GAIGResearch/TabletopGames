@@ -20,4 +20,11 @@ public class QuietNight implements Action {
         ((Deck)gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash)).discard(card);
         return true;
    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        if (this == other) return true;
+        return other instanceof QuietNight;
+    }
 }

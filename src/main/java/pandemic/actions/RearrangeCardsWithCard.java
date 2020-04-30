@@ -3,8 +3,10 @@ package pandemic.actions;
 import actions.Action;
 import components.Card;
 import components.Deck;
+import components.IDeck;
 import core.GameState;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static pandemic.Constants.playerHandHash;
@@ -22,18 +24,18 @@ public class RearrangeCardsWithCard implements Action {
 
     @Override
     public boolean execute(GameState gs) {
-        Deck deckFrom = gs.findDeck(deckIdFrom);
+        IDeck deckFrom = gs.findDeck(deckIdFrom);
         Card[] cards = new Card[newCardOrder.length];
         for (int value : newCardOrder) {
             cards[value] = deckFrom.draw();
         }
-        Deck draws = new Deck();
-        draws.setCards(Arrays.asList(cards));
+        IDeck draws = new Deck();
+        draws.setCards(new ArrayList<>(Arrays.asList(cards)));
         boolean result = deckFrom.add(draws);
 
         if (result) {
             ((Deck) gs.getAreas().get(gs.getActivePlayer()).getComponent(playerHandHash)).discard(card);
-            Deck discardDeck = gs.findDeck("Player Deck Discard");
+            IDeck discardDeck = gs.findDeck("Player Deck Discard");
             result = discardDeck.add(card);
         }
         return result;
