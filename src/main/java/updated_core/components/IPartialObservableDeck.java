@@ -1,18 +1,21 @@
-package components;
+package updated_core.components;
+
+import components.IDeck;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+
 /**
- * Class for a deck of cards.
+ * Class for a deck of elements which are partial observable to the players.
  * A deck is defined as a "group of cards". Examples of decks are:
  *   * A hand of cards
  *   * A deck to draw from
  *   * Cards played on the player's area
  *   * Discard pile
  */
-public interface IDeck<T>
-{
+public interface IPartialObservableDeck<T> extends IDeck<T> {
+
     /**
      * Maximum number of cards this deck may contain.
      */
@@ -66,7 +69,7 @@ public interface IDeck<T>
      * Creates a copy of this object.
      * @return a copy of the IDeck.
      */
-    IDeck<T> copy();
+    IPartialObservableDeck<T> copy();
 
     /**
      * Returns a unique ID for this deck.
@@ -85,7 +88,7 @@ public interface IDeck<T>
     void clear();
 
     /**
-     * Adds a card to a deck on the given index and uses the default visibility.
+     * Adds a card to a deck on the given index
      * @param c card to add
      * @param index where to add it
      * @return true if it was correctly added.
@@ -93,11 +96,29 @@ public interface IDeck<T>
     boolean add(T c, int index);
 
     /**
-     * Adds a card to a deck on the first position of the deck and uses the default visibility.
+     * Adds a card to a deck on the first position of the deck
      * @param c card to add
      * @return true if it was correctly added.
      */
     boolean add(T c);
+
+
+    /**
+     * Adds a card to a deck on the first position of the deck and lets you specify its visibility.
+     * @param c card to add
+     * @param visibilityPerPlayer visibility of the card to be added
+     * @return true if add was successful
+     */
+    boolean add(T c, boolean[] visibilityPerPlayer);
+
+    /**
+     * Adds a card to a deck on the given index and lets you specify its visibility.
+     * @param c card to add
+     * @param visibilityPerPlayer visibility of the card to be added
+     * @return true if add was successful
+     */
+    boolean add(T c, int index, boolean[] visibilityPerPlayer);
+
 
     /**
      * Returns all the cards in this deck.
@@ -106,7 +127,23 @@ public interface IDeck<T>
     ArrayList<T> getCards();
 
     /**
+     * Returns all the cards that are visible to the given player. All other cards will be null.
+     * @param playerID the player to check visibility for
+     * @return all visible cards
+     */
+    ArrayList<T> getVisibleCards(int playerID);
+
+    /**
      * Shuffles the order of elements in the deck.
      */
     void shuffle();
+
+    /**
+     *
+     * @param index index of the element to change visibility of
+     * @param player index of player whose visibility should be changed
+     * @param visibility visibility to be set
+     */
+    boolean setVisibility(int index, int player, boolean visibility);
 }
+

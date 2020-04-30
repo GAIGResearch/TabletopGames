@@ -22,6 +22,7 @@ public class TicTacToeForwardModel extends ForwardModel {
             currentState.endGame();
 
         checkWinCondition((TicTacToeGameState) currentState);
+        turnOrder.endPlayerTurn(currentState);
     }
 
     private void checkWinCondition(TicTacToeGameState gameState){
