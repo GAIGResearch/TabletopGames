@@ -12,8 +12,6 @@ import java.util.*;
 
 public class PandemicGame extends Game {
 
-
-
     public PandemicGame(List<AbstractPlayer> agents)
     {
         players = agents;
@@ -28,7 +26,6 @@ public class PandemicGame extends Game {
     @Override
     public void run(GUI gui) {
         int turn = 0;
-        int actionsPlayed = 0;
 
         while (!isEnded()){
 
@@ -41,7 +38,6 @@ public class PandemicGame extends Game {
 
             // Resolve actions and game rules for the turn
             forwardModel.next(gameState, turnOrder, actions.get(action));
-            actionsPlayed++;
 
             if (gui != null) {
                 gui.update(gameState, turnOrder);

@@ -8,7 +8,7 @@ import java.util.List;
 public class PandemicData implements GameData {
 
     private List<Board> boards;
-    private List<Deck> decks;
+    private List<Deck<Card>> decks;
     private List<Token> tokens;
     private List<Counter> counters;
 
@@ -52,8 +52,8 @@ public class PandemicData implements GameData {
     }
 
     @Override
-    public Deck findDeck(String name) {
-        for (Deck d: decks) {
+    public Deck<Card> findDeck(String name) {
+        for (Deck<Card> d: decks) {
             if (name.equalsIgnoreCase(d.getID())) {
                 return d;
             }
@@ -69,7 +69,7 @@ public class PandemicData implements GameData {
         for(Board b : boards) pd.boards.add(b.copy());
 
         pd.decks = new ArrayList<>();
-        for(Deck d : decks) pd.decks.add(d.copy());
+        for(Deck<Card> d : decks) pd.decks.add(d.copy());
 
         pd.tokens = new ArrayList<>();
         for(Token t : tokens) pd.tokens.add(t.copy());

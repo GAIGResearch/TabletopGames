@@ -208,10 +208,10 @@ public class Deck<T> extends Component implements IDeck<T> {
         return newDeck;
     }
 
-    public static List<Deck> loadDecks(String filename)
+    public static List<Deck<Card>> loadDecks(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<Deck> decks = new ArrayList<>();
+        ArrayList<Deck<Card>> decks = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
