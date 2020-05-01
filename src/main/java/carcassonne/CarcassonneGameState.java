@@ -1,16 +1,19 @@
 package carcassonne;
 
-import actions.Action;
 import components.Card;
 import components.Deck;
-import core.GameState;
+import updated_core.GameParameters;
+import updated_core.actions.IAction;
+import updated_core.gamestates.AbstractGameState;
+import updated_core.observations.Observation;
+import updated_core.players.AbstractPlayer;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 
 
-public class CarcassonneGameState extends GameState {
+public class CarcassonneGameState extends AbstractGameState {
 
     private int[] points;
     private int[] unusedMeeple;
@@ -19,22 +22,11 @@ public class CarcassonneGameState extends GameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    @Override
-    public GameState copy() {
-        return null;
+    public CarcassonneGameState(GameParameters gameParameters) {
+        super(gameParameters);
+        setComponents();
     }
 
-    @Override
-    public GameState createNewGameState() {
-        return null;
-    }
-
-    @Override
-    public void copyTo(GameState dest, int playerId) {
-
-    }
-
-    @Override
     public void setComponents() {
         points = new int[getNPlayers()];
         unusedMeeple = new int[getNPlayers()];
@@ -43,28 +35,32 @@ public class CarcassonneGameState extends GameState {
 
         Deck<CarcassonneTile> drawPile = new Deck<>();
 
-
         //drawPile.add(new CarcassonneTile());
     }
 
-    @Override
-    public int nPossibleActions() {
-        return numAvailableActions;
-    }
-
-    private List<Action> tileActions(){
+    private List<IAction> tileActions(){
 
         return new ArrayList<>();
     }
 
-    private List<Action> meepleActions(){
+    private List<IAction> meepleActions(){
 
         return new ArrayList<>();
     }
 
+
+    public String toString(){
+        return this.gameBoard.toString();
+    }
+
     @Override
-    public List<Action> possibleActions() {
-        List<Action> actions;
+    public Observation getObservation(AbstractPlayer player) {
+        return null;
+    }
+
+    @Override
+    public List<IAction> getActions(AbstractPlayer player) {
+        List<IAction> actions;
         switch (gamePhase){
             case PlaceTile:
                 actions = tileActions();
@@ -81,8 +77,9 @@ public class CarcassonneGameState extends GameState {
         return actions;
     }
 
-    public String toString(){
-        return this.gameBoard.toString();
+    @Override
+    public void endGame() {
+
     }
 
     private class CarcassonneBoard{
