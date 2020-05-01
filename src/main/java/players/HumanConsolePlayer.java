@@ -1,8 +1,8 @@
 package updated_core.players;
 
 import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.observations.Observation;
+import observations.IPrintable;
+import observations.Observation;
 
 import java.util.List;
 import java.util.Scanner;

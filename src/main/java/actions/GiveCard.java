@@ -1,9 +1,10 @@
 package actions;
 
 import components.Card;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class GiveCard implements Action {
+public class GiveCard implements IAction {
     //TODO: this should be agreed between players
 
     private Card card;
@@ -15,7 +16,7 @@ public class GiveCard implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         //TODO
         return false;
     }

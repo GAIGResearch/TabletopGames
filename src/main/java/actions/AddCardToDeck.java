@@ -1,11 +1,11 @@
 package actions;
 
 import components.Card;
-import components.Deck;
 import components.IDeck;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class AddCardToDeck implements Action {
+public class AddCardToDeck implements IAction {
     private Card card;
     private IDeck deck;
     private int index;
@@ -23,7 +23,7 @@ public class AddCardToDeck implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         return deck.add(card, index);
     }
 

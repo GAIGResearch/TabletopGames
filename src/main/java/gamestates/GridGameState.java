@@ -1,6 +1,6 @@
 package updated_core.gamestates;
 
-import updated_core.components.Grid;
+import components.Grid;
 
 public interface GridGameState<T> {
 

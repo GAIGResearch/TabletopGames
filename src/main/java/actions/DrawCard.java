@@ -1,11 +1,11 @@
 package actions;
 
 import components.Card;
-import components.Deck;
 import components.IDeck;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class DrawCard implements Action {
+public class DrawCard implements IAction {
 
     //TODO: turn this into IDs and do not use two ways of creating this action.
 //    private String deckIdFrom;
@@ -39,7 +39,7 @@ public class DrawCard implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         Card card;
 //        if (deckFrom == null) {
 //            deckFrom = (IDeck<Card>)gs.findDeck(deckIdFrom);

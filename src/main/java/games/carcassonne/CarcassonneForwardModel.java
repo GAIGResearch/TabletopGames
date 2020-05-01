@@ -1,8 +1,9 @@
 package carcassonne;
 
-import actions.Action;
+import actions.IAction;
 import core.ForwardModel;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
 public class CarcassonneForwardModel implements ForwardModel {
 
@@ -11,12 +12,12 @@ public class CarcassonneForwardModel implements ForwardModel {
     }
 
     @Override
-    public void setup(GameState firstState) {
+    public void setup(AbstractGameState firstState) {
 
     }
 
     @Override
-    public void next(GameState currentState, Action action) {
+    public void next(AbstractGameState currentState, TurnOrder turnOrder, IAction IAction) {
 
     }
 

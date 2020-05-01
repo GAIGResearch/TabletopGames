@@ -1,7 +1,7 @@
 package core;
 
-import actions.Action;
-import components.*;
+import actions.IAction;
+
 import java.util.*;
 
 import static pandemic.Constants.GAME_ONGOING;
@@ -75,8 +75,8 @@ public abstract class GameState {
     public abstract void setComponents(String dataPath);
 
 
-    public void next(Action action) {
-        forwardModel.next(this, action);
+    public void next(IAction IAction) {
+        forwardModel.next(this, null, IAction);
     }
 
 
@@ -107,6 +107,6 @@ public abstract class GameState {
 
     /* Methods to be implemented by subclass */
     public abstract int nPossibleActions();
-    public abstract List<Action> possibleActions();
+    public abstract List<IAction> possibleActions();
 
 }

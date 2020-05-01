@@ -1,10 +1,9 @@
 package updated_core.actions;
 
-import core.GameState;
-import updated_core.components.Grid;
+import observations.IPrintable;
+import components.Grid;
 import updated_core.gamestates.AbstractGameState;
-import updated_core.gamestates.GridGameState;
-import updated_core.turn_order.TurnOrder;
+import turnorder.TurnOrder;
 
 public class SetGridValueAction<T> implements IAction, IPrintable {
 

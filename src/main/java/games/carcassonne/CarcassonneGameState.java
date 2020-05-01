@@ -2,10 +2,7 @@ package carcassonne;
 
 import components.Card;
 import components.Deck;
-import updated_core.GameParameters;
-import updated_core.actions.IAction;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.observations.Observation;
+import observations.Observation;
 import updated_core.players.AbstractPlayer;
 
 import java.awt.*;
@@ -13,7 +10,7 @@ import java.util.*;
 import java.util.List;
 
 
-public class CarcassonneGameState extends AbstractGameState {
+public class CarcassonneGameState {
 
     private int[] points;
     private int[] unusedMeeple;

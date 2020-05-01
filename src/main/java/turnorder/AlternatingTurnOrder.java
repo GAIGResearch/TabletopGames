@@ -1,7 +1,7 @@
-package updated_core.turn_order;
+package turnorder;
 
-import updated_core.gamestates.AbstractGameState;
-import updated_core.players.AbstractPlayer;
+import core.AbstractGameState;
+import players.AbstractPlayer;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ public class AlternatingTurnOrder extends TurnOrder {
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         currentPlayer = (currentPlayer + direction) % players.size();
+        turnCounter += 1;
     }
 
     public AbstractPlayer getCurrentPlayer(AbstractGameState gameState){

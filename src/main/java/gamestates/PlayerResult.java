@@ -1,4 +1,4 @@
-package updated_core.enums;
+package updated_core.gamestates;
 
 public enum PlayerResult {
     Winner,
