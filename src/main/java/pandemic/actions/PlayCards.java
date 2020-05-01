@@ -1,11 +1,12 @@
 package pandemic.actions;
 
-import actions.Action;
-import core.GameState;
+import actions.IAction;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class PlayCards implements Action {
+public class PlayCards implements IAction {
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         return false;
     }
     // TODO: like PlayCard, but play multiple cards, check conditions, resolve effects (Discover a cure)

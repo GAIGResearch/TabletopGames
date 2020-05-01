@@ -1,25 +1,37 @@
 package players;
 
-import actions.Action;
-import core.AIPlayer;
-import core.GameState;
+import actions.IAction;
+import observations.Observation;
 
+import java.util.List;
 import java.util.Random;
 
-public class RandomPlayer implements AIPlayer {
+public class RandomPlayer extends AbstractPlayer {
 
     /**
      * Random generator for this agent.
      */
-    private Random rnd;
+    private final Random rnd;
 
-    public RandomPlayer(Random rnd)
+    public RandomPlayer(int playerID, Random rnd)
     {
+        super(playerID);
         this.rnd = rnd;
     }
 
+    public RandomPlayer(int playerID)
+    {
+        this(playerID, new Random());
+    }
+
     @Override
-    public Action getAction(GameState gameState) {
-        return gameState.possibleActions().get(rnd.nextInt(gameState.nPossibleActions()));
+    public void initializePlayer(Observation observation) {}
+
+    @Override
+    public void finalizePlayer(Observation observation) {}
+
+    @Override
+    public int getAction(Observation observation, List<IAction> actions) {
+        return rnd.nextInt(actions.size());
     }
 }

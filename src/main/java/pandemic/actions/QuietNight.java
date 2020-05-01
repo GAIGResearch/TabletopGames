@@ -1,13 +1,13 @@
 package pandemic.actions;
 
-import actions.Action;
-import core.GameState;
-import pandemic.PandemicGameState;
+import actions.IAction;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class QuietNight implements Action {
+public class QuietNight implements IAction {
 
    @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
        return true;
    }
 

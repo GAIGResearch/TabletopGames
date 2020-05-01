@@ -6,6 +6,9 @@ import java.util.HashMap;
 
 public class PandemicParameters extends GameParameters {
 
+    private String dataPath;
+    public String getDataPath(){return dataPath;}
+
     long game_seed = System.currentTimeMillis(); //0;
     int lose_max_outbreak = 8;
 
@@ -37,37 +40,38 @@ public class PandemicParameters extends GameParameters {
     int n_actions_per_turn = 4;
     int n_research_stations = 6;
 
+    protected PandemicParameters(int nPlayers, String dataPath) {
+        super(nPlayers);
+        this.dataPath = dataPath;
+    }
 
-    @Override
-    public GameParameters copy() {
-        PandemicParameters ppCopy = new PandemicParameters();
+    public PandemicParameters(PandemicParameters pandemicParameters) {
+        this(pandemicParameters.nPlayers, pandemicParameters.dataPath);
 
-        ppCopy.game_seed = game_seed;
-        ppCopy.lose_max_outbreak = lose_max_outbreak;
-        ppCopy.max_cubes_per_city = max_cubes_per_city;  // More cause outbreak
-        ppCopy.n_epidemic_cards = n_epidemic_cards;
-        ppCopy.n_cubes_epidemic = n_cubes_epidemic;
-        ppCopy.n_infection_cards_setup = n_infection_cards_setup;
-        ppCopy.n_infections_setup = n_infections_setup;
-        ppCopy.n_cubes_infection = n_cubes_infection;
-        ppCopy.n_initial_disease_cubes = n_initial_disease_cubes;
-        ppCopy.n_cards_for_cure = n_cards_for_cure;
-        ppCopy.n_cards_for_cure_reduced = n_cards_for_cure_reduced;
-        ppCopy.n_players = n_players;
-        ppCopy.max_cards_per_player = max_cards_per_player;  // Max cards in hand per player
-        ppCopy.n_cards_draw = n_cards_draw;  // Number of cards players draw each turn
-        ppCopy.n_actions_per_turn = n_actions_per_turn;
-        ppCopy.n_research_stations = n_research_stations;
+        this.game_seed = pandemicParameters.game_seed;
+        this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
+        this.max_cubes_per_city = pandemicParameters.max_cubes_per_city;  // More cause outbreak
+        this.n_epidemic_cards = pandemicParameters.n_epidemic_cards;
+        this.n_cubes_epidemic = pandemicParameters.n_cubes_epidemic;
+        this.n_infection_cards_setup = pandemicParameters.n_infection_cards_setup;
+        this.n_infections_setup = pandemicParameters.n_infections_setup;
+        this.n_cubes_infection = pandemicParameters.n_cubes_infection;
+        this.n_initial_disease_cubes = pandemicParameters.n_initial_disease_cubes;
+        this.n_cards_for_cure = pandemicParameters.n_cards_for_cure;
+        this.n_cards_for_cure_reduced = pandemicParameters.n_cards_for_cure_reduced;
+        this.n_players = pandemicParameters.n_players;
+        this.max_cards_per_player = pandemicParameters.max_cards_per_player;  // Max cards in hand per player
+        this.n_cards_draw = pandemicParameters.n_cards_draw;  // Number of cards players draw each turn
+        this.n_actions_per_turn = pandemicParameters.n_actions_per_turn;
+        this.n_research_stations = pandemicParameters.n_research_stations;
 
         // How many cards are drawn for each counter
-        ppCopy.infection_rate = new int[infection_rate.length];
-        System.arraycopy(infection_rate, 0, ppCopy.infection_rate, 0, infection_rate.length);
+        this.infection_rate = new int[infection_rate.length];
+        System.arraycopy(infection_rate, 0, pandemicParameters.infection_rate, 0, infection_rate.length);
 
         // Number of cards each player receives.
-        ppCopy.n_cards_per_player = new HashMap<>();
-        for(int key : n_cards_per_player.keySet())
-            ppCopy.n_cards_per_player.put(key, n_cards_per_player.get(key));
-
-        return ppCopy;
+        this.n_cards_per_player = new HashMap<>();
+        for(int key : pandemicParameters.n_cards_per_player.keySet())
+            this.n_cards_per_player.put(key, pandemicParameters.n_cards_per_player.get(key));
     }
 }

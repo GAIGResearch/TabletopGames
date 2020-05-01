@@ -3,30 +3,49 @@ package pandemic;
 import actions.*;
 import components.*;
 import content.*;
+import core.AbstractGameState;
 import core.Area;
-import core.GameState;
+import core.ForwardModel;
+import core.GameParameters;
+import observations.Observation;
 import pandemic.actions.*;
+import players.AbstractPlayer;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static pandemic.Constants.nameHash;
 
-public class PandemicGameState extends GameState {
 
+public class PandemicGameState extends AbstractGameState implements  Observation {
+
+    private HashMap<Integer, Area> areas;
     public Board world;
     private int numAvailableActions = 0;
     private boolean quietNight;
     private boolean modelInterrupted;  // Flag notifying if a reaction request interrupted the state update, so it'd continue from there
 
-    public void setComponents()
+    private PandemicData _data;
+    private Deck tempDeck;
+
+    public PandemicGameState(PandemicParameters gameParameters) {
+        super(gameParameters);
+        setComponents(gameParameters.getDataPath());
+        reactivePlayers = new ArrayList<>();
+    }
+
+    public void setComponents(String dataPath)
     {
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
+        _data = new PandemicData();
+        _data.load(dataPath);
+        tempDeck = new Deck();
+        areas = new HashMap<>();
       
         // For each player, initialize their own areas: they get a player hand and a player card
-        for (int i = 0; i < nPlayers; i++) {
+        for (int i = 0; i < getNPlayers(); i++) {
             Area playerArea = new Area();
             playerArea.setOwner(i);
             playerArea.addComponent(Constants.playerHandHash, new Deck(pp.max_cards_per_player));
@@ -42,51 +61,45 @@ public class PandemicGameState extends GameState {
         areas.put(-1, gameArea);
 
         // load the board
-        world = findBoard("cities"); //world.getNode("name","Valencia");
+        world = _data.findBoard("cities"); //world.getNode("name","Valencia");
 
         // Set up the counters
-        Counter infection_rate = findCounter("Infection Rate");
-        Counter outbreaks = findCounter("Outbreaks");
+        Counter infection_rate = _data.findCounter("Infection Rate");
+        Counter outbreaks = _data.findCounter("Outbreaks");
         gameArea.addComponent(Constants.infectionRateHash, infection_rate);
         gameArea.addComponent(Constants.outbreaksHash, outbreaks);
 
         for (String color : Constants.colors) {
             int hash = Hash.GetInstance().hash("Disease " + color);
-            Counter diseaseC = findCounter("Disease " + color);
+            Counter diseaseC = _data.findCounter("Disease " + color);
             diseaseC.setValue(0);  // 0 - cure not discovered; 1 - cure discovered; 2 - eradicated
             gameArea.addComponent(hash, diseaseC);
 
             hash = Hash.GetInstance().hash("Disease Cube " + color);
-            Counter diseaseCubeCounter = findCounter("Disease Cube " + color);
+            Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
             gameArea.addComponent(hash, diseaseCubeCounter);
         }
 
         // Set up decks
         Deck playerDeck = new Deck("Player Deck"); // contains city & event cards
-        playerDeck.add((Deck) findDeck("Cities"));
-        playerDeck.add((Deck) findDeck("Events"));
+        playerDeck.add(_data.findDeck("Cities"));
+        playerDeck.add(_data.findDeck("Events"));
 
-        Deck playerDiscard = new Deck("Player Deck Discard");
-        Deck infDiscard = new Deck("Infection Discard");
-        Deck plannerDeck = new Deck("plannerDeck"); // deck to store extra card for the contingency planner
+        Deck<Card>  playerDiscard = new Deck<> ("Player Deck Discard");
+        Deck<Card>  infDiscard = new Deck<> ("Infection Discard");
+        Deck<Card>  plannerDeck = new Deck<> ("plannerDeck"); // deck to store extra card for the contingency planner
 
         gameArea.addComponent(Constants.playerDeckHash, playerDeck);
         gameArea.addComponent(Constants.playerDeckDiscardHash, playerDiscard);
         gameArea.addComponent(Constants.infectionDiscardHash, infDiscard);
         gameArea.addComponent(Constants.plannerDeckHash, plannerDeck);
-        gameArea.addComponent(Constants.infectionHash, (Deck) findDeck("Infections"));
-        gameArea.addComponent(Constants.playerRolesHash, (Deck) findDeck("Player Roles"));
-
-        // add them to the list of decks, so they are accessible by the findDeck() function
-        addDeckToList(playerDeck);
-        addDeckToList(playerDiscard);
-        addDeckToList(infDiscard);
-        addDeckToList(plannerDeck);
+        gameArea.addComponent(Constants.infectionHash, _data.findDeck("Infections"));
+        gameArea.addComponent(Constants.playerRolesHash, _data.findDeck("Player Roles"));
+        gameArea.addComponent(Constants.researchStationHash, _data.findCounter("Research Stations"));
     }
 
-    @Override
-    public GameState createNewGameState() {
-        return new PandemicGameState();
+    public AbstractGameState createNewGameState() {
+        return new PandemicGameState((PandemicParameters) this.gameParameters);
     }
 
     /**
@@ -96,24 +109,33 @@ public class PandemicGameState extends GameState {
      * @param playerId id of the player the copy is being prepared for
      * @return a copy of the game state.
      */
-    protected GameState _copy(int playerId)
+    protected AbstractGameState _copy(int playerId)
     {
         //Insert code here to change the way super.decks, etc are copied (i.e. for PO).
 
         //This line below is the same as doing nothing, just here for demonstration purposes.
-        return super._copy(playerId);
+        return createNewGameState();
     }
 
 
-    @Override
-    public void copyTo(GameState dest, int playerId)
+    public void copyTo(PandemicGameState dest, int playerId)
     {
-        PandemicGameState gs = (PandemicGameState)dest;
+        PandemicGameState gs = dest;
 
         gs.world = this.world.copy();
         gs.numAvailableActions = numAvailableActions;
         gs.quietNight = quietNight;
+
+        gs.areas = new HashMap<>();
+        for(int key : areas.keySet())
+        {
+            Area a = areas.get(key);
+            gs.areas.put(key, a.copy());
+        }
+
+        gs._data = _data.copy();
     }
+
 
     public int nInputActions() {
         return ((PandemicParameters) this.gameParameters).n_actions_per_turn;  // Pandemic requires up to 4 actions per player per turn.
@@ -124,14 +146,15 @@ public class PandemicGameState extends GameState {
     }
 
     @Override
-    public List<Action> possibleActions() {
+    public List<IAction> getActions(AbstractPlayer player) {
 
         // Create a list for possible actions
-        ArrayList<Action> actions = new ArrayList<>();
+        ArrayList<IAction> actions = new ArrayList<>();
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
         // get player's hand and role card
-        Deck playerHand = ((Deck)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
+        Deck<Card> playerHand = ((Deck<Card>)this.areas.get(activePlayer).getComponent(Constants.playerHandHash));
+        Deck discardDeck = (Deck) areas.get(-1).getComponent(Constants.playerDeckDiscardHash);
         Card playerCard = ((Card)this.areas.get(activePlayer).getComponent(Constants.playerCardHash));
         String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
@@ -149,7 +172,7 @@ public class PandemicGameState extends GameState {
         if (playerHand.isOverCapacity()){
             // need to discard a card
             for (int i = 0; i < playerHand.getCards().size(); i++){
-                actions.add(new DiscardCard(playerHand, i));
+                actions.add(new DrawCard(playerHand, discardDeck, i));
             }
             this.numAvailableActions = actions.size();
             return actions;
@@ -166,7 +189,8 @@ public class PandemicGameState extends GameState {
             // check if role is operations expert
             if (roleString.equals("Operations Expert")){
                 // can be a research station in the current city
-                if (findCounter("Research Stations").getValue() == 0) {
+                Counter rStationCounter = (Counter) this.areas.get(-1).getComponent(Constants.researchStationHash);
+                if (rStationCounter.getValue() == 0) {
                     // If all research stations are used, then take one from board
                     for (String station : researchStations) {
                         actions.add(new AddResearchStationFrom(station, playerLocationName.value));
@@ -189,7 +213,8 @@ public class PandemicGameState extends GameState {
             }
             if (card_in_hand != null) {
                 // Check if any research station tokens left
-                if (findCounter("Research Stations").getValue() == 0) {
+                Counter rStationCounter = (Counter) this.areas.get(-1).getComponent(Constants.researchStationHash);
+                if (rStationCounter.getValue() == 0) {
                     // If all research stations are used, then take one from board
                     for (String station : researchStations) {
                         actions.add(new AddResearchStationWithCardFrom(station, playerLocationName.value, card_in_hand));
@@ -238,7 +263,7 @@ public class PandemicGameState extends GameState {
                 }
                     
                 // take card
-                Deck otherDeck = (Deck) this.areas.get(i).getComponent(Constants.playerHandHash);
+                Deck<Card>  otherDeck = (Deck<Card>) this.areas.get(i).getComponent(Constants.playerHandHash);
                 Card otherPlayerCard = ((Card)this.areas.get(i).getComponent(Constants.playerCardHash));
                 String otherRoleString = ((PropertyString)otherPlayerCard.getProperty(nameHash)).value;
                 // can take any card from the researcher or the card that matches the city if the player is in that city
@@ -296,20 +321,21 @@ public class PandemicGameState extends GameState {
         }
 
         if (roleString.equals("Contingency Planner")){
-            if (findDeck("plannerDeck").getCards().size() != 0){
+            Deck plannerDeck = (Deck) this.areas.get(-1).getComponent(Constants.plannerDeckHash);
+            if (plannerDeck.getCards().size() != 0){
                 // then can pick up an event card
-                ArrayList<Card> infDiscard = findDeck("InfectionDiscard").getCards();
+                Deck infectionDiscarcDeck = (Deck) this.areas.get(-1).getComponent(Constants.infectionDiscardHash);
+                ArrayList<Card> infDiscard = infectionDiscarcDeck.getCards();
                 for (int i = 0; i < infDiscard.size(); i++){
                     Card card = infDiscard.get(i);
                     if (card.getProperty(Constants.colorHash) != null){
-                        actions.add(new DrawCard("InfectionDiscard", "plannerDeck", i));
+                        actions.add(new DrawCard(infectionDiscarcDeck, plannerDeck, i));
                     }
                 }
             }
             else {
-                Deck deck = (Deck) findDeck("plannerDeck");
-                if (deck.getCards().size() > 0) {
-                    actions.addAll(actionsFromEventCard(deck.draw(), researchStations));
+                if (plannerDeck.getCards().size() > 0) {
+                    actions.addAll(actionsFromEventCard((Card) plannerDeck.draw(), researchStations));
                 }
             }
         }
@@ -329,18 +355,25 @@ public class PandemicGameState extends GameState {
     }
 
     void nextPlayer() {
-        activePlayer = (activePlayer + 1) % nPlayers;
+        activePlayer = (activePlayer + 1) % getNPlayers();
     }
     void setActivePlayer(int p) {
         activePlayer = p;
     }
 
+    public void clearTempDeck() {
+        tempDeck.clear();
+    }
 
-    private List<Action> getMoveActions(int playerId, Deck playerHand, List<String> researchStations){
+    public Deck getTempDeck() {
+        return tempDeck;
+    }
+
+    private List<IAction> getMoveActions(int playerId, Deck<Card> playerHand, List<String> researchStations){
         // playerID - for the player we want to move
         // playerHand - the deck that we use for the movement
         // researchStations - a list of String locations where research stations are present
-        ArrayList<Action> actions = new ArrayList<>();
+        ArrayList<IAction> actions = new ArrayList<>();
 
         PropertyString playerLocationName = (PropertyString) this.areas.get(playerId).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
         BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
@@ -387,21 +420,23 @@ public class PandemicGameState extends GameState {
         return actions;
     }
 
-    private List<Action> actionsFromEventCard(Card card, ArrayList<String> researchStations){
-        ArrayList<Action> actions = new ArrayList<>();
+    private List<IAction> actionsFromEventCard(Card card, ArrayList<String> researchStations){
+        ArrayList<IAction> actions = new ArrayList<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
         switch (cardString) {
             case "Resilient Population":
                 // Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic.
-                Deck infectionDiscardDeck = (Deck) findDeck("Infection Discard");
-                for (int i = 0; i < infectionDiscardDeck.getCards().size(); i++){
-                    actions.add(new DiscardCard(infectionDiscardDeck, i));
+                Deck infDeck = (Deck) this.areas.get(-1).getComponent(Constants.infectionDiscardHash);
+                Deck discardDeck = (Deck) areas.get(-1).getComponent(Constants.playerDeckDiscardHash);
+
+                for (int i = 0; i < infDeck.getCards().size(); i++){
+                    actions.add(new DrawCard(infDeck, discardDeck, i));
                 }
                 break;
             case "Airlift":
                 // Move any 1 pawn to any city. Get permission before moving another player's pawn.
-                for (int i = 0; i < nPlayers; i++){
+                for (int i = 0; i < getNPlayers(); i++){
                     for (BoardNode bn: world.getBoardNodes())
                     actions.add(new MovePlayer(i, ((PropertyString)bn.getProperty(Constants.nameHash)).value));
                 }
@@ -411,7 +446,8 @@ public class PandemicGameState extends GameState {
                 for (BoardNode bn: world.getBoardNodes()) {
                     if (!((PropertyBoolean) bn.getProperty(Constants.researchStationHash)).value) {
                         String cityName = ((PropertyString) bn.getProperty(nameHash)).value;
-                        if (findCounter("Research Stations").getValue() == 0) {
+                        Counter rStationCounter = (Counter) this.areas.get(-1).getComponent(Constants.researchStationHash);
+                        if (rStationCounter.getValue() == 0) {
                             // If all research stations are used, then take one from board
                             for (String stations : researchStations) {
                                 actions.add(new AddResearchStationWithCardFrom(stations, cityName, card));
@@ -446,6 +482,15 @@ public class PandemicGameState extends GameState {
         return actions;
     }
 
+    public Component getComponent(int componentId, int playerId)
+    {
+        return areas.get(playerId).getComponent(componentId);
+    }
+
+    public Component getComponent(int componentId)
+    {
+        return getComponent(componentId, -1);
+    }
     
     protected void setQuietNight(boolean qn) {
         quietNight = qn;
@@ -457,4 +502,57 @@ public class PandemicGameState extends GameState {
 
     public boolean wasModelInterrupted() { return modelInterrupted; }
     public void setModelInterrupted(boolean b) { modelInterrupted = b; }
+
+
+    Area getArea(int playerId) {
+        return areas.get(playerId);
+    }
+
+    public PandemicData getData() {
+        return _data;
+    }
+
+
+    protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
+    protected ArrayList<Integer> reactivePlayers;
+
+    protected ForwardModel forwardModel;
+
+    //Getters & setters
+    public Constants.GameResult getGameStatus() {  return gameStatus; }
+    void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
+    ForwardModel getModel() {return this.forwardModel;}
+    public GameParameters getGameParameters() { return gameParameters; }
+
+    public void setGameOver(Constants.GameResult status){  this.gameStatus = status; }
+
+    @Override
+    public Observation getObservation(AbstractPlayer player) {
+        return null;
+    }
+
+    @Override
+    public void endGame() {
+
+    }
+
+    public int getActingPlayer() {  // Returns player taking an action (or possibly a reaction) next
+        if (reactivePlayers.size() == 0)
+            return activePlayer;
+        else return reactivePlayers.get(0);
+    }
+    public int getActivePlayer() { return activePlayer; }  // Returns the player whose turn it is, might not be active player
+    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }  // Returns players queued to react
+    public void addReactivePlayer(int player) { reactivePlayers.add(player); }
+    public boolean removeReactivePlayer() {
+        if (reactivePlayers.size() > 0) {
+            reactivePlayers.remove(0);
+            return true;
+        }
+        return false;
+    }
+    public HashMap<Integer, Area> getAreas() { return areas; }
+    public int getNPlayers() { return gameParameters.nPlayers; }
+    public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }
+
 }

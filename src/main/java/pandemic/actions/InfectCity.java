@@ -1,15 +1,15 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.BoardNode;
 import components.Card;
 import components.Counter;
 import content.*;
-import core.GameParameters;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.Constants;
 import pandemic.PandemicGameState;
-import pandemic.PandemicParameters;
+import turnorder.TurnOrder;
+import utilities.Hash;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.HashSet;
 
 import static pandemic.Constants.*;
 
-public class InfectCity implements Action {
+public class InfectCity implements IAction {
 
     private Card infectingCard;
     private int count;
@@ -30,15 +30,16 @@ public class InfectCity implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         // todo Quarantine Specialist
         PandemicGameState pgs = (PandemicGameState)gs;
         PropertyColor color = (PropertyColor) infectingCard.getProperty(colorHash);
 
-        boolean disease_eradicated = pgs.findCounter("Disease " + color.valueStr).getValue() == 2;
-        if (!disease_eradicated) {  // Only infect if disease is not eradicated
+        Counter diseaseCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color.valueStr));
 
-            Counter diseaseCubeCounter = gs.findCounter("Disease Cube " + color.valueStr);
+        boolean disease_eradicated = diseaseCounter.getValue() == 2;
+        if (!disease_eradicated) {  // Only infect if disease is not eradicated
+            Counter diseaseCubeCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color.valueStr));
             int colorIdx = Utils.indexOf(colors, color.valueStr);
             PropertyString city = (PropertyString) infectingCard.getProperty(nameHash);
 
@@ -47,7 +48,7 @@ public class InfectCity implements Action {
                 // check if quarantine specialist is on that node
                 PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(Constants.playersBNHash);
                 for (int playerIdx: players.getValues()){
-                    Card playerCard = (Card)gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+                    Card playerCard = (Card) pgs.getComponent(Constants.playerCardHash, playerIdx);
                     String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
                     if (roleString.equals("Quarantine Specialist")){
                         // no infection or outbreak
@@ -61,7 +62,7 @@ public class InfectCity implements Action {
                 array[colorIdx] += count;
 
                 if (array[colorIdx] > maxCubesPerCity) {  // Outbreak!
-                    Counter outbreakCounter = pgs.findCounter("Outbreaks");
+                    Counter outbreakCounter = (Counter) pgs.getComponent(Constants.outbreaksHash);
 
                     diseaseCubeCounter.decrement(maxCubesPerCity - array[colorIdx]);
                     array[colorIdx] = maxCubesPerCity;
@@ -88,8 +89,9 @@ public class InfectCity implements Action {
         return false;
     }
 
-    private ArrayList<BoardNode> outbreak(BoardNode n, GameState gs, int colorIdx, Counter diseaseCubeCounter,
+    private ArrayList<BoardNode> outbreak(BoardNode n, AbstractGameState gs, int colorIdx, Counter diseaseCubeCounter,
                                           Counter outbreakCounter) {
+        PandemicGameState pgs = (PandemicGameState)gs;
         // Returns list of neighbouring board nodes which have outbreaks happening as well for chain reactions
         ArrayList<BoardNode> outbreaks = new ArrayList<>();
         outbreakCounter.increment(1);
@@ -99,7 +101,7 @@ public class InfectCity implements Action {
 
             PropertyIntArrayList players = (PropertyIntArrayList)b2.getProperty(Constants.playersBNHash);
             for (int playerIdx: players.getValues()){
-                Card playerCard = (Card)gs.getAreas().get(playerIdx).getComponent(Constants.playerCardHash);
+                Card playerCard = (Card)pgs.getComponent(Constants.playerCardHash, playerIdx);
                 String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
                 if (!roleString.equals("Quarantine Specialist")) {
                     // no infection or outbreak in the city where the QS is placed

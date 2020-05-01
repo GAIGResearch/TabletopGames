@@ -1,12 +1,12 @@
 package actions;
 
-import actions.Action;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class DoNothing implements Action {
+public class DoNothing implements IAction {
 
    @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
        return true;
    }
 
