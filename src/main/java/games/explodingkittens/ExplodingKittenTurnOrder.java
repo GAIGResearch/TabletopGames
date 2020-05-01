@@ -1,13 +1,12 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
-import updated_core.gamestates.AbstractGameState;
-import updated_core.players.AbstractPlayer;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import players.AbstractPlayer;
+import turnorder.TurnOrder;
 
 import java.util.*;
 
 public class ExplodingKittenTurnOrder extends TurnOrder {
-    List<AbstractPlayer> players;
     public int currentPlayer;
     int requiredDraws = 1;
 

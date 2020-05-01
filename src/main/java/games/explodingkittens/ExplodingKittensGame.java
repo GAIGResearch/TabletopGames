@@ -1,15 +1,15 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
-import updated_core.ForwardModel;
-import updated_core.Game;
-import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.games.explodingkittens.cards.ExplodingKittenCard;
-import updated_core.observations.Observation;
-import updated_core.players.AbstractPlayer;
-import updated_core.players.HumanConsolePlayer;
-import updated_core.players.RandomAIPlayer;
-import updated_core.turn_order.TurnOrder;
+import actions.IAction;
+import core.ForwardModel;
+import core.GUI;
+import core.Game;
+import players.RandomPlayer;
+import observations.IPrintable;
+import games.explodingkittens.cards.ExplodingKittenCard;
+import observations.Observation;
+import players.AbstractPlayer;
+import turnorder.TurnOrder;
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ public class ExplodingKittensGame extends Game {
     }
 
     @Override
-    public void run() {
+    public void run(GUI gui) {
         while (!isEnded()){
             //((ExplodingKittensGameState) gameState).print((ExplodingKittenTurnOrder) turnOrder);
             AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
@@ -82,12 +82,12 @@ public class ExplodingKittensGame extends Game {
 
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomAIPlayer(0));
-        agents.add(new RandomAIPlayer(1));
-        agents.add(new RandomAIPlayer(2));
-        agents.add(new RandomAIPlayer(3));
+        agents.add(new RandomPlayer(0));
+        agents.add(new RandomPlayer(1));
+        agents.add(new RandomPlayer(2));
+        agents.add(new RandomPlayer(3));
 
         Game game = new ExplodingKittensGame(agents);
-        game.run();
+        game.run(null);
     }
 }

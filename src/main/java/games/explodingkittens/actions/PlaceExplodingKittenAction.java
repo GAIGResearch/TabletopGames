@@ -1,12 +1,11 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
-import components.Deck;
 import components.IDeck;
-import updated_core.actions.IPrintable;
-import updated_core.games.explodingkittens.ExplodingKittensGamePhase;
-import updated_core.games.explodingkittens.ExplodingKittensGameState;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import observations.IPrintable;
+import games.explodingkittens.ExplodingKittensGamePhase;
+import games.explodingkittens.ExplodingKittensGameState;
+import turnorder.TurnOrder;
 
 public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrintable {
     int targetIndex;

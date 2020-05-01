@@ -1,21 +1,17 @@
-package updated_core.games.uno;
+package games.uno;
 
-import updated_core.ForwardModel;
-import updated_core.Game;
-import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.games.tictactoe.TicTacToeForwardModel;
-import updated_core.games.tictactoe.TicTacToeGame;
-import updated_core.games.tictactoe.TicTacToeGameParameters;
-import updated_core.games.tictactoe.TicTacToeGameState;
-import updated_core.observations.Observation;
-import updated_core.players.AbstractPlayer;
-import updated_core.players.HumanConsolePlayer;
-import updated_core.players.RandomAIPlayer;
-import updated_core.turn_order.AlternatingTurnOrder;
-import updated_core.turn_order.TurnOrder;
+import actions.IAction;
+import core.ForwardModel;
+import core.GUI;
+import core.Game;
+import observations.Observation;
+import players.AbstractPlayer;
+import players.HumanConsolePlayer;
+import turnorder.AlternatingTurnOrder;
+import turnorder.TurnOrder;
 
 import java.util.*;
+
 
 public class UnoGame extends Game {
 
@@ -29,7 +25,7 @@ public class UnoGame extends Game {
     }
 
     @Override
-    public void run() {
+    public void run(GUI gui) {
         while (!isEnded()){
             AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
@@ -63,7 +59,7 @@ public class UnoGame extends Game {
         agents.add(new HumanConsolePlayer(1));
 
         UnoGame game = new UnoGame(agents);
-        game.run();
+        game.run(null);
     }
 
 }

@@ -1,7 +1,8 @@
 package actions;
 
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public interface Action {
-    boolean execute(GameState gs);
+public interface IAction {
+    boolean Execute(AbstractGameState gs, TurnOrder turnOrder);
 }

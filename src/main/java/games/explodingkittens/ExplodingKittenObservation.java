@@ -1,12 +1,12 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
 import components.Deck;
 import components.IDeck;
-import updated_core.actions.IPrintable;
-import updated_core.components.IPartialObservableDeck;
-import updated_core.components.PartialObservableDeck;
-import updated_core.games.explodingkittens.cards.ExplodingKittenCard;
-import updated_core.observations.Observation;
+import observations.IPrintable;
+import components.IPartialObservableDeck;
+import components.PartialObservableDeck;
+import games.explodingkittens.cards.ExplodingKittenCard;
+import observations.Observation;
 
 import java.util.List;
 

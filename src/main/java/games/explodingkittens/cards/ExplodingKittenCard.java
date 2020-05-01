@@ -1,4 +1,4 @@
-package updated_core.games.explodingkittens.cards;
+package games.explodingkittens.cards;
 
 import components.Card;
 //import explodingkittens.ExplodingKittensCardTypeProperty;

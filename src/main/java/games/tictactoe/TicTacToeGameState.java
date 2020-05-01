@@ -1,14 +1,14 @@
-package updated_core.games.tictactoe;
+package games.tictactoe;
 
-import updated_core.actions.IAction;
-import updated_core.actions.SetGridValueAction;
-import updated_core.components.Grid;
-import updated_core.enums.PlayerResult;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.gamestates.GridGameState;
-import updated_core.observations.GridObservation;
-import updated_core.observations.Observation;
-import updated_core.players.AbstractPlayer;
+import actions.IAction;
+import actions.SetGridValueAction;
+import components.Grid;
+import core.AbstractGameState;
+import gamestates.PlayerResult;
+import gamestates.GridGameState;
+import observations.GridObservation;
+import observations.Observation;
+import players.AbstractPlayer;
 
 import java.util.*;
 import java.util.List;

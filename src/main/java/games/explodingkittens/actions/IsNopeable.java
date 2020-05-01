@@ -1,7 +1,7 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
 public interface IsNopeable {
     boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder);

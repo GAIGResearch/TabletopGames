@@ -1,15 +1,16 @@
-package carcassonne;
+package games.carcassonne;
 
 import core.GameParameters;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
-import static carcassonne.CarcassonneGameState.CarcassonneType;
+import static games.carcassonne.CarcassonneGameState.CarcassonneType;
 
 public class CarcassonneParameters extends GameParameters {
     HashMap<CarcassonneType[][], Integer> tiles = new HashMap<>();
-    public CarcassonneParameters(){
+    public CarcassonneParameters(int nPlayers){
+        super(nPlayers);
+
         // church
          tiles.put(new CarcassonneType[][]{
                  {CarcassonneType.Grass, CarcassonneType.Grass, CarcassonneType.Grass},
@@ -54,8 +55,4 @@ public class CarcassonneParameters extends GameParameters {
 
     }
 
-    @Override
-    public GameParameters copy() {
-        return null;
-    }
 }

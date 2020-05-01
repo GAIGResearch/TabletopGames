@@ -1,15 +1,16 @@
-package updated_core.games.tictactoe;
+package games.tictactoe;
 
-import updated_core.ForwardModel;
-import updated_core.Game;
-import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.observations.Observation;
-import updated_core.players.AbstractPlayer;
-import updated_core.players.HumanConsolePlayer;
-import updated_core.players.RandomAIPlayer;
-import updated_core.turn_order.AlternatingTurnOrder;
-import updated_core.turn_order.TurnOrder;
+import actions.IAction;
+import core.ForwardModel;
+import core.GUI;
+import core.Game;
+import observations.IPrintable;
+import observations.Observation;
+import players.AbstractPlayer;
+import players.HumanConsolePlayer;
+import players.RandomPlayer;
+import turnorder.AlternatingTurnOrder;
+import turnorder.TurnOrder;
 
 import java.util.*;
 
@@ -25,7 +26,7 @@ public class TicTacToeGame extends Game {
     }
 
     @Override
-    public void run() {
+    public void run(GUI gui) {
         while (!isEnded()){
             AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
@@ -52,10 +53,10 @@ public class TicTacToeGame extends Game {
 
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomAIPlayer(0));
+        agents.add(new RandomPlayer(0));
         agents.add(new HumanConsolePlayer(1));
 
         Game game = new TicTacToeGame(agents);
-        game.run();
+        game.run(null);
     }
 }

@@ -1,4 +1,4 @@
-package carcassonne;
+package games.carcassonne;
 
 import core.GUI;
 import core.Game;

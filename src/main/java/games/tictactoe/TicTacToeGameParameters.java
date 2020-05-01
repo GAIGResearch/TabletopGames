@@ -1,6 +1,6 @@
-package updated_core.games.tictactoe;
+package games.tictactoe;
 
-import updated_core.GameParameters;
+import core.GameParameters;
 
 public class TicTacToeGameParameters extends GameParameters {
     protected TicTacToeGameParameters(int nPlayers) {

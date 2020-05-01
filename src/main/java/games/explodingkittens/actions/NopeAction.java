@@ -1,12 +1,9 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
-import components.Card;
-import components.Deck;
 import components.IDeck;
-import core.GameState;
-import updated_core.actions.IPrintable;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import observations.IPrintable;
+import turnorder.TurnOrder;
 
 public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
 

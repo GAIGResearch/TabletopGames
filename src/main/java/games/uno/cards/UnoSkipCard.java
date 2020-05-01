@@ -1,8 +1,8 @@
-package updated_core.games.uno.cards;
+package games.uno.cards;
 
-import updated_core.games.uno.UnoGameState;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import games.uno.UnoGameState;
+import turnorder.TurnOrder;
 
 
 public class UnoSkipCard extends UnoCard {

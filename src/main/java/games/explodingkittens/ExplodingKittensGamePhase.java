@@ -1,4 +1,4 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
 public enum  ExplodingKittensGamePhase{
         PlayerMove,

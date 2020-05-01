@@ -1,13 +1,13 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
+import actions.IAction;
 import components.IDeck;
-import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.games.explodingkittens.ExplodingKittensGamePhase;
-import updated_core.games.explodingkittens.ExplodingKittensGameState;
-import updated_core.games.explodingkittens.cards.ExplodingKittenCard;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import observations.IPrintable;
+import games.explodingkittens.ExplodingKittensGamePhase;
+import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.cards.ExplodingKittenCard;
+import turnorder.TurnOrder;
 
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 

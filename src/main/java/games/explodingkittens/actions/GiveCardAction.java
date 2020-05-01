@@ -1,15 +1,14 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
-import components.Deck;
+import actions.IAction;
 import components.IDeck;
-import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.games.explodingkittens.ExplodingKittenTurnOrder;
-import updated_core.games.explodingkittens.ExplodingKittensGamePhase;
-import updated_core.games.explodingkittens.ExplodingKittensGameState;
-import updated_core.games.explodingkittens.cards.ExplodingKittenCard;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import observations.IPrintable;
+import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensGamePhase;
+import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.cards.ExplodingKittenCard;
+import turnorder.TurnOrder;
 
 
 public class GiveCardAction implements IAction, IPrintable {
@@ -29,7 +28,7 @@ public class GiveCardAction implements IAction, IPrintable {
         giverDeck.remove(card);
         receiverDeck.add(card);
         ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
-        ((ExplodingKittenTurnOrder) turnOrder).endPlayerTurn(gs);
+        turnOrder.endPlayerTurn(gs);
         ((ExplodingKittenTurnOrder) turnOrder).currentPlayer = ((ExplodingKittensGameState) gs).playerGettingAFavor;
         return true;
     }

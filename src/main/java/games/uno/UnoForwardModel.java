@@ -1,26 +1,21 @@
-package updated_core.games.uno;
+package games.uno;
 
-import updated_core.ForwardModel;
-import updated_core.actions.IAction;
-import updated_core.games.tictactoe.TicTacToeGameState;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import actions.IAction;
+import core.AbstractGameState;
+import core.ForwardModel;
+import turnorder.TurnOrder;
 
 public class UnoForwardModel extends ForwardModel {
 
     @Override
-    public void setup(AbstractGameState firstState) {
+    public void next(AbstractGameState gameState, TurnOrder turnOrder, IAction action) {
+        action.Execute(gameState, turnOrder);
+        turnOrder.endPlayerTurn(gameState);
 
-    }
+        if (turnOrder.getTurnCounter() == 9)
+            gameState.endGame();
 
-    @Override
-    public void next(AbstractGameState currentState, TurnOrder turnOrder, IAction action) {
-        action.Execute(currentState, turnOrder);
-        currentState.increaseTurnCounter();
-        if (currentState.getTurnCounter() == 9)
-            currentState.endGame();
-
-        checkWinCondition((UnoGameState) currentState);
+        checkWinCondition((UnoGameState) gameState);
     }
 
     public void checkWinCondition(UnoGameState gameState) {

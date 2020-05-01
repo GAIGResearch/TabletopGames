@@ -1,14 +1,14 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
+import actions.IAction;
 import components.Deck;
 import components.IDeck;
-import updated_core.actions.IAction;
-import updated_core.components.PartialObservableDeck;
-import updated_core.enums.PlayerResult;
-import updated_core.games.explodingkittens.actions.*;
-import updated_core.games.explodingkittens.cards.ExplodingKittenCard;
-import updated_core.observations.Observation;
-import updated_core.players.AbstractPlayer;
+import components.PartialObservableDeck;
+import gamestates.PlayerResult;
+import games.explodingkittens.actions.*;
+import games.explodingkittens.cards.ExplodingKittenCard;
+import observations.Observation;
+import players.AbstractPlayer;
 
 import java.util.ArrayList;
 import java.util.Arrays;

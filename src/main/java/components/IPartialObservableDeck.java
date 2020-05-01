@@ -1,6 +1,4 @@
-package updated_core.components;
-
-import components.IDeck;
+package components;
 
 import java.util.ArrayList;
 import java.util.Random;

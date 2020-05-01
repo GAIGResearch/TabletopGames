@@ -1,8 +1,9 @@
-package updated_core.players;
+package players;
 
-import updated_core.actions.IAction;
+import actions.IAction;
 import observations.IPrintable;
 import observations.Observation;
+import players.AbstractPlayer;
 
 import java.util.List;
 import java.util.Scanner;
@@ -20,7 +21,7 @@ public class HumanConsolePlayer extends AbstractPlayer {
     }
 
     @Override
-    public void finalizePlayer() {
+    public void finalizePlayer(Observation observation) {
 
     }
 

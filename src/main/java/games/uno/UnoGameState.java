@@ -1,13 +1,13 @@
-package updated_core.games.uno;
+package games.uno;
 
+import actions.IAction;
 import components.Deck;
-import updated_core.GameParameters;
-import updated_core.actions.IAction;
-import updated_core.enums.PlayerResult;
-import updated_core.games.uno.cards.*;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.observations.Observation;
-import updated_core.players.AbstractPlayer;
+import core.AbstractGameState;
+import core.GameParameters;
+import gamestates.PlayerResult;
+import games.uno.cards.*;
+import observations.Observation;
+import players.AbstractPlayer;
 
 import java.util.ArrayList;
 import java.util.Arrays;

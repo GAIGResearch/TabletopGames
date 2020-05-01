@@ -1,6 +1,4 @@
-package updated_core.observations;
-
-import updated_core.actions.IPrintable;
+package observations;
 
 public class GridObservation<T> implements Observation, IPrintable {
 

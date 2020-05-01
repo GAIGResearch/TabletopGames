@@ -1,4 +1,4 @@
-package carcassonne;
+package games.carcassonne;
 
 public enum CarcassonneGamePhase {
     PlaceTile,

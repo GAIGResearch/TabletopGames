@@ -1,7 +1,7 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
-import updated_core.GameParameters;
-import updated_core.games.explodingkittens.cards.ExplodingKittenCard;
+import core.GameParameters;
+import games.explodingkittens.cards.ExplodingKittenCard;
 
 import java.util.HashMap;
 

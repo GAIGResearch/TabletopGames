@@ -1,4 +1,4 @@
-package updated_core.actions;
+package observations;
 
 public interface IPrintable {
     void PrintToConsole();

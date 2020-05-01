@@ -1,4 +1,4 @@
-package updated_core.gamestates;
+package gamestates;
 
 public enum PlayerResult {
     Winner,

@@ -1,4 +1,4 @@
-package updated_core.components;
+package components;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

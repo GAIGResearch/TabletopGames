@@ -1,4 +1,4 @@
-package updated_core.games.uno.cards;
+package games.uno.cards;
 
 public class UnoWildCard {
 }

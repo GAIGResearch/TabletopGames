@@ -1,11 +1,11 @@
-package updated_core.games.explodingkittens;
+package games.explodingkittens;
 
-import updated_core.ForwardModel;
-import updated_core.actions.IAction;
-import updated_core.games.explodingkittens.actions.IsNope;
-import updated_core.games.explodingkittens.actions.IsNopeable;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import actions.IAction;
+import core.AbstractGameState;
+import core.ForwardModel;
+import games.explodingkittens.actions.IsNope;
+import games.explodingkittens.actions.IsNopeable;
+import turnorder.TurnOrder;
 
 import java.util.Stack;
 
@@ -14,10 +14,6 @@ public class ExplodingKittensForwardModel extends ForwardModel {
 
     private Stack<IAction> actionStack = new Stack<>();
     private int initialPlayer = -1;
-
-    @Override
-    public void setup(AbstractGameState firstState) {
-    }
 
     @Override
     public void next(AbstractGameState gameState, TurnOrder turnOrder, IAction action) {

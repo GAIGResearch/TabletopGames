@@ -1,11 +1,11 @@
-package updated_core.games.uno;
+package games.uno;
 
+import actions.IAction;
 import components.Deck;
-import updated_core.actions.IAction;
-import updated_core.actions.IPrintable;
-import updated_core.games.uno.cards.CardEffect;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import observations.IPrintable;
+import games.uno.cards.CardEffect;
+import turnorder.TurnOrder;
 
 public class PlayCard<T> implements IAction, IPrintable {
 

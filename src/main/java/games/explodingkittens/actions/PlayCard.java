@@ -1,12 +1,12 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
+import actions.IAction;
 import components.IDeck;
-import updated_core.actions.IAction;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
 
-public class PlayCard<T> implements IAction{
+public class PlayCard<T> implements IAction {
 
     T card;
     final IDeck<T> sourceDeck;

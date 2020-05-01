@@ -1,4 +1,4 @@
-package updated_core.observations;
+package observations;
 
 public interface Observation {
 }

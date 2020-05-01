@@ -1,9 +1,7 @@
-package updated_core.games.uno.cards;
+package games.uno.cards;
 
 
-import core.GameState;
-import updated_core.actions.IAction;
-import updated_core.games.uno.UnoGameState;
+import games.uno.UnoGameState;
 
 
 public abstract class UnoCard  {

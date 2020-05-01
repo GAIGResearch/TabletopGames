@@ -1,14 +1,11 @@
-package updated_core.games.explodingkittens.actions;
+package games.explodingkittens.actions;
 
-import components.Card;
-import components.Deck;
 import components.IDeck;
-import core.GameState;
-import updated_core.actions.IPrintable;
-import updated_core.games.explodingkittens.ExplodingKittenTurnOrder;
-import updated_core.games.explodingkittens.ExplodingKittensGameState;
-import updated_core.gamestates.AbstractGameState;
-import updated_core.turn_order.TurnOrder;
+import core.AbstractGameState;
+import observations.IPrintable;
+import games.explodingkittens.ExplodingKittenTurnOrder;
+import turnorder.TurnOrder;
+
 
 public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
     int attackTargetID;

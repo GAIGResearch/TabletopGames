@@ -1,9 +1,7 @@
-package updated_core.components;
+package components;
 
 import java.util.*;
 
-import components.Component;
-import components.IDeck;
 import utilities.Utils.ComponentType;
 
 
