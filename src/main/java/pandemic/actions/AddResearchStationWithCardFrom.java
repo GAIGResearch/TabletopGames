@@ -1,17 +1,18 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.BoardNode;
 import components.Card;
 import components.Deck;
 import content.PropertyBoolean;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.PandemicGameState;
+import turnorder.TurnOrder;
 
 import static pandemic.Constants.*;
 
 
-public class AddResearchStationWithCardFrom extends AddResearchStation implements Action {
+public class AddResearchStationWithCardFrom extends AddResearchStation implements IAction {
 
     private String fromCity;
     private Card card;
@@ -23,12 +24,12 @@ public class AddResearchStationWithCardFrom extends AddResearchStation implement
     }
 
     @Override
-    public boolean execute(GameState gs) {
-        boolean success = super.execute(gs);
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+        boolean success = super.Execute(gs, turnOrder);
         PandemicGameState pgs = (PandemicGameState)gs;
 
         // Discard the card played
-        Deck playerHand = (Deck)pgs.getComponent(playerHandHash, gs.getActingPlayer());
+        Deck playerHand = (Deck)pgs.getComponent(playerHandHash, ((PandemicGameState) gs).getActingPlayer());
         playerHand.discard(card);
 
         // Remove research station from "fromCity" location

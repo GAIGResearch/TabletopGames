@@ -1,15 +1,16 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.Card;
 import components.Deck;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.PandemicGameState;
+import turnorder.TurnOrder;
 
 import static pandemic.Constants.playerHandHash;
 
 
-public class AddResearchStationWithCard extends AddResearchStation implements Action {
+public class AddResearchStationWithCard extends AddResearchStation implements IAction {
 
     private Card card;
 
@@ -19,12 +20,12 @@ public class AddResearchStationWithCard extends AddResearchStation implements Ac
     }
 
     @Override
-    public boolean execute(GameState gs) {
-        super.execute(gs);
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+        super.Execute(gs, turnOrder);
         PandemicGameState pgs = (PandemicGameState)gs;
 
         // Discard the card played
-        Deck playerHand = (Deck)pgs.getComponent(playerHandHash, gs.getActingPlayer());
+        Deck playerHand = (Deck)pgs.getComponent(playerHandHash, ((PandemicGameState) gs).getActingPlayer());
         playerHand.discard(card);
 
         return false;

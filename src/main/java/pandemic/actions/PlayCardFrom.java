@@ -1,15 +1,16 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.Card;
 import content.PropertyString;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.PandemicGameState;
+import turnorder.TurnOrder;
 import utilities.Hash;
 
 import pandemic.Constants;
 
-public class PlayCardFrom implements Action {
+public class PlayCardFrom implements IAction {
 
     private Card card;
     private String destination;
@@ -20,13 +21,13 @@ public class PlayCardFrom implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         // TODO: execute effect of card
         PandemicGameState pgs = (PandemicGameState)gs;
 
         PropertyString country = (PropertyString) card.getProperty(Hash.GetInstance().hash("country"));
         if (country != null) {
-            int activePlayer = gs.getActingPlayer();
+            int activePlayer = ((PandemicGameState) gs).getActingPlayer();
 
             // Tried to play a city card. Moving from this city to the destination, only if current location matches
             // the card played.
@@ -35,7 +36,7 @@ public class PlayCardFrom implements Action {
             PropertyString currentLocation = (PropertyString) ((Card) pgs.getComponent(Constants.playerCardHash, activePlayer)).getProperty(Constants.playerLocationHash);
 
             if (name.equals(currentLocation)) {
-                new MovePlayer(activePlayer, destination).execute(gs);
+                new MovePlayer(activePlayer, destination).Execute(gs, null);
                 // TODO discard card
                 return true;
             }

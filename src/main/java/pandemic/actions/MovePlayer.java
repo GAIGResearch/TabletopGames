@@ -1,17 +1,18 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.BoardNode;
 import components.Card;
 import content.*;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.PandemicGameState;
 import pandemic.Constants;
+import turnorder.TurnOrder;
 
 import static pandemic.Constants.nameHash;
 
 
-public class MovePlayer implements Action {
+public class MovePlayer implements IAction {
 
 
     private int playerIdx;
@@ -23,7 +24,7 @@ public class MovePlayer implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         PandemicGameState pgs = (PandemicGameState) gs;
         PropertyString prop = (PropertyString) pgs.getComponent(Constants.playerCardHash, playerIdx).getProperty(Constants.playerLocationHash);
         BoardNode currentCity = ((PandemicGameState)gs).world.getNode(nameHash, prop.value);

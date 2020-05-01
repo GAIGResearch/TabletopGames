@@ -1,15 +1,14 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.BoardNode;
 import components.Card;
 import components.Counter;
 import content.*;
-import core.GameParameters;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.Constants;
 import pandemic.PandemicGameState;
-import pandemic.PandemicParameters;
+import turnorder.TurnOrder;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -18,7 +17,7 @@ import java.util.HashSet;
 
 import static pandemic.Constants.*;
 
-public class InfectCity implements Action {
+public class InfectCity implements IAction {
 
     private Card infectingCard;
     private int count;
@@ -31,7 +30,7 @@ public class InfectCity implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         // todo Quarantine Specialist
         PandemicGameState pgs = (PandemicGameState)gs;
         PropertyColor color = (PropertyColor) infectingCard.getProperty(colorHash);
@@ -90,7 +89,7 @@ public class InfectCity implements Action {
         return false;
     }
 
-    private ArrayList<BoardNode> outbreak(BoardNode n, GameState gs, int colorIdx, Counter diseaseCubeCounter,
+    private ArrayList<BoardNode> outbreak(BoardNode n, AbstractGameState gs, int colorIdx, Counter diseaseCubeCounter,
                                           Counter outbreakCounter) {
         PandemicGameState pgs = (PandemicGameState)gs;
         // Returns list of neighbouring board nodes which have outbreaks happening as well for chain reactions
