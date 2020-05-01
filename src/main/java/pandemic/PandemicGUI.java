@@ -5,9 +5,9 @@ import components.Counter;
 import components.Deck;
 import core.GUI;
 import core.Game;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 import utilities.CounterView;
-import utilities.Hash;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,10 +22,9 @@ public class PandemicGUI extends GUI {
     int nPlayers, activePlayer;
     int maxCards = 7;
 
-    public PandemicGUI(Game game) {
-        gameState = (PandemicGameState) game.getGameState();
-        nPlayers = game.getPlayers().size();
-        activePlayer = gameState.getActingPlayer();
+    public PandemicGUI(PandemicGameState gameState, PandemicTurnOrder turnOrder) {
+        nPlayers = gameState.getNPlayers();
+        activePlayer = turnOrder.getCurrentPlayer(gameState).playerID;
 
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
         JPanel playerAreas = createPlayerAreas();
@@ -98,7 +97,7 @@ public class PandemicGUI extends GUI {
         return counterArea;
     }
 
-    public void update(GameState gs) {
+    public void update(AbstractGameState gs, TurnOrder turnOrder) {
         this.gameState = (PandemicGameState) gs;
         ((PandemicBoardView)boardView).gameState = gameState;
         for (int i = 0; i < nPlayers; i++) {
