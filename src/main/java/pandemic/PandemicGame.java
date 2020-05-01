@@ -39,7 +39,7 @@ public class PandemicGame extends Game {
             int action = players.get(activePlayer).getAction((Observation) gameState, actions);
 
             // Resolve actions and game rules for the turn
-            gameState.next(actions.get(action));
+            forwardModel.next(gameState, turnOrder, actions.get(action));
             actionsPlayed++;
 
             if (gui != null) {

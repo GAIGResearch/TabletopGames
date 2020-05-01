@@ -3,9 +3,13 @@ package pandemic;
 import actions.*;
 import components.*;
 import content.*;
+import core.AbstractGameState;
 import core.Area;
-import core.GameState;
+import core.ForwardModel;
+import core.GameParameters;
+import observations.Observation;
 import pandemic.actions.*;
+import players.AbstractPlayer;
 import utilities.Hash;
 
 import java.util.ArrayList;
@@ -14,7 +18,8 @@ import java.util.List;
 
 import static pandemic.Constants.nameHash;
 
-public class PandemicGameState extends GameState {
+
+public class PandemicGameState extends AbstractGameState {
 
     private HashMap<Integer, Area> areas;
     public Board world;
@@ -24,6 +29,11 @@ public class PandemicGameState extends GameState {
 
     private PandemicData _data;
     private Deck tempDeck;
+
+    public PandemicGameState(PandemicParameters gameParameters) {
+        super(gameParameters);
+        setComponents(gameParameters.getDataPath());
+    }
 
     public void setComponents(String dataPath)
     {
@@ -87,9 +97,8 @@ public class PandemicGameState extends GameState {
         gameArea.addComponent(Constants.researchStationHash, _data.findCounter("Research Stations"));
     }
 
-    @Override
-    public GameState createNewGameState() {
-        return new PandemicGameState();
+    public AbstractGameState createNewGameState() {
+        return new PandemicGameState((PandemicParameters) this.gameParameters);
     }
 
     /**
@@ -99,19 +108,18 @@ public class PandemicGameState extends GameState {
      * @param playerId id of the player the copy is being prepared for
      * @return a copy of the game state.
      */
-    protected GameState _copy(int playerId)
+    protected AbstractGameState _copy(int playerId)
     {
         //Insert code here to change the way super.decks, etc are copied (i.e. for PO).
 
         //This line below is the same as doing nothing, just here for demonstration purposes.
-        return super._copy(playerId);
+        return createNewGameState();
     }
 
 
-    @Override
-    public void copyTo(GameState dest, int playerId)
+    public void copyTo(PandemicGameState dest, int playerId)
     {
-        PandemicGameState gs = (PandemicGameState)dest;
+        PandemicGameState gs = dest;
 
         gs.world = this.world.copy();
         gs.numAvailableActions = numAvailableActions;
@@ -137,10 +145,10 @@ public class PandemicGameState extends GameState {
     }
 
     @Override
-    public List<Action> possibleActions() {
+    public List<IAction> getActions(AbstractPlayer player) {
 
         // Create a list for possible actions
-        ArrayList<Action> actions = new ArrayList<>();
+        ArrayList<IAction> actions = new ArrayList<>();
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
         // get player's hand and role card
@@ -360,11 +368,11 @@ public class PandemicGameState extends GameState {
         return tempDeck;
     }
 
-    private List<Action> getMoveActions(int playerId, Deck<Card> playerHand, List<String> researchStations){
+    private List<IAction> getMoveActions(int playerId, Deck<Card> playerHand, List<String> researchStations){
         // playerID - for the player we want to move
         // playerHand - the deck that we use for the movement
         // researchStations - a list of String locations where research stations are present
-        ArrayList<Action> actions = new ArrayList<>();
+        ArrayList<IAction> actions = new ArrayList<>();
 
         PropertyString playerLocationName = (PropertyString) this.areas.get(playerId).getComponent(Constants.playerCardHash).getProperty(Constants.playerLocationHash);
         BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
@@ -411,8 +419,8 @@ public class PandemicGameState extends GameState {
         return actions;
     }
 
-    private List<Action> actionsFromEventCard(Card card, ArrayList<String> researchStations){
-        ArrayList<Action> actions = new ArrayList<>();
+    private List<IAction> actionsFromEventCard(Card card, ArrayList<String> researchStations){
+        ArrayList<IAction> actions = new ArrayList<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
         switch (cardString) {
@@ -502,4 +510,49 @@ public class PandemicGameState extends GameState {
     public PandemicData getData() {
         return _data;
     }
+
+
+    protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
+    protected ArrayList<Integer> reactivePlayers;
+    protected int nPlayers;
+
+    protected ForwardModel forwardModel;
+
+    //Getters & setters
+    public Constants.GameResult getGameStatus() {  return gameStatus; }
+    void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
+    ForwardModel getModel() {return this.forwardModel;}
+    public GameParameters getGameParameters() { return gameParameters; }
+
+    public void setGameOver(Constants.GameResult status){  this.gameStatus = status; }
+
+    @Override
+    public Observation getObservation(AbstractPlayer player) {
+        return null;
+    }
+
+    @Override
+    public void endGame() {
+
+    }
+
+    public int getActingPlayer() {  // Returns player taking an action (or possibly a reaction) next
+        if (reactivePlayers.size() == 0)
+            return activePlayer;
+        else return reactivePlayers.get(0);
+    }
+    public int getActivePlayer() { return activePlayer; }  // Returns the player whose turn it is, might not be active player
+    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }  // Returns players queued to react
+    public void addReactivePlayer(int player) { reactivePlayers.add(player); }
+    public boolean removeReactivePlayer() {
+        if (reactivePlayers.size() > 0) {
+            reactivePlayers.remove(0);
+            return true;
+        }
+        return false;
+    }
+    public HashMap<Integer, Area> getAreas() { return areas; }
+    public int getNPlayers() { return nPlayers; }
+    public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }
+
 }

@@ -5,6 +5,7 @@ import components.*;
 import content.*;
 import core.*;
 import pandemic.actions.*;
+import turnorder.TurnOrder;
 import utilities.Hash;
 
 import java.util.Random;
@@ -12,22 +13,21 @@ import java.util.Random;
 import static pandemic.Constants.*;
 import static pandemic.actions.MovePlayer.placePlayer;
 
-public class PandemicForwardModel implements ForwardModel {
+public class PandemicForwardModel extends ForwardModel {
 
     /**
      * Random generator for this game.
      */
     protected Random rnd;
     
-    @Override
-    public void setup(GameState firstState) {
+    public void setup(AbstractGameState firstState) {
 
         PandemicGameState state = (PandemicGameState) firstState;
-        PandemicParameters gameParameters = (PandemicParameters) firstState.getGameParameters();
+        PandemicParameters gameParameters = (PandemicParameters) ((PandemicGameState) firstState).getGameParameters();
         rnd = new Random(gameParameters.game_seed);
 
         // 1 research station in Atlanta
-        new AddResearchStation("Atlanta").execute(state);
+        new AddResearchStation("Atlanta").Execute(state, null);
 
         // init counters
         Counter outbreaksCounter = (Counter) state.getComponent(outbreaksHash);
@@ -55,10 +55,10 @@ public class PandemicForwardModel implements ForwardModel {
                 Card c = (Card) infectionDeck.draw();
 
                 // Place matching color (nTimes - j) cubes and place on matching city
-                new InfectCity(gameParameters.max_cubes_per_city, c, nTimes - j).execute(state);
+                new InfectCity(gameParameters.max_cubes_per_city, c, nTimes - j).Execute(state, null);
 
                 // Discard card
-                new DrawCard(infectionDeck, infectionDiscard).execute(state);
+                new DrawCard(infectionDeck, infectionDiscard).Execute(state, null);
             }
         }
 
@@ -86,7 +86,7 @@ public class PandemicForwardModel implements ForwardModel {
 
             playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {
-                new DrawCard(playerDeck, playerHandDeck).execute(state);
+                new DrawCard(playerDeck, playerHandDeck).Execute(state, null);
             }
 
             for (Card card: playerHandDeck.getCards()) {
@@ -111,7 +111,7 @@ public class PandemicForwardModel implements ForwardModel {
 
             Card card = new Card();
             card.setProperty(Hash.GetInstance().hash("name"), new PropertyString("epidemic"));
-            new AddCardToDeck(card, playerDeck, index).execute(state);
+            new AddCardToDeck(card, playerDeck, index).Execute(state, null);
 
         }
 
@@ -120,9 +120,9 @@ public class PandemicForwardModel implements ForwardModel {
     }
 
     @Override
-    public void next(GameState currentState, Action action) {
+    public void next(AbstractGameState currentState, TurnOrder turnOrder, IAction action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
-        PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
+        PandemicParameters gameParameters = (PandemicParameters) ((PandemicGameState) currentState).getGameParameters();
 
         if (pgs.getReactivePlayers().size() == 0) {
             // Only advance round step if no one is reacting
@@ -138,7 +138,7 @@ public class PandemicForwardModel implements ForwardModel {
                 if (diseaseCounter.getValue() < 1) all_cured = false;
             }
             if (all_cured) {
-                pgs.setGameOver(GAME_WIN);
+                pgs.setGameOver(GameResult.GAME_WIN);
                 System.out.println("WIN!");
             }
         }
@@ -169,15 +169,14 @@ public class PandemicForwardModel implements ForwardModel {
         // TODO: wanna play event card?
     }
 
-    @Override
     public ForwardModel copy() {
         PandemicForwardModel fm = new PandemicForwardModel();
         fm.rnd = rnd; //TODO: revisit this, we may not want the same random generator.
         return fm;
     }
 
-    private void playerActions(PandemicGameState currentState, Action action) {
-        action.execute(currentState);
+    private void playerActions(PandemicGameState currentState, IAction action) {
+        action.Execute(currentState, null);
         PandemicParameters gameParameters = (PandemicParameters) currentState.getGameParameters();
         if (action instanceof QuietNight) {
             currentState.setQuietNight(true);
@@ -201,10 +200,10 @@ public class PandemicForwardModel implements ForwardModel {
         }
     }
 
-    private void drawCards(GameState currentState, PandemicParameters gameParameters) {
-        PandemicGameState pgs = (PandemicGameState) currentState;
+    private void drawCards(PandemicGameState currentState, PandemicParameters gameParameters) {
+        PandemicGameState pgs =  currentState;
         int noCardsDrawn = gameParameters.n_cards_draw;
-        int activePlayer = currentState.getActingPlayer();
+        int activePlayer = ((PandemicGameState) currentState).getActingPlayer();
 
         pgs.clearTempDeck();
         Deck<Card> tempDeck = pgs.getTempDeck();
@@ -216,10 +215,10 @@ public class PandemicForwardModel implements ForwardModel {
 
             // if player cannot draw it means that the deck is empty -> GAME OVER
             if (!canDraw){
-                currentState.setGameOver(GAME_LOSE);
+                currentState.setGameOver(GameResult.GAME_LOSE);
                 System.out.println("No more cards to draw");
             }
-            action.execute(currentState);
+            action.Execute(currentState, null);
 
         }
 
@@ -237,7 +236,7 @@ public class PandemicForwardModel implements ForwardModel {
             } else {  // Otherwise, give card to player
                 if (playerHandDeck != null) {
                     // deck size doesn't go beyond 7
-                    new AddCardToDeck(c, playerHandDeck).execute(currentState);
+                    new AddCardToDeck(c, playerHandDeck).Execute(currentState, null);
                 }
             }
         }
@@ -253,10 +252,10 @@ public class PandemicForwardModel implements ForwardModel {
         }
     }
 
-    private void epidemic(GameState currentState, PandemicParameters gameParameters) {
+    private void epidemic(PandemicGameState currentState, PandemicParameters gameParameters) {
 
         // 1. infection counter idx ++
-        PandemicGameState pgs = (PandemicGameState) currentState;
+        PandemicGameState pgs = currentState;
         Counter infRateCounter = (Counter) pgs.getComponent(infectionRateHash);
         infRateCounter.increment(1);
 
@@ -265,24 +264,24 @@ public class PandemicForwardModel implements ForwardModel {
         Card c = (Card) infectionDeck.pickLast();
         if (c == null){
             // cannot draw card
-            currentState.setGameOver(GAME_LOSE);
+            currentState.setGameOver(GameResult.GAME_LOSE);
             System.out.println("No more cards to draw");
             return;
         }
-        new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_epidemic).execute(currentState);
+        new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_epidemic).Execute(currentState, null);
         if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
 
         // 3. shuffle infection discard deck, add back on top of infection deck
         Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         infectionDiscardDeck.shuffle(rnd);
         for (Card card: infectionDiscardDeck.getCards()) {
-            new AddCardToDeck(card, infectionDeck).execute(currentState);
+            new AddCardToDeck(card, infectionDeck).Execute(currentState, null);
         }
     }
 
-    private void infectCities(GameState currentState, PandemicParameters gameParameters) {
+    private void infectCities(PandemicGameState currentState, PandemicParameters gameParameters) {
 
-        PandemicGameState pgs = (PandemicGameState) currentState;
+        PandemicGameState pgs = currentState;
         Counter infRateCounter = (Counter) pgs.getComponent(infectionRateHash);
         int noCardsDrawn = gameParameters.infection_rate[infRateCounter.getValue()];
 
@@ -291,37 +290,37 @@ public class PandemicForwardModel implements ForwardModel {
         Deck infections = (Deck) pgs.getComponent(infectionHash);
         DrawCard action = new DrawCard(infections, tempDeck);
         for (int i = 0; i < noCardsDrawn; i++) {  // Draw cards for active player from player deck into a new deck
-            action.execute(currentState);
+            action.Execute(currentState, null);
         }
 
         for (Card c : tempDeck.getCards()) {  // Check the drawn cards
-            new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_infection).execute(currentState);
+            new InfectCity(gameParameters.max_cubes_per_city, c, gameParameters.n_cubes_infection).Execute(currentState, null);
             if (checkInfectionGameEnd(currentState, gameParameters, c)) return;
         }
         pgs.clearTempDeck();
     }
 
-    private boolean checkInfectionGameEnd(GameState currentState, PandemicParameters gameParameters, Card c) {
+    private boolean checkInfectionGameEnd(PandemicGameState currentState, PandemicParameters gameParameters, Card c) {
 
-        PandemicGameState pgs = (PandemicGameState) currentState;
+        PandemicGameState pgs = currentState;
         Counter outbreaksCounter = (Counter) pgs.getComponent(outbreaksHash);
 
         if (outbreaksCounter.getValue() >= gameParameters.lose_max_outbreak) {
-            currentState.setGameOver(GAME_LOSE);
+            currentState.setGameOver(GameResult.GAME_LOSE);
             System.out.println("Too many outbreaks");
             return true;
         }
         String dc = "Disease Cube " + ((PropertyColor)c.getProperty(colorHash)).valueStr;
         Counter diseaseCube = (Counter) pgs.getComponent(Hash.GetInstance().hash(dc));
         if (diseaseCube.getValue() < 0) {
-            currentState.setGameOver(GAME_LOSE);
+            currentState.setGameOver(GameResult.GAME_LOSE);
             System.out.println("Ran out of disease cubes");
             return true;
         }
 
         // Discard this infection card
         Deck infectionDiscardDeck = (Deck) pgs.getComponent(infectionDiscardHash);
-        new AddCardToDeck(c, infectionDiscardDeck).execute(currentState);
+        new AddCardToDeck(c, infectionDiscardDeck).Execute(currentState, null);
         return false;
     }
 }
