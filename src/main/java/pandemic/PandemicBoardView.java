@@ -2,7 +2,7 @@ package pandemic;
 
 import components.*;
 import content.*;
-import core.GameState;
+import core.AbstractGameState;
 import utilities.Hash;
 import utilities.ImageIO;
 import utilities.Utils;
@@ -60,7 +60,7 @@ public class PandemicBoardView extends JComponent {
             new Point2D.Double(560, 775)
     };
 
-    public PandemicBoardView(GameState gs, String backgroundPath) {
+    public PandemicBoardView(AbstractGameState gs, String backgroundPath) {
         gameState = (PandemicGameState) gs;
         this.board = ((PandemicGameState) gs).getData().findBoard("Cities");
         this.background = ImageIO.GetInstance().getImage(backgroundPath);
