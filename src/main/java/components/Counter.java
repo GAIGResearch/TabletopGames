@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Counter extends Component {
+public class Counter extends Component implements ICounter {
     private int count;      //By default, counters go from min to max, and are initialized at min.
     private int minimum;
     private int maximum;
@@ -23,6 +23,7 @@ public class Counter extends Component {
         this.properties = new HashMap<>();
     }
 
+    @Override
     public Counter copy() {
         Counter copy = new Counter();
         copy.minimum = minimum;
@@ -32,10 +33,14 @@ public class Counter extends Component {
         return copy;
     }
 
+    @Override
     public Boolean isMinimum()  { return this.count == this.minimum; }
+    @Override
     public Boolean isMaximum()  { return this.count == this.maximum; }
+    @Override
     public int getValue() { return this.count;                 }
 
+    @Override
     public void increment(int value) {
         this.count += value;
         if (this.count > this.maximum) {
@@ -43,6 +48,7 @@ public class Counter extends Component {
         }
     }
 
+    @Override
     public void decrement(int value) {
         this.count -= value;
         if (this.count < this.minimum) {
@@ -50,6 +56,7 @@ public class Counter extends Component {
         }
     }
 
+    @Override
     public void setValue(int i) {
         this.count = i;
     }
@@ -91,6 +98,7 @@ public class Counter extends Component {
         return counters;
     }
 
+    @Override
     public String getID() {
         return id;
     }

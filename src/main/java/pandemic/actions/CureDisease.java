@@ -1,16 +1,19 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.Card;
 import components.Counter;
 import components.Deck;
-import core.GameState;
+import core.AbstractGameState;
+import pandemic.PandemicGameState;
+import turnorder.TurnOrder;
+import utilities.Hash;
 
 import java.util.ArrayList;
 
 import static pandemic.Constants.playerHandHash;
 
-public class CureDisease implements Action {
+public class CureDisease implements IAction {
     private String color;
     private ArrayList<Card> cards;
 
@@ -20,14 +23,15 @@ public class CureDisease implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         // Find disease counter
-        Counter diseaseCounter = gs.findCounter("Disease " + color);
+        PandemicGameState pgs = (PandemicGameState)gs;
+        Counter diseaseCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color));
         if (diseaseCounter.getValue() == 0) {
             diseaseCounter.setValue(1);  // Set to cured
 
             // Discard cards from player hand
-            Deck playerHand = (Deck) gs.getAreas().get(gs.getActingPlayer()).getComponent(playerHandHash);
+            Deck playerHand = (Deck) pgs.getComponent(playerHandHash, ((PandemicGameState) gs).getActingPlayer());
             for (Card c: cards) {
                 playerHand.discard(c);
             }

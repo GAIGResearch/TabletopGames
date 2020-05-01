@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 
 
-public class Token extends Component {
+public class Token extends Component implements IToken {
     // position should be reference to a graph
     private int position;           // todo graph
     private HashSet<Integer> owner; // owner
@@ -32,6 +32,7 @@ public class Token extends Component {
         properties = new HashMap<>();
     }
 
+    @Override
     public Token copy(){
         Token copy = new Token();
         copy.position = position;
@@ -45,7 +46,34 @@ public class Token extends Component {
         return copy;
     }
 
-    public void loadToken(JSONObject token) {
+    @Override
+    public HashSet<Integer> getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void setOwner(HashSet<Integer> owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    public int getOccurenceLimit() {
+        return occurenceLimit;
+    }
+
+    @Override
+    public void setOccurenceLimit(int occurenceLimit) {
+        this.occurenceLimit = occurenceLimit;
+    }
+
+    @Override
+    public String getNameID() {
+        return nameID;
+    }
+
+
+
+    private void loadToken(JSONObject token) {
 
         this.nameID = (String) token.get("id");
         this.token_type = (String) ( (JSONArray) token.get("type")).get(1);
@@ -75,42 +103,5 @@ public class Token extends Component {
         }
 
         return tokens;
-    }
-
-    public String getTokenType() {
-        return token_type;
-    }
-
-    public void setTokenType(String token_type) {
-        this.token_type = token_type;
-    }
-
-    public HashSet<Integer> getOwner() {
-        return owner;
-    }
-
-    public void setOwner(HashSet<Integer> owner) {
-        this.owner = owner;
-    }
-
-    public int getOccurenceLimit() {
-        return occurenceLimit;
-    }
-
-    public void setOccurenceLimit(int occurenceLimit) {
-        this.occurenceLimit = occurenceLimit;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
-    }
-
-    public int getPosition() {
-
-        return position;
-    }
-
-    public String getNameID() {
-        return nameID;
     }
 }

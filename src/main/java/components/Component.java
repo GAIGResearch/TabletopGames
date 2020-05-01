@@ -46,7 +46,7 @@ public abstract class Component {
      * @param obj - JSON object to parse.
      * @return new Component object with properties as defined in JSON.
      */
-    protected Component parseComponent(Component c, JSONObject obj)
+    protected static Component parseComponent(Component c, JSONObject obj)
     {
         for(Object o : obj.keySet())
         {

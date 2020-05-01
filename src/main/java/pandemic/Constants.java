@@ -4,9 +4,18 @@ import utilities.Hash;
 
 public class Constants {
 
-    public final static int GAME_WIN = 1;
-    public final static int GAME_LOSE = 0;
-    public final static int GAME_ONGOING = -1;
+    public enum GameResult {
+        GAME_WIN(3),
+        GAME_DRAW(1),
+        GAME_ONGOING(0),
+        GAME_LOSE(-1);
+
+        public final int value;
+
+        GameResult(int value) {
+            this.value = value;
+        }
+    }
 
     public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 

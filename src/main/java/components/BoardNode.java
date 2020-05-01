@@ -6,7 +6,7 @@ import utilities.Vector2D;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class BoardNode extends Component{
+public class BoardNode extends Component implements IBoardNode {
 
     public static int idCounter = 0;  // Used to set unique ids for all nodes added.
 
@@ -47,10 +47,12 @@ public class BoardNode extends Component{
      * @param neighbour - new neighbour of this node.
      * @return - true if added successfully, false otherwise. may fail if too many neighbours added.
      */
-    public boolean addNeighbour(BoardNode neighbour) {
+    @Override
+    public boolean addNeighbour(IBoardNode neighbour) {
+        BoardNode n = (BoardNode)neighbour;
         if (neighbours.size() <= maxNeighbours || maxNeighbours == -1) {
             if (!(neighbours.contains(neighbour))) {
-                neighbours.add(neighbour);
+                neighbours.add(n);
                 return true;
             }
         }
@@ -62,7 +64,8 @@ public class BoardNode extends Component{
      * @param neighbour - neighbour to remove.
      * @return - true if removed successfully, false otherwise. may fail if neighbour didn't exist in the first place.
      */
-    public boolean removeNeighbour(BoardNode neighbour) {
+    @Override
+    public boolean removeNeighbour(IBoardNode neighbour) {
         if (neighbours.contains(neighbour)) {
             neighbours.remove(neighbour);
             neighbourSideMapping.remove(neighbour);
@@ -77,11 +80,13 @@ public class BoardNode extends Component{
      * @param side - side of this node to be added in.
      * @return - true if added successfully, false otherwise. may fail if too many neighbours added already.
      */
-    public boolean addNeighbour(BoardNode neighbour, int side) {
+    @Override
+    public boolean addNeighbour(IBoardNode neighbour, int side) {
+        BoardNode n = (BoardNode)neighbour;
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
             if (!(neighbours.contains(neighbour)) && !(neighbourSideMapping.containsKey(neighbour))) {
-                neighbours.add(neighbour);
-                neighbourSideMapping.put(neighbour, side);
+                neighbours.add(n);
+                neighbourSideMapping.put(n, side);
                 return true;
             }
         }
@@ -92,7 +97,8 @@ public class BoardNode extends Component{
      * Copies all node properties to a new instance of this node.
      * @return - a new instance of this node.
      */
-    public BoardNode copy() {
+    @Override
+    public IBoardNode copy() {
         BoardNode copy = new BoardNode(maxNeighbours, position.copy());
         copy.id = id;
         idCounter--;  // This increases automatically in constructor, but we don't need that if we're copying the ID
@@ -108,6 +114,7 @@ public class BoardNode extends Component{
     /**
      * @return the ID of this node
      */
+    @Override
     public int getId() {
         return id;
     }
@@ -116,6 +123,7 @@ public class BoardNode extends Component{
     /**
      * @return the neighbours of this node
      */
+    @Override
     public HashSet<BoardNode> getNeighbours() {
         return neighbours;
     }
@@ -123,6 +131,7 @@ public class BoardNode extends Component{
     /**
      * @return the neighbours mapping to sides of this node
      */
+    @Override
     public HashMap<BoardNode, Integer> getNeighbourSideMapping() {
         return neighbourSideMapping;
     }
@@ -130,6 +139,7 @@ public class BoardNode extends Component{
     /**
      * @return the physical position of this board node
      */
+    @Override
     public Vector2D getPosition() {
         return position;
     }
@@ -152,7 +162,7 @@ public class BoardNode extends Component{
         if(otherBoardNode.id != id)
             return false;
 
-        for (BoardNode n: otherBoardNode.neighbours) {
+        for (IBoardNode n: otherBoardNode.neighbours) {
             if (!(neighbours.contains(n))) {
                 return false;
             }
@@ -187,6 +197,7 @@ public class BoardNode extends Component{
     }
 
 
+    @Override
     public void setMaxNeighbours(int maxNeighbours) {
         this.maxNeighbours = maxNeighbours;
     }
