@@ -24,7 +24,8 @@ public class PandemicGUI extends GUI {
 
     public PandemicGUI(PandemicGameState gameState, PandemicTurnOrder turnOrder) {
         nPlayers = gameState.getNPlayers();
-        activePlayer = turnOrder.getCurrentPlayer(gameState).playerID;
+        activePlayer = gameState.getActingPlayer();
+        this.gameState = gameState;
 
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
         JPanel playerAreas = createPlayerAreas();
@@ -97,6 +98,7 @@ public class PandemicGUI extends GUI {
         return counterArea;
     }
 
+    @Override
     public void update(AbstractGameState gs, TurnOrder turnOrder) {
         this.gameState = (PandemicGameState) gs;
         ((PandemicBoardView)boardView).gameState = gameState;

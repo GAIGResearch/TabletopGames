@@ -16,6 +16,7 @@ public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents)
     {
+        players = agents;
         turnOrder = new PandemicTurnOrder(agents);
         forwardModel = new PandemicForwardModel();
 
@@ -43,7 +44,7 @@ public class PandemicGame extends Game {
             actionsPlayed++;
 
             if (gui != null) {
-                gui.update(gameState);
+                gui.update(gameState, turnOrder);
                 try {
                     Thread.sleep(100);
                 } catch (Exception e) {

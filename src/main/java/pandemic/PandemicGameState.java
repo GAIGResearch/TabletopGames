@@ -19,7 +19,7 @@ import java.util.List;
 import static pandemic.Constants.nameHash;
 
 
-public class PandemicGameState extends AbstractGameState {
+public class PandemicGameState extends AbstractGameState implements  Observation {
 
     private HashMap<Integer, Area> areas;
     public Board world;
@@ -33,6 +33,7 @@ public class PandemicGameState extends AbstractGameState {
     public PandemicGameState(PandemicParameters gameParameters) {
         super(gameParameters);
         setComponents(gameParameters.getDataPath());
+        reactivePlayers = new ArrayList<>();
     }
 
     public void setComponents(String dataPath)
@@ -44,7 +45,7 @@ public class PandemicGameState extends AbstractGameState {
         areas = new HashMap<>();
       
         // For each player, initialize their own areas: they get a player hand and a player card
-        for (int i = 0; i < nPlayers; i++) {
+        for (int i = 0; i < getNPlayers(); i++) {
             Area playerArea = new Area();
             playerArea.setOwner(i);
             playerArea.addComponent(Constants.playerHandHash, new Deck(pp.max_cards_per_player));
@@ -354,7 +355,7 @@ public class PandemicGameState extends AbstractGameState {
     }
 
     void nextPlayer() {
-        activePlayer = (activePlayer + 1) % nPlayers;
+        activePlayer = (activePlayer + 1) % getNPlayers();
     }
     void setActivePlayer(int p) {
         activePlayer = p;
@@ -435,7 +436,7 @@ public class PandemicGameState extends AbstractGameState {
                 break;
             case "Airlift":
                 // Move any 1 pawn to any city. Get permission before moving another player's pawn.
-                for (int i = 0; i < nPlayers; i++){
+                for (int i = 0; i < getNPlayers(); i++){
                     for (BoardNode bn: world.getBoardNodes())
                     actions.add(new MovePlayer(i, ((PropertyString)bn.getProperty(Constants.nameHash)).value));
                 }
@@ -514,7 +515,6 @@ public class PandemicGameState extends AbstractGameState {
 
     protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
     protected ArrayList<Integer> reactivePlayers;
-    protected int nPlayers;
 
     protected ForwardModel forwardModel;
 
@@ -552,7 +552,7 @@ public class PandemicGameState extends AbstractGameState {
         return false;
     }
     public HashMap<Integer, Area> getAreas() { return areas; }
-    public int getNPlayers() { return nPlayers; }
+    public int getNPlayers() { return gameParameters.nPlayers; }
     public void setNPlayers(int nPlayers) { this.nPlayers = nPlayers; }
 
 }
