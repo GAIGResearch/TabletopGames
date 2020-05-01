@@ -1,9 +1,9 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import turnorder.TurnOrder;
+import core.observations.IPrintable;
+import core.turnorder.TurnOrder;
 
 public class ShuffleAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
     final IDeck<T> shuffleDeck;
@@ -14,9 +14,9 @@ public class ShuffleAction<T> extends PlayCard<T> implements IsNopeable, IPrinta
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         shuffleDeck.shuffle();
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ShuffleAction<T> extends PlayCard<T> implements IsNopeable, IPrinta
 
     @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override

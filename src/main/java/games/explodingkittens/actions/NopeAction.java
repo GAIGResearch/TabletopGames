@@ -1,9 +1,8 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import turnorder.TurnOrder;
+import core.observations.IPrintable;
 
 public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
 
@@ -15,8 +14,8 @@ public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        super.Execute(gs, turnOrder);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
         return true;
     }
 

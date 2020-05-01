@@ -20,15 +20,6 @@ public class ExplodingKittenParameters extends GameParameters {
         put(ExplodingKittenCard.CardType.FURRYCAT, 4);
         put(ExplodingKittenCard.CardType.NOPE, 5);
         put(ExplodingKittenCard.CardType.DEFUSE, 6);
-        put(ExplodingKittenCard.CardType.EXPLODING_KITTEN, nPlayers-1);
+        put(ExplodingKittenCard.CardType.EXPLODING_KITTEN, -1);
     }};
-
-    protected ExplodingKittenParameters(int nPlayers) {
-        super(nPlayers);
-    }
-
-    protected ExplodingKittenParameters(int nPlayers, HashMap<ExplodingKittenCard.CardType, Integer> cardCounts){
-        super(nPlayers);
-        this.cardCounts = cardCounts;
-    }
 }

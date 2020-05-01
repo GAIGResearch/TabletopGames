@@ -1,9 +1,9 @@
 package games.uno;
 
-import components.Deck;
-import observations.IPrintable;
+import core.components.Deck;
+import core.observations.IPrintable;
 import games.uno.cards.UnoCard;
-import observations.Observation;
+import core.observations.Observation;
 
 import java.util.Arrays;
 

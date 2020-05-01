@@ -1,14 +1,13 @@
 package games.tictactoe;
 
-import actions.IAction;
-import actions.SetGridValueAction;
-import components.Grid;
+import core.actions.IAction;
+import core.actions.SetGridValueAction;
+import core.components.Grid;
 import core.AbstractGameState;
-import gamestates.PlayerResult;
-import gamestates.GridGameState;
-import observations.GridObservation;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.gamestates.PlayerResult;
+import core.gamestates.GridGameState;
+import core.observations.GridObservation;
+import core.observations.Observation;
 
 import java.util.*;
 import java.util.List;
@@ -20,32 +19,32 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
 
     //HashMap<AbstractPlayer, Character> playerSymbols = new HashMap<>();
 
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters){
-        super(gameParameters);
+    public TicTacToeGameState(TicTacToeGameParameters gameParameters, int nPlayers){
+        super(gameParameters, nPlayers);
     }
 
     @Override
-    public Observation getObservation(AbstractPlayer player) {
+    public Observation getObservation(int player) {
         return new GridObservation<>(grid.getGridValues());
-    }
-
-    @Override
-    public List<IAction> getActions(AbstractPlayer player) {
-        ArrayList<IAction> actions = new ArrayList<>();
-
-        for (int x = 0; x < grid.getWidth(); x++){
-            for (int y = 0; y < grid.getHeight(); y++) {
-                if (grid.getElement(x, y) == ' ')
-                    actions.add(new SetGridValueAction<>(grid, x, y, player.playerID == 0 ? 'x' : 'o'));
-            }
-        }
-        return actions;
     }
 
     @Override
     public void endGame() {
         terminalState = true;
         Arrays.fill(playerResults, PlayerResult.Draw);
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions(int player) {
+        ArrayList<IAction> actions = new ArrayList<>();
+
+        for (int x = 0; x < grid.getWidth(); x++){
+            for (int y = 0; y < grid.getHeight(); y++) {
+                if (grid.getElement(x, y) == ' ')
+                    actions.add(new SetGridValueAction<>(grid, x, y, player == 0 ? 'x' : 'o'));
+            }
+        }
+        return actions;
     }
 
     @Override

@@ -1,13 +1,12 @@
 package games.explodingkittens.actions;
 
-import actions.IAction;
+import core.actions.IAction;
 import core.AbstractGameState;
-import observations.IPrintable;
-import components.IPartialObservableDeck;
+import core.observations.IPrintable;
+import core.components.IPartialObservableDeck;
 import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import turnorder.TurnOrder;
 
 
 public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
@@ -28,7 +27,7 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         drawPile.remove(card1);
         drawPile.remove(card2);
         drawPile.remove(card3);

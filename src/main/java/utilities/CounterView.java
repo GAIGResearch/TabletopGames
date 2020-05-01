@@ -1,6 +1,6 @@
 package utilities;
 
-import components.Counter;
+import core.components.Counter;
 
 import javax.swing.*;
 import java.awt.*;

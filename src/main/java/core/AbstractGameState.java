@@ -1,10 +1,10 @@
 package core;
 
-import actions.IAction;
-import gamestates.PlayerResult;
-import observations.Observation;
-import pandemic.Constants;
-import players.AbstractPlayer;
+import core.actions.IAction;
+import core.gamestates.PlayerResult;
+import core.observations.Observation;
+import core.turnorder.TurnOrder;
+import games.pandemic.Constants;
 
 import java.util.*;
 
@@ -13,31 +13,60 @@ import java.util.*;
  */
 public abstract class AbstractGameState {
 
-    protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
-    //protected ArrayList<Integer> reactivePlayers;
-
+    protected ForwardModel forwardModel;
+    protected TurnOrder turnOrder;
+    public TurnOrder getTurnOrder(){return turnOrder;}
+    protected void setTurnOrder(TurnOrder turnOrder){ this.turnOrder = turnOrder;}
 
     protected int nPlayers;
-    public int getNPlayers() { return nPlayers; }
+    protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
+    //protected ArrayList<Integer> reactivePlayers;
+    protected int numAvailableActions = 0;
+    protected List<IAction> availableActions;
 
     public int roundStep;
-
-    /**
-     * Set of parameters for this game.
-     */
-    protected final GameParameters gameParameters;
-
     protected boolean terminalState;
     protected Constants.GameResult gameStatus = Constants.GameResult.GAME_ONGOING;
     protected PlayerResult[] playerResults;
-    public PlayerResult[] getPlayerResults() { return playerResults; }
 
+    // Set of parameters for this game.
+    protected final GameParameters gameParameters;
 
-    public AbstractGameState(GameParameters gameParameters){
+    public AbstractGameState(GameParameters gameParameters, int nPlayers){
         this.gameParameters = gameParameters;
-        this.playerResults = new PlayerResult[gameParameters.nPlayers];
+        this.playerResults = new PlayerResult[nPlayers];
         Arrays.fill(this.playerResults, PlayerResult.Undecided);
+        availableActions = new ArrayList<>();
     }
+
+    //Getters & setters
+    public Constants.GameResult getGameStatus() {  return gameStatus; }
+    void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
+    ForwardModel getModel() {return this.forwardModel;}
+    //public GameParameters getGameParameters() { return this.gameParameters; }
+    public void setGameOver(Constants.GameResult status){  this.gameStatus = status; }
+    public int getNPlayers() { return nPlayers; }
+    public PlayerResult[] getPlayerResults() { return playerResults; }
+    public boolean isTerminal(){ return terminalState; }
+    public int nPossibleActions() { return numAvailableActions; }
+    public final List<IAction> getActions(int player) {
+        if (availableActions == null || availableActions.size() == 0) {
+            availableActions = computeAvailableActions(player);
+        }
+        return availableActions;
+    }
+    public List<IAction> setAvailableActions(List<IAction> actions, int player) {
+        if (actions != null && actions.size() > 0) {
+            numAvailableActions = actions.size();
+            availableActions = actions;
+        } else computeAvailableActions(player);
+        return availableActions;
+    }
+
+    /* Methods to be implemented by subclass */
+    public abstract Observation getObservation(int player);
+    public abstract void endGame();
+    public abstract List<IAction> computeAvailableActions(int player);
 
     /*
     public AbstractGameState(AbstractGameState gameState) {
@@ -51,55 +80,14 @@ public abstract class AbstractGameState {
     protected AbstractGameState _copy()
     {
         AbstractGameState gsCopy = this.createNewGameState();
-
-
-
         return gsCopy;
     }
 
-     */
+    public abstract AbstractGameState createNewGameState();
 
+    public abstract void copyTo(AbstractGameState dest, int playerId);
 
-    /**
-     * Creates a new GameState object.
-     * @return the new GameState object
-     */
-    //public abstract AbstractGameState createNewGameState();
-
-    /**
-     * Copies the game state objects defined in the subclass of this game state to a
-     * new GameState object and returns it.
-     * @param dest      GameState where things need to be copied to.
-     * @param playerId ID of the player for which this copy is being created (so observations can be
-     *                 adapted for them). -1 indicates the game state should be copied at full.
-     */
-    //public abstract void copyTo(AbstractGameState dest, int playerId);
-
-    //public abstract void setComponents(String dataPath);
-
-    //Getters & setters
-    public Constants.GameResult getGameStatus() {  return gameStatus; }
-    //public GameParameters getGameParameters() { return this.gameParameters; }
-
-    public void setGameOver(Constants.GameResult status){  this.gameStatus = status; }
-
-
-    /* Methods to be implemented by subclass */
-    public abstract List<IAction> getActions(AbstractPlayer player);
-
-    public boolean isTerminal(){ return terminalState; }
-
-
-    public abstract Observation getObservation(AbstractPlayer player);
-
-    public abstract void endGame();
-
-    /*
-    public final void init()
-    {
-        reactivePlayers = new ArrayList<>();
-    }
-
+    public abstract void setComponents(String dataPath);
 
     void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
     ForwardModel getModel() {return this.forwardModel;}
@@ -121,5 +109,5 @@ public abstract class AbstractGameState {
         }
         return false;
     }
-    */
+     */
 }

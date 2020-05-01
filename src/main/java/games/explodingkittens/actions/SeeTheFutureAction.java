@@ -1,12 +1,12 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import components.IPartialObservableDeck;
+import core.observations.IPrintable;
+import core.components.IPartialObservableDeck;
 import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
-import turnorder.TurnOrder;
+import core.turnorder.TurnOrder;
 
 public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
     private final IPartialObservableDeck<T> drawPile;
@@ -19,8 +19,8 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        super.Execute(gs, turnOrder);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
         ((ExplodingKittensGameState)gs).gamePhase = ExplodingKittensGamePhase.SeeTheFuturePhase;
         return false;
     }
@@ -31,7 +31,7 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
     }
 
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override

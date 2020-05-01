@@ -1,9 +1,8 @@
 package players;
 
-import actions.IAction;
-import observations.IPrintable;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.actions.IAction;
+import core.observations.IPrintable;
+import core.observations.Observation;
 
 import java.util.List;
 import java.util.Scanner;

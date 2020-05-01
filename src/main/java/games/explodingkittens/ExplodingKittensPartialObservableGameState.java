@@ -1,14 +1,13 @@
 package games.explodingkittens;
 
-import actions.IAction;
-import components.Deck;
-import components.IDeck;
-import components.PartialObservableDeck;
-import gamestates.PlayerResult;
+import core.actions.IAction;
+import core.components.Deck;
+import core.components.IDeck;
+import core.components.PartialObservableDeck;
+import core.gamestates.PlayerResult;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.observations.Observation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +20,8 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
     public List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
     public PartialObservableDeck<ExplodingKittenCard> drawPile;
 
-    public ExplodingKittensPartialObservableGameState(ExplodingKittenParameters gameParameters) {
-        super(gameParameters);
+    public ExplodingKittensPartialObservableGameState(ExplodingKittenParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
         setComponents(gameParameters);
     }
 
@@ -135,7 +134,7 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
         ArrayList<IAction> actions = new ArrayList<>();
         PartialObservableDeck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
 
-        // todo: only add unique actions
+        // todo: only add unique core.actions
         for (ExplodingKittenCard card : playerDeck.getCards()) {
             switch (card.cardType) {
                 case DEFUSE:
@@ -174,7 +173,7 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
                     actions.add(new SeeTheFutureAction<>(card, playerDeck, discardPile, playerID, drawPile));
                     break;
                 default:
-                    System.out.println("No actions known for cardtype: " + card.cardType.toString());
+                    System.out.println("No core.actions known for cardtype: " + card.cardType.toString());
             }
         }
         /* todo add special combos
@@ -183,7 +182,7 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
             if (i != activePlayer){
                 Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(playerHandHash);
                 for (Card card: otherDeck.getCards()){
-                    actions.add(new TakeCard(card, i));
+                    core.actions.add(new TakeCard(card, i));
                 }
             }
         }*/
@@ -233,37 +232,8 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
     }
 
     @Override
-    public Observation getObservation(AbstractPlayer player) {
-        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player.playerID);
-    }
-
-    @Override
-    public List<IAction> getActions(AbstractPlayer player) {
-        ArrayList<IAction> actions;
-        // todo the actions per player do not change a lot in between two turns
-        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
-        switch (gamePhase){
-            case PlayerMove:
-                actions = playerActions(player.playerID);
-                break;
-            case DefusePhase:
-                actions = defuseActions(player.playerID);
-                break;
-            case NopePhase:
-                actions = nopeActions(player.playerID);
-                break;
-            case FavorPhase:
-                actions = favorActions(player.playerID);
-                break;
-            case SeeTheFuturePhase:
-                actions = seeTheFutureActions(player.playerID);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
-        }
-
-        return actions;
+    public Observation getObservation(int player) {
+        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player);
     }
 
     @Override
@@ -272,5 +242,35 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
         for (int i = 0; i < getNPlayers(); i++){
             playerResults[i] = isPlayerAlive[i] ? PlayerResult.Winner : PlayerResult.Loser;
         }
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions(int player) {
+
+        ArrayList<IAction> actions;
+        // todo the core.actions per player do not change a lot in between two turns
+        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
+        switch (gamePhase){
+            case PlayerMove:
+                actions = playerActions(player);
+                break;
+            case DefusePhase:
+                actions = defuseActions(player);
+                break;
+            case NopePhase:
+                actions = nopeActions(player);
+                break;
+            case FavorPhase:
+                actions = favorActions(player);
+                break;
+            case SeeTheFuturePhase:
+                actions = seeTheFutureActions(player);
+                break;
+            default:
+                actions = new ArrayList<>();
+                break;
+        }
+
+        return actions;
     }
 }

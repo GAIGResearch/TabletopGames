@@ -1,13 +1,12 @@
 package games.explodingkittens.actions;
 
-import actions.IAction;
-import components.IDeck;
+import core.actions.IAction;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
+import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import turnorder.TurnOrder;
 
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 
@@ -27,7 +26,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         ExplodingKittenCard c = deckFrom.draw();
         ExplodingKittenCard.CardType type = c.cardType;
         if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
@@ -51,13 +50,13 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 }
                 deckTo.clear();
                 discardDeck.add(c);
-                turnOrder.endPlayerTurn(gs);
+                gs.getTurnOrder().endPlayerTurn(gs);
                 //((ExplodingKittensGameState) gs).setActivePlayer(((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID));
                 //((ExplodingKittensGameState) gs).remainingDraws = 1;
             }
         } else {
             deckTo.add(c);
-            turnOrder.endPlayerTurn(gs);
+            gs.getTurnOrder().endPlayerTurn(gs);
         }
         return true;
     }

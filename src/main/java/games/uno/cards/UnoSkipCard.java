@@ -2,7 +2,6 @@ package games.uno.cards;
 
 import core.AbstractGameState;
 import games.uno.UnoGameState;
-import turnorder.TurnOrder;
 
 
 public class UnoSkipCard extends UnoCard {
@@ -20,8 +19,8 @@ public class UnoSkipCard extends UnoCard {
         public SkipCardEffect(){};
 
         @Override
-        public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-            turnOrder.endPlayerTurn(gs);
+        public boolean execute(AbstractGameState gs) {
+            gs.getTurnOrder().endPlayerTurn(gs);
             return true;
         }
     }

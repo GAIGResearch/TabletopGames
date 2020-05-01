@@ -1,21 +1,19 @@
 package games.explodingkittens;
 
-import actions.IAction;
-import components.Deck;
-import components.IDeck;
-import components.PartialObservableDeck;
+import core.actions.IAction;
+import core.components.Deck;
+import core.components.IDeck;
+import core.components.PartialObservableDeck;
 import core.AbstractGameState;
-import gamestates.PlayerResult;
+import core.gamestates.PlayerResult;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import games.explodingkittens.actions.*;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.observations.Observation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
 
 public class ExplodingKittensGameState extends AbstractGameState {
 
@@ -29,8 +27,9 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     public ExplodingKittensGamePhase gamePhase = ExplodingKittensGamePhase.PlayerMove;
 
-    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters) {
-        super(gameParameters);
+    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
+        setTurnOrder(new ExplodingKittenTurnOrder(nPlayers));
         setComponents(gameParameters);
     }
 
@@ -130,7 +129,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
         ArrayList<IAction> actions = new ArrayList<>();
         IDeck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
 
-        // todo: only add unique actions
+        // todo: only add unique core.actions
         for (ExplodingKittenCard card : playerDeck.getCards()) {
             switch (card.cardType) {
                 case DEFUSE:
@@ -169,7 +168,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
                     actions.add(new SeeTheFutureAction<>(card, playerDeck, discardPile, playerID, drawPile));
                     break;
                 default:
-                    System.out.println("No actions known for cardtype: " + card.cardType.toString());
+                    System.out.println("No core.actions known for cardtype: " + card.cardType.toString());
             }
         }
         /* todo add special combos
@@ -178,7 +177,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
             if (i != activePlayer){
                 Deck otherDeck = (Deck)this.areas.get(activePlayer).getComponent(playerHandHash);
                 for (Card card: otherDeck.getCards()){
-                    actions.add(new TakeCard(card, i));
+                    core.actions.add(new TakeCard(card, i));
                 }
             }
         }*/
@@ -228,34 +227,8 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(AbstractPlayer player) {
+    public Observation getObservation(int player) {
         return null;
-    }
-
-    @Override
-    public List<IAction> getActions(AbstractPlayer player) {
-        ArrayList<IAction> actions;
-        // todo the actions per player do not change a lot in between two turns
-        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
-        switch (gamePhase){
-            case PlayerMove:
-                actions = playerActions(player.playerID);
-                break;
-            case DefusePhase:
-                actions = defuseActions(player.playerID);
-                break;
-            case NopePhase:
-                actions = nopeActions(player.playerID);
-                break;
-            case FavorPhase:
-                actions = favorActions(player.playerID);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
-        }
-
-        return actions;
     }
 
     @Override
@@ -264,5 +237,32 @@ public class ExplodingKittensGameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++){
             playerResults[i] = isPlayerAlive[i] ? PlayerResult.Winner : PlayerResult.Loser;
         }
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions(int player) {
+
+        ArrayList<IAction> actions;
+        // todo the core.actions per player do not change a lot in between two turns
+        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
+        switch (gamePhase){
+            case PlayerMove:
+                actions = playerActions(player);
+                break;
+            case DefusePhase:
+                actions = defuseActions(player);
+                break;
+            case NopePhase:
+                actions = nopeActions(player);
+                break;
+            case FavorPhase:
+                actions = favorActions(player);
+                break;
+            default:
+                actions = new ArrayList<>();
+                break;
+        }
+
+        return actions;
     }
 }

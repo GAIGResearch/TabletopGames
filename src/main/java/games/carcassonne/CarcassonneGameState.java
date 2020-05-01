@@ -1,12 +1,11 @@
 package games.carcassonne;
 
-import actions.IAction;
-import components.Card;
-import components.Deck;
+import core.actions.IAction;
+import core.components.Card;
+import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.observations.Observation;
 
 import java.awt.*;
 import java.util.*;
@@ -22,8 +21,8 @@ public class CarcassonneGameState extends AbstractGameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    public CarcassonneGameState(GameParameters gameParameters) {
-        super(gameParameters);
+    public CarcassonneGameState(GameParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
         setComponents();
     }
 
@@ -54,12 +53,18 @@ public class CarcassonneGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(AbstractPlayer player) {
+    public Observation getObservation(int player) {
         return null;
     }
 
     @Override
-    public List<IAction> getActions(AbstractPlayer player) {
+    public void endGame() {
+
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions(int player) {
+
         List<IAction> actions;
         switch (gamePhase){
             case PlaceTile:
@@ -75,11 +80,6 @@ public class CarcassonneGameState extends AbstractGameState {
 
         this.numAvailableActions = actions.size();
         return actions;
-    }
-
-    @Override
-    public void endGame() {
-
     }
 
     private class CarcassonneBoard{

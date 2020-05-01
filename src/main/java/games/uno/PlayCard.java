@@ -1,11 +1,10 @@
 package games.uno;
 
-import actions.IAction;
-import components.Deck;
+import core.actions.IAction;
+import core.components.Deck;
 import core.AbstractGameState;
-import observations.IPrintable;
+import core.observations.IPrintable;
 import games.uno.cards.CardEffect;
-import turnorder.TurnOrder;
 
 public class PlayCard<T> implements IAction, IPrintable {
 
@@ -30,10 +29,10 @@ public class PlayCard<T> implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         sourceDeck.remove(cardToBePlayed);
         targetDeck.add(cardToBePlayed);
-        if (postEffect != null) postEffect.Execute(gs, turnOrder);
+        if (postEffect != null) postEffect.execute(gs);
         return true;
     }
 

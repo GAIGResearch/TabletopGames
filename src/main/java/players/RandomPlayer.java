@@ -1,7 +1,7 @@
 package players;
 
-import actions.IAction;
-import observations.Observation;
+import core.actions.IAction;
+import core.observations.Observation;
 
 import java.util.List;
 import java.util.Random;

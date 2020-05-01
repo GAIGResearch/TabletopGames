@@ -1,10 +1,10 @@
 package core;
 
-import components.*;
+import core.components.*;
 import java.util.HashMap;
 
 /**
- * An Area is a collection of components as Decks, Token, Dices, Cards and Boards.
+ * An Area is a collection of core.components as Decks, Token, Dices, Cards and Boards.
  */
 public class Area {
     protected HashMap<Integer, Component> components;

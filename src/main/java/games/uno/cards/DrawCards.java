@@ -1,10 +1,9 @@
 package games.uno.cards;
 
-import actions.IAction;
-import components.IDeck;
+import core.actions.IAction;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import turnorder.TurnOrder;
+import core.observations.IPrintable;
 
 public class DrawCards<T> implements IAction, IPrintable {
 
@@ -21,7 +20,7 @@ public class DrawCards<T> implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         for (int i = 0; i < this.numberOfCards; i++){
             T card = deckFrom.draw();
             deckTo.add(card);

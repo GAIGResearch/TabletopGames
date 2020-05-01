@@ -1,43 +1,38 @@
 package games.tictactoe;
 
-import actions.IAction;
-import core.ForwardModel;
+import core.actions.IAction;
 import core.GUI;
 import core.Game;
-import observations.IPrintable;
-import observations.Observation;
+import core.observations.IPrintable;
+import core.observations.Observation;
 import players.AbstractPlayer;
 import players.HumanConsolePlayer;
 import players.RandomPlayer;
-import turnorder.AlternatingTurnOrder;
-import turnorder.TurnOrder;
 
 import java.util.*;
 
 public class TicTacToeGame extends Game {
 
-    TurnOrder turnOrder;
-    ForwardModel forwardModel = new TicTacToeForwardModel();
-
     public TicTacToeGame(List<AbstractPlayer> agents)
     {
-        turnOrder = new AlternatingTurnOrder(agents);
-        gameState = new TicTacToeGameState(new TicTacToeGameParameters(2));
+        gameState = new TicTacToeGameState(new TicTacToeGameParameters(), agents.size());
+        forwardModel = new TicTacToeForwardModel();
     }
 
     @Override
     public void run(GUI gui) {
         while (!isEnded()){
-            AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
-            Observation observation = gameState.getObservation(currentPlayer);
+            AbstractPlayer currentPlayer = players.get(gameState.getTurnOrder().getCurrentPlayer());
+            int idx = currentPlayer.playerID;
+            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(idx));
+            Observation observation = gameState.getObservation(idx);
             ((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
-            forwardModel.next(gameState, turnOrder, actions.get(actionIdx));
+            forwardModel.next(gameState, actions.get(actionIdx));
             System.out.println();
         }
 
-        ((IPrintable) gameState.getObservation(null)).PrintToConsole();
+        ((IPrintable) gameState.getObservation(-1)).PrintToConsole();
         System.out.println(Arrays.toString(gameState.getPlayerResults()));
     }
 

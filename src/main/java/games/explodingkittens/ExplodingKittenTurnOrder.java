@@ -1,8 +1,7 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
-import players.AbstractPlayer;
-import turnorder.TurnOrder;
+import core.turnorder.TurnOrder;
 
 import java.util.*;
 
@@ -13,8 +12,8 @@ public class ExplodingKittenTurnOrder extends TurnOrder {
     Queue<Integer> requiresReactionByPlayer = new LinkedList<>();
     int direction = 1;
 
-    public ExplodingKittenTurnOrder(List<AbstractPlayer> players){
-        this.players = players;
+    public ExplodingKittenTurnOrder(int nPlayers){
+        super(nPlayers);
         this.currentPlayer = 0;
     }
 
@@ -27,9 +26,9 @@ public class ExplodingKittenTurnOrder extends TurnOrder {
                 requiredDraws -= 1;
                 if (requiredDraws == 0 || !ekgs.isPlayerAlive[currentPlayer]) {
                     requiredDraws = 1;
-                    currentPlayer = (currentPlayer + direction) % players.size();
+                    currentPlayer = (currentPlayer + direction) % nPlayers;
                     while (!ekgs.isPlayerAlive[currentPlayer])
-                        currentPlayer = (currentPlayer + direction) % players.size();
+                        currentPlayer = (currentPlayer + direction) % nPlayers;
                 }
                 break;
             case NopePhase:
@@ -37,11 +36,6 @@ public class ExplodingKittenTurnOrder extends TurnOrder {
                 requiresReactionByPlayer.poll();
                 break;
         }
-    }
-
-    public AbstractPlayer getCurrentPlayer(AbstractGameState gameState){
-        return players.get(getCurrentPlayerIndex(gameState));
-
     }
 
     public int getCurrentPlayerIndex(AbstractGameState gameState){

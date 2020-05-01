@@ -1,23 +1,21 @@
 package games.tictactoe;
 
-import actions.IAction;
-import components.Grid;
+import core.actions.IAction;
+import core.components.Grid;
 import core.AbstractGameState;
 import core.ForwardModel;
-import turnorder.TurnOrder;
 
 
 public class TicTacToeForwardModel extends ForwardModel {
 
-
     @Override
-    public void next(AbstractGameState currentState, TurnOrder turnOrder, IAction action) {
-        action.Execute(currentState, turnOrder);
-        if (turnOrder.getTurnCounter() == 9)
+    public void next(AbstractGameState currentState, IAction action) {
+        action.execute(currentState);
+        if (currentState.getTurnOrder().getTurnCounter() == 9)
             currentState.endGame();
 
         checkWinCondition((TicTacToeGameState) currentState);
-        turnOrder.endPlayerTurn(currentState);
+        currentState.getTurnOrder().endPlayerTurn(currentState);
     }
 
     private void checkWinCondition(TicTacToeGameState gameState){

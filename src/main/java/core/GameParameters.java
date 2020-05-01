@@ -1,9 +1,3 @@
 package core;
 
-public abstract class GameParameters {
-    public final int nPlayers;
-
-    protected GameParameters(int nPlayers) {
-        this.nPlayers = nPlayers;
-    }
-}
+public abstract class GameParameters { }

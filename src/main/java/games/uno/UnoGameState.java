@@ -1,13 +1,13 @@
 package games.uno;
 
-import actions.IAction;
-import components.Deck;
+import core.actions.IAction;
+import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
-import gamestates.PlayerResult;
+import core.gamestates.PlayerResult;
+import core.turnorder.AlternatingTurnOrder;
 import games.uno.cards.*;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.observations.Observation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,8 +19,9 @@ public class UnoGameState extends AbstractGameState {
     Deck<UnoCard> discardPile;
     public UnoCard currentCard;
 
-    public UnoGameState(GameParameters gameParameters) {
-        super(gameParameters);
+    public UnoGameState(GameParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
+        setTurnOrder(new AlternatingTurnOrder(nPlayers));
 
         drawPile = new Deck<>();
 
@@ -59,20 +60,26 @@ public class UnoGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(AbstractPlayer player) {
+    public Observation getObservation(int player) {
 
         int[] cardsPerPlayer = new int[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++)
             cardsPerPlayer[i] = playerDecks.get(i).getCards().size();
 
-        return new UnoObservation(currentCard, playerDecks.get(player.playerID), discardPile,
+        return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
                 cardsPerPlayer, drawPile.getCards().size());
     }
 
     @Override
-    public List<IAction> getActions(AbstractPlayer player) {
+    public void endGame() {
+        terminalState = true;
+        Arrays.fill(playerResults, PlayerResult.Draw);
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions(int player) {
         ArrayList<IAction> actions = new ArrayList<>();
-        Deck<UnoCard> playerDeck = playerDecks.get(player.playerID);
+        Deck<UnoCard> playerDeck = playerDecks.get(player);
         for (UnoCard card : playerDeck.getCards()){
             if (card.isPlayable(this))
             {
@@ -84,14 +91,8 @@ public class UnoGameState extends AbstractGameState {
                     actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoReverseCard.ReverseCardEffect()));
             }
         }
-        actions.add(new DrawCards<>(drawPile, playerDecks.get(player.playerID), discardPile, 1));
+        actions.add(new DrawCards<>(drawPile, playerDecks.get(player), discardPile, 1));
         return actions;
-    }
-
-    @Override
-    public void endGame() {
-        terminalState = true;
-        Arrays.fill(playerResults, PlayerResult.Draw);
     }
 
     public void registerWinner(int playerID){

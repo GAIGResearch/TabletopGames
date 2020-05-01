@@ -1,44 +1,38 @@
 package games.uno;
 
-import actions.IAction;
-import core.ForwardModel;
+import core.actions.IAction;
 import core.GUI;
 import core.Game;
-import observations.Observation;
+import core.observations.Observation;
 import players.AbstractPlayer;
 import players.HumanConsolePlayer;
-import turnorder.AlternatingTurnOrder;
-import turnorder.TurnOrder;
 
 import java.util.*;
 
-
 public class UnoGame extends Game {
-
-    TurnOrder turnOrder;
-    ForwardModel forwardModel = new UnoForwardModel();
 
     public UnoGame(List<AbstractPlayer> agents)
     {
-        turnOrder = new AlternatingTurnOrder(agents);
-        gameState = new UnoGameState(new UnoGameParameters(2));
+        gameState = new UnoGameState(new UnoGameParameters(), agents.size());
+        forwardModel = new UnoForwardModel();
     }
 
     @Override
     public void run(GUI gui) {
         while (!isEnded()){
-            AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
-            Observation observation = gameState.getObservation(currentPlayer);
+            AbstractPlayer currentPlayer = players.get(gameState.getTurnOrder().getCurrentPlayer());
+            int idx = currentPlayer.playerID;
+            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(idx));
+            Observation observation = gameState.getObservation(idx);
             //((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
 
-            forwardModel.next(gameState, turnOrder, actions.get(actionIdx));
-            turnOrder.endPlayerTurn(gameState);
+            forwardModel.next(gameState, actions.get(actionIdx));
+            gameState.getTurnOrder().endPlayerTurn(gameState);
             System.out.println();
         }
 
-        //((IPrintable) gameState.getObservation(null)).PrintToConsole();
+        //((IPrintable) gameState.getObservation(-1)).PrintToConsole();
         //System.out.println(Arrays.toString(gameState.getPlayerResults()));
     }
 
