@@ -208,7 +208,7 @@ public class PartialObservableDeck<T> extends Component implements IPartialObser
 
     public ArrayList<T> getVisibleCards(int playerID) {
         ArrayList<T> visibleCards = new ArrayList<>(cards.size());
-        for (int i = 0; i < visibilityPerPlayer.size(); i++) {
+        for (int i = 0; i < cards.size(); i++) {
             boolean[] b = visibilityPerPlayer.get(i);
             if (b[playerID])
                 visibleCards.add(i, cards.get(i));

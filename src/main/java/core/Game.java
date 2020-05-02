@@ -2,9 +2,6 @@ package core;
 
 import core.observations.IObservation;
 import players.AbstractPlayer;
-import utilities.Utils;
-
-import java.util.HashSet;
 import java.util.List;
 
 public abstract class Game {
