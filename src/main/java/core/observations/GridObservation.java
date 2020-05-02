@@ -1,6 +1,6 @@
 package core.observations;
 
-public class GridObservation<T> implements Observation, IPrintable {
+public class GridObservation<T> implements IObservation, IPrintable {
 
     private final T[][] grid;
 

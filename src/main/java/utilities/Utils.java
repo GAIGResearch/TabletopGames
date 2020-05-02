@@ -27,7 +27,20 @@ public abstract class Utils {
         CARD,
         COUNTER,
         DICE,
-        TOKEN;
+        TOKEN
+    }
+
+    public enum GameResult {
+        GAME_WIN(3),
+        GAME_DRAW(1),
+        GAME_ONGOING(0),
+        GAME_LOSE(-1);
+
+        public final int value;
+
+        GameResult(int value) {
+            this.value = value;
+        }
     }
 
     public static int indexOf (String[] array, String object) {

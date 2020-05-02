@@ -1,7 +1,7 @@
 package players;
 
 import core.actions.IAction;
-import core.observations.Observation;
+import core.observations.IObservation;
 
 import java.util.List;
 import java.util.Random;
@@ -25,13 +25,13 @@ public class RandomPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void initializePlayer(Observation observation) {}
+    public void initializePlayer(IObservation observation) {}
 
     @Override
-    public void finalizePlayer(Observation observation) {}
+    public void finalizePlayer(IObservation observation) {}
 
     @Override
-    public int getAction(Observation observation, List<IAction> actions) {
+    public int getAction(IObservation observation, List<IAction> actions) {
         return rnd.nextInt(actions.size());
     }
 }

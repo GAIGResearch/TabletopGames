@@ -4,14 +4,14 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.Counter;
 import core.content.PropertyString;
-import games.pandemic.Constants;
+import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.actions.MovePlayer;
 import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
-import static games.pandemic.Constants.nameHash;
+import static games.pandemic.PandemicConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
 
@@ -37,11 +37,11 @@ public class PlayerAction extends RuleNode {
         } else if (action instanceof MovePlayer){
             // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
             int playerIdx = pgs.getActivePlayer();
-            Card playerCard = (Card) pgs.getComponent(Constants.playerCardHash, playerIdx);
+            Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
             String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
             if (roleString.equals("Medic")){
-                for (String color: Constants.colors){
+                for (String color: PandemicConstants.colors){
                     Counter diseaseToken = (Counter)((PandemicGameState)gs).getComponent(Hash.GetInstance().hash("Disease " + color));
                     String city = ((MovePlayer)action).getDestination();
                     boolean disease_cured = diseaseToken.getValue() > 0;

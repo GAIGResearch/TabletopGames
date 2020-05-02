@@ -13,7 +13,7 @@ import utilities.Hash;
 
 import java.util.Random;
 
-import static games.pandemic.Constants.*;
+import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
 
 @SuppressWarnings("unchecked")
@@ -129,7 +129,7 @@ public class PandemicForwardModel extends ForwardModel {
         Counter infectionRateCounter = (Counter) state.getComponent(infectionRateHash);
         infectionRateCounter.setValue(0);
 
-        for (String color : Constants.colors) {
+        for (String color : PandemicConstants.colors) {
             Counter diseaseCounter = (Counter) state.getComponent(Hash.GetInstance().hash("Disease " + color));
             diseaseCounter.setValue(0);
         }
@@ -172,7 +172,7 @@ public class PandemicForwardModel extends ForwardModel {
             placePlayer(state, "Atlanta", i);
 
             // Give players cards
-            IDeck<Card> playerHandDeck = (IDeck<Card>) playerArea.getComponent(Constants.playerHandHash);
+            IDeck<Card> playerHandDeck = (IDeck<Card>) playerArea.getComponent(PandemicConstants.playerHandHash);
 
             playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {

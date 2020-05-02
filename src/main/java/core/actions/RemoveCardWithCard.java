@@ -5,8 +5,8 @@ import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicGameState;
 
-import static games.pandemic.Constants.playerDeckDiscardHash;
-import static games.pandemic.Constants.playerHandHash;
+import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
+import static games.pandemic.PandemicConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class RemoveCardWithCard implements IAction {

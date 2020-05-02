@@ -5,12 +5,12 @@ import core.actions.DrawCard;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
-import games.pandemic.Constants;
+import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
 import java.util.ArrayList;
 
-import static games.pandemic.Constants.playerDeckDiscardHash;
+import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 
 @SuppressWarnings("unchecked")
 public class ForceDiscardReaction extends RuleNode {
@@ -20,7 +20,7 @@ public class ForceDiscardReaction extends RuleNode {
         PandemicGameState pgs = (PandemicGameState)gs;
         // player needs to discard N cards
         int activePlayer = pgs.getActingPlayerID();
-        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponent(Constants.playerHandHash, activePlayer);
+        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponent(PandemicConstants.playerHandHash, activePlayer);
         Deck<Card> playerDiscardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);  // TODO: not general
 
         int nDiscards = playerDeck.getCards().size() - playerDeck.getCapacity();

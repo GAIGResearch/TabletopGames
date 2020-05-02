@@ -8,24 +8,17 @@ import java.util.HashMap;
  */
 public class Area {
     protected HashMap<Integer, Component> components;
-    protected int owner;   // -1 for all
+    protected int owner;   // -1 for main game area
 
-    public Area() {
+    public Area(int owner) {
         this.components = new HashMap<>();
-        this.owner = -1;
-    }
-
-    public Area(int owner, HashMap<Integer, Component> components) {
-        this.components = new HashMap<>();
-        this.components.putAll(components);
         this.owner = owner;
     }
 
     public Area copy() {
-        Area new_area = new Area();
+        Area new_area = new Area(owner);
         new_area.components = new HashMap<>();
         new_area.components.putAll(this.components);
-        new_area.owner = this.owner;
 
         return new_area;
     }

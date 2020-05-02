@@ -10,7 +10,7 @@ import utilities.Hash;
 
 import java.util.ArrayList;
 
-import static games.pandemic.Constants.playerHandHash;
+import static games.pandemic.PandemicConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class CureDisease implements IAction {

@@ -8,8 +8,8 @@ import games.pandemic.PandemicGameState;
 
 import java.util.Random;
 
-import static games.pandemic.Constants.infectionDiscardHash;
-import static games.pandemic.Constants.infectionHash;
+import static games.pandemic.PandemicConstants.infectionDiscardHash;
+import static games.pandemic.PandemicConstants.infectionHash;
 
 @SuppressWarnings("unchecked")
 public class EpidemicIntensify extends RuleNode {

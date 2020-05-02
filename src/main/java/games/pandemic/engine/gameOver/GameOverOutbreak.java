@@ -2,12 +2,12 @@ package games.pandemic.engine.gameOver;
 
 import core.AbstractGameState;
 import core.components.Counter;
-import games.pandemic.Constants;
 import games.pandemic.PandemicGameState;
+import utilities.Utils;
 
-import static games.pandemic.Constants.GameResult.GAME_LOSE;
-import static games.pandemic.Constants.GameResult.GAME_ONGOING;
-import static games.pandemic.Constants.outbreaksHash;
+import static games.pandemic.PandemicConstants.outbreaksHash;
+import static utilities.Utils.GameResult.GAME_LOSE;
+import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class GameOverOutbreak extends GameOverCondition {
     private int lose_max_outbreak;
@@ -17,7 +17,7 @@ public class GameOverOutbreak extends GameOverCondition {
     }
 
     @Override
-    public Constants.GameResult test(AbstractGameState gs) {
+    public Utils.GameResult test(AbstractGameState gs) {
         if (((Counter)((PandemicGameState)gs).getComponent(outbreaksHash)).getValue() >= lose_max_outbreak) {
             System.out.println("Too many outbreaks");
             return GAME_LOSE;

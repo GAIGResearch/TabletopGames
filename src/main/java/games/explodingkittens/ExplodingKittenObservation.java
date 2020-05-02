@@ -6,11 +6,11 @@ import core.observations.IPrintable;
 import core.components.IPartialObservableDeck;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import core.observations.Observation;
+import core.observations.IObservation;
 
 import java.util.List;
 
-public class ExplodingKittenObservation implements IPrintable, Observation {
+public class ExplodingKittenObservation implements IPrintable, IObservation {
 
     private List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
     private PartialObservableDeck<ExplodingKittenCard> drawPile;

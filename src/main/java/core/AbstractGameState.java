@@ -1,10 +1,9 @@
 package core;
 
 import core.actions.IAction;
-import core.gamestates.PlayerResult;
-import core.observations.Observation;
+import core.observations.IObservation;
 import core.turnorder.TurnOrder;
-import games.pandemic.Constants;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -26,36 +25,36 @@ public abstract class AbstractGameState {
 
     public int roundStep;
     protected boolean terminalState;
-    protected Constants.GameResult gameStatus = Constants.GameResult.GAME_ONGOING;
-    protected PlayerResult[] playerResults;
+    protected Utils.GameResult gameStatus = Utils.GameResult.GAME_ONGOING;
+    protected Utils.GameResult[] playerResults;
 
     // Set of parameters for this game.
     protected final GameParameters gameParameters;
 
     public AbstractGameState(GameParameters gameParameters, int nPlayers){
         this.gameParameters = gameParameters;
-        this.playerResults = new PlayerResult[nPlayers];
-        Arrays.fill(this.playerResults, PlayerResult.Undecided);
+        this.playerResults = new Utils.GameResult[nPlayers];
+        Arrays.fill(this.playerResults, Utils.GameResult.GAME_ONGOING);
         availableActions = new ArrayList<>();
     }
 
     //Getters & setters
-    public Constants.GameResult getGameStatus() {  return gameStatus; }
-    void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
-    ForwardModel getModel() {return this.forwardModel;}
+    public Utils.GameResult getGameStatus() {  return gameStatus; }
+    public void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
     //public GameParameters getGameParameters() { return this.gameParameters; }
-    public void setGameOver(Constants.GameResult status){  this.gameStatus = status; }
-    public int getNPlayers() { return nPlayers; }
-    public PlayerResult[] getPlayerResults() { return playerResults; }
-    public boolean isTerminal(){ return terminalState; }
-    public int nPossibleActions() { return numAvailableActions; }
+    public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
+    public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
+    public final int getNPlayers() { return nPlayers; }
+    public final Utils.GameResult[] getPlayerResults() { return playerResults; }
+    public final boolean isTerminal(){ return terminalState; }
+    public final int nPossibleActions() { return numAvailableActions; }
     public final List<IAction> getActions(int player) {
         if (availableActions == null || availableActions.size() == 0) {
             availableActions = computeAvailableActions(player);
         }
         return availableActions;
     }
-    public List<IAction> setAvailableActions(List<IAction> actions, int player) {
+    public final List<IAction> setAvailableActions(List<IAction> actions, int player) {
         if (actions != null && actions.size() > 0) {
             numAvailableActions = actions.size();
             availableActions = actions;
@@ -64,7 +63,7 @@ public abstract class AbstractGameState {
     }
 
     /* Methods to be implemented by subclass */
-    public abstract Observation getObservation(int player);
+    public abstract IObservation getObservation(int player);
     public abstract void endGame();
     public abstract List<IAction> computeAvailableActions(int player);
 

@@ -5,7 +5,7 @@ import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
-import core.observations.Observation;
+import core.observations.IObservation;
 
 import java.awt.*;
 import java.util.*;
@@ -53,7 +53,7 @@ public class CarcassonneGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(int player) {
+    public IObservation getObservation(int player) {
         return null;
     }
 

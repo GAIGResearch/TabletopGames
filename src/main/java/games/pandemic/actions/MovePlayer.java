@@ -6,9 +6,9 @@ import core.components.Card;
 import core.content.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
-import games.pandemic.Constants;
+import games.pandemic.PandemicConstants;
 
-import static games.pandemic.Constants.nameHash;
+import static games.pandemic.PandemicConstants.nameHash;
 
 
 public class MovePlayer implements IAction {
@@ -25,7 +25,7 @@ public class MovePlayer implements IAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
-        PropertyString prop = (PropertyString) pgs.getComponent(Constants.playerCardHash, playerIdx).getProperty(Constants.playerLocationHash);
+        PropertyString prop = (PropertyString) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx).getProperty(PandemicConstants.playerLocationHash);
         BoardNode currentCity = ((PandemicGameState)gs).world.getNode(nameHash, prop.value);
         BoardNode destinationCity = ((PandemicGameState)gs).world.getNode(nameHash, destination);
 
@@ -42,24 +42,24 @@ public class MovePlayer implements IAction {
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(PandemicConstants.playersBNHash);
         prop.getValues().add(playerIdx);
 
-        Card playerCard = (Card) gs.getComponent(Constants.playerCardHash, playerIdx);
-        playerCard.setProperty(Constants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
+        Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
+        playerCard.setProperty(PandemicConstants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(Constants.playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(PandemicConstants.playersBNHash);
         prop.getValues().remove(new Integer(playerIdx));
 
-        Card playerCard = (Card) gs.getComponent(Constants.playerCardHash, playerIdx);
-        playerCard.setProperty(Constants.playerLocationHash, new PropertyString(null));
+        Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
+        playerCard.setProperty(PandemicConstants.playerLocationHash, new PropertyString(null));
     }
 
     boolean checkNeighbours(BoardNode city1, BoardNode city2) {
-        PropertyStringArray neighbours = (PropertyStringArray) city1.getProperty(Constants.neighboursHash);
+        PropertyStringArray neighbours = (PropertyStringArray) city1.getProperty(PandemicConstants.neighboursHash);
         PropertyString name = (PropertyString) city2.getProperty(nameHash);
         for (String neighbour : neighbours.getValues()) {
             if (name.value.equals(neighbour)) {
@@ -70,8 +70,8 @@ public class MovePlayer implements IAction {
     }
 
     boolean checkResearchStations(BoardNode city1, BoardNode city2) {
-        PropertyBoolean research1 = (PropertyBoolean) city1.getProperty(Constants.researchStationHash);
-        PropertyBoolean research2 = (PropertyBoolean) city2.getProperty(Constants.researchStationHash);
+        PropertyBoolean research1 = (PropertyBoolean) city1.getProperty(PandemicConstants.researchStationHash);
+        PropertyBoolean research2 = (PropertyBoolean) city2.getProperty(PandemicConstants.researchStationHash);
         return research1.value && research2.value;
     }
 

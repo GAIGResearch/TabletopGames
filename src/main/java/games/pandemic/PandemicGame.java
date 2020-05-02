@@ -6,10 +6,11 @@ import core.Game;
 
 import java.util.HashSet;
 import java.util.List;
-import core.observations.Observation;
+import core.observations.IObservation;
 import players.AbstractPlayer;
 import players.RandomPlayer;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -24,6 +25,7 @@ public class PandemicGame extends Game {
         forwardModel = new PandemicForwardModel(params);
 
         gameState = new PandemicGameState(params, agents.size());
+        gameState.setForwardModel(forwardModel);
         ((PandemicGameState)gameState).setComponents(params.getDataPath());
         ((PandemicForwardModel) forwardModel).setup(gameState);
     }
@@ -39,7 +41,7 @@ public class PandemicGame extends Game {
             // Get core.actions of current active player for their turn
             Pair<Integer, List<IAction>> activePlayer = ((PandemicGameState)gameState).getActingPlayer();
             List<IAction> actions = Collections.unmodifiableList(gameState.setAvailableActions(activePlayer.b, activePlayer.a));
-            int action = players.get(activePlayer.a).getAction((Observation) gameState, actions);
+            int action = players.get(activePlayer.a).getAction((IObservation) gameState, actions);
             gameState.setAvailableActions(null, activePlayer.a);  // Reset core.actions for next player
 
             // Resolve core.actions and game rules for the turn
@@ -61,7 +63,7 @@ public class PandemicGame extends Game {
         }
 
         System.out.println("Game Over");
-        if (gameState.getGameStatus() == Constants.GameResult.GAME_WIN) {
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_WIN) {
             System.out.println("Winners: " + winners().toString());
         } else {
             System.out.println("Lose");
@@ -70,13 +72,13 @@ public class PandemicGame extends Game {
 
     @Override
     public boolean isEnded() {
-        return gameState.getGameStatus() != Constants.GameResult.GAME_ONGOING;
+        return gameState.getGameStatus() != Utils.GameResult.GAME_ONGOING;
     }
 
     @Override
     public HashSet<Integer> winners() {
         HashSet<Integer> winners = new HashSet<>();
-        if (gameState.getGameStatus() == Constants.GameResult.GAME_WIN) {
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_WIN) {
             for (int i = 0; i < players.size(); i++) winners.add(i);
         }
         return winners;

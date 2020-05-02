@@ -1,13 +1,13 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import games.pandemic.Constants;
 import games.pandemic.engine.Node;
 import games.pandemic.engine.gameOver.GameOverCondition;
+import utilities.Utils;
 
 import java.util.ArrayList;
 
-import static games.pandemic.Constants.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public abstract class RuleNode extends Node {
     Node childNext;
@@ -35,9 +35,9 @@ public abstract class RuleNode extends Node {
         boolean interrupted = !run(gs);
         if (gameOverConditions != null && gameOverConditions.size() > 0) {
             for (GameOverCondition goc: gameOverConditions) {  // TODO: this triggers first condition, maybe order matters/loss first
-                Constants.GameResult result = goc.test(gs);
+                Utils.GameResult result = goc.test(gs);
                 if (result != GAME_ONGOING) {
-                    gs.setGameOver(result);
+                    gs.setGameStatus(result);
                     return null;
                 }
             }

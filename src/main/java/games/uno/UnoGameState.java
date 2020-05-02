@@ -4,10 +4,10 @@ import core.actions.IAction;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
-import core.gamestates.PlayerResult;
 import core.turnorder.AlternatingTurnOrder;
 import games.uno.cards.*;
-import core.observations.Observation;
+import core.observations.IObservation;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public class UnoGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(int player) {
+    public IObservation getObservation(int player) {
 
         int[] cardsPerPlayer = new int[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++)
@@ -73,7 +73,7 @@ public class UnoGameState extends AbstractGameState {
     @Override
     public void endGame() {
         terminalState = true;
-        Arrays.fill(playerResults, PlayerResult.Draw);
+        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
     }
 
     @Override
@@ -100,9 +100,9 @@ public class UnoGameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++)
         {
             if (i == playerID)
-                playerResults[i] = PlayerResult.Winner;
+                playerResults[i] = Utils.GameResult.GAME_WIN;
             else
-                playerResults[i] = PlayerResult.Loser;
+                playerResults[i] = Utils.GameResult.GAME_LOSE;
         }
     }
 }

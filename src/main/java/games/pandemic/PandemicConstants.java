@@ -2,20 +2,7 @@ package games.pandemic;
 
 import utilities.Hash;
 
-public class Constants {
-
-    public enum GameResult {
-        GAME_WIN(3),
-        GAME_DRAW(1),
-        GAME_ONGOING(0),
-        GAME_LOSE(-1);
-
-        public final int value;
-
-        GameResult(int value) {
-            this.value = value;
-        }
-    }
+public class PandemicConstants {
 
     public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 

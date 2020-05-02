@@ -4,10 +4,10 @@ import core.actions.IAction;
 import core.actions.SetGridValueAction;
 import core.components.Grid;
 import core.AbstractGameState;
-import core.gamestates.PlayerResult;
 import core.gamestates.GridGameState;
 import core.observations.GridObservation;
-import core.observations.Observation;
+import core.observations.IObservation;
+import utilities.Utils;
 
 import java.util.*;
 import java.util.List;
@@ -24,14 +24,14 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     }
 
     @Override
-    public Observation getObservation(int player) {
+    public IObservation getObservation(int player) {
         return new GridObservation<>(grid.getGridValues());
     }
 
     @Override
     public void endGame() {
         terminalState = true;
-        Arrays.fill(playerResults, PlayerResult.Draw);
+        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
     }
 
     @Override
@@ -55,11 +55,11 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     public void registerWinner(char winnerSymbol){
         terminalState = true;
         if (winnerSymbol == 'o'){
-            playerResults[1] = PlayerResult.Winner;
-            playerResults[0] = PlayerResult.Loser;
+            playerResults[1] = Utils.GameResult.GAME_WIN;
+            playerResults[0] = Utils.GameResult.GAME_LOSE;
         } else {
-            playerResults[0] = PlayerResult.Winner;
-            playerResults[1] = PlayerResult.Loser;
+            playerResults[0] = Utils.GameResult.GAME_WIN;
+            playerResults[1] = Utils.GameResult.GAME_LOSE;
         }
     }
 }

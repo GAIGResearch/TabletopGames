@@ -6,7 +6,7 @@ import core.components.Card;
 import core.components.Counter;
 import core.content.*;
 import core.AbstractGameState;
-import games.pandemic.Constants;
+import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
@@ -14,7 +14,7 @@ import utilities.Utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static games.pandemic.Constants.*;
+import static games.pandemic.PandemicConstants.*;
 
 public class InfectCity implements IAction {
 
@@ -45,9 +45,9 @@ public class InfectCity implements IAction {
             BoardNode bn = pgs.world.getNode(nameHash, city.value);
             if (bn != null) {
                 // check if quarantine specialist is on that node
-                PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(Constants.playersBNHash);
+                PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(PandemicConstants.playersBNHash);
                 for (int playerIdx: players.getValues()){
-                    Card playerCard = (Card) pgs.getComponent(Constants.playerCardHash, playerIdx);
+                    Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
                     String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
                     if (roleString.equals("Quarantine Specialist")){
                         // no infection or outbreak
@@ -61,7 +61,7 @@ public class InfectCity implements IAction {
                 array[colorIdx] += count;
 
                 if (array[colorIdx] > maxCubesPerCity) {  // Outbreak!
-                    Counter outbreakCounter = (Counter) pgs.getComponent(Constants.outbreaksHash);
+                    Counter outbreakCounter = (Counter) pgs.getComponent(PandemicConstants.outbreaksHash);
 
                     diseaseCubeCounter.decrement(maxCubesPerCity - array[colorIdx]);
                     array[colorIdx] = maxCubesPerCity;
@@ -98,9 +98,9 @@ public class InfectCity implements IAction {
         // Find neighbouring board nodes
         for (BoardNode b2 : n.getNeighbours()){
 
-            PropertyIntArrayList players = (PropertyIntArrayList)b2.getProperty(Constants.playersBNHash);
+            PropertyIntArrayList players = (PropertyIntArrayList)b2.getProperty(PandemicConstants.playersBNHash);
             for (int playerIdx: players.getValues()){
-                Card playerCard = (Card)pgs.getComponent(Constants.playerCardHash, playerIdx);
+                Card playerCard = (Card)pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
                 String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
                 if (!roleString.equals("Quarantine Specialist")) {
                     // no infection or outbreak in the city where the QS is placed

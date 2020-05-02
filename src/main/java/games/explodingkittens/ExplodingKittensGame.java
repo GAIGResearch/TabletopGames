@@ -5,7 +5,7 @@ import core.GUI;
 import core.Game;
 import players.RandomPlayer;
 import core.observations.IPrintable;
-import core.observations.Observation;
+import core.observations.IObservation;
 import players.AbstractPlayer;
 
 import java.util.*;
@@ -25,7 +25,7 @@ public class ExplodingKittensGame extends Game {
             AbstractPlayer currentPlayer = players.get(gameState.getTurnOrder().getCurrentPlayer());
             int idx = currentPlayer.playerID;
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(idx));
-            Observation observation = gameState.getObservation(idx);
+            IObservation observation = gameState.getObservation(idx);
             if (observation != null)
                 ((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);

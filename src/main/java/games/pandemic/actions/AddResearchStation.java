@@ -5,10 +5,11 @@ import core.components.BoardNode;
 import core.components.Counter;
 import core.content.PropertyBoolean;
 import core.AbstractGameState;
-import games.pandemic.Constants;
+import core.content.PropertyString;
+import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
-import static games.pandemic.Constants.*;
+import static games.pandemic.PandemicConstants.*;
 
 public class AddResearchStation implements IAction {
     private String city;
@@ -23,8 +24,9 @@ public class AddResearchStation implements IAction {
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(true));
-            Counter rStationCounter = (Counter) pgs.getComponent(Constants.researchStationHash);
+            Counter rStationCounter = (Counter) pgs.getComponent(PandemicConstants.researchStationHash);
             rStationCounter.decrement(1); // We have one less research station
+            pgs.addResearchStation(((PropertyString) bn.getProperty(nameHash)).value);
             return true;
         }
         return false;

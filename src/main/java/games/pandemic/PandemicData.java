@@ -1,5 +1,6 @@
 package games.pandemic;
 
+import core.GameData;
 import core.components.*;
 
 import java.util.ArrayList;

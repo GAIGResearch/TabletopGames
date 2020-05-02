@@ -5,10 +5,10 @@ import core.components.Deck;
 import core.components.IDeck;
 import core.components.PartialObservableDeck;
 import core.AbstractGameState;
-import core.gamestates.PlayerResult;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import games.explodingkittens.actions.*;
-import core.observations.Observation;
+import core.observations.IObservation;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -227,7 +227,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(int player) {
+    public IObservation getObservation(int player) {
         return null;
     }
 
@@ -235,7 +235,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     public void endGame() {
         this.terminalState = true;
         for (int i = 0; i < getNPlayers(); i++){
-            playerResults[i] = isPlayerAlive[i] ? PlayerResult.Winner : PlayerResult.Loser;
+            playerResults[i] = isPlayerAlive[i] ? Utils.GameResult.GAME_WIN : Utils.GameResult.GAME_LOSE;
         }
     }
 

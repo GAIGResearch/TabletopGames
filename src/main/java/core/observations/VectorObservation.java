@@ -2,7 +2,7 @@ package core.observations;
 
 import java.util.Arrays;
 
-class ArrayObservation<T> implements Observation, IPrintable {
+class ArrayObservation<T> implements IObservation, IPrintable {
 
     private T[] values;
 

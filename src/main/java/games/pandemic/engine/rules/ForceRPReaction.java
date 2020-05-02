@@ -11,7 +11,7 @@ import games.pandemic.PandemicGameState;
 
 import java.util.ArrayList;
 
-import static games.pandemic.Constants.*;
+import static games.pandemic.PandemicConstants.*;
 
 @SuppressWarnings("unchecked")
 public class ForceRPReaction extends RuleNode {

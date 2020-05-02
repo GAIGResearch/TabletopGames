@@ -9,7 +9,7 @@ import core.components.Deck;
 import games.pandemic.PandemicGameState;
 import games.pandemic.actions.InfectCity;
 
-import static games.pandemic.Constants.*;
+import static games.pandemic.PandemicConstants.*;
 
 @SuppressWarnings("unchecked")
 public class InfectCities extends RuleNode {

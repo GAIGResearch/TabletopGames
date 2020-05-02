@@ -1,4 +1,4 @@
-package games.pandemic;
+package core;
 
 import core.components.Board;
 import core.components.Counter;

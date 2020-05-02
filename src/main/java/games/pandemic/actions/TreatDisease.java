@@ -9,7 +9,7 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
-import static games.pandemic.Constants.*;
+import static games.pandemic.PandemicConstants.*;
 
 public class TreatDisease implements IAction {
 

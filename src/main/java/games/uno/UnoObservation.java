@@ -3,11 +3,11 @@ package games.uno;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.uno.cards.UnoCard;
-import core.observations.Observation;
+import core.observations.IObservation;
 
 import java.util.Arrays;
 
-public class UnoObservation implements IPrintable, Observation {
+public class UnoObservation implements IPrintable, IObservation {
 
     String[] strings = new String[5];
     public UnoObservation(UnoCard currentCard, Deck<UnoCard> playerHand, Deck<UnoCard> discardPile, int[] cardsPerPlayer, int cardsInDeck){

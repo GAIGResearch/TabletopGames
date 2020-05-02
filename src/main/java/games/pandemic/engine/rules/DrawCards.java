@@ -6,10 +6,10 @@ import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import core.content.PropertyString;
-import games.pandemic.Constants;
+import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
-import static games.pandemic.Constants.nameHash;
-import static games.pandemic.Constants.playerDeckHash;
+import static games.pandemic.PandemicConstants.nameHash;
+import static games.pandemic.PandemicConstants.playerDeckHash;
 
 @SuppressWarnings("unchecked")
 public class DrawCards extends RuleNode {
@@ -28,11 +28,11 @@ public class DrawCards extends RuleNode {
         boolean drawn = action.execute(gs);
 
         if (drawn) {
-            Deck<Card> playerHand = (Deck<Card>) pgs.getComponent(Constants.playerHandHash, activePlayer);
+            Deck<Card> playerHand = (Deck<Card>) pgs.getComponent(PandemicConstants.playerHandHash, activePlayer);
 
             Card c = tempDeck.pick();  // Check the drawn card
             // If epidemic card, do epidemic, only one per draw
-            if (((PropertyString) c.getProperty(nameHash)).value.hashCode() == Constants.epidemicCard) {
+            if (((PropertyString) c.getProperty(nameHash)).value.hashCode() == PandemicConstants.epidemicCard) {
                 epidemic = true;
             } else {  // Otherwise, give card to player
                 if (playerHand != null) {

@@ -9,8 +9,8 @@ import games.pandemic.PandemicGameState;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static games.pandemic.Constants.playerDeckDiscardHash;
-import static games.pandemic.Constants.playerHandHash;
+import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
+import static games.pandemic.PandemicConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class RearrangeCardsWithCard implements IAction {

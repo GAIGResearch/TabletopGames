@@ -1,7 +1,7 @@
 package players;
 
 import core.actions.IAction;
-import core.observations.Observation;
+import core.observations.IObservation;
 
 import java.util.List;
 
@@ -18,18 +18,18 @@ public abstract class AbstractPlayer {
      * e.g. load weights, initialize neural network
      * @param observation observation of the initial game-state
      */
-    public abstract void initializePlayer(Observation observation);
+    public abstract void initializePlayer(IObservation observation);
 
     /**
      * Finalize agent given an observation of the final game-state.
      * e.g. store variables after training, modify weights, etc.
      * @param observation observation of the final game-state
      */
-    public abstract void finalizePlayer(Observation observation);
+    public abstract void finalizePlayer(IObservation observation);
 
     /**
      * Initialize agent given an observation of the initial game-state.
      * @param observation observation of the initial game-state
      */
-    public abstract int getAction(Observation observation, List<IAction> actions);
+    public abstract int getAction(IObservation observation, List<IAction> actions);
 }
