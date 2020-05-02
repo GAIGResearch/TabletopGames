@@ -1,8 +1,10 @@
-package games.pandemic;
+package games.pandemic.gui;
 
 import core.components.*;
 import core.content.*;
 import core.AbstractGameState;
+import games.pandemic.PandemicConstants;
+import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.ImageIO;
 import utilities.Utils;
@@ -13,7 +15,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-import static games.pandemic.PandemicCardView.drawCard;
+import static games.pandemic.gui.PandemicCardView.drawCard;
 
 public class PandemicBoardView extends JComponent {
     //TODO: images for tokens?

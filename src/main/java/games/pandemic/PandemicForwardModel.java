@@ -213,8 +213,6 @@ public class PandemicForwardModel extends ForwardModel {
     }
 
     /*
-
-
     @Override
     public ForwardModel copy() {
         PandemicForwardModel fm = new PandemicForwardModel(pp);

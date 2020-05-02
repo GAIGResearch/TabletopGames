@@ -1,6 +1,5 @@
-package core;
+package core.components;
 
-import core.components.*;
 import java.util.HashMap;
 
 /**

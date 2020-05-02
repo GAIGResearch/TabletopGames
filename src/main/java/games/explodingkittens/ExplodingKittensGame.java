@@ -13,6 +13,7 @@ import java.util.*;
 public class ExplodingKittensGame extends Game {
 
     public ExplodingKittensGame(List<AbstractPlayer> agents) {
+        this.players = agents;
         ExplodingKittenParameters params = new ExplodingKittenParameters();
         gameState = new ExplodingKittensPartialObservableGameState(params, agents.size());
         forwardModel = new ExplodingKittensForwardModel();

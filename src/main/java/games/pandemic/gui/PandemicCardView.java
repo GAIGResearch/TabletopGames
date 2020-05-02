@@ -1,4 +1,4 @@
-package games.pandemic;
+package games.pandemic.gui;
 
 import core.components.Card;
 import core.content.Property;

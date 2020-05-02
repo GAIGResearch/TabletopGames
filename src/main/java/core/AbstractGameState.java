@@ -32,6 +32,7 @@ public abstract class AbstractGameState {
     protected final GameParameters gameParameters;
 
     public AbstractGameState(GameParameters gameParameters, int nPlayers){
+        this.nPlayers = nPlayers;
         this.gameParameters = gameParameters;
         this.playerResults = new Utils.GameResult[nPlayers];
         Arrays.fill(this.playerResults, Utils.GameResult.GAME_ONGOING);

@@ -4,7 +4,7 @@ import core.actions.*;
 import core.components.*;
 import core.content.*;
 import core.AbstractGameState;
-import core.Area;
+import core.components.Area;
 import core.GameParameters;
 import core.observations.IObservation;
 import games.pandemic.actions.*;
@@ -369,7 +369,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     /**
      * Calculates all event actions available for the given player.
-     * @param playerId - player to caluclate actions for.
+     * @param playerId - player to calculate actions for.
      * @return - list of all actions available based on event cards owned by the player.
      */
     List<IAction> getEventActions(int playerId) {

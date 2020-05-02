@@ -1,10 +1,12 @@
-package games.pandemic;
+package games.pandemic.gui;
 
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.GUI;
+import games.pandemic.PandemicConstants;
+import games.pandemic.PandemicGameState;
 import utilities.CounterView;
 
 import javax.swing.*;
