@@ -70,13 +70,13 @@ public class PandemicForwardModel extends ForwardModel {
         drawCards.setNext(firstEpidemic);
         firstEpidemic.setYes(epidemic1);
         firstEpidemic.setNo(enoughDraws);
-        epidemic1.setNext(playerHasRPCard);
+        epidemic1.setNext(playerHasRPCard);  // Only 1 of these cards in the game, so only need to ask 1 player for reaction (possible future work: ReactionNode that can have N children, one requesting reaction from each of the players), and also Nodes passing parameters to others
         playerHasRPCard.setYes(forceRPreaction);
         playerHasRPCard.setNo(epidemic2);
         forceRPreaction.setNext(playerActionInterrupt1);
-        playerActionInterrupt1.setNext(playerHasRPCard);  // Loop
+        playerActionInterrupt1.setNext(epidemic2);
         epidemic2.setNext(enoughDraws);  // Loop
-        enoughDraws.setYes(playerHandOverCapacity);
+        enoughDraws.setYes(playerHandOverCapacity);  // Only asks current player for reaction
         enoughDraws.setNo(drawCards); // Loop
         playerHandOverCapacity.setYes(forceDiscardReaction);
         playerHandOverCapacity.setNo(infectCities);
@@ -95,9 +95,13 @@ public class PandemicForwardModel extends ForwardModel {
         PandemicGameState pgs = (PandemicGameState)currentState;
 
         do {
-            if (nextRule.requireAction() && action != null) {
-                nextRule.setAction(action);
-                action = null;
+            if (nextRule.requireAction()) {
+                if (action != null) {
+                    nextRule.setAction(action);
+                    action = null;
+                } else {
+                    return;  // Wait for action to be sent to execute this rule requiring action
+                }
             }
             lastRule = nextRule;
             nextRule = nextRule.execute(currentState);
@@ -109,7 +113,6 @@ public class PandemicForwardModel extends ForwardModel {
             pgs.roundStep = 0;
             nextRule = root;
             pgs.nextPlayer();
-
         }
     }
 
@@ -148,7 +151,7 @@ public class PandemicForwardModel extends ForwardModel {
                 new InfectCity(pp.max_cubes_per_city, c, nTimes - j).execute(state);
 
                 // Discard card
-                new DrawCard(infectionDeck, infectionDiscard).execute(state);
+                new AddCardToDeck(c, infectionDiscard).execute(state);
             }
         }
 

@@ -48,9 +48,9 @@ public class PandemicGame extends Game {
             forwardModel.next(gameState, actions.get(action));
 
             // Add all players as reactions for event cards
-            for (int i = 0; i < players.size(); i++) {
-                ((PandemicGameState)gameState).addReactivePlayer(i, ((PandemicGameState) gameState).getEventActions(i));
-            }
+//            for (int i = 0; i < players.size(); i++) {
+//                ((PandemicGameState)gameState).addReactivePlayer(i, ((PandemicGameState) gameState).getEventActions(i));
+//            }
 
             if (gui != null) {
                 gui.update(gameState);

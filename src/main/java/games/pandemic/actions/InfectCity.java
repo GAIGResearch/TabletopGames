@@ -30,10 +30,8 @@ public class InfectCity implements IAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // todo Quarantine Specialist
         PandemicGameState pgs = (PandemicGameState)gs;
         PropertyColor color = (PropertyColor) infectingCard.getProperty(colorHash);
-
         Counter diseaseCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color.valueStr));
 
         boolean disease_eradicated = diseaseCounter.getValue() == 2;

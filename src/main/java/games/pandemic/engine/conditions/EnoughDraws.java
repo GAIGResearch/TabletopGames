@@ -13,6 +13,6 @@ public class EnoughDraws extends ConditionNode {
 
     @Override
     public boolean test(AbstractGameState gs) {
-        return ((PandemicGameState)gs).getNCardsDrawn() == cards_to_draw;
+        return ((PandemicGameState)gs).getNCardsDrawn() >= cards_to_draw;
     }
 }

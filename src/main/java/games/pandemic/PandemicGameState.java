@@ -89,14 +89,10 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         playerDeck.add(_data.findDeck("Cities"));
         playerDeck.add(_data.findDeck("Events"));
 
-        Deck<Card>  playerDiscard = new Deck<> ("Player Deck Discard");
-        Deck<Card>  infDiscard = new Deck<> ("Infection Discard");
-        Deck<Card>  plannerDeck = new Deck<> ("plannerDeck"); // deck to store extra card for the contingency planner
-
         gameArea.addComponent(PandemicConstants.playerDeckHash, playerDeck);
-        gameArea.addComponent(PandemicConstants.playerDeckDiscardHash, playerDiscard);
-        gameArea.addComponent(PandemicConstants.infectionDiscardHash, infDiscard);
-        gameArea.addComponent(PandemicConstants.plannerDeckHash, plannerDeck);
+        gameArea.addComponent(PandemicConstants.playerDeckDiscardHash, new Deck<> ("Player Deck Discard"));
+        gameArea.addComponent(PandemicConstants.infectionDiscardHash, new Deck<> ("Infection Discard"));
+        gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<> ("plannerDeck")); // deck to store extra card for the contingency planner
         gameArea.addComponent(PandemicConstants.infectionHash, _data.findDeck("Infections"));
         gameArea.addComponent(PandemicConstants.playerRolesHash, _data.findDeck("Player Roles"));
         gameArea.addComponent(PandemicConstants.researchStationHash, _data.findCounter("Research Stations"));
@@ -104,6 +100,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     void nextPlayer() {
         activePlayer = (activePlayer + 1) % getNPlayers();
+        nCardsDrawn = 0;
     }
 
     @Override
@@ -463,10 +460,9 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                     order[i] = i;
                 }
                 generatePermutations(n, order, permutations);
-//                for (int[] perm: permutations) {
-//                    actions.add(new RearrangeCardsWithCard(infectionDiscard, perm, card));
-//                }
-                int a = 0;
+                for (int[] perm: permutations) {
+                    actions.add(new RearrangeCardsWithCard(infectionDeck, perm, card));
+                }
                 break;
         }
 

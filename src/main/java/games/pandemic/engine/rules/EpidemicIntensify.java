@@ -2,6 +2,7 @@ package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
 import core.actions.AddCardToDeck;
+import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicGameState;
@@ -25,10 +26,11 @@ public class EpidemicIntensify extends RuleNode {
         PandemicGameState pgs = (PandemicGameState)gs;
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
+        int nDiscards = infectionDiscard.getCards().size();
         // 3. shuffle infection discard deck, add back on top of infection deck
         infectionDiscard.shuffle(rnd);
-        for (Card card: infectionDiscard.getCards()) {
-            new AddCardToDeck(card, infectionDeck).execute(gs);
+        for (int i = 0; i < nDiscards; i++) {
+            new DrawCard(infectionDiscard, infectionDeck).execute(gs);
         }
         return true;
     }

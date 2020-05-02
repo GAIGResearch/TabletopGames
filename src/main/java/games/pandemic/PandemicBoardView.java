@@ -148,14 +148,14 @@ public class PandemicBoardView extends JComponent {
         // Discard piles
         Deck playerDiscardDeck = (Deck) gameState.getComponent(PandemicConstants.playerDeckDiscardHash);
         if (playerDiscardDeck != null) {
-            Card cP = (Card) playerDiscardDeck.draw();
+            Card cP = (Card) playerDiscardDeck.peek();
             if (cP != null) {
                 drawCard(g, 100, 50, cP, null, (int)playerDiscardPosition.getX(), (int)playerDiscardPosition.getY());
             }
         }
         Deck infectionDiscardDeck = (Deck) gameState.getComponent(PandemicConstants.infectionDiscardHash);
         if (infectionDiscardDeck != null) {
-            Card cI = (Card) infectionDiscardDeck.draw();
+            Card cI = (Card) infectionDiscardDeck.peek();
             if (cI != null) {
                 drawCard(g, 100, 50, cI, null, (int)infectionDiscardPosition.getX(), (int)infectionDiscardPosition.getY());
             }
