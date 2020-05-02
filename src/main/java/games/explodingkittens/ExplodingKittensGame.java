@@ -49,13 +49,6 @@ public class ExplodingKittensGame extends Game {
         return ((ExplodingKittensGameState) gameState).isGameOver();
     }
 
-    @Override
-    public HashSet<Integer> winners() {
-        HashSet<Integer> winners = new HashSet<>();
-        // TODO: all or nothing, check gamestate
-        return winners;
-    }
-
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer(0));

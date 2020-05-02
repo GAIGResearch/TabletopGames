@@ -41,11 +41,6 @@ public class TicTacToeGame extends Game {
         return gameState.isTerminal();
     }
 
-    @Override
-    public HashSet<Integer> winners() {
-        return null;
-    }
-
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer(0));

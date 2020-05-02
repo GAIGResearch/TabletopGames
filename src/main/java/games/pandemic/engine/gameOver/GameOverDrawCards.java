@@ -19,7 +19,7 @@ public class GameOverDrawCards extends GameOverCondition {
 
         // if player cannot draw it means that the deck is empty -> GAME OVER
         if (!canDraw){
-            System.out.println("No more cards to draw");
+//            System.out.println("No more cards to draw");
             return GAME_LOSE;
         }
         return GAME_ONGOING;

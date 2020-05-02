@@ -1,10 +1,9 @@
 package games.pandemic;
 
+import core.Game;
 import core.actions.IAction;
 import core.GUI;
-import core.Game;
 
-import java.util.HashSet;
 import java.util.List;
 import core.observations.IObservation;
 import players.AbstractPlayer;
@@ -13,6 +12,8 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
+
+import static games.pandemic.PandemicConstants.VERBOSE;
 
 
 public class PandemicGame extends Game {
@@ -36,7 +37,7 @@ public class PandemicGame extends Game {
 
         while (!isEnded()){
 
-            System.out.println(turn++);
+            if (VERBOSE) System.out.println(turn++);
 
             // Get core.actions of current active player for their turn
             Pair<Integer, List<IAction>> activePlayer = ((PandemicGameState)gameState).getActingPlayer();
@@ -62,26 +63,19 @@ public class PandemicGame extends Game {
             }
         }
 
-        System.out.println("Game Over");
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_WIN) {
-            System.out.println("Winners: " + winners().toString());
-        } else {
-            System.out.println("Lose");
+//        System.out.println("Game Over");
+        if (VERBOSE) {
+            if (gameState.getGameStatus() == Utils.GameResult.GAME_WIN) {
+                System.out.println("Win");
+            } else {
+                System.out.println("Lose");
+            }
         }
     }
 
     @Override
     public boolean isEnded() {
         return gameState.getGameStatus() != Utils.GameResult.GAME_ONGOING;
-    }
-
-    @Override
-    public HashSet<Integer> winners() {
-        HashSet<Integer> winners = new HashSet<>();
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_WIN) {
-            for (int i = 0; i < players.size(); i++) winners.add(i);
-        }
-        return winners;
     }
 
     public static void main(String[] args){
@@ -92,8 +86,28 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(2, new Random()));
         players.add(new RandomPlayer(3, new Random()));
 
-        PandemicGame game = new PandemicGame(players);
-        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
-        game.run(gui);
+//        PandemicGame game = new PandemicGame(players);
+//        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
+//        Utils.GameResult gameResult = game.run(gui);
+//        System.out.println(gameResult);
+
+        runMany(players);
+    }
+
+    public static void runMany(List<AbstractPlayer> players) {
+        HashMap<Utils.GameResult, Integer> results = new HashMap<>();
+        for (Utils.GameResult r: Utils.GameResult.values()) {
+            results.put(r, 0);
+        }
+
+        for (int i = 0; i < 10000; i++) {
+            PandemicGame game = new PandemicGame(players);
+            game.run(null);
+            Utils.GameResult result = game.gameState.getGameStatus();
+            int prevCount = results.get(result);
+            results.put(result, prevCount + 1);
+        }
+
+        System.out.println(results.toString());
     }
 }

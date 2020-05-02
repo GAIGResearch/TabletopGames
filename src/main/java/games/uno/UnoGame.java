@@ -41,12 +41,6 @@ public class UnoGame extends Game {
         return false;
     }
 
-    @Override
-    public HashSet<Integer> winners() {
-        return null;
-    }
-
-
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new HumanConsolePlayer(0));

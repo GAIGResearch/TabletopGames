@@ -4,6 +4,8 @@ import utilities.Hash;
 
 public class PandemicConstants {
 
+    public final static boolean VERBOSE = false;
+
     public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
     public final static int playerLocationHash = Hash.GetInstance().hash("playerLocation");
