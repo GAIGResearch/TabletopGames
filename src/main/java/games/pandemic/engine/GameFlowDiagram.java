@@ -11,6 +11,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Shows game flow given root node rule for a game.
+ * Legend:
+ * - rectangles = rules
+ * - circles = conditions
+ * - blue nodes = require action
+ * - green outline = root node
+ * - red outline = terminal node for one game turn
+ * - red X = node contains game over conditions and can trigger end of game
+ */
 public class GameFlowDiagram extends JFrame {
     public GameFlowDiagram(Node root) {
 
