@@ -1,47 +1,53 @@
 package actions;
 
-import actions.Action;
 import components.Card;
-import components.Deck;
 import components.IDeck;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 
-public class DrawCard implements Action {
+
+public class DrawCard implements IAction {
 
     //TODO: turn this into IDs and do not use two ways of creating this action.
-    private String deckIdFrom;
-    private String deckIdTo;
+//    private String deckIdFrom;
+//    private String deckIdTo;
 
-    private IDeck deckFrom;
-    private IDeck deckTo;
+    private IDeck<Card> deckFrom;
+    private IDeck<Card> deckTo;
 
     private int index;
+//
+//    public DrawCard (String deckFrom, String deckTo) {
+//        this.deckIdFrom = deckFrom;
+//        this.deckIdTo = deckTo;
+//    }
+//
+//    public DrawCard (String deckFrom, String deckTo, int index) {
+//        this.deckIdFrom = deckFrom;
+//        this.deckIdTo = deckTo;
+//        this.index = index;
+//    }
 
-    public DrawCard (String deckFrom, String deckTo) {
-        this.deckIdFrom = deckFrom;
-        this.deckIdTo = deckTo;
-    }
-
-    public DrawCard (String deckFrom, String deckTo, int index) {
-        this.deckIdFrom = deckFrom;
-        this.deckIdTo = deckTo;
+    public DrawCard (IDeck<Card> deckFrom, IDeck<Card> deckTo, int index) {
+        this.deckFrom = deckFrom;
+        this.deckTo = deckTo;
         this.index = index;
     }
 
-    public DrawCard (IDeck deckFrom, IDeck deckTo) {
+    public DrawCard (IDeck<Card> deckFrom, IDeck<Card> deckTo) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         Card card;
-        if (deckFrom == null) {
-            deckFrom = gs.findDeck(deckIdFrom);
-        }
-        if (deckTo == null) {
-            deckTo = gs.findDeck(deckIdTo);
-        }
+//        if (deckFrom == null) {
+//            deckFrom = (IDeck<Card>)gs.findDeck(deckIdFrom);
+//        }
+//        if (deckTo == null) {
+//            deckTo = (IDeck<Card>)gs.findDeck(deckIdTo);
+//        }
 
         if (index != -1){
             card = deckFrom.pick(index);
@@ -64,8 +70,7 @@ public class DrawCard implements Action {
         if(other instanceof DrawCard)
         {
             DrawCard otherAction = (DrawCard) other;
-            return deckIdFrom.equals(otherAction.deckIdFrom) && deckIdTo.equals(otherAction.deckIdTo) &&
-                    deckFrom.equals(otherAction.deckFrom) && deckTo.equals(otherAction.deckTo);
+            return deckFrom.equals(otherAction.deckFrom) && deckTo.equals(otherAction.deckTo);
 
         }else return false;
     }

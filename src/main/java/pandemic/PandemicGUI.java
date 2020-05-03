@@ -5,9 +5,9 @@ import components.Counter;
 import components.Deck;
 import core.GUI;
 import core.Game;
-import core.GameState;
+import core.AbstractGameState;
+import turnorder.TurnOrder;
 import utilities.CounterView;
-import utilities.Hash;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,14 +18,14 @@ public class PandemicGUI extends GUI {
     ArrayList<PandemicCardView>[] playerHands;
     JComponent boardView;
 
-    GameState gameState;
+    PandemicGameState gameState;
     int nPlayers, activePlayer;
     int maxCards = 7;
 
-    public PandemicGUI(Game game) {
-        gameState = game.getGameState();
-        nPlayers = game.getPlayers().size();
+    public PandemicGUI(PandemicGameState gameState, PandemicTurnOrder turnOrder) {
+        nPlayers = gameState.getNPlayers();
         activePlayer = gameState.getActingPlayer();
+        this.gameState = gameState;
 
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
         JPanel playerAreas = createPlayerAreas();
@@ -50,14 +50,14 @@ public class PandemicGUI extends GUI {
         playerHands = new ArrayList[nPlayers];
 
         for (int i = 0; i < nPlayers; i++) {
-            Card playerCard = (Card) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerCard"));
+            Card playerCard = (Card) gameState.getComponent(Constants.playerCardHash, i);
             PandemicCardView cv = new PandemicCardView(playerCard, null);
             playerCards[i] = cv;
             playerCardsPanel.add(cv);
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
-            Deck playerHand = (Deck) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(Constants.playerHandHash, i);
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
@@ -82,31 +82,32 @@ public class PandemicGUI extends GUI {
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
-        Counter cnY = gameState.findCounter("Disease yellow");
+        Counter cnY = gameState.getData().findCounter("Disease yellow");
         JComponent cY = new CounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
-        Counter cnR = gameState.findCounter("Disease red");
+        Counter cnR = gameState.getData().findCounter("Disease red");
         JComponent cR = new CounterView(cnR, Color.red, null);
         counterArea.add(cR);
-        Counter cnB = gameState.findCounter("Disease blue");
+        Counter cnB = gameState.getData().findCounter("Disease blue");
         JComponent cB = new CounterView(cnB, Color.blue, null);
         counterArea.add(cB);
-        Counter cnK = gameState.findCounter("Disease black");
+        Counter cnK = gameState.getData().findCounter("Disease black");
         JComponent cK = new CounterView(cnK, Color.black, null);
         counterArea.add(cK);
 
         return counterArea;
     }
 
-    public void update(GameState gameState) {
-        this.gameState = gameState;
+    @Override
+    public void update(AbstractGameState gs, TurnOrder turnOrder) {
+        this.gameState = (PandemicGameState) gs;
         ((PandemicBoardView)boardView).gameState = gameState;
         for (int i = 0; i < nPlayers; i++) {
-            Card playerCard = (Card) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerCard"));
+            Card playerCard = (Card) gameState.getComponent(Constants.playerCardHash, i);
             playerCards[i].update(playerCard);
             playerCards[i].repaint();
 
-            Deck playerHand = (Deck) gameState.getAreas().get(i).getComponent(Hash.GetInstance().hash("playerHand"));
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(Constants.playerHandHash, i);
 //            playerHands[i].clear();
             for (int j = 0; j < playerHand.getCards().size(); j++) {
                 Card c = playerHand.getCards().get(j);

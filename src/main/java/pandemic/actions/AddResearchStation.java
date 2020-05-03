@@ -1,13 +1,17 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.BoardNode;
+import components.Counter;
 import content.PropertyBoolean;
-import core.GameState;
+import core.AbstractGameState;
+import pandemic.Constants;
 import pandemic.PandemicGameState;
+import turnorder.TurnOrder;
+
 import static pandemic.Constants.*;
 
-public class AddResearchStation implements Action {
+public class AddResearchStation implements IAction {
     private String city;
 
     public AddResearchStation(String city) {
@@ -15,11 +19,13 @@ public class AddResearchStation implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, city);
+        PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(true));
-            gs.findCounter("Research Stations").decrement(1); // We have one less research station
+            Counter rStationCounter = (Counter) pgs.getComponent(Constants.researchStationHash);
+            rStationCounter.decrement(1); // We have one less research station
             return true;
         }
         return false;

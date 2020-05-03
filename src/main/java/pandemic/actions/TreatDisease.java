@@ -1,18 +1,18 @@
 package pandemic.actions;
 
-import actions.Action;
+import actions.IAction;
 import components.BoardNode;
 import components.Counter;
 import content.PropertyIntArray;
-import core.GameParameters;
-import core.GameState;
+import core.AbstractGameState;
 import pandemic.PandemicGameState;
-import pandemic.PandemicParameters;
+import turnorder.TurnOrder;
+import utilities.Hash;
 import utilities.Utils;
 
 import static pandemic.Constants.*;
 
-public class TreatDisease implements Action {
+public class TreatDisease implements IAction {
 
     //PandemicParameters gp;
     private int initialDiseaseCubes;
@@ -35,11 +35,11 @@ public class TreatDisease implements Action {
     }
 
     @Override
-    public boolean execute(GameState gs) {
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
         PandemicGameState pgs = (PandemicGameState) gs;
 
-        Counter diseaseToken = pgs.findCounter("Disease " + color);
-        Counter diseaseCubeCounter = gs.findCounter("Disease Cube " + color);
+        Counter diseaseToken = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color));
+        Counter diseaseCubeCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color));
         int colorIdx = Utils.indexOf(colors, color);
 
         BoardNode bn = pgs.world.getNode(nameHash, city);
