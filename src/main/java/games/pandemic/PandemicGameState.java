@@ -372,7 +372,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
      * @param playerId - player to calculate actions for.
      * @return - list of all actions available based on event cards owned by the player.
      */
-    List<IAction> getEventActions(int playerId) {
+    public List<IAction> getEventActions(int playerId) {
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
         List<IAction> actions = new ArrayList<>();

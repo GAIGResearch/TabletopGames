@@ -24,16 +24,20 @@ import java.util.Objects;
  * - red X = node contains game over conditions and can trigger end of game
  */
 public class GameFlowDiagram extends JFrame {
+
     public GameFlowDiagram(Node root) {
 
         JComponent mainArea = new TreeDraw(root);
+        JScrollPane pane = new JScrollPane();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        pane.setPreferredSize(new Dimension(Math.min(screenSize.width, mainArea.getPreferredSize().width),
+                Math.min(screenSize.height, mainArea.getPreferredSize().height)));
         getContentPane().add(mainArea);
 
         // Frame properties
         pack();
         this.setVisible(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         repaint();
     }
 
@@ -45,29 +49,36 @@ public class GameFlowDiagram extends JFrame {
         int nodeGapX = 150;
         int nodeGapY = 50;
         int arrowSize = 8;
+        Dimension size;
+        int maxY = 0, maxX = 0;
 
         TreeDraw(Node root) {
             this.root = root;
             treeNodes = new HashMap<>();
             drawn = new HashSet<>();
+            traverseNodes(root, 0);
+            size = new Dimension((maxX+1) * (nodeSize + nodeGapX), (maxY+1) * (nodeSize + nodeGapY));
+            treeNodes.get(root.getId()).root = true;
         }
 
         @Override
         public Dimension getPreferredSize() {
-            return new Dimension(700, 500);
+            return size;
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            traverseNodes(root, 0);
-            treeNodes.get(root.getId()).root = true;
             drawTree((Graphics2D)g);
         }
 
         private void traverseNodes(Node node, int level) {
             if (node == null || treeNodes.containsKey(node.getId())) return;
-            treeNodes.put(node.getId(), new TreeNode(node, level));
+            TreeNode n = new TreeNode(node, level);
+            treeNodes.put(node.getId(), n);
+            if (n.y > maxY) maxY = n.y;
+            if (n.x > maxX) maxX = n.x;
+
             if (node instanceof RuleNode) {
                 traverseNodes(node.getNext(), level + 1);
             } else if (node instanceof ConditionNode) {
