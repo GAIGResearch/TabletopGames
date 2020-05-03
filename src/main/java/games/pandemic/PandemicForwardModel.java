@@ -26,7 +26,7 @@ public class PandemicForwardModel extends ForwardModel {
     // Rule executed last, rule to be executed next, and first rule to be executed in a turn (root)
     Node lastRule, nextRule, root;
 
-    public PandemicForwardModel(PandemicParameters pp) {
+    public PandemicForwardModel(PandemicParameters pp, int nPlayers) {
         rnd = new Random(pp.game_seed);
         this.pp = pp;
 
@@ -78,13 +78,25 @@ public class PandemicForwardModel extends ForwardModel {
         playerHandOverCapacity.setYesNo(forceDiscardReaction, infectCities);
         forceDiscardReaction.setNext(playerActionInterrupt2);
         playerActionInterrupt2.setNext(infectCities);
-        infectCities.setNext(null);  // End of turn
+//        infectCities.setNext(null);  // End of turn
+
+        // Player reactions at the end of turn, one for each player
+        RuleNode forceAllPlayersEventReaction = new ForceAllEventReaction();
+        infectCities.setNext(forceAllPlayersEventReaction);  // End of turn, event reactions coming next
+        RuleNode[] eventActionInterrupt = new PlayerAction[nPlayers];
+        for (int i = 0; i < nPlayers; i++) {
+            eventActionInterrupt[i] = new PlayerAction(pp.n_initial_disease_cubes);
+        }
+        for (int i = 0; i < nPlayers-1; i++) {  // Last one will be null, turn over
+            eventActionInterrupt[i].setNext(eventActionInterrupt[i+1]);
+        }
+        forceAllPlayersEventReaction.setNext(eventActionInterrupt[0]);
 
         // Next rule to execute is root
         nextRule = root;
 
         // draw tree from root
-//        new GameFlowDiagram(root);
+        new GameFlowDiagram(root);
     }
 
     @Override

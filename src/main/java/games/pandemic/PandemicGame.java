@@ -24,7 +24,7 @@ public class PandemicGame extends Game {
         PandemicParameters params = new PandemicParameters("data/");
 
         players = agents;
-        forwardModel = new PandemicForwardModel(params);
+        forwardModel = new PandemicForwardModel(params, agents.size());
 
         gameState = new PandemicGameState(params, agents.size());
         gameState.setForwardModel(forwardModel);
@@ -48,11 +48,6 @@ public class PandemicGame extends Game {
 
             // Resolve core.actions and game rules for the turn
             forwardModel.next(gameState, actions.get(action));
-
-            // Add all players as reactions for event cards
-//            for (int i = 0; i < players.size(); i++) {
-//                ((PandemicGameState)gameState).addReactivePlayer(i, ((PandemicGameState) gameState).getEventActions(i));
-//            }
 
             if (gui != null) {
                 gui.update(gameState);
