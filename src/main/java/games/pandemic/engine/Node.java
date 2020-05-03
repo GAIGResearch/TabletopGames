@@ -15,14 +15,16 @@ public abstract class Node {
     }
 
     public abstract Node execute(AbstractGameState gs);
-    public boolean requireAction() { return actionNode; }
+    public abstract Node getNext();
 
-    public void setAction(IAction action) {
+    public final void setAction(IAction action) {
         this.action = action;
     }
+    public final boolean requireAction() { return actionNode; }
+    public final int getId() { return id; }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Node node = (Node) o;
@@ -30,9 +32,12 @@ public abstract class Node {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return id;
     }
 
-    public abstract Node getNext();
+    @Override
+    public String toString() {
+        return this.getClass().toString();
+    }
 }

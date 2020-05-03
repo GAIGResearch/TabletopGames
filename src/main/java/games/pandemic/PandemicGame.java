@@ -6,6 +6,7 @@ import core.GUI;
 
 import java.util.List;
 import core.observations.IObservation;
+import games.pandemic.gui.PandemicGUI;
 import players.AbstractPlayer;
 import players.RandomPlayer;
 import utilities.Pair;
@@ -86,12 +87,12 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(2, new Random()));
         players.add(new RandomPlayer(3, new Random()));
 
-//        PandemicGame game = new PandemicGame(players);
-//        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
-//        Utils.GameResult gameResult = game.run(gui);
-//        System.out.println(gameResult);
+        PandemicGame game = new PandemicGame(players);
+        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
+        game.run(gui);
+        System.out.println(game.gameState.getGameStatus());
 
-        runMany(players);
+//        runMany(players);
     }
 
     public static void runMany(List<AbstractPlayer> players) {

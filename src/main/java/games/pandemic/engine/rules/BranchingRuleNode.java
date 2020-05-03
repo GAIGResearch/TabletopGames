@@ -6,26 +6,30 @@ import games.pandemic.engine.gameOver.GameOverCondition;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 /**
- * Executes a piece of game logic and moves on to the next Node. Can trigger game end if it has game over conditions
- * attached. Does not execute if it requires an action and did not receive one. Can be interrupted, which will mean
- * the external game loop is interrupted after this rule, and this rule is skipped next time the loop resumes.
+ * Splits a node into n branches:
  *
- * parent -> childNext
+ * parent
+ *  - child 0
+ *  - child 1
+ *  ...
+ *  - child n
  */
-public abstract class RuleNode extends Node {
-    Node childNext;
+public abstract class BranchingRuleNode extends Node {
+    int next = 0;
+    Node[] children;
     private ArrayList<GameOverCondition> gameOverConditions;
 
-    public RuleNode() {
+    public BranchingRuleNode() {
         super();
         gameOverConditions = new ArrayList<>();
     }
 
-    protected RuleNode(boolean actionNode) {
+    protected BranchingRuleNode(boolean actionNode) {
         super();
         this.actionNode = actionNode;
         gameOverConditions = new ArrayList<>();
@@ -45,20 +49,19 @@ public abstract class RuleNode extends Node {
                 Utils.GameResult result = goc.test(gs);
                 if (result != GAME_ONGOING) {
                     gs.setGameStatus(result);
-                    childNext = null;
+                    Arrays.fill(children, null);
                 }
             }
         }
-        if (!interrupted) return childNext;
+        if (!interrupted) return children[next++];
         return null;
     }
-    public final void setNext(Node childNext) {
-        this.childNext = childNext;
+    public final void setNext(Node[] children) {
+        this.children = children;
     }
     public final Node getNext() {
-        return childNext;
+        return children[next];
     }
-    public final ArrayList<GameOverCondition> getGameOverConditions() {
-        return gameOverConditions;
-    }
+    public final Node[] getChildren() { return children; }
+    public final int getNextIdx() { return next; }
 }

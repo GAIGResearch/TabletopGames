@@ -63,23 +63,19 @@ public class PandemicForwardModel extends ForwardModel {
         infectCities.addGameOverCondition(outbreakLose);
 
         // Putting it all together to set up game turn flow
+        // possible future work: Nodes passing parameters to others
         root = playerAction;
         playerAction.setNext(enoughActions);
-        enoughActions.setYes(drawCards);
-        enoughActions.setNo(playerAction);  // Loop
+        enoughActions.setYesNo(drawCards, playerAction);  // Loop
         drawCards.setNext(firstEpidemic);
-        firstEpidemic.setYes(epidemic1);
-        firstEpidemic.setNo(enoughDraws);
-        epidemic1.setNext(playerHasRPCard);  // Only 1 of these cards in the game, so only need to ask 1 player for reaction (possible future work: ReactionNode that can have N children, one requesting reaction from each of the players), and also Nodes passing parameters to others
-        playerHasRPCard.setYes(forceRPreaction);
-        playerHasRPCard.setNo(epidemic2);
+        firstEpidemic.setYesNo(epidemic1, enoughDraws);
+        epidemic1.setNext(playerHasRPCard);  // Only 1 of these cards in the game, so only need to ask 1 player for reaction
+        playerHasRPCard.setYesNo(forceRPreaction, epidemic2);
         forceRPreaction.setNext(playerActionInterrupt1);
         playerActionInterrupt1.setNext(epidemic2);
         epidemic2.setNext(enoughDraws);  // Loop
-        enoughDraws.setYes(playerHandOverCapacity);  // Only asks current player for reaction
-        enoughDraws.setNo(drawCards); // Loop
-        playerHandOverCapacity.setYes(forceDiscardReaction);
-        playerHandOverCapacity.setNo(infectCities);
+        enoughDraws.setYesNo(playerHandOverCapacity, drawCards);  // Only asks current player for reaction. Loop
+        playerHandOverCapacity.setYesNo(forceDiscardReaction, infectCities);
         forceDiscardReaction.setNext(playerActionInterrupt2);
         playerActionInterrupt2.setNext(infectCities);
         infectCities.setNext(null);  // End of turn
@@ -87,7 +83,8 @@ public class PandemicForwardModel extends ForwardModel {
         // Next rule to execute is root
         nextRule = root;
 
-        // draw tree from root TODO
+        // draw tree from root
+//        new GameFlowDiagram(root);
     }
 
     @Override
