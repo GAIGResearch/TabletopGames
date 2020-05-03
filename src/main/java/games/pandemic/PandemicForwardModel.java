@@ -96,7 +96,7 @@ public class PandemicForwardModel extends ForwardModel {
         nextRule = root;
 
         // draw tree from root
-        new GameFlowDiagram(root);
+//        new GameFlowDiagram(root);
     }
 
     @Override
