@@ -51,6 +51,14 @@ public abstract class Utils {
         }
         return -1;
     }
+    public static int indexOf (int[] array, int object) {
+        for (int i = 0; i < array.length; i++) {
+            if (object == array[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public static void generatePermutations(int n, int[] elements, ArrayList<int[]> all) {
         if (n == 1) {

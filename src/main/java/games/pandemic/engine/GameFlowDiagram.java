@@ -3,11 +3,13 @@ package games.pandemic.engine;
 import games.pandemic.engine.conditions.ConditionNode;
 import games.pandemic.engine.rules.BranchingRuleNode;
 import games.pandemic.engine.rules.RuleNode;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,6 +40,7 @@ public class GameFlowDiagram extends JFrame {
     private static class TreeDraw extends JComponent {
         Node root;
         HashMap<Integer, TreeNode> treeNodes;
+        HashSet<TreeNode> drawn;
         int nodeSize = 15;
         int nodeGapX = 150;
         int nodeGapY = 50;
@@ -46,6 +49,7 @@ public class GameFlowDiagram extends JFrame {
         TreeDraw(Node root) {
             this.root = root;
             treeNodes = new HashMap<>();
+            drawn = new HashSet<>();
         }
 
         @Override
@@ -84,6 +88,8 @@ public class GameFlowDiagram extends JFrame {
 
         private void drawNode(Graphics2D g, TreeNode n) {
             if (n != null) {
+                drawn.add(n);
+
                 int x = (n.x + 1) * nodeSize + n.x * nodeGapX;
                 int y = (n.y + 1) * nodeSize + n.y * nodeGapY;
 
@@ -121,7 +127,9 @@ public class GameFlowDiagram extends JFrame {
 
                 // Draw lines to children
                 g.setColor(Color.black);
-                for (int c : n.childrenId) {
+                int nChildren = n.childrenId.length;
+                for (int i = 0; i < nChildren; i++) {
+                    int c = n.childrenId[i];
                     if (c != -1) {
                         TreeNode tn = treeNodes.get(c);
                         int dirX = tn.x - n.x;
@@ -146,68 +154,61 @@ public class GameFlowDiagram extends JFrame {
                                 y2 += nodeSize;
                             }
                         }
-                        if (n.x == tn.x && Math.abs(n.y - tn.y) > 1) {  // vertical arc
+
+                        int optX = (x1+x2)/2;
+                        int optY = (y1+y2)/2;
+                        if ((n.x == tn.x && Math.abs(n.y - tn.y) > 1)
+                                || Utils.indexOf(tn.childrenId, n.id) != -1 && drawn.contains(tn)) {  // vertical arc
                             Path2D.Double path = new Path2D.Double();
                             path.moveTo(x1, y1);
                             path.curveTo(x1, y1, x1 - nodeGapX/4.0, (y1 + y2)/2.0, x2, y2);
                             g.draw(path);
-                        } else if (tn.y == n.y && Math.abs(n.x - tn.x) > 1) {
+                            drawArrowHead(g, x2, y2,x1 - nodeGapX/4, (y1 + y2)/2);
+                            optX = (x1+x1 - nodeGapX/4)/2;
+                        } else if (Math.abs(n.x - tn.x) > 1) {  // horizontal arc
                             Path2D.Double path = new Path2D.Double();
                             path.moveTo(x1, y1);
                             path.curveTo(x1, y1, (x1+x2)/2.0, y1 - nodeGapY/4.0, x2, y2);
                             g.draw(path);
+                            drawArrowHead(g, x2, y2, (x1+x2)/2, y1 - nodeGapY/4);
+                            optY = (y1+(y1 + y2)/2)/2;
                         } else {
-//                            if (tn.y == n.y || tn.x == n.x) {
-                                g.drawLine(x1, y1, x2, y2);
-//                            } else {
-//                                // Avoid diagonal lines, draw jagged: find middle x, draw 3 lines
-//                                int midX = (x1+x2)/2;
-//                                g.drawLine(x1, y1, midX, y1);
-//                                g.drawLine(midX, y1, midX, y2);
-//                                g.drawLine(midX, y2, x2, y2);
-//                            }
+                            g.drawLine(x1, y1, x2, y2);
+                            drawArrowHead(g, x2, y2, x1, y1);
                         }
                         g.fillOval(x1-arrowSize/4, y1-arrowSize/4, arrowSize/2, arrowSize/2);
-                        drawArrowHead(g, x2, y2, x1, y1);
+
+                        if (n.type == TreeNode.NodeType.CONDITION) {
+                            if (i == 0) {
+                                // yes
+                                g.drawString("yes", optX, optY);
+                            } else {
+                                // no
+                                g.drawString("no", optX, optY);
+                            }
+                        }
                     }
                 }
             }
         }
 
         private void drawArrowHead(Graphics2D g, int endX, int endY, int fromX, int fromY) {
-            int x2;
-            int y2;
-            int x3;
-            int y3;
+            int dx = endX - fromX, dy = endY - fromY;
+            double D = Math.sqrt(dx*dx + dy*dy);
+            double xm = D - arrowSize, xn = xm, ym = arrowSize, yn = -arrowSize, x;
+            double sin = dy / D, cos = dx / D;
 
-            if (endX > fromX) {
-                // >
-                x2 = endX - arrowSize;
-                x3 = endX - arrowSize;
-                y2 = endY - arrowSize/2;
-                y3 = endY + arrowSize/2;
-            } else if (endX < fromX) {
-                // <
-                x2 = endX + arrowSize;
-                x3 = endX + arrowSize;
-                y2 = endY - arrowSize/2;
-                y3 = endY + arrowSize/2;
-            } else {
-                if (endY > fromY) {
-                    // v
-                    x2 = endX-arrowSize/2;
-                    y2 = endY-arrowSize;
-                    x3 = endX+arrowSize/2;
-                    y3 = endY-arrowSize;
-                } else {
-                    // ^
-                    x2 = endX-arrowSize/2;
-                    y2 = endY+arrowSize;
-                    x3 = endX+arrowSize/2;
-                    y3 = endY+arrowSize;
-                }
-            }
-            g.fillPolygon(new int[] {endX, x2, x3}, new int[] {endY, y2, y3}, 3);
+            x = xm*cos - ym*sin + fromX;
+            ym = xm*sin + ym*cos + fromY;
+            xm = x;
+
+            x = xn*cos - yn*sin + fromX;
+            yn = xn*sin + yn*cos + fromY;
+            xn = x;
+
+            int[] xpoints = {endX, (int) xm, (int) xn};
+            int[] ypoints = {endY, (int) ym, (int) yn};
+            g.fillPolygon(xpoints, ypoints, 3);
         }
     }
 
