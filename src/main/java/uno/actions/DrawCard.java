@@ -25,10 +25,10 @@ public class DrawCard implements Action {
     @Override
     public boolean execute(GameState gs) {
         if (deckFrom == null) {
-            deckFrom = gs.findDeck(deckIdFrom);
+            deckFrom = (Deck) gs.findDeck(deckIdFrom);
         }
         if (deckTo == null) {
-            deckTo = gs.findDeck(deckIdTo);
+            deckTo = (Deck) gs.findDeck(deckIdTo);
         }
         Card c = deckFrom.draw();
         if (c == null) {

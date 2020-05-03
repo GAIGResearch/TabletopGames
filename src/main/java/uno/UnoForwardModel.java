@@ -15,4 +15,9 @@ public class UnoForwardModel implements ForwardModel {
     public void next(GameState currentState, Action action) {
         // TODO
     }
+
+    @Override
+    public ForwardModel copy() {
+        return null;
+    }
 }

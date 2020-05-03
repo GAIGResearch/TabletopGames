@@ -12,14 +12,27 @@ import java.util.List;
 
 public class UnoGameState extends GameState {
 
-    private int direction = 1;
+    private int    direction = 1;
     private String mainColor;
-    private int mainNumber;
+    private int    mainNumber;
+
+    public String GetMainColor()  { return mainColor; }
+    public int    GetMainNumber() { return mainNumber; }
 
     @Override
     public GameState copy() {
         //TODO: copy uno game state
         return this;
+    }
+
+    @Override
+    public GameState createNewGameState() {
+        return new UnoGameState();
+    }
+
+    @Override
+    public void copyTo(GameState dest, int playerId) {
+        // TODO
     }
 
     @Override
@@ -89,7 +102,7 @@ public class UnoGameState extends GameState {
 
     public void drawCardsFromDeck(Deck playerDeck, int nCards)
     {
-        Deck drawnDeck = findDeck("drawDeck");
+        Deck drawnDeck = (Deck) findDeck("drawDeck");
 
         for (int i=0; i< nCards; i++) {
             // Remove from drawDeck
@@ -102,7 +115,7 @@ public class UnoGameState extends GameState {
 
     public void playCardOnHand(Deck playerDeck, int idCard)
     {
-        Deck mainDeck = findDeck("mainDeck");
+        Deck mainDeck = (Deck) findDeck("mainDeck");
 
         // Remover from playerDeck
         Card c = playerDeck.pick(idCard);

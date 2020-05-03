@@ -19,8 +19,8 @@ public class UnoGame extends Game {
             System.out.println(turn++);
 
             // Get actions of current active player for their turn
-            int activePlayer = gameState.getActivePlayer();
-            Action action = players.get(activePlayer).getAction(gameState);
+            int   activePlayer = gameState.getActivePlayer();
+            Action action      = players.get(activePlayer).getAction(gameState);
 
             gameState.next(action);
             actionsPlayed++;
