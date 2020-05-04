@@ -7,6 +7,8 @@ import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +46,7 @@ public class GameFlowDiagram extends JFrame {
     private static class TreeDraw extends JComponent {
         Node root;
         HashMap<Integer, TreeNode> treeNodes;
+        HashMap<Integer, Rectangle> treeNodeLocations;
         HashSet<TreeNode> drawn;
         int nodeSize = 15;
         int nodeGapX = 150;
@@ -52,13 +55,43 @@ public class GameFlowDiagram extends JFrame {
         Dimension size;
         int maxY = 0, maxX = 0;
 
+        Map.Entry<Integer, Rectangle> dragging;
+
         TreeDraw(Node root) {
             this.root = root;
             treeNodes = new HashMap<>();
+            treeNodeLocations = new HashMap<>();
             drawn = new HashSet<>();
             traverseNodes(root, 0);
             size = new Dimension((maxX+1) * (nodeSize + nodeGapX), (maxY+1) * (nodeSize + nodeGapY));
             treeNodes.get(root.getId()).root = true;
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    for (Map.Entry<Integer, Rectangle> en: treeNodeLocations.entrySet()) {
+                        if (en.getValue().contains(e.getPoint())) {
+                            // clicked on this rectangle
+                            dragging = en;
+                            break;
+                        }
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    dragging.getValue().setLocation(e.getPoint());
+                    treeNodeLocations.put(dragging.getKey(), dragging.getValue());
+                    repaint();
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    dragging.getValue().setLocation(e.getPoint());
+                    treeNodeLocations.put(dragging.getKey(), dragging.getValue());
+                    repaint();
+                }
+            });
         }
 
         @Override
@@ -76,6 +109,9 @@ public class GameFlowDiagram extends JFrame {
             if (node == null || treeNodes.containsKey(node.getId())) return;
             TreeNode n = new TreeNode(node, level);
             treeNodes.put(node.getId(), n);
+            int x = (n.x + 1) * nodeSize + n.x * nodeGapX;
+            int y = (n.y + 1) * nodeSize + n.y * nodeGapY;
+            treeNodeLocations.put(node.getId(), new Rectangle(x, y, nodeSize, nodeSize));
             if (n.y > maxY) maxY = n.y;
             if (n.x > maxX) maxX = n.x;
 
@@ -101,8 +137,8 @@ public class GameFlowDiagram extends JFrame {
             if (n != null) {
                 drawn.add(n);
 
-                int x = (n.x + 1) * nodeSize + n.x * nodeGapX;
-                int y = (n.y + 1) * nodeSize + n.y * nodeGapY;
+                int x = (int)treeNodeLocations.get(n.id).getX();
+                int y = (int)treeNodeLocations.get(n.id).getY();
 
                 // Draw the node
                 g.setColor(Color.darkGray);
@@ -148,8 +184,8 @@ public class GameFlowDiagram extends JFrame {
 
                         int x1 = x + nodeSize/2;
                         int y1 = y + nodeSize/2;
-                        int x2 = (tn.x + 1) * nodeSize + tn.x * nodeGapX;
-                        int y2 = (tn.y + 1) * nodeSize + tn.y * nodeGapY;
+                        int x2 = (int)treeNodeLocations.get(tn.id).getX();
+                        int y2 = (int)treeNodeLocations.get(tn.id).getY();
 
                         if (dirX > 0) {
                             // >
