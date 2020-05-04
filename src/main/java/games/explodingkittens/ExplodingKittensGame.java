@@ -31,6 +31,7 @@ public class ExplodingKittensGame extends Game {
                 ((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
             forwardModel.next(gameState, actions.get(actionIdx));
+            gameState.setAvailableActions(null, idx);
             System.out.println();
         }
 
