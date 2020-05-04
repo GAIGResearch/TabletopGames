@@ -12,6 +12,6 @@ public class ActionsPerTurnPlayed extends ConditionNode {
 
     @Override
     public boolean test(AbstractGameState gs) {
-        return gs.roundStep == n_actions;
+        return gs.getTurnOrder().getTurnStep() == n_actions;
     }
 }

@@ -1,5 +1,6 @@
 package games.uno;
 
+import core.ForwardModel;
 import core.actions.IAction;
 import core.components.Deck;
 import core.AbstractGameState;
@@ -19,9 +20,8 @@ public class UnoGameState extends AbstractGameState {
     Deck<UnoCard> discardPile;
     public UnoCard currentCard;
 
-    public UnoGameState(GameParameters gameParameters, int nPlayers) {
-        super(gameParameters, nPlayers);
-        setTurnOrder(new AlternatingTurnOrder(nPlayers));
+    public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
+        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
 
         drawPile = new Deck<>();
 
@@ -72,13 +72,14 @@ public class UnoGameState extends AbstractGameState {
 
     @Override
     public void endGame() {
-        terminalState = true;
+        gameStatus = Utils.GameResult.GAME_DRAW;
         Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
     }
 
     @Override
-    public List<IAction> computeAvailableActions(int player) {
+    public List<IAction> computeAvailableActions() {
         ArrayList<IAction> actions = new ArrayList<>();
+        int player = turnOrder.getCurrentPlayer(this);
         Deck<UnoCard> playerDeck = playerDecks.get(player);
         for (UnoCard card : playerDeck.getCards()){
             if (card.isPlayable(this))
@@ -96,7 +97,7 @@ public class UnoGameState extends AbstractGameState {
     }
 
     public void registerWinner(int playerID){
-        terminalState = true;
+        gameStatus = Utils.GameResult.GAME_END;
         for (int i = 0; i < getNPlayers(); i++)
         {
             if (i == playerID)

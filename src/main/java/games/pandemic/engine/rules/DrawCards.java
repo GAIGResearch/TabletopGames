@@ -19,7 +19,6 @@ public class DrawCards extends RuleNode {
         PandemicGameState pgs = (PandemicGameState)gs;
 
         boolean epidemic = false;
-        int activePlayer = pgs.getActingPlayerID();
 
         Deck<Card> tempDeck = pgs.getTempDeck();
 
@@ -28,7 +27,7 @@ public class DrawCards extends RuleNode {
         boolean drawn = action.execute(gs);
 
         if (drawn) {
-            Deck<Card> playerHand = (Deck<Card>) pgs.getComponent(PandemicConstants.playerHandHash, activePlayer);
+            Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(PandemicConstants.playerHandHash);
 
             Card c = tempDeck.pick();  // Check the drawn card
             // If epidemic card, do epidemic, only one per draw

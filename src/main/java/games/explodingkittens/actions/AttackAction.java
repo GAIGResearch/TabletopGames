@@ -33,7 +33,7 @@ public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintab
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

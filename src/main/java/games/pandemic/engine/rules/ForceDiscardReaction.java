@@ -7,10 +7,12 @@ import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicTurnOrder;
 
 import java.util.ArrayList;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
+import static games.pandemic.PandemicGameState.GamePhase.DiscardReaction;
 
 @SuppressWarnings("unchecked")
 public class ForceDiscardReaction extends RuleNode {
@@ -19,18 +21,12 @@ public class ForceDiscardReaction extends RuleNode {
     protected boolean run(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
         // player needs to discard N cards
-        int activePlayer = pgs.getActingPlayerID();
-        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponent(PandemicConstants.playerHandHash, activePlayer);
-        Deck<Card> playerDiscardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);  // TODO: not general
-
+        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponentActingPlayer(PandemicConstants.playerHandHash);
         int nDiscards = playerDeck.getCards().size() - playerDeck.getCapacity();
-        ArrayList<IAction> acts = new ArrayList<>();  // Only discard card core.actions available
-        for (int i = 0; i < playerDeck.getCards().size(); i++) {
-            acts.add(new DrawCard(playerDeck, playerDiscardDeck, i));  // adding card i from player deck to player discard deck
-        }
         for (int i = 0; i < nDiscards; i++) {
-            pgs.addReactivePlayer(activePlayer, acts);
+            ((PandemicTurnOrder)pgs.getTurnOrder()).addCurrentPlayerReaction(gs);
         }
+        pgs.setGamePhase(DiscardReaction);
         return false;
     }
 }

@@ -10,9 +10,15 @@ public class AlternatingTurnOrder extends TurnOrder {
     }
 
     @Override
-    public void endPlayerTurn(AbstractGameState gameState) {
-        currentPlayer = (currentPlayer + direction) % nPlayers;
-        turnCounter += 1;
+    public TurnOrder copy() {
+        AlternatingTurnOrder to = new AlternatingTurnOrder(nPlayers);
+        to.direction = direction;
+        return copyTo(to);
+    }
+
+    @Override
+    public int nextPlayer(AbstractGameState gameState) {
+        return (nPlayers + turnOwner + direction) % nPlayers;
     }
 
     public void reverse(){

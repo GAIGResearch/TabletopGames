@@ -9,10 +9,11 @@ public class UnoForwardModel extends ForwardModel {
     @Override
     public void next(AbstractGameState gameState, IAction action) {
         action.execute(gameState);
-        gameState.getTurnOrder().endPlayerTurn(gameState);
+        gameState.getTurnOrder().endPlayerTurnStep(gameState);
 
-        if (gameState.getTurnOrder().getTurnCounter() == 9)
+        if (gameState.getTurnOrder().getRoundCounter() == 9) {
             gameState.endGame();
+        }
 
         checkWinCondition((UnoGameState) gameState);
     }

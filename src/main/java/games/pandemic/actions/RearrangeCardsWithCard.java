@@ -36,7 +36,7 @@ public class RearrangeCardsWithCard implements IAction {
         boolean result = deckFrom.add(draws);
 
         if (result) {
-            ((Deck<Card>) pgs.getComponent(playerHandHash, pgs.getActingPlayerID())).discard(card);
+            ((Deck<Card>) pgs.getComponentActingPlayer(playerHandHash)).remove(card);
             Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
             result = discardDeck.add(card);
         }

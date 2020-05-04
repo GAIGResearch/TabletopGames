@@ -15,30 +15,9 @@ public class TicTacToeGame extends Game {
 
     public TicTacToeGame(List<AbstractPlayer> agents)
     {
-        gameState = new TicTacToeGameState(new TicTacToeGameParameters(), agents.size());
+        super(agents);
         forwardModel = new TicTacToeForwardModel();
-    }
-
-    @Override
-    public void run(GUI gui) {
-        while (!isEnded()){
-            AbstractPlayer currentPlayer = players.get(gameState.getTurnOrder().getCurrentPlayer());
-            int idx = currentPlayer.playerID;
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(idx));
-            IObservation observation = gameState.getObservation(idx);
-            ((IPrintable) observation).PrintToConsole();
-            int actionIdx = currentPlayer.getAction(observation, actions);
-            forwardModel.next(gameState, actions.get(actionIdx));
-            System.out.println();
-        }
-
-        ((IPrintable) gameState.getObservation(-1)).PrintToConsole();
-        System.out.println(Arrays.toString(gameState.getPlayerResults()));
-    }
-
-    @Override
-    public boolean isEnded() {
-        return gameState.isTerminal();
+        gameState = new TicTacToeGameState(new TicTacToeGameParameters(), forwardModel, agents.size());
     }
 
     public static void main(String[] args){

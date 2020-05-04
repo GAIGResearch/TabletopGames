@@ -27,7 +27,7 @@ public class PassAction implements IAction, IsNope, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

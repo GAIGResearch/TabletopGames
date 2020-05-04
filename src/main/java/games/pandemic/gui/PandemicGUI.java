@@ -25,7 +25,7 @@ public class PandemicGUI extends GUI {
 
     public PandemicGUI(PandemicGameState gameState) {
         nPlayers = gameState.getNPlayers();
-        activePlayer = gameState.getActingPlayerID();
+        activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
         this.gameState = gameState;
 
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
@@ -63,7 +63,7 @@ public class PandemicGUI extends GUI {
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
                 if (k < playerHand.getCards().size()) {
-                    c = playerHand.getCards().get(k);
+                    c = playerHand.peek(k);
                 }
                 PandemicCardView cv2 = new PandemicCardView(c, null);
                 playerHands[i].add(cv2);
@@ -109,9 +109,8 @@ public class PandemicGUI extends GUI {
             playerCards[i].repaint();
 
             Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(PandemicConstants.playerHandHash, i);
-//            playerHands[i].clear();
             for (int j = 0; j < playerHand.getCards().size(); j++) {
-                Card c = playerHand.getCards().get(j);
+                Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
                     playerHands[i].get(j).update(c);
                 } else {

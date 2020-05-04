@@ -19,8 +19,8 @@ public class PlayCard<T> implements IAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        boolean succes = sourceDeck.remove(card);
+        boolean success = sourceDeck.remove(card);
         targetDeck.add(card);
-        return succes;
+        return success;
     }
 }

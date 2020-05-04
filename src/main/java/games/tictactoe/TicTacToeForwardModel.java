@@ -11,11 +11,11 @@ public class TicTacToeForwardModel extends ForwardModel {
     @Override
     public void next(AbstractGameState currentState, IAction action) {
         action.execute(currentState);
-        if (currentState.getTurnOrder().getTurnCounter() == 9)
+        if (currentState.getTurnOrder().getRoundCounter() == 9)
             currentState.endGame();
 
         checkWinCondition((TicTacToeGameState) currentState);
-        currentState.getTurnOrder().endPlayerTurn(currentState);
+        currentState.getTurnOrder().endPlayerTurnStep(currentState);
     }
 
     private void checkWinCondition(TicTacToeGameState gameState){

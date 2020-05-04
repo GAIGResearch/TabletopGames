@@ -26,17 +26,11 @@ public class PlayerAction extends RuleNode {
         action.execute(gs);
         PandemicGameState pgs = (PandemicGameState)gs;
 
-        int nReactivePlayers = pgs.getReactivePlayers().size();
-        if (nReactivePlayers == 0) {
-            // Only advance round step if no one is reacting
-            gs.roundStep += 1;
-        }
-
         if (action instanceof QuietNight) {
             ((PandemicGameState)gs).setQuietNight(true);
         } else if (action instanceof MovePlayer){
             // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
-            int playerIdx = pgs.getActivePlayer();
+            int playerIdx = pgs.getTurnOrder().getCurrentPlayer(gs);
             Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
             String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
@@ -51,7 +45,6 @@ public class PlayerAction extends RuleNode {
                 }
             }
         }
-        pgs.removeReactivePlayer();  // Reaction (if any) done.
         return true;
     }
 }

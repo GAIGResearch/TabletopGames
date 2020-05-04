@@ -1,18 +1,19 @@
 package games.explodingkittens.actions;
 
+import core.components.Deck;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
-import core.components.IPartialObservableDeck;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import core.turnorder.TurnOrder;
 
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.SeeTheFuturePhase;
+
 public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
-    private final IPartialObservableDeck<T> drawPile;
+    private final Deck<T> drawPile;
     private final int playerID;
 
-    public SeeTheFutureAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID, IPartialObservableDeck<T> drawPile) {
+    public SeeTheFutureAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID, Deck<T> drawPile) {
         super(card, playerDeck, discardDeck);
         this.drawPile = drawPile;
         this.playerID = playerID;
@@ -21,7 +22,7 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        ((ExplodingKittensGameState)gs).gamePhase = ExplodingKittensGamePhase.SeeTheFuturePhase;
+        ((ExplodingKittensGameState)gs).setGamePhase(SeeTheFuturePhase);
         return false;
     }
 
@@ -35,7 +36,7 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

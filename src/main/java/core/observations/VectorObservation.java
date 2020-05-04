@@ -11,7 +11,7 @@ class ArrayObservation<T> implements IObservation, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(Arrays.toString(values));
     }
 }

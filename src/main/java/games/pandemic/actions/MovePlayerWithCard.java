@@ -27,8 +27,8 @@ public class MovePlayerWithCard extends MovePlayer implements IAction {
 
         if (result) {
             // Discard the card played
-            Deck<Card> playerHand = (Deck<Card>) pgs.getComponent(playerHandHash, pgs.getActingPlayerID());
-            playerHand.discard(card);
+            Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
+            playerHand.remove(card);
             Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
             result = discardDeck.add(card);
         }

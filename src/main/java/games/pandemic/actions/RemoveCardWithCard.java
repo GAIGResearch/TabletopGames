@@ -1,6 +1,7 @@
-package core.actions;
+package games.pandemic.actions;
 
 import core.AbstractGameState;
+import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicGameState;
@@ -24,12 +25,12 @@ public class RemoveCardWithCard implements IAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
-        deck.discard(removeCard); // card removed from the game
+        deck.remove(removeCard); // card removed from the game
 
         // Discard other card from player hand
-        Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);  // TODO: if this action is to be general, this could be another deck
-        Deck<Card> playerHand = (Deck<Card>) pgs.getComponent(playerHandHash, pgs.getActingPlayerID());
-        playerHand.discard(card);
+        Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
+        Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
+        playerHand.remove(card);
         discardDeck.add(card);
         return true;
     }

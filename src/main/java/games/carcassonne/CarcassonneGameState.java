@@ -1,11 +1,13 @@
 package games.carcassonne;
 
+import core.ForwardModel;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
 import core.observations.IObservation;
+import core.turnorder.AlternatingTurnOrder;
 
 import java.awt.*;
 import java.util.*;
@@ -21,8 +23,8 @@ public class CarcassonneGameState extends AbstractGameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    public CarcassonneGameState(GameParameters gameParameters, int nPlayers) {
-        super(gameParameters, nPlayers);
+    public CarcassonneGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
+        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
         setComponents();
     }
 
@@ -63,7 +65,7 @@ public class CarcassonneGameState extends AbstractGameState {
     }
 
     @Override
-    public List<IAction> computeAvailableActions(int player) {
+    public List<IAction> computeAvailableActions() {
 
         List<IAction> actions;
         switch (gamePhase){

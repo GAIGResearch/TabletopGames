@@ -31,9 +31,9 @@ public class CureDisease implements IAction {
             diseaseCounter.setValue(1);  // Set to cured
 
             // Discard cards from player hand
-            Deck<Card> playerHand = (Deck<Card>) pgs.getComponent(playerHandHash, pgs.getActingPlayerID());
+            Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
             for (Card c: cards) {
-                playerHand.discard(c);
+                playerHand.remove(c);
             }
 
             return true;

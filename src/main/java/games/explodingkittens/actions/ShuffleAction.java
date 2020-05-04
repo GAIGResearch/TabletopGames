@@ -31,7 +31,7 @@ public class ShuffleAction<T> extends PlayCard<T> implements IsNopeable, IPrinta
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

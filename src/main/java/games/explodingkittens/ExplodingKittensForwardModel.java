@@ -8,11 +8,13 @@ import games.explodingkittens.actions.IsNopeable;
 
 import java.util.Stack;
 
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.NopePhase;
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
+
 
 public class ExplodingKittensForwardModel extends ForwardModel {
 
     private Stack<IAction> actionStack = new Stack<>();
-    private int initialPlayer = -1;
 
     @Override
     public void next(AbstractGameState gameState, IAction action) {
@@ -24,7 +26,6 @@ public class ExplodingKittensForwardModel extends ForwardModel {
             if (action instanceof IsNopeable){
                 actionStack.add(action);
                 ekTurnOrder.registerNopeableActionByPlayer(ekgs);
-                initialPlayer = ekTurnOrder.currentPlayer;
             } else {
                 action.execute(gameState);
             }
@@ -35,7 +36,7 @@ public class ExplodingKittensForwardModel extends ForwardModel {
                 action.execute(gameState);
                 ekTurnOrder.registerNopeableActionByPlayer(ekgs);
             } else {
-                ekTurnOrder.endPlayerTurn(gameState);
+                ekTurnOrder.endPlayerTurnStep(gameState);
 
                 if (!ekTurnOrder.reactionsRemaining()){
                     // apply stack
@@ -45,11 +46,9 @@ public class ExplodingKittensForwardModel extends ForwardModel {
                             //Action was successfully noped
                         ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder);
                         System.out.println("Action was successfully noped");
-                        actionStack.clear();
                     } else {
                         if (actionStack.size() > 2)
                             System.out.println("All nopes were noped");
-                        ((ExplodingKittenTurnOrder) ekTurnOrder).currentPlayer = initialPlayer;
 
                         while (actionStack.size() > 1)
                             actionStack.pop();//.Execute(gameState, turnOrder);
@@ -57,10 +56,10 @@ public class ExplodingKittensForwardModel extends ForwardModel {
                         //Action can be played
                         IAction stackedAction = actionStack.get(0);
                         stackedAction.execute(gameState);
-                        actionStack.clear();
                     }
-                    if (ekgs.gamePhase == ExplodingKittensGamePhase.NopePhase)
-                        ekgs.gamePhase = ExplodingKittensGamePhase.PlayerMove;
+                    actionStack.clear();
+                    if (ekgs.getGamePhase() == NopePhase)
+                        ekgs.setGamePhase(PlayerMove);
                 }
             }
         }

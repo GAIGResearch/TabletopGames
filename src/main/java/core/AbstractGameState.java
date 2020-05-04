@@ -12,61 +12,67 @@ import java.util.*;
  */
 public abstract class AbstractGameState {
 
+    protected final GameParameters gameParameters;
     protected ForwardModel forwardModel;
     protected TurnOrder turnOrder;
-    public TurnOrder getTurnOrder(){return turnOrder;}
-    protected void setTurnOrder(TurnOrder turnOrder){ this.turnOrder = turnOrder;}
+    public boolean[] isPlayerAlive;
 
-    protected int nPlayers;
-    protected int activePlayer;  // Player who's currently taking a turn, index from player list, N+1 is game master, -1 is game
-    //protected ArrayList<Integer> reactivePlayers;
-    protected int numAvailableActions = 0;
+    protected int numAvailableActions;
     protected List<IAction> availableActions;
 
-    public int roundStep;
-    protected boolean terminalState;
-    protected Utils.GameResult gameStatus = Utils.GameResult.GAME_ONGOING;
+    protected Utils.GameResult gameStatus;
     protected Utils.GameResult[] playerResults;
 
-    // Set of parameters for this game.
-    protected final GameParameters gameParameters;
-
-    public AbstractGameState(GameParameters gameParameters, int nPlayers){
-        this.nPlayers = nPlayers;
+    public AbstractGameState(GameParameters gameParameters, ForwardModel model, int nPlayers, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
+        this.forwardModel = model;
+        this.turnOrder = turnOrder;
+        isPlayerAlive = new boolean[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) isPlayerAlive[i] = true;
+
+        numAvailableActions = 0;
+        availableActions = new ArrayList<>();
+
+        this.gameStatus = Utils.GameResult.GAME_ONGOING;
         this.playerResults = new Utils.GameResult[nPlayers];
         Arrays.fill(this.playerResults, Utils.GameResult.GAME_ONGOING);
-        availableActions = new ArrayList<>();
     }
 
-    //Getters & setters
-    public Utils.GameResult getGameStatus() {  return gameStatus; }
-    public void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
-    //public GameParameters getGameParameters() { return this.gameParameters; }
+    // Setters
+    public final void setTurnOrder(TurnOrder turnOrder) {
+        this.turnOrder = turnOrder;
+    }
+    public final void setPlayerAlive(int player, boolean b) {
+        isPlayerAlive[player] = b;
+    }
     public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
     public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
-    public final int getNPlayers() { return nPlayers; }
-    public final Utils.GameResult[] getPlayerResults() { return playerResults; }
-    public final boolean isTerminal(){ return terminalState; }
-    public final int nPossibleActions() { return numAvailableActions; }
-    public final List<IAction> getActions(int player) {
-        if (availableActions == null || availableActions.size() == 0) {
-            availableActions = computeAvailableActions(player);
-        }
-        return availableActions;
+
+    // Getters
+    public boolean isPlayerAlive(int player) {
+        return isPlayerAlive[player];
     }
-    public final List<IAction> setAvailableActions(List<IAction> actions, int player) {
-        if (actions != null) {
-            numAvailableActions = actions.size();
-        } else numAvailableActions = 0;
-        availableActions = actions;
+    public final TurnOrder getTurnOrder(){return turnOrder;}
+    public final Utils.GameResult getGameStatus() {  return gameStatus; }
+    public final GameParameters getGameParameters() { return this.gameParameters; }
+    public final int getNPlayers() { return turnOrder.nPlayers(); }
+    public final Utils.GameResult[] getPlayerResults() { return playerResults; }
+    public final boolean isTerminal(){ return gameStatus != Utils.GameResult.GAME_ONGOING; }
+    public final int nPossibleActions() { return numAvailableActions; }
+    public final List<IAction> getActions() {
+        return getActions(false);
+    }
+    public final List<IAction> getActions(boolean forceCompute) {
+        if (forceCompute || availableActions == null || availableActions.size() == 0) {
+            availableActions = computeAvailableActions();
+        }
         return availableActions;
     }
 
     /* Methods to be implemented by subclass */
+    public void endGame() {}
     public abstract IObservation getObservation(int player);
-    public abstract void endGame();
-    public abstract List<IAction> computeAvailableActions(int player);
+    public abstract List<IAction> computeAvailableActions();
 
     /*
     public AbstractGameState(AbstractGameState gameState) {

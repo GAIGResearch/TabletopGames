@@ -4,9 +4,10 @@ import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import core.turnorder.TurnOrder;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.FavorPhase;
 
 
 public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
@@ -24,8 +25,8 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
         super.execute(gs);
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
-        ekgs.gamePhase = ExplodingKittensGamePhase.FavorPhase;
-        ekgs.playerGettingAFavor = playerAskingForFavor;
+        ekgs.setGamePhase(FavorPhase);
+        ekgs.setPlayerGettingAFavor(playerAskingForFavor);
 
         ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
         ekto.registerFavorAction(target);
@@ -42,7 +43,7 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 

@@ -39,7 +39,7 @@ public class DrawCards<T> implements IAction, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println("Draw " + numberOfCards + " card(s)");
     }
 }

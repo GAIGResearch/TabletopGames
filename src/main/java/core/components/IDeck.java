@@ -75,11 +75,6 @@ public interface IDeck<T>
     String getID();
 
     /**
-     * Removes the specified element from the deck
-     */
-    public boolean remove(T el);
-
-    /**
      * Removes all the cards from the deck.
      */
     void clear();
@@ -104,10 +99,24 @@ public interface IDeck<T>
      * @return all the cards in this deck.
      */
     ArrayList<T> getCards();
+    ArrayList<T> getCards(int playerID);
     void setCards(ArrayList<T> cards);
 
     /**
      * Shuffles the order of elements in the deck.
      */
     void shuffle();
+
+    void setCardsVisibility(ArrayList<boolean[]> cardVisibility);
+    void setCardVisibility(int cardIdx, int player, boolean visibility);
+    void setCapacity(int capacity);
+    void setID(String id);
+    void setDeckVisibility(int nPlayers, boolean v);
+    void setDeckVisibility(boolean[] visibility);
+    boolean isOverCapacity();
+    T peek(int idx);
+    boolean add(T c, int index, boolean[] visibilityPerPlayer);
+    boolean add(Deck<T> d);
+    boolean remove(T card);
+    boolean remove(int idx);
 }

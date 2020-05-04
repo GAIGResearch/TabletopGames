@@ -37,7 +37,7 @@ public class PlayCard<T> implements IAction, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println("Play card: " + cardToBePlayed.toString());
     }
 }

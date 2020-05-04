@@ -4,9 +4,10 @@ import core.actions.IAction;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.DefusePhase;
 
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 
@@ -38,31 +39,31 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 }
             }
             if (defuseCard != null){
-                ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.DefusePhase;
+                ((ExplodingKittensGameState) gs).setGamePhase(DefusePhase);
                 deckTo.remove(defuseCard);
                 deckTo.add(c);
             } else {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
-                IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).discardPile;
+                IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
                 for (ExplodingKittenCard card : deckTo.getCards()){
                     discardDeck.add(card);
                 }
                 deckTo.clear();
                 discardDeck.add(c);
-                gs.getTurnOrder().endPlayerTurn(gs);
+                gs.getTurnOrder().endPlayerTurnStep(gs);
                 //((ExplodingKittensGameState) gs).setActivePlayer(((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID));
                 //((ExplodingKittensGameState) gs).remainingDraws = 1;
             }
         } else {
             deckTo.add(c);
-            gs.getTurnOrder().endPlayerTurn(gs);
+            gs.getTurnOrder().endPlayerTurnStep(gs);
         }
         return true;
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

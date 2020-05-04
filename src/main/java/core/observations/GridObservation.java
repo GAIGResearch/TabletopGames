@@ -9,7 +9,7 @@ public class GridObservation<T> implements IObservation, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         for (T[] ts : grid) {
             for (T t : ts) System.out.print(t.toString());
             System.out.println();

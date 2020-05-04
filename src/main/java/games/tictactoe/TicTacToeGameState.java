@@ -1,5 +1,6 @@
 package games.tictactoe;
 
+import core.ForwardModel;
 import core.actions.IAction;
 import core.actions.SetGridValueAction;
 import core.components.Grid;
@@ -7,6 +8,7 @@ import core.AbstractGameState;
 import core.gamestates.GridGameState;
 import core.observations.GridObservation;
 import core.observations.IObservation;
+import core.turnorder.AlternatingTurnOrder;
 import utilities.Utils;
 
 import java.util.*;
@@ -19,8 +21,8 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
 
     //HashMap<AbstractPlayer, Character> playerSymbols = new HashMap<>();
 
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters, int nPlayers){
-        super(gameParameters, nPlayers);
+    public TicTacToeGameState(TicTacToeGameParameters gameParameters, ForwardModel model, int nPlayers){
+        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
     }
 
     @Override
@@ -30,13 +32,14 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
 
     @Override
     public void endGame() {
-        terminalState = true;
+        gameStatus = Utils.GameResult.GAME_DRAW;
         Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
     }
 
     @Override
-    public List<IAction> computeAvailableActions(int player) {
+    public List<IAction> computeAvailableActions() {
         ArrayList<IAction> actions = new ArrayList<>();
+        int player = turnOrder.getCurrentPlayer(this);
 
         for (int x = 0; x < grid.getWidth(); x++){
             for (int y = 0; y < grid.getHeight(); y++) {
@@ -53,7 +56,7 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     }
 
     public void registerWinner(char winnerSymbol){
-        terminalState = true;
+        gameStatus = Utils.GameResult.GAME_END;
         if (winnerSymbol == 'o'){
             playerResults[1] = Utils.GameResult.GAME_WIN;
             playerResults[0] = Utils.GameResult.GAME_LOSE;

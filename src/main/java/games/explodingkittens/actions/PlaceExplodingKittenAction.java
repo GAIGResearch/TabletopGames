@@ -3,8 +3,9 @@ package games.explodingkittens.actions;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrintable {
     int targetIndex;
@@ -18,8 +19,8 @@ public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrint
     public boolean execute(AbstractGameState gs) {
         boolean succes = sourceDeck.remove(card);
         targetDeck.add(card, targetIndex);
-        ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
-        gs.getTurnOrder().endPlayerTurn(gs);
+        ((ExplodingKittensGameState) gs).setGamePhase(PlayerMove);
+        gs.getTurnOrder().endPlayerTurnStep(gs);
         return succes;
     }
 
@@ -29,7 +30,7 @@ public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrint
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

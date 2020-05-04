@@ -1,5 +1,5 @@
 package core.observations;
 
 public interface IPrintable {
-    void PrintToConsole();
+    void printToConsole();
 }

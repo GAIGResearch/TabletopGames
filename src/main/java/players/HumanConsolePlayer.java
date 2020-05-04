@@ -27,12 +27,12 @@ public class HumanConsolePlayer extends AbstractPlayer {
     @Override
     public int getAction(IObservation observation, List<IAction> actions) {
         if (observation instanceof IPrintable)
-            ((IPrintable) observation).PrintToConsole();
+            ((IPrintable) observation).printToConsole();
 
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) instanceof IPrintable) {
                 System.out.print("Action " + i + ": ");
-                ((IPrintable) actions.get(i)).PrintToConsole();
+                ((IPrintable) actions.get(i)).printToConsole();
             }
             else
                 System.out.println("action i: Action does not implement IPrintableAction");

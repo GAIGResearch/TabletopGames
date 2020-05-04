@@ -2,21 +2,22 @@ package games.explodingkittens.actions;
 
 import core.actions.IAction;
 import core.AbstractGameState;
+import core.components.Deck;
 import core.observations.IPrintable;
-import core.components.IPartialObservableDeck;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 
 public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
     private ExplodingKittenCard card1;
     private ExplodingKittenCard card2;
     private ExplodingKittenCard card3;
-    private IPartialObservableDeck<ExplodingKittenCard> drawPile;
+    private Deck<ExplodingKittenCard> drawPile;
     private int playerID;
 
-    public ChooseSeeTheFutureOrder(IPartialObservableDeck<ExplodingKittenCard> drawPile,
+    public ChooseSeeTheFutureOrder(Deck<ExplodingKittenCard> drawPile,
                                    ExplodingKittenCard card1, ExplodingKittenCard card2, ExplodingKittenCard card3,
                                    int playerID){
         this.drawPile = drawPile;
@@ -51,11 +52,11 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
                 continue;
 
             for (int j = 0; j < gs.getNPlayers(); j++){
-                drawPile.setVisibility(i, j, false);        // other players don't know the order anymore
+                drawPile.setCardVisibility(i, j, false);        // other players don't know the order anymore
             }
-            drawPile.setVisibility(i, playerID, true);      // this player knows the first three cards
+            drawPile.setCardVisibility(i, playerID, true);      // this player knows the first three cards
         }
-        ((ExplodingKittensGameState)gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
+        ((ExplodingKittensGameState)gs).setGamePhase(PlayerMove);
         return false;
     }
 
@@ -75,7 +76,7 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(toString());
     }
 

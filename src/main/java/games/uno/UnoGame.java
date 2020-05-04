@@ -1,9 +1,6 @@
 package games.uno;
 
-import core.actions.IAction;
-import core.GUI;
 import core.Game;
-import core.observations.IObservation;
 import players.AbstractPlayer;
 import players.HumanConsolePlayer;
 
@@ -13,32 +10,9 @@ public class UnoGame extends Game {
 
     public UnoGame(List<AbstractPlayer> agents)
     {
-        gameState = new UnoGameState(new UnoGameParameters(), agents.size());
+        super(agents);
         forwardModel = new UnoForwardModel();
-    }
-
-    @Override
-    public void run(GUI gui) {
-        while (!isEnded()){
-            AbstractPlayer currentPlayer = players.get(gameState.getTurnOrder().getCurrentPlayer());
-            int idx = currentPlayer.playerID;
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(idx));
-            IObservation observation = gameState.getObservation(idx);
-            //((IPrintable) observation).PrintToConsole();
-            int actionIdx = currentPlayer.getAction(observation, actions);
-
-            forwardModel.next(gameState, actions.get(actionIdx));
-            gameState.getTurnOrder().endPlayerTurn(gameState);
-            System.out.println();
-        }
-
-        //((IPrintable) gameState.getObservation(-1)).PrintToConsole();
-        //System.out.println(Arrays.toString(gameState.getPlayerResults()));
-    }
-
-    @Override
-    public boolean isEnded() {
-        return false;
+        gameState = new UnoGameState(new UnoGameParameters(), forwardModel, agents.size());
     }
 
     public static void main(String[] args){

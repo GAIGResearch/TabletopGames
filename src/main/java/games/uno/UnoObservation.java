@@ -35,7 +35,7 @@ public class UnoObservation implements IPrintable, IObservation {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         for (String s : strings){
             System.out.println(s);
         }

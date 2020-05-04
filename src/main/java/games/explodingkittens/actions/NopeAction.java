@@ -30,7 +30,7 @@ public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

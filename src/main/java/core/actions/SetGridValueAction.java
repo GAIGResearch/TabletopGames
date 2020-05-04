@@ -19,7 +19,7 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println("Set " + value.toString() + " at pos (" + x + ", " + y + ")");
     }
 

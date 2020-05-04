@@ -19,7 +19,7 @@ public class QuietNight implements IAction {
     public boolean execute(AbstractGameState gs) {
         // Discards the card
         PandemicGameState pgs = (PandemicGameState) gs;
-        ((Deck<Card>) pgs.getComponent(playerHandHash, pgs.getActingPlayerID())).discard(card);
+        ((Deck<Card>) pgs.getComponentActingPlayer(playerHandHash)).remove(card);
         return true;
    }
 

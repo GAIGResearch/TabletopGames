@@ -1,18 +1,16 @@
 package games.pandemic;
 
 import core.AbstractGameState;
-import players.AbstractPlayer;
-import core.turnorder.TurnOrder;
+import core.turnorder.ReactiveTurnOrder;
 
-import java.util.List;
-
-public class PandemicTurnOrder extends TurnOrder {
-    PandemicTurnOrder(int nPlayers){
-        super(nPlayers);
+public class PandemicTurnOrder extends ReactiveTurnOrder {
+    PandemicTurnOrder(int nPlayers, int nActionsPerTurn){
+        super(nPlayers, nActionsPerTurn, -1);
     }
 
     @Override
-    public void endPlayerTurn(AbstractGameState gameState) {
-
+    public void endPlayerTurnStep(AbstractGameState gameState) {
+        if (reactivePlayers.size() > 0) reactivePlayers.poll();
+        else turnStep++;
     }
 }

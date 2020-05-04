@@ -1,77 +1,26 @@
 package games.pandemic;
 
 import core.Game;
-import core.actions.IAction;
 import core.GUI;
 
 import java.util.List;
-import core.observations.IObservation;
 import games.pandemic.gui.PandemicGUI;
 import players.AbstractPlayer;
 import players.RandomPlayer;
-import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
 
-import static games.pandemic.PandemicConstants.VERBOSE;
-
-
 public class PandemicGame extends Game {
 
-    public PandemicGame(List<AbstractPlayer> agents)
-    {
+    public PandemicGame(List<AbstractPlayer> agents) {
+        super(agents);
+
         PandemicParameters params = new PandemicParameters("data/");
-
-        players = agents;
         forwardModel = new PandemicForwardModel(params, agents.size());
-
-        gameState = new PandemicGameState(params, agents.size());
-        gameState.setForwardModel(forwardModel);
+        gameState = new PandemicGameState(params, forwardModel, agents.size());
         ((PandemicGameState)gameState).setComponents(params.getDataPath());
         ((PandemicForwardModel) forwardModel).setup(gameState);
-    }
-
-    @Override
-    public void run(GUI gui) {
-        int turn = 0;
-
-        while (!isEnded()){
-
-            if (VERBOSE) System.out.println(turn++);
-
-            // Get core.actions of current active player for their turn
-            Pair<Integer, List<IAction>> activePlayer = ((PandemicGameState)gameState).getActingPlayer();
-            List<IAction> actions = Collections.unmodifiableList(gameState.setAvailableActions(activePlayer.b, activePlayer.a));
-            int action = players.get(activePlayer.a).getAction((IObservation) gameState, actions);
-            gameState.setAvailableActions(null, activePlayer.a);  // Reset core.actions for next player
-
-            // Resolve core.actions and game rules for the turn
-            forwardModel.next(gameState, actions.get(action));
-
-            if (gui != null) {
-                gui.update(gameState);
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    System.out.println("EXCEPTION " + e);
-                }
-            }
-        }
-
-//        System.out.println("Game Over");
-        if (VERBOSE) {
-            if (gameState.getGameStatus() == Utils.GameResult.GAME_WIN) {
-                System.out.println("Win");
-            } else {
-                System.out.println("Lose");
-            }
-        }
-    }
-
-    @Override
-    public boolean isEnded() {
-        return gameState.getGameStatus() != Utils.GameResult.GAME_ONGOING;
     }
 
     public static void main(String[] args){
@@ -82,12 +31,12 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(2, new Random()));
         players.add(new RandomPlayer(3, new Random()));
 
-        PandemicGame game = new PandemicGame(players);
-        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
-        game.run(gui);
-        System.out.println(game.gameState.getGameStatus());
+//        PandemicGame game = new PandemicGame(players);
+//        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
+//        game.run(gui);
+//        System.out.println(game.gameState.getGameStatus());
 
-//        runMany(players);
+        runMany(players);
     }
 
     public static void runMany(List<AbstractPlayer> players) {

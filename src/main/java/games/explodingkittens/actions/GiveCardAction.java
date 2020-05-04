@@ -5,9 +5,10 @@ import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 
 public class GiveCardAction implements IAction, IPrintable {
@@ -24,11 +25,12 @@ public class GiveCardAction implements IAction, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         giverDeck.remove(card);
         receiverDeck.add(card);
-        ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
-        gs.getTurnOrder().endPlayerTurn(gs);
-        ((ExplodingKittenTurnOrder) gs.getTurnOrder()).currentPlayer = ((ExplodingKittensGameState) gs).playerGettingAFavor;
+        ekgs.setGamePhase(PlayerMove);
+        gs.getTurnOrder().endPlayerTurnStep(gs);
+        ((ExplodingKittenTurnOrder) gs.getTurnOrder()).addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;
     }
 
@@ -39,7 +41,7 @@ public class GiveCardAction implements IAction, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 

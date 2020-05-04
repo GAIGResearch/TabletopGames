@@ -11,8 +11,7 @@ public class PlayerHandOverCapacity extends ConditionNode {
     @Override
     public boolean test(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
-        int activePlayer = pgs.getActingPlayerID();
-        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponent(PandemicConstants.playerHandHash, activePlayer);
+        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponentActingPlayer(PandemicConstants.playerHandHash);
         return playerDeck != null && playerDeck.isOverCapacity();
     }
 }

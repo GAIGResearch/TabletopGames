@@ -1,9 +1,9 @@
 package games.explodingkittens;
 
+import core.ForwardModel;
 import core.actions.IAction;
 import core.components.Deck;
 import core.components.IDeck;
-import core.components.PartialObservableDeck;
 import core.AbstractGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import games.explodingkittens.actions.*;
@@ -17,38 +17,60 @@ import java.util.List;
 
 public class ExplodingKittensGameState extends AbstractGameState {
 
-    public List<Deck<ExplodingKittenCard>> playerHandCards;
-    public PartialObservableDeck<ExplodingKittenCard> drawPile;
-    public Deck<ExplodingKittenCard> discardPile;
-    public int playerGettingAFavor = -1;
+    public enum GamePhase {
+        PlayerMove,
+        NopePhase,
+        DefusePhase,
+        FavorPhase,
+        SeeTheFuturePhase
+    }
 
-    public boolean[] isPlayerAlive;
-    public int nPlayersActive;
+    private List<Deck<ExplodingKittenCard>> playerHandCards;
+    private Deck<ExplodingKittenCard> drawPile;
+    private Deck<ExplodingKittenCard> discardPile;
+    private int playerGettingAFavor = -1;
+    private GamePhase gamePhase = GamePhase.PlayerMove;
 
-    public ExplodingKittensGamePhase gamePhase = ExplodingKittensGamePhase.PlayerMove;
+    public static boolean PARTIAL_OBSERVABLE = false;
 
-    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, int nPlayers) {
-        super(gameParameters, nPlayers);
-        setTurnOrder(new ExplodingKittenTurnOrder(nPlayers));
-        setComponents(gameParameters);
+    public int getPlayerGettingAFavor() {
+        return playerGettingAFavor;
+    }
+
+    public void setPlayerGettingAFavor(int playerGettingAFavor) {
+        this.playerGettingAFavor = playerGettingAFavor;
+    }
+
+    public GamePhase getGamePhase() {
+        return gamePhase;
+    }
+
+    public void setGamePhase(GamePhase gamePhase) {
+        this.gamePhase = gamePhase;
+    }
+
+    public Deck<ExplodingKittenCard> getDiscardPile() {
+        return discardPile;
+    }
+
+    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, ForwardModel model, int nPlayers) {
+        super(gameParameters, model, nPlayers, new ExplodingKittenTurnOrder(nPlayers));
     }
 
     public void killPlayer(int playerID){
         isPlayerAlive[playerID] = false;
-        nPlayersActive -= 1;
+        int nPlayersActive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (isPlayerAlive[i]) nPlayersActive++;
+        }
         if (nPlayersActive == 1) {
-            endGame();
+            this.gameStatus = Utils.GameResult.GAME_END;
         }
     }
 
     public void setComponents(ExplodingKittenParameters gameParameters) {
-        isPlayerAlive = new boolean[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++) isPlayerAlive[i] = true;
-        nPlayersActive = getNPlayers();
+        drawPile = new Deck<>();
 
-        boolean[] visibility = new boolean[getNPlayers()];
-        Arrays.fill(visibility, true);
-        drawPile = new PartialObservableDeck<>(visibility);
         // add all cards and distribute 7 random cards to each player
         for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : gameParameters.cardCounts.entrySet()) {
             if (entry.getKey() == ExplodingKittenCard.CardType.DEFUSE || entry.getKey() == ExplodingKittenCard.CardType.EXPLODING_KITTEN)
@@ -64,8 +86,12 @@ public class ExplodingKittensGameState extends AbstractGameState {
         // give each player a defuse card and seven random cards from the deck
         playerHandCards = new ArrayList<>(getNPlayers());
         for (int i = 0; i < getNPlayers(); i++) {
-            String deckname = "Player" + i + "HandCards";
-            Deck<ExplodingKittenCard> playerCards = new Deck<>(deckname);
+            boolean[] visibility = new boolean[getNPlayers()];
+            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
+            visibility[i] = true;
+
+            Deck<ExplodingKittenCard> playerCards = new Deck<>();
+            playerCards.setDeckVisibility(visibility);
             playerHandCards.add(playerCards);
 
             //add defuse card
@@ -125,9 +151,28 @@ public class ExplodingKittensGameState extends AbstractGameState {
         return actions;
     }
 
+    private ArrayList<IAction> seeTheFutureActions(int playerID){
+        ArrayList<IAction> actions = new ArrayList<>();
+        ArrayList<ExplodingKittenCard> cards = drawPile.getCards();
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= cards.size() ? null : cards.get(1),
+                2 >= cards.size() ? null : cards.get(2), 3 >= cards.size() ? null : cards.get(3), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= cards.size() ? null : cards.get(1),
+                3 >= cards.size() ? null : cards.get(3), 2 >= cards.size() ? null : cards.get(2), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >= cards.size() ? null : cards.get(2),
+                1 >= cards.size() ? null : cards.get(1), 3 >= cards.size() ? null : cards.get(3), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >= cards.size() ? null : cards.get(2),
+                3 >= cards.size() ? null : cards.get(3), 1 >= cards.size() ? null : cards.get(1), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >= cards.size() ? null : cards.get(3),
+                1 >= cards.size() ? null : cards.get(1), 2 >= cards.size() ? null : cards.get(2), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >= cards.size() ? null : cards.get(3),
+                2 >= cards.size() ? null : cards.get(2), 1 >= cards.size() ? null : cards.get(1), playerID));
+
+        return actions;
+    }
+
     private ArrayList<IAction> playerActions(int playerID){
         ArrayList<IAction> actions = new ArrayList<>();
-        IDeck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
+        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
 
         // todo: only add unique core.actions
         for (ExplodingKittenCard card : playerDeck.getCards()) {
@@ -187,11 +232,56 @@ public class ExplodingKittensGameState extends AbstractGameState {
         return actions;
     }
 
+    @Override
+    public IObservation getObservation(int player) {
+        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player);
+    }
+
+    @Override
+    public void endGame() {
+        this.gameStatus = Utils.GameResult.GAME_END;
+        for (int i = 0; i < getNPlayers(); i++){
+            playerResults[i] = isPlayerAlive[i] ? Utils.GameResult.GAME_WIN : Utils.GameResult.GAME_LOSE;
+        }
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions() {
+
+        ArrayList<IAction> actions;
+        // todo the core.actions per player do not change a lot in between two turns
+        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
+        int player = getTurnOrder().getCurrentPlayer(this);
+        switch (gamePhase){
+            case PlayerMove:
+                actions = playerActions(player);
+                break;
+            case DefusePhase:
+                actions = defuseActions(player);
+                break;
+            case NopePhase:
+                actions = nopeActions(player);
+                break;
+            case FavorPhase:
+                actions = favorActions(player);
+                break;
+            case SeeTheFuturePhase:
+                actions = seeTheFutureActions(player);
+                break;
+            default:
+                actions = new ArrayList<>();
+                break;
+        }
+
+        return actions;
+    }
+
+
     public void print(ExplodingKittenTurnOrder turnOrder) {
         System.out.println("Exploding Kittens Game-State");
         System.out.println("============================");
 
-        int currentPlayer = turnOrder.getCurrentPlayerIndex(this);
+        int currentPlayer = turnOrder.getCurrentPlayer(this);
 
         for (int i = 0; i < getNPlayers(); i++){
             if (currentPlayer == i)
@@ -220,49 +310,5 @@ public class ExplodingKittensGameState extends AbstractGameState {
         if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
         System.out.println(sb.toString());
         //System.out.println();
-    }
-
-    public boolean isGameOver(){
-        return terminalState;
-    }
-
-    @Override
-    public IObservation getObservation(int player) {
-        return null;
-    }
-
-    @Override
-    public void endGame() {
-        this.terminalState = true;
-        for (int i = 0; i < getNPlayers(); i++){
-            playerResults[i] = isPlayerAlive[i] ? Utils.GameResult.GAME_WIN : Utils.GameResult.GAME_LOSE;
-        }
-    }
-
-    @Override
-    public List<IAction> computeAvailableActions(int player) {
-
-        ArrayList<IAction> actions;
-        // todo the core.actions per player do not change a lot in between two turns
-        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
-        switch (gamePhase){
-            case PlayerMove:
-                actions = playerActions(player);
-                break;
-            case DefusePhase:
-                actions = defuseActions(player);
-                break;
-            case NopePhase:
-                actions = nopeActions(player);
-                break;
-            case FavorPhase:
-                actions = favorActions(player);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
-        }
-
-        return actions;
     }
 }
