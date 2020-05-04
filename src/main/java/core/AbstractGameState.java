@@ -60,7 +60,6 @@ public abstract class AbstractGameState {
             numAvailableActions = actions.size();
         } else numAvailableActions = 0;
         availableActions = actions;
-
         return availableActions;
     }
 
