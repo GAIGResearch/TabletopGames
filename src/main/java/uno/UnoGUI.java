@@ -19,7 +19,7 @@ public class UnoGUI extends GUI {
         getContentPane().add(player2Panel, BorderLayout.EAST);
         getContentPane().add(player3Panel, BorderLayout.NORTH);
         getContentPane().add(player4Panel, BorderLayout.WEST);
-        getContentPane().add(player1Panel, BorderLayout.CENTER);
+        getContentPane().add(commonPanel, BorderLayout.CENTER);
 
         this.setSize(500,500);
         this.setVisible(true);

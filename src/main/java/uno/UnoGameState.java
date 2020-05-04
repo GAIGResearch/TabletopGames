@@ -67,6 +67,8 @@ public class UnoGameState extends GameState {
         commonArea.addComponent(Constants.drawDeckHash, new Deck(parameters.max_cards));
         commonArea.addComponent(Constants.mainDeckHash, new Deck(parameters.max_cards));
         areas.put(-1, commonArea);
+
+        //  public static List<Deck<Card>> loadDecks(String filename)
     }
 
     public void skipTurn()

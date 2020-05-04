@@ -22,6 +22,7 @@ public class UnoCardView  extends JComponent {
     public UnoCardView(Card c)  {
         this.card = c;
         // load image depending on the card
+        // TODO USE path propierty
         Property type   = card.getProperty(Hash.GetInstance().hash("type"));
         Property number = card.getProperty(Hash.GetInstance().hash("number"));
         Property color  = card.getProperty(Hash.GetInstance().hash("color"));
