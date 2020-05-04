@@ -80,16 +80,22 @@ public class GameFlowDiagram extends JFrame {
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    dragging.getValue().setLocation(e.getPoint());
-                    treeNodeLocations.put(dragging.getKey(), dragging.getValue());
-                    repaint();
+                    if (dragging != null) {
+                        dragging.getValue().setLocation(e.getPoint());
+                        treeNodeLocations.put(dragging.getKey(), dragging.getValue());
+                        repaint();
+                        dragging = null;
+                    }
                 }
 
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    dragging.getValue().setLocation(e.getPoint());
-                    treeNodeLocations.put(dragging.getKey(), dragging.getValue());
-                    repaint();
+                    if (dragging != null) {
+                        dragging.getValue().setLocation(e.getPoint());
+                        treeNodeLocations.put(dragging.getKey(), dragging.getValue());
+                        repaint();
+                        dragging = null;
+                    }
                 }
             });
         }
