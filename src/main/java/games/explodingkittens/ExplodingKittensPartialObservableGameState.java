@@ -120,12 +120,18 @@ public class ExplodingKittensPartialObservableGameState extends ExplodingKittens
     private ArrayList<IAction> seeTheFutureActions(int playerID){
         ArrayList<IAction> actions = new ArrayList<>();
         ArrayList<ExplodingKittenCard> cards = drawPile.getCards();
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, cards.get(1), cards.get(2), cards.get(3), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, cards.get(1), cards.get(3), cards.get(2), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, cards.get(2), cards.get(1), cards.get(3), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, cards.get(2), cards.get(3), cards.get(1), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, cards.get(3), cards.get(1), cards.get(2), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, cards.get(3), cards.get(2), cards.get(1), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= cards.size() ? null : cards.get(1),
+                2 >= cards.size() ? null : cards.get(2), 3 >= cards.size() ? null : cards.get(3), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= cards.size() ? null : cards.get(1),
+                3 >= cards.size() ? null : cards.get(3), 2 >= cards.size() ? null : cards.get(2), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >= cards.size() ? null : cards.get(2),
+                1 >= cards.size() ? null : cards.get(1), 3 >= cards.size() ? null : cards.get(3), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >= cards.size() ? null : cards.get(2),
+                3 >= cards.size() ? null : cards.get(3), 1 >= cards.size() ? null : cards.get(1), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >= cards.size() ? null : cards.get(3),
+                1 >= cards.size() ? null : cards.get(1), 2 >= cards.size() ? null : cards.get(2), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >= cards.size() ? null : cards.get(3),
+                2 >= cards.size() ? null : cards.get(2), 1 >= cards.size() ? null : cards.get(1), playerID));
 
         return actions;
     }

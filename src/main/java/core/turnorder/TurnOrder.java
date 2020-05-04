@@ -11,7 +11,7 @@ public abstract class TurnOrder {
     int currentPlayer = 0;
     protected int turnCounter;
     public final int getTurnCounter() {return turnCounter;}
-    public final int getCurrentPlayer(){
+    public int getCurrentPlayer(){
         return currentPlayer;
     }
 

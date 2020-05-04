@@ -23,7 +23,7 @@ public class ExplodingKittensGame extends Game {
     public void run(GUI gui) {
         while (!isEnded()){
             //((ExplodingKittensGameState) gameState).print((ExplodingKittenTurnOrder) turnOrder);
-            AbstractPlayer currentPlayer = players.get(gameState.getTurnOrder().getCurrentPlayer());
+            AbstractPlayer currentPlayer = players.get(((ExplodingKittenTurnOrder) gameState.getTurnOrder()).getCurrentPlayerIndex(gameState));
             int idx = currentPlayer.playerID;
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(idx));
             IObservation observation = gameState.getObservation(idx);
@@ -31,6 +31,7 @@ public class ExplodingKittensGame extends Game {
                 ((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
             forwardModel.next(gameState, actions.get(actionIdx));
+            gameState.setAvailableActions(null, idx);
             System.out.println();
         }
 
@@ -57,7 +58,9 @@ public class ExplodingKittensGame extends Game {
         agents.add(new RandomPlayer(2));
         agents.add(new RandomPlayer(3));
 
-        Game game = new ExplodingKittensGame(agents);
-        game.run(null);
+        for (int i=0; i<1000; i++) {
+            Game game = new ExplodingKittensGame(agents);
+            game.run(null);
+        }
     }
 }

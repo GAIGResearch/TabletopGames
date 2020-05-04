@@ -56,10 +56,11 @@ public abstract class AbstractGameState {
         return availableActions;
     }
     public final List<IAction> setAvailableActions(List<IAction> actions, int player) {
-        if (actions != null && actions.size() > 0) {
+        if (actions != null) {
             numAvailableActions = actions.size();
-            availableActions = actions;
-        } else computeAvailableActions(player);
+        } else numAvailableActions = 0;
+        availableActions = actions;
+
         return availableActions;
     }
 
