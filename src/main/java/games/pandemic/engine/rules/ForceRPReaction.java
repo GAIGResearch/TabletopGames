@@ -1,16 +1,11 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.actions.DoNothing;
-import core.actions.IAction;
 import games.pandemic.PandemicTurnOrder;
-import games.pandemic.actions.RemoveCardWithCard;
 import core.components.Card;
 import core.components.Deck;
 import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
-
-import java.util.ArrayList;
 
 import static games.pandemic.PandemicConstants.*;
 
@@ -24,9 +19,9 @@ public class ForceRPReaction extends RuleNode {
 
         for (int i = 0; i < nPlayers; i++) {
             Deck<Card> ph = (Deck<Card>) pgs.getComponent(playerHandHash, i);
-            int nCards = ph.getCards().size();
+            int nCards = ph.getElements().size();
             for (int cp = 0; cp < nCards; cp++) {
-                Card card = ph.getCards().get(cp);
+                Card card = ph.getElements().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     ((PandemicTurnOrder)pgs.getTurnOrder()).addReactivePlayer(i);
                     pgs.setGamePhase(PandemicGameState.GamePhase.RPReaction);

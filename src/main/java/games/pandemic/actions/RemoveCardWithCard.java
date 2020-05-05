@@ -6,6 +6,8 @@ import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicGameState;
 
+import java.util.Objects;
+
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 import static games.pandemic.PandemicConstants.playerHandHash;
 
@@ -33,5 +35,41 @@ public class RemoveCardWithCard implements IAction {
         playerHand.remove(card);
         discardDeck.add(card);
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RemoveCardWithCard that = (RemoveCardWithCard) o;
+        return removeCard == that.removeCard &&
+                Objects.equals(deck, that.deck) &&
+                Objects.equals(card, that.card);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deck, card, removeCard);
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    public Deck<Card> getDeck() {
+        return deck;
+    }
+
+    public int getRemoveCard() {
+        return removeCard;
+    }
+
+    @Override
+    public String toString() {
+        return "RemoveCardWithCard{" +
+                "deck=" + deck.getID() +
+                ", card=" + card.toString() +
+                ", removeCard=" + removeCard +
+                '}';
     }
 }

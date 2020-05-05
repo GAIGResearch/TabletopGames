@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 import static games.pandemic.PandemicConstants.playerHandHash;
 
-@SuppressWarnings("unchecked")
 public class CureDisease implements IAction {
     private String color;
     private ArrayList<Card> cards;
@@ -58,5 +57,21 @@ public class CureDisease implements IAction {
             return true;
 
         }else return false;
+    }
+
+    public ArrayList<Card> getCards() {
+        return cards;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    @Override
+    public String toString() {
+        return "CureDisease{" +
+                "color='" + color + '\'' +
+                ", cards=" + cards.toString() +
+                '}';
     }
 }

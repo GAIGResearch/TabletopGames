@@ -24,11 +24,11 @@ public class DrawCards<T> implements IAction, IPrintable {
         for (int i = 0; i < this.numberOfCards; i++){
             T card = deckFrom.draw();
             deckTo.add(card);
-            if (deckFrom.getCards().isEmpty())
+            if (deckFrom.getElements().isEmpty())
             {
                 T activeCard = deckReserve.draw();
                 deckReserve.shuffle();
-                while (!deckReserve.getCards().isEmpty()){
+                while (!deckReserve.getElements().isEmpty()){
                     deckFrom.add(deckReserve.draw());
                 }
                 deckReserve.add(activeCard);

@@ -98,17 +98,17 @@ public interface IDeck<T>
      * Returns all the cards in this deck.
      * @return all the cards in this deck.
      */
-    ArrayList<T> getCards();
+    ArrayList<T> getElements();
     ArrayList<T> getCards(int playerID);
-    void setCards(ArrayList<T> cards);
+    void setElements(ArrayList<T> elements);
 
     /**
      * Shuffles the order of elements in the deck.
      */
     void shuffle();
 
-    void setCardsVisibility(ArrayList<boolean[]> cardVisibility);
-    void setCardVisibility(int cardIdx, int player, boolean visibility);
+    void setElementsVisibility(ArrayList<boolean[]> cardVisibility);
+    void setElementVisibility(int cardIdx, int player, boolean visibility);
     void setCapacity(int capacity);
     void setID(String id);
     void setDeckVisibility(int nPlayers, boolean v);

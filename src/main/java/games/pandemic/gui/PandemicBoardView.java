@@ -5,17 +5,19 @@ import core.content.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
-import utilities.Hash;
-import utilities.ImageIO;
-import utilities.Utils;
-import utilities.Vector2D;
+import utilities.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import static games.pandemic.gui.PandemicCardView.drawCard;
+import static games.pandemic.PandemicConstants.*;
+import static games.pandemic.gui.PandemicCardView.*;
 
 public class PandemicBoardView extends JComponent {
     //TODO: images for tokens?
@@ -24,13 +26,16 @@ public class PandemicBoardView extends JComponent {
     private IBoard board;
     private int width;
     private int height;
+
     PandemicGameState gameState;
+
     int nodeSize = 20;
     int researchStationSize = 10;
     int playerPawnSize = 10;
     int diseaseCubeSize = 10;
     int diseaseCubeDistance = 2;
     int counterWidth = 20, counterHeight = 20;
+    int strokeWidth = 2;
 
     Point2D[] infectionPositions = new Point2D[]{
             new Point2D.Double(755, 180),
@@ -52,9 +57,6 @@ public class PandemicBoardView extends JComponent {
             new Point2D.Double(120, 700),
             new Point2D.Double(75, 730)
     };
-
-    Point2D infectionDiscardPosition = new Point2D.Double(915, 50);
-    Point2D playerDiscardPosition = new Point2D.Double(880, 625);
     Point2D[] diseaseMarkerPositions = new Point2D[]{
             new Point2D.Double(395, 775),
             new Point2D.Double(450, 775),
@@ -62,17 +64,77 @@ public class PandemicBoardView extends JComponent {
             new Point2D.Double(560, 775)
     };
 
+    // Clickable locations
+    Rectangle infectionDeckLocation = new Rectangle(800, 50, cardWidth, cardHeight);
+    Rectangle infectionDiscardDeckLocation = new Rectangle(915, 50, cardWidth, cardHeight);
+    Rectangle playerDiscardDeckLocation = new Rectangle(880, 625, cardWidth, cardHeight);
+    Rectangle plannerDeckLocation = new Rectangle(1000, 625, cardWidth, cardHeight);
+    HashMap<String, Rectangle> boardNodeLocations;
+    Rectangle[] playerLocations;
+
+    HashMap<String, Rectangle> highlights;
+    int maxHighlights = 3;
+
     public PandemicBoardView(AbstractGameState gs, String backgroundPath) {
         gameState = (PandemicGameState) gs;
         this.board = ((PandemicGameState) gs).getData().findBoard("Cities");
         this.background = ImageIO.GetInstance().getImage(backgroundPath);
         width = background.getWidth(null);
         height = background.getHeight(null);
+
+        boardNodeLocations = new HashMap<>();
+        playerLocations = new Rectangle[gs.getNPlayers()];
+        highlights = new HashMap<>();
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1 || highlights.size() >= maxHighlights) {
+                    highlights.clear();
+                    return;
+                }
+                if (infectionDeckLocation.contains(e.getPoint())) {
+                    highlights.put("infectionDeck", infectionDeckLocation);
+                } else if (infectionDiscardDeckLocation.contains(e.getPoint())) {
+                    highlights.put("infectionDiscard", infectionDiscardDeckLocation);
+                } else if (playerDiscardDeckLocation.contains(e.getPoint())) {
+                    highlights.put("playerDiscard", playerDiscardDeckLocation);
+                } else if (plannerDeckLocation.contains(e.getPoint())) {
+                    highlights.put("plannerDeck", plannerDeckLocation);
+                } else {
+                    for (int i = 0; i < playerLocations.length; i++) {
+                        if (playerLocations[i] != null && playerLocations[i].contains(e.getPoint())) {
+                            highlights.put("player " + i, playerLocations[i]);
+                            break;
+                        }
+                    }
+                    for (Map.Entry<String, Rectangle> en: boardNodeLocations.entrySet()) {
+                        if (en.getValue().contains(e.getPoint())) {
+                            highlights.put("BN " + en.getKey(), en.getValue());
+                            break;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawBoard((Graphics2D) g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.black);
+        drawBoard(g2);
+        if (highlights.size() > 0) {
+            Stroke s = g2.getStroke();
+            g2.setStroke(new BasicStroke(strokeWidth));
+            g2.setColor(Color.CYAN);
+            for (Map.Entry<String, Rectangle> e: highlights.entrySet()) {
+                Rectangle highlight = e.getValue();
+                g2.drawRect(highlight.x - strokeWidth / 2, highlight.y - strokeWidth / 2, highlight.width + strokeWidth,
+                        highlight.height + strokeWidth);
+            }
+            g2.setStroke(s);
+        }
     }
 
     private void drawBoard(Graphics2D g) {
@@ -85,12 +147,14 @@ public class PandemicBoardView extends JComponent {
         // Draw nodes
         java.util.List<BoardNode> bList = board.getBoardNodes();
         for (BoardNode b : bList) {
-            Vector2D pos = ((PropertyVector2D) ((BoardNode)b).getProperty(Hash.GetInstance().hash("coordinates"))).values;
+            Vector2D pos = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
+            boardNodeLocations.put(((PropertyString)b.getProperty(nameHash)).value,
+                    new Rectangle(pos.getX()-nodeSize/2, pos.getY()-nodeSize/2, nodeSize, nodeSize));
 //            g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(Hash.GetInstance().hash("color"))).valueStr));
 //            g.fillOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
 
             // Check if a research stations is here, draw just underneath the node
-            PropertyBoolean isStation = (PropertyBoolean) ((BoardNode)b).getProperty(Hash.GetInstance().hash("researchStation"));
+            PropertyBoolean isStation = (PropertyBoolean) b.getProperty(researchStationHash);
             if (isStation.value) {
                 // Draw research station here
                 g.setColor(Color.WHITE);
@@ -101,21 +165,24 @@ public class PandemicBoardView extends JComponent {
             }
 
             // Check if there are players here
-            PropertyIntArrayList prop = (PropertyIntArrayList) ((BoardNode)b).getProperty(PandemicConstants.playersBNHash);
+            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(PandemicConstants.playersBNHash);
             ArrayList<Integer> players = prop.getValues();
             for (int p: players) {
                 // This player is here, draw them just above the node
                 // Find color of player
                 Card playerCard = (Card) gameState.getComponent(PandemicConstants.playerCardHash, p);
-                PropertyColor color = (PropertyColor) playerCard.getProperty(Hash.GetInstance().hash("color"));
+                PropertyColor color = (PropertyColor) playerCard.getProperty(colorHash);
                 g.setColor(Utils.stringToColor(color.valueStr));
-                g.fillOval(pos.getX() + nPlayers * playerPawnSize / 2 - p * playerPawnSize - playerPawnSize /2, pos.getY() - nodeSize /2 - playerPawnSize /2, playerPawnSize, playerPawnSize);
+                int x = pos.getX() + nPlayers * playerPawnSize / 2 - p * playerPawnSize - playerPawnSize /2;
+                int y = pos.getY() - nodeSize /2 - playerPawnSize /2;
+                g.fillOval(x, y, playerPawnSize, playerPawnSize);
                 g.setColor(Color.black);
-                g.drawOval(pos.getX() + nPlayers * playerPawnSize / 2 - p * playerPawnSize - playerPawnSize /2, pos.getY() - nodeSize /2 - playerPawnSize /2, playerPawnSize, playerPawnSize);
+                g.drawOval(x, y, playerPawnSize, playerPawnSize);
+                playerLocations[p] = new Rectangle(x, y, playerPawnSize, playerPawnSize);
             }
 
             // Draw disease cubes on top of the node
-            int[] array = ((PropertyIntArray) ((BoardNode)b).getProperty(Hash.GetInstance().hash("infection"))).getValues();
+            int[] array = ((PropertyIntArray) b.getProperty(infectionHash)).getValues();
             int total = 0;
             for (int cube: array) {
                 total += cube;
@@ -147,33 +214,44 @@ public class PandemicBoardView extends JComponent {
         pos = outbreakPositions[outbreakCounter.getValue()];
         g.drawImage(ImageIO.GetInstance().getImage("data/outbreakMarker.png"), (int)pos.getX(), (int)pos.getY(), null, null);
 
-        // Discard piles
-        Deck playerDiscardDeck = (Deck) gameState.getComponent(PandemicConstants.playerDeckDiscardHash);
+        // Decks
+        Deck<Card> playerDiscardDeck = (Deck<Card>) gameState.getComponent(PandemicConstants.playerDeckDiscardHash);
         if (playerDiscardDeck != null) {
-            Card cP = (Card) playerDiscardDeck.peek();
+            Card cP = playerDiscardDeck.peek();
             if (cP != null) {
-                drawCard(g, 100, 50, cP, null, (int)playerDiscardPosition.getX(), (int)playerDiscardPosition.getY());
+                drawCard(g, cP, null, playerDiscardDeckLocation);
             }
         }
-        Deck infectionDiscardDeck = (Deck) gameState.getComponent(PandemicConstants.infectionDiscardHash);
+        Deck<Card> infectionDiscardDeck = (Deck<Card>) gameState.getComponent(PandemicConstants.infectionDiscardHash);
         if (infectionDiscardDeck != null) {
-            Card cI = (Card) infectionDiscardDeck.peek();
+            Card cI = infectionDiscardDeck.peek();
             if (cI != null) {
-                drawCard(g, 100, 50, cI, null, (int)infectionDiscardPosition.getX(), (int)infectionDiscardPosition.getY());
+                drawCard(g, cI, null, infectionDiscardDeckLocation);
             }
+        }
+        Deck<Card> plannerDeck = (Deck<Card>) gameState.getComponent(plannerDeckHash);
+        if (plannerDeck != null) {
+            Card cI = plannerDeck.peek();
+            if (cI != null) {
+                drawCard(g, cI, null, plannerDeckLocation);
+            }
+        }
+        Deck<Card> infectionDeck = (Deck<Card>) gameState.getComponent(infectionHash);
+        if (infectionDeck != null) {
+            drawDeckBack(g, "Infections", null, infectionDeckLocation);
         }
 
         // Disease markers
         Counter yC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
         drawCounter(g, yC.getValue(), Color.yellow, 0);
 
-        Counter rC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
+        Counter rC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease red"));
         drawCounter(g, rC.getValue(), Color.red, 1);
 
-        Counter bC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
+        Counter bC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease blue"));
         drawCounter(g, bC.getValue(), Color.blue, 2);
 
-        Counter bkC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
+        Counter bkC = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease black"));
         drawCounter(g, bkC.getValue(), Color.black, 3);
 
     }
@@ -194,5 +272,13 @@ public class PandemicBoardView extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
+    }
+
+    public HashMap<String, Rectangle> getHighlights() {
+        return highlights;
+    }
+
+    public void clearHighlights() {
+        highlights.clear();
     }
 }

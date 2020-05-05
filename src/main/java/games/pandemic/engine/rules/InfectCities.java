@@ -38,7 +38,7 @@ public class InfectCities extends RuleNode {
             for (int i = 0; i < noCardsDrawn; i++) {  // Draw infection cards into a new deck
                 action.execute(gs);
             }
-            for (Card c : tempDeck.getCards()) {  // Check the drawn cards and infect cities
+            for (Card c : tempDeck.getElements()) {  // Check the drawn cards and infect cities
                 new InfectCity(max_cubes_per_city, c, n_cubes_infection).execute(gs);
                 new AddCardToDeck(c, infectionDiscardDeck).execute(gs);
             }

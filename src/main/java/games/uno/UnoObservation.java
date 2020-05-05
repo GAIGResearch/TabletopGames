@@ -16,7 +16,7 @@ public class UnoObservation implements IPrintable, IObservation {
         StringBuilder sb = new StringBuilder();
         sb.append("Player Hand: ");
 
-        for (UnoCard card : playerHand.getCards()) {
+        for (UnoCard card : playerHand.getElements()) {
             sb.append(card.toString());
             sb.append("\t");
         }
@@ -24,7 +24,7 @@ public class UnoObservation implements IPrintable, IObservation {
 
         sb = new StringBuilder();
         sb.append("Discard Pile: ");
-        for (UnoCard card : discardPile.getCards()) {
+        for (UnoCard card : discardPile.getElements()) {
             sb.append(card.toString());
             sb.append("\t");
         }

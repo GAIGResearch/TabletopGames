@@ -48,4 +48,17 @@ public class MovePlayerWithCard extends MovePlayer implements IAction {
 
         }else return false;
     }
+
+    public Card getCard() {
+        return card;
+    }
+
+    @Override
+    public String toString() {
+        return "MovePlayerWithCard{" +
+                "card=" + card.toString() +
+                ", player=" + playerIdx +
+                ", destination='" + destination + '\'' +
+                '}';
+    }
 }

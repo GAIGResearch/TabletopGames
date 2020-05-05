@@ -10,7 +10,6 @@ import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 import static games.pandemic.PandemicConstants.playerHandHash;
 
 
-@SuppressWarnings("unchecked")
 public class AddResearchStationWithCard extends AddResearchStation implements IAction {
 
     private Card card;
@@ -45,5 +44,17 @@ public class AddResearchStationWithCard extends AddResearchStation implements IA
             return card.equals(otherAction.card);
 
         }else return false;
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    @Override
+    public String toString() {
+        return "AddResearchStationWithCard{" +
+                "card=" + card.toString() +
+                ", toCity='" + toCity + '\'' +
+                '}';
     }
 }

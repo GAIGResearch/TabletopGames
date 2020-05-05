@@ -64,10 +64,10 @@ public class UnoGameState extends AbstractGameState {
 
         int[] cardsPerPlayer = new int[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++)
-            cardsPerPlayer[i] = playerDecks.get(i).getCards().size();
+            cardsPerPlayer[i] = playerDecks.get(i).getElements().size();
 
         return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
-                cardsPerPlayer, drawPile.getCards().size());
+                cardsPerPlayer, drawPile.getElements().size());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class UnoGameState extends AbstractGameState {
         ArrayList<IAction> actions = new ArrayList<>();
         int player = turnOrder.getCurrentPlayer(this);
         Deck<UnoCard> playerDeck = playerDecks.get(player);
-        for (UnoCard card : playerDeck.getCards()){
+        for (UnoCard card : playerDeck.getElements()){
             if (card.isPlayable(this))
             {
                 if (card instanceof UnoNumberCard)

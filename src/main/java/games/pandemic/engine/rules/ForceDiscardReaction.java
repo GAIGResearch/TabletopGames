@@ -1,17 +1,12 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.actions.DrawCard;
-import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
 
-import java.util.ArrayList;
-
-import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 import static games.pandemic.PandemicGameState.GamePhase.DiscardReaction;
 
 @SuppressWarnings("unchecked")
@@ -22,7 +17,7 @@ public class ForceDiscardReaction extends RuleNode {
         PandemicGameState pgs = (PandemicGameState)gs;
         // player needs to discard N cards
         Deck<Card> playerDeck = (Deck<Card>) pgs.getComponentActingPlayer(PandemicConstants.playerHandHash);
-        int nDiscards = playerDeck.getCards().size() - playerDeck.getCapacity();
+        int nDiscards = playerDeck.getElements().size() - playerDeck.getCapacity();
         for (int i = 0; i < nDiscards; i++) {
             ((PandemicTurnOrder)pgs.getTurnOrder()).addCurrentPlayerReaction(gs);
         }

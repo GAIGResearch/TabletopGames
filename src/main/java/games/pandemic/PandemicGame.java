@@ -6,11 +6,14 @@ import core.GUI;
 import java.util.List;
 import games.pandemic.gui.PandemicGUI;
 import players.AbstractPlayer;
+import players.ActionController;
+import players.HumanGUIPlayer;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.*;
 
+@SuppressWarnings("UnusedAssignment")
 public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents) {
@@ -24,19 +27,21 @@ public class PandemicGame extends Game {
     }
 
     public static void main(String[] args){
+        ActionController ac = new ActionController();
 
         List<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer(0, new Random()));
-        players.add(new RandomPlayer(1, new Random()));
-        players.add(new RandomPlayer(2, new Random()));
-        players.add(new RandomPlayer(3, new Random()));
+        int pid = 0;
+        players.add(new HumanGUIPlayer(pid++, ac));
+        players.add(new RandomPlayer(pid++, new Random()));
+        players.add(new RandomPlayer(pid++, new Random()));
+        players.add(new RandomPlayer(pid++, new Random()));
 
-//        PandemicGame game = new PandemicGame(players);
-//        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
-//        game.run(gui);
-//        System.out.println(game.gameState.getGameStatus());
+        PandemicGame game = new PandemicGame(players);
+        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState(), ac);
+        game.run(gui);
+        System.out.println(game.gameState.getGameStatus());
 
-        runMany(players);
+//        runMany(players);
     }
 
     public static void runMany(List<AbstractPlayer> players) {

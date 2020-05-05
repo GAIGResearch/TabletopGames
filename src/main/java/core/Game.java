@@ -19,7 +19,6 @@ public abstract class Game {
     protected AbstractGameState gameState;
     protected ForwardModel forwardModel;
 
-    // GameState observations as seen by different players.
     protected IObservation[] gameStateObservations;
 
     public Game(List<AbstractPlayer> players) {
@@ -32,6 +31,7 @@ public abstract class Game {
 
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
+            AbstractPlayer player = players.get(activePlayer);
             // Get actions for the player
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
@@ -39,20 +39,23 @@ public abstract class Game {
                 ((IPrintable) observation).printToConsole();
             }
 
-            int action = players.get(activePlayer).getAction(observation, actions);
-            gameState.getTurnOrder().endPlayerTurnStep(gameState);
+            int action = -1;
+            while (action == -1) {
+                action = player.getAction(observation, actions);
 
-            // Resolve core.actions and game rules for the turn
-            forwardModel.next(gameState, actions.get(action));
-
-            if (gui != null) {
-                gui.update(gameState);
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    System.out.println("EXCEPTION " + e);
+                if (gui != null) {
+                    gui.update(player, gameState);
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception e) {
+                        System.out.println("EXCEPTION " + e);
+                    }
                 }
             }
+
+            // Resolve actions and game rules for the turn
+            forwardModel.next(gameState, actions.get(action));
+            gameState.getTurnOrder().endPlayerTurnStep(gameState);
         }
 
         gameState.endGame();

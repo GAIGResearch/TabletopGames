@@ -66,6 +66,9 @@ public class PandemicForwardModel extends ForwardModel {
         // possible future work: Nodes passing parameters to others
         root = playerAction;
         playerAction.setNext(enoughActions);
+        // TODO: Give/Take card actions: If the player who gets the card now has more than 7 cards, that player must
+        // immediately discard a card or play an Event card (see Event Cards on page 7)
+        // TODO: allow playing event cards, but redo this rule if that's the case
         enoughActions.setYesNo(drawCards, playerAction);  // Loop
         drawCards.setNext(firstEpidemic);
         firstEpidemic.setYesNo(epidemic1, enoughDraws);
@@ -191,7 +194,7 @@ public class PandemicForwardModel extends ForwardModel {
                 new DrawCard(playerDeck, playerHandDeck).execute(state);
             }
 
-            for (Card card: playerHandDeck.getCards()) {
+            for (Card card: playerHandDeck.getElements()) {
                 Property property = card.getProperty(Hash.GetInstance().hash("population"));
                 if (property != null){
                     long pop = ((PropertyLong) property).value;
@@ -205,7 +208,7 @@ public class PandemicForwardModel extends ForwardModel {
 
         // Epidemic cards
         playerDeck.shuffle(rnd);
-        int noCards = playerDeck.getCards().size();
+        int noCards = playerDeck.getElements().size();
         int noEpidemicCards = pp.n_epidemic_cards;
         int range = noCards / noEpidemicCards;
         for (int i = 0; i < noEpidemicCards; i++) {

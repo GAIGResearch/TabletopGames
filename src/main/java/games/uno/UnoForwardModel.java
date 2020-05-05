@@ -21,7 +21,7 @@ public class UnoForwardModel extends ForwardModel {
     public void checkWinCondition(UnoGameState gameState) {
         for (int i = 0; i < gameState.getNPlayers(); i++)
         {
-            if (gameState.playerDecks.get(i).getCards().size() == 0)
+            if (gameState.playerDecks.get(i).getElements().size() == 0)
                 gameState.registerWinner(i);
         }
     }

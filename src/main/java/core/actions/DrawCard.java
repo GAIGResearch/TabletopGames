@@ -47,4 +47,26 @@ public class DrawCard implements IAction {
 
         }else return false;
     }
+
+    @Override
+    public String toString() {
+        return "DrawCard{" +
+                "deckFrom=" + deckFrom.getID() +
+                ", deckTo=" + deckTo.getID() +
+                ", index=" + index +
+                '}';
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public IDeck<Card> getDeckFrom() {
+        return deckFrom;
+    }
+
+    public IDeck<Card> getDeckTo() {
+        return deckTo;
+    }
 }
+

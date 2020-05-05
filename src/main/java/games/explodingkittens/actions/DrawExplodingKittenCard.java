@@ -32,7 +32,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
         ExplodingKittenCard.CardType type = c.cardType;
         if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
             ExplodingKittenCard defuseCard = null;
-            for (ExplodingKittenCard card : deckTo.getCards()){
+            for (ExplodingKittenCard card : deckTo.getElements()){
                 if (card.cardType == ExplodingKittenCard.CardType.DEFUSE){
                     defuseCard = card;
                     break;
@@ -46,7 +46,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
                 IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
-                for (ExplodingKittenCard card : deckTo.getCards()){
+                for (ExplodingKittenCard card : deckTo.getElements()){
                     discardDeck.add(card);
                 }
                 deckTo.clear();

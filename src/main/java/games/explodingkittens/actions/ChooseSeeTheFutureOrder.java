@@ -52,9 +52,9 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
                 continue;
 
             for (int j = 0; j < gs.getNPlayers(); j++){
-                drawPile.setCardVisibility(i, j, false);        // other players don't know the order anymore
+                drawPile.setElementVisibility(i, j, false);        // other players don't know the order anymore
             }
-            drawPile.setCardVisibility(i, playerID, true);      // this player knows the first three cards
+            drawPile.setElementVisibility(i, playerID, true);      // this player knows the first three cards
         }
         ((ExplodingKittensGameState)gs).setGamePhase(PlayerMove);
         return false;

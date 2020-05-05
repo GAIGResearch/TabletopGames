@@ -46,4 +46,16 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
 
         }else return false;
     }
+
+    public String getFromCity() {
+        return fromCity;
+    }
+
+    @Override
+    public String toString() {
+        return "AddResearchStationFrom{" +
+                "fromCity='" + fromCity + '\'' +
+                ", city='" + toCity + '\'' +
+                '}';
+    }
 }
