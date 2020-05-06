@@ -28,7 +28,7 @@ public class MovePlayer implements IAction {
         removePlayer((PandemicGameState)gs, prop.value, playerIdx);
         placePlayer((PandemicGameState)gs, destination, playerIdx);
 
-        return false;
+        return true;
     }
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {

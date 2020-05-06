@@ -65,5 +65,10 @@ public abstract class GUI extends JFrame {
             this.action = action;
             setText(action.toString());
         }
+
+        public void setButtonAction(IAction action, String actionText) {
+            this.action = action;
+            setText(actionText);
+        }
     }
 }
