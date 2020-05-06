@@ -44,7 +44,7 @@ public class PandemicGUI extends GUI {
     ArrayList<Integer> bufferHighlights;
 
     // Game state info
-    JLabel gameStatus, turnOwner, turn, gamePhase, currentPlayer;
+    JLabel gamePhase;
 
     public PandemicGUI(PandemicGameState gameState, ActionController ac) {
         super(ac, 721);
@@ -64,7 +64,7 @@ public class PandemicGUI extends GUI {
         highlights[1] = boardView.getHighlights().keySet();
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
-        JPanel gameStateInfo = createGameStateInfoPanel();
+        JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
         JComponent actionPanel = createActionPanel(highlights, 300, 200);
@@ -181,33 +181,16 @@ public class PandemicGUI extends GUI {
         return cv2;
     }
 
-    private JPanel createGameStateInfoPanel() {
-        JPanel gameInfo = new JPanel();
-        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
-        gameInfo.add(new JLabel("Pandemic"));
-
-        gameStatus = new JLabel();
-        turnOwner = new JLabel();
-        turn = new JLabel();
-        gamePhase = new JLabel();
-        currentPlayer = new JLabel();
-        updateGameStatusInfo();
-
-        gameInfo.add(gameStatus);
-        gameInfo.add(turnOwner);
-        gameInfo.add(turn);
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
+        JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
         gameInfo.add(gamePhase);
-        gameInfo.add(currentPlayer);
 
         return gameInfo;
     }
 
-    private void updateGameStatusInfo() {
-        gameStatus.setText("Game status: " + gameState.getGameStatus());
-        turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
-        turn.setText("Turn step: " + gameState.getTurnOrder().getTurnStep() + "; Round: " + gameState.getTurnOrder().getRoundCounter());
+    protected void updateGameStateInfo() {
+        super.updateGameStateInfo(gameState);
         gamePhase.setText("Game phase: " + gameState.getGamePhase());
-        currentPlayer.setText("Current player: " + gameState.getTurnOrder().getCurrentPlayer(gameState));
     }
 
     private JPanel createCounterArea() {
@@ -232,7 +215,6 @@ public class PandemicGUI extends GUI {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState){
         this.gameState = (PandemicGameState) gameState;
-        updateGameStatusInfo();
         boardView.gameState = this.gameState;
 
         for (int i = 0; i < nPlayers; i++) {
@@ -493,11 +475,6 @@ public class PandemicGUI extends GUI {
                 System.out.println("Action type unknown: " + action.toString());
             }
         }
-
-//            for (int i = 0; i < actions.size(); i++) {
-//                actionButtons[i].setVisible(true);
-//                actionButtons[i].setButtonAction(actions.get(i));
-//            }
     }
 
     private int indexOfCardInHand(Card c, int player) {

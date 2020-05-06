@@ -41,7 +41,6 @@ public abstract class TurnOrder {
         nMaxRounds = -1;
     }
 
-
     public final void setStartingPlayer(int player) {
         firstPlayer = player;
         turnOwner = player;
@@ -57,6 +56,9 @@ public abstract class TurnOrder {
     }
     public int getTurnStep() {
         return turnStep;
+    }
+    public int getTurnCounter() {
+        return turnCounter;
     }
 
 
@@ -144,6 +146,7 @@ public abstract class TurnOrder {
         return nPlayers == turnOrder.nPlayers &&
                 turnOwner == turnOrder.turnOwner &&
                 roundCounter == turnOrder.roundCounter &&
+                turnCounter == turnOrder.turnCounter &&
                 turnStep == turnOrder.turnStep &&
                 firstPlayer == turnOrder.firstPlayer &&
                 nMaxRounds == turnOrder.nMaxRounds &&
@@ -152,11 +155,12 @@ public abstract class TurnOrder {
 
     @Override
     public int hashCode() {
-        return Objects.hash(nPlayers, turnOwner, roundCounter, turnStep, firstPlayer, nStepsPerTurn, nMaxRounds);
+        return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, turnStep, firstPlayer, nStepsPerTurn, nMaxRounds);
     }
 
     public TurnOrder copyTo (TurnOrder turnOrder) {
         turnOrder.turnOwner = turnOwner;
+        turnOrder.turnCounter = turnCounter;
         turnOrder.roundCounter = roundCounter;
         turnOrder.turnStep = turnStep;
         turnOrder.firstPlayer = firstPlayer;
