@@ -1,23 +1,14 @@
 package uno;
 
-import actions.Action;
+import actions.IAction;
+import core.AbstractGameState;
 import core.ForwardModel;
-import core.GameState;
+import turnorder.TurnOrder;
 
-public class UnoForwardModel implements ForwardModel {
-
-    @Override
-    public void setup(GameState firstState) {
-        // TODO
-    }
+public class UnoForwardModel extends ForwardModel {
 
     @Override
-    public void next(GameState currentState, Action action) {
-        // TODO
-    }
-
-    @Override
-    public ForwardModel copy() {
-        return null;
+    public void next(AbstractGameState gameState, TurnOrder turnOrder, IAction action) {
+        action.Execute(gameState, turnOrder);
     }
 }

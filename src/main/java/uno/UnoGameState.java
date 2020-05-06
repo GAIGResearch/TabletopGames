@@ -1,128 +1,126 @@
 package uno;
 
-import actions.Action;
-import components.Card;
+import actions.IAction;
 import components.Deck;
-import core.Area;
-import core.GameState;
-import uno.Constants;
+import core.AbstractGameState;
+import core.GameParameters;
+import uno.actions.PlayCard;
+import uno.cards.*;
+import observations.Observation;
+import players.AbstractPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-public class UnoGameState extends GameState {
 
-    private int    direction = 1;
-    private String mainColor;
-    private int    mainNumber;
+public class UnoGameState extends AbstractGameState {
+    private List<Deck<UnoCard>> playerDecks;
+    private Deck<UnoCard> drawPile;
+    private Deck<UnoCard> discardPile;
 
-    public String GetMainColor()  { return mainColor; }
-    public int    GetMainNumber() { return mainNumber; }
+    public int currentNumber;
+    public UnoCard.UnoCardColor currentColor;
+    private UnoCard currentCard;
 
-    @Override
-    public GameState copy() {
-        //TODO: copy uno game state
-        return this;
+    public UnoGameState(GameParameters gameParameters) {
+        super(gameParameters);
+
+        int nPlayers = gameParameters.nPlayers;
+
+        // Create the draw deck with all the cards
+        drawPile = new Deck<>();
+        CreateCards();
+
+        // Shuffle the deck
+        int seed = 2;
+        // drawPile.shuffle();
+        drawPile.shuffle(new Random(seed));
+
+        // Create the discard deck, at the beginning it is empty
+        discardPile = new Deck<>();
+
+        // Create a deck for each player and draw 7 cards to each one
+        playerDecks = new ArrayList<>(nPlayers);
+
+        for (int player = 0; player < nPlayers; player++) {
+            playerDecks.add(new Deck<>());
+            for (int card = 0; card < 7; card++) {
+                playerDecks.get(player).add(drawPile.draw());
+            }
+        }
+
+        // get current card and set the current number and color
+        currentCard = drawPile.draw();
+        discardPile.add(currentCard);
+        currentColor = currentCard.color;
+        currentNumber = currentCard.number;
+    }
+
+    // Create all the cards and include them into the drawPile
+    private void CreateCards() {
+        // Create the number cards
+        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
+            if (color == UnoCard.UnoCardColor.Wild)
+                continue;
+
+            // one card 0, two cards of 1, 2, ... 9
+            for (int number = 0; number< 10; number++) {
+                drawPile.add(new UnoNumberCard(color, number));
+                if (number > 0)
+                    drawPile.add(new UnoNumberCard(color, number));
+            }
+        }
+
+        // Create the DrawTwo, Reverse and Skip cards for each color
+        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
+            if (color == UnoCard.UnoCardColor.Wild)
+                continue;
+
+            drawPile.add(new UnoSkipCard(color));
+            drawPile.add(new UnoSkipCard(color));
+            drawPile.add(new UnoReverseCard(color));
+            drawPile.add(new UnoReverseCard(color));
+            drawPile.add(new UnoDrawTwoCard(color));
+            drawPile.add(new UnoDrawTwoCard(color));
+        }
+
+        // Create the wild cards, 4 of each type
+        for (int i = 0; i < 4; i++) {
+            drawPile.add(new UnoWildCard());
+            drawPile.add(new UnoWildDrawFourCard());
+        }
     }
 
     @Override
-    public GameState createNewGameState() {
-        return new UnoGameState();
+    public Observation getObservation(AbstractPlayer player) {
+        Deck<UnoCard> playerHand = playerDecks.get(player.playerID);
+        return new UnoObservation(currentCard, currentColor, currentNumber, playerHand);
     }
 
     @Override
-    public void copyTo(GameState dest, int playerId) {
-        // TODO
+    public void endGame() {
+
     }
 
-    @Override
-    public int nPossibleActions() {
-        // TODO
-        return 1;
+    // TODO
+    // The game is ended if there is a player without cards
+    public boolean isEnded() {
+        return false;
     }
 
+    // For each card on player hand, we add an action if the card is playable
     @Override
-    public List<Action> possibleActions() {
-        // TODO
-        // Create a list for possible actions
-        ArrayList<Action> actions = new ArrayList<>();
+    public List<IAction> getActions(AbstractPlayer player) {
+        ArrayList<IAction> actions = new ArrayList<>();
+
+        Deck<UnoCard> playerHand = playerDecks.get(player.playerID);
+        for (UnoCard card : playerHand.getCards()) {
+            if (card.isPlayable(this))
+                actions.add(new PlayCard<>(card, playerHand, discardPile));
+        }
+
         return actions;
     }
-
-    // UNo has one area for player and one common area
-    public void setComponents() {
-        UnoParameters parameters = (UnoParameters) this.gameParameters;
-
-        // For each player, initialize their own areas
-        for (int i = 0; i < nPlayers; i++) {
-            Area playerArea = new Area();
-            playerArea.setOwner(i);
-            playerArea.addComponent(Constants.playerHandHash, new Deck(parameters.max_cards));
-            areas.put(i, playerArea);
-        }
-
-        // Create common area
-        Area commonArea = new Area();
-        commonArea.setOwner(-1);
-        commonArea.addComponent(Constants.drawDeckHash, new Deck(parameters.max_cards));
-        commonArea.addComponent(Constants.mainDeckHash, new Deck(parameters.max_cards));
-        areas.put(-1, commonArea);
-
-        //  public static List<Deck<Card>> loadDecks(String filename)
-    }
-
-    public void skipTurn()
-    {
-        if (direction == 1) {
-            activePlayer += 2;
-            if (activePlayer >= nPlayers) {
-                activePlayer = nPlayers - activePlayer;
-            }
-        }
-        else {
-            activePlayer -= 2;
-            if (activePlayer < 0) {
-                activePlayer = nPlayers + activePlayer;
-            }
-        }
-    }
-
-    public void changeDirection()
-    {
-        direction *= -1;
-    }
-
-    public void changeMainColor(String newColor)
-    {
-        mainColor = newColor;
-    }
-
-    public void changeMainNumber(int newNumber)
-    {
-        mainNumber = newNumber;
-    }
-
-    public void drawCardsFromDeck(Deck playerDeck, int nCards)
-    {
-        Deck drawnDeck = (Deck) findDeck("drawDeck");
-
-        for (int i=0; i< nCards; i++) {
-            // Remove from drawDeck
-            Card c = drawnDeck.pick(0);
-
-            // Add to playerDeck
-            playerDeck.add(c);
-        }
-    }
-
-    public void playCardOnHand(Deck playerDeck, int idCard)
-    {
-        Deck mainDeck = (Deck) findDeck("mainDeck");
-
-        // Remover from playerDeck
-        Card c = playerDeck.pick(idCard);
-
-        // Add to mainDeck
-        mainDeck.add(c);
-    }
 }
+

@@ -1,33 +1,38 @@
 package uno.actions;
 
-import actions.Action;
-import components.Card;
-import content.PropertyString;
-import core.GameState;
-import uno.UnoGameState;
-import utilities.Hash;
+import actions.IAction;
+import components.Deck;
+import core.AbstractGameState;
+import games.uno.cards.CardEffect;
+import observations.IPrintable;
+import turnorder.TurnOrder;
+import uno.cards.UnoNumberCard;
 
-public class PlayCard  implements Action {
+public class PlayCard<T> implements IAction, IPrintable {
 
-    Card card;
+    private final Deck<T> sourceDeck;
+    private final Deck<T> targetDeck;
+    private final T cardToBePlayed;
 
-    PlayCard(Card c) {
-        this.card = c;
+    public PlayCard(T card, Deck<T> sourceDeck, Deck<T> targetDeck){
+        cardToBePlayed = card;
+        this.sourceDeck = sourceDeck;
+        this.targetDeck = targetDeck;
+    }
+
+    // TODO
+    @Override
+    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+        if (cardToBePlayed instanceof UnoNumberCard) {
+            sourceDeck.discard(cardToBePlayed);
+            targetDeck.add(cardToBePlayed);
+        }
+        return true;
     }
 
     @Override
-    public boolean execute(GameState gs) {
-        PropertyString type   = (PropertyString) card.getProperty(Hash.GetInstance().hash("type"));
-        PropertyString number = (PropertyString) card.getProperty(Hash.GetInstance().hash("number"));
-        PropertyString color  = (PropertyString) card.getProperty(Hash.GetInstance().hash("color"));
-
-        // TODO: play the card
-
-        String mainColor   = ((UnoGameState) gs).GetMainColor();
-        int    mainNumber  = ((UnoGameState) gs).GetMainNumber();
-
-
-
-        return true;
+    public void PrintToConsole() {
+        System.out.println("Play card: " + cardToBePlayed.toString());
     }
 }
+
