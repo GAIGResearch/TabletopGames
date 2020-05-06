@@ -32,7 +32,7 @@ public class RearrangeCardsWithCard implements IAction {
         for (int value : newCardOrder) {
             cards[value] = deckFrom.draw();
         }
-        Deck<Card> draws = new Deck<>();
+        Deck<Card> draws = new Deck<>("Temp Draws from: " + deckFrom.getID());
         draws.setElements(new ArrayList<>(Arrays.asList(cards)));
         boolean result = deckFrom.add(draws);
 

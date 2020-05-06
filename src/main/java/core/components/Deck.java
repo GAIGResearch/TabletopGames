@@ -22,9 +22,9 @@ public class Deck<T> extends Component implements IDeck<T> {
 
     private String id;
 
-    public Deck()
+    public Deck(String id)
     {
-        this.id = "";
+        this.id = id;
         super.type = ComponentType.DECK;
         elements = new ArrayList<>();
         properties = new HashMap<>();
@@ -155,7 +155,7 @@ public class Deck<T> extends Component implements IDeck<T> {
     @Override
     public Deck<T> copy()
     {
-        Deck<T> dp = new Deck<>();
+        Deck<T> dp = new Deck<>(id);
         this.copyTo(dp);
         return dp;
     }
@@ -209,8 +209,7 @@ public class Deck<T> extends Component implements IDeck<T> {
      * @param deck - deck to load in JSON format
      */
     public static Deck<Card> loadDeckOfCards(JSONObject deck) {
-        Deck<Card> newDeck = new Deck<>();
-        newDeck.id = (String) ( (JSONArray) deck.get("name")).get(1);
+        Deck<Card> newDeck = new Deck<>((String) ( (JSONArray) deck.get("name")).get(1));
         newDeck.properties.put(Hash.GetInstance().hash("name"), new PropertyString(newDeck.id));
 
         JSONArray deckCards = (JSONArray) deck.get("cards");

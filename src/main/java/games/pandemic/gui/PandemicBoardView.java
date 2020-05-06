@@ -18,7 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static games.pandemic.PandemicConstants.*;
-import static games.pandemic.gui.PandemicCardView.*;
+import static games.pandemic.gui.PandemicCardView.drawCard;
+import static games.pandemic.gui.PandemicCardView.drawDeckBack;
 
 public class PandemicBoardView extends JComponent {
     //TODO: images for tokens?
@@ -31,6 +32,8 @@ public class PandemicBoardView extends JComponent {
     PandemicGameState gameState;
     double scale = 0.75;
 
+    private int cardWidth = (int)(scale * 100);
+    private int cardHeight = (int)(scale * 50);
     int nodeSize = (int)(scale * 20);
     int researchStationSize = (int)(scale * 10);
     int playerPawnSize = (int)(scale * 10);

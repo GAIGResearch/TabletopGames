@@ -50,14 +50,14 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public void setComponents(String dataPath) {
         _data = new PandemicData();
         _data.load(dataPath);
-        tempDeck = new Deck<>();
+        tempDeck = new Deck<>("Temp Deck");
         areas = new HashMap<>();
 
         // For each player, initialize their own areas: they get a player hand and a player card
         int capacity = ((PandemicParameters)gameParameters).n_cards_per_player.get(getNPlayers());
         for (int i = 0; i < getNPlayers(); i++) {
             Area playerArea = new Area(i);
-            Deck<Card> playerHand = new Deck<>();
+            Deck<Card> playerHand = new Deck<>("Player Hand");
             playerHand.setCapacity(capacity);
             playerArea.addComponent(PandemicConstants.playerHandHash, playerHand);
             playerArea.addComponent(PandemicConstants.playerCardHash, new Card());
@@ -91,14 +91,14 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         }
 
         // Set up decks
-        Deck<Card> playerDeck = new Deck<>(); // contains city & event cards
+        Deck<Card> playerDeck = new Deck<>("Player Deck"); // contains city & event cards
         playerDeck.add(_data.findDeck("Cities"));
         playerDeck.add(_data.findDeck("Events"));
 
         gameArea.addComponent(PandemicConstants.playerDeckHash, playerDeck);
-        gameArea.addComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>());
-        gameArea.addComponent(PandemicConstants.infectionDiscardHash, new Deck<>());
-        gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<>()); // deck to store extra card for the contingency planner
+        gameArea.addComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>("Player Deck Discard"));
+        gameArea.addComponent(PandemicConstants.infectionDiscardHash, new Deck<>("Infection Discard"));
+        gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
         gameArea.addComponent(PandemicConstants.infectionHash, _data.findDeck("Infections"));
         gameArea.addComponent(PandemicConstants.playerRolesHash, _data.findDeck("Player Roles"));
         gameArea.addComponent(PandemicConstants.researchStationHash, _data.findCounter("Research Stations"));
@@ -595,6 +595,9 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public void addResearchStation(String location) { researchStationLocations.add(location); }
     public void removeResearchStation(String location) { researchStationLocations.remove(location); }
 
+    public GamePhase getGamePhase() {
+        return gamePhase;
+    }
     public void setQuietNight(boolean qn) {
         quietNight = qn;
     }

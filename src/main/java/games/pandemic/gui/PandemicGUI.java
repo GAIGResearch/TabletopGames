@@ -29,17 +29,19 @@ public class PandemicGUI extends GUI {
     PandemicBoardView boardView;
 
     PandemicGameState gameState;
-    int nPlayers, activePlayer;
+    int nPlayers;
     int maxCards = 9; // can go 2 over limit before discarding
 
     ArrayList<Integer>[] handCardHighlights;
     HashSet<Integer> playerHighlights;
 
+    // Game state info
+    JLabel gameStatus, turnOwner, turn, gamePhase, currentPlayer;
+
     public PandemicGUI(PandemicGameState gameState, ActionController ac) {
         super(ac, 721);
 
         nPlayers = gameState.getNPlayers();
-        activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
         this.gameState = gameState;
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
 
@@ -53,11 +55,13 @@ public class PandemicGUI extends GUI {
         highlights[1] = boardView.getHighlights().keySet();
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
+        JPanel gameStateInfo = createGameStateInfoPanel();
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
         JComponent actionPanel = createActionPanel(highlights, 300, 200);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
+        side.add(gameStateInfo);
         side.add(playerAreas);
         side.add(actionPanel);
 
@@ -139,6 +143,35 @@ public class PandemicGUI extends GUI {
         return cv2;
     }
 
+    private JPanel createGameStateInfoPanel() {
+        JPanel gameInfo = new JPanel();
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("Pandemic"));
+
+        gameStatus = new JLabel();
+        turnOwner = new JLabel();
+        turn = new JLabel();
+        gamePhase = new JLabel();
+        currentPlayer = new JLabel();
+        updateGameStatusInfo();
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(turnOwner);
+        gameInfo.add(turn);
+        gameInfo.add(gamePhase);
+        gameInfo.add(currentPlayer);
+
+        return gameInfo;
+    }
+
+    private void updateGameStatusInfo() {
+        gameStatus.setText("Game status: " + gameState.getGameStatus());
+        turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
+        turn.setText("Turn step: " + gameState.getTurnOrder().getTurnStep() + "; Round: " + gameState.getTurnOrder().getRoundCounter());
+        gamePhase.setText("Game phase: " + gameState.getGamePhase());
+        currentPlayer.setText("Current player: " + gameState.getTurnOrder().getCurrentPlayer(gameState));
+    }
+
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
@@ -160,10 +193,10 @@ public class PandemicGUI extends GUI {
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState){
-        // TODO: message informing of reaction, game phase
-
         this.gameState = (PandemicGameState) gameState;
+        updateGameStatusInfo();
         boardView.gameState = this.gameState;
+
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) this.gameState.getComponent(PandemicConstants.playerCardHash, i);
             playerCards[i].updateCard(playerCard);
@@ -186,10 +219,36 @@ public class PandemicGUI extends GUI {
 
         // Update actions for human
         if (player instanceof HumanGUIPlayer) {
+            updateCardHighlightDisplay();
             updateActionButtons(player, gameState);
+        } else {
+            // Clear all highlights if it's not human acting
+            clearAllHighlights();
+            updateCardHighlightDisplay();
         }
 
         repaint();
+    }
+
+    private void updateCardHighlightDisplay() {
+        for (int i = 0; i < playerCards.length; i++) {
+            if (!playerHighlights.contains(i)) {
+                playerCards[i].setBorder(new LineBorder(Color.black, 0));
+            }
+            for (int j = 0; j < playerHands[i].size(); j++) {
+                if (!handCardHighlights[i].contains(j)) {
+                    playerHands[i].get(j).setBorder(new LineBorder(Color.black, 0));
+                }
+            }
+        }
+    }
+
+    protected void clearAllHighlights() {
+        playerHighlights.clear();
+        for (int i = 0; i < playerCards.length; i++) {
+            handCardHighlights[i].clear();
+        }
+        boardView.getHighlights().clear();
     }
 
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {

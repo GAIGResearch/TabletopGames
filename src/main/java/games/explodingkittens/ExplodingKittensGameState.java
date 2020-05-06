@@ -69,7 +69,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
     public void setComponents(ExplodingKittenParameters gameParameters) {
-        drawPile = new Deck<>();
+        drawPile = new Deck<>("Draw pile");
 
         // add all cards and distribute 7 random cards to each player
         for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : gameParameters.cardCounts.entrySet()) {
@@ -90,7 +90,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
             Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
             visibility[i] = true;
 
-            Deck<ExplodingKittenCard> playerCards = new Deck<>();
+            Deck<ExplodingKittenCard> playerCards = new Deck<>("Player Cards");
             playerCards.setDeckVisibility(visibility);
             playerHandCards.add(playerCards);
 
@@ -115,7 +115,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
         drawPile.shuffle();
 
         // setup discardPile area
-        discardPile = new Deck<>();
+        discardPile = new Deck<>("Discard Pile");
     }
 
     private ArrayList<IAction> defuseActions(int playerID){
