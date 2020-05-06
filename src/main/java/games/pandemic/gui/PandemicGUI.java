@@ -19,11 +19,10 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
+@SuppressWarnings("rawtypes")
 public class PandemicGUI extends GUI {
     PandemicCardView[] playerCards;
     ArrayList<PandemicCardView>[] playerHands;
@@ -33,24 +32,30 @@ public class PandemicGUI extends GUI {
     int nPlayers, activePlayer;
     int maxCards = 9; // can go 2 over limit before discarding
 
-    ActionButton[] actionButtons;
-    int maxActionSpace = 721;
-    ActionController ac;
-    ArrayList<Card> handCardHighlights; // TODO: per player
-    ArrayList<Integer> playerHighlights;
+    ArrayList<Integer>[] handCardHighlights;
+    HashSet<Integer> playerHighlights;
 
     public PandemicGUI(PandemicGameState gameState, ActionController ac) {
+        super(ac, 721);
+
         nPlayers = gameState.getNPlayers();
         activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
         this.gameState = gameState;
-        this.ac = ac;
-        handCardHighlights = new ArrayList<>();
-        playerHighlights = new ArrayList<>();
-
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
+
+        handCardHighlights = new ArrayList[nPlayers];
+        playerHighlights = new HashSet<>();
+        for (int i = 0; i < nPlayers; i++) {
+            handCardHighlights[i] = new ArrayList<>();
+        }
+        Collection[] highlights = new Collection[2+nPlayers];
+        highlights[0] = playerHighlights;
+        highlights[1] = boardView.getHighlights().keySet();
+        System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
+
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel();
+        JComponent actionPanel = createActionPanel(highlights, 300, 200);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(playerAreas);
@@ -85,7 +90,7 @@ public class PandemicGUI extends GUI {
                         playerHighlights.add(player);
                         cv.setBorder(new LineBorder(Color.cyan, 2));
                     } else {
-                        playerHighlights.remove(Integer.valueOf(player));
+                        playerHighlights.add(player);
                         cv.setBorder(null);
                     }
                 }
@@ -102,20 +107,7 @@ public class PandemicGUI extends GUI {
                 if (k < playerHand.getElements().size()) {
                     c = playerHand.peek(k);
                 }
-                PandemicCardView cv2 = new PandemicCardView(c, null);
-                cv2.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        if (e.getButton() == MouseEvent.BUTTON1) {
-                            handCardHighlights.add(cv2.getCard());
-                            cv2.setBorder(new LineBorder(Color.cyan, 2));
-                        } else {
-                            handCardHighlights.remove(cv2.getCard());
-                            cv2.setBorder(null);
-                        }
-                    }
-                });
-                playerHands[i].add(cv2);
+                PandemicCardView cv2 = getCardView(i, c, k);
                 hand.add(cv2);
             }
             playerHandPanel.add(hand);
@@ -127,6 +119,24 @@ public class PandemicGUI extends GUI {
         playerAreas.add(playerHandPanel);
 
         return playerAreas;
+    }
+
+    private PandemicCardView getCardView(int player, Card c, int cardIdx) {
+        PandemicCardView cv2 = new PandemicCardView(c, null);
+        cv2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    handCardHighlights[player].add(cardIdx);
+                    cv2.setBorder(new LineBorder(Color.cyan, 2));
+                } else {
+                    handCardHighlights[player].remove(Integer.valueOf(cardIdx));
+                    cv2.setBorder(null);
+                }
+            }
+        });
+        playerHands[player].add(cv2);
+        return cv2;
     }
 
     private JPanel createCounterArea() {
@@ -149,161 +159,128 @@ public class PandemicGUI extends GUI {
     }
 
     @Override
-    public void update(AbstractPlayer player, AbstractGameState gameState){
+    protected void _update(AbstractPlayer player, AbstractGameState gameState){
+        // TODO: message informing of reaction, game phase
+
         this.gameState = (PandemicGameState) gameState;
         boardView.gameState = this.gameState;
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) this.gameState.getComponent(PandemicConstants.playerCardHash, i);
-            playerCards[i].update(playerCard);
+            playerCards[i].updateCard(playerCard);
             playerCards[i].repaint();
 
             Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(PandemicConstants.playerHandHash, i);
-            for (int j = 0; j < playerHand.getElements().size(); j++) {
+            int nCards = playerHand.getElements().size();
+            for (int j = 0; j < nCards; j++) {
                 Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
-                    playerHands[i].get(j).update(c);
+                    playerHands[i].get(j).updateCard(c);
                 } else {
-                    PandemicCardView cv2 = new PandemicCardView(c, null);
-                    cv2.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            if (e.getButton() == MouseEvent.BUTTON1) {
-                                handCardHighlights.add(cv2.getCard());
-                                cv2.setBorder(new LineBorder(Color.cyan, 2));
-                            } else {
-                                handCardHighlights.remove(cv2.getCard());
-                                cv2.setBorder(null);
-                            }
-                        }
-                    });
-                    playerHands[i].add(cv2);
+                    getCardView(i, c, j);
                 }
+            }
+            for (int j = nCards; j < playerHands[i].size(); j++) {
+                playerHands[i].get(j).updateCard(null);
             }
         }
 
         // Update actions for human
         if (player instanceof HumanGUIPlayer) {
-            // TODO: message informing of reaction
-
-            resetActionButtons();
-            List<IAction> actions = gameState.getActions();
-            int k = 0;
-
-            Set<String> highlights = boardView.getHighlights().keySet();
-            Set<Integer> playerTokenHighlights = new HashSet<>();
-            Set<String> bnHighlights = new HashSet<>();
-            Set<String> deckHighlights = new HashSet<>();
-            for (String highlight: highlights) {
-                if (highlight.contains("BN")) {
-                    bnHighlights.add(highlight.split(" ")[1]);
-                } else if (highlight.contains("player ")) {
-                    playerTokenHighlights.add(Integer.parseInt(highlight.split(" ")[1]));
-                } else {
-                    deckHighlights.add(highlight);
-                }
-            }
-            for (IAction action : actions) {
-                if (action instanceof MovePlayer) {
-                    int pIdx = ((MovePlayer) action).getPlayerIdx();
-                    if (bnHighlights.contains(((MovePlayer) action).getDestination()) &&
-                            (pIdx == gameState.getTurnOrder().getCurrentPlayer(gameState) || playerTokenHighlights.contains(pIdx))) {
-                        if (!(action instanceof MovePlayerWithCard) || handCardHighlights.contains(((MovePlayerWithCard) action).getCard())) {
-                            actionButtons[k].setVisible(true);
-                            actionButtons[k++].setButtonAction(action);
-                        }
-                    }
-                } else if (action instanceof AddResearchStation && bnHighlights.contains(((AddResearchStation) action).getToCity())) {
-                    if (action instanceof AddResearchStationFrom) {
-                        if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
-                            if (!(action instanceof AddResearchStationWithCardFrom) || handCardHighlights.contains(((AddResearchStationWithCardFrom) action).getCard())) {
-                                actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action);
-                            }
-                        }
-                    } else {
-                        if (!(action instanceof AddResearchStationWithCard) || handCardHighlights.contains(((AddResearchStationWithCard) action).getCard())) {
-                            actionButtons[k].setVisible(true);
-                            actionButtons[k++].setButtonAction(action);
-                        }
-                    }
-                } else if (action instanceof DoNothing || action instanceof DrawCard || action instanceof QuietNight
-                    || action instanceof TreatDisease) {
-                    // TODO click player discard deck -> (display all cards, contingency planner selects card to add to
-                    //  planner deck, other actions related to planner deck ignored)
-                    actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action);
-                } else if (action instanceof RearrangeCardsWithCard) {
-                    // TODO: display top N cards of infection deck, player selects order
-                } else if (action instanceof CureDisease) {
-                    ArrayList<Card> cards = ((CureDisease) action).getCards();
-                    boolean allSelected = true;
-                    for (Card c: cards) {
-                        if (!handCardHighlights.contains(c)) {
-                            allSelected = false;
-                            break;
-                        }
-                    }
-                    if (allSelected) {
-                        actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action);
-                    }
-                } else if (action instanceof GiveCard) {
-                    // TODO: a card in hand selected, and another player
-                } else if (action instanceof TakeCard) {
-                    // TODO: a card from another player selected
-                } else if (action instanceof RemoveCardWithCard) {
-                    // TODO: RP card in hand selected? + resilient population action possible,
-                    //  show infection discard cards from which player must select 1
-                }
-            }
-            // TODO: event actions if available
-
-//            for (int i = 0; i < actions.size(); i++) {
-//                actionButtons[i].setVisible(true);
-//                actionButtons[i].setButtonAction(actions.get(i));
-//            }
+            updateActionButtons(player, gameState);
         }
 
         repaint();
     }
 
-    private JComponent createActionPanel() {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setPreferredSize(new Dimension(300, 300));
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        int id = player.getPlayerID();
+        List<IAction> actions = gameState.getActions();
+        int k = 0;
 
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton();
-            actionButtons[i] = ab;
-            actionButtons[i].addActionListener(e -> {
-                ac.addAction(ab.getButtonAction());
-                handCardHighlights.clear();
-                playerHighlights.clear();
-                boardView.clearHighlights();
-            });
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
+        Set<String> highlights = boardView.getHighlights().keySet();
+        Set<Integer> playerTokenHighlights = new HashSet<>();
+        Set<String> bnHighlights = new HashSet<>();
+        Set<String> deckHighlights = new HashSet<>();
+        for (String highlight: highlights) {
+            if (highlight.contains("BN")) {
+                bnHighlights.add(highlight.split(" ")[1]);
+            } else if (highlight.contains("player ")) {
+                playerTokenHighlights.add(Integer.parseInt(highlight.split(" ")[1]));
+            } else {
+                deckHighlights.add(highlight);
+            }
         }
+        for (IAction action : actions) {
+            if (action instanceof MovePlayer) {
+                int pIdx = ((MovePlayer) action).getPlayerIdx();
+                if (bnHighlights.contains(((MovePlayer) action).getDestination()) &&
+                        (pIdx == id || playerTokenHighlights.contains(pIdx))) {
+                    if (!(action instanceof MovePlayerWithCard) ||
+                            handCardHighlights[pIdx].contains(indexOfCardInHand(((MovePlayerWithCard) action).getCard(), pIdx))) {
+                        actionButtons[k].setVisible(true);
+                        actionButtons[k++].setButtonAction(action);
+                    }
+                }
+            } else if (action instanceof AddResearchStation && bnHighlights.contains(((AddResearchStation) action).getToCity())) {
+                if (action instanceof AddResearchStationFrom) {
+                    if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
+                        if (!(action instanceof AddResearchStationWithCardFrom) ||
+                                handCardHighlights[id].contains(indexOfCardInHand(((AddResearchStationWithCardFrom) action).getCard(), id))) {
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action);
+                        }
+                    }
+                } else {
+                    if (!(action instanceof AddResearchStationWithCard) ||
+                            handCardHighlights[id].contains(indexOfCardInHand(((AddResearchStationWithCard) action).getCard(), id))) {
+                        actionButtons[k].setVisible(true);
+                        actionButtons[k++].setButtonAction(action);
+                    }
+                }
+            } else if (action instanceof DoNothing || action instanceof DrawCard || action instanceof QuietNight
+                    || action instanceof TreatDisease) {
+                // TODO click player discard deck -> (display all cards, contingency planner selects card to add to
+                //  planner deck, other actions related to planner deck ignored)
+                actionButtons[k].setVisible(true);
+                actionButtons[k++].setButtonAction(action);
+            } else if (action instanceof RearrangeCardsWithCard) {
+                // TODO: display top N cards of infection deck, player selects order
+            } else if (action instanceof CureDisease) {
+                ArrayList<Card> cards = ((CureDisease) action).getCards();
+                boolean allSelected = true;
+                for (Card c: cards) {
+                    if (indexOfCardInHand(c, id) != -1) {
+                        allSelected = false;
+                        break;
+                    }
+                }
+                if (allSelected) {
+                    actionButtons[k].setVisible(true);
+                    actionButtons[k++].setButtonAction(action);
+                }
+            } else if (action instanceof GiveCard) {
+                // TODO: a card in hand selected, and another player
+            } else if (action instanceof TakeCard) {
+                // TODO: a card from another player selected
+            } else if (action instanceof RemoveCardWithCard) {
+                // TODO: RP card in hand selected? + resilient population action possible,
+                //  show infection discard cards from which player must select 1
+            }
+        }
+        // TODO: event actions if available
 
-        return actionPanel;
+//            for (int i = 0; i < actions.size(); i++) {
+//                actionButtons[i].setVisible(true);
+//                actionButtons[i].setButtonAction(actions.get(i));
+//            }
     }
 
-    private void resetActionButtons() {
-        for (int i = 0; i < maxActionSpace; i++) {
-            actionButtons[i].setVisible(false);
+    private int indexOfCardInHand(Card c, int player) {
+        int n = playerHands[player].size();
+        for (int i = 0; i < n; i++) {
+            PandemicCardView pcv = playerHands[player].get(i);
+            if (pcv.getCard().equals(c)) return i;
         }
-    }
-
-    static class ActionButton extends JButton {
-        IAction action;
-
-        public void setButtonAction(IAction action) {
-            this.action = action;
-            setText(action.toString());
-        }
-
-        public IAction getButtonAction() {
-            return action;
-        }
+        return -1;
     }
 }

@@ -100,7 +100,7 @@ public class PandemicCardView extends JComponent {
         }
     }
 
-    public void update(Card c) {
+    public void updateCard(Card c) {
         this.card = c;
     }
 

@@ -32,4 +32,8 @@ public abstract class AbstractPlayer {
      * @param observation observation of the initial game-state
      */
     public abstract int getAction(IObservation observation, List<IAction> actions);
+
+    public int getPlayerID() {
+        return playerID;
+    }
 }
