@@ -190,7 +190,7 @@ public class Deck<T> extends Component implements IDeck<T> {
         ArrayList<T> visibleCards = new ArrayList<>();
         for (int i = 0; i < cards.size(); i++) {
             boolean[] b = cardVisibility.get(i);
-            if (b[playerID]) visibleCards.add(i, cards.get(i));
+            if (b == null || b[playerID]) visibleCards.add(i, cards.get(i));
             else visibleCards.add(i, null);
         }
         return visibleCards;
