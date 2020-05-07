@@ -3,12 +3,11 @@ package core;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
-import players.AbstractPlayer;
 
 import java.util.Collections;
 import java.util.List;
 
-import static games.pandemic.PandemicConstants.VERBOSE;
+import static utilities.CoreConstants.VERBOSE;
 
 public abstract class Game {
 
@@ -22,11 +21,20 @@ public abstract class Game {
     // GameState observations as seen by different players.
     protected IObservation[] gameStateObservations;
 
-    public Game(List<AbstractPlayer> players) {
+    public Game(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
         this.players = players;
+        int id = 0;
+        for (AbstractPlayer player: players) {
+            player.playerID = id++;
+        }
+        this.forwardModel = model;
+        this.gameState = gameState;
     }
 
     public void run(GUI gui) {
+        gameState.setComponents();
+        forwardModel.setup(gameState);
+
         while (!gameState.isTerminal()){
             if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
@@ -40,7 +48,6 @@ public abstract class Game {
             }
 
             int action = players.get(activePlayer).getAction(observation, actions);
-            gameState.getTurnOrder().endPlayerTurnStep(gameState);
 
             // Resolve core.actions and game rules for the turn
             forwardModel.next(gameState, actions.get(action));

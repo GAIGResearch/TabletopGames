@@ -7,6 +7,7 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.playerHandHash;
 
 
 @SuppressWarnings("unchecked")

@@ -25,7 +25,6 @@ public class CarcassonneGameState extends AbstractGameState {
 
     public CarcassonneGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
-        setComponents();
     }
 
     public void setComponents() {

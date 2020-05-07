@@ -58,21 +58,22 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
     public void killPlayer(int playerID){
-        isPlayerAlive[playerID] = false;
+        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (isPlayerAlive[i]) nPlayersActive++;
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
         }
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
         }
     }
 
-    public void setComponents(ExplodingKittenParameters gameParameters) {
+    public void setComponents() {
+        ExplodingKittenParameters ekp = (ExplodingKittenParameters)gameParameters;
         drawPile = new Deck<>();
 
         // add all cards and distribute 7 random cards to each player
-        for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : gameParameters.cardCounts.entrySet()) {
+        for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
             if (entry.getKey() == ExplodingKittenCard.CardType.DEFUSE || entry.getKey() == ExplodingKittenCard.CardType.EXPLODING_KITTEN)
                 continue;
             for (int i = 0; i < entry.getValue(); i++) {
@@ -122,7 +123,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
         ArrayList<IAction> actions = new ArrayList<>();
         Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
         ExplodingKittenCard kitten = playerDeck.peek();
-        for (int i = 0; i <= drawPile.getCards().size(); i++){
+        for (int i = 0; i <= drawPile.getSize(); i++){
             actions.add(new PlaceExplodingKittenAction<>(kitten, playerDeck, drawPile, i));
         }
         return actions;
@@ -193,14 +194,14 @@ public class ExplodingKittensGameState extends AbstractGameState {
                     for (int player = 0; player < getNPlayers(); player++) {
                         if (player == playerID)
                             continue;
-                        if (playerHandCards.get(player).getCards().size() > 0)
+                        if (playerHandCards.get(player).getSize() > 0)
                             actions.add(new FavorAction<>(card, playerDeck, discardPile, player, playerID));
                     }
                     break;
                 case ATTACK:
                     for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
 
-                        if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
+                        if (targetPlayer == playerID || playerResults[targetPlayer] != Utils.GameResult.GAME_ONGOING)
                             continue;
 
                         actions.add(new AttackAction<>(card, playerDeck, discardPile, targetPlayer));
@@ -241,7 +242,8 @@ public class ExplodingKittensGameState extends AbstractGameState {
     public void endGame() {
         this.gameStatus = Utils.GameResult.GAME_END;
         for (int i = 0; i < getNPlayers(); i++){
-            playerResults[i] = isPlayerAlive[i] ? Utils.GameResult.GAME_WIN : Utils.GameResult.GAME_LOSE;
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING)
+                playerResults[i] = Utils.GameResult.GAME_WIN;
         }
     }
 

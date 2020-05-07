@@ -3,6 +3,7 @@ package games.explodingkittens;
 import core.AbstractGameState;
 import core.turnorder.ReactiveTurnOrder;
 import core.turnorder.TurnOrder;
+import utilities.Utils;
 
 import static games.explodingkittens.ExplodingKittensGameState.GamePhase.NopePhase;
 
@@ -13,15 +14,14 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
         super(nPlayers);
     }
 
-    @Override
     public void endPlayerTurnStep(AbstractGameState gameState) {
         if (reactivePlayers.size() > 0) reactivePlayers.poll();
         else {
             requiredDraws -= 1;
-            if (requiredDraws == 0 || !gameState.isPlayerAlive(turnOwner)) {
+            if (requiredDraws == 0 || gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
                 requiredDraws = 1;
                 turnOwner = (turnOwner + 1) % nPlayers;
-                while (!gameState.isPlayerAlive(turnOwner))
+                while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING)
                     turnOwner = (turnOwner + 1) % nPlayers;
             }
         }

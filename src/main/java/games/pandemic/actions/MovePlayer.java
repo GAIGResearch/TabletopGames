@@ -8,7 +8,8 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicConstants;
 
-import static games.pandemic.PandemicConstants.nameHash;
+import static utilities.CoreConstants.nameHash;
+import static utilities.CoreConstants.playersHash;
 
 
 public class MovePlayer implements IAction {
@@ -42,7 +43,7 @@ public class MovePlayer implements IAction {
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(PandemicConstants.playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
@@ -51,7 +52,7 @@ public class MovePlayer implements IAction {
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(PandemicConstants.playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().remove(new Integer(playerIdx));
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);

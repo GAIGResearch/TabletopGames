@@ -262,4 +262,8 @@ public class Deck<T> extends Component implements IDeck<T> {
         }
         return false;
     }
+
+    public int getSize() {
+        return cards.size();
+    }
 }

@@ -11,7 +11,7 @@ import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
-import static games.pandemic.PandemicConstants.nameHash;
+import static utilities.CoreConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
 

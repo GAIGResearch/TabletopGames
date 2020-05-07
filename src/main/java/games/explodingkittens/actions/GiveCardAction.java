@@ -29,7 +29,7 @@ public class GiveCardAction implements IAction, IPrintable {
         giverDeck.remove(card);
         receiverDeck.add(card);
         ekgs.setGamePhase(PlayerMove);
-        gs.getTurnOrder().endPlayerTurnStep(gs);
+        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         ((ExplodingKittenTurnOrder) gs.getTurnOrder()).addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;
     }

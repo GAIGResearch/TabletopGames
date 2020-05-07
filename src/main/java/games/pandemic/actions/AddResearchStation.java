@@ -10,6 +10,7 @@ import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
 
 public class AddResearchStation implements IAction {
     private String city;

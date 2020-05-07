@@ -13,6 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static utilities.CoreConstants.playerHandHash;
+
 @SuppressWarnings("unchecked")
 public class PandemicGUI extends GUI {
     PandemicCardView[] playerCards;
@@ -58,11 +60,11 @@ public class PandemicGUI extends GUI {
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
-            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(PandemicConstants.playerHandHash, i);
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(playerHandHash, i);
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
-                if (k < playerHand.getCards().size()) {
+                if (k < playerHand.getSize()) {
                     c = playerHand.peek(k);
                 }
                 PandemicCardView cv2 = new PandemicCardView(c, null);
@@ -108,8 +110,8 @@ public class PandemicGUI extends GUI {
             playerCards[i].update(playerCard);
             playerCards[i].repaint();
 
-            Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(PandemicConstants.playerHandHash, i);
-            for (int j = 0; j < playerHand.getCards().size(); j++) {
+            Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(playerHandHash, i);
+            for (int j = 0; j < playerHand.getSize(); j++) {
                 Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
                     playerHands[i].get(j).update(c);

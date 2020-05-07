@@ -15,6 +15,7 @@ import java.util.Random;
 
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class PandemicForwardModel extends ForwardModel {
@@ -184,7 +185,7 @@ public class PandemicForwardModel extends ForwardModel {
             placePlayer(state, "Atlanta", i);
 
             // Give players cards
-            IDeck<Card> playerHandDeck = (IDeck<Card>) playerArea.getComponent(PandemicConstants.playerHandHash);
+            IDeck<Card> playerHandDeck = (IDeck<Card>) playerArea.getComponent(playerHandHash);
 
             playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {
@@ -205,7 +206,7 @@ public class PandemicForwardModel extends ForwardModel {
 
         // Epidemic cards
         playerDeck.shuffle(rnd);
-        int noCards = playerDeck.getCards().size();
+        int noCards = playerDeck.getSize();
         int noEpidemicCards = pp.n_epidemic_cards;
         int range = noCards / noEpidemicCards;
         for (int i = 0; i < noEpidemicCards; i++) {

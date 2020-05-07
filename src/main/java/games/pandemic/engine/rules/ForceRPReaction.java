@@ -13,6 +13,8 @@ import games.pandemic.PandemicGameState;
 import java.util.ArrayList;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class ForceRPReaction extends RuleNode {
@@ -24,7 +26,7 @@ public class ForceRPReaction extends RuleNode {
 
         for (int i = 0; i < nPlayers; i++) {
             Deck<Card> ph = (Deck<Card>) pgs.getComponent(playerHandHash, i);
-            int nCards = ph.getCards().size();
+            int nCards = ph.getSize();
             for (int cp = 0; cp < nCards; cp++) {
                 Card card = ph.getCards().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {

@@ -5,6 +5,8 @@ import core.AbstractGameState;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import static utilities.Utils.GameResult.GAME_ONGOING;
+
 public class ReactiveTurnOrder extends TurnOrder {
 
     protected Queue<Integer> reactivePlayers = new LinkedList<>();
@@ -13,16 +15,8 @@ public class ReactiveTurnOrder extends TurnOrder {
         super(nPlayers);
     }
 
-    public ReactiveTurnOrder(int nPlayers, int nActionsPerTurn, int nMaxRounds) {
-        super(nPlayers, nActionsPerTurn, nMaxRounds);
-    }
-
-    @Override
-    public void endPlayerTurnStep(AbstractGameState gameState) {
-        if (reactivePlayers.size() > 0) reactivePlayers.poll();
-        else {
-            super.endPlayerTurnStep(gameState);
-        }
+    public ReactiveTurnOrder(int nPlayers, int nMaxRounds) {
+        super(nPlayers, nMaxRounds);
     }
 
     @Override
@@ -56,7 +50,7 @@ public class ReactiveTurnOrder extends TurnOrder {
 
     public void addAllReactivePlayers(AbstractGameState gameState) {
         for (int i = 0; i < gameState.getNPlayers()-1; i++) {
-            if (gameState.isPlayerAlive(i)) {
+            if (gameState.getPlayerResults()[i] == GAME_ONGOING) {
                 reactivePlayers.add(i);
             }
         }
@@ -64,7 +58,7 @@ public class ReactiveTurnOrder extends TurnOrder {
     public void addAllReactivePlayersButCurrent(AbstractGameState gameState) {
         int currentPlayer = getCurrentPlayer(gameState);
         for (int i = 0; i < gameState.getNPlayers()-1; i++) {
-            if (i != currentPlayer && gameState.isPlayerAlive(i)) {
+            if (i != currentPlayer && gameState.getPlayerResults()[i] == GAME_ONGOING) {
                 reactivePlayers.add(i);
             }
         }

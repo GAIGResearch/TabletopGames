@@ -26,7 +26,7 @@ public class EpidemicIntensify extends RuleNode {
         PandemicGameState pgs = (PandemicGameState)gs;
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
-        int nDiscards = infectionDiscard.getCards().size();
+        int nDiscards = infectionDiscard.getSize();
         // 3. shuffle infection discard deck, add back on top of infection deck
         infectionDiscard.shuffle(rnd);
         for (int i = 0; i < nDiscards; i++) {

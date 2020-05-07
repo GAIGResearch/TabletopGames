@@ -8,6 +8,7 @@ import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
 
 
 public class AddResearchStationFrom extends AddResearchStation implements IAction {

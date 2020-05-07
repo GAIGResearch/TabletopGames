@@ -17,6 +17,11 @@ public class ExplodingKittensForwardModel extends ForwardModel {
     private Stack<IAction> actionStack = new Stack<>();
 
     @Override
+    public void setup(AbstractGameState firstState) {
+
+    }
+
+    @Override
     public void next(AbstractGameState gameState, IAction action) {
         System.out.println(action.toString());
         ExplodingKittenTurnOrder ekTurnOrder = (ExplodingKittenTurnOrder) gameState.getTurnOrder();

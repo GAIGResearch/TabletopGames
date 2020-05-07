@@ -1,5 +1,6 @@
 package players;
 
+import core.AbstractPlayer;
 import core.actions.IAction;
 import core.observations.IPrintable;
 import core.observations.IObservation;
@@ -9,10 +10,6 @@ import java.util.Scanner;
 
 
 public class HumanConsolePlayer extends AbstractPlayer {
-
-    public HumanConsolePlayer(int playerID){
-        super(playerID);
-    }
 
     @Override
     public void initializePlayer(IObservation observation) {
