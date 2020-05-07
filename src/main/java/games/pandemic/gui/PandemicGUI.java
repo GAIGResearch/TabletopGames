@@ -1,18 +1,17 @@
 package games.pandemic.gui;
 
 import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.*;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.GUI;
-import core.components.IDeck;
 import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.actions.*;
-import players.AbstractPlayer;
 import players.ActionController;
 import players.HumanGUIPlayer;
 import utilities.CounterView;
@@ -26,6 +25,8 @@ import java.util.*;
 import java.util.List;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("rawtypes")
 public class PandemicGUI extends GUI {
@@ -114,11 +115,11 @@ public class PandemicGUI extends GUI {
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
-            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(PandemicConstants.playerHandHash, i);
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(playerHandHash, i);
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
-                if (k < playerHand.getElements().size()) {
+                if (k < playerHand.getSize()) {
                     c = playerHand.peek(k);
                 }
                 PandemicCardView cv2 = getCardView(i, c, k);
@@ -223,8 +224,8 @@ public class PandemicGUI extends GUI {
             playerCards[i].updateCard(playerCard);
             playerCards[i].repaint();
 
-            Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(PandemicConstants.playerHandHash, i);
-            int nCards = playerHand.getElements().size();
+            Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(playerHandHash, i);
+            int nCards = playerHand.getSize();
             for (int j = 0; j < nCards; j++) {
                 Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
@@ -307,13 +308,13 @@ public class PandemicGUI extends GUI {
             } else if (action instanceof AddResearchStation) {
                 Card playerRole = (Card) this.gameState.getComponentActingPlayer(playerCardHash);
                 String playerLocation = ((PropertyString)playerRole.getProperty(playerLocationHash)).value;
-                String toCity = ((AddResearchStation) action).getToCity();
+                String toCity = ((AddResearchStation) action).getCity();
 
                 if (bnHighlights.contains(toCity) || playerLocation.equals(toCity)) {
                     if (action instanceof AddResearchStationFrom) {
                         if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
-                                    isCardHighlighted(((AddResearchStationWithCardFrom) action).getCard(), id)) {
+                                    isCardHighlighted(((AddResearchStationWithCard) action).getCard(), id)) {
                                 actionButtons[k].setVisible(true);
                                 actionButtons[k++].setButtonAction(action);
                             }
@@ -408,7 +409,7 @@ public class PandemicGUI extends GUI {
                 if (isCardHighlighted(eventCard, id)) {
                     // event card in hand selected
 
-                    for (int i = 0; i < deck.getElements().size(); i++) {
+                    for (int i = 0; i < deck.getSize(); i++) {
                         if (i < maxBufferCards) {
                             Card c = deck.peek();
                             if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
@@ -444,9 +445,9 @@ public class PandemicGUI extends GUI {
                 } else {
                     if (this.gameState.getPlayerRole(id).equals("Contingency Planner")) {  // Special role
                         if (deckHighlights.contains("playerDiscard")) {
-                            IDeck<Card> deck = ((DrawCard) action).getDeckFrom();
+                            Deck<Card> deck = ((DrawCard) action).getDeckFrom();
 
-                            for (int i = 0; i < deck.getElements().size(); i++) {
+                            for (int i = 0; i < deck.getSize(); i++) {
                                 if (i < maxBufferCards) {
                                     Card c = deck.peek();
                                     if (c != null && !bufferDeck.get(i).getCard().equals(c)) {

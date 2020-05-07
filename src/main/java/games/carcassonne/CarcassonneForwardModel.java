@@ -12,6 +12,11 @@ public class CarcassonneForwardModel extends ForwardModel {
 
 
     @Override
+    public void setup(AbstractGameState firstState) {
+
+    }
+
+    @Override
     public void next(AbstractGameState currentState, IAction action) {
 
     }

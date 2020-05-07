@@ -10,6 +10,7 @@ import utilities.Hash;
 import utilities.Utils;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
 
 public class TreatDisease implements IAction {
 

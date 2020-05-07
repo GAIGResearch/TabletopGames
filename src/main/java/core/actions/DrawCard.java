@@ -1,23 +1,24 @@
 package core.actions;
 
 import core.components.Card;
+import core.components.Deck;
 import core.components.IDeck;
 import core.AbstractGameState;
 
 public class DrawCard implements IAction {
 
-    private IDeck<Card> deckFrom;
-    private IDeck<Card> deckTo;
+    private Deck<Card> deckFrom;
+    private Deck<Card> deckTo;
 
     private int index;
 
-    public DrawCard (IDeck<Card> deckFrom, IDeck<Card> deckTo, int index) {
+    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo, int index) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
         this.index = index;
     }
 
-    public DrawCard (IDeck<Card> deckFrom, IDeck<Card> deckTo) {
+    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
     }
@@ -61,7 +62,7 @@ public class DrawCard implements IAction {
         return index;
     }
 
-    public IDeck<Card> getDeckFrom() {
+    public Deck<Card> getDeckFrom() {
         return deckFrom;
     }
 

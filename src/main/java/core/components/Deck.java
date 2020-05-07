@@ -16,8 +16,8 @@ public class Deck<T> extends Component implements IDeck<T> {
 
     protected int capacity = -1;
 
-    protected ArrayList<T> elements;
-    protected ArrayList<boolean[]> elementVisibility;
+    protected ArrayList<T> cards;
+    protected ArrayList<boolean[]> cardVisibility;
     protected boolean[] deckVisibility;
 
     private String id;
@@ -26,28 +26,28 @@ public class Deck<T> extends Component implements IDeck<T> {
     {
         this.id = id;
         super.type = ComponentType.DECK;
-        elements = new ArrayList<>();
+        cards = new ArrayList<>();
         properties = new HashMap<>();
-        elementVisibility = new ArrayList<>();
+        cardVisibility = new ArrayList<>();
         deckVisibility = new boolean[0];
     }
 
-    public void setElements(ArrayList<T> elements) {
-        this.elements = elements;
-        setElementVisibility(deckVisibility);
+    public void setCards(ArrayList<T> cards) {
+        this.cards = cards;
+        setCardVisibility(deckVisibility);
     }
-    public void setElementsVisibility(ArrayList<boolean[]> cardVisibility) {
-        this.elementVisibility = cardVisibility;
+    public void setCardsVisibility(ArrayList<boolean[]> cardVisibility) {
+        this.cardVisibility = cardVisibility;
     }
-    public void setElementVisibility(boolean[] visibility) {
-        this.elementVisibility = new ArrayList<>();
-        for (int i = 0; i < elements.size(); i++) {
-            if (visibility != null) elementVisibility.add(visibility.clone());
-            else elementVisibility.add(null);
+    public void setCardVisibility(boolean[] visibility) {
+        this.cardVisibility = new ArrayList<>();
+        for (int i = 0; i < cards.size(); i++) {
+            if (visibility != null) cardVisibility.add(visibility.clone());
+            else cardVisibility.add(null);
         }
     }
-    public void setElementVisibility(int cardIdx, int player, boolean visibility) {
-        this.elementVisibility.get(cardIdx)[player] = visibility;
+    public void setCardVisibility(int cardIdx, int player, boolean visibility) {
+        this.cardVisibility.get(cardIdx)[player] = visibility;
     }
     public void setCapacity(int capacity) {
         this.capacity = capacity;
@@ -70,17 +70,17 @@ public class Deck<T> extends Component implements IDeck<T> {
     }
 
     public boolean isOverCapacity(){
-        return capacity != -1 && elements.size() > capacity;
+        return capacity != -1 && cards.size() > capacity;
     }
 
     public void shuffle(Random rnd) {
         // TODO: this messes up visibility
-        Collections.shuffle(elements, rnd);
+        Collections.shuffle(cards, rnd);
     }
 
     public void shuffle() {
         // TODO: this messes up visibility
-        Collections.shuffle(elements, new Random());
+        Collections.shuffle(cards, new Random());
     }
 
     public T draw() {
@@ -92,17 +92,17 @@ public class Deck<T> extends Component implements IDeck<T> {
     }
 
     public T pick(int idx) {
-        if(elements.size() > 0 && idx < elements.size()) {
-            T c = elements.get(idx);
-            elementVisibility.remove(idx);
-            elements.remove(idx);
+        if(cards.size() > 0 && idx < cards.size()) {
+            T c = cards.get(idx);
+            cardVisibility.remove(idx);
+            cards.remove(idx);
             return c;
         }
         return null;
     }
 
     public T pickLast() {
-        return pick(elements.size()-1);
+        return pick(cards.size()-1);
     }
 
     @Override
@@ -124,8 +124,8 @@ public class Deck<T> extends Component implements IDeck<T> {
 
     public T peek(int idx)
     {
-        if(elements.size() > 0 && idx < elements.size()) {
-            return elements.get(idx);
+        if(cards.size() > 0 && idx < cards.size()) {
+            return cards.get(idx);
         }
         return null;
     }
@@ -140,14 +140,14 @@ public class Deck<T> extends Component implements IDeck<T> {
         return add(c, index, null);
     }
     public boolean add(T c, int index, boolean[] visibilityPerPlayer) {
-        elements.add(index, c);
-        elementVisibility.add(index, visibilityPerPlayer);
-        return capacity == -1 || elements.size() <= capacity;
+        cards.add(index, c);
+        cardVisibility.add(index, visibilityPerPlayer);
+        return capacity == -1 || cards.size() <= capacity;
     }
 
     public boolean add(Deck<T> d){
-        elements.addAll(d.elements);
-        elementVisibility.addAll(d.elementVisibility);
+        cards.addAll(d.cards);
+        cardVisibility.addAll(d.cardVisibility);
         return true;
     }
 
@@ -164,7 +164,7 @@ public class Deck<T> extends Component implements IDeck<T> {
     {
         Deck<T> dp = (Deck<T>) target;
         ArrayList<T> newCards = new ArrayList<>();
-        for (T c : dp.elements)
+        for (T c : dp.cards)
         {
             try {
                 newCards.add((T) c.getClass().getMethod("clone").invoke(c));
@@ -172,25 +172,25 @@ public class Deck<T> extends Component implements IDeck<T> {
                 throw new RuntimeException("Objects in deck target do not implement the method 'clone'", e);
             }
         }
-        dp.setElements(newCards);
+        dp.setCards(newCards);
         dp.capacity = capacity;
 
-        ArrayList<boolean[]> visibility = new ArrayList<>(dp.elementVisibility);
-        dp.setElementsVisibility(visibility);
+        ArrayList<boolean[]> visibility = new ArrayList<>(dp.cardVisibility);
+        dp.setCardsVisibility(visibility);
 
         //copy type and component.
         copyComponentTo(dp);
     }
 
-    public ArrayList<T> getElements() {
-        return elements;
+    public ArrayList<T> getCards() {
+        return cards;
     }
 
     public ArrayList<T> getCards(int playerID) {
         ArrayList<T> visibleCards = new ArrayList<>();
-        for (int i = 0; i < elements.size(); i++) {
-            boolean[] b = elementVisibility.get(i);
-            if (b[playerID]) visibleCards.add(i, elements.get(i));
+        for (int i = 0; i < cards.size(); i++) {
+            boolean[] b = cardVisibility.get(i);
+            if (b[playerID]) visibleCards.add(i, cards.get(i));
             else visibleCards.add(i, null);
         }
         return visibleCards;
@@ -201,7 +201,7 @@ public class Deck<T> extends Component implements IDeck<T> {
     }
 
     public void clear() {
-        elements.clear();
+        cards.clear();
     }
 
     /**
@@ -245,39 +245,24 @@ public class Deck<T> extends Component implements IDeck<T> {
     }
 
     public boolean remove(T card) {
-        if (elements.contains(card)) {
-            elementVisibility.remove(elements.indexOf(card));
-            elements.remove(card);
+        if (cards.contains(card)) {
+            cardVisibility.remove(cards.indexOf(card));
+            cards.remove(card);
             return true;
         }
         return false;
     }
 
     public boolean remove(int idx) {
-        if (idx >= 0 && idx < elements.size()) {
-            elements.remove(idx);
-            elementVisibility.remove(idx);
+        if (idx >= 0 && idx < cards.size()) {
+            cards.remove(idx);
+            cardVisibility.remove(idx);
             return true;
         }
         return false;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Deck<?> deck = (Deck<?>) o;
-        return capacity == deck.capacity &&
-                Objects.equals(elements, deck.elements) &&
-                Objects.equals(elementVisibility, deck.elementVisibility) &&
-                Arrays.equals(deckVisibility, deck.deckVisibility) &&
-                Objects.equals(id, deck.id);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(capacity, elements, elementVisibility, id);
-        result = 31 * result + Arrays.hashCode(deckVisibility);
-        return result;
+    public int getSize() {
+        return cards.size();
     }
 }

@@ -3,6 +3,7 @@ package games.explodingkittens.actions;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
+import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 
 import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
@@ -20,7 +21,7 @@ public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrint
         boolean succes = sourceDeck.remove(card);
         targetDeck.add(card, targetIndex);
         ((ExplodingKittensGameState) gs).setGamePhase(PlayerMove);
-        gs.getTurnOrder().endPlayerTurnStep(gs);
+        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         return succes;
     }
 

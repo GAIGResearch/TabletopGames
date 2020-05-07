@@ -51,6 +51,11 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     }
 
     @Override
+    public void setComponents() {
+
+    }
+
+    @Override
     public Grid<Character> getGrid() {
         return grid;
     }

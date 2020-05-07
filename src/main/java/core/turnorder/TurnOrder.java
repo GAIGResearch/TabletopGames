@@ -5,24 +5,23 @@ import utilities.Utils;
 
 import java.util.Objects;
 
+import static utilities.Utils.GameResult.GAME_ONGOING;
+
 public abstract class TurnOrder {
 
     // Fixed
     protected int nPlayers;  // Number of players in the game
     protected int firstPlayer;  // ID of first player to get a turn in a round
-    protected int nStepsPerTurn;  // Number of steps in a turn before player's turn is finished
     protected int nMaxRounds;  // Number of rounds until the game is finished; -1 if infinite
 
     // Variable
     protected int turnOwner;  // Owner of current turn
-    protected int turnStep;  // 1 turn = n steps (by default n = 1)
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
 
-    public TurnOrder(int nPlayers, int nStepsPerTurn, int nMaxRounds) {
+    public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
         this.nPlayers = nPlayers;
-        this.nStepsPerTurn = nStepsPerTurn;
         this.nMaxRounds = nMaxRounds;
     }
 
@@ -36,10 +35,9 @@ public abstract class TurnOrder {
         turnOwner = 0;
         turnCounter = 0;
         roundCounter = 0;
-        turnStep = 0;
-        nStepsPerTurn = 1;
         nMaxRounds = -1;
     }
+
 
     public final void setStartingPlayer(int player) {
         firstPlayer = player;
@@ -54,25 +52,12 @@ public abstract class TurnOrder {
     public int getRoundCounter() {
         return roundCounter;
     }
-    public int getTurnStep() {
-        return turnStep;
-    }
     public int getTurnCounter() {
         return turnCounter;
     }
 
 
     /* The following can be overwritten by subclasses */
-
-    /**
-     * Method executed after a player action.
-     * By default it only increases the turn step.
-     * @param gameState - current game state.
-     */
-    public void endPlayerTurnStep(AbstractGameState gameState) {
-        turnStep++;
-        if (turnStep >= nStepsPerTurn) endPlayerTurn(gameState);
-    }
 
     /**
      * Method executed after a player's turn is finished.
@@ -84,9 +69,8 @@ public abstract class TurnOrder {
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
-            turnStep = 0;
             turnOwner = nextPlayer(gameState);
-            while (!gameState.isPlayerAlive(turnOwner)) {
+            while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
             }
         }
@@ -102,10 +86,9 @@ public abstract class TurnOrder {
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(Utils.GameResult.GAME_END);
         else {
-            turnStep = 0;
             turnCounter = 0;
             turnOwner = 0;
-            while (!gameState.isPlayerAlive(turnOwner)) {
+            while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
             }
         }
@@ -146,25 +129,19 @@ public abstract class TurnOrder {
         return nPlayers == turnOrder.nPlayers &&
                 turnOwner == turnOrder.turnOwner &&
                 roundCounter == turnOrder.roundCounter &&
-                turnCounter == turnOrder.turnCounter &&
-                turnStep == turnOrder.turnStep &&
                 firstPlayer == turnOrder.firstPlayer &&
-                nMaxRounds == turnOrder.nMaxRounds &&
-                nStepsPerTurn == turnOrder.nStepsPerTurn;
+                nMaxRounds == turnOrder.nMaxRounds;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, turnStep, firstPlayer, nStepsPerTurn, nMaxRounds);
+        return Objects.hash(nPlayers, turnOwner, roundCounter, firstPlayer, nMaxRounds);
     }
 
     public TurnOrder copyTo (TurnOrder turnOrder) {
         turnOrder.turnOwner = turnOwner;
-        turnOrder.turnCounter = turnCounter;
         turnOrder.roundCounter = roundCounter;
-        turnOrder.turnStep = turnStep;
         turnOrder.firstPlayer = firstPlayer;
-        turnOrder.nStepsPerTurn = nStepsPerTurn;
         turnOrder.nMaxRounds = nMaxRounds;
         return turnOrder;
     }

@@ -20,6 +20,7 @@ import java.util.Map;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
 import static games.pandemic.gui.PandemicCardView.drawDeckBack;
+import static utilities.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
     //TODO: images for tokens?
@@ -181,11 +182,12 @@ public class PandemicBoardView extends JComponent {
             }
 
             // Check if there are players here
-            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(PandemicConstants.playersBNHash);
+            PropertyIntArrayList prop = (PropertyIntArrayList) b.getProperty(playersHash);
             ArrayList<Integer> players = prop.getValues();
-            for (int p: players) {
+            for (int i = 0; i < players.size(); i++) {
                 // This player is here, draw them just above the node
                 // Find color of player
+                int p = players.get(i);
                 Card playerCard = (Card) gameState.getComponent(PandemicConstants.playerCardHash, p);
                 PropertyColor color = (PropertyColor) playerCard.getProperty(colorHash);
                 g.setColor(Utils.stringToColor(color.valueStr));

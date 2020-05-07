@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
-import static games.pandemic.PandemicConstants.playerHandHash;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class RearrangeCardsWithCard implements IAction {
@@ -33,7 +33,7 @@ public class RearrangeCardsWithCard implements IAction {
             cards[value] = deckFrom.draw();
         }
         Deck<Card> draws = new Deck<>("Temp Draws from: " + deckFrom.getID());
-        draws.setElements(new ArrayList<>(Arrays.asList(cards)));
+        draws.setCards(new ArrayList<>(Arrays.asList(cards)));
         boolean result = deckFrom.add(draws);
 
         if (result) {

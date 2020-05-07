@@ -1,5 +1,6 @@
 package players;
 
+import core.AbstractPlayer;
 import core.actions.IAction;
 import core.observations.IObservation;
 
@@ -13,15 +14,14 @@ public class RandomPlayer extends AbstractPlayer {
      */
     private final Random rnd;
 
-    public RandomPlayer(int playerID, Random rnd)
+    public RandomPlayer(Random rnd)
     {
-        super(playerID);
         this.rnd = rnd;
     }
 
-    public RandomPlayer(int playerID)
+    public RandomPlayer()
     {
-        this(playerID, new Random());
+        this(new Random());
     }
 
     @Override

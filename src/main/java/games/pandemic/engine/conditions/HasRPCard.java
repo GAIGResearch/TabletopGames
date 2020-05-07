@@ -6,8 +6,8 @@ import core.components.Deck;
 import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
 
-import static games.pandemic.PandemicConstants.nameHash;
-import static games.pandemic.PandemicConstants.playerHandHash;
+import static utilities.CoreConstants.nameHash;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class HasRPCard extends ConditionNode {
@@ -17,9 +17,9 @@ public class HasRPCard extends ConditionNode {
         int nPlayers = gs.getNPlayers();
         for (int i = 0; i < nPlayers; i++) {
             Deck<Card> ph = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, i);
-            int nCards = ph.getElements().size();
+            int nCards = ph.getSize();
             for (int cp = 0; cp < nCards; cp++) {
-                Card card = ph.getElements().get(cp);
+                Card card = ph.getCards().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     return true;
                 }

@@ -1,7 +1,6 @@
 package core;
 
 import core.actions.IAction;
-import players.AbstractPlayer;
 import players.ActionController;
 
 import javax.swing.*;
@@ -119,8 +118,7 @@ public abstract class GUI extends JFrame {
     protected void updateGameStateInfo(AbstractGameState gameState) {
         gameStatus.setText("Game status: " + gameState.getGameStatus());
         turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
-        turn.setText("Step: " + gameState.getTurnOrder().getTurnStep() +
-                "; Turn: " + gameState.getTurnOrder().getTurnCounter() +
+        turn.setText("Turn: " + gameState.getTurnOrder().getTurnCounter() +
                 "; Round: " + gameState.getTurnOrder().getRoundCounter());
         currentPlayer.setText("Current player: " + gameState.getTurnOrder().getCurrentPlayer(gameState));
     }

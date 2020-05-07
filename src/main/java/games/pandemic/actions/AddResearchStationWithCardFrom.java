@@ -7,6 +7,7 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.playerHandHash;
 
 
 @SuppressWarnings("unchecked")
@@ -50,16 +51,12 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom imple
         }else return false;
     }
 
-    public Card getCard() {
-        return card;
-    }
-
     @Override
     public String toString() {
         return "AddResearchStationWithCardFrom{" +
                 "card=" + card.toString() +
                 ", fromCity='" + fromCity + '\'' +
-                ", toCity='" + toCity + '\'' +
+                ", toCity='" + city + '\'' +
                 '}';
     }
 }

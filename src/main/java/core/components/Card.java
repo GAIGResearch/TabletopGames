@@ -5,7 +5,7 @@ import java.util.HashMap;
 import core.content.PropertyString;
 import utilities.Utils.ComponentType;
 
-import static games.pandemic.PandemicConstants.nameHash;
+import static utilities.CoreConstants.nameHash;
 
 public class Card extends Component implements Cloneable{
 

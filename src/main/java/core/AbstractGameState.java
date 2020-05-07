@@ -15,7 +15,6 @@ public abstract class AbstractGameState {
     protected final GameParameters gameParameters;
     protected ForwardModel forwardModel;
     protected TurnOrder turnOrder;
-    public boolean[] isPlayerAlive;
 
     protected int numAvailableActions;
     protected List<IAction> availableActions;
@@ -27,8 +26,6 @@ public abstract class AbstractGameState {
         this.gameParameters = gameParameters;
         this.forwardModel = model;
         this.turnOrder = turnOrder;
-        isPlayerAlive = new boolean[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++) isPlayerAlive[i] = true;
 
         numAvailableActions = 0;
         availableActions = new ArrayList<>();
@@ -42,16 +39,10 @@ public abstract class AbstractGameState {
     public final void setTurnOrder(TurnOrder turnOrder) {
         this.turnOrder = turnOrder;
     }
-    public final void setPlayerAlive(int player, boolean b) {
-        isPlayerAlive[player] = b;
-    }
     public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
     public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
 
     // Getters
-    public boolean isPlayerAlive(int player) {
-        return isPlayerAlive[player];
-    }
     public final TurnOrder getTurnOrder(){return turnOrder;}
     public final Utils.GameResult getGameStatus() {  return gameStatus; }
     public final GameParameters getGameParameters() { return this.gameParameters; }
@@ -73,6 +64,7 @@ public abstract class AbstractGameState {
     public void endGame() {}
     public abstract IObservation getObservation(int player);
     public abstract List<IAction> computeAvailableActions();
+    public abstract void setComponents();
 
     /*
     public AbstractGameState(AbstractGameState gameState) {

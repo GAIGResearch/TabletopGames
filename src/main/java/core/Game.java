@@ -3,12 +3,12 @@ package core;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
-import players.AbstractPlayer;
+import players.HumanGUIPlayer;
 
 import java.util.Collections;
 import java.util.List;
 
-import static games.pandemic.PandemicConstants.VERBOSE;
+import static utilities.CoreConstants.VERBOSE;
 
 public abstract class Game {
 
@@ -19,19 +19,30 @@ public abstract class Game {
     protected AbstractGameState gameState;
     protected ForwardModel forwardModel;
 
+    // GameState observations as seen by different players.
     protected IObservation[] gameStateObservations;
 
-    public Game(List<AbstractPlayer> players) {
+    public Game(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
         this.players = players;
+        int id = 0;
+        for (AbstractPlayer player: players) {
+            player.playerID = id++;
+        }
+        this.forwardModel = model;
+        this.gameState = gameState;
+        this.gameState.setComponents();
+        this.forwardModel.setup(gameState);
     }
 
     public void run(GUI gui) {
+
         while (!gameState.isTerminal()){
             if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
             AbstractPlayer player = players.get(activePlayer);
+
             // Get actions for the player
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
@@ -40,10 +51,10 @@ public abstract class Game {
             }
 
             int action = -1;
-            while (action == -1) {
-                action = player.getAction(observation, actions);
 
-                if (gui != null) {
+            if (gui != null && player instanceof HumanGUIPlayer) {
+                while (action == -1) {
+                    action = player.getAction(observation, actions);
                     gui.update(player, gameState);
                     try {
                         Thread.sleep(100);
@@ -51,11 +62,13 @@ public abstract class Game {
                         System.out.println("EXCEPTION " + e);
                     }
                 }
+            } else {
+                action = player.getAction(observation, actions);
             }
+            System.out.println(actions.get(action).toString());
 
             // Resolve actions and game rules for the turn
             forwardModel.next(gameState, actions.get(action));
-            gameState.getTurnOrder().endPlayerTurnStep(gameState);
         }
 
         gameState.endGame();

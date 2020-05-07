@@ -22,6 +22,47 @@ public class UnoGameState extends AbstractGameState {
 
     public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
+    }
+
+    @Override
+    public IObservation getObservation(int player) {
+
+        int[] cardsPerPlayer = new int[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++)
+            cardsPerPlayer[i] = playerDecks.get(i).getSize();
+
+        return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
+                cardsPerPlayer, drawPile.getSize());
+    }
+
+    @Override
+    public void endGame() {
+        gameStatus = Utils.GameResult.GAME_DRAW;
+        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions() {
+        ArrayList<IAction> actions = new ArrayList<>();
+        int player = turnOrder.getCurrentPlayer(this);
+        Deck<UnoCard> playerDeck = playerDecks.get(player);
+        for (UnoCard card : playerDeck.getCards()){
+            if (card.isPlayable(this))
+            {
+                if (card instanceof UnoNumberCard)
+                    actions.add(new PlayCard<>(card, playerDeck, discardPile));
+                if (card instanceof UnoSkipCard)
+                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoSkipCard.SkipCardEffect()));
+                if (card instanceof UnoReverseCard)
+                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoReverseCard.ReverseCardEffect()));
+            }
+        }
+        actions.add(new DrawCards<>(drawPile, playerDecks.get(player), discardPile, 1));
+        return actions;
+    }
+
+    @Override
+    public void setComponents() {
 
         drawPile = new Deck<>("Draw Pile");
 
@@ -57,43 +98,6 @@ public class UnoGameState extends AbstractGameState {
 
         currentCard = drawPile.draw();
         discardPile.add(currentCard);
-    }
-
-    @Override
-    public IObservation getObservation(int player) {
-
-        int[] cardsPerPlayer = new int[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++)
-            cardsPerPlayer[i] = playerDecks.get(i).getElements().size();
-
-        return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
-                cardsPerPlayer, drawPile.getElements().size());
-    }
-
-    @Override
-    public void endGame() {
-        gameStatus = Utils.GameResult.GAME_DRAW;
-        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
-    }
-
-    @Override
-    public List<IAction> computeAvailableActions() {
-        ArrayList<IAction> actions = new ArrayList<>();
-        int player = turnOrder.getCurrentPlayer(this);
-        Deck<UnoCard> playerDeck = playerDecks.get(player);
-        for (UnoCard card : playerDeck.getElements()){
-            if (card.isPlayable(this))
-            {
-                if (card instanceof UnoNumberCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile));
-                if (card instanceof UnoSkipCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoSkipCard.SkipCardEffect()));
-                if (card instanceof UnoReverseCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoReverseCard.ReverseCardEffect()));
-            }
-        }
-        actions.add(new DrawCards<>(drawPile, playerDecks.get(player), discardPile, 1));
-        return actions;
     }
 
     public void registerWinner(int playerID){

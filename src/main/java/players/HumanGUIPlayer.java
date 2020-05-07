@@ -1,19 +1,15 @@
 package players;
 
+import core.AbstractPlayer;
 import core.actions.IAction;
 import core.observations.IObservation;
-import core.observations.IPrintable;
-
-import javax.swing.*;
 import java.util.List;
-import java.util.Scanner;
 
 
 public class HumanGUIPlayer extends AbstractPlayer {
     ActionController ac;
 
-    public HumanGUIPlayer(int playerID, ActionController ac){
-        super(playerID);
+    public HumanGUIPlayer(ActionController ac){
         this.ac = ac;
     }
 

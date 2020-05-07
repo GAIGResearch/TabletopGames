@@ -10,17 +10,18 @@ import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
 
 public class AddResearchStation implements IAction {
-    protected String toCity;
+    protected String city;
 
     public AddResearchStation(String city) {
-        this.toCity = city;
+        this.city = city;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, toCity);
+        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, city);
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(true));
@@ -39,19 +40,19 @@ public class AddResearchStation implements IAction {
         if(other instanceof AddResearchStation)
         {
             AddResearchStation otherAction = (AddResearchStation) other;
-            return toCity.equals(otherAction.toCity);
+            return city.equals(otherAction.city);
 
         }else return false;
-    }
-
-    public String getToCity() {
-        return toCity;
     }
 
     @Override
     public String toString() {
         return "AddResearchStation{" +
-                "city='" + toCity + '\'' +
+                "toCity='" + city + '\'' +
                 '}';
+    }
+
+    public String getCity() {
+        return city;
     }
 }

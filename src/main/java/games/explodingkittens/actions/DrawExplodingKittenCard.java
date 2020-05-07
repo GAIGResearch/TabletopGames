@@ -4,6 +4,7 @@ import core.actions.IAction;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
+import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
@@ -32,7 +33,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
         ExplodingKittenCard.CardType type = c.cardType;
         if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
             ExplodingKittenCard defuseCard = null;
-            for (ExplodingKittenCard card : deckTo.getElements()){
+            for (ExplodingKittenCard card : deckTo.getCards()){
                 if (card.cardType == ExplodingKittenCard.CardType.DEFUSE){
                     defuseCard = card;
                     break;
@@ -46,18 +47,18 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
                 IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
-                for (ExplodingKittenCard card : deckTo.getElements()){
+                for (ExplodingKittenCard card : deckTo.getCards()){
                     discardDeck.add(card);
                 }
                 deckTo.clear();
                 discardDeck.add(c);
-                gs.getTurnOrder().endPlayerTurnStep(gs);
+                ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
                 //((ExplodingKittensGameState) gs).setActivePlayer(((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID));
                 //((ExplodingKittensGameState) gs).remainingDraws = 1;
             }
         } else {
             deckTo.add(c);
-            gs.getTurnOrder().endPlayerTurnStep(gs);
+            ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         }
         return true;
     }
