@@ -26,14 +26,24 @@ public class LoveLetterForwardModel extends ForwardModel {
             llgs.setGamePhase(LoveLetterGameState.GamePhase.PlayerMove);
         else{
             llgs.setGamePhase(LoveLetterGameState.GamePhase.DrawPhase);
-            llTurnOrder.endPlayerTurn(llgs);
-            if (llgs.getRemainingCards() == 0)
-                checkWinningCondition(llgs);
+            checkWinningCondition(llgs);
         }
     }
 
-    private void checkWinningCondition(LoveLetterGameState llgs){
-        System.out.println();
+    private void checkWinningCondition(LoveLetterGameState llgs) {
+        int playersAlive = 0;
+        for (boolean b : llgs.isPlayerAlive)
+            if (b)
+                playersAlive += 1;
+
+        if (playersAlive == 1) {
+            // game ends because only a single player is left
+            llgs.endGame();
+        }
+        else if (llgs.getRemainingCards() == 0){
+            // game needs to end because their are no cards left
+            llgs.endGame();
+        }
     }
 
     private void printActionStack(){

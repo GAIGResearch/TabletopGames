@@ -37,7 +37,10 @@ public class PrinceAction extends PlayCard<LoveLetterCard> implements IAction, I
             else
             {
                 opponentDiscardPile.add(card);
-                opponentDeck.add(drawPile.draw());
+                LoveLetterCard cardDrawn = drawPile.draw();
+                if (cardDrawn == null)
+                    cardDrawn = ((LoveLetterGameState)gs).getReserveCard();
+                opponentDeck.add(cardDrawn);
             }
 
         }

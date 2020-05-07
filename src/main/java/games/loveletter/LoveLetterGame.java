@@ -7,6 +7,7 @@ import core.observations.IObservation;
 import core.observations.IPrintable;
 import players.AbstractPlayer;
 import players.RandomPlayer;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ public class LoveLetterGame extends Game {
     @Override
     public void run(GUI gui) {
         while (!gameState.isTerminal()){
+            System.out.println();
+            System.out.println();
             if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
@@ -39,10 +42,10 @@ public class LoveLetterGame extends Game {
             }
 
             int action = players.get(activePlayer).getAction(observation, actions);
+            forwardModel.next(gameState, actions.get(action));
             gameState.getTurnOrder().endPlayerTurnStep(gameState);
 
             // Resolve core.actions and game rules for the turn
-            forwardModel.next(gameState, actions.get(action));
 
             if (gui != null) {
                 gui.update(gameState);
@@ -66,7 +69,7 @@ public class LoveLetterGame extends Game {
         agents.add(new RandomPlayer(2));
         agents.add(new RandomPlayer(3));
 
-        for (int i=0; i<1; i++) {
+        for (int i=0; i<1000; i++) {
             Game game = new LoveLetterGame(agents);
             game.run(null);
             LoveLetterGameState gameState = (LoveLetterGameState) game.getGameState();
@@ -75,8 +78,9 @@ public class LoveLetterGame extends Game {
             // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
 
+            Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){
-                if (gameState.isPlayerAlive(j))
+                if (playerResults[j] == Utils.GameResult.GAME_WIN)
                     System.out.println("Player " + j + " won");
             }
         }

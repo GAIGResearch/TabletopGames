@@ -22,14 +22,14 @@ public class LoveLetterGameState extends AbstractGameState {
         PlayerMove
     }
 
-    private List<Deck<LoveLetterCard>> playerHandCards;
+    private List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
     private List<Deck<LoveLetterCard>> playerDiscardCards;
-    private Deck<LoveLetterCard> drawPile;
+    private PartialObservableDeck<LoveLetterCard> drawPile;
     private Deck<LoveLetterCard> discardPile;
     private boolean[] effectProtection;
     private GamePhase gamePhase = GamePhase.DrawPhase;
 
-    public static boolean PARTIAL_OBSERVABLE = true;
+    public static boolean PARTIAL_OBSERVABLE = false;
 
     public GamePhase getGamePhase() {
         return gamePhase;
@@ -47,7 +47,7 @@ public class LoveLetterGameState extends AbstractGameState {
     public void killPlayer(int playerID){
         isPlayerAlive[playerID] = false;
         while (playerHandCards.get(playerID).getCards().size() > 0)
-            playerDiscardCards.get(playerID).add(playerDiscardCards.get(playerID).draw());
+            playerDiscardCards.get(playerID).add(playerHandCards.get(playerID).draw());
 
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
@@ -57,6 +57,8 @@ public class LoveLetterGameState extends AbstractGameState {
             this.gameStatus = Utils.GameResult.GAME_END;
         }
     }
+
+    public LoveLetterCard getReserveCard(){return discardPile.draw();}
 
     public boolean getProtection(int playerID){
         return effectProtection[playerID];
@@ -69,7 +71,7 @@ public class LoveLetterGameState extends AbstractGameState {
     public int getRemainingCards(){return drawPile.getCards().size();}
 
     public void setComponents(LoveLetterParameters gameParameters) {
-        drawPile = new Deck<>();
+        drawPile = new PartialObservableDeck<>(getNPlayers());
         effectProtection = new boolean[getNPlayers()];
 
         // add all cards and distribute 7 random cards to each player
@@ -92,8 +94,7 @@ public class LoveLetterGameState extends AbstractGameState {
             Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
             visibility[i] = true;
 
-            Deck<LoveLetterCard> playerCards = new Deck<>();
-            playerCards.setDeckVisibility(visibility);
+            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>(visibility);
             playerCards.add(drawPile.draw());
             playerHandCards.add(playerCards);
 
@@ -164,6 +165,7 @@ public class LoveLetterGameState extends AbstractGameState {
                             actions.add(new BaronAction(card, playerDeck, playerDiscardPile,
                                     playerHandCards.get(targetPlayer), targetPlayer, playerID));
                         }
+                        break;
                     case Handmaid:
                         actions.add(new HandmaidAction(card, playerDeck, playerDiscardPile, playerID));
                         break;
@@ -175,6 +177,7 @@ public class LoveLetterGameState extends AbstractGameState {
                                     playerHandCards.get(targetPlayer), targetPlayer, drawPile,
                                     playerDiscardCards.get(targetPlayer)));
                         }
+                        break;
                     case King:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
                             if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
@@ -182,13 +185,15 @@ public class LoveLetterGameState extends AbstractGameState {
                             actions.add(new KingAction(card, playerDeck, playerDiscardPile,
                                     playerHandCards.get(targetPlayer), targetPlayer));
                         }
+                        break;
                     case Countess:
+                        actions.add(new CountessAction(card, playerDeck, playerDiscardPile));
                         break;
                     case Princess:
-                        actions.add(new PrincessAction(card, playerDeck, discardPile, playerID));
+                        actions.add(new PrincessAction(card, playerDeck, playerDiscardPile, playerID));
                         break;
                     default:
-                        System.out.println("No core.actions known for cardtype: " + card.cardType.toString());
+                        System.out.println("No core actions known for cardtype: " + card.cardType.toString());
                 }
             }
         }
@@ -199,15 +204,62 @@ public class LoveLetterGameState extends AbstractGameState {
 
     @Override
     public IObservation getObservation(int player) {
-        return new LoveLetterObservation(playerHandCards, drawPile, discardPile, player);
+        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, discardPile, effectProtection, player, gamePhase, isPlayerAlive);
     }
 
     @Override
     public void endGame() {
         this.gameStatus = Utils.GameResult.GAME_END;
+
         for (int i = 0; i < getNPlayers(); i++){
             playerResults[i] = isPlayerAlive[i] ? Utils.GameResult.GAME_WIN : Utils.GameResult.GAME_LOSE;
         }
+
+        List<Integer> bestPlayers = new ArrayList<>();
+        int bestValue = 0;
+        int points;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (playerResults[i] == Utils.GameResult.GAME_WIN)
+                 points = playerHandCards.get(i).peek().cardType.getValue();
+            else
+                points = 0;
+            if (points > bestValue){
+                bestValue = points;
+                bestPlayers.clear();
+                bestPlayers.add(i);
+            } else if (points == bestValue) {
+                bestPlayers.add(i);
+            }
+        }
+
+        if (bestPlayers.size() == 1){
+            for (int i = 0; i < getNPlayers(); i++) {
+                playerResults[i] = Utils.GameResult.GAME_LOSE;
+            }
+            playerResults[bestPlayers.get(0)] = Utils.GameResult.GAME_WIN;
+            return;
+        }
+
+        bestValue = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            points = 0;
+            if (playerResults[i] == Utils.GameResult.GAME_WIN)
+                for (LoveLetterCard card : playerDiscardCards.get(i).getCards())
+                    points += card.cardType.getValue();
+            if (points > bestValue){
+                bestValue = points;
+                bestPlayers.clear();
+                bestPlayers.add(i);
+            } else if (points == bestValue) {
+                bestPlayers.add(i);
+            }
+        }
+
+        for (int i = 0; i < getNPlayers(); i++) {
+            playerResults[i] = Utils.GameResult.GAME_LOSE;
+        }
+        for (Integer playerID : bestPlayers)
+            playerResults[playerID] = Utils.GameResult.GAME_WIN;
     }
 
     private ArrayList<IAction> drawAction(int player){
@@ -269,6 +321,8 @@ public class LoveLetterGameState extends AbstractGameState {
     public void printDeck(IDeck<LoveLetterCard> deck){
         StringBuilder sb = new StringBuilder();
         for (LoveLetterCard card : deck.getCards()){
+            if (card == null)
+                System.out.println();
             sb.append(card.cardType.toString());
             sb.append(",");
         }

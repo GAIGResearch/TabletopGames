@@ -8,6 +8,8 @@ public class LoveLetterTurnOrder extends AlternatingTurnOrder {
 
     public LoveLetterTurnOrder(int nPlayers){
         super(nPlayers);
+        setStartingPlayer(0);
+        nStepsPerTurn = 2;
     }
 
     @Override

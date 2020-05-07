@@ -27,9 +27,9 @@ public class GuardAction extends PlayCard<LoveLetterCard> implements IAction, IP
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
         if (!((LoveLetterGameState)gs).getProtection(opponentID)){
-            for (LoveLetterCard card : opponentDeck.getCards())
-                if (card.cardType == this.cardType)
-                    ((LoveLetterGameState) gs).killPlayer(opponentID);
+            LoveLetterCard card = opponentDeck.peek();
+            if (card.cardType == this.cardType)
+                ((LoveLetterGameState) gs).killPlayer(opponentID);
         }
 
         return false;

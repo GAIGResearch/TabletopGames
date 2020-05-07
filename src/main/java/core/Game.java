@@ -28,6 +28,7 @@ public abstract class Game {
 
     public void run(GUI gui) {
         while (!gameState.isTerminal()){
+            System.out.println();
             if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
@@ -36,11 +37,11 @@ public abstract class Game {
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
             if (observation != null && VERBOSE) {
-                ((IPrintable) observation).printToConsole();
+                //((IPrintable) observation).printToConsole();
             }
 
             int action = players.get(activePlayer).getAction(observation, actions);
-            gameState.getTurnOrder().endPlayerTurnStep(gameState);
+            //gameState.getTurnOrder().endPlayerTurnStep(gameState);
 
             // Resolve core.actions and game rules for the turn
             forwardModel.next(gameState, actions.get(action));
