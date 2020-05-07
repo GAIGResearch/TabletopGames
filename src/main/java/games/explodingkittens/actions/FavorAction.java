@@ -1,12 +1,13 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
+import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
-import turnorder.TurnOrder;
+import core.turnorder.TurnOrder;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.FavorPhase;
 
 
 public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
@@ -20,20 +21,20 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        super.Execute(gs, turnOrder);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
-        ekgs.gamePhase = ExplodingKittensGamePhase.FavorPhase;
-        ekgs.playerGettingAFavor = playerAskingForFavor;
+        ekgs.setGamePhase(FavorPhase);
+        ekgs.setPlayerGettingAFavor(playerAskingForFavor);
 
-        ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) turnOrder;
+        ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
         ekto.registerFavorAction(target);
         return true;
     }
 
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 

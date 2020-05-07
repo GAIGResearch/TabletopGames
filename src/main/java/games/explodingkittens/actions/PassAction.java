@@ -1,9 +1,8 @@
 package games.explodingkittens.actions;
 
-import actions.IAction;
+import core.actions.IAction;
 import core.AbstractGameState;
-import observations.IPrintable;
-import turnorder.TurnOrder;
+import core.observations.IPrintable;
 
 public class PassAction implements IAction, IsNope, IPrintable {
 
@@ -13,7 +12,7 @@ public class PassAction implements IAction, IsNope, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         return false;
     }
 
@@ -28,7 +27,7 @@ public class PassAction implements IAction, IsNope, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

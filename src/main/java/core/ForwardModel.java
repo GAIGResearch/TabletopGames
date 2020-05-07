@@ -1,8 +1,8 @@
 package core;
 
-import actions.IAction;
-import turnorder.TurnOrder;
+import core.actions.IAction;
 
 public abstract class ForwardModel {
-    public abstract void next(AbstractGameState currentState, TurnOrder turnOrder, IAction IAction);
+    public abstract void setup(AbstractGameState firstState);
+    public abstract void next(AbstractGameState currentState, IAction action);
 }

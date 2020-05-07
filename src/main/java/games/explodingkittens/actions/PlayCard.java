@@ -1,9 +1,8 @@
 package games.explodingkittens.actions;
 
-import actions.IAction;
-import components.IDeck;
+import core.actions.IAction;
+import core.components.IDeck;
 import core.AbstractGameState;
-import turnorder.TurnOrder;
 
 
 public class PlayCard<T> implements IAction {
@@ -19,9 +18,9 @@ public class PlayCard<T> implements IAction {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        boolean succes = sourceDeck.remove(card);
+    public boolean execute(AbstractGameState gs) {
+        boolean success = sourceDeck.remove(card);
         targetDeck.add(card);
-        return succes;
+        return success;
     }
 }

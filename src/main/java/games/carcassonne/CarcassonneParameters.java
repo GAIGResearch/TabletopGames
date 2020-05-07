@@ -8,9 +8,7 @@ import static games.carcassonne.CarcassonneGameState.CarcassonneType;
 
 public class CarcassonneParameters extends GameParameters {
     HashMap<CarcassonneType[][], Integer> tiles = new HashMap<>();
-    public CarcassonneParameters(int nPlayers){
-        super(nPlayers);
-
+    public CarcassonneParameters(){
         // church
          tiles.put(new CarcassonneType[][]{
                  {CarcassonneType.Grass, CarcassonneType.Grass, CarcassonneType.Grass},

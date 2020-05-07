@@ -1,11 +1,13 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import games.explodingkittens.ExplodingKittensGamePhase;
+import core.observations.IPrintable;
+import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
-import turnorder.TurnOrder;
+import core.turnorder.TurnOrder;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 public class SkipAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
 
@@ -15,10 +17,10 @@ public class SkipAction<T> extends PlayCard<T> implements IsNopeable, IPrintable
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        super.Execute(gs, turnOrder);
-        ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
-        turnOrder.endPlayerTurn(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
+        ((ExplodingKittensGameState) gs).setGamePhase(PlayerMove);
+        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         //int nextPlayer = ((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID);
         //if (nextPlayer != playerID)
         //    ((ExplodingKittensGameState) gs).remainingDraws = 1;
@@ -36,11 +38,11 @@ public class SkipAction<T> extends PlayCard<T> implements IsNopeable, IPrintable
 
     @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

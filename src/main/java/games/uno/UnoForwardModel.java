@@ -1,19 +1,24 @@
 package games.uno;
 
-import actions.IAction;
+import core.actions.IAction;
 import core.AbstractGameState;
 import core.ForwardModel;
-import turnorder.TurnOrder;
 
 public class UnoForwardModel extends ForwardModel {
 
     @Override
-    public void next(AbstractGameState gameState, TurnOrder turnOrder, IAction action) {
-        action.Execute(gameState, turnOrder);
-        turnOrder.endPlayerTurn(gameState);
+    public void setup(AbstractGameState firstState) {
 
-        if (turnOrder.getTurnCounter() == 9)
+    }
+
+    @Override
+    public void next(AbstractGameState gameState, IAction action) {
+        action.execute(gameState);
+        gameState.getTurnOrder().endPlayerTurn(gameState);
+
+        if (gameState.getTurnOrder().getRoundCounter() == 9) {
             gameState.endGame();
+        }
 
         checkWinCondition((UnoGameState) gameState);
     }
@@ -21,7 +26,7 @@ public class UnoForwardModel extends ForwardModel {
     public void checkWinCondition(UnoGameState gameState) {
         for (int i = 0; i < gameState.getNPlayers(); i++)
         {
-            if (gameState.playerDecks.get(i).getCards().size() == 0)
+            if (gameState.playerDecks.get(i).getSize() == 0)
                 gameState.registerWinner(i);
         }
     }
