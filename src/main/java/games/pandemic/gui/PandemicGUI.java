@@ -183,6 +183,7 @@ public class PandemicGUI extends GUI {
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
         JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
+        gamePhase = new JLabel();
         gameInfo.add(gamePhase);
 
         return gameInfo;
@@ -481,7 +482,7 @@ public class PandemicGUI extends GUI {
         int n = playerHands[player].size();
         for (int i = 0; i < n; i++) {
             PandemicCardView pcv = playerHands[player].get(i);
-            if (pcv.getCard().equals(c)) return i;
+            if (pcv.getCard() != null && pcv.getCard().equals(c)) return i;
         }
         return -1;
     }
