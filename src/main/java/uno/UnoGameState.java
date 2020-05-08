@@ -4,6 +4,9 @@ import actions.IAction;
 import components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
+import turnorder.AlternatingTurnOrder;
+import turnorder.TurnOrder;
+import uno.actions.NoCards;
 import uno.actions.PlayCard;
 import uno.cards.*;
 import observations.Observation;
@@ -15,46 +18,88 @@ import java.util.Random;
 
 
 public class UnoGameState extends AbstractGameState {
-    private List<Deck<UnoCard>> playerDecks;
+    public List<Deck<UnoCard>> playerDecks;
     private Deck<UnoCard> drawPile;
     private Deck<UnoCard> discardPile;
 
     public int currentNumber;
     public UnoCard.UnoCardColor currentColor;
-    private UnoCard currentCard;
+    public UnoCard currentCard;
 
-    public UnoGameState(GameParameters gameParameters) {
+    public TurnOrder turnOrder;
+    int nPlayers;
+
+    private final int initialNumberOfCardsForEachPLayer = 3;
+
+    public UnoGameState(GameParameters gameParameters, TurnOrder turnOrder) {
         super(gameParameters);
+        this.turnOrder = turnOrder;
+        nPlayers = gameParameters.nPlayers;
 
-        int nPlayers = gameParameters.nPlayers;
+        gameSetUp(nPlayers);
+    }
 
+    private void gameSetUp(int nPlayers)
+    {
         // Create the draw deck with all the cards
         drawPile = new Deck<>();
         CreateCards();
 
         // Shuffle the deck
-        int seed = 2;
+        int seed = 2;                        // To be removed after debugging
         // drawPile.shuffle();
-        drawPile.shuffle(new Random(seed));
+        drawPile.shuffle(new Random(seed));  // To be removed after debugging
 
         // Create the discard deck, at the beginning it is empty
         discardPile = new Deck<>();
 
-        // Create a deck for each player and draw 7 cards to each one
         playerDecks = new ArrayList<>(nPlayers);
-
-        for (int player = 0; player < nPlayers; player++) {
-            playerDecks.add(new Deck<>());
-            for (int card = 0; card < 7; card++) {
-                playerDecks.get(player).add(drawPile.draw());
-            }
-        }
+        DrawCardsToPlayers();
 
         // get current card and set the current number and color
         currentCard = drawPile.draw();
+
+        // The first card cannot be a wild
+        while (isWildCard(currentCard))
+        {
+            seed ++;                        // To be removed after debugging
+            drawPile.add(currentCard);
+            drawPile.shuffle(new Random(seed));
+            currentCard = drawPile.draw();
+        }
+
         discardPile.add(currentCard);
         currentColor = currentCard.color;
         currentNumber = currentCard.number;
+
+        // If the first card is Skip, Reverse or DrawTwo, play the card
+        if (!isNumberCard(currentCard)) {
+            playFirstCard(currentCard);
+        }
+    }
+
+    private boolean isWildCard(UnoCard card) {
+        return card instanceof UnoWildCard || card instanceof UnoWildDrawFourCard;
+    }
+
+    private boolean isNumberCard(UnoCard card) {
+        return card instanceof UnoNumberCard;
+    }
+
+    private void playFirstCard(UnoCard card) {
+        if (card instanceof UnoSkipCard) {
+            ((AlternatingTurnOrder) turnOrder).skip();
+        }
+        else if (card instanceof UnoReverseCard) {
+            ((AlternatingTurnOrder) turnOrder).reverse();
+        }
+        else if (card instanceof UnoDrawTwoCard) {
+            AbstractPlayer nextPlayer = ((AlternatingTurnOrder) turnOrder).getNextPlayer();
+            int playerID = nextPlayer.playerID;
+
+            playerDecks.get(playerID).add(drawPile.draw());
+            playerDecks.get(playerID).add(drawPile.draw());
+        }
     }
 
     // Create all the cards and include them into the drawPile
@@ -72,6 +117,7 @@ public class UnoGameState extends AbstractGameState {
             }
         }
 
+        /* SIMPLIFICATION ONLY WITH NUMBER CARDS
         // Create the DrawTwo, Reverse and Skip cards for each color
         for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
             if (color == UnoCard.UnoCardColor.Wild)
@@ -90,6 +136,17 @@ public class UnoGameState extends AbstractGameState {
             drawPile.add(new UnoWildCard());
             drawPile.add(new UnoWildDrawFourCard());
         }
+        */
+
+    }
+
+    private void DrawCardsToPlayers() {
+        for (int player = 0; player < nPlayers; player++) {
+            playerDecks.add(new Deck<>());
+            for (int card = 0; card < initialNumberOfCardsForEachPLayer; card++) {
+                playerDecks.get(player).add(drawPile.draw());
+            }
+        }
     }
 
     @Override
@@ -98,14 +155,19 @@ public class UnoGameState extends AbstractGameState {
         return new UnoObservation(currentCard, currentColor, currentNumber, playerHand);
     }
 
+    // TODO
     @Override
     public void endGame() {
 
     }
 
-    // TODO
-    // The game is ended if there is a player without cards
+      // The game is ended if there is a player without cards
     public boolean isEnded() {
+        for (int playerID = 0; playerID < nPlayers; playerID++) {
+            int nCards = playerDecks.get(playerID).getCards().size();
+            if (nCards == 0)
+                return true;
+        }
         return false;
     }
 
@@ -120,7 +182,32 @@ public class UnoGameState extends AbstractGameState {
                 actions.add(new PlayCard<>(card, playerHand, discardPile));
         }
 
+        if (actions.isEmpty())
+            actions.add(new NoCards(drawPile, playerHand));
+
         return actions;
+    }
+
+    public int GetCurrentPLayerID()
+    {
+        return turnOrder.getCurrentPlayer(this).playerID;
+    }
+
+    public void UpdateCurrentCard(UnoCard card)
+    {
+        currentCard = card;
+        currentColor = card.color;
+        currentNumber = card.number;
+    }
+
+    public int getWinnerID()
+    {
+        for (int playerID = 0; playerID < nPlayers; playerID++) {
+            int nCards = playerDecks.get(playerID).getCards().size();
+            if (nCards == 0)
+                return playerID;
+        }
+        return -1;
     }
 }
 

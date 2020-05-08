@@ -13,4 +13,10 @@ public class UnoDrawTwoCard extends UnoCard {
     public boolean isPlayable(UnoGameState gameState) {
         return this.color == gameState.currentColor;
     }
+
+
+    @Override
+    public String toString() {
+        return color.toString() + "DrawTwo";
+    }
 }

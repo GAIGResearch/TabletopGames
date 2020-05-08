@@ -13,4 +13,9 @@ public class UnoWildCard extends UnoCard {
     public boolean isPlayable(UnoGameState gameState) {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Wild";
+    }
 }

@@ -4,43 +4,45 @@ import actions.IAction;
 import core.ForwardModel;
 import core.GUI;
 import core.Game;
+import observations.IPrintable;
 import observations.Observation;
 import players.AbstractPlayer;
 import players.HumanConsolePlayer;
 import turnorder.AlternatingTurnOrder;
 import turnorder.TurnOrder;
+import uno.actions.PlayCard;
 
 import java.util.*;
 
 public class UnoGame extends Game {
 
-    TurnOrder turnOrder;
-    ForwardModel forwardModel = new UnoForwardModel();
+    private TurnOrder turnOrder;
+    private ForwardModel forwardModel = new UnoForwardModel();
 
     public UnoGame(List<AbstractPlayer> agents) {
         int nPlayers = agents.size();
 
-        turnOrder = new AlternatingTurnOrder(agents);                               // The turn order can change
-        gameState = new UnoGameState(new UnoGameParameters(nPlayers));
+        turnOrder = new AlternatingTurnOrder(agents);
+        UnoGameParameters gameParameters = new UnoGameParameters(nPlayers);
+        gameState = new UnoGameState(gameParameters, turnOrder);
     }
 
     @Override
     public void run(GUI gui) {
         while (!isEnded()) {
+            System.out.println("### " + turnOrder.getTurnCounter());
             AbstractPlayer currentPlayer = turnOrder.getCurrentPlayer(gameState);
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(currentPlayer));
             Observation observation = gameState.getObservation(currentPlayer);
-
-            //((IPrintable) observation).PrintToConsole();
             int actionIdx = currentPlayer.getAction(observation, actions);
-
             forwardModel.next(gameState, turnOrder, actions.get(actionIdx));
             turnOrder.endPlayerTurn(gameState);
             System.out.println();
         }
 
-        //((IPrintable) gameState.getObservation(null)).PrintToConsole();
-        //System.out.println(Arrays.toString(gameState.getPlayerResults()));
+        System.out.println("**************************************************");
+        System.out.println("The winner is the player: " + ((UnoGameState) gameState).getWinnerID());
+        System.out.println("**************************************************");
     }
 
     // The game is ended if there is a player without cards
@@ -51,7 +53,6 @@ public class UnoGame extends Game {
 
     @Override
     public HashSet<Integer> winners() {
-        // TODO
         return null;
     }
 

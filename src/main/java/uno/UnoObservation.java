@@ -7,37 +7,21 @@ import observations.Observation;
 
 public class UnoObservation implements IPrintable, Observation {
 
-    String[] strings = new String[5];
+    String[] strings = new String[4];
 
     public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, int currentNumber, Deck<UnoCard> playerHand) {
-
-    }
-
-    /*
-    public UnoObservation(UnoCard currentCard, Deck<UnoCard> playerHand, Deck<UnoCard> discardPile, int[] cardsPerPlayer, int cardsInDeck){
-        strings[0] = "Current Card: " + currentCard.toString();
-
+        strings[0] = "----------------------------------------------------";
+        strings[1] = "Current Card: " + currentCard.toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Player Hand: ");
 
         for (UnoCard card : playerHand.getCards()) {
             sb.append(card.toString());
-            sb.append("\t");
-        }
-        strings[1] = sb.toString();
-
-        sb = new StringBuilder();
-        sb.append("Discard Pile: ");
-        for (UnoCard card : discardPile.getCards()) {
-            sb.append(card.toString());
-            sb.append("\t");
+            sb.append(" ");
         }
         strings[2] = sb.toString();
-
-        strings[3] = "Cards per player: " + Arrays.toString(cardsPerPlayer);
-        strings[4] = "Remaining cards in draw pile: " + Integer.toString(cardsInDeck);
+        strings[3] = "----------------------------------------------------";
     }
-*/
 
     @Override
     public void PrintToConsole() {
