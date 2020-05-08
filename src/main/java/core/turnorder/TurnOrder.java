@@ -109,7 +109,7 @@ public abstract class TurnOrder {
      * @return - int, player ID in range [0, nPlayers)
      */
     public int nextPlayer(AbstractGameState gameState) {
-        return turnOwner++;
+        return turnOwner+1;
     }
 
     /**

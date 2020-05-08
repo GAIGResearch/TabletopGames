@@ -184,15 +184,14 @@ public class PandemicGUI extends GUI {
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
         JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
-        gamePhase = new JLabel();
         gameInfo.add(gamePhase);
 
         return gameInfo;
     }
 
-    protected void updateGameStateInfo() {
+    protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
-        gamePhase.setText("Game phase: " + gameState.getGamePhase());
+        gamePhase = new JLabel("Game phase: " + this.gameState.getGamePhase());
     }
 
     private JPanel createCounterArea() {
