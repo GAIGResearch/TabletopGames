@@ -25,16 +25,6 @@ public abstract class GUI extends JFrame {
     }
 
     /**
-     * Resets all action buttons
-     */
-    private void resetActionButtons() {
-        for (int i = 0; i < maxActionSpace; i++) {
-            actionButtons[i].setVisible(false);
-            actionButtons[i].setButtonAction(null);
-        }
-    }
-
-    /**
      * Updates all GUI elements. Must be implemented by subclass.
      * @param player - current player acting.
      * @param gameState - current game state to be used in updating visuals.
@@ -49,7 +39,7 @@ public abstract class GUI extends JFrame {
      */
     public void update(AbstractPlayer player, AbstractGameState gameState){
         updateGameStateInfo(gameState);
-        resetActionButtons();
+//        resetActionButtons();
         _update(player, gameState);
     }
 
@@ -85,6 +75,9 @@ public abstract class GUI extends JFrame {
             actionButtons[i] = ab;
             actionButtons[i].setVisible(false);
             actionPanel.add(actionButtons[i]);
+        }
+        for (ActionButton actionButton : actionButtons) {
+            actionButton.informAllActionButtons(actionButtons);
         }
 
         return actionPanel;
@@ -130,6 +123,7 @@ public abstract class GUI extends JFrame {
     @SuppressWarnings("rawtypes")
     protected static class ActionButton extends JButton {
         IAction action;
+        ActionButton[] actionButtons;
 
         public ActionButton(ActionController ac, Collection[] highlights) {
             addActionListener(e -> {
@@ -139,6 +133,9 @@ public abstract class GUI extends JFrame {
                         c.clear();
                     }
                 }
+                resetActionButtons();
+                setVisible(false);
+                action = null;
             });
         }
 
@@ -151,6 +148,20 @@ public abstract class GUI extends JFrame {
         public void setButtonAction(IAction action, String actionText) {
             this.action = action;
             setText(actionText);
+        }
+
+        public void informAllActionButtons(ActionButton[] actionButtons) {
+            this.actionButtons = actionButtons;
+        }
+
+        /**
+         * Resets all action buttons
+         */
+        private void resetActionButtons() {
+            for (ActionButton actionButton : actionButtons) {
+                actionButton.setVisible(false);
+                actionButton.setButtonAction(null);
+            }
         }
     }
 }

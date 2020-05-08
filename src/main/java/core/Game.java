@@ -65,7 +65,7 @@ public abstract class Game {
             } else {
                 action = player.getAction(observation, actions);
             }
-            System.out.println(actions.get(action).toString());
+//            System.out.println(actions.get(action).toString());
 
             // Resolve actions and game rules for the turn
             forwardModel.next(gameState, actions.get(action));
