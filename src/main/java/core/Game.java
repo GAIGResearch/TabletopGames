@@ -50,29 +50,35 @@ public abstract class Game {
                 ((IPrintable) observation).printToConsole();
             }
 
-            int action = -1;
-
+            // either ask player which action to use or, in case no actions are available, report the updated observation
+            int actionIdx = -1;
             if (gui != null && player instanceof HumanGUIPlayer) {
-                while (action == -1) {
-                    action = player.getAction(observation, actions);
-                    gui.update(player, gameState);
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception e) {
-                        System.out.println("EXCEPTION " + e);
+                if (actions.size() > 0) {
+                    while (actionIdx == -1) {
+                        actionIdx = player.getAction(observation, actions);
+
+                        gui.update(player, gameState);
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception e) {
+                            System.out.println("EXCEPTION " + e);
+                        }
                     }
-                }
+                } else
+                    player.registerUpdatedObservation(observation);
             } else {
-                action = player.getAction(observation, actions);
+                if (actions.size() > 0)
+                    actionIdx = player.getAction(observation, actions);
+                else
+                    player.registerUpdatedObservation(observation);
             }
-//            System.out.println(actions.get(action).toString());
 
             // Resolve actions and game rules for the turn
-            forwardModel.next(gameState, actions.get(action));
+            if (actionIdx != -1)
+                forwardModel.next(gameState, actions.get(actionIdx));
         }
 
         gameState.endGame();
-
         System.out.println("Game Over");
     }
 
