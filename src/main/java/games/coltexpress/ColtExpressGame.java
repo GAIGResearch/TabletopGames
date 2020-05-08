@@ -1,11 +1,12 @@
 package games.coltexpress;
 
+import core.AbstractPlayer;
+import core.ForwardModel;
 import core.GUI;
 import core.Game;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
-import players.AbstractPlayer;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -14,15 +15,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static games.pandemic.PandemicConstants.VERBOSE;
+import static utilities.CoreConstants.VERBOSE;
 
 public class ColtExpressGame extends Game {
 
-    public ColtExpressGame(List<AbstractPlayer> agents) {
-        super(agents);
-        ColtExpressParameters params = new ColtExpressParameters();
-        forwardModel = new ColtExpressForwardModel();
-        gameState = new ColtExpressGameState(params, forwardModel, agents.size());
+    public ColtExpressGame(List<AbstractPlayer> agents, ForwardModel forwardModel, ColtExpressGameState gameState) {
+        super(agents, forwardModel, gameState);
     }
 
     @Override
@@ -53,13 +51,17 @@ public class ColtExpressGame extends Game {
 
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomPlayer(0));
-        agents.add(new RandomPlayer(1));
-        agents.add(new RandomPlayer(2));
-        agents.add(new RandomPlayer(3));
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
 
         for (int i=0; i<1; i++) {
-            Game game = new ColtExpressGame(agents);
+            ColtExpressParameters params = new ColtExpressParameters();
+            ForwardModel forwardModel = new ColtExpressForwardModel();
+            ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, forwardModel, agents.size());
+
+            Game game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
             game.run(null);
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
