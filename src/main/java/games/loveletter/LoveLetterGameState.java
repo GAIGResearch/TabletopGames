@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.ForwardModel;
 import core.actions.IAction;
 import core.components.Deck;
-import core.components.IDeck;
+import core.components.PartialObservableDeck;
 import core.observations.IObservation;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
@@ -26,7 +26,7 @@ public class LoveLetterGameState extends AbstractGameState {
     private List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
     private List<Deck<LoveLetterCard>> playerDiscardCards;
     private PartialObservableDeck<LoveLetterCard> drawPile;
-    private Deck<LoveLetterCard> discardPile;
+    private PartialObservableDeck<LoveLetterCard> reserveCards;
     private boolean[] effectProtection;
     private GamePhase gamePhase = GamePhase.DrawPhase;
 
@@ -59,7 +59,7 @@ public class LoveLetterGameState extends AbstractGameState {
         }
     }
 
-    public LoveLetterCard getReserveCard(){return discardPile.draw();}
+    public LoveLetterCard getReserveCard(){return reserveCards.draw();}
 
     public boolean getProtection(int playerID){
         return effectProtection[playerID];
@@ -72,7 +72,7 @@ public class LoveLetterGameState extends AbstractGameState {
     public int getRemainingCards(){return drawPile.getCards().size();}
 
     public void setComponents(LoveLetterParameters gameParameters) {
-        drawPile = new PartialObservableDeck<>(getNPlayers());
+        drawPile = new PartialObservableDeck<>("drawPile", getNPlayers());
         effectProtection = new boolean[getNPlayers()];
 
         // add all cards and distribute 7 random cards to each player
@@ -83,9 +83,9 @@ public class LoveLetterGameState extends AbstractGameState {
             }
         }
 
-        discardPile = new Deck<>("discard");
+        reserveCards = new PartialObservableDeck<>("reserveCards", getNPlayers());
         drawPile.shuffle();
-        discardPile.add(drawPile.draw());
+        reserveCards.add(drawPile.draw());
 
         // give each player a single card
         playerHandCards = new ArrayList<>(getNPlayers());
@@ -95,7 +95,7 @@ public class LoveLetterGameState extends AbstractGameState {
             Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
             visibility[i] = true;
 
-            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>(visibility);
+            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>("playerHand"+i, visibility);
             playerCards.add(drawPile.draw());
             playerHandCards.add(playerCards);
 
@@ -205,7 +205,7 @@ public class LoveLetterGameState extends AbstractGameState {
 
     @Override
     public IObservation getObservation(int player) {
-        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, discardPile, effectProtection, player, gamePhase, playerResults);
+        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, reserveCards, effectProtection, player, gamePhase, playerResults);
     }
 
     @Override
@@ -302,33 +302,21 @@ public class LoveLetterGameState extends AbstractGameState {
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ": ");
-            printDeck(playerHandCards.get(i));
+            System.out.print(playerHandCards.get(i).toString(currentPlayer));
             System.out.print("; Discarded: ");
-            printDeck(playerDiscardCards.get(i));
+            System.out.print(playerDiscardCards.get(i));
             System.out.print("; Protected: ");
             System.out.println(effectProtection[i]);
         }
 
         System.out.print("DrawPile" + ":");
-        printDeck(drawPile);
+        System.out.print(drawPile.toString(currentPlayer));
         System.out.println();
 
-        System.out.print("DiscardPile" + ":");
-        printDeck(discardPile);
+        System.out.print("ReserveCards" + ":");
+        System.out.println(reserveCards.toString(currentPlayer));
         System.out.println();
 
         System.out.println("Current GamePhase: " + gamePhase);
-    }
-
-    public void printDeck(IDeck<LoveLetterCard> deck){
-        StringBuilder sb = new StringBuilder();
-        for (LoveLetterCard card : deck.getCards()){
-            if (card == null)
-                System.out.println();
-            sb.append(card.cardType.toString());
-            sb.append(",");
-        }
-        if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-        System.out.print(sb.toString());
     }
 }

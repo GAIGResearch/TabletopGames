@@ -54,7 +54,7 @@ public class LoveLetterGame extends Game {
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
 
-        for (int i=0; i<10000; i++) {
+        for (int i=0; i<1; i++) {
             LoveLetterParameters params = new LoveLetterParameters();
             LoveLetterForwardModel forwardModel = new LoveLetterForwardModel();
             LoveLetterGameState tmp_gameState = new LoveLetterGameState(params, forwardModel, agents.size());

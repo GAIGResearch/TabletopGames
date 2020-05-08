@@ -1,10 +1,9 @@
 package games.loveletter;
 
 import core.components.Deck;
-import core.components.IDeck;
+import core.components.PartialObservableDeck;
 import core.observations.IObservation;
 import core.observations.IPrintable;
-import games.explodingkittens.cards.ExplodingKittenCard;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
@@ -15,7 +14,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
     private final List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
     private final List<Deck<LoveLetterCard>> playerDiscardCards;
     private final Deck<LoveLetterCard> drawPile;
-    private final Deck<LoveLetterCard> discardPile;
+    private final PartialObservableDeck<LoveLetterCard> reserveCards;
     private final boolean[] effectProtection;
     private final Utils.GameResult[] isAlive;
     private final int currentPlayer;
@@ -24,7 +23,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
     public LoveLetterObservation(List<PartialObservableDeck<LoveLetterCard>> playerDecks,
                                  List<Deck<LoveLetterCard>> playerDiscardCards,
                                  Deck<LoveLetterCard> drawPile,
-                                 Deck<LoveLetterCard> discardPile,
+                                 PartialObservableDeck<LoveLetterCard> reserveCards,
                                  boolean[] effectProtection,
                                  int currentPlayer,
                                  LoveLetterGameState.GamePhase gamePhase,
@@ -32,7 +31,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
         this.playerHandCards = playerDecks;
         this.playerDiscardCards = playerDiscardCards;
         this.drawPile = drawPile;
-        this.discardPile = discardPile;
+        this.reserveCards = reserveCards;
         this.effectProtection = effectProtection;
         this.currentPlayer = currentPlayer;
         this.gamePhase = gamePhase;
@@ -49,9 +48,9 @@ public class LoveLetterObservation implements IPrintable, IObservation {
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ": ");
-            printDeck(playerHandCards.get(i));
+            System.out.print(playerHandCards.get(i).toString(currentPlayer));
             System.out.print(";\t Discarded: ");
-            printDeck(playerDiscardCards.get(i));
+            System.out.print(playerDiscardCards.get(i));
             System.out.print(";\t Protected: ");
             System.out.print(effectProtection[i]);
             System.out.print(";\t Status: ");
@@ -59,40 +58,14 @@ public class LoveLetterObservation implements IPrintable, IObservation {
         }
 
         System.out.print("DrawPile" + ":");
-        printDeck(drawPile);
+        System.out.print(drawPile);
         System.out.println();
 
-        System.out.print("DiscardPile" + ":");
-        printDeck(discardPile);
+        System.out.print("ReserveCards" + ":");
+        System.out.println(reserveCards.toString(currentPlayer));
         System.out.println();
 
         System.out.println("Current GamePhase: " + gamePhase);
         System.out.println();
     }
-
-    public void printDeck(IDeck<LoveLetterCard> deck){
-        StringBuilder sb = new StringBuilder();
-        for (LoveLetterCard card : deck.getCards()){
-            sb.append(card.cardType.toString());
-            sb.append(",");
-        }
-        if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-        System.out.print(sb.toString());
-    }
-
-    public void printDeck(IPartialObservableDeck<LoveLetterCard> deck){
-        StringBuilder sb = new StringBuilder();
-        for (LoveLetterCard card : deck.getVisibleCards(currentPlayer)){
-            if (card == null)
-                sb.append("UNKNOWN");
-            else
-                sb.append(card.cardType.toString());
-            sb.append(",");
-        }
-        if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-        System.out.print(sb.toString());
-    }
-
-
-
 }

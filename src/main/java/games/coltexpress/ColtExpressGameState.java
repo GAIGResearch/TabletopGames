@@ -8,8 +8,8 @@ import core.observations.IPrintable;
 import games.coltexpress.cards.CharacterType;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Train;
-import games.loveletter.IPartialObservableDeck;
-import games.loveletter.PartialObservableDeck;
+import core.components.IPartialObservableDeck;
+import core.components.PartialObservableDeck;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -63,7 +63,8 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
             Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
             visibility[playerIndex] = true;
 
-            PartialObservableDeck<ColtExpressCard> playerCards = new PartialObservableDeck<>(visibility);
+            PartialObservableDeck<ColtExpressCard> playerCards =
+                    new PartialObservableDeck<>("playerCards"+playerIndex, visibility);
             for (ColtExpressCard.CardType type : gameParameters.cardCounts.keySet()){
                 for (int j = 0; j < gameParameters.cardCounts.get(type); j++)
                     playerCards.add(new ColtExpressCard(type));

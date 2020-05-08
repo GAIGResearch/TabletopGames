@@ -2,12 +2,11 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
-import core.components.Deck;
 import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.PartialObservableDeck;
+import core.components.PartialObservableDeck;
 import games.loveletter.cards.LoveLetterCard;
 
 public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
@@ -29,7 +28,7 @@ public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, I
         super.execute(gs);
         if (!((LoveLetterGameState)gs).getProtection(opponentID)){
             for (int i = 0; i < opponentDeck.getCards().size(); i++)
-                opponentDeck.setVisibility(i, playerID, true);
+                opponentDeck.setVisibilityOfCard(i, playerID, true);
         }
 
         return false;
