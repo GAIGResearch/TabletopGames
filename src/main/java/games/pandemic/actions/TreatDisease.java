@@ -80,4 +80,14 @@ public class TreatDisease implements IAction {
 
         }else return false;
     }
+
+    @Override
+    public String
+    toString() {
+        return "TreatDisease{" +
+                "color='" + color + '\'' +
+                ", city='" + city + '\'' +
+                ", treatAll=" + treatAll +
+                '}';
+    }
 }

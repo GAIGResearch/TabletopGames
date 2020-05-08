@@ -3,7 +3,6 @@ package games.pandemic.engine.conditions;
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
-import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
 import static utilities.CoreConstants.playerHandHash;

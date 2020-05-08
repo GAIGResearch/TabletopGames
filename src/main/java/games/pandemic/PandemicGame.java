@@ -7,6 +7,8 @@ import core.GUI;
 
 import java.util.List;
 import games.pandemic.gui.PandemicGUI;
+import players.ActionController;
+import players.HumanGUIPlayer;
 import core.AbstractPlayer;
 import players.RandomPlayer;
 import utilities.Utils;
@@ -21,18 +23,20 @@ public class PandemicGame extends Game {
 
     public static void main(String[] args){
 
+        ActionController ac = new ActionController();
+
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
+        players.add(new HumanGUIPlayer(ac));
 
         PandemicParameters params = new PandemicParameters("data/");
         ForwardModel forwardModel = new PandemicForwardModel(params, players.size());
-        AbstractGameState gameState = new PandemicGameState(params, forwardModel, players.size());
+        PandemicGameState gameState = new PandemicGameState(params, forwardModel, players.size());
 
         PandemicGame game = new PandemicGame(players, forwardModel, gameState);
-        GUI gui = new PandemicGUI((PandemicGameState) game.getGameState());
+        GUI gui = new PandemicGUI(gameState, ac);
         game.run(gui);
         System.out.println(game.gameState.getGameStatus());
 

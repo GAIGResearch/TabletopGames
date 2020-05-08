@@ -7,6 +7,8 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
+
+
 import static utilities.CoreConstants.playerHandHash;
 
 
@@ -45,5 +47,17 @@ public class AddResearchStationWithCard extends AddResearchStation implements IA
             return card.equals(otherAction.card);
 
         }else return false;
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    @Override
+    public String toString() {
+        return "AddResearchStationWithCard{" +
+                "card=" + card.toString() +
+                ", toCity='" + city + '\'' +
+                '}';
     }
 }

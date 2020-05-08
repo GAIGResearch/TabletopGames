@@ -132,4 +132,24 @@ public class InfectCity implements IAction {
 
         }else return false;
     }
+
+    public Card getInfectingCard() {
+        return infectingCard;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public int getMaxCubesPerCity() {
+        return maxCubesPerCity;
+    }
+
+    @Override
+    public String toString() {
+        return "InfectCity{" +
+                "infectingCard=" + infectingCard.toString() +
+                ", count=" + count +
+                '}';
+    }
 }

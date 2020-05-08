@@ -13,7 +13,7 @@ import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 
 public class AddResearchStation implements IAction {
-    private String city;
+    protected String city;
 
     public AddResearchStation(String city) {
         this.city = city;
@@ -43,5 +43,16 @@ public class AddResearchStation implements IAction {
             return city.equals(otherAction.city);
 
         }else return false;
+    }
+
+    @Override
+    public String toString() {
+        return "AddResearchStation{" +
+                "toCity='" + city + '\'' +
+                '}';
+    }
+
+    public String getCity() {
+        return city;
     }
 }

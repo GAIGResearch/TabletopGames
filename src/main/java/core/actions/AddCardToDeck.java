@@ -37,4 +37,25 @@ public class AddCardToDeck implements IAction {
 
         }else return false;
     }
+
+    public Card getCard() {
+        return card;
+    }
+
+    public IDeck getDeck() {
+        return deck;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public String toString() {
+        return "AddCardToDeck{" +
+                "card=" + card.toString() +
+                ", deck=" + deck.getID() +
+                ", index=" + index +
+                '}';
+    }
 }

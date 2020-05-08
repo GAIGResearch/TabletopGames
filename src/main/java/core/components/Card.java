@@ -2,7 +2,10 @@ package core.components;
 
 import java.util.HashMap;
 
+import core.content.PropertyString;
 import utilities.Utils.ComponentType;
+
+import static utilities.CoreConstants.nameHash;
 
 public class Card extends Component implements Cloneable{
 
@@ -23,4 +26,8 @@ public class Card extends Component implements Cloneable{
         return copy;
     }
 
+    @Override
+    public String toString() {
+        return ((PropertyString)getProperty(nameHash)).value;
+    }
 }

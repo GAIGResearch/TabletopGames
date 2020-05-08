@@ -5,18 +5,23 @@ import core.content.Property;
 import core.content.PropertyColor;
 import core.content.PropertyString;
 import org.davidmoten.text.utils.WordWrap;
-import utilities.Hash;
 import utilities.ImageIO;
 import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static utilities.CoreConstants.colorHash;
+import static utilities.CoreConstants.nameHash;
+
 public class PandemicCardView extends JComponent {
     private Image background;
     private Card card;
     private int width;
     private int height;
+
+    public static final int cardWidth = 100;
+    public static final int cardHeight = 50;
 
     public PandemicCardView(Card c, String backgroundPath) {
         this.card = c;
@@ -25,17 +30,35 @@ public class PandemicCardView extends JComponent {
             width = background.getWidth(null);
             height = background.getHeight(null);
         } else {
-            width = 100;
-            height = 50;
+            width = cardWidth;
+            height = cardHeight;
         }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawCard((Graphics2D) g, width, height, card, background, 0, 0);
+        drawCard((Graphics2D) g, card, background, 0, 0, width, height);
     }
 
-    public static void drawCard(Graphics2D g, int width, int height, Card card, Image background, int x, int y) {
+    public static void drawCard(Graphics2D g, Card card, Image background, Rectangle rect) {
+        drawCard(g, card, background, rect.x, rect.y, rect.width, rect.height);
+    }
+
+    public static void drawDeckBack(Graphics2D g, String name, Image background, Rectangle rect) {
+        if (background != null) {
+            g.drawImage(background, rect.x, rect.y, null, null);
+        } else {
+            g.setColor(Color.lightGray);
+            g.fillRect(rect.x, rect.y, rect.width-1, rect.height-1);
+            g.setColor(Color.black);
+        }
+
+        int size = g.getFont().getSize();
+        g.drawString(name, rect.x + 10, rect.y + size + 20);
+        g.drawRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
+    }
+
+    public static void drawCard(Graphics2D g, Card card, Image background, int x, int y, int width, int height) {
         // Draw card background
         if (background != null) {
             g.drawImage(background, x, y, null, null);
@@ -46,8 +69,17 @@ public class PandemicCardView extends JComponent {
         }
 
         if (card != null) {
-            Property name = card.getProperty(Hash.GetInstance().hash("name"));
-            Property color = card.getProperty(Hash.GetInstance().hash("color"));
+            Property name = card.getProperty(nameHash);
+            PropertyColor col = (PropertyColor)card.getProperty(colorHash);
+            if (col != null) {
+                g.setColor(Utils.stringToColor(col.valueStr));
+            }
+            Stroke st = g.getStroke();
+            g.setStroke(new BasicStroke(4));
+            g.drawRect(x+1, y+1, width-2, height-2);
+            g.setStroke(st);
+
+            g.setColor(Color.black);
 
 //        FontMetrics met = g.getFontMetrics();
             int w = (width * 2) / g.getFont().getSize();
@@ -64,19 +96,20 @@ public class PandemicCardView extends JComponent {
                 i++;
             }
 
-            if (color != null) {
-                g.setColor(Utils.stringToColor(((PropertyColor) color).valueStr));
-            }
-            g.drawRect(x, y, width - 1, height - 1);
+//            g.drawRect(x, y, width - 1, height - 1);
         }
     }
 
-    public void update(Card c) {
+    public void updateCard(Card c) {
         this.card = c;
     }
 
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
+    }
+
+    public Card getCard() {
+        return card;
     }
 }

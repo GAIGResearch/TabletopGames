@@ -15,6 +15,7 @@ public class PandemicConstants {
     public final static int epidemicCard = Hash.GetInstance().hash("epidemic");
     public final static int infectionHash = Hash.GetInstance().hash("infection");
     public final static int countryHash = Hash.GetInstance().hash("country");
+    public final static int coordinateHash = Hash.GetInstance().hash("coordinates");
 
     // mostly for setup
     public final static int playerDeckHash = Hash.GetInstance().hash("Player Deck");

@@ -16,7 +16,6 @@ public class ExplodingKittensForwardModel extends ForwardModel {
 
     private Stack<IAction> actionStack = new Stack<>();
 
-    @Override
     public void setup(AbstractGameState firstState) {
 
     }
