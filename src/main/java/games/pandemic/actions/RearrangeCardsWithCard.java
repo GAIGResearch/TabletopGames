@@ -8,9 +8,10 @@ import games.pandemic.PandemicGameState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
-import static games.pandemic.PandemicConstants.playerHandHash;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class RearrangeCardsWithCard implements IAction {
@@ -31,7 +32,7 @@ public class RearrangeCardsWithCard implements IAction {
         for (int value : newCardOrder) {
             cards[value] = deckFrom.draw();
         }
-        Deck<Card> draws = new Deck<>();
+        Deck<Card> draws = new Deck<>("Temp Draws from: " + deckFrom.getID());
         draws.setCards(new ArrayList<>(Arrays.asList(cards)));
         boolean result = deckFrom.add(draws);
 
@@ -41,5 +42,43 @@ public class RearrangeCardsWithCard implements IAction {
             result = discardDeck.add(card);
         }
         return result;
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    public Deck<Card> getDeckFrom() {
+        return deckFrom;
+    }
+
+    public int[] getNewCardOrder() {
+        return newCardOrder;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RearrangeCardsWithCard that = (RearrangeCardsWithCard) o;
+        return Objects.equals(deckFrom, that.deckFrom) &&
+                Arrays.equals(newCardOrder, that.newCardOrder) &&
+                Objects.equals(card, that.card);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(deckFrom, card);
+        result = 31 * result + Arrays.hashCode(newCardOrder);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RearrangeCardsWithCard{" +
+                "deck=" + deckFrom.getID() +
+                ", newCardOrder=" + Arrays.toString(newCardOrder) +
+                ", card=" + card.toString() +
+                '}';
     }
 }

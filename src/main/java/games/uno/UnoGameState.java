@@ -22,41 +22,6 @@ public class UnoGameState extends AbstractGameState {
 
     public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
-
-        drawPile = new Deck<>();
-
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values())
-        {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            for (int i = 0; i < 10; i++)
-            {
-                drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
-                if (i > 0)
-                    drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
-            }
-            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
-            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
-            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
-            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
-        }
-
-        drawPile.shuffle();
-        // todo add action cards step-by-step
-
-        discardPile = new Deck<>();
-
-        playerDecks = new ArrayList<>(getNPlayers());
-        for (int i = 0; i < getNPlayers(); i++){
-            playerDecks.add(new Deck<>());
-            for (int j = 0; j < 7; j++){
-                playerDecks.get(i).add(drawPile.draw());
-            }
-        }
-
-        currentCard = drawPile.draw();
-        discardPile.add(currentCard);
     }
 
     @Override
@@ -64,10 +29,10 @@ public class UnoGameState extends AbstractGameState {
 
         int[] cardsPerPlayer = new int[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++)
-            cardsPerPlayer[i] = playerDecks.get(i).getCards().size();
+            cardsPerPlayer[i] = playerDecks.get(i).getSize();
 
         return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
-                cardsPerPlayer, drawPile.getCards().size());
+                cardsPerPlayer, drawPile.getSize());
     }
 
     @Override
@@ -94,6 +59,45 @@ public class UnoGameState extends AbstractGameState {
         }
         actions.add(new DrawCards<>(drawPile, playerDecks.get(player), discardPile, 1));
         return actions;
+    }
+
+    @Override
+    public void setComponents() {
+
+        drawPile = new Deck<>("Draw Pile");
+
+        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values())
+        {
+            if (color == UnoCard.UnoCardColor.Wild)
+                continue;
+
+            for (int i = 0; i < 10; i++)
+            {
+                drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
+                if (i > 0)
+                    drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
+            }
+            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
+            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
+            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
+            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
+        }
+
+        drawPile.shuffle();
+        // todo add action cards step-by-step
+
+        discardPile = new Deck<>("Discard Pile");
+
+        playerDecks = new ArrayList<>(getNPlayers());
+        for (int i = 0; i < getNPlayers(); i++){
+            playerDecks.add(new Deck<>("Player Deck"));
+            for (int j = 0; j < 7; j++){
+                playerDecks.get(i).add(drawPile.draw());
+            }
+        }
+
+        currentCard = drawPile.draw();
+        discardPile.add(currentCard);
     }
 
     public void registerWinner(int playerID){

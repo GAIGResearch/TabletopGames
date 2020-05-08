@@ -15,7 +15,7 @@ public class GameOverInfection extends GameOverCondition {
     public Utils.GameResult test(AbstractGameState gs) {
         for (String c: colors) {
             if (((Counter)((PandemicGameState)gs).getComponent(Hash.GetInstance().hash("Disease Cube " + c))).getValue() < 0) {
-//                System.out.println("Ran out of disease cubes");
+                System.out.println("Ran out of disease cubes");
                 return GAME_LOSE;
             }
         }

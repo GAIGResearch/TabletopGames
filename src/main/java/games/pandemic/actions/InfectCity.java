@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.*;
 
 public class InfectCity implements IAction {
 
@@ -43,7 +44,7 @@ public class InfectCity implements IAction {
             BoardNode bn = pgs.world.getNode(nameHash, city.value);
             if (bn != null) {
                 // check if quarantine specialist is on that node
-                PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(PandemicConstants.playersBNHash);
+                PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(playersHash);
                 for (int playerIdx: players.getValues()){
                     Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
                     String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
@@ -96,7 +97,7 @@ public class InfectCity implements IAction {
         // Find neighbouring board nodes
         for (BoardNode b2 : n.getNeighbours()){
 
-            PropertyIntArrayList players = (PropertyIntArrayList)b2.getProperty(PandemicConstants.playersBNHash);
+            PropertyIntArrayList players = (PropertyIntArrayList)b2.getProperty(playersHash);
             for (int playerIdx: players.getValues()){
                 Card playerCard = (Card)pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
                 String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
@@ -130,5 +131,25 @@ public class InfectCity implements IAction {
             return infectingCard == otherAction.infectingCard && count == otherAction.count && maxCubesPerCity == otherAction.maxCubesPerCity;
 
         }else return false;
+    }
+
+    public Card getInfectingCard() {
+        return infectingCard;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public int getMaxCubesPerCity() {
+        return maxCubesPerCity;
+    }
+
+    @Override
+    public String toString() {
+        return "InfectCity{" +
+                "infectingCard=" + infectingCard.toString() +
+                ", count=" + count +
+                '}';
     }
 }

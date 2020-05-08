@@ -75,4 +75,80 @@ public class PandemicParameters extends GameParameters {
         for(int key : pandemicParameters.n_cards_per_player.keySet())
             this.n_cards_per_player.put(key, pandemicParameters.n_cards_per_player.get(key));
     }
+
+    public long getGame_seed() {
+        return game_seed;
+    }
+
+    public int getLose_max_outbreak() {
+        return lose_max_outbreak;
+    }
+
+    public int getMax_cubes_per_city() {
+        return max_cubes_per_city;
+    }
+
+    public int getN_epidemic_cards() {
+        return n_epidemic_cards;
+    }
+
+    public int getN_cubes_epidemic() {
+        return n_cubes_epidemic;
+    }
+
+    public int[] getInfection_rate() {
+        return infection_rate;
+    }
+
+    public int getN_infection_cards_setup() {
+        return n_infection_cards_setup;
+    }
+
+    public int getN_infections_setup() {
+        return n_infections_setup;
+    }
+
+    public int getN_cubes_infection() {
+        return n_cubes_infection;
+    }
+
+    public int getN_initial_disease_cubes() {
+        return n_initial_disease_cubes;
+    }
+
+    public int getN_cards_for_cure() {
+        return n_cards_for_cure;
+    }
+
+    public int getN_cards_for_cure_reduced() {
+        return n_cards_for_cure_reduced;
+    }
+
+    public int getN_forecast_cards() {
+        return n_forecast_cards;
+    }
+
+    public int getN_players() {
+        return n_players;
+    }
+
+    public int getMax_cards_per_player() {
+        return max_cards_per_player;
+    }
+
+    public int getN_cards_draw() {
+        return n_cards_draw;
+    }
+
+    public HashMap<Integer, Integer> getN_cards_per_player() {
+        return n_cards_per_player;
+    }
+
+    public int getN_actions_per_turn() {
+        return n_actions_per_turn;
+    }
+
+    public int getN_research_stations() {
+        return n_research_stations;
+    }
 }

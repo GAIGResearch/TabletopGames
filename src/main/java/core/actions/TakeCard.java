@@ -31,4 +31,20 @@ public class TakeCard implements IAction {
 
         }else return false;
     }
+
+    @Override
+    public String toString() {
+        return "TakeCard{" +
+                "card=" + card.toString() +
+                ", otherPlayer=" + otherPlayer +
+                '}';
+    }
+
+    public int getOtherPlayer() {
+        return otherPlayer;
+    }
+
+    public Card getCard() {
+        return card;
+    }
 }

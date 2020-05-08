@@ -6,7 +6,7 @@ import core.components.Deck;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
-import static games.pandemic.PandemicConstants.playerHandHash;
+import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class QuietNight implements IAction {
@@ -28,5 +28,10 @@ public class QuietNight implements IAction {
     {
         if (this == other) return true;
         return other instanceof QuietNight;
+    }
+
+    @Override
+    public String toString() {
+        return "QuietNight";
     }
 }

@@ -8,11 +8,12 @@ import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
 
 
 public class AddResearchStationFrom extends AddResearchStation implements IAction {
 
-    private String fromCity;
+    protected String fromCity;
 
     public AddResearchStationFrom(String from, String to) {
         super(to);
@@ -45,5 +46,17 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
             return fromCity.equals(otherAction.fromCity);
 
         }else return false;
+    }
+
+    @Override
+    public String toString() {
+        return "AddResearchStationFrom{" +
+                "fromCity='" + fromCity + '\'' +
+                ", toCity='" + city + '\'' +
+                '}';
+    }
+
+    public String getFromCity() {
+        return fromCity;
     }
 }

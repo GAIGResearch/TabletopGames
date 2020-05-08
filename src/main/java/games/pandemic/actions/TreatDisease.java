@@ -10,6 +10,7 @@ import utilities.Hash;
 import utilities.Utils;
 
 import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
 
 public class TreatDisease implements IAction {
 
@@ -78,5 +79,15 @@ public class TreatDisease implements IAction {
                     initialDiseaseCubes == otherAction.initialDiseaseCubes && treatAll == otherAction.treatAll;
 
         }else return false;
+    }
+
+    @Override
+    public String
+    toString() {
+        return "TreatDisease{" +
+                "color='" + color + '\'' +
+                ", city='" + city + '\'' +
+                ", treatAll=" + treatAll +
+                '}';
     }
 }

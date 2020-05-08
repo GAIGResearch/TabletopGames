@@ -1,38 +1,82 @@
 package games.pandemic.gui;
 
 import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.actions.*;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.GUI;
+import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicParameters;
+import games.pandemic.actions.*;
+import players.ActionController;
+import players.HumanGUIPlayer;
 import utilities.CounterView;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
+import java.util.List;
 
-@SuppressWarnings("unchecked")
+import static games.pandemic.PandemicConstants.*;
+import static utilities.CoreConstants.nameHash;
+import static utilities.CoreConstants.playerHandHash;
+
+@SuppressWarnings("rawtypes")
 public class PandemicGUI extends GUI {
     PandemicCardView[] playerCards;
     ArrayList<PandemicCardView>[] playerHands;
-    JComponent boardView;
+    ArrayList<PandemicCardView> bufferDeck;
+    PandemicBoardView boardView;
 
     PandemicGameState gameState;
-    int nPlayers, activePlayer;
-    int maxCards = 7;
+    int nPlayers;
+    int maxCards;
+    int maxBufferCards = 10;
 
-    public PandemicGUI(PandemicGameState gameState) {
+    ArrayList<Integer>[] handCardHighlights;
+    HashSet<Integer> playerHighlights;
+    ArrayList<Integer> bufferHighlights;
+
+    // Game state info
+    JLabel gamePhase;
+
+    public PandemicGUI(PandemicGameState gameState, ActionController ac) {
+        super(ac, 721);
+
+        maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
-        activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
         this.gameState = gameState;
-
         boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
+
+        handCardHighlights = new ArrayList[nPlayers];
+        playerHighlights = new HashSet<>();
+        for (int i = 0; i < nPlayers; i++) {
+            handCardHighlights[i] = new ArrayList<>();
+        }
+        Collection[] highlights = new Collection[2+nPlayers];
+        highlights[0] = playerHighlights;
+        highlights[1] = boardView.getHighlights().keySet();
+        System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
+
+        gamePhase = new JLabel();
+        JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
+        JComponent actionPanel = createActionPanel(highlights, 300, 200);
+        JPanel side = new JPanel();
+        side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
+        side.add(gameStateInfo);
+        side.add(playerAreas);
+        side.add(actionPanel);
 
-        getContentPane().add(playerAreas, BorderLayout.EAST);
+        getContentPane().add(side, BorderLayout.EAST);
         getContentPane().add(boardView, BorderLayout.CENTER);
         getContentPane().add(counterArea, BorderLayout.SOUTH);
 
@@ -45,6 +89,7 @@ public class PandemicGUI extends GUI {
     }
 
     private JPanel createPlayerAreas() {
+        JPanel cardAreas = new JPanel();
         JPanel playerCardsPanel = new JPanel();
         JPanel playerHandPanel = new JPanel();
         playerCards = new PandemicCardView[nPlayers];
@@ -53,20 +98,32 @@ public class PandemicGUI extends GUI {
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) gameState.getComponent(PandemicConstants.playerCardHash, i);
             PandemicCardView cv = new PandemicCardView(playerCard, null);
+            int player = i;
+            cv.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        playerHighlights.add(player);
+                        cv.setBorder(new LineBorder(Color.cyan, 2));
+                    } else {
+                        playerHighlights.remove(player);
+                        cv.setBorder(null);
+                    }
+                }
+            });
             playerCards[i] = cv;
             playerCardsPanel.add(cv);
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
-            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(PandemicConstants.playerHandHash, i);
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(playerHandHash, i);
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
                 Card c = null;
-                if (k < playerHand.getCards().size()) {
+                if (k < playerHand.getSize()) {
                     c = playerHand.peek(k);
                 }
-                PandemicCardView cv2 = new PandemicCardView(c, null);
-                playerHands[i].add(cv2);
+                PandemicCardView cv2 = getCardView(i, c, k);
                 hand.add(cv2);
             }
             playerHandPanel.add(hand);
@@ -76,8 +133,66 @@ public class PandemicGUI extends GUI {
         playerAreas.setLayout(new BoxLayout(playerAreas, BoxLayout.Y_AXIS));
         playerAreas.add(playerCardsPanel);
         playerAreas.add(playerHandPanel);
+        cardAreas.add(playerAreas);
 
-        return playerAreas;
+        // Buffer deck space
+        JPanel bufferDeckArea = new JPanel();
+        bufferDeck = new ArrayList<>();
+        for (int i = 0; i < maxBufferCards; i++) {
+            PandemicCardView cv = new PandemicCardView(null, null);
+            int idx = i;
+            cv.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        bufferHighlights.add(idx);
+                        cv.setBorder(new LineBorder(Color.cyan, 2));
+                    } else {
+                        bufferHighlights.remove(Integer.valueOf(idx));
+                        cv.setBorder(null);
+                    }
+                }
+            });
+            cv.setVisible(false);
+            bufferDeck.add(cv);
+            bufferDeckArea.add(cv);
+        }
+
+        cardAreas.add(bufferDeckArea);
+
+        return cardAreas;
+    }
+
+    private PandemicCardView getCardView(int player, Card c, int cardIdx) {
+        PandemicCardView cv2 = new PandemicCardView(c, null);
+        cv2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    handCardHighlights[player].add(cardIdx);
+                    cv2.setBorder(new LineBorder(Color.cyan, 2));
+                } else {
+                    handCardHighlights[player].remove(Integer.valueOf(cardIdx));
+                    cv2.setBorder(null);
+                }
+            }
+        });
+        if (c == null) cv2.setVisible(false);
+        else cv2.setVisible(true);
+        playerHands[player].add(cv2);
+        return cv2;
+    }
+
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
+        JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
+        gameInfo.add(gamePhase);
+
+        return gameInfo;
+    }
+
+    protected void updateGameStateInfo(AbstractGameState gameState) {
+        super.updateGameStateInfo(gameState);
+        gamePhase.setText("Game phase: " + ((PandemicGameState)gameState).getGamePhase());
     }
 
     private JPanel createCounterArea() {
@@ -100,25 +215,280 @@ public class PandemicGUI extends GUI {
     }
 
     @Override
-    public void update(AbstractGameState gameState){
+    protected void _update(AbstractPlayer player, AbstractGameState gameState){
         this.gameState = (PandemicGameState) gameState;
-        ((PandemicBoardView)boardView).gameState = this.gameState;
+        boardView.gameState = this.gameState;
+
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) this.gameState.getComponent(PandemicConstants.playerCardHash, i);
-            playerCards[i].update(playerCard);
+            playerCards[i].updateCard(playerCard);
             playerCards[i].repaint();
 
-            Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(PandemicConstants.playerHandHash, i);
-            for (int j = 0; j < playerHand.getCards().size(); j++) {
+            Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(playerHandHash, i);
+            int nCards = playerHand.getSize();
+            for (int j = 0; j < nCards; j++) {
                 Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
-                    playerHands[i].get(j).update(c);
+                    playerHands[i].get(j).updateCard(c);
+                    playerHands[i].get(j).setVisible(true);
                 } else {
-                    PandemicCardView cv2 = new PandemicCardView(c, null);
-                    playerHands[i].add(cv2);
+                    getCardView(i, c, j);
+                }
+            }
+            for (int j = nCards; j < playerHands[i].size(); j++) {
+                playerHands[i].get(j).updateCard(null);
+                if (j == 0) playerHands[i].get(j).setVisible(true);
+                else playerHands[i].get(j).setVisible(false);
+            }
+        }
+
+        // Update actions for human
+        if (player instanceof HumanGUIPlayer) {
+            updateCardHighlightDisplay();
+            updateActionButtons(player, gameState);
+        } else {
+            // Clear all highlights if it's not human acting
+            clearAllHighlights();
+            updateCardHighlightDisplay();
+        }
+
+        repaint();
+    }
+
+    private void updateCardHighlightDisplay() {
+        for (int i = 0; i < playerCards.length; i++) {
+            if (!playerHighlights.contains(i)) {
+                playerCards[i].setBorder(null);
+            }
+            for (int j = 0; j < playerHands[i].size(); j++) {
+                if (!handCardHighlights[i].contains(j)) {
+                    playerHands[i].get(j).setBorder(null);
                 }
             }
         }
-        repaint();
+    }
+
+    protected void clearAllHighlights() {
+        playerHighlights.clear();
+        for (int i = 0; i < playerCards.length; i++) {
+            handCardHighlights[i].clear();
+        }
+        boardView.getHighlights().clear();
+    }
+
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        int id = player.getPlayerID();
+        List<IAction> actions = gameState.getActions();
+        int k = 0;
+
+        Set<String> highlights = boardView.getHighlights().keySet();
+        Set<Integer> playerTokenHighlights = new HashSet<>();
+        Set<String> bnHighlights = new HashSet<>();
+        Set<String> deckHighlights = new HashSet<>();
+        for (String highlight: highlights) {
+            if (highlight.contains("BN")) {
+                bnHighlights.add(highlight.split(" ")[1]);
+            } else if (highlight.contains("player ")) {
+                playerTokenHighlights.add(Integer.parseInt(highlight.split(" ")[1]));
+            } else {
+                deckHighlights.add(highlight);
+            }
+        }
+        for (IAction action : actions) {
+            if (action instanceof MovePlayer) {
+                int pIdx = ((MovePlayer) action).getPlayerIdx();
+                if (action instanceof MovePlayerWithCard && isCardHighlighted(((MovePlayerWithCard) action).getCard(), pIdx)) {
+                    actionButtons[k].setVisible(true);
+                    actionButtons[k++].setButtonAction(action);
+                } else if (bnHighlights.contains(((MovePlayer) action).getDestination()) &&
+                        (pIdx == id || playerTokenHighlights.contains(pIdx))) {
+                    actionButtons[k].setVisible(true);
+                    actionButtons[k++].setButtonAction(action);
+                }
+            } else if (action instanceof AddResearchStation) {
+                Card playerRole = (Card) this.gameState.getComponentActingPlayer(playerCardHash);
+                String playerLocation = ((PropertyString)playerRole.getProperty(playerLocationHash)).value;
+                String toCity = ((AddResearchStation) action).getCity();
+
+                if (bnHighlights.contains(toCity) || playerLocation.equals(toCity)) {
+                    if (action instanceof AddResearchStationFrom) {
+                        if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
+                            if (!(action instanceof AddResearchStationWithCardFrom) ||
+                                    isCardHighlighted(((AddResearchStationWithCard) action).getCard(), id)) {
+                                actionButtons[k].setVisible(true);
+                                actionButtons[k++].setButtonAction(action);
+                            }
+                        }
+                    } else {
+                        if (!(action instanceof AddResearchStationWithCard) ||
+                                isCardHighlighted(((AddResearchStationWithCard) action).getCard(), id)) {
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action);
+                        }
+                    }
+                }
+            } else if (action instanceof DoNothing || action instanceof TreatDisease) {
+                actionButtons[k].setVisible(true);
+                actionButtons[k++].setButtonAction(action);
+            } else if (action instanceof CureDisease) {
+                ArrayList<Card> cards = ((CureDisease) action).getCards();
+                boolean allSelected = true;
+                for (Card c: cards) {
+                    if (isCardHighlighted(c, id)) {
+                        allSelected = false;
+                        break;
+                    }
+                }
+                if (allSelected) {
+                    actionButtons[k].setVisible(true);
+                    actionButtons[k++].setButtonAction(action);
+                }
+            } else if (action instanceof GiveCard) {
+                if (isCardHighlighted(((GiveCard) action).getCard(), id)
+                        && playerHighlights.contains(((GiveCard) action).getOtherPlayer())) {
+                    // card in hand selected and other player, show this action as available
+                    actionButtons[k].setVisible(true);
+                    actionButtons[k++].setButtonAction(action);
+                }
+            } else if (action instanceof TakeCard) {
+                // A card from another player selected
+                int otherId = ((TakeCard) action).getOtherPlayer();
+                if (isCardHighlighted(((TakeCard) action).getCard(), otherId)) {
+                    actionButtons[k].setVisible(true);
+                    actionButtons[k++].setButtonAction(action);
+                }
+            } else if (action instanceof QuietNight) {  // Event
+                // QuietNight card in hand selected
+                for (int i = 0; i < handCardHighlights[id].size(); i++) {
+                    Card c = playerHands[id].get(i).getCard();
+                    if (c != null) {
+                        String name = ((PropertyString)c.getProperty(nameHash)).value;
+                        if (name.equals("One quiet night")) {
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action, "Play: " + name);
+                            break;
+                        }
+                    }
+                }
+            } else if (action instanceof RearrangeCardsWithCard) {  // Event
+                Card eventCard = ((RearrangeCardsWithCard) action).getCard();
+                int[] cardOrder = ((RearrangeCardsWithCard) action).getNewCardOrder();
+                int nCards = cardOrder.length;
+                Deck<Card> deckFrom = ((RearrangeCardsWithCard) action).getDeckFrom();
+
+                if (isCardHighlighted(eventCard, id)) {
+                    // event card is highlighted
+
+                    // Show top N card of infection discard deck for player to select order
+                    for (int i = 0; i < nCards; i++) {
+                        Card c = deckFrom.peek();
+                        if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
+                            bufferDeck.get(i).updateCard(c);
+                        }
+                    }
+
+                    if (bufferHighlights.size() == nCards) {
+                        // Card order selected
+                        int[] selectedOrder = new int[nCards];
+                        for (int i = 0; i < nCards; i++) {
+                            selectedOrder[i] = bufferHighlights.get(i);
+                        }
+
+                        if (Arrays.equals(selectedOrder, cardOrder)) {
+                            String name = ((PropertyString)eventCard.getProperty(nameHash)).value;
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action, "Play: " + name);
+                        }
+                    }
+                }
+            } else if (action instanceof RemoveCardWithCard) {  // Event
+                Card eventCard = ((RemoveCardWithCard) action).getCard();
+                int infectionCard = ((RemoveCardWithCard) action).getRemoveCard();
+                Deck<Card> deck = ((RemoveCardWithCard) action).getDeck();
+
+                if (isCardHighlighted(eventCard, id)) {
+                    // event card in hand selected
+
+                    for (int i = 0; i < deck.getSize(); i++) {
+                        if (i < maxBufferCards) {
+                            Card c = deck.peek();
+                            if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
+                                bufferDeck.get(i).updateCard(c);
+                            }
+                        } else {
+                            System.out.println("More cards in deck that are not displayed");
+                        }
+                    }
+
+                    if (bufferHighlights.size() == 1) {
+                        int selected = bufferHighlights.get(0);
+
+                        if (infectionCard == selected) {
+                            String name = ((PropertyString) eventCard.getProperty(nameHash)).value;
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action, "Play: " + name);
+                        }
+                    }
+                }
+            } else if (action instanceof DrawCard) {
+                if (this.gameState.getGamePhase() == PandemicGameState.GamePhase.DiscardReaction) {  // Discarding
+                    int idx = ((DrawCard) action).getIndex();
+                    if (handCardHighlights[id].contains(idx)) {
+                        Card c = playerHands[id].get(idx).getCard();
+                        if (c != null) {
+                            String name = ((PropertyString)c.getProperty(nameHash)).value;
+                            // Action name should be just "Discard" for card selected in hand
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action, "Discard: " + name);
+                        }
+                    }
+                } else {
+                    if (this.gameState.getPlayerRole(id).equals("Contingency Planner")) {  // Special role
+                        if (deckHighlights.contains("playerDiscard")) {
+                            Deck<Card> deck = ((DrawCard) action).getDeckFrom();
+
+                            for (int i = 0; i < deck.getSize(); i++) {
+                                if (i < maxBufferCards) {
+                                    Card c = deck.peek();
+                                    if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
+                                        bufferDeck.get(i).updateCard(c);
+                                    }
+                                } else {
+                                    System.out.println("More cards in deck that are not displayed");
+                                }
+                            }
+
+                            if (bufferHighlights.size() == 1) {
+                                int selected = bufferHighlights.get(0);
+
+                                if (((DrawCard) action).getIndex() == selected) {
+                                    Card c = playerHands[id].get(selected).getCard();
+                                    if (c != null) {
+                                        String name = ((PropertyString) c.getProperty(nameHash)).value;
+                                        actionButtons[k].setVisible(true);
+                                        actionButtons[k++].setButtonAction(action, "Choose: " + name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                System.out.println("Action type unknown: " + action.toString());
+            }
+        }
+    }
+
+    private int indexOfCardInHand(Card c, int player) {
+        int n = playerHands[player].size();
+        for (int i = 0; i < n; i++) {
+            PandemicCardView pcv = playerHands[player].get(i);
+            if (pcv.getCard() != null && pcv.getCard().equals(c)) return i;
+        }
+        return -1;
+    }
+
+    private boolean isCardHighlighted(Card c, int player) {
+        return handCardHighlights[player].contains(indexOfCardInHand(c, player));
     }
 }

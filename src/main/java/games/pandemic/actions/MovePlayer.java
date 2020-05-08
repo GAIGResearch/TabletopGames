@@ -8,14 +8,15 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicConstants;
 
-import static games.pandemic.PandemicConstants.nameHash;
+import static utilities.CoreConstants.nameHash;
+import static utilities.CoreConstants.playersHash;
 
 
 public class MovePlayer implements IAction {
 
 
-    private int playerIdx;
-    private String destination;
+    int playerIdx;
+    String destination;
 
     public MovePlayer(int playerIdx, String city) {
         this.playerIdx = playerIdx;
@@ -37,12 +38,12 @@ public class MovePlayer implements IAction {
         removePlayer((PandemicGameState)gs, prop.value, playerIdx);
         placePlayer((PandemicGameState)gs, destination, playerIdx);
 
-        return false;
+        return true;
     }
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(PandemicConstants.playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
@@ -51,7 +52,7 @@ public class MovePlayer implements IAction {
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
-        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(PandemicConstants.playersBNHash);
+        PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().remove(new Integer(playerIdx));
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
@@ -90,5 +91,17 @@ public class MovePlayer implements IAction {
             return destination.equals(otherAction.destination) && playerIdx == otherAction.playerIdx;
 
         }else return false;
+    }
+
+    @Override
+    public String toString() {
+        return "MovePlayer{" +
+                "playerIdx=" + playerIdx +
+                ", destination='" + destination + '\'' +
+                '}';
+    }
+
+    public int getPlayerIdx() {
+        return playerIdx;
     }
 }

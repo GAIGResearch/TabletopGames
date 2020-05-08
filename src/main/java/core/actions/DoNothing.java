@@ -15,4 +15,9 @@ public class DoNothing implements IAction {
         if (this == other) return true;
         return other instanceof DoNothing;
     }
+
+    @Override
+    public String toString() {
+        return "DoNothing";
+    }
 }

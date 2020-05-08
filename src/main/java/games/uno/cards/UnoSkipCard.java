@@ -20,7 +20,7 @@ public class UnoSkipCard extends UnoCard {
 
         @Override
         public boolean execute(AbstractGameState gs) {
-            gs.getTurnOrder().endPlayerTurnStep(gs);
+            gs.getTurnOrder().endPlayerTurn(gs);
             return true;
         }
     }

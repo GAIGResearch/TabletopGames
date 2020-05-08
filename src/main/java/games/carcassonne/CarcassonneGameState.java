@@ -25,7 +25,6 @@ public class CarcassonneGameState extends AbstractGameState {
 
     public CarcassonneGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
-        setComponents();
     }
 
     public void setComponents() {
@@ -34,7 +33,7 @@ public class CarcassonneGameState extends AbstractGameState {
         Arrays.fill(unusedMeeple, 7);
         gameBoard = new CarcassonneBoard();
 
-        Deck<CarcassonneTile> drawPile = new Deck<>();
+        Deck<CarcassonneTile> drawPile = new Deck<>("Draw Pile");
 
         //drawPile.add(new CarcassonneTile());
     }

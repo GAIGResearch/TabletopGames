@@ -7,7 +7,7 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
-import static games.pandemic.PandemicConstants.playerHandHash;
+import static utilities.CoreConstants.playerHandHash;
 
 
 @SuppressWarnings("unchecked")
@@ -28,9 +28,9 @@ public class MovePlayerWithCard extends MovePlayer implements IAction {
         if (result) {
             // Discard the card played
             Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-            playerHand.remove(card);
+            result = playerHand.remove(card);
             Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
-            result = discardDeck.add(card);
+            result &= discardDeck.add(card);
         }
 
         return result;
@@ -47,5 +47,18 @@ public class MovePlayerWithCard extends MovePlayer implements IAction {
             return card.equals(otherAction.card);
 
         }else return false;
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    @Override
+    public String toString() {
+        return "MovePlayerWithCard{" +
+                "card=" + card.toString() +
+                ", player=" + playerIdx +
+                ", destination='" + destination + '\'' +
+                '}';
     }
 }

@@ -6,12 +6,13 @@ import core.components.Counter;
 import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.MovePlayer;
 import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
-import static games.pandemic.PandemicConstants.nameHash;
+import static utilities.CoreConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
 
@@ -45,6 +46,8 @@ public class PlayerAction extends RuleNode {
                 }
             }
         }
+
+        ((PandemicTurnOrder)gs.getTurnOrder()).endPlayerTurnStep();
         return true;
     }
 }

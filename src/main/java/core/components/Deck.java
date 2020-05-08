@@ -22,9 +22,9 @@ public class Deck<T> extends Component implements IDeck<T> {
 
     private String id;
 
-    public Deck()
+    public Deck(String id)
     {
-        this.id = "";
+        this.id = id;
         super.type = ComponentType.DECK;
         cards = new ArrayList<>();
         properties = new HashMap<>();
@@ -155,7 +155,7 @@ public class Deck<T> extends Component implements IDeck<T> {
     @Override
     public Deck<T> copy()
     {
-        Deck<T> dp = new Deck<>();
+        Deck<T> dp = new Deck<>(id);
         this.copyTo(dp);
         return dp;
     }
@@ -190,7 +190,7 @@ public class Deck<T> extends Component implements IDeck<T> {
         ArrayList<T> visibleCards = new ArrayList<>();
         for (int i = 0; i < cards.size(); i++) {
             boolean[] b = cardVisibility.get(i);
-            if (b == null || b[playerID]) visibleCards.add(i, cards.get(i));
+            if (b[playerID]) visibleCards.add(i, cards.get(i));
             else visibleCards.add(i, null);
         }
         return visibleCards;
@@ -209,8 +209,7 @@ public class Deck<T> extends Component implements IDeck<T> {
      * @param deck - deck to load in JSON format
      */
     public static Deck<Card> loadDeckOfCards(JSONObject deck) {
-        Deck<Card> newDeck = new Deck<>();
-        newDeck.id = (String) ( (JSONArray) deck.get("name")).get(1);
+        Deck<Card> newDeck = new Deck<>((String) ( (JSONArray) deck.get("name")).get(1));
         newDeck.properties.put(Hash.GetInstance().hash("name"), new PropertyString(newDeck.id));
 
         JSONArray deckCards = (JSONArray) deck.get("cards");
@@ -261,5 +260,9 @@ public class Deck<T> extends Component implements IDeck<T> {
             return true;
         }
         return false;
+    }
+
+    public int getSize() {
+        return cards.size();
     }
 }
