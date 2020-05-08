@@ -12,6 +12,11 @@ public class ColtExpressForwardModel extends ForwardModel {
     private Stack<IAction> actionStack = new Stack<>();
 
     @Override
+    public void setup(AbstractGameState firstState) {
+
+    }
+
+    @Override
     public void next(AbstractGameState gameState, IAction action) {
         ColtExpressTurnOrder llTurnOrder = (ColtExpressTurnOrder) gameState.getTurnOrder();
         ColtExpressGameState llgs = (ColtExpressGameState) gameState;

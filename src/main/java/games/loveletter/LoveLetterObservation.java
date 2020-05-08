@@ -6,6 +6,7 @@ import core.observations.IObservation;
 import core.observations.IPrintable;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import games.loveletter.cards.LoveLetterCard;
+import utilities.Utils;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
     private final Deck<LoveLetterCard> drawPile;
     private final Deck<LoveLetterCard> discardPile;
     private final boolean[] effectProtection;
-    private final boolean[] isAlive;
+    private final Utils.GameResult[] isAlive;
     private final int currentPlayer;
     private final LoveLetterGameState.GamePhase gamePhase;
 
@@ -27,7 +28,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
                                  boolean[] effectProtection,
                                  int currentPlayer,
                                  LoveLetterGameState.GamePhase gamePhase,
-                                 boolean[] isAlive){
+                                 Utils.GameResult[] isAlive){
         this.playerHandCards = playerDecks;
         this.playerDiscardCards = playerDiscardCards;
         this.drawPile = drawPile;
@@ -53,7 +54,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
             printDeck(playerDiscardCards.get(i));
             System.out.print(";\t Protected: ");
             System.out.print(effectProtection[i]);
-            System.out.print(";\t Alive: ");
+            System.out.print(";\t Status: ");
             System.out.println(isAlive[i]);
         }
 

@@ -15,7 +15,7 @@ public class PartialObservableDeck<T> extends Deck<T> implements IPartialObserva
 
     public PartialObservableDeck(int nPlayers)
     {
-        super();
+        super("tmp");
         super.type = Utils.ComponentType.DECK;
         cards = new ArrayList<>();
         visibilityPerPlayer = new ArrayList<>();
@@ -26,6 +26,7 @@ public class PartialObservableDeck<T> extends Deck<T> implements IPartialObserva
 
     public PartialObservableDeck(boolean[] defaultVisbility)
     {
+        super("tmp");
         super.type = Utils.ComponentType.DECK;
         cards = new ArrayList<>();
         visibilityPerPlayer = new ArrayList<>();

@@ -28,7 +28,7 @@ public class KingAction extends PlayCard<LoveLetterCard> implements IAction, IPr
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
         if (!((LoveLetterGameState)gs).getProtection(opponentID)){
-            Deck<LoveLetterCard> tmpDeck = new Deck<>();
+            Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp");
             while (opponentDeck.getCards().size() > 0)
                 tmpDeck.add(opponentDeck.draw());
             while (playerDeck.getCards().size() > 0)

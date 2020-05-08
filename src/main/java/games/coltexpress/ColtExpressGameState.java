@@ -19,7 +19,6 @@ import java.util.List;
 
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
-
     public enum GamePhase {
         DrawCards,
         PlanActions,
@@ -130,6 +129,11 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         }
 
         return actions;
+    }
+
+    @Override
+    public void setComponents() {
+
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+
 public class LoveLetterGameState extends AbstractGameState {
 
     public enum GamePhase {
@@ -45,13 +46,13 @@ public class LoveLetterGameState extends AbstractGameState {
     }
 
     public void killPlayer(int playerID){
-        isPlayerAlive[playerID] = false;
+        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
         while (playerHandCards.get(playerID).getCards().size() > 0)
             playerDiscardCards.get(playerID).add(playerHandCards.get(playerID).draw());
 
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (isPlayerAlive[i]) nPlayersActive++;
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
         }
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
@@ -82,7 +83,7 @@ public class LoveLetterGameState extends AbstractGameState {
             }
         }
 
-        discardPile = new Deck<>();
+        discardPile = new Deck<>("discard");
         drawPile.shuffle();
         discardPile.add(drawPile.draw());
 
@@ -99,7 +100,7 @@ public class LoveLetterGameState extends AbstractGameState {
             playerHandCards.add(playerCards);
 
             Arrays.fill(visibility, true);
-            Deck<LoveLetterCard> discardCards = new Deck<>();
+            Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer"+i);
             playerDiscardCards.add(discardCards);
         }
     }
@@ -143,7 +144,7 @@ public class LoveLetterGameState extends AbstractGameState {
                 switch (card.cardType) {
                     case Priest:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
+                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
                                 continue;
                             actions.add(new PriestAction(card, playerDeck, playerDiscardPile,
                                     playerHandCards.get(targetPlayer), targetPlayer, playerID));
@@ -151,7 +152,7 @@ public class LoveLetterGameState extends AbstractGameState {
                         break;
                     case Guard:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
+                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
                                 actions.add(new GuardAction(card, playerDeck, playerDiscardPile,
@@ -160,7 +161,7 @@ public class LoveLetterGameState extends AbstractGameState {
                         break;
                     case Baron:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
+                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
                                 continue;
                             actions.add(new BaronAction(card, playerDeck, playerDiscardPile,
                                     playerHandCards.get(targetPlayer), targetPlayer, playerID));
@@ -171,7 +172,7 @@ public class LoveLetterGameState extends AbstractGameState {
                         break;
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
+                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
                                 continue;
                             actions.add(new PrinceAction(card, playerDeck, playerDiscardPile,
                                     playerHandCards.get(targetPlayer), targetPlayer, drawPile,
@@ -180,7 +181,7 @@ public class LoveLetterGameState extends AbstractGameState {
                         break;
                     case King:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || !isPlayerAlive[targetPlayer])
+                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
                                 continue;
                             actions.add(new KingAction(card, playerDeck, playerDiscardPile,
                                     playerHandCards.get(targetPlayer), targetPlayer));
@@ -204,22 +205,18 @@ public class LoveLetterGameState extends AbstractGameState {
 
     @Override
     public IObservation getObservation(int player) {
-        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, discardPile, effectProtection, player, gamePhase, isPlayerAlive);
+        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, discardPile, effectProtection, player, gamePhase, playerResults);
     }
 
     @Override
     public void endGame() {
         this.gameStatus = Utils.GameResult.GAME_END;
 
-        for (int i = 0; i < getNPlayers(); i++){
-            playerResults[i] = isPlayerAlive[i] ? Utils.GameResult.GAME_WIN : Utils.GameResult.GAME_LOSE;
-        }
-
         List<Integer> bestPlayers = new ArrayList<>();
         int bestValue = 0;
         int points;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_WIN)
+            if (playerResults[i] != Utils.GameResult.GAME_LOSE)
                  points = playerHandCards.get(i).peek().cardType.getValue();
             else
                 points = 0;
@@ -286,6 +283,11 @@ public class LoveLetterGameState extends AbstractGameState {
         }
 
         return actions;
+    }
+
+    @Override
+    public void setComponents() {
+
     }
 
 

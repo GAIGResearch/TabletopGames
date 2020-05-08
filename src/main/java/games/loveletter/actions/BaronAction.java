@@ -8,6 +8,7 @@ import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
+import utilities.Utils;
 
 public class BaronAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
 
@@ -28,7 +29,7 @@ public class BaronAction extends PlayCard<LoveLetterCard> implements IAction, IP
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        if (!((LoveLetterGameState)gs).getProtection(opponentID) && gs.isPlayerAlive(playerID)){
+        if (!((LoveLetterGameState)gs).getProtection(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
             if (opponentDeck.peek() == null || playerDeck.peek() == null)
                 System.out.println();
             if (opponentDeck.peek().cardType.getValue() < playerDeck.peek().cardType.getValue())
@@ -44,6 +45,7 @@ public class BaronAction extends PlayCard<LoveLetterCard> implements IAction, IP
     public String toString(){
         return "Baron - compare the cards with player "+ opponentID;
     }
+
     @Override
     public void printToConsole() {
         System.out.println(this.toString());

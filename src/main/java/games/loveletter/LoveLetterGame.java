@@ -1,11 +1,12 @@
 package games.loveletter;
 
+import core.AbstractPlayer;
+import core.ForwardModel;
 import core.GUI;
 import core.Game;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
-import players.AbstractPlayer;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -14,15 +15,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static games.pandemic.PandemicConstants.VERBOSE;
+import static utilities.CoreConstants.VERBOSE;
 
 public class LoveLetterGame extends Game {
 
-    public LoveLetterGame(List<AbstractPlayer> agents) {
-        super(agents);
-        LoveLetterParameters params = new LoveLetterParameters();
-        forwardModel = new LoveLetterForwardModel();
-        gameState = new LoveLetterGameState(params, forwardModel, agents.size());
+
+    public LoveLetterGame(List<AbstractPlayer> agents, LoveLetterForwardModel forwardModel, LoveLetterGameState gameState) {
+        super(agents, forwardModel, gameState);
     }
 
     @Override
@@ -30,47 +29,37 @@ public class LoveLetterGame extends Game {
         while (!gameState.isTerminal()){
             System.out.println();
             System.out.println();
-            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+            if (true) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
             // Get actions for the player
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
-            if (observation != null && VERBOSE) {
+            if (observation != null && true) {
                 ((IPrintable) observation).printToConsole();
             }
 
             int action = players.get(activePlayer).getAction(observation, actions);
             forwardModel.next(gameState, actions.get(action));
-            gameState.getTurnOrder().endPlayerTurnStep(gameState);
-
-            // Resolve core.actions and game rules for the turn
-
-            if (gui != null) {
-                gui.update(gameState);
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    System.out.println("EXCEPTION " + e);
-                }
-            }
         }
-
-        gameState.endGame();
 
         System.out.println("Game Over");
     }
 
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomPlayer(0));
-        agents.add(new RandomPlayer(1));
-        agents.add(new RandomPlayer(2));
-        agents.add(new RandomPlayer(3));
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
 
-        for (int i=0; i<1000; i++) {
-            Game game = new LoveLetterGame(agents);
+        for (int i=0; i<10000; i++) {
+            LoveLetterParameters params = new LoveLetterParameters();
+            LoveLetterForwardModel forwardModel = new LoveLetterForwardModel();
+            LoveLetterGameState tmp_gameState = new LoveLetterGameState(params, forwardModel, agents.size());
+
+            Game game = new LoveLetterGame(agents, forwardModel, tmp_gameState);
             game.run(null);
             LoveLetterGameState gameState = (LoveLetterGameState) game.getGameState();
 
