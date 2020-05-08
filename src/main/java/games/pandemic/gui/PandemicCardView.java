@@ -51,10 +51,13 @@ public class PandemicCardView extends JComponent {
             g.setColor(Color.lightGray);
             g.fillRect(rect.x, rect.y, rect.width-1, rect.height-1);
             g.setColor(Color.black);
+            g.drawLine(rect.x, rect.y, rect.x+rect.width-1, rect.y+rect.height-1);
         }
 
         int size = g.getFont().getSize();
-        g.drawString(name, rect.x + 10, rect.y + size + 20);
+        if (name != null && !name.equals("")) {
+            g.drawString(name, rect.x + 10, rect.y + size + 20);
+        }
         g.drawRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
     }
 

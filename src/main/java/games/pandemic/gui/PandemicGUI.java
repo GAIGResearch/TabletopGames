@@ -53,7 +53,7 @@ public class PandemicGUI extends GUI {
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
         this.gameState = gameState;
-        boardView = new PandemicBoardView(gameState, "data/pandemicBackground.jpg");
+        boardView = new PandemicBoardView(gameState);
 
         handCardHighlights = new ArrayList[nPlayers];
         playerHighlights = new HashSet<>();
