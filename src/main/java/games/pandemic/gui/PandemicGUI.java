@@ -65,6 +65,7 @@ public class PandemicGUI extends GUI {
         highlights[1] = boardView.getHighlights().keySet();
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
+        gamePhase = new JLabel();
         JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
@@ -191,7 +192,7 @@ public class PandemicGUI extends GUI {
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
-        gamePhase = new JLabel("Game phase: " + this.gameState.getGamePhase());
+        gamePhase.setText("Game phase: " + ((PandemicGameState)gameState).getGamePhase());
     }
 
     private JPanel createCounterArea() {

@@ -55,7 +55,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         areas = new HashMap<>();
 
         // For each player, initialize their own areas: they get a player hand and a player card
-        int capacity = ((PandemicParameters)gameParameters).n_cards_per_player.get(getNPlayers());
+        int capacity = ((PandemicParameters)gameParameters).max_cards_per_player;
         for (int i = 0; i < getNPlayers(); i++) {
             Area playerArea = new Area(i);
             Deck<Card> playerHand = new Deck<>("Player Hand");
@@ -119,7 +119,9 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public List<IAction> computeAvailableActions() {
-        if (!((PandemicTurnOrder)turnOrder).reactionsRemaining()) gamePhase = GamePhase.Main;
+        if (!((PandemicTurnOrder)turnOrder).reactionsRemaining()) {
+            gamePhase = GamePhase.Main;
+        }
         if (gamePhase == GamePhase.DiscardReaction)
                 return getDiscardActions();
         else if (gamePhase == GamePhase.RPReaction)

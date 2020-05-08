@@ -49,17 +49,16 @@ public class ReactiveTurnOrder extends TurnOrder {
     }
 
     public void addAllReactivePlayers(AbstractGameState gameState) {
-        for (int i = 0; i < gameState.getNPlayers()-1; i++) {
-
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
             if (gameState.getPlayerResults()[i] == GAME_ONGOING) {
                 reactivePlayers.add(i);
             }
         }
     }
+
     public void addAllReactivePlayersButCurrent(AbstractGameState gameState) {
         int currentPlayer = getCurrentPlayer(gameState);
-        for (int i = 0; i < gameState.getNPlayers()-1; i++) {
-
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
             if (i != currentPlayer && gameState.getPlayerResults()[i] == GAME_ONGOING) {
                 reactivePlayers.add(i);
             }
