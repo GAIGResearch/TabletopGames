@@ -1,13 +1,14 @@
 package games.explodingkittens.actions;
 
-import actions.IAction;
-import components.IDeck;
+import core.actions.IAction;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import games.explodingkittens.ExplodingKittensGamePhase;
+import core.observations.IPrintable;
+import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import turnorder.TurnOrder;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.DefusePhase;
 
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 
@@ -27,7 +28,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         ExplodingKittenCard c = deckFrom.draw();
         ExplodingKittenCard.CardType type = c.cardType;
         if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
@@ -39,31 +40,31 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 }
             }
             if (defuseCard != null){
-                ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.DefusePhase;
+                ((ExplodingKittensGameState) gs).setGamePhase(DefusePhase);
                 deckTo.remove(defuseCard);
                 deckTo.add(c);
             } else {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
-                IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).discardPile;
+                IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
                 for (ExplodingKittenCard card : deckTo.getCards()){
                     discardDeck.add(card);
                 }
                 deckTo.clear();
                 discardDeck.add(c);
-                turnOrder.endPlayerTurn(gs);
+                ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
                 //((ExplodingKittensGameState) gs).setActivePlayer(((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID));
                 //((ExplodingKittensGameState) gs).remainingDraws = 1;
             }
         } else {
             deckTo.add(c);
-            turnOrder.endPlayerTurn(gs);
+            ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         }
         return true;
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

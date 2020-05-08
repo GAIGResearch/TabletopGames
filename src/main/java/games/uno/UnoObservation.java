@@ -1,13 +1,13 @@
 package games.uno;
 
-import components.Deck;
-import observations.IPrintable;
+import core.components.Deck;
+import core.observations.IPrintable;
 import games.uno.cards.UnoCard;
-import observations.Observation;
+import core.observations.IObservation;
 
 import java.util.Arrays;
 
-public class UnoObservation implements IPrintable, Observation {
+public class UnoObservation implements IPrintable, IObservation {
 
     String[] strings = new String[5];
     public UnoObservation(UnoCard currentCard, Deck<UnoCard> playerHand, Deck<UnoCard> discardPile, int[] cardsPerPlayer, int cardsInDeck){
@@ -35,7 +35,7 @@ public class UnoObservation implements IPrintable, Observation {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         for (String s : strings){
             System.out.println(s);
         }

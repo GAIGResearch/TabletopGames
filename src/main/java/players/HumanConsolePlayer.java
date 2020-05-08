@@ -1,9 +1,9 @@
 package players;
 
-import actions.IAction;
-import observations.IPrintable;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.AbstractPlayer;
+import core.actions.IAction;
+import core.observations.IPrintable;
+import core.observations.IObservation;
 
 import java.util.List;
 import java.util.Scanner;
@@ -11,29 +11,25 @@ import java.util.Scanner;
 
 public class HumanConsolePlayer extends AbstractPlayer {
 
-    public HumanConsolePlayer(int playerID){
-        super(playerID);
-    }
-
     @Override
-    public void initializePlayer(Observation observation) {
+    public void initializePlayer(IObservation observation) {
 
     }
 
     @Override
-    public void finalizePlayer(Observation observation) {
+    public void finalizePlayer(IObservation observation) {
 
     }
 
     @Override
-    public int getAction(Observation observation, List<IAction> actions) {
+    public int getAction(IObservation observation, List<IAction> actions) {
         if (observation instanceof IPrintable)
-            ((IPrintable) observation).PrintToConsole();
+            ((IPrintable) observation).printToConsole();
 
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) instanceof IPrintable) {
                 System.out.print("Action " + i + ": ");
-                ((IPrintable) actions.get(i)).PrintToConsole();
+                ((IPrintable) actions.get(i)).printToConsole();
             }
             else
                 System.out.println("action i: Action does not implement IPrintableAction");

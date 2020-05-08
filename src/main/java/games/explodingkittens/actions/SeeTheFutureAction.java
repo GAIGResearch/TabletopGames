@@ -1,27 +1,28 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.Deck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
-import components.IPartialObservableDeck;
-import games.explodingkittens.ExplodingKittensGamePhase;
+import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittensGameState;
-import turnorder.TurnOrder;
+import core.turnorder.TurnOrder;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.SeeTheFuturePhase;
 
 public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
-    private final IPartialObservableDeck<T> drawPile;
+    private final Deck<T> drawPile;
     private final int playerID;
 
-    public SeeTheFutureAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID, IPartialObservableDeck<T> drawPile) {
+    public SeeTheFutureAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID, Deck<T> drawPile) {
         super(card, playerDeck, discardDeck);
         this.drawPile = drawPile;
         this.playerID = playerID;
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        super.Execute(gs, turnOrder);
-        ((ExplodingKittensGameState)gs).gamePhase = ExplodingKittensGamePhase.SeeTheFuturePhase;
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
+        ((ExplodingKittensGameState)gs).setGamePhase(SeeTheFuturePhase);
         return false;
     }
 
@@ -31,11 +32,11 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
     }
 
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

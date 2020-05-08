@@ -1,7 +1,8 @@
 package players;
 
-import actions.IAction;
-import observations.Observation;
+import core.AbstractPlayer;
+import core.actions.IAction;
+import core.observations.IObservation;
 
 import java.util.List;
 import java.util.Random;
@@ -13,25 +14,24 @@ public class RandomPlayer extends AbstractPlayer {
      */
     private final Random rnd;
 
-    public RandomPlayer(int playerID, Random rnd)
+    public RandomPlayer(Random rnd)
     {
-        super(playerID);
         this.rnd = rnd;
     }
 
-    public RandomPlayer(int playerID)
+    public RandomPlayer()
     {
-        this(playerID, new Random());
+        this(new Random());
     }
 
     @Override
-    public void initializePlayer(Observation observation) {}
+    public void initializePlayer(IObservation observation) {}
 
     @Override
-    public void finalizePlayer(Observation observation) {}
+    public void finalizePlayer(IObservation observation) {}
 
     @Override
-    public int getAction(Observation observation, List<IAction> actions) {
+    public int getAction(IObservation observation, List<IAction> actions) {
         return rnd.nextInt(actions.size());
     }
 }

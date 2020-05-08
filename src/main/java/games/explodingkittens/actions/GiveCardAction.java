@@ -1,14 +1,14 @@
 package games.explodingkittens.actions;
 
-import actions.IAction;
-import components.IDeck;
+import core.actions.IAction;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
+import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import games.explodingkittens.ExplodingKittensGamePhase;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import turnorder.TurnOrder;
+
+import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 
 public class GiveCardAction implements IAction, IPrintable {
@@ -24,12 +24,13 @@ public class GiveCardAction implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         giverDeck.remove(card);
         receiverDeck.add(card);
-        ((ExplodingKittensGameState) gs).gamePhase = ExplodingKittensGamePhase.PlayerMove;
-        turnOrder.endPlayerTurn(gs);
-        ((ExplodingKittenTurnOrder) turnOrder).currentPlayer = ((ExplodingKittensGameState) gs).playerGettingAFavor;
+        ekgs.setGamePhase(PlayerMove);
+        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+        ((ExplodingKittenTurnOrder) gs.getTurnOrder()).addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;
     }
 
@@ -40,7 +41,7 @@ public class GiveCardAction implements IAction, IPrintable {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 

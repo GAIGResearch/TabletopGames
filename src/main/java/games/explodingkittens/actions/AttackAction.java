@@ -1,10 +1,10 @@
 package games.explodingkittens.actions;
 
-import components.IDeck;
+import core.components.IDeck;
 import core.AbstractGameState;
-import observations.IPrintable;
+import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import turnorder.TurnOrder;
+import core.turnorder.TurnOrder;
 
 
 public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
@@ -16,9 +16,9 @@ public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintab
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
-        super.Execute(gs, turnOrder);
-        ((ExplodingKittenTurnOrder) turnOrder).registerAttackAction(attackTargetID);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
+        ((ExplodingKittenTurnOrder) gs.getTurnOrder()).registerAttackAction(attackTargetID);
         return false;
     }
 
@@ -29,11 +29,11 @@ public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintab
 
     @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.Execute(gs, turnOrder);
+        return super.execute(gs);
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println(this.toString());
     }
 }

@@ -1,6 +1,6 @@
 package games.explodingkittens.cards;
 
-import components.Card;
+import core.components.Card;
 //import explodingkittens.ExplodingKittensCardTypeProperty;
 
 public class ExplodingKittenCard extends Card {

@@ -1,12 +1,13 @@
 package games.carcassonne;
 
-import actions.IAction;
-import components.Card;
-import components.Deck;
+import core.ForwardModel;
+import core.actions.IAction;
+import core.components.Card;
+import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
-import observations.Observation;
-import players.AbstractPlayer;
+import core.observations.IObservation;
+import core.turnorder.AlternatingTurnOrder;
 
 import java.awt.*;
 import java.util.*;
@@ -22,9 +23,8 @@ public class CarcassonneGameState extends AbstractGameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    public CarcassonneGameState(GameParameters gameParameters) {
-        super(gameParameters);
-        setComponents();
+    public CarcassonneGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
+        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
     }
 
     public void setComponents() {
@@ -54,12 +54,18 @@ public class CarcassonneGameState extends AbstractGameState {
     }
 
     @Override
-    public Observation getObservation(AbstractPlayer player) {
+    public IObservation getObservation(int player) {
         return null;
     }
 
     @Override
-    public List<IAction> getActions(AbstractPlayer player) {
+    public void endGame() {
+
+    }
+
+    @Override
+    public List<IAction> computeAvailableActions() {
+
         List<IAction> actions;
         switch (gamePhase){
             case PlaceTile:
@@ -75,11 +81,6 @@ public class CarcassonneGameState extends AbstractGameState {
 
         this.numAvailableActions = actions.size();
         return actions;
-    }
-
-    @Override
-    public void endGame() {
-
     }
 
     private class CarcassonneBoard{
