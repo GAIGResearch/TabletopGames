@@ -13,10 +13,28 @@ import java.util.Random;
  */
 public interface IDeck<T>
 {
+    void setID(String id);
+
     /**
      * Maximum number of cards this deck may contain.
      */
     int getCapacity();
+
+    /**
+     * Maximum number of cards this deck may contain.
+     */
+    void setCapacity(int capacity);
+
+    boolean isOverCapacity();
+
+    /**
+     * Returns all the cards in this deck.
+     * @return all the cards in this deck.
+     */
+    ArrayList<T> getCards();
+
+    void setCards(ArrayList<T> cards);
+
 
     /**
      * Shuffles the deck
@@ -74,10 +92,7 @@ public interface IDeck<T>
      */
     String getID();
 
-    /**
-     * Removes all the cards from the deck.
-     */
-    void clear();
+    T peek(int idx);
 
     /**
      * Adds a card to a deck on the given index and uses the default visibility.
@@ -94,29 +109,19 @@ public interface IDeck<T>
      */
     boolean add(T c);
 
+    boolean add(Deck<T> d);
+
+    boolean remove(T card);
+
+    boolean remove(int idx);
+
     /**
-     * Returns all the cards in this deck.
-     * @return all the cards in this deck.
+     * Removes all the cards from the deck.
      */
-    ArrayList<T> getCards();
-    ArrayList<T> getCards(int playerID);
-    void setCards(ArrayList<T> cards);
+    void clear();
 
     /**
      * Shuffles the order of elements in the deck.
      */
     void shuffle();
-
-    void setCardsVisibility(ArrayList<boolean[]> cardVisibility);
-    void setCardVisibility(int cardIdx, int player, boolean visibility);
-    void setCapacity(int capacity);
-    void setID(String id);
-    void setDeckVisibility(int nPlayers, boolean v);
-    void setDeckVisibility(boolean[] visibility);
-    boolean isOverCapacity();
-    T peek(int idx);
-    boolean add(T c, int index, boolean[] visibilityPerPlayer);
-    boolean add(Deck<T> d);
-    boolean remove(T card);
-    boolean remove(int idx);
 }
