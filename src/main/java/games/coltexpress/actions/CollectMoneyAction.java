@@ -46,7 +46,7 @@ public class CollectMoneyAction extends ColtExpressExecuteCardAction{
 
     public String toString(){
         if (lootType == null)
-            return "no loot to grab";
+            return "Attempt to collect loot but no loot is available";
         return "Collect random loot of type " + lootType;
     }
 }

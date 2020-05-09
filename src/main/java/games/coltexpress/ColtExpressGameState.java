@@ -165,13 +165,15 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     public ArrayList<IAction> stealingActions(int player)
     {
         ArrayList<IAction> actions = new ArrayList<>();
+        if (plannedActions.getSize() == 0)
+            return actions;
+        
         ColtExpressCard plannedActionCard = plannedActions.peek(0);
         if (player == plannedActionCard.playerID)
         {
             switch (plannedActionCard.cardType){
                 case Punch:
-                    actions.add(new PunchAction(plannedActionCard, plannedActions,
-                            playerDecks.get(player)));
+                    createPunchingActions(plannedActionCard, actions, player);
                     break;
                 case Shoot:
                     if (bulletsLeft[player] <= 0)
@@ -292,6 +294,96 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         return actions;
     }
 
+    private void createPunchingActions(ColtExpressCard card, ArrayList<IAction> actions, int player){
+        int playerCompartmentIndex = 0;
+        Compartment playerCompartment = null;
+        HashSet<Integer> availableTargets = new HashSet<>();
+        boolean playerOnTop = false;
+
+        for (int i = 0; i < train.getSize(); i++)
+        {
+            Compartment compartment = train.getCompartment(i);
+            if (compartment.playersOnTopOfCompartment.contains(player)) {
+                for (Integer targetID : compartment.playersOnTopOfCompartment){
+                    if (targetID != player)
+                        availableTargets.add(targetID);
+                }
+
+                playerCompartmentIndex = i;
+                playerCompartment = compartment;
+                playerOnTop = true;
+                break;
+            } else if (compartment.playersInsideCompartment.contains(player)){
+                for (Integer targetID : compartment.playersInsideCompartment){
+                    if (targetID != player)
+                        availableTargets.add(targetID);
+                }
+
+                playerCompartmentIndex = i;
+                playerCompartment = compartment;
+                break;
+            }
+        }
+
+        if (availableTargets.size() > 1 && availableTargets.contains(playerPlayingBelle))
+            availableTargets.remove(playerPlayingBelle);
+        boolean playerIsCheyenne = playerCharacters.get(player) == CharacterType.Django;
+
+        // punch forward
+        for (int offset = -1; offset <= 1; offset++){
+            if (offset == 0 || playerCompartmentIndex+offset < 0 || playerCompartmentIndex+offset >= train.getSize())
+                continue;
+            Compartment targetCompartment = train.getCompartment(playerCompartmentIndex+offset);
+            for (Integer targetPlayer : availableTargets){
+                PartialObservableDeck<Loot> availableLoot = playerLoot.get(targetPlayer);
+
+                if (availableLoot.getSize() > 0){
+                    for (Loot loot : availableLoot.getCards())
+                    {
+                        if (loot.getType() == Loot.LootType.Purse){
+                            actions.add(new PunchAction(card, plannedActions,
+                                    playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
+                                    Loot.LootType.Purse, availableLoot, playerIsCheyenne));
+                            break;
+                        }
+                    }
+                    for (Loot loot : availableLoot.getCards())
+                    {
+                        if (loot.getType() == Loot.LootType.Strongbox){
+                            actions.add(new PunchAction(card, plannedActions,
+                                    playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
+                                    Loot.LootType.Purse, availableLoot, playerIsCheyenne));
+                            break;
+                        }
+                    }
+
+                    for (Loot loot : availableLoot.getCards())
+                    {
+                        if (loot.getType() == Loot.LootType.Jewel){
+                            actions.add(new PunchAction(card, plannedActions,
+                                    playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
+                                    Loot.LootType.Purse, availableLoot, playerIsCheyenne));
+                            break;
+                        }
+                    }
+                }
+                else {
+                    // punch opponent that cannot drop anymore loot
+                    actions.add(new PunchAction(card, plannedActions,
+                            playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
+                            null, null, playerIsCheyenne));
+                }
+            }
+        }
+
+
+
+        if (actions.size() == 0)
+            actions.add(new PunchAction(card, plannedActions,
+                    playerDecks.get(player), -1, null, null,
+                    null, null, playerIsCheyenne));
+    }
+
     private void createShootingActions(ColtExpressCard card, ArrayList<IAction> actions, int player) {
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
@@ -306,7 +398,8 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                 break;
             } else if (compartment.playersInsideCompartment.contains(player)){
                 playerCompartmentIndex = i;
-                playerCompartment = compartment; //todo add break;
+                playerCompartment = compartment;
+                break;
             }
         }
 
