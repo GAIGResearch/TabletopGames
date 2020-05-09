@@ -10,7 +10,7 @@ public class EndCardHostage extends RoundCard {
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo Hostage - All bandits in or on the locomotive collect $250 ransom.
         gameState.endGame();
     }

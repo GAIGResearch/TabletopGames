@@ -10,7 +10,7 @@ public class EndCardMarshallsRevenge extends RoundCard{
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo  Marshall's Revenge - All bandits on the roof of the Marshall's car drop their least valuable purse.
         gameState.endGame();
     }

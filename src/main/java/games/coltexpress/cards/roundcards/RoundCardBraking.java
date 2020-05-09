@@ -14,7 +14,7 @@ public class RoundCardBraking extends RoundCard{
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo Braking - All bandits on the roof of the train move one car toward the locomotive.
     }
 }

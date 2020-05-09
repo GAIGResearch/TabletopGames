@@ -11,7 +11,6 @@ import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,10 +25,9 @@ public class ColtExpressGame extends Game {
     @Override
     public void run(GUI gui) {
         while (!gameState.isTerminal()){
-            System.out.println();
-            System.out.println();
-            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-
+            //System.out.println();
+            //if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+            ((IPrintable) gameState).printToConsole();
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
             // Get actions for the player
@@ -41,7 +39,6 @@ public class ColtExpressGame extends Game {
 
             IAction action = actions.size() > 0 ? actions.get(players.get(activePlayer).getAction(observation, actions)) : null;
             forwardModel.next(gameState, action);
-            break;
         }
 
         gameState.endGame();
@@ -67,7 +64,7 @@ public class ColtExpressGame extends Game {
 
             gameState.printToConsole();
             // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
+            //System.out.println(Arrays.toString(gameState.getPlayerResults()));
 
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){

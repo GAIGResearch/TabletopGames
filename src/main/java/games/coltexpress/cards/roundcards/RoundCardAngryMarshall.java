@@ -20,7 +20,7 @@ public class RoundCardAngryMarshall extends RoundCard{
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo Angry Marshall - The Marshall shoots all bandits on the roof of his car and then moves one car toward the caboose.
     }
 }

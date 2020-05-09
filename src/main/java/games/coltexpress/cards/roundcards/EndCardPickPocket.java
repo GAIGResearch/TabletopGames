@@ -10,7 +10,7 @@ public class EndCardPickPocket extends RoundCard {
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo Pick Pocket - Any bandit alone in or on a car can pick up a purse if there is one.
         gameState.endGame();
     }

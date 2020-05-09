@@ -1,5 +1,7 @@
 package core.observations;
 
 public interface IPrintable {
-    void printToConsole();
+    default void printToConsole(){
+        System.out.println(toString());
+    }
 }

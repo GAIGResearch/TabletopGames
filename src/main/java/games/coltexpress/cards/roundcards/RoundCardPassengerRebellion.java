@@ -22,7 +22,7 @@ public class RoundCardPassengerRebellion extends RoundCard {
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo Passenger Rebellion - All bandits in the train receive one Neutral Bullet card.
     }
 }

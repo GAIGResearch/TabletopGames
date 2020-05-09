@@ -15,7 +15,7 @@ public class ColtExpressParameters extends GameParameters {
         put(ColtExpressCard.CardType.MoveSideways, 2);
         put(ColtExpressCard.CardType.MoveUp, 2);
         put(ColtExpressCard.CardType.Punch, 1);
-        put(ColtExpressCard.CardType.MoveSheriff, 1);
+        put(ColtExpressCard.CardType.MoveMarshal, 1);
         put(ColtExpressCard.CardType.Shoot, 2);
         put(ColtExpressCard.CardType.CollectMoney, 2);
     }};

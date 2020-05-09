@@ -15,7 +15,7 @@ public class RoundCardSwivelArm extends RoundCard{
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //todo: Swivel Arm - All bandits on the roof of the train are swept to the caboose.
     }
 }

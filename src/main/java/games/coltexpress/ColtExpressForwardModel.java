@@ -18,13 +18,32 @@ public class ColtExpressForwardModel extends ForwardModel {
 
     @Override
     public void next(AbstractGameState gameState, IAction action) {
-        ColtExpressTurnOrder llTurnOrder = (ColtExpressTurnOrder) gameState.getTurnOrder();
-        ColtExpressGameState llgs = (ColtExpressGameState) gameState;
+        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) gameState.getTurnOrder();
+        ColtExpressGameState cegs = (ColtExpressGameState) gameState;
+
         if (action != null) {
             System.out.println(action.toString());
             action.execute(gameState);
+        } else {
+            System.out.println("Player cannot do anything since he has drawn cards or " +
+                    " doesn't have any targets available");
         }
+
+        switch (cegs.getGamePhase()){
+            case PlanActions:
+                ceto.endPlayerTurn(gameState);
+                break;
+            case ExecuteActions:
+                ceto.endPlayerTurn(gameState);
+                if (cegs.plannedActions.getSize() == 0)
+                    ceto.endRoundCard(gameState);
+                break;
+            case DraftCharacter:
+                break;
+        }
+
     }
+
 
     private void checkWinningCondition(ColtExpressGameState gs) {
 
