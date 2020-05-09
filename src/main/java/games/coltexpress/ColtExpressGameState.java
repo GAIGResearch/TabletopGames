@@ -140,6 +140,69 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     public void endGame() {
         this.gameStatus = Utils.GameResult.GAME_END;
         Arrays.fill(playerResults, Utils.GameResult.GAME_LOSE);
+
+        int[] pointsPerPlayer = new int[getNPlayers()];
+        int[] bulletCardsPerPlayer = new int[getNPlayers()];
+
+        List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
+        int bestValue = 6;
+        for (int i = 0; i < getNPlayers(); i++) {
+            for (Loot loot : playerLoot.get(i).getCards())
+                pointsPerPlayer[i] += loot.getValue();
+            for (ColtExpressCard card : playerDecks.get(i).getCards())
+                if (card.cardType == ColtExpressCard.CardType.Bullet)
+                    bulletCardsPerPlayer[i]++;
+            for (ColtExpressCard card : playerHandCards.get(i).getCards())
+                if (card.cardType == ColtExpressCard.CardType.Bullet)
+                    bulletCardsPerPlayer[i]++;
+
+            if (bulletsLeft[i] < bestValue){
+                bestValue = bulletsLeft[i];
+                playersWithMostSuccessfulShots.clear();
+                playersWithMostSuccessfulShots.add(i);
+            } else if (bulletsLeft[i] == bestValue) {
+                playersWithMostSuccessfulShots.add(i);
+            }
+        }
+
+        for (Integer bestShooter : playersWithMostSuccessfulShots)
+            pointsPerPlayer[bestShooter] += 1000;
+
+        LinkedList<Integer> potentialWinnersByPoints = new LinkedList<>();
+        bestValue = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (pointsPerPlayer[i] > bestValue){
+                bestValue = pointsPerPlayer[i];
+                potentialWinnersByPoints.clear();
+                potentialWinnersByPoints.add(i);
+            } else if (pointsPerPlayer[i] == bestValue) {
+                potentialWinnersByPoints.add(i);
+            }
+        }
+        if (potentialWinnersByPoints.size() == 1)
+        {
+            for (Integer playerID : potentialWinnersByPoints)
+                playerResults[playerID] = Utils.GameResult.GAME_WIN;
+            return;
+        }
+
+        //In case of a tie, the winner is the tied player who has received the fewest
+        // Bullet cards from other players and Events during the game.
+        LinkedList<Integer> potentialWinnerByBulletCards = new LinkedList<>();
+        bestValue = -1;
+        for (Integer potentialWinner : potentialWinnersByPoints) {
+            if (bestValue == -1 || bulletCardsPerPlayer[potentialWinner] < bestValue){
+                bestValue = bulletCardsPerPlayer[potentialWinner];
+                potentialWinnerByBulletCards.clear();
+                potentialWinnerByBulletCards.add(potentialWinner);
+            } else if (bulletCardsPerPlayer[potentialWinner] == bestValue) {
+                potentialWinnerByBulletCards.add(potentialWinner);
+            }
+        }
+
+        for (Integer playerID : potentialWinnerByBulletCards)
+            playerResults[playerID] = Utils.GameResult.GAME_WIN;
+
     }
 
     public ArrayList<IAction> schemingActions(int player){
@@ -167,7 +230,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         ArrayList<IAction> actions = new ArrayList<>();
         if (plannedActions.getSize() == 0)
             return actions;
-        
+
         ColtExpressCard plannedActionCard = plannedActions.peek(0);
         if (player == plannedActionCard.playerID)
         {
