@@ -279,7 +279,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
         if (playerOnTop){
             //shots in rear direction
-            for (int offset = 0; playerCompartmentIndex-offset >=0; offset++){
+            for (int offset = 1; playerCompartmentIndex-offset >=0; offset++){
                 Compartment targetCompartment = train.getCompartment(playerCompartmentIndex-offset);
                 if (targetCompartment.playersOnTopOfCompartment.size() > 0){
                     for (Integer target : targetCompartment.playersOnTopOfCompartment)
@@ -289,7 +289,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
             }
 
             //shots to the front of the train
-            for (int offset = 0; playerCompartmentIndex+offset < train.getSize(); offset++){
+            for (int offset = 1; playerCompartmentIndex+offset < train.getSize(); offset++){
                 Compartment targetCompartment = train.getCompartment(playerCompartmentIndex+offset);
                 if (targetCompartment.playersOnTopOfCompartment.size() > 0){
                     for (Integer target : targetCompartment.playersOnTopOfCompartment)
@@ -335,6 +335,10 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
             actions.add(new ShootPlayerAction(card, plannedActions, playerDecks.get(player), playerCompartment,
                     entry.getKey(), entry.getValue(), playerIsDjango));
         }
+
+        if (actions.size() == 0)
+            actions.add(new ShootPlayerAction(card, plannedActions, playerDecks.get(player), playerCompartment,
+                    -1, null, playerIsDjango));
     }
 
     @Override

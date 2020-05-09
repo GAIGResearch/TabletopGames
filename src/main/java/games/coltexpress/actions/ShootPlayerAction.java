@@ -30,6 +30,9 @@ public class ShootPlayerAction extends ColtExpressExecuteCardAction{
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
+        if (targetID == -1)
+            return true;
+
         ColtExpressGameState cegs = ((ColtExpressGameState) gs);
         cegs.addBullet(targetID, card.playerID);
 
@@ -67,6 +70,8 @@ public class ShootPlayerAction extends ColtExpressExecuteCardAction{
     }
 
     public String toString(){
-        return "Player " + card.playerID + " shoots player " + targetID;
+        if (targetID != -1)
+            return "Player " + card.playerID + " shoots player " + targetID;
+        return "Player attempts to shoot but has not target available";
     }
 }
