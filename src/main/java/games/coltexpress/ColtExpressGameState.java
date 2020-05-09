@@ -210,8 +210,43 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                     }
                     break;
                 case CollectMoney:
-                    actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
-                            playerDecks.get(player)));
+                    PartialObservableDeck<Loot> availableLoot = null;
+                    for (int i = 0; i < train.getSize(); i++){
+                        Compartment compartment = train.getCompartment(i);
+                        if (compartment.playersOnTopOfCompartment.contains(player))
+                            availableLoot = compartment.lootOnTop;
+                        else if (compartment.playersInsideCompartment.contains(player))
+                            availableLoot = compartment.lootInside;
+                        if (availableLoot != null){
+                            for (Loot loot : availableLoot.getCards())
+                            {
+                                if (loot.getType() == Loot.LootType.Purse){
+                                    actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
+                                            playerDecks.get(player), Loot.LootType.Purse, availableLoot));
+                                    break;
+                                }
+                            }
+                            for (Loot loot : availableLoot.getCards())
+                            {
+                                if (loot.getType() == Loot.LootType.Strongbox){
+                                    actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
+                                            playerDecks.get(player), Loot.LootType.Strongbox, availableLoot));
+                                    break;
+                                }
+                            }
+                            for (Loot loot : availableLoot.getCards())
+                            {
+                                if (loot.getType() == Loot.LootType.Jewel){
+                                    actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
+                                            playerDecks.get(player), Loot.LootType.Jewel, availableLoot));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (actions.size() == 0)
+                        actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
+                                playerDecks.get(player), null, null));
                     break;
                 case MoveSideways:
                     for (int i = 0; i < train.getSize(); i++){
@@ -400,6 +435,4 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         System.out.println();
         System.out.println("Current GamePhase: " + gamePhase);
     }
-
-
 }
