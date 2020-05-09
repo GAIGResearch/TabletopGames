@@ -1,6 +1,9 @@
 package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
+import games.coltexpress.components.Train;
 
 public class RoundCardAngryMarshall extends RoundCard{
 
@@ -21,6 +24,17 @@ public class RoundCardAngryMarshall extends RoundCard{
 
     @Override
     public void endRoundCardEvent(ColtExpressGameState gameState) {
-        //todo Angry Marshall - The Marshall shoots all bandits on the roof of his car and then moves one car toward the caboose.
+        Train train = gameState.getTrain();
+        for (int i = 0; i < train.getSize(); i++){
+            Compartment c = train.getCompartment(i);
+            if (c.containsMarshal){
+                for (Integer playerID : c.playersOnTopOfCompartment)
+                    gameState.addNeutralBullet(playerID);
+                if (i > 0){
+                    c.containsMarshal = false;
+                    train.getCompartment(i-1).containsMarshal = true;
+                }
+            }
+        }
     }
 }

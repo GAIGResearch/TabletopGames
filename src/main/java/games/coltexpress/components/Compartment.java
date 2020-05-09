@@ -10,20 +10,22 @@ public class Compartment {
     public Set<Integer> playersOnTopOfCompartment = new HashSet<>();
 
     public boolean containsMarshal = false;
-    public PartialObservableDeck<Loot> loot;
+    public PartialObservableDeck<Loot> lootInside;
+    public PartialObservableDeck<Loot> lootOnTop;
     public final int id;
 
     public Compartment(int nPlayers, int id){
-        this(new PartialObservableDeck<>("loot", nPlayers), id);
+        this(new PartialObservableDeck<>("lootInside", nPlayers), new PartialObservableDeck<>("lootOntop", nPlayers), id);
     }
 
-    public Compartment(PartialObservableDeck<Loot> loot, int id){
-        this.loot = loot;
+    public Compartment(PartialObservableDeck<Loot> lootInside, PartialObservableDeck<Loot> lootOnTop, int id){
+        this.lootInside = lootInside;
+        this.lootOnTop = lootOnTop;
         this.id = id;
-        if (loot.getSize() == 0){
-            loot.add(new Loot(Loot.LootType.Purse, 250));
-            loot.add(new Loot(Loot.LootType.Purse, 250));
-            loot.add(new Loot(Loot.LootType.Purse, 500));
+        if (lootInside.getSize() == 0){
+            lootInside.add(new Loot(Loot.LootType.Purse, 250));
+            lootInside.add(new Loot(Loot.LootType.Purse, 250));
+            lootInside.add(new Loot(Loot.LootType.Purse, 500));
         }
         //todo add varying compartments
     }
@@ -37,7 +39,7 @@ public class Compartment {
     public static Compartment createLocomotive(int nPlayers){
         PartialObservableDeck<Loot> loot = new PartialObservableDeck<>("loot", nPlayers);
         loot.add(new Loot(Loot.LootType.Strongbox, 1000));
-        Compartment locomotive = new Compartment(loot, nPlayers);
+        Compartment locomotive = new Compartment(loot, new PartialObservableDeck<>("lootOnTop", nPlayers), nPlayers);
         locomotive.containsMarshal = true;
         return locomotive;
     }
@@ -67,8 +69,10 @@ public class Compartment {
         sb.append(playersOnTopOfCompartment.toString());
         sb.append("; Marshal=");
         sb.append(containsMarshal);
-        sb.append("; Loot=");
-        sb.append(loot.toString());
+        sb.append("; LootInside=");
+        sb.append(lootInside.toString());
+        sb.append("; LootOntop=");
+        sb.append(lootInside.toString());
 
         return sb.toString();
     }

@@ -1,6 +1,8 @@
 package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Train;
 
 public class RoundCardBraking extends RoundCard{
 
@@ -15,6 +17,14 @@ public class RoundCardBraking extends RoundCard{
 
     @Override
     public void endRoundCardEvent(ColtExpressGameState gameState) {
-        //todo Braking - All bandits on the roof of the train move one car toward the locomotive.
+        Train train = gameState.getTrain();
+        Compartment targetCompartment = train.getCompartment(train.getSize()-1);
+        Compartment sourceCompartment;
+        for (int i = train.getSize()-2; i >= 0; i--){
+            sourceCompartment = train.getCompartment(i);
+            targetCompartment.playersOnTopOfCompartment.addAll(sourceCompartment.playersOnTopOfCompartment);
+            sourceCompartment.playersOnTopOfCompartment.clear();
+            targetCompartment = sourceCompartment;
+        }
     }
 }

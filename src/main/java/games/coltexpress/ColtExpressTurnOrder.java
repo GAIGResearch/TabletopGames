@@ -45,6 +45,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
             case NormalTurn:
             case DoubleTurn:
             case HiddenTurn:
+                direction = 1;
                 break;
             case ReverseTurn:
                 direction = -1;

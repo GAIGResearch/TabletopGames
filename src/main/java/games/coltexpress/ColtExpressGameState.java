@@ -34,6 +34,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
     private Train train;
     public Train getTrain(){return train;}
+    public PartialObservableDeck<Loot> getLoot(int playerID){return playerLoot.get(playerID);}
 
     private GamePhase gamePhase = GamePhase.PlanActions;
 
@@ -114,6 +115,10 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
             if (playerCharacters.get(playerIndex) == CharacterType.Doc)
                 playerHand.add(playerDeck.draw());
         }
+    }
+
+    public void addLoot(Integer playerID, Loot loot) {
+        playerLoot.get(playerID).add(loot);
     }
 
     public void addNeutralBullet(Integer playerID) {

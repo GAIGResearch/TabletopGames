@@ -18,6 +18,9 @@ public class Loot {
     public int getValue(){
         return value;
     }
+    public LootType getType(){
+        return type;
+    }
 
     public String toString(){
         return this.type.toString() + "_" + this.value;
