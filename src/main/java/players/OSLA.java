@@ -1,7 +1,6 @@
 package players;
 
 import actions.Action;
-import actions.DoNothing;
 import core.AIPlayer;
 import core.GameState;
 import players.heuristics.PandemicHeuristic;
