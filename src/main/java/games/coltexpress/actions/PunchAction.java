@@ -73,12 +73,15 @@ public class PunchAction  extends ColtExpressExecuteCardAction{
                 if (loot.getType() == lootType)
                     potentialLoot.add(loot);
             }
-            Loot chosenLoot = potentialLoot.get(new Random().nextInt(potentialLoot.size()));
-            if (playerIsCheyenne)
-                ((ColtExpressGameState) gameState).addLoot(card.playerID, chosenLoot);
-            else
-                targetLootArea.add(chosenLoot);
-            availableLoot.remove(chosenLoot);
+
+            if (potentialLoot.size() > 0){
+                Loot chosenLoot = potentialLoot.get(new Random().nextInt(potentialLoot.size()));
+                if (playerIsCheyenne)
+                    ((ColtExpressGameState) gameState).addLoot(card.playerID, chosenLoot);
+                else
+                    targetLootArea.add(chosenLoot);
+                availableLoot.remove(chosenLoot);
+            }
         }
         return true;
     }
