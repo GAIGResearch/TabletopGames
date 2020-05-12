@@ -14,20 +14,56 @@ public class Compartment {
     public PartialObservableDeck<Loot> lootOnTop;
     public final int id;
 
-    public Compartment(int nPlayers, int id){
-        this(new PartialObservableDeck<>("lootInside", nPlayers), new PartialObservableDeck<>("lootOntop", nPlayers), id);
+    enum CompartmentType {
+        COMPARTMENT_1,
+        COMPARTMENT_2,
+        COMPARTMENT_3,
+        COMPARTMENT_4,
+        COMPARTMENT_5,
+        COMPARTMENT_6,
     }
 
-    public Compartment(PartialObservableDeck<Loot> lootInside, PartialObservableDeck<Loot> lootOnTop, int id){
-        this.lootInside = lootInside;
-        this.lootOnTop = lootOnTop;
+    private Compartment(int nPlayers, int id){
+        this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
+        this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
         this.id = id;
-        if (lootInside.getSize() == 0){
-            lootInside.add(new Loot(Loot.LootType.Purse, 250));
-            lootInside.add(new Loot(Loot.LootType.Purse, 250));
-            lootInside.add(new Loot(Loot.LootType.Purse, 500));
+    }
+
+    Compartment(Train train, int nPlayers, int id, CompartmentType type){
+        this(nPlayers, id);
+
+        switch (type){
+            case COMPARTMENT_1:
+                lootInside.add(train.getRandomPurse());
+                break;
+            case COMPARTMENT_2:
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(train.getRandomPurse());
+                break;
+            case COMPARTMENT_3:
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(train.getRandomPurse());
+                break;
+            case COMPARTMENT_4:
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(Loot.createJewel());
+                break;
+            case COMPARTMENT_5:
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(train.getRandomPurse());
+                lootInside.add(Loot.createJewel());
+                break;
+            case COMPARTMENT_6:
+                lootInside.add(Loot.createJewel());
+                lootInside.add(Loot.createJewel());
+                lootInside.add(Loot.createJewel());
+                break;
+            default:
+                throw new IllegalArgumentException("CompartmentType " + type + " not defined");
         }
-        //todo add varying compartments
     }
 
     public boolean containsPlayer(int playerID) {
@@ -36,10 +72,9 @@ public class Compartment {
         return playersOnTopOfCompartment.contains(playerID);
     }
 
-    public static Compartment createLocomotive(int nPlayers){
-        PartialObservableDeck<Loot> loot = new PartialObservableDeck<>("loot", nPlayers);
-        loot.add(new Loot(Loot.LootType.Strongbox, 1000));
-        Compartment locomotive = new Compartment(loot, new PartialObservableDeck<>("lootOnTop", nPlayers), nPlayers);
+    static Compartment createLocomotive(int nPlayers, int id){
+        Compartment locomotive = new Compartment(nPlayers, id);
+        locomotive.lootInside.add(new Loot(Loot.LootType.Strongbox, 1000));
         locomotive.containsMarshal = true;
         return locomotive;
     }
@@ -72,7 +107,7 @@ public class Compartment {
         sb.append("; LootInside=");
         sb.append(lootInside.toString());
         sb.append("; LootOntop=");
-        sb.append(lootInside.toString());
+        sb.append(lootOnTop.toString());
 
         return sb.toString();
     }

@@ -15,6 +15,14 @@ public class Loot {
         this.value = value;
     }
 
+    public static Loot createJewel(){
+        return new Loot(LootType.Jewel, 500);
+    }
+
+    public static Loot createStrongbox(){
+        return new Loot(LootType.Strongbox, 1000);
+    }
+
     public int getValue(){
         return value;
     }
