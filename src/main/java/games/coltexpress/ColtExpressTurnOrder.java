@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.CoreConstants.VERBOSE;
 
 
 public class ColtExpressTurnOrder extends TurnOrder {
@@ -67,7 +68,9 @@ public class ColtExpressTurnOrder extends TurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         turnCounter++;
         turnOwner = nextPlayer(gameState);
-        System.out.println("Next Player: " + turnOwner);
+
+        if (VERBOSE)
+            System.out.println("Next Player: " + turnOwner);
     }
 
     @Override

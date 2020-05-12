@@ -26,8 +26,8 @@ public class ColtExpressGame extends Game {
     public void run(GUI gui) {
         while (!gameState.isTerminal()){
             //System.out.println();
-            //if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-            ((IPrintable) gameState).printToConsole();
+            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+            //((IPrintable) gameState).printToConsole();
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
             // Get actions for the player
@@ -43,7 +43,8 @@ public class ColtExpressGame extends Game {
 
         gameState.endGame();
 
-        System.out.println("Game Over");
+        if (VERBOSE)
+            System.out.println("Game Over");
     }
 
     public static void main(String[] args){
@@ -53,7 +54,7 @@ public class ColtExpressGame extends Game {
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
 
-        for (int i=0; i<100; i++) {
+        for (int i=0; i<1; i++) {
             ColtExpressParameters params = new ColtExpressParameters();
             ForwardModel forwardModel = new ColtExpressForwardModel();
             ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, forwardModel, agents.size());
@@ -62,7 +63,7 @@ public class ColtExpressGame extends Game {
             game.run(null);
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
-            gameState.printToConsole();
+            //gameState.printToConsole();
             // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
             //System.out.println(Arrays.toString(gameState.getPlayerResults()));
 
