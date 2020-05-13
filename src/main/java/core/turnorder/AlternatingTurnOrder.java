@@ -3,7 +3,7 @@ package core.turnorder;
 import core.AbstractGameState;
 
 public class AlternatingTurnOrder extends TurnOrder {
-    int direction = 1;
+    protected int direction = 1;
 
     public AlternatingTurnOrder(int nPlayers){
         super(nPlayers);

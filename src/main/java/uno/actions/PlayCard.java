@@ -6,8 +6,7 @@ import core.actions.IAction;
 import core.components.Deck;
 import core.observations.IPrintable;
 import uno.UnoGameState;
-import uno.cards.UnoCard;
-import uno.cards.UnoNumberCard;
+import uno.cards.*;
 
 public class PlayCard<T> implements IAction, IPrintable {
 
@@ -28,6 +27,27 @@ public class PlayCard<T> implements IAction, IPrintable {
             targetDeck.add(cardToBePlayed);
 
             ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
+        }
+        else if (cardToBePlayed instanceof UnoReverseCard) {
+            sourceDeck.remove(cardToBePlayed);
+            targetDeck.add(cardToBePlayed);
+            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
+
+            ((UnoGameState) gameState).reverseTurn();
+        }
+        else if (cardToBePlayed instanceof UnoSkipCard) {
+            sourceDeck.remove(cardToBePlayed);
+            targetDeck.add(cardToBePlayed);
+            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
+
+            ((UnoGameState) gameState).skipTurn();
+        }
+        else if (cardToBePlayed instanceof UnoDrawTwoCard) {
+            sourceDeck.remove(cardToBePlayed);
+            targetDeck.add(cardToBePlayed);
+            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
+
+            ((UnoGameState) gameState).drawTwo();
         }
         return true;
     }

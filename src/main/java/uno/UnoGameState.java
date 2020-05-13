@@ -67,6 +67,7 @@ public class UnoGameState extends AbstractGameState {
         currentColor = currentCard.color;
         currentNumber = currentCard.number;
 
+        // TODO
         // If the first card is Skip, Reverse or DrawTwo, play the card
         if (!isNumberCard(currentCard)) {
             playFirstCard(currentCard);
@@ -114,7 +115,6 @@ public class UnoGameState extends AbstractGameState {
             }
         }
 
-        /* SIMPLIFICATION ONLY WITH NUMBER CARDS
         // Create the DrawTwo, Reverse and Skip cards for each color
         for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
             if (color == UnoCard.UnoCardColor.Wild)
@@ -128,13 +128,13 @@ public class UnoGameState extends AbstractGameState {
             drawPile.add(new UnoDrawTwoCard(color));
         }
 
+        /* SIMPLIFICATION WITHOUT WILDCARDS
         // Create the wild cards, 4 of each type
         for (int i = 0; i < 4; i++) {
             drawPile.add(new UnoWildCard());
             drawPile.add(new UnoWildDrawFourCard());
         }
         */
-
     }
 
     private void DrawCardsToPlayers() {
@@ -146,7 +146,6 @@ public class UnoGameState extends AbstractGameState {
         }
     }
 
-     // TODO
     @Override
     public void endGame() {
         System.out.println("Game Results:");
@@ -181,9 +180,9 @@ public class UnoGameState extends AbstractGameState {
     }
 
     @Override
-    public IObservation getObservation(int player) {
-        Deck<UnoCard> playerHand = playerDecks.get(player);
-        return new UnoObservation(currentCard, playerHand);
+    public IObservation getObservation(int playerID) {
+        Deck<UnoCard> playerHand = playerDecks.get(playerID);
+        return new UnoObservation(currentCard, playerHand, playerID);
     }
 
 
@@ -213,6 +212,22 @@ public class UnoGameState extends AbstractGameState {
 
     public void endTurn() {
         turnOrder.endPlayerTurn(this);
+    }
+
+    public void reverseTurn() {
+        ((UnoTurnOrder) turnOrder).reverse();
+    }
+
+    public void skipTurn() {
+        ((UnoTurnOrder) turnOrder).skip();
+    }
+
+    public void drawTwo() {
+        int nextPlayer = turnOrder.nextPlayer(this);
+        playerDecks.get(nextPlayer).add(drawPile.draw());
+        playerDecks.get(nextPlayer).add(drawPile.draw());
+
+        ((UnoTurnOrder) turnOrder).skip();
     }
 }
 

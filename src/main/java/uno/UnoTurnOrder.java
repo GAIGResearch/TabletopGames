@@ -7,5 +7,9 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         super(nPlayers);
     }
 
-
+    public void skip()
+    {
+        turnOwner = (nPlayers + turnOwner + direction) % nPlayers;
+    }
 }
+

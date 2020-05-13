@@ -16,6 +16,7 @@ public class NoCards implements IAction, IPrintable {
         this.targetDeck = targetDeck;
     }
 
+    // TODO if the card drawn is playable, then play it
     @Override
     public boolean execute(AbstractGameState gs) {
         UnoCard card = sourceDeck.draw();
