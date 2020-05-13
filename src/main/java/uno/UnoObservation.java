@@ -1,15 +1,15 @@
 package uno;
 
-import components.Deck;
+import core.components.Deck;
+import core.observations.IObservation;
+import core.observations.IPrintable;
 import uno.cards.UnoCard;
-import observations.IPrintable;
-import observations.Observation;
 
-public class UnoObservation implements IPrintable, Observation {
+public class UnoObservation implements IPrintable, IObservation {
 
     String[] strings = new String[4];
 
-    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, int currentNumber, Deck<UnoCard> playerHand) {
+    public UnoObservation(UnoCard currentCard, Deck<UnoCard> playerHand) {
         strings[0] = "----------------------------------------------------";
         strings[1] = "Current Card: " + currentCard.toString();
         StringBuilder sb = new StringBuilder();
@@ -24,7 +24,7 @@ public class UnoObservation implements IPrintable, Observation {
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         for (String s : strings){
             System.out.println(s);
         }

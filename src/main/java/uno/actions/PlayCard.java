@@ -1,11 +1,10 @@
 package uno.actions;
 
-import actions.IAction;
-import components.Deck;
+
 import core.AbstractGameState;
-import games.uno.cards.CardEffect;
-import observations.IPrintable;
-import turnorder.TurnOrder;
+import core.actions.IAction;
+import core.components.Deck;
+import core.observations.IPrintable;
 import uno.UnoGameState;
 import uno.cards.UnoCard;
 import uno.cards.UnoNumberCard;
@@ -22,20 +21,19 @@ public class PlayCard<T> implements IAction, IPrintable {
         this.targetDeck = targetDeck;
     }
 
-    // TODO
     @Override
-    public boolean Execute(AbstractGameState gameState, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gameState) {
         if (cardToBePlayed instanceof UnoNumberCard) {
-            sourceDeck.discard(cardToBePlayed);
+            sourceDeck.remove(cardToBePlayed);
             targetDeck.add(cardToBePlayed);
 
-            ((UnoGameState) gameState).UpdateCurrentCard((UnoCard) cardToBePlayed);
+            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
         }
         return true;
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println("Play card: " + cardToBePlayed.toString());
     }
 }

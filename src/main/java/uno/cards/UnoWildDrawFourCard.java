@@ -1,8 +1,7 @@
 package uno.cards;
 
-import components.Deck;
+import core.components.Deck;
 import uno.UnoGameState;
-import uno.actions.PlayCard;
 
 public class UnoWildDrawFourCard extends UnoCard {
 
@@ -13,7 +12,7 @@ public class UnoWildDrawFourCard extends UnoCard {
     // It is playable if the player has not playable Number cards on the hand
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        int playerID = gameState.GetCurrentPLayerID();
+        /*int playerID = gameState.GetCurrentPLayerID();
         Deck<UnoCard> playerHand = gameState.playerDecks.get(playerID);
         boolean canPlay = true;
         for (UnoCard card : playerHand.getCards()) {
@@ -22,7 +21,10 @@ public class UnoWildDrawFourCard extends UnoCard {
                 break;
             }
         }
+
         return canPlay;
+        */
+         return true;
     }
 
     @Override

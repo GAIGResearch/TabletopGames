@@ -1,10 +1,10 @@
 package uno.actions;
 
-import actions.IAction;
-import components.Deck;
+
 import core.AbstractGameState;
-import observations.IPrintable;
-import turnorder.TurnOrder;
+import core.actions.IAction;
+import core.components.Deck;
+import core.observations.IPrintable;
 import uno.cards.UnoCard;
 
 public class NoCards implements IAction, IPrintable {
@@ -17,14 +17,14 @@ public class NoCards implements IAction, IPrintable {
     }
 
     @Override
-    public boolean Execute(AbstractGameState gs, TurnOrder turnOrder) {
+    public boolean execute(AbstractGameState gs) {
         UnoCard card = sourceDeck.draw();
         targetDeck.add(card);
         return true;
     }
 
     @Override
-    public void PrintToConsole() {
+    public void printToConsole() {
         System.out.println("No playable cards. You must draw a card.");
     }
 }

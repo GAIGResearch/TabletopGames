@@ -1,14 +1,23 @@
 package uno;
 
-import actions.IAction;
+
 import core.AbstractGameState;
 import core.ForwardModel;
-import turnorder.TurnOrder;
+import core.actions.IAction;
+import utilities.Utils;
 
 public class UnoForwardModel extends ForwardModel {
 
     @Override
-    public void next(AbstractGameState gameState, TurnOrder turnOrder, IAction action) {
-        action.Execute(gameState, turnOrder);
+    public void setup(AbstractGameState firstState) {
+    }
+
+    @Override
+    public void next(AbstractGameState gameState, IAction action) {
+        action.execute(gameState);
+        ((UnoGameState) gameState).checkWinCondition();
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
+            ((UnoGameState) gameState).endTurn();
     }
 }
+

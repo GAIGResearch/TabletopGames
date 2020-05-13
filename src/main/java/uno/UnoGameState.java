@@ -1,45 +1,39 @@
 package uno;
 
-import actions.IAction;
-import components.Deck;
+
 import core.AbstractGameState;
+import core.ForwardModel;
 import core.GameParameters;
-import turnorder.AlternatingTurnOrder;
-import turnorder.TurnOrder;
+import core.actions.IAction;
+import core.components.Deck;
+import core.observations.IObservation;
 import uno.actions.NoCards;
 import uno.actions.PlayCard;
 import uno.cards.*;
-import observations.Observation;
-import players.AbstractPlayer;
+import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 
 public class UnoGameState extends AbstractGameState {
-    public List<Deck<UnoCard>> playerDecks;
-    private Deck<UnoCard> drawPile;
-    private Deck<UnoCard> discardPile;
-
-    public int currentNumber;
-    public UnoCard.UnoCardColor currentColor;
-    public UnoCard currentCard;
-
-    public TurnOrder turnOrder;
-    int nPlayers;
+    public  List<Deck<UnoCard>> playerDecks;
+    private Deck<UnoCard>       drawPile;
+    private Deck<UnoCard>       discardPile;
+    public  UnoCard             currentCard;
+    private int                 nPlayers;
 
     private final int initialNumberOfCardsForEachPLayer = 3;
 
-    public UnoGameState(GameParameters gameParameters, TurnOrder turnOrder) {
-        super(gameParameters);
-        this.turnOrder = turnOrder;
-        nPlayers = gameParameters.nPlayers;
+    public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers){
+        super(gameParameters, model, nPlayers, new UnoTurnOrder(nPlayers));
 
-        gameSetUp(nPlayers);
+        this.nPlayers = nPlayers;
     }
 
-    private void gameSetUp(int nPlayers)
+    private void gameSetUp()
     {
         // Create the draw deck with all the cards
         drawPile = new Deck<>();
@@ -60,6 +54,7 @@ public class UnoGameState extends AbstractGameState {
         currentCard = drawPile.draw();
 
         // The first card cannot be a wild
+        /*
         while (isWildCard(currentCard))
         {
             seed ++;                        // To be removed after debugging
@@ -76,6 +71,8 @@ public class UnoGameState extends AbstractGameState {
         if (!isNumberCard(currentCard)) {
             playFirstCard(currentCard);
         }
+        */
+
     }
 
     private boolean isWildCard(UnoCard card) {
@@ -85,7 +82,7 @@ public class UnoGameState extends AbstractGameState {
     private boolean isNumberCard(UnoCard card) {
         return card instanceof UnoNumberCard;
     }
-
+/*
     private void playFirstCard(UnoCard card) {
         if (card instanceof UnoSkipCard) {
             ((AlternatingTurnOrder) turnOrder).skip();
@@ -101,7 +98,7 @@ public class UnoGameState extends AbstractGameState {
             playerDecks.get(playerID).add(drawPile.draw());
         }
     }
-
+*/
     // Create all the cards and include them into the drawPile
     private void CreateCards() {
         // Create the number cards
@@ -149,34 +146,24 @@ public class UnoGameState extends AbstractGameState {
         }
     }
 
-    @Override
-    public Observation getObservation(AbstractPlayer player) {
-        Deck<UnoCard> playerHand = playerDecks.get(player.playerID);
-        return new UnoObservation(currentCard, currentColor, currentNumber, playerHand);
-    }
-
-    // TODO
+     // TODO
     @Override
     public void endGame() {
-
-    }
-
-      // The game is ended if there is a player without cards
-    public boolean isEnded() {
+        System.out.println("Game Results:");
         for (int playerID = 0; playerID < nPlayers; playerID++) {
-            int nCards = playerDecks.get(playerID).getCards().size();
-            if (nCards == 0)
-                return true;
+            if (playerResults[playerID] == Utils.GameResult.GAME_WIN) {
+                System.out.println("The winner is the player : " + playerID);
+                break;
+            }
         }
-        return false;
     }
 
-    // For each card on player hand, we add an action if the card is playable
     @Override
-    public List<IAction> getActions(AbstractPlayer player) {
+    public List<IAction> computeAvailableActions() {
         ArrayList<IAction> actions = new ArrayList<>();
+        int player = getCurrentPLayerID();
 
-        Deck<UnoCard> playerHand = playerDecks.get(player.playerID);
+        Deck<UnoCard> playerHand = playerDecks.get(player);
         for (UnoCard card : playerHand.getCards()) {
             if (card.isPlayable(this))
                 actions.add(new PlayCard<>(card, playerHand, discardPile));
@@ -188,26 +175,44 @@ public class UnoGameState extends AbstractGameState {
         return actions;
     }
 
-    public int GetCurrentPLayerID()
-    {
-        return turnOrder.getCurrentPlayer(this).playerID;
+    @Override
+    public void setComponents() {
+        gameSetUp();
     }
 
-    public void UpdateCurrentCard(UnoCard card)
-    {
-        currentCard = card;
-        currentColor = card.color;
-        currentNumber = card.number;
+    @Override
+    public IObservation getObservation(int player) {
+        Deck<UnoCard> playerHand = playerDecks.get(player);
+        return new UnoObservation(currentCard, playerHand);
     }
 
-    public int getWinnerID()
-    {
+
+    // The game is ended if there is a player without cards
+    public void checkWinCondition() {
         for (int playerID = 0; playerID < nPlayers; playerID++) {
             int nCards = playerDecks.get(playerID).getCards().size();
-            if (nCards == 0)
-                return playerID;
+            if (nCards == 0) {
+                for (int i = 0; i < nPlayers; i++) {
+                    if (i == playerID)
+                        playerResults[i] = Utils.GameResult.GAME_WIN;
+                    else
+                        playerResults[i] = Utils.GameResult.GAME_LOSE;
+                }
+                gameStatus = Utils.GameResult.GAME_END;
+            }
         }
-        return -1;
+    }
+
+    public int getCurrentPLayerID() {
+        return turnOrder.getTurnOwner();
+    }
+
+    public void updateCurrentCard(UnoCard card) {
+        currentCard = card;
+    }
+
+    public void endTurn() {
+        turnOrder.endPlayerTurn(this);
     }
 }
 

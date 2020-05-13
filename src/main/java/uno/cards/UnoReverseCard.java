@@ -11,7 +11,8 @@ public class UnoReverseCard extends UnoCard {
     // It is playable if the color is the same of the currentColor
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        return this.color == gameState.currentColor || gameState.currentCard instanceof UnoReverseCard;
+       // return this.color == gameState.currentColor || gameState.currentCard instanceof UnoReverseCard;
+        return true;
     }
 
     @Override

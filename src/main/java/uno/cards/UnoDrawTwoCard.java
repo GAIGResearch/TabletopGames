@@ -11,7 +11,8 @@ public class UnoDrawTwoCard extends UnoCard {
     // It is playable if the color is the same of the currentColor
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        return this.color == gameState.currentColor;
+        //return this.color == gameState.currentColor;
+        return true;
     }
 
 
