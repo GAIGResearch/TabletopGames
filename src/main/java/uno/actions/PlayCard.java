@@ -22,33 +22,17 @@ public class PlayCard<T> implements IAction, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gameState) {
-        if (cardToBePlayed instanceof UnoNumberCard) {
-            sourceDeck.remove(cardToBePlayed);
-            targetDeck.add(cardToBePlayed);
+        sourceDeck.remove(cardToBePlayed);
+        targetDeck.add(cardToBePlayed);
+        ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
 
-            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
-        }
-        else if (cardToBePlayed instanceof UnoReverseCard) {
-            sourceDeck.remove(cardToBePlayed);
-            targetDeck.add(cardToBePlayed);
-            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
-
+        if (cardToBePlayed instanceof UnoReverseCard)
             ((UnoGameState) gameState).reverseTurn();
-        }
-        else if (cardToBePlayed instanceof UnoSkipCard) {
-            sourceDeck.remove(cardToBePlayed);
-            targetDeck.add(cardToBePlayed);
-            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
-
+        else if (cardToBePlayed instanceof UnoSkipCard)
             ((UnoGameState) gameState).skipTurn();
-        }
-        else if (cardToBePlayed instanceof UnoDrawTwoCard) {
-            sourceDeck.remove(cardToBePlayed);
-            targetDeck.add(cardToBePlayed);
-            ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
-
+        else if (cardToBePlayed instanceof UnoDrawTwoCard)
             ((UnoGameState) gameState).drawTwo();
-        }
+
         return true;
     }
 
