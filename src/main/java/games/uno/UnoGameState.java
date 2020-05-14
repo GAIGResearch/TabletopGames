@@ -64,7 +64,7 @@ public class UnoGameState extends AbstractGameState {
     @Override
     public void setComponents() {
 
-        drawPile = new Deck<>();
+        drawPile = new Deck<>("Draw Pile");
 
         for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values())
         {
@@ -86,11 +86,11 @@ public class UnoGameState extends AbstractGameState {
         drawPile.shuffle();
         // todo add action cards step-by-step
 
-        discardPile = new Deck<>();
+        discardPile = new Deck<>("Discard Pile");
 
         playerDecks = new ArrayList<>(getNPlayers());
         for (int i = 0; i < getNPlayers(); i++){
-            playerDecks.add(new Deck<>());
+            playerDecks.add(new Deck<>("Player Deck"));
             for (int j = 0; j < 7; j++){
                 playerDecks.get(i).add(drawPile.draw());
             }

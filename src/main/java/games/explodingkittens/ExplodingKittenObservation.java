@@ -2,21 +2,23 @@ package games.explodingkittens;
 
 import core.components.Deck;
 import core.components.IDeck;
+import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import core.observations.IObservation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExplodingKittenObservation implements IPrintable, IObservation {
 
-    private List<Deck<ExplodingKittenCard>> playerHandCards;
-    private Deck<ExplodingKittenCard> drawPile;
+    private List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
+    private PartialObservableDeck<ExplodingKittenCard> drawPile;
     private Deck<ExplodingKittenCard> discardPile;
     private int currentPlayer;
 
-    public ExplodingKittenObservation(List<Deck<ExplodingKittenCard>> playerDecks,
-                                      Deck<ExplodingKittenCard> drawPile,
+    public ExplodingKittenObservation(List<PartialObservableDeck<ExplodingKittenCard>> playerDecks,
+                                      PartialObservableDeck<ExplodingKittenCard> drawPile,
                                       Deck<ExplodingKittenCard> discardPile,
                                       int currentPlayer){
         playerHandCards = playerDecks;
@@ -32,19 +34,20 @@ public class ExplodingKittenObservation implements IPrintable, IObservation {
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ":");
-            printDeck(playerHandCards.get(i));
+            printDeck(playerHandCards.get(i).getVisibleCards(currentPlayer));
         }
 
         System.out.print("DrawPile" + ":");
-        printDeck(drawPile);
+        printDeck(drawPile.getVisibleCards(currentPlayer));
 
         System.out.print("DiscardPile" + ":");
-        printDeck(discardPile);
+        printDeck(discardPile.getCards());
     }
 
-    public void printDeck(IDeck<ExplodingKittenCard> deck){
+    private void printDeck(ArrayList<ExplodingKittenCard> cards){
         StringBuilder sb = new StringBuilder();
-        for (ExplodingKittenCard card : deck.getCards(currentPlayer)){
+
+        for (ExplodingKittenCard card : cards){
             if (card == null)
                 sb.append("UNKNOWN");
             else

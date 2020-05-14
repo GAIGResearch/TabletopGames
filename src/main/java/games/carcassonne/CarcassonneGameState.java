@@ -33,7 +33,7 @@ public class CarcassonneGameState extends AbstractGameState {
         Arrays.fill(unusedMeeple, 7);
         gameBoard = new CarcassonneBoard();
 
-        Deck<CarcassonneTile> drawPile = new Deck<>();
+        Deck<CarcassonneTile> drawPile = new Deck<>("Draw Pile");
 
         //drawPile.add(new CarcassonneTile());
     }

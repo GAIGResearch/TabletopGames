@@ -50,4 +50,13 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom imple
 
         }else return false;
     }
+
+    @Override
+    public String toString() {
+        return "AddResearchStationWithCardFrom{" +
+                "card=" + card.toString() +
+                ", fromCity='" + fromCity + '\'' +
+                ", toCity='" + city + '\'' +
+                '}';
+    }
 }

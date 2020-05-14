@@ -17,9 +17,9 @@ public class GameOverDrawCards extends GameOverCondition {
         Deck<Card> cityDeck = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckHash);
         boolean canDraw = cityDeck.getSize() > 0;
 
-        // if player cannot draw it means that the deck is empty -> GAME OVER
+        // if the deck is empty -> GAME OVER
         if (!canDraw){
-//            System.out.println("No more cards to draw");
+            System.out.println("No more cards to draw");
             return GAME_LOSE;
         }
         return GAME_ONGOING;

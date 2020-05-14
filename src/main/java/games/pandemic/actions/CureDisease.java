@@ -59,4 +59,20 @@ public class CureDisease implements IAction {
 
         }else return false;
     }
+
+    public ArrayList<Card> getCards() {
+        return cards;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    @Override
+    public String toString() {
+        return "CureDisease{" +
+                "color='" + color + '\'' +
+                ", cards=" + cards.toString() +
+                '}';
+    }
 }

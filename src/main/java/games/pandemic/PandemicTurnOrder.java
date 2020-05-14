@@ -10,7 +10,7 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;  // 1 turn = n steps (by default n = 1)
 
     PandemicTurnOrder(int nPlayers, int nActionsPerTurn){
-        super(nPlayers, -1);
+        super(nPlayers);
         turnStep = 0;
         this.nStepsPerTurn = nActionsPerTurn;
     }

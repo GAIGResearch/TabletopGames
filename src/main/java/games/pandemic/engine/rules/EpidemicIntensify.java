@@ -1,7 +1,6 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.actions.AddCardToDeck;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;

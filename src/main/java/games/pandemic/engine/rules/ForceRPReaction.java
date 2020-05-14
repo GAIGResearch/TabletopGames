@@ -1,18 +1,12 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.actions.DoNothing;
-import core.actions.IAction;
 import games.pandemic.PandemicTurnOrder;
-import games.pandemic.actions.RemoveCardWithCard;
 import core.components.Card;
 import core.components.Deck;
 import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
 
-import java.util.ArrayList;
-
-import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 import static utilities.CoreConstants.playerHandHash;
 

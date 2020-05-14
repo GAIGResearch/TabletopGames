@@ -27,4 +27,30 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
     public boolean execute(AbstractGameState gs) {
         return grid.setElement(x, y, value);
     }
+
+    public Grid<T> getGrid() {
+        return grid;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return "SetGridValueAction{" +
+                "grid=" + grid.toString() +
+                ", x=" + x +
+                ", y=" + y +
+                ", value=" + value +
+                '}';
+    }
 }

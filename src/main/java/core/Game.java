@@ -3,6 +3,7 @@ package core;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
+import players.HumanGUIPlayer;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,17 +30,19 @@ public abstract class Game {
         }
         this.forwardModel = model;
         this.gameState = gameState;
+        this.gameState.setComponents();
+        this.forwardModel.setup(gameState);
     }
 
     public void run(GUI gui) {
-        gameState.setComponents();
-        forwardModel.setup(gameState);
 
         while (!gameState.isTerminal()){
             if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
+            AbstractPlayer player = players.get(activePlayer);
+
             // Get actions for the player
             List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
@@ -47,23 +50,35 @@ public abstract class Game {
                 ((IPrintable) observation).printToConsole();
             }
 
-            int action = players.get(activePlayer).getAction(observation, actions);
+            // either ask player which action to use or, in case no actions are available, report the updated observation
+            int actionIdx = -1;
+            if (gui != null && player instanceof HumanGUIPlayer) {
+                if (actions.size() > 0) {
+                    while (actionIdx == -1) {
+                        actionIdx = player.getAction(observation, actions);
 
-            // Resolve core.actions and game rules for the turn
-            forwardModel.next(gameState, actions.get(action));
-
-            if (gui != null) {
-                gui.update(gameState);
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    System.out.println("EXCEPTION " + e);
-                }
+                        gui.update(player, gameState);
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception e) {
+                            System.out.println("EXCEPTION " + e);
+                        }
+                    }
+                } else
+                    player.registerUpdatedObservation(observation);
+            } else {
+                if (actions.size() > 0)
+                    actionIdx = player.getAction(observation, actions);
+                else
+                    player.registerUpdatedObservation(observation);
             }
+
+            // Resolve actions and game rules for the turn
+            if (actionIdx != -1)
+                forwardModel.next(gameState, actions.get(actionIdx));
         }
 
         gameState.endGame();
-
         System.out.println("Game Over");
     }
 

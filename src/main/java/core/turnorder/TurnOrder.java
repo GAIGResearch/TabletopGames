@@ -52,6 +52,9 @@ public abstract class TurnOrder {
     public int getRoundCounter() {
         return roundCounter;
     }
+    public int getTurnCounter() {
+        return turnCounter;
+    }
 
 
     /* The following can be overwritten by subclasses */
@@ -67,6 +70,7 @@ public abstract class TurnOrder {
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnOwner = nextPlayer(gameState);
+            System.out.println(turnOwner);
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
             }
@@ -106,7 +110,7 @@ public abstract class TurnOrder {
      * @return - int, player ID in range [0, nPlayers)
      */
     public int nextPlayer(AbstractGameState gameState) {
-        return turnOwner++;
+        return (turnOwner+1) % nPlayers;
     }
 
     /**

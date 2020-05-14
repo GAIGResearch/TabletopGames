@@ -32,4 +32,20 @@ public class GiveCard implements IAction {
 
         }else return false;
     }
+
+    @Override
+    public String toString() {
+        return "GiveCard{" +
+                "card=" + card.toString() +
+                ", otherPlayer=" + otherPlayer +
+                '}';
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    public int getOtherPlayer() {
+        return otherPlayer;
+    }
 }
