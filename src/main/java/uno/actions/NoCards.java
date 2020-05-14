@@ -5,22 +5,31 @@ import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Deck;
 import core.observations.IPrintable;
+import uno.UnoGameState;
 import uno.cards.UnoCard;
 
 public class NoCards implements IAction, IPrintable {
-    private final Deck<UnoCard> sourceDeck;
-    private final Deck<UnoCard> targetDeck;
+    private final Deck<UnoCard> drawDeck;
+    private final Deck<UnoCard> discardDeck;
+    private final Deck<UnoCard> playerDeck;
 
-    public NoCards(Deck<UnoCard> sourceDeck, Deck<UnoCard> targetDeck){
-        this.sourceDeck = sourceDeck;
-        this.targetDeck = targetDeck;
+    public NoCards(Deck<UnoCard> drawDeck, Deck<UnoCard> discardDeck, Deck<UnoCard> playerDeck){
+        this.drawDeck    = drawDeck;
+        this.discardDeck = discardDeck;
+        this.playerDeck  = playerDeck;
     }
 
-    // TODO if the card drawn is playable, then play it
+    // If the card drawn is playable, then play it
     @Override
     public boolean execute(AbstractGameState gs) {
-        UnoCard card = sourceDeck.draw();
-        targetDeck.add(card);
+        UnoCard card = drawDeck.draw();
+
+        if (card.isPlayable((UnoGameState) gs)) {
+            discardDeck.add(card);
+            System.out.println("It can be played. " + card.toString());
+        }
+        else
+            playerDeck.add(card);
         return true;
     }
 

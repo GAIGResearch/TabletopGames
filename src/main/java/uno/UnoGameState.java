@@ -9,6 +9,7 @@ import core.components.Deck;
 import core.observations.IObservation;
 import uno.actions.NoCards;
 import uno.actions.PlayCard;
+import uno.actions.PlayWild;
 import uno.cards.*;
 import utilities.Utils;
 
@@ -19,13 +20,14 @@ import java.util.Random;
 
 
 public class UnoGameState extends AbstractGameState {
-    public  List<Deck<UnoCard>> playerDecks;
-    private Deck<UnoCard>       drawPile;
-    private Deck<UnoCard>       discardPile;
-    public  UnoCard             currentCard;
-    private int                 nPlayers;
+    public  List<Deck<UnoCard>>  playerDecks;
+    private Deck<UnoCard>        drawPile;
+    private Deck<UnoCard>        discardPile;
+    public  UnoCard              currentCard;
+    public  UnoCard.UnoCardColor currentColor;
+    private int                  nPlayers;
 
-    private final int initialNumberOfCardsForEachPLayer = 3;
+    private final int initialNumberOfCardsForEachPLayer = 7;
 
     public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers){
         super(gameParameters, model, nPlayers, new UnoTurnOrder(nPlayers));
@@ -50,8 +52,9 @@ public class UnoGameState extends AbstractGameState {
         playerDecks = new ArrayList<>(nPlayers);
         DrawCardsToPlayers();
 
-        // get current card and set the current number and color
-        currentCard = drawPile.draw();
+        // get current card and set the current card and color
+        currentCard  = drawPile.draw();
+        currentColor = currentCard.color;
 
         // The first card cannot be a wild
         /*
@@ -67,8 +70,7 @@ public class UnoGameState extends AbstractGameState {
         currentColor = currentCard.color;
         currentNumber = currentCard.number;
 
-        // TODO
-        // If the first card is Skip, Reverse or DrawTwo, play the card
+          // If the first card is Skip, Reverse or DrawTwo, play the card
         if (!isNumberCard(currentCard)) {
             playFirstCard(currentCard);
         }
@@ -83,6 +85,7 @@ public class UnoGameState extends AbstractGameState {
     private boolean isNumberCard(UnoCard card) {
         return card instanceof UnoNumberCard;
     }
+
 /*
     private void playFirstCard(UnoCard card) {
         if (card instanceof UnoSkipCard) {
@@ -128,13 +131,12 @@ public class UnoGameState extends AbstractGameState {
             drawPile.add(new UnoDrawTwoCard(color));
         }
 
-        /* SIMPLIFICATION WITHOUT WILDCARDS
         // Create the wild cards, 4 of each type
         for (int i = 0; i < 4; i++) {
             drawPile.add(new UnoWildCard());
-            drawPile.add(new UnoWildDrawFourCard());
+            //drawPile.add(new UnoWildDrawFourCard()); TODO add this card
         }
-        */
+
     }
 
     private void DrawCardsToPlayers() {
@@ -164,12 +166,21 @@ public class UnoGameState extends AbstractGameState {
 
         Deck<UnoCard> playerHand = playerDecks.get(player);
         for (UnoCard card : playerHand.getCards()) {
-            if (card.isPlayable(this))
-                actions.add(new PlayCard<>(card, playerHand, discardPile));
+            if (card.isPlayable(this)) {
+                if (isWildCard(card)) {
+                    actions.add(new PlayWild<>(card, discardPile, playerHand, UnoCard.UnoCardColor.Red));
+                    actions.add(new PlayWild<>(card, discardPile, playerHand, UnoCard.UnoCardColor.Blue));
+                    actions.add(new PlayWild<>(card, discardPile, playerHand, UnoCard.UnoCardColor.Green));
+                    actions.add(new PlayWild<>(card, discardPile, playerHand, UnoCard.UnoCardColor.Yellow));
+                }
+                else {
+                    actions.add(new PlayCard<>(card, discardPile, playerHand));
+                }
+            }
         }
 
         if (actions.isEmpty())
-            actions.add(new NoCards(drawPile, playerHand));
+            actions.add(new NoCards(drawPile, discardPile, playerHand));
 
         return actions;
     }
@@ -182,9 +193,8 @@ public class UnoGameState extends AbstractGameState {
     @Override
     public IObservation getObservation(int playerID) {
         Deck<UnoCard> playerHand = playerDecks.get(playerID);
-        return new UnoObservation(currentCard, playerHand, playerID);
+        return new UnoObservation(currentCard, currentColor, playerHand, playerID);
     }
-
 
     // The game is ended if there is a player without cards
     public void checkWinCondition() {
@@ -207,7 +217,13 @@ public class UnoGameState extends AbstractGameState {
     }
 
     public void updateCurrentCard(UnoCard card) {
-        currentCard = card;
+        currentCard  = card;
+        currentColor = card.color;
+    }
+
+    public void updateCurrentCard(UnoCard card, UnoCard.UnoCardColor color) {
+        currentCard  = card;
+        currentColor = color;
     }
 
     public void endTurn() {

@@ -2,8 +2,6 @@ package uno;
 
 import core.*;
 import players.HumanConsolePlayer;
-import utilities.CoreConstants;
-
 import java.util.*;
 
 public class UnoGame extends Game {

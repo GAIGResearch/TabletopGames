@@ -10,20 +10,20 @@ import uno.cards.*;
 
 public class PlayCard<T> implements IAction, IPrintable {
 
-    private final Deck<T> sourceDeck;
-    private final Deck<T> targetDeck;
+    private final Deck<T> discardDeck;
+    private final Deck<T> playerDeck;
     private final T cardToBePlayed;
 
-    public PlayCard(T card, Deck<T> sourceDeck, Deck<T> targetDeck){
+    public PlayCard(T card, Deck<T> discardDeck, Deck<T> playerDeck){
         cardToBePlayed = card;
-        this.sourceDeck = sourceDeck;
-        this.targetDeck = targetDeck;
+        this.discardDeck = discardDeck;
+        this.playerDeck = playerDeck;
     }
 
     @Override
     public boolean execute(AbstractGameState gameState) {
-        sourceDeck.remove(cardToBePlayed);
-        targetDeck.add(cardToBePlayed);
+        playerDeck.remove(cardToBePlayed);
+        discardDeck.add(cardToBePlayed);
         ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
 
         if (cardToBePlayed instanceof UnoReverseCard)

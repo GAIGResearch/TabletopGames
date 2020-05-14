@@ -11,7 +11,7 @@ public class UnoNumberCard extends UnoCard {
     // To be playable, the card number or color must to be the same than the current one
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        return this.number == gameState.currentCard.number || this.color == gameState.currentCard.color;
+        return this.number == gameState.currentCard.number || this.color == gameState.currentColor;
     }
 
     @Override
