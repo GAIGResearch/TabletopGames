@@ -1,12 +1,12 @@
-package uno.actions;
+package games.uno.actions;
 
 
 import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Deck;
 import core.observations.IPrintable;
-import uno.UnoGameState;
-import uno.cards.UnoCard;
+import games.uno.UnoGameState;
+import games.uno.cards.UnoCard;
 
 public class NoCards implements IAction, IPrintable {
     private final Deck<UnoCard> drawDeck;
@@ -22,6 +22,9 @@ public class NoCards implements IAction, IPrintable {
     // If the card drawn is playable, then play it
     @Override
     public boolean execute(AbstractGameState gs) {
+        if (drawDeck.getSize() == 0)
+            ((UnoGameState) gs).drawDeckEmpty();
+
         UnoCard card = drawDeck.draw();
 
         if (card.isPlayable((UnoGameState) gs)) {

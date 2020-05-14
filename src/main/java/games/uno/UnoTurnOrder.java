@@ -1,4 +1,4 @@
-package uno;
+package games.uno;
 
 import core.AbstractGameState;
 import core.turnorder.AlternatingTurnOrder;

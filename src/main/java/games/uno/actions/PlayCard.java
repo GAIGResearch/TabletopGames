@@ -1,12 +1,15 @@
-package uno.actions;
+package games.uno.actions;
 
 
 import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Deck;
 import core.observations.IPrintable;
-import uno.UnoGameState;
-import uno.cards.*;
+import games.uno.cards.UnoCard;
+import games.uno.cards.UnoDrawTwoCard;
+import games.uno.cards.UnoReverseCard;
+import games.uno.cards.UnoSkipCard;
+import games.uno.UnoGameState;
 
 public class PlayCard<T> implements IAction, IPrintable {
 

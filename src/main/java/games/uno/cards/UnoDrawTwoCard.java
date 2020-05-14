@@ -1,6 +1,6 @@
-package uno.cards;
+package games.uno.cards;
 
-import uno.UnoGameState;
+import games.uno.UnoGameState;
 
 public class UnoDrawTwoCard extends UnoCard {
 
