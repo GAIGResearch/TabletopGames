@@ -34,4 +34,9 @@ public class RandomPlayer extends AbstractPlayer {
     public int getAction(IObservation observation, List<IAction> actions) {
         return rnd.nextInt(actions.size());
     }
+
+    @Override
+    public void registerUpdatedObservation(IObservation observation) {
+        // Nothing to be done here, since the RandomPlayer does not need to react on such an observation.
+    }
 }

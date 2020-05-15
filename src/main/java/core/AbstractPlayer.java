@@ -36,4 +36,9 @@ public abstract class AbstractPlayer {
     public int getPlayerID() {
         return playerID;
     }
+
+    /**
+     * Receive an updated game-state for which it is not required to respond with an action.
+     */
+    public abstract void registerUpdatedObservation(IObservation observation);
 }

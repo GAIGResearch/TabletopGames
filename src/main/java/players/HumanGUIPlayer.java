@@ -27,5 +27,10 @@ public class HumanGUIPlayer extends AbstractPlayer {
     public int getAction(IObservation observation, List<IAction> actions) {
         return actions.indexOf(ac.getAction());
     }
+
+    @Override
+    public void registerUpdatedObservation(IObservation observation) {
+        
+    }
 }
 

@@ -5,6 +5,7 @@ import core.actions.IAction;
 import core.components.Deck;
 import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.PartialObservableDeck;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import games.explodingkittens.actions.*;
 import core.observations.IObservation;
@@ -25,8 +26,8 @@ public class ExplodingKittensGameState extends AbstractGameState {
         SeeTheFuturePhase
     }
 
-    private List<Deck<ExplodingKittenCard>> playerHandCards;
-    private Deck<ExplodingKittenCard> drawPile;
+    private List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
+    private PartialObservableDeck<ExplodingKittenCard> drawPile;
     private Deck<ExplodingKittenCard> discardPile;
     private int playerGettingAFavor = -1;
     private GamePhase gamePhase = GamePhase.PlayerMove;
@@ -70,7 +71,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     public void setComponents() {
         ExplodingKittenParameters ekp = (ExplodingKittenParameters)gameParameters;
-        drawPile = new Deck<>("Draw Pile");
+        drawPile = new PartialObservableDeck<>("Draw Pile", getNPlayers());
 
         // add all cards and distribute 7 random cards to each player
         for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
@@ -91,8 +92,8 @@ public class ExplodingKittensGameState extends AbstractGameState {
             Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
             visibility[i] = true;
 
-            Deck<ExplodingKittenCard> playerCards = new Deck<>("Player Cards");
-            playerCards.setDeckVisibility(visibility);
+            PartialObservableDeck<ExplodingKittenCard> playerCards =
+                    new PartialObservableDeck<>("Player Cards", visibility);
             playerHandCards.add(playerCards);
 
             //add defuse card
@@ -155,18 +156,19 @@ public class ExplodingKittensGameState extends AbstractGameState {
     private ArrayList<IAction> seeTheFutureActions(int playerID){
         ArrayList<IAction> actions = new ArrayList<>();
         ArrayList<ExplodingKittenCard> cards = drawPile.getCards();
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= cards.size() ? null : cards.get(1),
-                2 >= cards.size() ? null : cards.get(2), 3 >= cards.size() ? null : cards.get(3), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= cards.size() ? null : cards.get(1),
-                3 >= cards.size() ? null : cards.get(3), 2 >= cards.size() ? null : cards.get(2), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >= cards.size() ? null : cards.get(2),
-                1 >= cards.size() ? null : cards.get(1), 3 >= cards.size() ? null : cards.get(3), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >= cards.size() ? null : cards.get(2),
-                3 >= cards.size() ? null : cards.get(3), 1 >= cards.size() ? null : cards.get(1), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >= cards.size() ? null : cards.get(3),
-                1 >= cards.size() ? null : cards.get(1), 2 >= cards.size() ? null : cards.get(2), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >= cards.size() ? null : cards.get(3),
-                2 >= cards.size() ? null : cards.get(2), 1 >= cards.size() ? null : cards.get(1), playerID));
+        int numberOfCards = drawPile.getSize();
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= numberOfCards ? null : cards.get(1),
+                2 >= numberOfCards ? null : cards.get(2), 3 >= numberOfCards? null : cards.get(3), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >=numberOfCards ? null : cards.get(1),
+                3 >= numberOfCards ? null : cards.get(3), 2 >= numberOfCards? null : cards.get(2), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >=numberOfCards ? null : cards.get(2),
+                1 >= numberOfCards ? null : cards.get(1), 3 >= numberOfCards? null : cards.get(3), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >=numberOfCards ? null : cards.get(2),
+                3 >= numberOfCards ? null : cards.get(3), 1 >= numberOfCards? null : cards.get(1), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >=numberOfCards ? null : cards.get(3),
+                1 >= numberOfCards ? null : cards.get(1), 2 >= numberOfCards? null : cards.get(2), playerID));
+        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >=numberOfCards ? null : cards.get(3),
+                2 >= numberOfCards ? null : cards.get(2), 1 >= numberOfCards? null : cards.get(1), playerID));
 
         return actions;
     }
