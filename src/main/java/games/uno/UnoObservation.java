@@ -9,7 +9,7 @@ public class UnoObservation implements IPrintable, IObservation {
 
     String[] strings = new String[6];
 
-    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, Deck<UnoCard> playerHand, int playerID) {
+    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, Deck<UnoCard> playerHand, Deck<UnoCard> discardDeck, int playerID) {
         String colorString = "";
         if (currentColor == UnoCard.UnoCardColor.Red)
             colorString = "Red";
