@@ -185,7 +185,12 @@ public class UnoGameState extends AbstractGameState {
     @Override
     public IObservation getObservation(int playerID) {
         Deck<UnoCard> playerHand = playerDecks.get(playerID);
-        return new UnoObservation(currentCard, currentColor, playerHand, discardDeck, playerID);
+        ArrayList<Integer> cardsLeft = new  ArrayList<Integer>();
+        for( int i = 0; i < nPlayers; i++) {
+            int nCards = playerDecks.get(playerID).getCards().size();
+            cardsLeft.add(nCards);
+        }
+        return new UnoObservation(currentCard, currentColor, playerHand, discardDeck, playerID, cardsLeft);
     }
 
     // The game is ended if there is a player without cards

@@ -5,11 +5,14 @@ import core.observations.IObservation;
 import core.observations.IPrintable;
 import games.uno.cards.UnoCard;
 
+import java.util.ArrayList;
+
 public class UnoObservation implements IPrintable, IObservation {
 
     String[] strings = new String[6];
 
-    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, Deck<UnoCard> playerHand, Deck<UnoCard> discardDeck, int playerID) {
+    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, Deck<UnoCard> playerHand,
+                          Deck<UnoCard> discardDeck, int playerID, ArrayList<Integer> cardsLeft) {
         String colorString = "";
         if (currentColor == UnoCard.UnoCardColor.Red)
             colorString = "Red";
