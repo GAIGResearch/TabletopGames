@@ -2,6 +2,7 @@ package games.pandemic.actions;
 
 import core.actions.IAction;
 import core.components.BoardNode;
+import core.components.Card;
 import core.content.PropertyBoolean;
 import core.AbstractGameState;
 import core.content.PropertyString;
@@ -35,6 +36,11 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
         }
 
         return success;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
 

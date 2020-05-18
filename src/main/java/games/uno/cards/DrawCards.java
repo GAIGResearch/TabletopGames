@@ -1,6 +1,7 @@
 package games.uno.cards;
 
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -36,6 +37,11 @@ public class DrawCards<T> implements IAction, IPrintable {
         }
 
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

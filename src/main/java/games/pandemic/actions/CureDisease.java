@@ -44,6 +44,11 @@ public class CureDisease implements IAction {
     }
 
     @Override
+    public Card getCard() {
+        return null;
+    }
+
+    @Override
     public boolean equals(Object other)
     {
         if (this == other) return true;

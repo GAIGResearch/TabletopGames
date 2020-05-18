@@ -73,7 +73,6 @@ public class PandemicForwardModel extends ForwardModel {
         playerHandOverCapacity1.setParent(playerAction);
         playerHandOverCapacity1.setYesNo(playerActionInterrupt3, enoughActions);
         playerActionInterrupt3.setNext(enoughActions);
-        // TODO: allow playing event cards, but don't increase turn step
         enoughActions.setYesNo(drawCards, playerAction);  // Loop
         drawCards.setNext(firstEpidemic);
         firstEpidemic.setYesNo(epidemic1, enoughDraws);

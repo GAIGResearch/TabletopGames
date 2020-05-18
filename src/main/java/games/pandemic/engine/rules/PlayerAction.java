@@ -14,6 +14,7 @@ import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
+import static games.pandemic.PandemicConstants.countryHash;
 import static utilities.CoreConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
@@ -31,12 +32,13 @@ public class PlayerAction extends RuleNode {
     protected boolean run(AbstractGameState gs) {
         action.execute(gs);
         PandemicGameState pgs = (PandemicGameState)gs;
+        PandemicTurnOrder pto = (PandemicTurnOrder) pgs.getTurnOrder();
 
         if (action instanceof QuietNight) {
             ((PandemicGameState)gs).setQuietNight(true);
         } else if (action instanceof MovePlayer){
             // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
-            int playerIdx = pgs.getTurnOrder().getCurrentPlayer(gs);
+            int playerIdx = pto.getCurrentPlayer(gs);
             Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
             String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
@@ -57,7 +59,13 @@ public class PlayerAction extends RuleNode {
             else playerHandOverCapacity = -1;
         }
 
-        ((PandemicTurnOrder)gs.getTurnOrder()).endPlayerTurnStep();
+        // Check if this was an event action. These actions are always played with the event card.
+        Card eventCard = action.getCard();
+        if (eventCard == null || eventCard.getProperty(countryHash) != null || pto.reactionsRemaining()) {
+            // Notify turn step only if an event card was not played, or if this was a reaction.
+            // Event cards are free.
+            pto.endPlayerTurnStep();
+        }
         return true;
     }
 

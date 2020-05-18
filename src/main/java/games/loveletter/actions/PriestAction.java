@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
@@ -32,6 +33,11 @@ public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, I
         }
 
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

@@ -32,6 +32,11 @@ public class MovePlayer implements IAction {
         return true;
     }
 
+    @Override
+    public Card getCard() {
+        return null;
+    }
+
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.world.getNode(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);

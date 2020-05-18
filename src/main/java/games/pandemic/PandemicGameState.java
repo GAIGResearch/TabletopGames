@@ -236,6 +236,10 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         // Special role actions
         actions.addAll(getSpecialRoleActions(roleString, pp, playerHand, playerLocationName.value));
 
+        // Event actions
+        actions.addAll(getEventActions());
+        actions.remove(new DoNothing());  // Players can't just do nothing in main game phase
+
         // Done!
         return new ArrayList<>(actions);
     }
