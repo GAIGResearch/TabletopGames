@@ -40,6 +40,9 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom imple
         return success;
     }
 
+    public Card getCard() {
+        return card;
+    }
 
     @Override
     public boolean equals(Object other)

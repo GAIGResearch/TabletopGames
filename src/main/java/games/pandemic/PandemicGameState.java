@@ -57,6 +57,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         for (int i = 0; i < getNPlayers(); i++) {
             Area playerArea = new Area(i);
             Deck<Card> playerHand = new Deck<>("Player Hand");
+            playerHand.setOwnerId(i);
             playerHand.setCapacity(capacity);
             playerArea.addComponent(playerHandHash, playerHand);
             playerArea.addComponent(playerCardHash, new Card());
@@ -112,6 +113,8 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     @Override
     public IObservation getObservation(int player) {
         // TODO
+        // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them
+        // for RearrangeCardWithCards action
         return this;
     }
 
@@ -147,7 +150,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         PropertyString playerLocationName = (PropertyString) getComponentActingPlayer(playerCardHash)
                 .getProperty(playerLocationHash);
         BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
-
         int activePlayer = turnOrder.getCurrentPlayer(this);
 
         // Create a list for possible actions, including first move actions
@@ -185,24 +187,24 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(playersHash)).getValues();
         for (int i : players) {
             if (i != activePlayer) {
+                Deck<Card> otherDeck = (Deck<Card>) getComponent(playerHandHash, i);
+                String otherRoleString = getPlayerRole(i);
+
                 // Give card
-                for (Card card : playerHand.getCards()) {
+                for (int j = 0; j < playerHand.getSize(); j++) {
+                    Card card = playerHand.getCards().get(j);
                     // Researcher can give any card, others only the card that matches the city name
                     if (roleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new GiveCard(card, i));
+                        actions.add(new DrawCard(playerHand, otherDeck, j));
                     }
                 }
 
                 // Take card
-
-                Deck<Card>  otherDeck = (Deck<Card>) getComponent(playerHandHash, i);
-                Card otherPlayerCard = ((Card) getComponent(playerCardHash, i));
-                String otherRoleString = ((PropertyString) otherPlayerCard.getProperty(nameHash)).value;
                 // Can take any card from the researcher or the card that matches the city if the player is in that city
-                for (Card card : otherDeck.getCards()) {
-                    if (otherRoleString.equals("Researcher") ||
-                            (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new TakeCard(card, i));
+                for (int j = 0; j < otherDeck.getSize(); j++) {
+                    Card card = otherDeck.getCards().get(j);
+                    if (otherRoleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
+                        actions.add(new DrawCard(otherDeck, playerHand, j));
                     }
                 }
             }
@@ -348,7 +350,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 .getProperty(playerLocationHash);
         BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
 
-        // Drive / Ferry add core.actions for travelling immediate cities
+        // Drive / Ferry add actions for travelling immediate cities
         for (BoardNode otherCity : playerLocationNode.getNeighbours()){
             actions.add(new MovePlayer(playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
         }
@@ -501,7 +503,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             case "Forecast":
 //                System.out.println("Forecast");
 //            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
-                // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them
                 // generate all permutations
                 Deck<Card> infectionDeck = (Deck<Card>) getComponent(infectionHash);
                 int nInfectCards = infectionDeck.getSize();
@@ -605,7 +606,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
         gs.world = this.world.copy();
         gs.numAvailableActions = numAvailableActions;
-        gs.availableActions = new ArrayList<>(availableActions); // TODO: Deep?
+        gs.availableActions = new ArrayList<>(availableActions); // Deep?
         gs.quietNight = quietNight;
         gs.nCardsDrawn = nCardsDrawn;
         gs.epidemic = epidemic;

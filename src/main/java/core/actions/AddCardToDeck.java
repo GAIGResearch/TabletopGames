@@ -1,21 +1,21 @@
 package core.actions;
 
 import core.components.Card;
-import core.components.IDeck;
+import core.components.Deck;
 import core.AbstractGameState;
 
 public class AddCardToDeck implements IAction {
     private Card card;
-    private IDeck deck;
+    private Deck<Card> deck;
     private int index;
 
-    public AddCardToDeck(Card c, IDeck deck) {
+    public AddCardToDeck(Card c, Deck<Card> deck) {
         this.card = c;
         this.deck = deck;
         this.index = 0;
     }
 
-    public AddCardToDeck(Card c, IDeck deck, int index) {
+    public AddCardToDeck(Card c, Deck<Card> deck, int index) {
         this.card = c;
         this.deck = deck;
         this.index = index;
@@ -36,18 +36,6 @@ public class AddCardToDeck implements IAction {
             return index == otherAction.index && card.equals(otherAction.card) && deck.equals(otherAction.deck);
 
         }else return false;
-    }
-
-    public Card getCard() {
-        return card;
-    }
-
-    public IDeck getDeck() {
-        return deck;
-    }
-
-    public int getIndex() {
-        return index;
     }
 
     @Override

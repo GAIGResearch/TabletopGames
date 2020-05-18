@@ -179,6 +179,7 @@ public class PandemicForwardModel extends ForwardModel {
         for (int i = 0; i < state.getNPlayers(); i++) {
             // Draw a player card
             Card c = playerRoles.draw();
+            c.setOwnerId(i);
 
             // Give the card to this player
             Area playerArea = state.getArea(i);

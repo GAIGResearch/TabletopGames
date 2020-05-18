@@ -11,6 +11,7 @@ import java.util.Objects;
 
 public abstract class Component {
     protected ComponentType type;
+    protected int ownerId = -1;  // By default belongs to the game
     protected HashMap<Integer, Property> properties;
 
     public ComponentType getType()                   { return this.type; }
@@ -20,6 +21,14 @@ public abstract class Component {
     public int getNumProperties()
     {
         return properties.size();
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
     }
 
     /**

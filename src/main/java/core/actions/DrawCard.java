@@ -2,7 +2,6 @@ package core.actions;
 
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.AbstractGameState;
 
 import java.util.Objects;
@@ -68,8 +67,12 @@ public class DrawCard implements IAction {
         return deckFrom;
     }
 
-    public IDeck<Card> getDeckTo() {
+    public Deck<Card> getDeckTo() {
         return deckTo;
+    }
+
+    public Card getDrawCard() {
+        return deckFrom.getCards().get(index);
     }
 
     @Override

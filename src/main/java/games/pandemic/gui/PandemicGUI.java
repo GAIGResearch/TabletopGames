@@ -318,7 +318,7 @@ public class PandemicGUI extends GUI {
                     if (action instanceof AddResearchStationFrom) {
                         if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
-                                    isCardHighlighted(((AddResearchStationWithCard) action).getCard(), id)) {
+                                    isCardHighlighted(((AddResearchStationWithCardFrom) action).getCard(), id)) {
                                 actionButtons[k].setVisible(true);
                                 actionButtons[k++].setButtonAction(action);
                             }
@@ -344,20 +344,6 @@ public class PandemicGUI extends GUI {
                     }
                 }
                 if (allSelected) {
-                    actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action);
-                }
-            } else if (action instanceof GiveCard) {
-                if (isCardHighlighted(((GiveCard) action).getCard(), id)
-                        && playerHighlights.contains(((GiveCard) action).getOtherPlayer())) {
-                    // card in hand selected and other player, show this action as available
-                    actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action);
-                }
-            } else if (action instanceof TakeCard) {
-                // A card from another player selected
-                int otherId = ((TakeCard) action).getOtherPlayer();
-                if (isCardHighlighted(((TakeCard) action).getCard(), otherId)) {
                     actionButtons[k].setVisible(true);
                     actionButtons[k++].setButtonAction(action);
                 }
@@ -474,6 +460,19 @@ public class PandemicGUI extends GUI {
                                     }
                                 }
                             }
+                        }
+                    } else {
+                        int otherId = ((DrawCard) action).getDeckTo().getOwnerId();
+                        if (isCardHighlighted(((DrawCard)action).getDrawCard(), id) && playerHighlights.contains(otherId)) {
+                            // Give card
+                            // card in hand selected and other player, show this action as available
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action);
+                        } else if (isCardHighlighted(((DrawCard)action).getDrawCard(), otherId)) {
+                            //Take card
+                            // A card from another player selected
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action);
                         }
                     }
                 }
