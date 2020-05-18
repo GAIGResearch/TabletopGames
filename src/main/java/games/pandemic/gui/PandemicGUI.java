@@ -291,7 +291,15 @@ public class PandemicGUI extends GUI {
         Set<String> deckHighlights = new HashSet<>();
         for (String highlight: highlights) {
             if (highlight.contains("BN")) {
-                bnHighlights.add(highlight.split(" ")[1]);
+                String[] splits = highlight.split(" ");
+                StringBuilder bn = new StringBuilder();
+                for (String s: splits) {
+                    s = s.trim();
+                    if (!s.equals("BN")) {
+                        bn.append(s).append(" ");
+                    }
+                }
+                bnHighlights.add(bn.toString().trim());
             } else if (highlight.contains("player ")) {
                 playerTokenHighlights.add(Integer.parseInt(highlight.split(" ")[1]));
             } else {

@@ -346,35 +346,40 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     private List<IAction> getMoveActions(int playerId, Deck<Card> playerHand){
         Set<IAction> actions = new HashSet<>();
 
-        PropertyString playerLocationName = (PropertyString) getComponent(playerCardHash, playerId)
+        PropertyString playerLocationProperty = (PropertyString) getComponent(playerCardHash, playerId)
                 .getProperty(playerLocationHash);
-        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
+        String playerLocationName = playerLocationProperty.value;
+        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationProperty);
+        HashSet<BoardNode> neighbours = playerLocationNode.getNeighbours();
 
-        // Drive / Ferry add actions for travelling immediate cities
-        for (BoardNode otherCity : playerLocationNode.getNeighbours()){
+        if (playerLocationName.equals("Washington")) {
+            int a = 0;
+        }
+
+        // Drive / Ferry add actions for travelling to immediate cities
+        for (BoardNode otherCity : neighbours){
             actions.add(new MovePlayer(playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
         }
 
-        // Direct Flight, discard city card and travel to that city
-        for (Card card: playerHand.getCards()){
-            //  check if card has country to determine if it is city card or not
-            if ((card.getProperty(countryHash)) != null){
-                actions.add(new MovePlayerWithCard(playerId, ((PropertyString)card.getProperty(nameHash)).value, card));
-            }
-        }
+        // Iterate over all the cities in the world
+        for (BoardNode bn: this.world.getBoardNodes()) {
+            String destination = ((PropertyString) bn.getProperty(nameHash)).value;
 
-        // Charter flight, discard card that matches your city and travel to any city
-        for (Card card: playerHand.getCards()){
-            // Get the city from the card
-            if (playerLocationName.equals(card.getProperty(nameHash))){
-                // Add all the cities
-                // Iterate over all the cities in the world
-                for (BoardNode bn: this.world.getBoardNodes()) {
-                    PropertyString destination = (PropertyString) bn.getProperty(nameHash);
-
-                    // Only add the ones that are different from the current location
-                    if (!destination.equals(playerLocationName)) {
-                        actions.add(new MovePlayerWithCard(playerId, destination.value, card));
+            if (!neighbours.contains(bn)) {  // Ignore neighbours, already covered in Drive/Ferry actions
+                for (Card card: playerHand.getCards()){
+                    //  Check if card has country to determine if it is city card or not
+                    if ((card.getProperty(countryHash)) != null){
+                        String cardCity = ((PropertyString)card.getProperty(nameHash)).value;
+                        if (playerLocationName.equals(cardCity)){
+                            // Charter flight, discard card that matches your city and travel to any city
+                            // Only add the ones that are different from the current location
+                            if (!destination.equals(playerLocationName)) {
+                                actions.add(new MovePlayerWithCard(playerId, destination, card));
+                            }
+                        } else {
+                            // Direct Flight, discard city card and travel to that city
+                            actions.add(new MovePlayerWithCard(playerId, cardCity, card));
+                        }
                     }
                 }
             }
@@ -387,6 +392,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 actions.add(new MovePlayer(playerId, station));
             }
         }
+
         return new ArrayList<>(actions);
     }
 
