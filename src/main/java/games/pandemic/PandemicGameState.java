@@ -352,10 +352,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationProperty);
         HashSet<BoardNode> neighbours = playerLocationNode.getNeighbours();
 
-        if (playerLocationName.equals("Washington")) {
-            int a = 0;
-        }
-
         // Drive / Ferry add actions for travelling to immediate cities
         for (BoardNode otherCity : neighbours){
             actions.add(new MovePlayer(playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
