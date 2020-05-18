@@ -1,8 +1,10 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
+import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Counter;
+import core.components.Deck;
 import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -16,10 +18,13 @@ import static utilities.CoreConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
 
-    int n_initial_disease_cubes;
+    private int playerHandOverCapacity;
+    private int n_initial_disease_cubes;
+
     public PlayerAction(int n_initial_disease_cubes) {
         super(true);
         this.n_initial_disease_cubes = n_initial_disease_cubes;
+        this.playerHandOverCapacity = -1;
     }
 
     @Override
@@ -41,13 +46,26 @@ public class PlayerAction extends RuleNode {
                     String city = ((MovePlayer)action).getDestination();
                     boolean disease_cured = diseaseToken.getValue() > 0;
                     if (disease_cured){
-                        new TreatDisease(n_initial_disease_cubes, color, city, true);
+                        new TreatDisease(n_initial_disease_cubes, color, city, true).execute(gs);
                     }
                 }
             }
+        } else if (action instanceof DrawCard) {
+            // Player hand may be over capacity, set parameter to inform next decision
+            Deck<Card> deckTo = ((DrawCard) action).getDeckTo();
+            if (deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
+            else playerHandOverCapacity = -1;
         }
 
         ((PandemicTurnOrder)gs.getTurnOrder()).endPlayerTurnStep();
         return true;
+    }
+
+    public int getPlayerHandOverCapacity() {
+        return playerHandOverCapacity;
+    }
+
+    public void setPlayerHandOverCapacity(int playerHandOverCapacity) {
+        this.playerHandOverCapacity = playerHandOverCapacity;
     }
 }

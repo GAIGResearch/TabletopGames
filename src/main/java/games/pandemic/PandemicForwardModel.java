@@ -40,16 +40,18 @@ public class PandemicForwardModel extends ForwardModel {
         // Rules
         RuleNode infectCities = new InfectCities(pp.infection_rate, pp.max_cubes_per_city, pp.n_cubes_infection);
         RuleNode forceDiscardReaction = new ForceDiscardReaction();
-        RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes);
         RuleNode epidemic2 = new EpidemicIntensify(rnd);
         RuleNode forceRPreaction = new ForceRPReaction();
-        RuleNode playerActionInterrupt1 = new PlayerAction(pp.n_initial_disease_cubes);
         RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic);
         RuleNode drawCards = new DrawCards();
         RuleNode playerAction = new PlayerAction(pp.n_initial_disease_cubes);
+        RuleNode playerActionInterrupt1 = new PlayerAction(pp.n_initial_disease_cubes);
+        RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes);
+        RuleNode playerActionInterrupt3 = new PlayerAction(pp.n_initial_disease_cubes);
 
         // Conditions
-        ConditionNode playerHandOverCapacity = new PlayerHandOverCapacity();
+        ConditionNode playerHandOverCapacity1 = new PlayerHandOverCapacity();
+        ConditionNode playerHandOverCapacity2 = new PlayerHandOverCapacity();
         ConditionNode playerHasRPCard = new HasRPCard();
         ConditionNode enoughDraws = new EnoughDraws(pp.n_cards_draw);
         ConditionNode firstEpidemic = new IsEpidemic();
@@ -66,10 +68,12 @@ public class PandemicForwardModel extends ForwardModel {
         // Putting it all together to set up game turn flow
         // possible future work: Nodes passing parameters to others
         root = playerAction;
-        playerAction.setNext(enoughActions);
-        // TODO: Give/Take card actions: If the player who gets the card now has more than 7 cards, that player must
-        // immediately discard a card or play an Event card (see Event Cards on page 7)
-        // TODO: allow playing event cards, but redo this rule if that's the case, and don't increase turn step
+        // Player hand may end up over capacity after give/take card actions, ideally this should receive parameter from other rule
+        playerAction.setNext(playerHandOverCapacity1);
+        playerHandOverCapacity1.setParent(playerAction);
+        playerHandOverCapacity1.setYesNo(playerActionInterrupt3, enoughActions);
+        playerActionInterrupt3.setNext(enoughActions);
+        // TODO: allow playing event cards, but don't increase turn step
         enoughActions.setYesNo(drawCards, playerAction);  // Loop
         drawCards.setNext(firstEpidemic);
         firstEpidemic.setYesNo(epidemic1, enoughDraws);
@@ -78,8 +82,8 @@ public class PandemicForwardModel extends ForwardModel {
         forceRPreaction.setNext(playerActionInterrupt1);
         playerActionInterrupt1.setNext(epidemic2);
         epidemic2.setNext(enoughDraws);  // Loop
-        enoughDraws.setYesNo(playerHandOverCapacity, drawCards);  // Only asks current player for reaction. Loop
-        playerHandOverCapacity.setYesNo(forceDiscardReaction, infectCities);
+        enoughDraws.setYesNo(playerHandOverCapacity2, drawCards);  // Only asks current player for reaction. Loop
+        playerHandOverCapacity2.setYesNo(forceDiscardReaction, infectCities);
         forceDiscardReaction.setNext(playerActionInterrupt2);
         playerActionInterrupt2.setNext(infectCities);
 //        infectCities.setNext(null);  // End of turn
