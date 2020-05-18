@@ -47,7 +47,7 @@ public class PlayerAction extends RuleNode {
             }
         }
 
-        ((PandemicTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+        ((PandemicTurnOrder)gs.getTurnOrder()).endPlayerTurnStep();
         return true;
     }
 }

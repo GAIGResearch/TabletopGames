@@ -1,6 +1,5 @@
 package core;
 
-import core.actions.DoNothing;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
@@ -80,8 +79,6 @@ public abstract class Game {
     public final AbstractGameState getGameState(){return gameState;}
 
     private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<IAction> actions) {
-        int actionIdx = player.getAction(observation, actions);
-
         if (gui != null) {
             gui.update(player, gameState);
             try {
@@ -91,6 +88,6 @@ public abstract class Game {
             }
         }
 
-        return actionIdx;
+        return player.getAction(observation, actions);
     }
 }

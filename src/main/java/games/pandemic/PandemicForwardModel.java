@@ -69,7 +69,7 @@ public class PandemicForwardModel extends ForwardModel {
         playerAction.setNext(enoughActions);
         // TODO: Give/Take card actions: If the player who gets the card now has more than 7 cards, that player must
         // immediately discard a card or play an Event card (see Event Cards on page 7)
-        // TODO: allow playing event cards, but redo this rule if that's the case
+        // TODO: allow playing event cards, but redo this rule if that's the case, and don't increase turn step
         enoughActions.setYesNo(drawCards, playerAction);  // Loop
         drawCards.setNext(firstEpidemic);
         firstEpidemic.setYesNo(epidemic1, enoughDraws);
