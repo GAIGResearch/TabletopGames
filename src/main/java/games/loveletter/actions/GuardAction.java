@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.components.IDeck;
 import core.observations.IPrintable;
@@ -33,6 +34,11 @@ public class GuardAction extends PlayCard<LoveLetterCard> implements IAction, IP
         }
 
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
 

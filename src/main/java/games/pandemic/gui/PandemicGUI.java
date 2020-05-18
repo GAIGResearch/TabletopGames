@@ -11,6 +11,7 @@ import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
+import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
 import players.ActionController;
 import players.HumanGUIPlayer;
@@ -45,7 +46,7 @@ public class PandemicGUI extends GUI {
     ArrayList<Integer> bufferHighlights;
 
     // Game state info
-    JLabel gamePhase;
+    JLabel gamePhase, gameTurnStep;
 
     public PandemicGUI(PandemicGameState gameState, ActionController ac) {
         super(ac, 721);
@@ -66,6 +67,7 @@ public class PandemicGUI extends GUI {
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
         gamePhase = new JLabel();
+        gameTurnStep = new JLabel();
         JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
@@ -185,6 +187,7 @@ public class PandemicGUI extends GUI {
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
         JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
+        gameInfo.add(gameTurnStep);
         gameInfo.add(gamePhase);
 
         return gameInfo;
@@ -192,6 +195,7 @@ public class PandemicGUI extends GUI {
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
+        gameTurnStep.setText("Turn step: " + ((PandemicTurnOrder)gameState.getTurnOrder()).getTurnStep());
         gamePhase.setText("Game phase: " + ((PandemicGameState)gameState).getGamePhase());
     }
 
@@ -287,7 +291,15 @@ public class PandemicGUI extends GUI {
         Set<String> deckHighlights = new HashSet<>();
         for (String highlight: highlights) {
             if (highlight.contains("BN")) {
-                bnHighlights.add(highlight.split(" ")[1]);
+                String[] splits = highlight.split(" ");
+                StringBuilder bn = new StringBuilder();
+                for (String s: splits) {
+                    s = s.trim();
+                    if (!s.equals("BN")) {
+                        bn.append(s).append(" ");
+                    }
+                }
+                bnHighlights.add(bn.toString().trim());
             } else if (highlight.contains("player ")) {
                 playerTokenHighlights.add(Integer.parseInt(highlight.split(" ")[1]));
             } else {
@@ -314,7 +326,7 @@ public class PandemicGUI extends GUI {
                     if (action instanceof AddResearchStationFrom) {
                         if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
-                                    isCardHighlighted(((AddResearchStationWithCard) action).getCard(), id)) {
+                                    isCardHighlighted(((AddResearchStationWithCardFrom) action).getCard(), id)) {
                                 actionButtons[k].setVisible(true);
                                 actionButtons[k++].setButtonAction(action);
                             }
@@ -340,20 +352,6 @@ public class PandemicGUI extends GUI {
                     }
                 }
                 if (allSelected) {
-                    actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action);
-                }
-            } else if (action instanceof GiveCard) {
-                if (isCardHighlighted(((GiveCard) action).getCard(), id)
-                        && playerHighlights.contains(((GiveCard) action).getOtherPlayer())) {
-                    // card in hand selected and other player, show this action as available
-                    actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action);
-                }
-            } else if (action instanceof TakeCard) {
-                // A card from another player selected
-                int otherId = ((TakeCard) action).getOtherPlayer();
-                if (isCardHighlighted(((TakeCard) action).getCard(), otherId)) {
                     actionButtons[k].setVisible(true);
                     actionButtons[k++].setButtonAction(action);
                 }
@@ -470,6 +468,19 @@ public class PandemicGUI extends GUI {
                                     }
                                 }
                             }
+                        }
+                    } else {
+                        int otherId = ((DrawCard) action).getDeckTo().getOwnerId();
+                        if (isCardHighlighted(((DrawCard)action).getDrawCard(), id) && playerHighlights.contains(otherId)) {
+                            // Give card
+                            // card in hand selected and other player, show this action as available
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action);
+                        } else if (isCardHighlighted(((DrawCard)action).getDrawCard(), otherId)) {
+                            //Take card
+                            // A card from another player selected
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k++].setButtonAction(action);
                         }
                     }
                 }

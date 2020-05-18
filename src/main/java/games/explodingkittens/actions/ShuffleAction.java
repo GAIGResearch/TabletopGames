@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -17,6 +18,11 @@ public class ShuffleAction<T> extends PlayCard<T> implements IsNopeable, IPrinta
     public boolean execute(AbstractGameState gs) {
         shuffleDeck.shuffle();
         return super.execute(gs);
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

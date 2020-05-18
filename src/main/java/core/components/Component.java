@@ -7,9 +7,11 @@ import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public abstract class Component {
     protected ComponentType type;
+    protected int ownerId = -1;  // By default belongs to the game
     protected HashMap<Integer, Property> properties;
 
     public ComponentType getType()                   { return this.type; }
@@ -19,6 +21,14 @@ public abstract class Component {
     public int getNumProperties()
     {
         return properties.size();
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
     }
 
     /**
@@ -110,4 +120,17 @@ public abstract class Component {
         copyTo.type = this.type;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Component component = (Component) o;
+        return type == component.type &&
+                Objects.equals(properties, component.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, properties);
+    }
 }

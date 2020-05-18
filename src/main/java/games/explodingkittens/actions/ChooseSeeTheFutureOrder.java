@@ -2,6 +2,7 @@ package games.explodingkittens.actions;
 
 import core.actions.IAction;
 import core.AbstractGameState;
+import core.components.Card;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
@@ -59,6 +60,11 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
         }
         ((ExplodingKittensGameState)gs).setGamePhase(PlayerMove);
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     public String toString(){

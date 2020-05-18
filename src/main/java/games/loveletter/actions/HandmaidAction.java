@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.components.IDeck;
 import core.observations.IPrintable;
@@ -25,6 +26,11 @@ public class HandmaidAction  extends PlayCard<LoveLetterCard> implements IAction
 
         ((LoveLetterGameState)gs).setProtection(playerID, true);
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

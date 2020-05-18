@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -40,6 +41,11 @@ public class DrawCard implements IAction, IPrintable {
             return false;
         }
         return deckTo.add(card);
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override
