@@ -233,7 +233,7 @@ public class PandemicForwardModel extends ForwardModel {
     @Override
     public ForwardModel copy() {
         PandemicForwardModel fm = new PandemicForwardModel(pp);
-        fm.rnd = rnd; //TODO: revisit this, we may not want the same random generator.
+        fm.rnd = new Random();
         fm.pp = (PandemicParameters)pp.copy();
         return fm;
     }

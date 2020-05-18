@@ -43,7 +43,7 @@ public class MovePlayer implements IAction {
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
-        playerCard.setProperty(PandemicConstants.playerLocationHash, new PropertyString(city));  // TODO: does this exist?
+        playerCard.setProperty(PandemicConstants.playerLocationHash, new PropertyString(city));
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {

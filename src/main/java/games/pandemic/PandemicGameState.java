@@ -112,9 +112,8 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public IObservation getObservation(int player) {
-        // TODO
-        // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them
-        // for RearrangeCardWithCards action
+        // TODO copy all components based on what this player observes
+        // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them for RearrangeCardWithCards action
         return this;
     }
 
