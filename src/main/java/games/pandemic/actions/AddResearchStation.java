@@ -9,6 +9,8 @@ import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
+import java.util.Objects;
+
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 
@@ -54,5 +56,10 @@ public class AddResearchStation implements IAction {
 
     public String getCity() {
         return city;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(city);
     }
 }

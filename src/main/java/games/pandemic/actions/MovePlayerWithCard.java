@@ -6,6 +6,8 @@ import core.components.Deck;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
+import java.util.Objects;
+
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 import static utilities.CoreConstants.playerHandHash;
 
@@ -60,5 +62,10 @@ public class MovePlayerWithCard extends MovePlayer implements IAction {
                 ", player=" + playerIdx +
                 ", destination='" + destination + '\'' +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), card);
     }
 }

@@ -9,6 +9,8 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
+import java.util.Objects;
+
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 
@@ -82,12 +84,16 @@ public class TreatDisease implements IAction {
     }
 
     @Override
-    public String
-    toString() {
+    public String  toString() {
         return "TreatDisease{" +
                 "color='" + color + '\'' +
                 ", city='" + city + '\'' +
                 ", treatAll=" + treatAll +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(initialDiseaseCubes, color, city, treatAll);
     }
 }

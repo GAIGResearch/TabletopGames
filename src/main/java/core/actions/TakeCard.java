@@ -3,9 +3,9 @@ package core.actions;
 import core.components.Card;
 import core.AbstractGameState;
 
-public class TakeCard implements IAction {
-    //TODO: this should be agreed between players
+import java.util.Objects;
 
+public class TakeCard implements IAction {
     private Card card;
     private int otherPlayer;
 
@@ -46,5 +46,10 @@ public class TakeCard implements IAction {
 
     public Card getCard() {
         return card;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(card, otherPlayer);
     }
 }

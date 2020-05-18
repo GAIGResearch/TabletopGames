@@ -6,6 +6,8 @@ import core.components.Deck;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
+import java.util.Objects;
+
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.playerHandHash;
 
@@ -58,5 +60,10 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom imple
                 ", fromCity='" + fromCity + '\'' +
                 ", toCity='" + city + '\'' +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), fromCity, card);
     }
 }

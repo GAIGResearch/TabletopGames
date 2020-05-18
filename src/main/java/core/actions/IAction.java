@@ -4,5 +4,4 @@ import core.AbstractGameState;
 
 public interface IAction {
     boolean execute(AbstractGameState gs);
-    String toString();
 }

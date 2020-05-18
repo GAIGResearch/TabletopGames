@@ -9,6 +9,7 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static utilities.CoreConstants.playerHandHash;
 
@@ -74,5 +75,10 @@ public class CureDisease implements IAction {
                 "color='" + color + '\'' +
                 ", cards=" + cards.toString() +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, cards);
     }
 }

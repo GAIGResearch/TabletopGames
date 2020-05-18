@@ -5,6 +5,8 @@ import core.components.Deck;
 import core.components.IDeck;
 import core.AbstractGameState;
 
+import java.util.Objects;
+
 public class DrawCard implements IAction {
 
     private Deck<Card> deckFrom;
@@ -68,6 +70,11 @@ public class DrawCard implements IAction {
 
     public IDeck<Card> getDeckTo() {
         return deckTo;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deckFrom, deckTo, index);
     }
 }
 
