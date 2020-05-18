@@ -2,12 +2,15 @@ package games.pandemic.actions;
 
 import core.actions.IAction;
 import core.components.BoardNode;
+import core.components.Card;
 import core.components.Counter;
 import core.content.PropertyIntArray;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
+
+import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
@@ -67,6 +70,11 @@ public class TreatDisease implements IAction {
         return false;
     }
 
+    @Override
+    public Card getCard() {
+        return null;
+    }
+
 
     @Override
     public boolean equals(Object other)
@@ -82,12 +90,16 @@ public class TreatDisease implements IAction {
     }
 
     @Override
-    public String
-    toString() {
+    public String  toString() {
         return "TreatDisease{" +
                 "color='" + color + '\'' +
                 ", city='" + city + '\'' +
                 ", treatAll=" + treatAll +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(initialDiseaseCubes, color, city, treatAll);
     }
 }

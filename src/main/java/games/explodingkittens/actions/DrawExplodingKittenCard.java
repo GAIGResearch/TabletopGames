@@ -1,6 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -61,6 +62,11 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
             ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         }
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

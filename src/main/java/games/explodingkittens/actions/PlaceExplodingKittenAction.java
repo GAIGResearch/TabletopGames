@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -23,6 +24,11 @@ public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrint
         ((ExplodingKittensGameState) gs).setGamePhase(PlayerMove);
         ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         return succes;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

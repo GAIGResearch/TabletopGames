@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.Deck;
 import core.components.IDeck;
 import core.AbstractGameState;
@@ -24,6 +25,11 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
         super.execute(gs);
         ((ExplodingKittensGameState)gs).setGamePhase(SeeTheFuturePhase);
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

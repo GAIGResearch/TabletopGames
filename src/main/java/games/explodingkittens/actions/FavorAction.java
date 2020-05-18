@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -31,6 +32,11 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
         ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
         ekto.registerFavorAction(target);
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {

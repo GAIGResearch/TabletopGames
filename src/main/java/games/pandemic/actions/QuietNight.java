@@ -6,6 +6,8 @@ import core.components.Deck;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
+import java.util.Objects;
+
 import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
@@ -24,6 +26,11 @@ public class QuietNight implements IAction {
    }
 
     @Override
+    public Card getCard() {
+        return null;
+    }
+
+    @Override
     public boolean equals(Object other)
     {
         if (this == other) return true;
@@ -33,5 +40,10 @@ public class QuietNight implements IAction {
     @Override
     public String toString() {
         return "QuietNight";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(card);
     }
 }

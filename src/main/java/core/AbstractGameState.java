@@ -56,6 +56,7 @@ public abstract class AbstractGameState {
     public final List<IAction> getActions(boolean forceCompute) {
         if (forceCompute || availableActions == null || availableActions.size() == 0) {
             availableActions = computeAvailableActions();
+            numAvailableActions = availableActions.size();
         }
         return availableActions;
     }

@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -20,6 +21,11 @@ public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintab
         super.execute(gs);
         ((ExplodingKittenTurnOrder) gs.getTurnOrder()).registerAttackAction(attackTargetID);
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

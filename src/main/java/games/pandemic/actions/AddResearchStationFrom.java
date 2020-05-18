@@ -2,10 +2,13 @@ package games.pandemic.actions;
 
 import core.actions.IAction;
 import core.components.BoardNode;
+import core.components.Card;
 import core.content.PropertyBoolean;
 import core.AbstractGameState;
 import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
+
+import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
@@ -35,6 +38,11 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
         return success;
     }
 
+    @Override
+    public Card getCard() {
+        return null;
+    }
+
 
     @Override
     public boolean equals(Object other)
@@ -58,5 +66,10 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
 
     public String getFromCity() {
         return fromCity;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), fromCity);
     }
 }

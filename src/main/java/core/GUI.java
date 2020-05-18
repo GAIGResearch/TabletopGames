@@ -134,8 +134,6 @@ public abstract class GUI extends JFrame {
                     }
                 }
                 resetActionButtons();
-                setVisible(false);
-                action = null;
             });
         }
 

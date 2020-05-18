@@ -1,6 +1,7 @@
 package core.actions;
 
 import core.AbstractGameState;
+import core.components.Card;
 import core.observations.IPrintable;
 import core.components.Grid;
 
@@ -26,6 +27,11 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         return grid.setElement(x, y, value);
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     public Grid<T> getGrid() {

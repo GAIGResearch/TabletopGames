@@ -11,9 +11,7 @@ import core.observations.IObservation;
 import games.pandemic.actions.*;
 import utilities.Hash;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.*;
@@ -59,6 +57,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         for (int i = 0; i < getNPlayers(); i++) {
             Area playerArea = new Area(i);
             Deck<Card> playerHand = new Deck<>("Player Hand");
+            playerHand.setOwnerId(i);
             playerHand.setCapacity(capacity);
             playerArea.addComponent(playerHandHash, playerHand);
             playerArea.addComponent(playerCardHash, new Card());
@@ -113,7 +112,8 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public IObservation getObservation(int player) {
-        // TODO
+        // TODO copy all components based on what this player observes
+        // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them for RearrangeCardWithCards action
         return this;
     }
 
@@ -123,11 +123,11 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             gamePhase = GamePhase.Main;
         }
         if (gamePhase == GamePhase.DiscardReaction)
-                return getDiscardActions();
+            return getDiscardActions();
         else if (gamePhase == GamePhase.RPReaction)
-                return getRPactions();
+            return getRPactions();
         else if (gamePhase == GamePhase.EventReaction)
-                return getEventActions();
+            return getEventActions();
         else return getPlayerActions();
     }
 
@@ -145,16 +145,14 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
         // get player's hand, role card, role string, player location name and player location BoardNode
         Deck<Card> playerHand = ((Deck<Card>)getComponentActingPlayer(playerHandHash));
-        Card playerCard = ((Card) getComponentActingPlayer(playerCardHash));
-        String roleString = ((PropertyString) playerCard.getProperty(nameHash)).value;
+        String roleString = getPlayerRoleActingPlayer();
         PropertyString playerLocationName = (PropertyString) getComponentActingPlayer(playerCardHash)
                 .getProperty(playerLocationHash);
         BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
-
         int activePlayer = turnOrder.getCurrentPlayer(this);
 
         // Create a list for possible actions, including first move actions
-        ArrayList<IAction> actions = new ArrayList<>(getMoveActions(activePlayer, playerHand));
+        Set<IAction> actions = new HashSet<>(getMoveActions(activePlayer, playerHand));
 
         // Build research station, discard card corresponding to current player location to build one, if not already there.
         if (!((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value
@@ -188,24 +186,24 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(playersHash)).getValues();
         for (int i : players) {
             if (i != activePlayer) {
+                Deck<Card> otherDeck = (Deck<Card>) getComponent(playerHandHash, i);
+                String otherRoleString = getPlayerRole(i);
+
                 // Give card
-                for (Card card : playerHand.getCards()) {
+                for (int j = 0; j < playerHand.getSize(); j++) {
+                    Card card = playerHand.getCards().get(j);
                     // Researcher can give any card, others only the card that matches the city name
                     if (roleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new GiveCard(card, i));
+                        actions.add(new DrawCard(playerHand, otherDeck, j));
                     }
                 }
 
                 // Take card
-
-                Deck<Card>  otherDeck = (Deck<Card>) getComponent(playerHandHash, i);
-                Card otherPlayerCard = ((Card) getComponent(playerCardHash, i));
-                String otherRoleString = ((PropertyString) otherPlayerCard.getProperty(nameHash)).value;
                 // Can take any card from the researcher or the card that matches the city if the player is in that city
-                for (Card card : otherDeck.getCards()) {
-                    if (otherRoleString.equals("Researcher") ||
-                            (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new TakeCard(card, i));
+                for (int j = 0; j < otherDeck.getSize(); j++) {
+                    Card card = otherDeck.getCards().get(j);
+                    if (otherRoleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
+                        actions.add(new DrawCard(otherDeck, playerHand, j));
                     }
                 }
             }
@@ -237,10 +235,12 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         // Special role actions
         actions.addAll(getSpecialRoleActions(roleString, pp, playerHand, playerLocationName.value));
 
+        // Event actions
+        actions.addAll(getEventActions());
+        actions.remove(new DoNothing());  // Players can't just do nothing in main game phase
+
         // Done!
-        this.numAvailableActions = actions.size();
-        this.availableActions = actions;
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     /**
@@ -322,7 +322,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
      * @return - list of AddResearchStation* actions
      */
     private List<IAction> getResearchStationActions(String playerLocation, Card card) {
-        ArrayList<IAction> actions = new ArrayList<>();
+        Set<IAction> actions = new HashSet<>();
         Counter rStationCounter = (Counter) getComponent(researchStationHash);
 
         // Check if any research station tokens left
@@ -337,7 +337,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             if (card == null) actions.add(new AddResearchStation(playerLocation));
             else actions.add(new AddResearchStationWithCard(playerLocation, card));
         }
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     /**
@@ -347,37 +347,38 @@ public class PandemicGameState extends AbstractGameState implements IObservation
      * @return all movement actions
      */
     private List<IAction> getMoveActions(int playerId, Deck<Card> playerHand){
-        ArrayList<IAction> actions = new ArrayList<>();
+        Set<IAction> actions = new HashSet<>();
 
-        PropertyString playerLocationName = (PropertyString) getComponent(playerCardHash, playerId)
+        PropertyString playerLocationProperty = (PropertyString) getComponent(playerCardHash, playerId)
                 .getProperty(playerLocationHash);
-        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationName);
+        String playerLocationName = playerLocationProperty.value;
+        BoardNode playerLocationNode = world.getNodeByProperty(nameHash, playerLocationProperty);
+        HashSet<BoardNode> neighbours = playerLocationNode.getNeighbours();
 
-        // Drive / Ferry add core.actions for travelling immediate cities
-        for (BoardNode otherCity : playerLocationNode.getNeighbours()){
+        // Drive / Ferry add actions for travelling to immediate cities
+        for (BoardNode otherCity : neighbours){
             actions.add(new MovePlayer(playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
         }
 
-        // Direct Flight, discard city card and travel to that city
-        for (Card card: playerHand.getCards()){
-            //  check if card has country to determine if it is city card or not
-            if ((card.getProperty(countryHash)) != null){
-                actions.add(new MovePlayerWithCard(playerId, ((PropertyString)card.getProperty(nameHash)).value, card));
-            }
-        }
+        // Iterate over all the cities in the world
+        for (BoardNode bn: this.world.getBoardNodes()) {
+            String destination = ((PropertyString) bn.getProperty(nameHash)).value;
 
-        // Charter flight, discard card that matches your city and travel to any city
-        for (Card card: playerHand.getCards()){
-            // Get the city from the card
-            if (playerLocationName.equals(card.getProperty(nameHash))){
-                // Add all the cities
-                // Iterate over all the cities in the world
-                for (BoardNode bn: this.world.getBoardNodes()) {
-                    PropertyString destination = (PropertyString) bn.getProperty(nameHash);
-
-                    // Only add the ones that are different from the current location
-                    if (!destination.equals(playerLocationName)) {
-                        actions.add(new MovePlayerWithCard(playerId, destination.value, card));
+            if (!neighbours.contains(bn)) {  // Ignore neighbours, already covered in Drive/Ferry actions
+                for (Card card: playerHand.getCards()){
+                    //  Check if card has country to determine if it is city card or not
+                    if ((card.getProperty(countryHash)) != null){
+                        String cardCity = ((PropertyString)card.getProperty(nameHash)).value;
+                        if (playerLocationName.equals(cardCity)){
+                            // Charter flight, discard card that matches your city and travel to any city
+                            // Only add the ones that are different from the current location
+                            if (!destination.equals(playerLocationName)) {
+                                actions.add(new MovePlayerWithCard(playerId, destination, card));
+                            }
+                        } else {
+                            // Direct Flight, discard city card and travel to that city
+                            actions.add(new MovePlayerWithCard(playerId, cardCity, card));
+                        }
                     }
                 }
             }
@@ -390,23 +391,24 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 actions.add(new MovePlayer(playerId, station));
             }
         }
-        return actions;
+
+        return new ArrayList<>(actions);
     }
 
     private List<IAction> getDiscardActions() {
         Deck<Card> playerDeck = (Deck<Card>) getComponentActingPlayer(playerHandHash);
         Deck<Card> playerDiscardDeck = (Deck<Card>) getComponent(playerDeckDiscardHash);
 
-        ArrayList<IAction> acts = new ArrayList<>();  // Only discard card actions available
+        Set<IAction> acts = new HashSet<>();  // Only discard card actions available
         for (int i = 0; i < playerDeck.getSize(); i++) {
             acts.add(new DrawCard(playerDeck, playerDiscardDeck, i));  // adding card i from player deck to player discard deck
         }
-        return acts;
+        return new ArrayList<>(acts);
     }
 
     // Set removing infection discarded cards (or do nothing) as the only options
     private List<IAction> getRPactions() {
-        ArrayList<IAction> acts = new ArrayList<>();
+        Set<IAction> acts = new HashSet<>();
         acts.add(new DoNothing());
 
         Deck<Card> infectionDiscard = (Deck<Card>) getComponent(infectionDiscardHash);
@@ -422,7 +424,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 break;
             }
         }
-        return acts;
+        return new ArrayList<>(acts);
     }
 
     /**
@@ -432,7 +434,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     private List<IAction> getEventActions() {
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
-        List<IAction> actions = new ArrayList<>();
+        Set<IAction> actions = new HashSet<>();
         actions.add(new DoNothing());  // Can always do nothing
 
         Deck<Card> playerHand = ((Deck<Card>) getComponentActingPlayer(playerHandHash));
@@ -455,7 +457,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             }
         }
 
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     /**
@@ -465,7 +467,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
      * @return list of actions corresponding to the event card.
      */
     private List<IAction> actionsFromEventCard(Card card, PandemicParameters pp){
-        ArrayList<IAction> actions = new ArrayList<>();
+        Set<IAction> actions = new HashSet<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
         switch (cardString) {
@@ -506,7 +508,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             case "Forecast":
 //                System.out.println("Forecast");
 //            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
-                // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them
                 // generate all permutations
                 Deck<Card> infectionDeck = (Deck<Card>) getComponent(infectionHash);
                 int nInfectCards = infectionDeck.getSize();
@@ -523,7 +524,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 break;
         }
 
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     //Getters & setters
@@ -610,7 +611,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
         gs.world = this.world.copy();
         gs.numAvailableActions = numAvailableActions;
-        gs.availableActions = new ArrayList<>(availableActions); // TODO: Deep?
+        gs.availableActions = new ArrayList<>(availableActions); // Deep?
         gs.quietNight = quietNight;
         gs.nCardsDrawn = nCardsDrawn;
         gs.epidemic = epidemic;
