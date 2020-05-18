@@ -1,5 +1,6 @@
 package core;
 
+import core.actions.DoNothing;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
@@ -52,7 +53,7 @@ public abstract class Game {
 
             // either ask player which action to use or, in case no actions are available, report the updated observation
             int actionIdx = -1;
-            if (actions.size() > 0) {
+            if (actions.size() > 1) {
                 if (player instanceof HumanGUIPlayer) {
                     while (actionIdx == -1) {
                         actionIdx = getPlayerAction(gui, player, observation, actions);
@@ -62,6 +63,8 @@ public abstract class Game {
                 }
             } else {
                 player.registerUpdatedObservation(observation);
+                // Can only do 1 action, so do it.
+                if (actions.size() == 1) actionIdx = 0;
             }
 
             // Resolve actions and game rules for the turn

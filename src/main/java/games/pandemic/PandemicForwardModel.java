@@ -124,7 +124,6 @@ public class PandemicForwardModel extends ForwardModel {
         nextRule = lastRule.getNext();  // go back to parent, skip it and go to next rule
         if (nextRule == null) {
             // if still null, end of turn:
-            pgs.getTurnOrder().endPlayerTurn(pgs);
             nextRule = root;
             pgs.nextPlayer();
         }
