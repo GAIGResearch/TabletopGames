@@ -52,25 +52,16 @@ public abstract class Game {
 
             // either ask player which action to use or, in case no actions are available, report the updated observation
             int actionIdx = -1;
-            if (gui != null && player instanceof HumanGUIPlayer) {
-                if (actions.size() > 0) {
+            if (actions.size() > 0) {
+                if (player instanceof HumanGUIPlayer) {
                     while (actionIdx == -1) {
-                        actionIdx = player.getAction(observation, actions);
-
-                        gui.update(player, gameState);
-                        try {
-                            Thread.sleep(100);
-                        } catch (Exception e) {
-                            System.out.println("EXCEPTION " + e);
-                        }
+                        actionIdx = getPlayerAction(gui, player, observation, actions);
                     }
-                } else
-                    player.registerUpdatedObservation(observation);
+                } else {
+                    actionIdx = getPlayerAction(gui, player, observation, actions);
+                }
             } else {
-                if (actions.size() > 0)
-                    actionIdx = player.getAction(observation, actions);
-                else
-                    player.registerUpdatedObservation(observation);
+                player.registerUpdatedObservation(observation);
             }
 
             // Resolve actions and game rules for the turn
@@ -84,4 +75,19 @@ public abstract class Game {
 
     // Public methods
     public final AbstractGameState getGameState(){return gameState;}
+
+    private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<IAction> actions) {
+        int actionIdx = player.getAction(observation, actions);
+
+        if (gui != null) {
+            gui.update(player, gameState);
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION " + e);
+            }
+        }
+
+        return actionIdx;
+    }
 }

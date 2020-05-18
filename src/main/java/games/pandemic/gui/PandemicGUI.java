@@ -11,6 +11,7 @@ import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
+import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
 import players.ActionController;
 import players.HumanGUIPlayer;
@@ -45,7 +46,7 @@ public class PandemicGUI extends GUI {
     ArrayList<Integer> bufferHighlights;
 
     // Game state info
-    JLabel gamePhase;
+    JLabel gamePhase, gameTurnStep;
 
     public PandemicGUI(PandemicGameState gameState, ActionController ac) {
         super(ac, 721);
@@ -66,6 +67,7 @@ public class PandemicGUI extends GUI {
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
         gamePhase = new JLabel();
+        gameTurnStep = new JLabel();
         JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
@@ -185,6 +187,7 @@ public class PandemicGUI extends GUI {
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
         JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
+        gameInfo.add(gameTurnStep);
         gameInfo.add(gamePhase);
 
         return gameInfo;
@@ -192,6 +195,7 @@ public class PandemicGUI extends GUI {
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
+        gameTurnStep.setText("Turn step: " + ((PandemicTurnOrder)gameState.getTurnOrder()).getTurnStep());
         gamePhase.setText("Game phase: " + ((PandemicGameState)gameState).getGamePhase());
     }
 

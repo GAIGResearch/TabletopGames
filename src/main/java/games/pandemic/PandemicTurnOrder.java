@@ -15,9 +15,12 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         this.nStepsPerTurn = nActionsPerTurn;
     }
 
-    public void endPlayerTurnStep() {
+    public void endPlayerTurnStep(AbstractGameState gameState) {
         if (reactivePlayers.size() > 0) reactivePlayers.poll();
-        else turnStep++;
+        else {
+            turnStep++;
+            if (turnStep >= nStepsPerTurn) endPlayerTurn(gameState);
+        }
     }
 
     public int getTurnStep() {

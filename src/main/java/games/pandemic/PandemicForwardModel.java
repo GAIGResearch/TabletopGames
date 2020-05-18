@@ -84,7 +84,7 @@ public class PandemicForwardModel extends ForwardModel {
         playerActionInterrupt2.setNext(infectCities);
 //        infectCities.setNext(null);  // End of turn
 
-        // Player reactions at the end of turn, one for each player
+        // Player reactions for playing events at the end of turn, one for each player
         RuleNode forceAllPlayersEventReaction = new ForceAllEventReaction();
         infectCities.setNext(forceAllPlayersEventReaction);  // End of turn, event reactions coming next
         RuleNode[] eventActionInterrupt = new PlayerAction[nPlayers];
@@ -95,6 +95,7 @@ public class PandemicForwardModel extends ForwardModel {
             eventActionInterrupt[i].setNext(eventActionInterrupt[i+1]);
         }
         forceAllPlayersEventReaction.setNext(eventActionInterrupt[0]);
+        eventActionInterrupt[nPlayers-1].setNext(null);  // End of turn
 
         // Next rule to execute is root
         nextRule = root;
