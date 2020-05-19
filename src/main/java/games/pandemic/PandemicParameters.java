@@ -26,7 +26,6 @@ public class PandemicParameters extends GameParameters {
     int n_cards_for_cure_reduced = 4;
     int n_forecast_cards = 6;  // How many cards should be viewed and rearranged for the Forecast event card
 
-    int n_players = 4;
     int max_cards_per_player = 7;  // Max cards in hand per player
     int n_cards_draw = 2;  // Number of cards players draw each turn
 
@@ -59,7 +58,6 @@ public class PandemicParameters extends GameParameters {
         this.n_initial_disease_cubes = pandemicParameters.n_initial_disease_cubes;
         this.n_cards_for_cure = pandemicParameters.n_cards_for_cure;
         this.n_cards_for_cure_reduced = pandemicParameters.n_cards_for_cure_reduced;
-        this.n_players = pandemicParameters.n_players;
         this.max_cards_per_player = pandemicParameters.max_cards_per_player;  // Max cards in hand per player
         this.n_cards_draw = pandemicParameters.n_cards_draw;  // Number of cards players draw each turn
         this.n_actions_per_turn = pandemicParameters.n_actions_per_turn;
@@ -126,10 +124,6 @@ public class PandemicParameters extends GameParameters {
 
     public int getN_forecast_cards() {
         return n_forecast_cards;
-    }
-
-    public int getN_players() {
-        return n_players;
     }
 
     public int getMax_cards_per_player() {

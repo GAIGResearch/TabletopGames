@@ -47,6 +47,9 @@ public class Board extends Component implements IBoard {
 
         nameID = (String) board.get("id");
         properties.put(Hash.GetInstance().hash("id"), new PropertyString(nameID));
+        if (board.get("img") != null) {
+            properties.put(Hash.GetInstance().hash("img"), new PropertyString((String) board.get("img")));
+        }
 
         JSONArray nodeList = (JSONArray) board.get("nodes");
         for(Object o : nodeList)

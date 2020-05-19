@@ -49,6 +49,8 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     }
 
     public void setComponents() {
+        PandemicParameters pp = (PandemicParameters)gameParameters;
+
         tempDeck = new Deck<>("Temp Deck");
         areas = new HashMap<>();
 
@@ -73,11 +75,16 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         world = _data.findBoard("cities"); //world.getNode("name","Valencia");
         gameArea.addComponent(pandemicBoardHash, world);
 
-        // Set up the counters
+        // Set up the counters and sync with game parameters
         Counter infection_rate = _data.findCounter("Infection Rate");
+        infection_rate.setMaximum(pp.infection_rate.length);
         Counter outbreaks = _data.findCounter("Outbreaks");
+        outbreaks.setMaximum(pp.lose_max_outbreak);
+        Counter researchStations = _data.findCounter("Research Stations");
+        researchStations.setMaximum(pp.n_research_stations);
         gameArea.addComponent(infectionRateHash, infection_rate);
         gameArea.addComponent(outbreaksHash, outbreaks);
+        gameArea.addComponent(PandemicConstants.researchStationHash, researchStations);
 
         for (String color : colors) {
             int hash = Hash.GetInstance().hash("Disease " + color);
@@ -87,6 +94,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
             hash = Hash.GetInstance().hash("Disease Cube " + color);
             Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
+            diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
             gameArea.addComponent(hash, diseaseCubeCounter);
         }
 
@@ -101,7 +109,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
         gameArea.addComponent(PandemicConstants.infectionHash, _data.findDeck("Infections"));
         gameArea.addComponent(PandemicConstants.playerRolesHash, _data.findDeck("Player Roles"));
-        gameArea.addComponent(PandemicConstants.researchStationHash, _data.findCounter("Research Stations"));
     }
 
     void nextPlayer() {
@@ -276,13 +283,13 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             // Dispatcher special actions
             case "Dispatcher":
                 // Move any pawn, if its owner agrees, to any city containing another pawn.
-                String[] locations = new String[pp.n_players];
-                for (int i = 0; i < pp.n_players; i++) {
+                String[] locations = new String[turnOrder.nPlayers()];
+                for (int i = 0; i < turnOrder.nPlayers(); i++) {
                     locations[i] = ((PropertyString) getComponent(playerCardHash, i)
                             .getProperty(playerLocationHash)).value;
                 }
-                for (int j = 0; j < pp.n_players; j++) {
-                    for (int i = 0; i < pp.n_players; i++) {
+                for (int j = 0; j < turnOrder.nPlayers(); j++) {
+                    for (int i = 0; i < turnOrder.nPlayers(); i++) {
                         if (i != j) {
                             actions.add(new MovePlayer(i, locations[j]));
                         }
@@ -290,7 +297,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 }
 
                 // Move another player’s pawn, if its owner agrees, as if it were his own.
-                for (int i = 0; i < pp.n_players; i++) {
+                for (int i = 0; i < turnOrder.nPlayers(); i++) {
                     if (i != playerIdx) {
                         actions.addAll(getMoveActions(i, playerHand));
                     }
