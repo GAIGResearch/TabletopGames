@@ -1,6 +1,7 @@
 package utilities;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public abstract class Utils {
 
@@ -26,7 +27,21 @@ public abstract class Utils {
         CARD,
         COUNTER,
         DICE,
-        TOKEN;
+        TOKEN
+    }
+
+    public enum GameResult {
+        GAME_WIN(2),
+        GAME_DRAW(1),
+        GAME_ONGOING(0),
+        GAME_LOSE(-1),
+        GAME_END(3);
+
+        public final int value;
+
+        GameResult(int value) {
+            this.value = value;
+        }
     }
 
     public static int indexOf (String[] array, String object) {
@@ -36,5 +51,35 @@ public abstract class Utils {
             }
         }
         return -1;
+    }
+    public static int indexOf (int[] array, int object) {
+        for (int i = 0; i < array.length; i++) {
+            if (object == array[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static void generatePermutations(int n, int[] elements, ArrayList<int[]> all) {
+        if (n == 1) {
+            all.add(elements.clone());
+        } else {
+            for(int i = 0; i < n-1; i++) {
+                generatePermutations(n - 1, elements, all);
+                if(n % 2 == 0) {
+                    swap(elements, i, n-1);
+                } else {
+                    swap(elements, 0, n-1);
+                }
+            }
+            generatePermutations(n - 1, elements, all);
+        }
+    }
+
+    private static void swap(int[] input, int a, int b) {
+        int tmp = input[a];
+        input[a] = input[b];
+        input[b] = tmp;
     }
 }

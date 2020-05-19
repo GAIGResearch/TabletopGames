@@ -1,10 +1,8 @@
 package core;
 
-import actions.Action;
+import core.actions.IAction;
 
-import java.util.Random;
-
-public interface ForwardModel {
-    void setup(GameState firstState);
-    void next(GameState currentState, Action action);
+public abstract class ForwardModel {
+    public abstract void setup(AbstractGameState firstState);
+    public abstract void next(AbstractGameState currentState, IAction action);
 }
