@@ -29,8 +29,8 @@ public class PandemicBoardView extends JComponent {
     PandemicGameState gameState;
     double scale = 0.75;
 
-    private int cardWidth = (int)(scale * 100);
-    private int cardHeight = (int)(scale * 50);
+    private int cardWidth = (int)(scale * PandemicCardView.cardWidth);
+    private int cardHeight = (int)(scale * PandemicCardView.cardHeight);
     int nodeSize = (int)(scale * 20);
     int researchStationSize = (int)(scale * 10);
     int playerPawnSize = (int)(scale * 10);
@@ -71,7 +71,7 @@ public class PandemicBoardView extends JComponent {
     public PandemicBoardView(AbstractGameState gs) {
         gameState = (PandemicGameState) gs;
         this.board = ((PandemicGameState) gs).getData().findBoard("Cities");
-        String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath();
+        String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
 
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString)board.getProperty(imgHash)).value);
         // infection rate marker
@@ -277,7 +277,7 @@ public class PandemicBoardView extends JComponent {
             int x = infectionMarkerPositionStart.getX() + infectionMarkerSize*i;
             Vector2D pos = new Vector2D(x, infectionMarkerPositionStart.getY());
             drawCenteredImage(g, infectionRateCounterBG, pos.getX(), pos.getY());
-            g.drawString(""+infectionArray[i], pos.getX(), pos.getY() + infectionMarkerSize*2/3 + (int)(4*scale));
+            g.drawString(""+infectionArray[i], pos.getX() - infectionMarkerSize/4, pos.getY() + infectionMarkerSize*2/3 + (int)(4*scale));
         }
         g.setFont(f);
 
@@ -287,7 +287,7 @@ public class PandemicBoardView extends JComponent {
 
         g.setFont(labelFont);
         g.drawString("Infection Rate", infectionMarkerPositionStart.getX() - infectionMarkerSize/2,
-                infectionMarkerPositionStart.getY() - infectionMarkerSize/2);
+                infectionMarkerPositionStart.getY() - infectionMarkerSize*2/3);
 
         // Draw outbreak marker
         Counter outbreakCounter = (Counter) gameState.getComponent(PandemicConstants.outbreaksHash);
@@ -300,7 +300,7 @@ public class PandemicBoardView extends JComponent {
             if (i == outbreakCounter.getMaximum()) {
                 drawCenteredImage(g, outbreakImgLast, pos.getX(), pos.getY());
             } else {
-                g.drawString("" + i, pos.getX() - fontSize/4, pos.getY() + fontSize/2);
+                g.drawString("" + i, pos.getX() - outbreakMarkerSize/5, pos.getY());
             }
         }
         g.setFont(f);
@@ -310,7 +310,7 @@ public class PandemicBoardView extends JComponent {
 
         g.setFont(labelFont);
         g.drawString("Outbreaks", outbreakMarkerPositionStart.getX() - outbreakMarkerGap/4,
-                outbreakMarkerPositionStart.getY() - outbreakMarkerSize/2);
+                outbreakMarkerPositionStart.getY() - outbreakMarkerSize*2/3);
 
         // Decks
         Deck<Card> playerDiscardDeck = (Deck<Card>) gameState.getComponent(PandemicConstants.playerDeckDiscardHash);
@@ -375,9 +375,7 @@ public class PandemicBoardView extends JComponent {
     private void drawCenteredImage(Graphics2D g, Image img, int x, int y) {
         int w = img.getWidth(null);
         int h = img.getHeight(null);
-        int width = (int) (w*scale);
-        int height = (int) (h*scale);
-        g.drawImage(img, x-width/2, y-height/2, width, height, null);
+        g.drawImage(img, x-w/2, y-h/2, (int) (w*scale), (int) (h*scale), null);
     }
 
     private void drawCounter(Graphics2D g, int value, Color color, int idx) {
