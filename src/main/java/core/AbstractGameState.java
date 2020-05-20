@@ -37,6 +37,8 @@ public abstract class AbstractGameState {
         this.gameStatus = Utils.GameResult.GAME_ONGOING;
         this.playerResults = new Utils.GameResult[nPlayers];
         Arrays.fill(this.playerResults, Utils.GameResult.GAME_ONGOING);
+
+        this.gamePhase = DefaultGamePhase.Main;
     }
 
     // Setters
