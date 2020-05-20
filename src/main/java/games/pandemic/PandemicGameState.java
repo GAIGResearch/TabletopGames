@@ -1,5 +1,7 @@
 package games.pandemic;
 
+import core.gamephase.GamePhase;
+import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
 import core.actions.*;
 import core.components.*;
@@ -21,11 +23,9 @@ import static utilities.Utils.indexOf;
 
 public class PandemicGameState extends AbstractGameState implements IObservation {
 
-    public enum GamePhase {
-        Main,
+    public enum PandemicGamePhase implements GamePhase {
         DiscardReaction,
-        RPReaction,
-        EventReaction
+        RPReaction
     }
 
     private HashMap<Integer, Area> areas;
@@ -35,7 +35,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public Board world;
     private boolean quietNight;
     private boolean epidemic;
-    private GamePhase gamePhase;
     private int nCardsDrawn = 0;
 
     private ArrayList<String> researchStationLocations;
@@ -43,7 +42,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public PandemicGameState(GameParameters pp, ForwardModel model, int nPlayers) {
         super(pp, model, nPlayers, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
         researchStationLocations = new ArrayList<>();
-        gamePhase = GamePhase.Main;
+        gamePhase = DefaultGamePhase.Main;
         _data = new PandemicData();
         _data.load(((PandemicParameters)gameParameters).getDataPath());
     }
@@ -114,7 +113,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     void nextPlayer() {
         turnOrder.endPlayerTurn(this);
         nCardsDrawn = 0;
-        gamePhase = GamePhase.Main;
+        gamePhase = DefaultGamePhase.Main;
     }
 
     @Override
@@ -127,13 +126,13 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     @Override
     public List<IAction> computeAvailableActions() {
         if (!((PandemicTurnOrder)turnOrder).reactionsRemaining()) {
-            gamePhase = GamePhase.Main;
+            gamePhase = DefaultGamePhase.Main;
         }
-        if (gamePhase == GamePhase.DiscardReaction)
+        if (gamePhase == PandemicGamePhase.DiscardReaction)
             return getDiscardActions();
-        else if (gamePhase == GamePhase.RPReaction)
+        else if (gamePhase == PandemicGamePhase.RPReaction)
             return getRPactions();
-        else if (gamePhase == GamePhase.EventReaction)
+        else if (gamePhase == DefaultGamePhase.PlayerReaction)
             return getEventActions();
         else return getPlayerActions();
     }
@@ -582,14 +581,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     }
     public Deck<Card> getTempDeck() {
         return tempDeck;
-    }
-
-    public void setGamePhase(GamePhase gamePhase) {
-        this.gamePhase = gamePhase;
-    }
-
-    public GamePhase getGamePhase() {
-        return gamePhase;
     }
 
     /*

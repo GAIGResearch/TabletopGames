@@ -1,5 +1,7 @@
 package games.explodingkittens;
 
+import core.gamephase.GamePhase;
+import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
 import core.actions.IAction;
 import core.components.Deck;
@@ -18,19 +20,17 @@ import java.util.List;
 
 public class ExplodingKittensGameState extends AbstractGameState {
 
-    public enum GamePhase {
-        PlayerMove,
-        NopePhase,
-        DefusePhase,
-        FavorPhase,
-        SeeTheFuturePhase
+    public enum ExplodingKittensGamePhase implements GamePhase {
+        Nope,
+        Defuse,
+        Favor,
+        SeeTheFuture
     }
 
     private List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
     private PartialObservableDeck<ExplodingKittenCard> drawPile;
     private Deck<ExplodingKittenCard> discardPile;
     private int playerGettingAFavor = -1;
-    private GamePhase gamePhase = GamePhase.PlayerMove;
 
     public static boolean PARTIAL_OBSERVABLE = false;
 
@@ -42,20 +42,13 @@ public class ExplodingKittensGameState extends AbstractGameState {
         this.playerGettingAFavor = playerGettingAFavor;
     }
 
-    public GamePhase getGamePhase() {
-        return gamePhase;
-    }
-
-    public void setGamePhase(GamePhase gamePhase) {
-        this.gamePhase = gamePhase;
-    }
-
     public Deck<ExplodingKittenCard> getDiscardPile() {
         return discardPile;
     }
 
     public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new ExplodingKittenTurnOrder(nPlayers));
+        gamePhase = DefaultGamePhase.Main;
     }
 
     public void killPlayer(int playerID){
@@ -177,7 +170,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
         ArrayList<IAction> actions = new ArrayList<>();
         Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
 
-        // todo: only add unique core.actions
+        // todo: only add unique actions
         for (ExplodingKittenCard card : playerDeck.getCards()) {
             switch (card.cardType) {
                 case DEFUSE:
@@ -253,28 +246,21 @@ public class ExplodingKittensGameState extends AbstractGameState {
     public List<IAction> computeAvailableActions() {
 
         ArrayList<IAction> actions;
-        // todo the core.actions per player do not change a lot in between two turns
+        // todo the actions per player do not change a lot in between two turns
         // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
         int player = getTurnOrder().getCurrentPlayer(this);
-        switch (gamePhase){
-            case PlayerMove:
-                actions = playerActions(player);
-                break;
-            case DefusePhase:
-                actions = defuseActions(player);
-                break;
-            case NopePhase:
-                actions = nopeActions(player);
-                break;
-            case FavorPhase:
-                actions = favorActions(player);
-                break;
-            case SeeTheFuturePhase:
-                actions = seeTheFutureActions(player);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
+        if (DefaultGamePhase.Main.equals(gamePhase)) {
+            actions = playerActions(player);
+        } else if (ExplodingKittensGamePhase.Defuse.equals(gamePhase)) {
+            actions = defuseActions(player);
+        } else if (ExplodingKittensGamePhase.Nope.equals(gamePhase)) {
+            actions = nopeActions(player);
+        } else if (ExplodingKittensGamePhase.Favor.equals(gamePhase)) {
+            actions = favorActions(player);
+        } else if (ExplodingKittensGamePhase.SeeTheFuture.equals(gamePhase)) {
+            actions = seeTheFutureActions(player);
+        } else {
+            actions = new ArrayList<>();
         }
 
         return actions;

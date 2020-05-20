@@ -1,6 +1,8 @@
 package games.loveletter;
 
 import core.AbstractGameState;
+import core.gamephase.GamePhase;
+import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
 import core.actions.IAction;
 import core.components.Deck;
@@ -15,12 +17,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-
 public class LoveLetterGameState extends AbstractGameState {
 
-    public enum GamePhase {
-        DrawPhase,
-        PlayerMove
+    public enum LoveLetterGamePhase implements GamePhase {
+        Draw
     }
 
     private List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
@@ -28,21 +28,12 @@ public class LoveLetterGameState extends AbstractGameState {
     private PartialObservableDeck<LoveLetterCard> drawPile;
     private PartialObservableDeck<LoveLetterCard> reserveCards;
     private boolean[] effectProtection;
-    private GamePhase gamePhase = GamePhase.DrawPhase;
 
     public static boolean PARTIAL_OBSERVABLE = false;
 
-    public GamePhase getGamePhase() {
-        return gamePhase;
-    }
-
-    public void setGamePhase(GamePhase gamePhase) {
-        this.gamePhase = gamePhase;
-    }
-
     public LoveLetterGameState(LoveLetterParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new LoveLetterTurnOrder(nPlayers));
-        setComponents(gameParameters);
+        gamePhase = LoveLetterGamePhase.Draw;
     }
 
     public void killPlayer(int playerID){
@@ -270,16 +261,12 @@ public class LoveLetterGameState extends AbstractGameState {
 
         ArrayList<IAction> actions;
         int player = getTurnOrder().getCurrentPlayer(this);
-        switch (gamePhase){
-            case PlayerMove:
-                actions = playerActions(player);
-                break;
-            case DrawPhase:
-                actions = drawAction(player);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
+        if (gamePhase.equals(DefaultGamePhase.Main)) {
+            actions = playerActions(player);
+        } else if (gamePhase.equals(LoveLetterGamePhase.Draw)) {
+            actions = drawAction(player);
+        } else {
+            actions = new ArrayList<>();
         }
 
         return actions;

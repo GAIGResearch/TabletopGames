@@ -2,6 +2,7 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.ForwardModel;
+import core.gamephase.GamePhase;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
@@ -19,7 +20,7 @@ import java.util.List;
 
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
-    public enum GamePhase {
+    public enum ColtExpressGamePhase implements GamePhase {
         DrawCards,
         PlanActions,
         ExecuteActions,
@@ -33,21 +34,11 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
     private Train train;
 
-    private GamePhase gamePhase = GamePhase.DrawCards;
-
     public static boolean PARTIAL_OBSERVABLE = false;
-
-    public GamePhase getGamePhase() {
-        return gamePhase;
-    }
-
-    public void setGamePhase(GamePhase gamePhase) {
-        this.gamePhase = gamePhase;
-    }
 
     public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new ColtExpressTurnOrder(nPlayers));
-        setComponents(gameParameters);
+        gamePhase = ColtExpressGamePhase.DrawCards;
     }
 
     public void setComponents(ColtExpressParameters gameParameters) {
@@ -112,21 +103,18 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
         ArrayList<IAction> actions;
         int player = getTurnOrder().getCurrentPlayer(this);
-        switch (gamePhase){
-            case DraftCharacter:
-                System.out.println("character drafting is not implemented yet");
-            case DrawCards:
-                actions = drawAction(player);
-                break;
-            case PlanActions:
-                actions = schemingActions(player);
-                break;
-            case ExecuteActions:
-                actions = stealingActions(player);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
+        if (ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
+            System.out.println("character drafting is not implemented yet");
+
+            actions = drawAction(player);
+        } else if (ColtExpressGamePhase.DrawCards.equals(gamePhase)) {
+            actions = drawAction(player);
+        } else if (ColtExpressGamePhase.PlanActions.equals(gamePhase)) {
+            actions = schemingActions(player);
+        } else if (ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
+            actions = stealingActions(player);
+        } else {
+            actions = new ArrayList<>();
         }
 
         return actions;

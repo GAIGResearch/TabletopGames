@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.List;
 
 import static games.pandemic.PandemicConstants.*;
+import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
 import static utilities.CoreConstants.nameHash;
@@ -48,7 +49,7 @@ public class PandemicGUI extends GUI {
     ArrayList<Integer> bufferHighlights;
 
     // Game state info
-    JLabel gamePhase, gameTurnStep;
+    JLabel gameTurnStep;
 
     public PandemicGUI(PandemicGameState gameState, ActionController ac) {
         super(ac, 721);
@@ -68,7 +69,6 @@ public class PandemicGUI extends GUI {
         highlights[1] = boardView.getHighlights().keySet();
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
-        gamePhase = new JLabel();
         gameTurnStep = new JLabel();
         JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
         JPanel playerAreas = createPlayerAreas();
@@ -201,7 +201,6 @@ public class PandemicGUI extends GUI {
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
         JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
         gameInfo.add(gameTurnStep);
-        gameInfo.add(gamePhase);
 
         return gameInfo;
     }
@@ -209,7 +208,6 @@ public class PandemicGUI extends GUI {
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
         gameTurnStep.setText("Turn step: " + ((PandemicTurnOrder)gameState.getTurnOrder()).getTurnStep());
-        gamePhase.setText("Game phase: " + ((PandemicGameState)gameState).getGamePhase());
     }
 
     private JPanel createCounterArea() {
@@ -448,7 +446,7 @@ public class PandemicGUI extends GUI {
                     }
                 }
             } else if (action instanceof DrawCard) {
-                if (this.gameState.getGamePhase() == PandemicGameState.GamePhase.DiscardReaction) {  // Discarding
+                if (this.gameState.getGamePhase() == DiscardReaction) {  // Discarding
                     int idx = ((DrawCard) action).getIndex();
                     if (handCardHighlights[id].contains(idx)) {
                         Card c = playerHands[id].get(idx).getCard();

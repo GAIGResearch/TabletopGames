@@ -9,7 +9,7 @@ import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.DefusePhase;
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse;
 
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 
@@ -41,7 +41,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 }
             }
             if (defuseCard != null){
-                ((ExplodingKittensGameState) gs).setGamePhase(DefusePhase);
+                gs.setGamePhase(Defuse);
                 deckTo.remove(defuseCard);
                 deckTo.add(c);
             } else {

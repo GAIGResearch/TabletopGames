@@ -7,6 +7,7 @@ import core.components.Deck;
 import core.content.PropertyString;
 import games.pandemic.PandemicGameState;
 
+import static games.pandemic.PandemicGameState.PandemicGamePhase.RPReaction;
 import static utilities.CoreConstants.nameHash;
 import static utilities.CoreConstants.playerHandHash;
 
@@ -25,7 +26,7 @@ public class ForceRPReaction extends RuleNode {
                 Card card = ph.getCards().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     ((PandemicTurnOrder)pgs.getTurnOrder()).addReactivePlayer(i);
-                    pgs.setGamePhase(PandemicGameState.GamePhase.RPReaction);
+                    pgs.setGamePhase(RPReaction);
                     return false;
                 }
             }
