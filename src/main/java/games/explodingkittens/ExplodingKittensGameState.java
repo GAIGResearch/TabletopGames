@@ -48,7 +48,6 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, nPlayers, new ExplodingKittenTurnOrder(nPlayers));
-        gamePhase = DefaultGamePhase.Main;
     }
 
     public void killPlayer(int playerID){

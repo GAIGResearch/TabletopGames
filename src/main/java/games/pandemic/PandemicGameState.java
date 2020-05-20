@@ -42,7 +42,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public PandemicGameState(GameParameters pp, ForwardModel model, int nPlayers) {
         super(pp, model, nPlayers, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
         researchStationLocations = new ArrayList<>();
-        gamePhase = DefaultGamePhase.Main;
         _data = new PandemicData();
         _data.load(((PandemicParameters)gameParameters).getDataPath());
     }
