@@ -61,7 +61,7 @@ public class PlayerAction extends RuleNode {
 
         // Check if this was an event action. These actions are always played with the event card.
         Card eventCard = action.getCard();
-        if (eventCard == null || eventCard.getProperty(countryHash) != null || pto.reactionsRemaining()) {
+        if (eventCard == null || eventCard.getProperty(countryHash) != null || pto.reactionsFinished()) {
             // Notify turn step only if an event card was not played, or if this was a reaction.
             // Event cards are free.
             pto.endPlayerTurnStep();

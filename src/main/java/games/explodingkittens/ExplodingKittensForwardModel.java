@@ -42,7 +42,7 @@ public class ExplodingKittensForwardModel extends ForwardModel {
             } else {
                 ekTurnOrder.endPlayerTurnStep(gameState);
 
-                if (!ekTurnOrder.reactionsRemaining()){
+                if (ekTurnOrder.reactionsFinished()){
                     // apply stack
                     if (actionStack.size()%2 == 0){
                         while (actionStack.size() > 1)
