@@ -1,42 +1,59 @@
 package players;
 
-import actions.Action;
-import core.AIPlayer;
-import core.GameState;
+import core.ForwardModel;
+import core.actions.IAction;
+import core.AbstractPlayer;
+import core.AbstractGameState;
+import core.observations.IObservation;
+import games.pandemic.PandemicGameState;
 import players.heuristics.PandemicHeuristic;
 import players.heuristics.StateHeuristic;
 
 import java.util.List;
 import java.util.Random;
 
-public class OSLA implements AIPlayer {
+public class OSLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
     private StateHeuristic stateHeuristic;
+    private ForwardModel fm;
     public double epsilon = 1e-6;
 
-    public OSLA(){
+    public OSLA(ForwardModel fm){
+        this.fm = fm;
         this.random = new Random();
     }
 
-    public OSLA(Random random)
+    public OSLA(ForwardModel fm, Random random)
     {
+        this.fm = fm;
         this.random = random;
     }
 
     @Override
-    public Action getAction(GameState gameState) {
-        List<Action> actions = gameState.possibleActions();
+    public void initializePlayer(IObservation observation) {
 
-        stateHeuristic = new PandemicHeuristic(gameState);
+    }
+
+    @Override
+    public void finalizePlayer(IObservation observation) {
+
+    }
+
+    @Override
+    public int getAction(IObservation observation, List<IAction> actions) {
+        stateHeuristic = new PandemicHeuristic((PandemicGameState)observation);
+        PandemicGameState gs = (PandemicGameState)observation;
 
         double maxQ = Double.NEGATIVE_INFINITY;
-        Action bestAction = null;
+        IAction bestAction = null;
 
-        for (Action action : actions) {
-            GameState gsCopy = gameState.copy();
+        for (IAction action : actions) {
+            AbstractGameState gsCopy = gs; // todo gs.copy()
 
-            gsCopy.next(action);
+            fm.next((AbstractGameState)observation, action);
+
+//            gsCopy.next(action);
             double valState = stateHeuristic.evaluateState(gsCopy);
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
@@ -48,7 +65,12 @@ public class OSLA implements AIPlayer {
 
         }
 
-        return bestAction;
+        return actions.indexOf(bestAction);
+    }
+
+    @Override
+    public void registerUpdatedObservation(IObservation observation) {
+
     }
 
     public static double noise(double input, double epsilon, double random)

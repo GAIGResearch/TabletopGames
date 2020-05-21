@@ -1,8 +1,8 @@
 
 package players.heuristics;
 
-import core.GameState;
+import core.AbstractGameState;
 
 public abstract class StateHeuristic {
-    public abstract double evaluateState(GameState gs);
+    public abstract double evaluateState(AbstractGameState gs);
 }

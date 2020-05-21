@@ -1,31 +1,35 @@
 package players.heuristics;
-import components.Deck;
-import core.GameState;
-import pandemic.Constants;
+import core.AbstractGameState;
+import core.components.Deck;
+import games.pandemic.PandemicConstants;
+import games.pandemic.PandemicData;
+import games.pandemic.PandemicGameState;
+import utilities.Utils;
 
 public class PandemicHeuristic extends StateHeuristic {
     private BoardStats rootBoardStats;
 
-    public PandemicHeuristic(GameState root) {
-        rootBoardStats = new BoardStats(root);
+    public PandemicHeuristic(AbstractGameState root) {
+        rootBoardStats = new BoardStats((PandemicGameState)root);
     }
 
     @Override
-    public double evaluateState(GameState gs) {
-        int gamestatus = gs.getGameStatus();
+    public double evaluateState(AbstractGameState gs) {
+        Utils.GameResult gamestatus = gs.getGameStatus();
 
         // Compute a score relative to the root's state.
-        BoardStats lastBoardState = new BoardStats(gs);
+        BoardStats lastBoardState = new BoardStats((PandemicGameState)gs);
         double rawScore = rootBoardStats.score(lastBoardState);
 
-        if(gamestatus == Constants.GAME_LOSE)
+        if(gamestatus == Utils.GameResult.GAME_LOSE)
             rawScore = -1;
 
-        if(gamestatus == Constants.GAME_WIN)
+        if(gamestatus == Utils.GameResult.GAME_WIN)
             rawScore = 1;
 
         return rawScore;
     }
+
 
     public static class BoardStats
     {
@@ -43,21 +47,22 @@ public class PandemicHeuristic extends StateHeuristic {
         double FACTOR_OUTBREAKS = -0.2;
         double FACTOR_RS = 0.2;
 
-        BoardStats(GameState gs) {
+        BoardStats(PandemicGameState gs) {
+            PandemicData data = gs.getData();
             // iterate over the game state and get the value for the variables
 //            int counterValue = gs.findCounter("Disease counter").getValue();
-            nOutbreaks = gs.findCounter("Outbreaks").getValue();
-            nCardsInPile = gs.findDeck("Player Deck").getCards().size();
-            nCardsInHand = ((Deck)gs.getAreas().get(gs.getActingPlayer()).getComponent(Constants.playerHandHash)).size();
+            nOutbreaks = data.findCounter("Outbreaks").getValue();
+            nCardsInPile = data.findDeck("Player Deck").getCards().size();
+            nCardsInHand = ((Deck)gs.getComponent(PandemicConstants.playerDeckHash)).getSize();
 
             // get disease cubes
             for (int i = 0; i < 4; i++){
-                nDiseaseCubes += gs.findCounter("Disease cube " + Constants.colors[i]).getValue();
-                if (gs.findCounter("Disease " + Constants.colors[i]).getValue() > 0)
+                nDiseaseCubes += data.findCounter("Disease cube " + PandemicConstants.colors[i]).getValue();
+                if (data.findCounter("Disease " + PandemicConstants.colors[i]).getValue() > 0)
                     nCuresDiscovered += 1;
             }
 
-            nResearchStations = gs.findCounter("Research Stations").getValue();
+            nResearchStations = data.findCounter("Research Stations").getValue();
 
 
         }

@@ -1,46 +1,55 @@
 package players;
 
-import actions.Action;
-import core.AIPlayer;
-import core.GameState;
-import pandemic.Constants;
+import core.ForwardModel;
+import core.actions.IAction;
+import core.AbstractPlayer;
+import core.AbstractGameState;
+import core.observations.IObservation;
+import games.pandemic.PandemicConstants;
+import games.pandemic.PandemicGameState;
 import players.heuristics.PandemicHeuristic;
 import players.heuristics.StateHeuristic;
 import utilities.ElapsedCpuTimer;
+import utilities.Utils;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 /* One Turn Look Ahead (4 actions)*/
-public class OTLA implements AIPlayer {
+public class OTLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
     private StateHeuristic stateHeuristic;
+    private ForwardModel fm;
     public double epsilon = 1e-6;
     public boolean rollN = true;
     public final static int time_to_act = 100; // in milliseconds
 
-    public OTLA(){
+    public OTLA(ForwardModel fm){
+        this.fm = fm;
         this.random = new Random();
     }
 
-    public OTLA(Random random)
+    public OTLA(ForwardModel fm, Random random)
     {
+        this.fm = fm;
         this.random = random;
     }
 
     @Override
-    public Action getAction(GameState gameState) {
+    public int getAction(IObservation observation, List<IAction> actions) {
         // todo execute n actions and return the first action only
-        List<Action> actions = gameState.possibleActions();
+        PandemicGameState gs = (PandemicGameState)observation;
 
-        stateHeuristic = new PandemicHeuristic(gameState);
+        stateHeuristic = new PandemicHeuristic(gs);
 
         double maxQ = Double.NEGATIVE_INFINITY;
-        Action bestAction = null;
+        IAction bestAction = null;
 
-        GameState gsCopy = gameState.copy();
+//        GameState gsCopy = gameState.copy(); // todo
+        PandemicGameState gsCopy = gs;
+
 
         ElapsedCpuTimer ect = new ElapsedCpuTimer();
         ect.setMaxTimeMillis(time_to_act);
@@ -53,6 +62,7 @@ public class OTLA implements AIPlayer {
         boolean stop = false;
 
         while (!stop) {
+            // todo this part requires generalization and avoid the usage of pandemic specific things
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
             if (rollN) {
@@ -60,10 +70,10 @@ public class OTLA implements AIPlayer {
                 // shuffle actions to avoid selecting the same actions twice
                 Collections.shuffle(actions);
                 int i = 0;
-                while (gameState.getActivePlayer() == gameState.getActingPlayer() || gsCopy.getGameStatus() != Constants.GAME_ONGOING) {
+                while (gs.getTurnOrder().getCurrentPlayer(gs) == this.getPlayerID() || gsCopy.getGameStatus() !=  Utils.GameResult.GAME_ONGOING) {
 //                    System.out.println("Active player = " + gameState.getActingPlayer() + " and acting player = "+ gameState.getActingPlayer());
                     // todo numbers are too large here
-                    gsCopy.next(actions.get(i%actions.size()));
+                    fm.next(gsCopy, actions.get(i%actions.size()));
                     System.out.println(i);
                     i++;
                 }
@@ -88,12 +98,12 @@ public class OTLA implements AIPlayer {
             }
         }
 
-        return bestAction;
+        return actions.indexOf(bestAction);
     }
 
-    public void rollRnd(GameState gs, Action[] actions){
-        for (Action a: actions){
-            gs.next(a);
+    public void rollRnd(AbstractGameState gs, IAction[] actions){
+        for (IAction a: actions){
+            fm.next(gs, a);
         }
     }
 
@@ -105,5 +115,21 @@ public class OTLA implements AIPlayer {
         }else {
             return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
         }
+    }
+
+    @Override
+    public void initializePlayer(IObservation observation) {
+
+    }
+
+    @Override
+    public void finalizePlayer(IObservation observation) {
+
+    }
+
+
+    @Override
+    public void registerUpdatedObservation(IObservation observation) {
+
     }
 }
