@@ -10,23 +10,36 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public abstract class Component {
-    protected ComponentType type;
+    protected ComponentType type;  // Type of this component
     protected int ownerId = -1;  // By default belongs to the game
-    protected HashMap<Integer, Property> properties;
+    protected HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
 
-    public ComponentType getType()                   { return this.type; }
-    public void          setType(ComponentType type) { this.type = type; }
+    /**
+     * Get and set the type of this component.
+     */
+    public ComponentType getType()                   {
+        return this.type;
+    }
+    public void setType(ComponentType type) {
+        this.type = type;
+    }
 
-
+    /**
+     * Get number of properties for this component.
+     * @return - int, size of properties map.
+     */
     public int getNumProperties()
     {
         return properties.size();
     }
 
+    /**
+     * Get and set the ID of the player who owns the deck (-1, the game's, by default).
+     * @return - int, owner ID
+     */
     public int getOwnerId() {
         return ownerId;
     }
-
     public void setOwnerId(int ownerId) {
         this.ownerId = ownerId;
     }
@@ -102,16 +115,22 @@ public abstract class Component {
                         prop = new PropertyLong(key, (long) value.get(1));
                     }
                 }
-                c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                if (prop != null) {
+                    c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                }
             }
         }
 
         return c;
     }
 
+    /**
+     * Copies super class variables in given subclass instance.
+     * @param copyTo - subclass component instance
+     */
     public void copyComponentTo(Component copyTo)
     {
-        for(int prop_key : this.properties.keySet())
+        for (int prop_key : this.properties.keySet())
         {
             Property newProp = this.properties.get(prop_key).copy();
             copyTo.setProperty(prop_key, newProp);

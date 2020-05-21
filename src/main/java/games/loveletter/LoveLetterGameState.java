@@ -13,112 +13,107 @@ import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class LoveLetterGameState extends AbstractGameState {
 
+    // Love letter adds one game phase on top of default phases
     public enum LoveLetterGamePhase implements GamePhase {
         Draw
     }
 
-    private List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
-    private List<Deck<LoveLetterCard>> playerDiscardCards;
-    private PartialObservableDeck<LoveLetterCard> drawPile;
-    private PartialObservableDeck<LoveLetterCard> reserveCards;
-    private boolean[] effectProtection;
-
-    public static boolean PARTIAL_OBSERVABLE = false;
+    // List of cards in player hands
+    List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
+    // Discarded cards
+    List<Deck<LoveLetterCard>> playerDiscardCards;
+    // Cards in draw pile
+    PartialObservableDeck<LoveLetterCard> drawPile;
+    // Cards in the reserve
+    PartialObservableDeck<LoveLetterCard> reserveCards;
+    //
+    boolean[] effectProtection;
 
     public LoveLetterGameState(LoveLetterParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new LoveLetterTurnOrder(nPlayers));
+        super(gameParameters, model, new LoveLetterTurnOrder(nPlayers));
         gamePhase = LoveLetterGamePhase.Draw;
     }
 
-    public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
-        while (playerHandCards.get(playerID).getCards().size() > 0)
-            playerDiscardCards.get(playerID).add(playerHandCards.get(playerID).draw());
+    @Override
+    public IObservation getObservation(int player) {
+        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, reserveCards, effectProtection, player, gamePhase, playerResults);
+    }
 
-        int nPlayersActive = 0;
+    @Override
+    public void endGame() {
+        this.gameStatus = Utils.GameResult.GAME_END;
+
+        List<Integer> bestPlayers = new ArrayList<>();
+        int bestValue = 0;
+        int points;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
-        }
-        if (nPlayersActive == 1) {
-            this.gameStatus = Utils.GameResult.GAME_END;
-        }
-    }
-
-    public LoveLetterCard getReserveCard(){return reserveCards.draw();}
-
-    public boolean getProtection(int playerID){
-        return effectProtection[playerID];
-    }
-
-    public void setProtection(int playerID, boolean protection){
-        effectProtection[playerID] = protection;
-    }
-
-    public int getRemainingCards(){return drawPile.getCards().size();}
-
-    public void setComponents(LoveLetterParameters gameParameters) {
-        drawPile = new PartialObservableDeck<>("drawPile", getNPlayers());
-        effectProtection = new boolean[getNPlayers()];
-
-        // add all cards and distribute 7 random cards to each player
-        for (HashMap.Entry<LoveLetterCard.CardType, Integer> entry : gameParameters.cardCounts.entrySet()) {
-            for (int i = 0; i < entry.getValue(); i++) {
-                LoveLetterCard card = new LoveLetterCard(entry.getKey());
-                drawPile.add(card);
+            if (playerResults[i] != Utils.GameResult.GAME_LOSE)
+                points = playerHandCards.get(i).peek().cardType.getValue();
+            else
+                points = 0;
+            if (points > bestValue){
+                bestValue = points;
+                bestPlayers.clear();
+                bestPlayers.add(i);
+            } else if (points == bestValue) {
+                bestPlayers.add(i);
             }
         }
 
-        reserveCards = new PartialObservableDeck<>("reserveCards", getNPlayers());
-        drawPile.shuffle();
-        reserveCards.add(drawPile.draw());
+        if (bestPlayers.size() == 1){
+            for (int i = 0; i < getNPlayers(); i++) {
+                playerResults[i] = Utils.GameResult.GAME_LOSE;
+            }
+            playerResults[bestPlayers.get(0)] = Utils.GameResult.GAME_WIN;
+            return;
+        }
 
-        // give each player a single card
-        playerHandCards = new ArrayList<>(getNPlayers());
-        playerDiscardCards = new ArrayList<>(getNPlayers());
+        bestValue = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            boolean[] visibility = new boolean[getNPlayers()];
-            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
-            visibility[i] = true;
-
-            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>("playerHand"+i, visibility);
-            playerCards.add(drawPile.draw());
-            playerHandCards.add(playerCards);
-
-            Arrays.fill(visibility, true);
-            Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer"+i);
-            playerDiscardCards.add(discardCards);
-        }
-    }
-
-    private boolean needToForceCountess(Deck<LoveLetterCard> playerDeck){
-
-        boolean ownsCountess = false;
-        for (LoveLetterCard card : playerDeck.getCards()) {
-            if (card.cardType == LoveLetterCard.CardType.Countess){
-                ownsCountess = true;
-                break;
+            points = 0;
+            if (playerResults[i] == Utils.GameResult.GAME_WIN)
+                for (LoveLetterCard card : playerDiscardCards.get(i).getCards())
+                    points += card.cardType.getValue();
+            if (points > bestValue){
+                bestValue = points;
+                bestPlayers.clear();
+                bestPlayers.add(i);
+            } else if (points == bestValue) {
+                bestPlayers.add(i);
             }
         }
 
-        boolean forceCountess = false;
-        if (ownsCountess)
-        {
-            for (LoveLetterCard card: playerDeck.getCards()) {
-                if (card.cardType == LoveLetterCard.CardType.Prince || card.cardType == LoveLetterCard.CardType.King){
-                    forceCountess = true;
-                    break;
-                }
-            }
+        for (int i = 0; i < getNPlayers(); i++) {
+            playerResults[i] = Utils.GameResult.GAME_LOSE;
         }
-        return forceCountess;
+        for (Integer playerID : bestPlayers)
+            playerResults[playerID] = Utils.GameResult.GAME_WIN;
     }
 
+    @Override
+    public List<IAction> computeAvailableActions() {
+        ArrayList<IAction> actions;
+        int player = getTurnOrder().getCurrentPlayer(this);
+        if (gamePhase.equals(DefaultGamePhase.Main)) {
+            actions = playerActions(player);
+        } else if (gamePhase.equals(LoveLetterGamePhase.Draw)) {
+            actions = drawAction(player);
+        } else {
+            actions = new ArrayList<>();
+        }
+
+        return actions;
+    }
+
+    /**
+     * Computes actions available for the given player.
+     * @param playerID - ID of player to calculate actions for.
+     * @return - ArrayList of IAction objects.
+     */
     private ArrayList<IAction> playerActions(int playerID) {
         ArrayList<IAction> actions = new ArrayList<>();
         Deck<LoveLetterCard> playerDeck = playerHandCards.get(playerID);
@@ -194,90 +189,76 @@ public class LoveLetterGameState extends AbstractGameState {
         return actions;
     }
 
-    @Override
-    public IObservation getObservation(int player) {
-        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, reserveCards, effectProtection, player, gamePhase, playerResults);
-    }
-
-    @Override
-    public void endGame() {
-        this.gameStatus = Utils.GameResult.GAME_END;
-
-        List<Integer> bestPlayers = new ArrayList<>();
-        int bestValue = 0;
-        int points;
-        for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] != Utils.GameResult.GAME_LOSE)
-                 points = playerHandCards.get(i).peek().cardType.getValue();
-            else
-                points = 0;
-            if (points > bestValue){
-                bestValue = points;
-                bestPlayers.clear();
-                bestPlayers.add(i);
-            } else if (points == bestValue) {
-                bestPlayers.add(i);
-            }
-        }
-
-        if (bestPlayers.size() == 1){
-            for (int i = 0; i < getNPlayers(); i++) {
-                playerResults[i] = Utils.GameResult.GAME_LOSE;
-            }
-            playerResults[bestPlayers.get(0)] = Utils.GameResult.GAME_WIN;
-            return;
-        }
-
-        bestValue = 0;
-        for (int i = 0; i < getNPlayers(); i++) {
-            points = 0;
-            if (playerResults[i] == Utils.GameResult.GAME_WIN)
-                for (LoveLetterCard card : playerDiscardCards.get(i).getCards())
-                    points += card.cardType.getValue();
-            if (points > bestValue){
-                bestValue = points;
-                bestPlayers.clear();
-                bestPlayers.add(i);
-            } else if (points == bestValue) {
-                bestPlayers.add(i);
-            }
-        }
-
-        for (int i = 0; i < getNPlayers(); i++) {
-            playerResults[i] = Utils.GameResult.GAME_LOSE;
-        }
-        for (Integer playerID : bestPlayers)
-            playerResults[playerID] = Utils.GameResult.GAME_WIN;
-    }
-
+    /**
+     * In draw phase, the players can only draw cards. This returns draw actions.
+     * @param player - ID of player who should be drawing a card.
+     * @return - ArrayList of DrawCard actions.
+     */
     private ArrayList<IAction> drawAction(int player){
         ArrayList<IAction> actions = new ArrayList<>();
         actions.add(new DrawCard(drawPile, playerHandCards.get(player), player));
         return actions;
     }
 
-    @Override
-    public List<IAction> computeAvailableActions() {
-
-        ArrayList<IAction> actions;
-        int player = getTurnOrder().getCurrentPlayer(this);
-        if (gamePhase.equals(DefaultGamePhase.Main)) {
-            actions = playerActions(player);
-        } else if (gamePhase.equals(LoveLetterGamePhase.Draw)) {
-            actions = drawAction(player);
-        } else {
-            actions = new ArrayList<>();
+    /**
+     * Checks if the countess needs to be forced to play.
+     * @param playerDeck - deck of player to check
+     * @return - true if countess should be forced, false otherwise.
+     */
+    private boolean needToForceCountess(Deck<LoveLetterCard> playerDeck){
+        boolean ownsCountess = false;
+        for (LoveLetterCard card : playerDeck.getCards()) {
+            if (card.cardType == LoveLetterCard.CardType.Countess){
+                ownsCountess = true;
+                break;
+            }
         }
 
-        return actions;
+        boolean forceCountess = false;
+        if (ownsCountess)
+        {
+            for (LoveLetterCard card: playerDeck.getCards()) {
+                if (card.cardType == LoveLetterCard.CardType.Prince || card.cardType == LoveLetterCard.CardType.King){
+                    forceCountess = true;
+                    break;
+                }
+            }
+        }
+        return forceCountess;
     }
 
-    @Override
-    public void setComponents() {
+    /**
+     * Sets this player as dead and updates game and player status
+     * @param playerID - ID of player dead
+     */
+    public void killPlayer(int playerID){
+        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
+        while (playerHandCards.get(playerID).getCards().size() > 0)
+            playerDiscardCards.get(playerID).add(playerHandCards.get(playerID).draw());
 
+        int nPlayersActive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
+        }
+        if (nPlayersActive == 1) {
+            this.gameStatus = Utils.GameResult.GAME_END;
+        }
     }
 
+    // Getters, Setters
+    public LoveLetterCard getReserveCard(){return reserveCards.draw();}
+    public boolean isNotProtected(int playerID){
+        return !effectProtection[playerID];
+    }
+    public void setProtection(int playerID, boolean protection){
+        effectProtection[playerID] = protection;
+    }
+    public int getRemainingCards(){return drawPile.getCards().size();}
 
+    /**
+     * Prints the game state.
+     * @param turnOrder - turn order for this game.
+     */
     public void print(LoveLetterTurnOrder turnOrder) {
         System.out.println("Love Letter Game-State");
         System.out.println("======================");

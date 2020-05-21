@@ -30,7 +30,7 @@ public class BaronAction extends PlayCard<LoveLetterCard> implements IAction, IP
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        if (!((LoveLetterGameState)gs).getProtection(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
+        if (((LoveLetterGameState) gs).isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
             if (opponentDeck.peek() == null || playerDeck.peek() == null)
                 System.out.println();
             if (opponentDeck.peek().cardType.getValue() < playerDeck.peek().cardType.getValue())

@@ -22,6 +22,13 @@ public abstract class Game {
     // GameState observations as seen by different players.
     protected IObservation[] gameStateObservations;
 
+    /**
+     * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
+     * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
+     * @param players - players taking part in this game.
+     * @param model - forward model used to apply game rules.
+     * @param gameState - object used to track the state of the game in a moment in time.
+     */
     public Game(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
         this.players = players;
         int id = 0;
@@ -30,13 +37,16 @@ public abstract class Game {
         }
         this.forwardModel = model;
         this.gameState = gameState;
-        this.gameState.setComponents();
-        this.forwardModel.setup(gameState);
+        this.forwardModel._setup(gameState);
     }
 
-    public void run(GUI gui) {
+    /**
+     * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
+     * @param gui - graphical user interface.
+     */
+    public final void run(GUI gui) {
 
-        while (!gameState.isTerminal()){
+        while (gameState.isNotTerminal()){
             if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
@@ -50,7 +60,7 @@ public abstract class Game {
                 ((IPrintable) observation).printToConsole();
             }
 
-            // either ask player which action to use or, in case no actions are available, report the updated observation
+            // Either ask player which action to use or, in case no actions are available, report the updated observation
             int actionIdx = -1;
             if (actions.size() > 1) {
                 if (player instanceof HumanGUIPlayer) {
@@ -71,13 +81,19 @@ public abstract class Game {
                 forwardModel.next(gameState, actions.get(actionIdx));
         }
 
+        // Perform any end of game computations as required by the game
         gameState.endGame();
         System.out.println("Game Over");
     }
 
-    // Public methods
-    public final AbstractGameState getGameState(){return gameState;}
-
+    /**
+     * Queries the player for an action, after performing of GUI update (if running with visuals).
+     * @param gui - graphical user interface.
+     * @param player - player being asked for an action.
+     * @param observation - observation the player receives from the current game state.
+     * @param actions - list of actions available in the current game state.
+     * @return - int, index of action chosen by player (from the list of actions).
+     */
     private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<IAction> actions) {
         if (gui != null) {
             gui.update(player, gameState);
@@ -89,5 +105,13 @@ public abstract class Game {
         }
 
         return player.getAction(observation, actions);
+    }
+
+    /**
+     * Retrieves the current game state.
+     * @return - current game state.
+     */
+    public final AbstractGameState getGameState() {
+        return gameState;
     }
 }

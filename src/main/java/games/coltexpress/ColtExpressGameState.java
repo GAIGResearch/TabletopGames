@@ -6,12 +6,12 @@ import core.gamephase.GamePhase;
 import core.actions.IAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
-import games.coltexpress.cards.CharacterType;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Train;
 import core.components.IPartialObservableDeck;
 import core.components.PartialObservableDeck;
 import utilities.Utils;
+import games.coltexpress.ColtExpressParameters.CharacterType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +20,7 @@ import java.util.List;
 
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
+    // Colt express adds 4 game phases
     public enum ColtExpressGamePhase implements GamePhase {
         DrawCards,
         PlanActions,
@@ -27,48 +28,20 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         DraftCharacter
     }
 
-    private List<PartialObservableDeck<ColtExpressCard>> playerHandCards;
-    private List<PartialObservableDeck<ColtExpressCard>> playerDecks;
-    private PartialObservableDeck<ColtExpressCard> cardStack;
-    private HashMap<Integer, CharacterType> playerCharacters;
-
-    private Train train;
-
-    public static boolean PARTIAL_OBSERVABLE = false;
+    // Cards in player hands
+    List<PartialObservableDeck<ColtExpressCard>> playerHandCards;
+    // A deck for each player
+    List<PartialObservableDeck<ColtExpressCard>> playerDecks;
+    // The card stack built by players each round
+    PartialObservableDeck<ColtExpressCard> cardStack;
+    // The player characters available
+    HashMap<Integer, CharacterType> playerCharacters;
+    // The train to loot
+    Train train;
 
     public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new ColtExpressTurnOrder(nPlayers));
+        super(gameParameters, model, new ColtExpressTurnOrder(nPlayers));
         gamePhase = ColtExpressGamePhase.DrawCards;
-    }
-
-    public void setComponents(ColtExpressParameters gameParameters) {
-        train = new Train(getNPlayers());
-        playerCharacters = new HashMap<>();
-
-        // give each player a single card
-        playerDecks = new ArrayList<>(getNPlayers());
-        for (int playerIndex = 0; playerIndex < getNPlayers(); playerIndex++) {
-            playerCharacters.put(playerIndex, gameParameters.pickRandomCharacterType());
-
-            boolean[] visibility = new boolean[getNPlayers()];
-            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
-            visibility[playerIndex] = true;
-
-            PartialObservableDeck<ColtExpressCard> playerCards =
-                    new PartialObservableDeck<>("playerCards"+playerIndex, visibility);
-            for (ColtExpressCard.CardType type : gameParameters.cardCounts.keySet()){
-                for (int j = 0; j < gameParameters.cardCounts.get(type); j++)
-                    playerCards.add(new ColtExpressCard(type));
-            }
-            playerDecks.add(playerCards);
-        }
-    }
-
-    private ArrayList<IAction> playerActions(int playerID) {
-        ArrayList<IAction> actions = new ArrayList<>();
-
-        // add end turn by drawing a card
-        return actions;
     }
 
     @Override
@@ -82,48 +55,47 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         Arrays.fill(playerResults, Utils.GameResult.GAME_LOSE);
     }
 
-    private ArrayList<IAction> drawAction(int player){
-        ArrayList<IAction> actions = new ArrayList<>();
-        return actions;
-    }
-
-    public ArrayList<IAction> schemingActions(int player){
-        ArrayList<IAction> actions = new ArrayList<>();
-        return actions;
-    }
-
-    public ArrayList<IAction> stealingActions(int player)
-    {
-        ArrayList<IAction> actions = new ArrayList<>();
-        return actions;
-    }
-
     @Override
     public List<IAction> computeAvailableActions() {
 
         ArrayList<IAction> actions;
-        int player = getTurnOrder().getCurrentPlayer(this);
         if (ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
-
-            actions = drawAction(player);
+            actions = drawAction();
         } else if (ColtExpressGamePhase.DrawCards.equals(gamePhase)) {
-            actions = drawAction(player);
+            actions = drawAction();
         } else if (ColtExpressGamePhase.PlanActions.equals(gamePhase)) {
-            actions = schemingActions(player);
+            actions = schemingActions();
         } else if (ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
-            actions = stealingActions(player);
+            actions = stealingActions();
         } else {
             actions = new ArrayList<>();
         }
 
         return actions;
     }
-
-    @Override
-    public void setComponents() {
-
+    private ArrayList<IAction> drawAction(){
+        ArrayList<IAction> actions = new ArrayList<>();
+        return actions;
     }
+
+    public ArrayList<IAction> schemingActions(){
+        ArrayList<IAction> actions = new ArrayList<>();
+        return actions;
+    }
+
+    public ArrayList<IAction> stealingActions()
+    {
+        ArrayList<IAction> actions = new ArrayList<>();
+        return actions;
+    }
+
+//    private ArrayList<IAction> playerActions(int playerID) {
+//        ArrayList<IAction> actions = new ArrayList<>();
+//
+//        // add end turn by drawing a card
+//        return actions;
+//    }
 
     @Override
     public void printToConsole() {

@@ -8,8 +8,6 @@ public class PandemicParameters extends GameParameters {
 
     private String dataPath;
     public String getDataPath(){return dataPath;}
-
-    long game_seed = System.currentTimeMillis(); //0;
     int lose_max_outbreak = 8;
 
     int max_cubes_per_city = 3;  // More cause outbreak
@@ -47,7 +45,7 @@ public class PandemicParameters extends GameParameters {
     public PandemicParameters(PandemicParameters pandemicParameters) {
         this(pandemicParameters.dataPath);
 
-        this.game_seed = pandemicParameters.game_seed;
+        this.gameSeed = pandemicParameters.getGameSeed();
         this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
         this.max_cubes_per_city = pandemicParameters.max_cubes_per_city;  // More cause outbreak
         this.n_epidemic_cards = pandemicParameters.n_epidemic_cards;
@@ -72,10 +70,6 @@ public class PandemicParameters extends GameParameters {
         this.n_cards_per_player = new HashMap<>();
         for(int key : pandemicParameters.n_cards_per_player.keySet())
             this.n_cards_per_player.put(key, pandemicParameters.n_cards_per_player.get(key));
-    }
-
-    public long getGame_seed() {
-        return game_seed;
     }
 
     public int getLose_max_outbreak() {

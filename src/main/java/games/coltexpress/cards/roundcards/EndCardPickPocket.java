@@ -1,6 +1,7 @@
 package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
+import utilities.Utils;
 
 public class EndCardPickPocket extends RoundCard {
 
@@ -12,6 +13,6 @@ public class EndCardPickPocket extends RoundCard {
     @Override
     public void endTurnEvent(ColtExpressGameState gameState) {
         //todo Pick Pocket - Any bandit alone in or on a car can pick up a purse if there is one.
-        gameState.endGame();
+        gameState.setGameStatus(Utils.GameResult.GAME_END);
     }
 }

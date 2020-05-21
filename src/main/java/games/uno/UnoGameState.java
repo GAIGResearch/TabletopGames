@@ -18,10 +18,10 @@ public class UnoGameState extends AbstractGameState {
     List<Deck<UnoCard>> playerDecks;
     Deck<UnoCard> drawPile;
     Deck<UnoCard> discardPile;
-    public UnoCard currentCard;
+    UnoCard currentCard;
 
     public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 
     @Override
@@ -61,45 +61,10 @@ public class UnoGameState extends AbstractGameState {
         return actions;
     }
 
-    @Override
-    public void setComponents() {
-
-        drawPile = new Deck<>("Draw Pile");
-
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values())
-        {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            for (int i = 0; i < 10; i++)
-            {
-                drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
-                if (i > 0)
-                    drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
-            }
-            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
-            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
-            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
-            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
-        }
-
-        drawPile.shuffle();
-        // todo add action cards step-by-step
-
-        discardPile = new Deck<>("Discard Pile");
-
-        playerDecks = new ArrayList<>(getNPlayers());
-        for (int i = 0; i < getNPlayers(); i++){
-            playerDecks.add(new Deck<>("Player Deck"));
-            for (int j = 0; j < 7; j++){
-                playerDecks.get(i).add(drawPile.draw());
-            }
-        }
-
-        currentCard = drawPile.draw();
-        discardPile.add(currentCard);
-    }
-
+    /**
+     * Inform the game state this player has won.
+     * @param playerID - ID of player who won.
+     */
     public void registerWinner(int playerID){
         gameStatus = Utils.GameResult.GAME_END;
         for (int i = 0; i < getNPlayers(); i++)
@@ -109,5 +74,21 @@ public class UnoGameState extends AbstractGameState {
             else
                 playerResults[i] = Utils.GameResult.GAME_LOSE;
         }
+    }
+
+    public Deck<UnoCard> getDiscardPile() {
+        return discardPile;
+    }
+
+    public Deck<UnoCard> getDrawPile() {
+        return drawPile;
+    }
+
+    public List<Deck<UnoCard>> getPlayerDecks() {
+        return playerDecks;
+    }
+
+    public UnoCard getCurrentCard() {
+        return currentCard;
     }
 }

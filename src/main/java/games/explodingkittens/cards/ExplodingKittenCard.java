@@ -1,7 +1,6 @@
 package games.explodingkittens.cards;
 
 import core.components.Card;
-//import explodingkittens.ExplodingKittensCardTypeProperty;
 
 public class ExplodingKittenCard extends Card {
     public enum CardType {

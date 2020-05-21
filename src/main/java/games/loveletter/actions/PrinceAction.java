@@ -30,7 +30,7 @@ public class PrinceAction extends PlayCard<LoveLetterCard> implements IAction, I
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        if (!((LoveLetterGameState)gs).getProtection(opponentID)){
+        if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             LoveLetterCard card = opponentDeck.draw();
 
             if (card.cardType == LoveLetterCard.CardType.Princess)

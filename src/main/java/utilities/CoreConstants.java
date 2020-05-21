@@ -8,4 +8,5 @@ public class CoreConstants {
     public final static int playersHash = Hash.GetInstance().hash("players");
     public final static int imgHash = Hash.GetInstance().hash("img");
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
+    public static boolean PARTIAL_OBSERVABLE = false;
 }

@@ -11,7 +11,6 @@ import core.components.Area;
 import core.GameParameters;
 import core.observations.IObservation;
 import games.pandemic.actions.*;
-import utilities.Hash;
 
 import java.util.*;
 
@@ -23,98 +22,47 @@ import static utilities.Utils.indexOf;
 
 public class PandemicGameState extends AbstractGameState implements IObservation {
 
+    // The Pandemic game phase enum distinguishes 2 more phases on top of the default ones for players forced to
+    // discard cards, or an opportunity to play a "Resilient Population" event card.
     public enum PandemicGamePhase implements GamePhase {
         DiscardReaction,
         RPReaction
     }
 
+    // Collection of areas, mapped to player ID. -1 is the general game area containing the board, counters and several decks.
     private HashMap<Integer, Area> areas;
-    private PandemicData _data;
+    // Temporary deck used as a buffer by several actions.
     private Deck<Card> tempDeck;
 
+    // The main game board
     public Board world;
+    // Was a quiet night card played?
     private boolean quietNight;
+    // Was an epidemic card drawn?
     private boolean epidemic;
-    private int nCardsDrawn = 0;
-
+    // How many cards the current player has drawn in their turn
+    private int nCardsDrawn;
+    // Keeps track of locations of all research stations (list of names of cities / board nodes)
     private ArrayList<String> researchStationLocations;
 
+    /**
+     * Constructor. Calls super with objects corresponding to this game and loads the data for the game.
+     * @param pp - Game parameters.
+     * @param model - forward model.
+     * @param nPlayers - number of players.
+     */
     public PandemicGameState(GameParameters pp, ForwardModel model, int nPlayers) {
-        super(pp, model, nPlayers, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
-        researchStationLocations = new ArrayList<>();
-        _data = new PandemicData();
-        _data.load(((PandemicParameters)gameParameters).getDataPath());
+        super(pp, model, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
+        data = new PandemicData();
+        data.load(((PandemicParameters)gameParameters).getDataPath());
     }
 
-    public void setComponents() {
-        PandemicParameters pp = (PandemicParameters)gameParameters;
-
-        tempDeck = new Deck<>("Temp Deck");
-        areas = new HashMap<>();
-
-        // For each player, initialize their own areas: they get a player hand and a player card
-        int capacity = ((PandemicParameters)gameParameters).max_cards_per_player;
-        for (int i = 0; i < getNPlayers(); i++) {
-            Area playerArea = new Area(i);
-            Deck<Card> playerHand = new Deck<>("Player Hand");
-            playerHand.setOwnerId(i);
-            playerHand.setCapacity(capacity);
-            playerArea.addComponent(playerHandHash, playerHand);
-            playerArea.addComponent(playerCardHash, new Card());
-            areas.put(i, playerArea);
-        }
-
-        // Initialize the game area: board, player deck, player discard deck, infection deck, infection discard
-        // infection rate counter, outbreak counter, diseases x 4
-        Area gameArea = new Area(-1);
-        areas.put(-1, gameArea);
-
-        // load the board
-        world = _data.findBoard("cities"); //world.getNode("name","Valencia");
-        gameArea.addComponent(pandemicBoardHash, world);
-
-        // Set up the counters and sync with game parameters
-        Counter infection_rate = _data.findCounter("Infection Rate");
-        infection_rate.setMaximum(pp.infection_rate.length);
-        Counter outbreaks = _data.findCounter("Outbreaks");
-        outbreaks.setMaximum(pp.lose_max_outbreak);
-        Counter researchStations = _data.findCounter("Research Stations");
-        researchStations.setMaximum(pp.n_research_stations);
-        gameArea.addComponent(infectionRateHash, infection_rate);
-        gameArea.addComponent(outbreaksHash, outbreaks);
-        gameArea.addComponent(PandemicConstants.researchStationHash, researchStations);
-
-        for (String color : colors) {
-            int hash = Hash.GetInstance().hash("Disease " + color);
-            Counter diseaseC = _data.findCounter("Disease " + color);
-            diseaseC.setValue(0);  // 0 - cure not discovered; 1 - cure discovered; 2 - eradicated
-            gameArea.addComponent(hash, diseaseC);
-
-            hash = Hash.GetInstance().hash("Disease Cube " + color);
-            Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
-            diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
-            gameArea.addComponent(hash, diseaseCubeCounter);
-        }
-
-        // Set up decks
-        Deck<Card> playerDeck = new Deck<>("Player Deck"); // contains city & event cards
-        playerDeck.add(_data.findDeck("Cities"));
-        playerDeck.add(_data.findDeck("Events"));
-
-        gameArea.addComponent(PandemicConstants.playerDeckHash, playerDeck);
-        gameArea.addComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>("Player Deck Discard"));
-        gameArea.addComponent(PandemicConstants.infectionDiscardHash, new Deck<>("Infection Discard"));
-        gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
-        gameArea.addComponent(PandemicConstants.infectionHash, _data.findDeck("Infections"));
-        gameArea.addComponent(PandemicConstants.playerRolesHash, _data.findDeck("Player Roles"));
-    }
-
-    void nextPlayer() {
-        turnOrder.endPlayerTurn(this);
-        nCardsDrawn = 0;
-        gamePhase = DefaultGamePhase.Main;
-    }
-
+    /**
+     * Retrieves an observation specific to the given player from this game state object. Components which are not
+     * observed by the player are removed, the rest are copied.
+     * @param player - player observing this game state.
+     * @return - IObservation, the observation for this player.
+     */
     @Override
     public IObservation getObservation(int player) {
         // TODO copy all components based on what this player observes
@@ -122,6 +70,10 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         return this;
     }
 
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of IAction objects.
+     */
     @Override
     public List<IAction> computeAvailableActions() {
         if (((PandemicTurnOrder) turnOrder).reactionsFinished()) {
@@ -136,15 +88,10 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         else return getPlayerActions();
     }
 
-    public String getPlayerRoleActingPlayer() {
-        return getPlayerRole(turnOrder.getCurrentPlayer(this));
-    }
-
-    public String getPlayerRole(int i) {
-        Card playerCard = ((Card) getComponent(playerCardHash, i));
-        return ((PropertyString) playerCard.getProperty(nameHash)).value;
-    }
-
+    /**
+     * Calculates regular player actions.
+     * @return - ArrayList, various action types (unique).
+     */
     private List<IAction> getPlayerActions() {
         PandemicParameters pp = (PandemicParameters) this.gameParameters;
 
@@ -238,7 +185,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         }
 
         // Special role actions
-        actions.addAll(getSpecialRoleActions(roleString, pp, playerHand, playerLocationName.value));
+        actions.addAll(getSpecialRoleActions(roleString, playerHand, playerLocationName.value));
 
         // Event actions
         actions.addAll(getEventActions());
@@ -252,13 +199,11 @@ public class PandemicGameState extends AbstractGameState implements IObservation
      * Calculate all special actions that can be performed by different player roles. Not included those that can
      * execute the same actions as other players but with different parameters.
      * @param role - role of player
-     * @param pp - game parameters
      * @param playerHand - cards in hand for the player
      * @param playerLocation - current location of player
      * @return - list of actions for the player role.
      */
-    private List<IAction> getSpecialRoleActions(String role, PandemicParameters pp, Deck<Card> playerHand,
-                                                String playerLocation) {
+    private List<IAction> getSpecialRoleActions(String role, Deck<Card> playerHand, String playerLocation) {
         ArrayList<IAction> actions = new ArrayList<>();
         int playerIdx = turnOrder.getCurrentPlayer(this);
 
@@ -400,6 +345,10 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         return new ArrayList<>(actions);
     }
 
+    /**
+     * Calculates discard card actions for current player.
+     * @return - ArrayList, DrawCard actions (from their hand to the player discard deck).
+     */
     private List<IAction> getDiscardActions() {
         Deck<Card> playerDeck = (Deck<Card>) getComponentActingPlayer(playerHandHash);
         Deck<Card> playerDiscardDeck = (Deck<Card>) getComponent(playerDeckDiscardHash);
@@ -411,7 +360,10 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         return new ArrayList<>(acts);
     }
 
-    // Set removing infection discarded cards (or do nothing) as the only options
+    /**
+     * Calculates actions restricted to removing infection discarded cards (or do nothing) for current player.
+     * @return - ArrayList, RemoveCardWithCard actions + DoNothing.
+     */
     private List<IAction> getRPactions() {
         Set<IAction> acts = new HashSet<>();
         acts.add(new DoNothing());
@@ -513,7 +465,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             case "Forecast":
 //                System.out.println("Forecast");
 //            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
-                // generate all permutations
+                // Generate all permutations. Each one is a potential action.
                 Deck<Card> infectionDeck = (Deck<Card>) getComponent(infectionHash);
                 int nInfectCards = infectionDeck.getSize();
                 int n = Math.min(nInfectCards, pp.n_forecast_cards);
@@ -532,7 +484,16 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         return new ArrayList<>(actions);
     }
 
-    //Getters & setters
+    /**
+     * Informs turn order of a need to move to the next player and performs any beginning of round setup.
+     */
+    void nextPlayer() {
+        turnOrder.endPlayerTurn(this);
+        nCardsDrawn = 0;
+        gamePhase = DefaultGamePhase.Main;
+    }
+
+    // Getters & setters
     public Component getComponent(int componentId, int playerId) {
         return areas.get(playerId).getComponent(componentId);
     }
@@ -545,10 +506,8 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     Area getArea(int playerId) {
         return areas.get(playerId);
     }
-
     public void addResearchStation(String location) { researchStationLocations.add(location); }
     public void removeResearchStation(String location) { researchStationLocations.remove(location); }
-
     public void setQuietNight(boolean qn) {
         quietNight = qn;
     }
@@ -570,17 +529,34 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public int getNCardsDrawn() {
         return nCardsDrawn;
     }
-
-    public PandemicData getData() {
-        return _data;
-    }
-
     public void clearTempDeck() {
         tempDeck.clear();
     }
     public Deck<Card> getTempDeck() {
         return tempDeck;
     }
+    public String getPlayerRoleActingPlayer() {
+        return getPlayerRole(turnOrder.getCurrentPlayer(this));
+    }
+    public String getPlayerRole(int i) {
+        Card playerCard = ((Card) getComponent(playerCardHash, i));
+        return ((PropertyString) playerCard.getProperty(nameHash)).value;
+    }
+
+    // Protected, only FM has access to these
+    protected void setTempDeck(Deck<Card> tempDeck) {
+        this.tempDeck = tempDeck;
+    }
+    protected void setAreas(HashMap<Integer, Area> areas) {
+        this.areas = areas;
+    }
+    protected void setWorld(Board world) {
+        this.world = world;
+    }
+    protected void setResearchStationLocations(ArrayList<String> researchStationLocations) {
+        this.researchStationLocations = researchStationLocations;
+    }
+
 
     /*
     public AbstractGameState createNewGameState() {

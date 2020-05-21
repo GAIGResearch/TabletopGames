@@ -23,32 +23,6 @@ public class ColtExpressGame extends Game {
         super(agents, forwardModel, gameState);
     }
 
-    @Override
-    public void run(GUI gui) {
-        while (!gameState.isTerminal()){
-            System.out.println();
-            System.out.println();
-            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-
-            // Get player to ask for actions next
-            int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
-            // Get actions for the player
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
-            IObservation observation = gameState.getObservation(activePlayer);
-            if (observation != null && VERBOSE) {
-                ((IPrintable) observation).printToConsole();
-            }
-
-            IAction action = actions.size() > 0 ? actions.get(players.get(activePlayer).getAction(observation, actions)) : null;
-            forwardModel.next(gameState, action);
-            break;
-        }
-
-        gameState.endGame();
-
-        System.out.println("Game Over");
-    }
-
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer());

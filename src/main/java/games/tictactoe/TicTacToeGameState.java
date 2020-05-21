@@ -17,12 +17,10 @@ import java.util.List;
 
 public class TicTacToeGameState extends AbstractGameState implements GridGameState<Character> {
 
-    private Grid<Character> grid = new Grid<>(3, 3, ' ');
-
-    //HashMap<AbstractPlayer, Character> playerSymbols = new HashMap<>();
+    Grid<Character> grid;
 
     public TicTacToeGameState(TicTacToeGameParameters gameParameters, ForwardModel model, int nPlayers){
-        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 
     @Override
@@ -51,15 +49,14 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     }
 
     @Override
-    public void setComponents() {
-
-    }
-
-    @Override
     public Grid<Character> getGrid() {
         return grid;
     }
 
+    /**
+     * Inform the game this player has won.
+     * @param winnerSymbol - which player won.
+     */
     public void registerWinner(char winnerSymbol){
         gameStatus = Utils.GameResult.GAME_END;
         if (winnerSymbol == 'o'){

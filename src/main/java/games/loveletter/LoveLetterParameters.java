@@ -17,4 +17,6 @@ public class LoveLetterParameters extends GameParameters {
         put(LoveLetterCard.CardType.Priest, 2);
         put(LoveLetterCard.CardType.Guard, 5);
     }};
+
+    public int nCardsPerPlayer = 1;
 }

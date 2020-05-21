@@ -27,7 +27,7 @@ public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, I
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        if (!((LoveLetterGameState)gs).getProtection(opponentID)){
+        if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             for (int i = 0; i < opponentDeck.getCards().size(); i++)
                 opponentDeck.setVisibilityOfCard(i, playerID, true);
         }
