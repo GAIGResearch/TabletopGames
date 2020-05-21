@@ -42,7 +42,7 @@ public class PandemicForwardModel extends ForwardModel {
         // Rules
         RuleNode infectCities = new InfectCities(pp.infection_rate, pp.max_cubes_per_city, pp.n_cubes_infection);
         RuleNode forceDiscardReaction = new ForceDiscardReaction();
-        RuleNode epidemic2 = new EpidemicIntensify(rnd);
+        RuleNode epidemic2 = new EpidemicIntensify(new Random(pp.getGameSeed()));
         RuleNode forceRPreaction = new ForceRPReaction();
         RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic);
         RuleNode drawCards = new DrawCards();
@@ -153,9 +153,8 @@ public class PandemicForwardModel extends ForwardModel {
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();
         PandemicData _data = (PandemicData)state.getData();
 
-        state.setTempDeck(new Deck<>("Temp Deck"));
-        HashMap<Integer, Area> areas = new HashMap<>();
-        state.setAreas(areas);
+        state.tempDeck = new Deck<>("Temp Deck");
+        state.areas = new HashMap<>();
 
         // For each player, initialize their own areas: they get a player hand and a player card
         int capacity = pp.max_cards_per_player;
@@ -166,22 +165,20 @@ public class PandemicForwardModel extends ForwardModel {
             playerHand.setCapacity(capacity);
             playerArea.addComponent(playerHandHash, playerHand);
             playerArea.addComponent(playerCardHash, new Card());
-            areas.put(i, playerArea);
+            state.areas.put(i, playerArea);
         }
 
         // Initialize the game area
         Area gameArea = new Area(-1);
-        areas.put(-1, gameArea);
+        state.areas.put(-1, gameArea);
 
         // Load the board
-        Board world = _data.findBoard("cities"); //world.getNode("name","Valencia");
-        state.setWorld(world);
-        gameArea.addComponent(pandemicBoardHash, world);
+        state.world = _data.findBoard("cities");
+        gameArea.addComponent(pandemicBoardHash, state.world);
 
         // Initialize game state variables
         state.setNCardsDrawn(0);
-        state.setResearchStationLocations(new ArrayList<>());
-        new AddResearchStation("Atlanta").execute(state);
+        state.researchStationLocations = new ArrayList<>();
 
         // Set up the counters and sync with game parameters
         Counter infection_rate = _data.findCounter("Infection Rate");
@@ -292,6 +289,9 @@ public class PandemicForwardModel extends ForwardModel {
             new AddCardToDeck(card, playerDeck, index).execute(state);
 
         }
+
+        // Research station in Atlanta
+        new AddResearchStation("Atlanta").execute(state);
 
         // Player with highest population starts
         state.getTurnOrder().setStartingPlayer(startingPlayer);

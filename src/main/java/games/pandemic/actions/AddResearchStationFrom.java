@@ -29,7 +29,7 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
         boolean success = super.execute(gs);
 
         // Remove research station from "fromCity" location
-        BoardNode bn = pgs.world.getNode(nameHash, fromCity);
+        BoardNode bn = pgs.getWorld().getNode(nameHash, fromCity);
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(false));
             pgs.removeResearchStation(((PropertyString) bn.getProperty(nameHash)).value);

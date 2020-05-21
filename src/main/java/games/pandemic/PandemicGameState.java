@@ -30,20 +30,20 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     }
 
     // Collection of areas, mapped to player ID. -1 is the general game area containing the board, counters and several decks.
-    private HashMap<Integer, Area> areas;
+    HashMap<Integer, Area> areas;
     // Temporary deck used as a buffer by several actions.
-    private Deck<Card> tempDeck;
+    Deck<Card> tempDeck;
 
     // The main game board
-    public Board world;
+    Board world;
     // Was a quiet night card played?
-    private boolean quietNight;
+    boolean quietNight;
     // Was an epidemic card drawn?
-    private boolean epidemic;
+    boolean epidemic;
     // How many cards the current player has drawn in their turn
-    private int nCardsDrawn;
+    int nCardsDrawn;
     // Keeps track of locations of all research stations (list of names of cities / board nodes)
-    private ArrayList<String> researchStationLocations;
+    ArrayList<String> researchStationLocations;
 
     /**
      * Constructor. Calls super with objects corresponding to this game and loads the data for the game.
@@ -542,22 +542,9 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         Card playerCard = ((Card) getComponent(playerCardHash, i));
         return ((PropertyString) playerCard.getProperty(nameHash)).value;
     }
-
-    // Protected, only FM has access to these
-    protected void setTempDeck(Deck<Card> tempDeck) {
-        this.tempDeck = tempDeck;
+    public Board getWorld() {
+        return world;
     }
-    protected void setAreas(HashMap<Integer, Area> areas) {
-        this.areas = areas;
-    }
-    protected void setWorld(Board world) {
-        this.world = world;
-    }
-    protected void setResearchStationLocations(ArrayList<String> researchStationLocations) {
-        this.researchStationLocations = researchStationLocations;
-    }
-
-
     /*
     public AbstractGameState createNewGameState() {
         return new PandemicGameState((PandemicParameters) this.gameParameters);

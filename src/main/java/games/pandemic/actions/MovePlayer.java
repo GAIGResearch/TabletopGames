@@ -38,7 +38,7 @@ public class MovePlayer implements IAction {
     }
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
-        BoardNode bn = gs.world.getNode(nameHash, city);
+        BoardNode bn = gs.getWorld().getNode(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().add(playerIdx);
 
@@ -47,7 +47,7 @@ public class MovePlayer implements IAction {
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
-        BoardNode bn = gs.world.getNode(nameHash, city);
+        BoardNode bn = gs.getWorld().getNode(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().remove(Integer.valueOf(playerIdx));
 

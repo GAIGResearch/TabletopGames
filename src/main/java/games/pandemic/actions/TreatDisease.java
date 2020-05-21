@@ -45,7 +45,7 @@ public class TreatDisease implements IAction {
         Counter diseaseCubeCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color));
         int colorIdx = Utils.indexOf(colors, color);
 
-        BoardNode bn = pgs.world.getNode(nameHash, city);
+        BoardNode bn = pgs.getWorld().getNode(nameHash, city);
         if (bn != null) {
             PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(infectionHash);
             int[] array = infectionArray.getValues();
