@@ -13,12 +13,13 @@ public abstract class GUI extends JFrame {
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
-    protected JLabel gameStatus, turnOwner, turn, currentPlayer;
+    protected JLabel gameStatus, turnOwner, turn, currentPlayer, gamePhase;
 
     public GUI(ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
         gameStatus = new JLabel();
+        gamePhase = new JLabel();
         turnOwner = new JLabel();
         turn = new JLabel();
         currentPlayer = new JLabel();
@@ -97,6 +98,7 @@ public abstract class GUI extends JFrame {
         updateGameStateInfo(gameState);
 
         gameInfo.add(gameStatus);
+        gameInfo.add(gamePhase);
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
@@ -110,6 +112,7 @@ public abstract class GUI extends JFrame {
      */
     protected void updateGameStateInfo(AbstractGameState gameState) {
         gameStatus.setText("Game status: " + gameState.getGameStatus());
+        gamePhase.setText("Game phase: " + gameState.getGamePhase());
         turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
         turn.setText("Turn: " + gameState.getTurnOrder().getTurnCounter() +
                 "; Round: " + gameState.getTurnOrder().getRoundCounter());

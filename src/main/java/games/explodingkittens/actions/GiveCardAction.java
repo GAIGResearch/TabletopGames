@@ -9,9 +9,6 @@ import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
-
-
 public class GiveCardAction implements IAction, IPrintable {
 
     final ExplodingKittenCard card;
@@ -27,11 +24,12 @@ public class GiveCardAction implements IAction, IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
+        ExplodingKittenTurnOrder ekto = ((ExplodingKittenTurnOrder) gs.getTurnOrder());
         giverDeck.remove(card);
         receiverDeck.add(card);
-        ekgs.setGamePhase(PlayerMove);
-        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
-        ((ExplodingKittenTurnOrder) gs.getTurnOrder()).addReactivePlayer(ekgs.getPlayerGettingAFavor());
+        gs.setMainGamePhase();
+        ekto.endPlayerTurnStep(gs);
+        ekto.addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;
     }
 

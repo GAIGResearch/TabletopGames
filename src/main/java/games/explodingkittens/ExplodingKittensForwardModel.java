@@ -8,9 +8,7 @@ import games.explodingkittens.actions.IsNopeable;
 
 import java.util.Stack;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.NopePhase;
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
-
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 
 public class ExplodingKittensForwardModel extends ForwardModel {
 
@@ -62,8 +60,8 @@ public class ExplodingKittensForwardModel extends ForwardModel {
                         stackedAction.execute(gameState);
                     }
                     actionStack.clear();
-                    if (ekgs.getGamePhase() == NopePhase)
-                        ekgs.setGamePhase(PlayerMove);
+                    if (ekgs.getGamePhase() == Nope)
+                        ekgs.setMainGamePhase();
                 }
             }
         }
