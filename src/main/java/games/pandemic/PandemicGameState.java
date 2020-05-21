@@ -124,7 +124,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public List<IAction> computeAvailableActions() {
-        if (!((PandemicTurnOrder)turnOrder).reactionsRemaining()) {
+        if (((PandemicTurnOrder) turnOrder).reactionsFinished()) {
             gamePhase = DefaultGamePhase.Main;
         }
         if (gamePhase == PandemicGamePhase.DiscardReaction)
@@ -380,7 +380,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                             if (!destination.equals(playerLocationName)) {
                                 actions.add(new MovePlayerWithCard(playerId, destination, card));
                             }
-                        } else {
+                        } else if (destination.equals(cardCity)) {
                             // Direct Flight, discard city card and travel to that city
                             actions.add(new MovePlayerWithCard(playerId, cardCity, card));
                         }
