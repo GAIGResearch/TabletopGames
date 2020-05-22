@@ -1,15 +1,16 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 import core.observations.IPrintable;
 
-public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
+public class NopeAction<T extends Component> extends PlayCard<T> implements IsNope, IPrintable {
 
     private final int playerID;
 
-    public NopeAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID) {
+    public NopeAction(T card, Deck<T> playerDeck, Deck<T> discardDeck, int playerID) {
         super(card, playerDeck, discardDeck);
         this.playerID = playerID;
     }

@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -16,7 +15,7 @@ public class GuardAction extends PlayCard<LoveLetterCard> implements IAction, IP
     private final int opponentID;
     private final LoveLetterCard.CardType cardType;
 
-    public GuardAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
+    public GuardAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
                         Deck<LoveLetterCard> opponentDeck, int opponentID, LoveLetterCard.CardType cardtype){
         super(card, playerHand, discardPile);
         this.opponentDeck = opponentDeck;

@@ -3,17 +3,17 @@ package core.actions;
 import core.AbstractGameState;
 import core.components.Card;
 import core.observations.IPrintable;
-import core.components.Grid;
+import core.components.GridBoard;
 
 public class SetGridValueAction<T> implements IAction, IPrintable {
 
-    private final Grid<T> grid;
+    private final GridBoard<T> gridBoard;
     private final int x;
     private final int y;
     private final T value;
 
-    public SetGridValueAction (Grid<T> grid, int x, int y, T value){
-        this.grid = grid;
+    public SetGridValueAction (GridBoard<T> gridBoard, int x, int y, T value){
+        this.gridBoard = gridBoard;
         this.x = x;
         this.y = y;
         this.value = value;
@@ -26,7 +26,7 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        return grid.setElement(x, y, value);
+        return gridBoard.setElement(x, y, value);
     }
 
     @Override
@@ -34,8 +34,8 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
         return null;
     }
 
-    public Grid<T> getGrid() {
-        return grid;
+    public GridBoard<T> getGridBoard() {
+        return gridBoard;
     }
 
     public int getX() {
@@ -53,7 +53,7 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
     @Override
     public String toString() {
         return "SetGridValueAction{" +
-                "grid=" + grid.toString() +
+                "grid=" + gridBoard.toString() +
                 ", x=" + x +
                 ", y=" + y +
                 ", value=" + value +

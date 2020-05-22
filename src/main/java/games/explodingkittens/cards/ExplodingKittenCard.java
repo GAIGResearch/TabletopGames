@@ -22,6 +22,7 @@ public class ExplodingKittenCard extends Card {
     public CardType cardType;
 
     public ExplodingKittenCard(CardType cardType) {
+        super(cardType.toString());
         this.cardType = cardType;
     }
 

@@ -8,7 +8,6 @@ import core.observations.IObservation;
 import core.observations.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Train;
-import core.components.IPartialObservableDeck;
 import core.components.PartialObservableDeck;
 import utilities.Utils;
 import games.coltexpress.ColtExpressParameters.CharacterType;
@@ -115,9 +114,9 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         System.out.println("Current GamePhase: " + gamePhase);
     }
 
-    public void printDeck(IPartialObservableDeck<ColtExpressCard> deck){
+    public void printDeck(PartialObservableDeck<ColtExpressCard> deck){
         StringBuilder sb = new StringBuilder();
-        for (ColtExpressCard card : deck.getVisibleCards(turnOrder.getCurrentPlayer(this))){
+        for (ColtExpressCard card : deck.getVisibleComponents(turnOrder.getCurrentPlayer(this))){
             if (card == null)
                 sb.append("UNKNOWN");
             else

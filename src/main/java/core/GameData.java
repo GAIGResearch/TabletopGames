@@ -1,18 +1,11 @@
 package core;
 
-import core.components.Board;
-import core.components.Counter;
-import core.components.Deck;
-import core.components.Token;
+import core.components.*;
 
-public interface GameData {
-    void load(String dataPath);
-
-    Board findBoard(String name);
-
-    Counter findCounter(String name);
-
-    Token findToken(String name);
-
-    Deck findDeck(String name);
+public abstract class GameData<T extends Component> {
+    public abstract void load(String dataPath);
+    public GraphBoard findBoard(String name) { return null; }
+    public Counter findCounter(String name) { return null; }
+    public Token findToken(String name) { return null; }
+    public Deck<T> findDeck(String name) { return null; }
 }

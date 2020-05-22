@@ -3,7 +3,7 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -16,7 +16,7 @@ public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, I
     private final int playerID;
     private final int opponentID;
 
-    public PriestAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
+    public PriestAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
                         PartialObservableDeck<LoveLetterCard> opponentDeck, int opponentID, int ownPlayerID){
         super(card, playerHand, discardPile);
         this.opponentDeck = opponentDeck;
@@ -28,8 +28,8 @@ public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, I
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
-            for (int i = 0; i < opponentDeck.getCards().size(); i++)
-                opponentDeck.setVisibilityOfCard(i, playerID, true);
+            for (int i = 0; i < opponentDeck.getComponents().size(); i++)
+                opponentDeck.setVisibilityOfComponent(i, playerID, true);
         }
 
         return false;

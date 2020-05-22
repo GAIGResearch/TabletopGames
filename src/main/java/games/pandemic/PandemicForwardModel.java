@@ -20,7 +20,6 @@ import static games.pandemic.actions.MovePlayer.placePlayer;
 import static utilities.CoreConstants.nameHash;
 import static utilities.CoreConstants.playerHandHash;
 
-@SuppressWarnings("unchecked")
 public class PandemicForwardModel extends ForwardModel {
 
     // Rule executed last, rule to be executed next, and first rule to be executed in a turn (root)
@@ -159,22 +158,22 @@ public class PandemicForwardModel extends ForwardModel {
         // For each player, initialize their own areas: they get a player hand and a player card
         int capacity = pp.max_cards_per_player;
         for (int i = 0; i < state.getNPlayers(); i++) {
-            Area playerArea = new Area(i);
+            Area playerArea = new Area(i, "Player Area");
             Deck<Card> playerHand = new Deck<>("Player Hand");
             playerHand.setOwnerId(i);
             playerHand.setCapacity(capacity);
-            playerArea.addComponent(playerHandHash, playerHand);
-            playerArea.addComponent(playerCardHash, new Card());
+            playerArea.putComponent(playerHandHash, playerHand);
+            playerArea.putComponent(playerCardHash, new Card("Player Role"));
             state.areas.put(i, playerArea);
         }
 
         // Initialize the game area
-        Area gameArea = new Area(-1);
+        Area gameArea = new Area(-1, "Game Area");
         state.areas.put(-1, gameArea);
 
         // Load the board
         state.world = _data.findBoard("cities");
-        gameArea.addComponent(pandemicBoardHash, state.world);
+        gameArea.putComponent(pandemicBoardHash, state.world);
 
         // Initialize game state variables
         state.setNCardsDrawn(0);
@@ -190,21 +189,21 @@ public class PandemicForwardModel extends ForwardModel {
         Counter researchStations = _data.findCounter("Research Stations");
         researchStations.setMaximum(pp.n_research_stations);
         researchStations.setValue(pp.n_research_stations);
-        gameArea.addComponent(infectionRateHash, infection_rate);
-        gameArea.addComponent(outbreaksHash, outbreaks);
-        gameArea.addComponent(PandemicConstants.researchStationHash, researchStations);
+        gameArea.putComponent(infectionRateHash, infection_rate);
+        gameArea.putComponent(outbreaksHash, outbreaks);
+        gameArea.putComponent(PandemicConstants.researchStationHash, researchStations);
 
         for (String color : colors) {
             int hash = Hash.GetInstance().hash("Disease " + color);
             Counter diseaseC = _data.findCounter("Disease " + color);
             diseaseC.setValue(0);  // 0 - cure not discovered; 1 - cure discovered; 2 - eradicated
-            gameArea.addComponent(hash, diseaseC);
+            gameArea.putComponent(hash, diseaseC);
 
             hash = Hash.GetInstance().hash("Disease Cube " + color);
             Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
             diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
             diseaseCubeCounter.setValue(0);
-            gameArea.addComponent(hash, diseaseCubeCounter);
+            gameArea.putComponent(hash, diseaseCubeCounter);
         }
 
         // Set up decks
@@ -215,12 +214,12 @@ public class PandemicForwardModel extends ForwardModel {
         Deck<Card> infectionDeck =  _data.findDeck("Infections");
         Deck<Card> infectionDiscard =  new Deck<>("Infection Discard");
 
-        gameArea.addComponent(PandemicConstants.playerDeckHash, playerDeck);
-        gameArea.addComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>("Player Deck Discard"));
-        gameArea.addComponent(PandemicConstants.infectionDiscardHash, infectionDiscard);
-        gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
-        gameArea.addComponent(PandemicConstants.infectionHash, infectionDeck);
-        gameArea.addComponent(PandemicConstants.playerRolesHash, playerRoles);
+        gameArea.putComponent(PandemicConstants.playerDeckHash, playerDeck);
+        gameArea.putComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>("Player Deck Discard"));
+        gameArea.putComponent(PandemicConstants.infectionDiscardHash, infectionDiscard);
+        gameArea.putComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
+        gameArea.putComponent(PandemicConstants.infectionHash, infectionDeck);
+        gameArea.putComponent(PandemicConstants.playerRolesHash, playerRoles);
 
         // Infection
         infectionDeck.shuffle(rnd);
@@ -251,7 +250,7 @@ public class PandemicForwardModel extends ForwardModel {
 
             // Give the card to this player
             Area playerArea = state.getArea(i);
-            playerArea.setComponent(playerCardHash, c);
+            playerArea.putComponent(playerCardHash, c);
 
             // Also add this player in Atlanta
             placePlayer(state, "Atlanta", i);
@@ -264,7 +263,7 @@ public class PandemicForwardModel extends ForwardModel {
                 new DrawCard(playerDeck, playerHandDeck).execute(state);
             }
 
-            for (Card card: playerHandDeck.getCards()) {
+            for (Card card: playerHandDeck.getComponents()) {
                 Property property = card.getProperty(Hash.GetInstance().hash("population"));
                 if (property != null){
                     long pop = ((PropertyLong) property).value;
@@ -284,7 +283,7 @@ public class PandemicForwardModel extends ForwardModel {
         for (int i = 0; i < noEpidemicCards; i++) {
             int index = i * range + i + rnd.nextInt(range);
 
-            Card card = new Card();
+            Card card = new Card("Epidemic");
             card.setProperty(nameHash, new PropertyString("epidemic"));
             new AddCardToDeck(card, playerDeck, index).execute(state);
 

@@ -2,28 +2,28 @@ package games.loveletter.actions;
 
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
 public class DrawCard implements IAction, IPrintable {
 
-    private final IDeck<LoveLetterCard> deckFrom;
-    private final IDeck<LoveLetterCard> deckTo;
+    private final Deck<LoveLetterCard> deckFrom;
+    private final Deck<LoveLetterCard> deckTo;
 
     private int index;
     private final int playerID;
 
-    public DrawCard (IDeck<LoveLetterCard> deckFrom, IDeck<LoveLetterCard> deckTo, int index, int playerID) {
+    public DrawCard (Deck<LoveLetterCard> deckFrom, Deck<LoveLetterCard> deckTo, int index, int playerID) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
         this.index = index;
         this.playerID = playerID;
     }
 
-    public DrawCard (IDeck<LoveLetterCard> deckFrom, IDeck<LoveLetterCard> deckTo, int playerID) {
+    public DrawCard (Deck<LoveLetterCard> deckFrom, Deck<LoveLetterCard> deckTo, int playerID) {
         this(deckFrom, deckTo, -1, playerID);
     }
 

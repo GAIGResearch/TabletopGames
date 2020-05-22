@@ -1,7 +1,7 @@
 package games.tictactoe;
 
 import core.actions.IAction;
-import core.components.Grid;
+import core.components.GridBoard;
 import core.AbstractGameState;
 import core.ForwardModel;
 import utilities.Utils;
@@ -12,7 +12,7 @@ public class TicTacToeForwardModel extends ForwardModel {
     @Override
     public void setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
-        ((TicTacToeGameState)firstState).grid = new Grid<>(tttgp.gridWidth, tttgp.gridHeight, ' ');
+        ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(tttgp.gridWidth, tttgp.gridHeight, Character.class, ' ');
     }
 
     @Override
@@ -33,40 +33,40 @@ public class TicTacToeForwardModel extends ForwardModel {
      * @param gameState - game state to check game end.
      */
     private void checkGameEnd(TicTacToeGameState gameState){
-        Grid<Character> grid = gameState.getGrid();
+        GridBoard<Character> gridBoard = gameState.getGridBoard();
 
         //check rows
-        for (int x = 0; x < grid.getWidth(); x++){
-            if (grid.getElement(x, 0).equals(grid.getElement(x, 1)) &&
-                    grid.getElement(x, 0).equals(grid.getElement(x, 2)) &&
-                    !grid.getElement(x, 0).equals(' ')){
-                gameState.registerWinner(grid.getElement(x, 0));
+        for (int x = 0; x < gridBoard.getWidth(); x++){
+            if (gridBoard.getElement(x, 0).equals(gridBoard.getElement(x, 1)) &&
+                    gridBoard.getElement(x, 0).equals(gridBoard.getElement(x, 2)) &&
+                    !gridBoard.getElement(x, 0).equals(' ')){
+                gameState.registerWinner(gridBoard.getElement(x, 0));
                 return;
             }
         }
 
         // check columns
-        for (int y = 0; y < grid.getHeight(); y++){
-            if (grid.getElement(0, y).equals(grid.getElement(1, y)) &&
-                    grid.getElement(0, y).equals(grid.getElement(2, y)) &&
-                    !grid.getElement(0, y).equals(' ')){
-                gameState.registerWinner(grid.getElement(0, y));
+        for (int y = 0; y < gridBoard.getHeight(); y++){
+            if (gridBoard.getElement(0, y).equals(gridBoard.getElement(1, y)) &&
+                    gridBoard.getElement(0, y).equals(gridBoard.getElement(2, y)) &&
+                    !gridBoard.getElement(0, y).equals(' ')){
+                gameState.registerWinner(gridBoard.getElement(0, y));
                 return;
             }
         }
 
         //check diagonals
-        if (grid.getElement(0, 0).equals(grid.getElement(1, 1)) &&
-                grid.getElement(0, 0).equals(grid.getElement(2, 2)) &&
-                !grid.getElement(1, 1).equals(' ')){
-            gameState.registerWinner(grid.getElement(1, 1));
+        if (gridBoard.getElement(0, 0).equals(gridBoard.getElement(1, 1)) &&
+                gridBoard.getElement(0, 0).equals(gridBoard.getElement(2, 2)) &&
+                !gridBoard.getElement(1, 1).equals(' ')){
+            gameState.registerWinner(gridBoard.getElement(1, 1));
             return;
         }
 
-        if (grid.getElement(0, 2).equals(grid.getElement(1, 1)) &&
-                grid.getElement(0, 2).equals(grid.getElement(2, 0)) &&
-                !grid.getElement(0, 2).equals(' ')){
-            gameState.registerWinner(grid.getElement(1, 1));
+        if (gridBoard.getElement(0, 2).equals(gridBoard.getElement(1, 1)) &&
+                gridBoard.getElement(0, 2).equals(gridBoard.getElement(2, 0)) &&
+                !gridBoard.getElement(0, 2).equals(' ')){
+            gameState.registerWinner(gridBoard.getElement(1, 1));
         }
     }
 }

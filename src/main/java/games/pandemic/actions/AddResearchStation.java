@@ -24,7 +24,7 @@ public class AddResearchStation implements IAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BoardNode bn = ((PandemicGameState)gs).getWorld().getNode(nameHash, city);
+        BoardNode bn = ((PandemicGameState)gs).getWorld().getNodeByStringProperty(nameHash, city);
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(true));

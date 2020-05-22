@@ -19,7 +19,7 @@ public class HasRPCard extends ConditionNode {
             Deck<Card> ph = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, i);
             int nCards = ph.getSize();
             for (int cp = 0; cp < nCards; cp++) {
-                Card card = ph.getCards().get(cp);
+                Card card = ph.getComponents().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     return true;
                 }

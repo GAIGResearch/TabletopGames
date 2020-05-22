@@ -1,15 +1,16 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import core.turnorder.TurnOrder;
 
-public class SkipAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
+public class SkipAction<T extends Component> extends PlayCard<T> implements IsNopeable, IPrintable {
 
-    public SkipAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck)
+    public SkipAction(T card, Deck<T> playerDeck, Deck<T> discardDeck)
     {
         super(card, playerDeck, discardDeck);
     }

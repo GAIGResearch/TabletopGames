@@ -16,6 +16,7 @@ public class ColtExpressCard extends Card {
     public CardType cardType;
 
     public ColtExpressCard(CardType cardType) {
+        super(cardType.toString());
         this.cardType = cardType;
     }
 

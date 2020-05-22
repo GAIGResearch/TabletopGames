@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -14,8 +13,8 @@ public class HandmaidAction  extends PlayCard<LoveLetterCard> implements IAction
 
     private final int playerID;
 
-    public HandmaidAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
-                            int ownPlayerID){
+    public HandmaidAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
+                          int ownPlayerID){
         super(card, playerHand, discardPile);
         this.playerID = ownPlayerID;
     }

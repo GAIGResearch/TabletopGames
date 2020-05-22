@@ -2,8 +2,8 @@ package games.explodingkittens.actions;
 
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -14,10 +14,10 @@ import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensG
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 
     int playerID;
-    final IDeck<ExplodingKittenCard> deckFrom;
-    final IDeck<ExplodingKittenCard>  deckTo;
+    final Deck<ExplodingKittenCard> deckFrom;
+    final Deck<ExplodingKittenCard>  deckTo;
 
-    public DrawExplodingKittenCard (int playerID, IDeck<ExplodingKittenCard>  deckFrom, IDeck<ExplodingKittenCard> deckTo) {
+    public DrawExplodingKittenCard (int playerID, Deck<ExplodingKittenCard>  deckFrom, Deck<ExplodingKittenCard> deckTo) {
         this.playerID = playerID;
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
@@ -34,7 +34,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
         ExplodingKittenCard.CardType type = c.cardType;
         if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
             ExplodingKittenCard defuseCard = null;
-            for (ExplodingKittenCard card : deckTo.getCards()){
+            for (ExplodingKittenCard card : deckTo.getComponents()){
                 if (card.cardType == ExplodingKittenCard.CardType.DEFUSE){
                     defuseCard = card;
                     break;
@@ -47,8 +47,8 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
             } else {
                 System.out.println("Player " + playerID + " died");
                 ((ExplodingKittensGameState) gs).killPlayer(this.playerID);
-                IDeck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
-                for (ExplodingKittenCard card : deckTo.getCards()){
+                Deck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
+                for (ExplodingKittenCard card : deckTo.getComponents()){
                     discardDeck.add(card);
                 }
                 deckTo.clear();

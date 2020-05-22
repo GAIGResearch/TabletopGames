@@ -144,6 +144,7 @@ public class CarcassonneGameState extends AbstractGameState {
         private boolean fixedRotation = false;
 
         private CarcassonneTile(CarcassonneType[][] type){
+            super(Arrays.deepToString(type));
             this.type = type;
         }
 

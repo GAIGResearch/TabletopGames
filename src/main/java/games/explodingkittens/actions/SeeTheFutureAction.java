@@ -1,19 +1,19 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
+import core.components.Component;
 import core.components.Deck;
-import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
 import core.turnorder.TurnOrder;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture;
 
-public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
+public class SeeTheFutureAction<T extends Component> extends PlayCard<T> implements IsNopeable, IPrintable {
     private final Deck<T> drawPile;
     private final int playerID;
 
-    public SeeTheFutureAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID, Deck<T> drawPile) {
+    public SeeTheFutureAction(T card, Deck<T> playerDeck, Deck<T> discardDeck, int playerID, Deck<T> drawPile) {
         super(card, playerDeck, discardDeck);
         this.drawPile = drawPile;
         this.playerID = playerID;

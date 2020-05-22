@@ -3,7 +3,7 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -13,7 +13,7 @@ public class PrincessAction extends PlayCard<LoveLetterCard> implements IAction,
 
     private final int playerID;
 
-    public PrincessAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
+    public PrincessAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
                           int playerIndex){
         super(card, playerHand, discardPile);
         this.playerID = playerIndex;

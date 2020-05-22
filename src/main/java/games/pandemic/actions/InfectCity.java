@@ -41,7 +41,7 @@ public class InfectCity implements IAction {
             int colorIdx = Utils.indexOf(colors, color.valueStr);
             PropertyString city = (PropertyString) infectingCard.getProperty(nameHash);
 
-            BoardNode bn = pgs.getWorld().getNode(nameHash, city.value);
+            BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, city.value);
             if (bn != null) {
                 // check if quarantine specialist is on that node
                 PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(playersHash);

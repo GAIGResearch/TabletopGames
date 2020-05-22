@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
-import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
 
@@ -51,9 +50,9 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
                 continue;
 
             for (int j = 0; j < gs.getNPlayers(); j++){
-                drawPile.setVisibilityOfCard(i, j, false);        // other players don't know the order anymore
+                drawPile.setVisibilityOfComponent(i, j, false);        // other players don't know the order anymore
             }
-            drawPile.setVisibilityOfCard(i, playerID, true);      // this player knows the first three cards
+            drawPile.setVisibilityOfComponent(i, playerID, true);      // this player knows the first three cards
         }
         gs.setMainGamePhase();
         return false;

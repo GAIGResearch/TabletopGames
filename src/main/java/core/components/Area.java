@@ -1,40 +1,62 @@
 package core.components;
 
+import utilities.Utils;
+
 import java.util.HashMap;
 
 /**
- * An Area is a collection of core.components as Decks, Token, Dices, Cards and Boards.
+ * An Area is a collection of components such as Decks, Token, Dices, Cards and Boards, mapping to their IDs.
  */
-public class Area {
-    protected HashMap<Integer, Component> components;
-    protected int owner;   // -1 for main game area
+public class Area extends Component {
 
-    public Area(int owner) {
+    // Collection of components stored in this area, mapping to their IDs
+    protected HashMap<Integer, Component> components;
+
+    public Area(int owner, String name) {
+        super(Utils.ComponentType.AREA, "");
         this.components = new HashMap<>();
-        this.owner = owner;
+        this.ownerId = owner;
     }
 
     public Area copy() {
-        Area new_area = new Area(owner);
+        Area new_area = new Area(ownerId, componentName);
         new_area.components = new HashMap<>();
         new_area.components.putAll(this.components);
-
+        copyComponentTo(new_area);
         return new_area;
     }
 
-    public int getOwner()           { return this.owner;  }
-    public void setOwner(int owner) { this.owner = owner; }
+    /**
+     * Retrieve the collection of components in this area.
+     * @return - HashMap, components mapped to their IDs
+     */
+    public HashMap<Integer, Component> getComponents() {
+        return this.components;
+    }
 
-    public HashMap<Integer, Component> getComponents()                                { return this.components;              }
-    public Component                   getComponent(Integer key)                      { return this.components.get(key);     }
-    public void                        addComponent(Integer key, Component component) { this.components.put(key, component); }
+    /**
+     * Retrieve a component by its id key.
+     * @param key - key to look for in the map.
+     * @return - component corresponding to the given key.
+     */
+    public Component getComponent(Integer key) {
+        return this.components.get(key);
+    }
 
-    public boolean setComponent(int hash, Component c) {
-        Component old = components.get(hash);
-        if (old.getType().equals(c.getType())) {
-            components.put(hash, c);
-            return true;
-        }
-        return false;
+    /**
+     * Adds a component to the collection.
+     * @param key - key for the component.
+     * @param component - component to add to the collection.
+     */
+    public void putComponent(Integer key, Component component) {
+        this.components.put(key, component);
+    }
+
+    /**
+     * Adds a component to the collection, using its own component ID as the key in the map.
+     * @param component - component to add to the collection.
+     */
+    public void putComponent(Component component) {
+        this.components.put(component.getComponentID(), component);
     }
 }

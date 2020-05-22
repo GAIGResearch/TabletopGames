@@ -3,14 +3,14 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.cards.LoveLetterCard;
 
 public class CountessAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
 
-    public CountessAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile){
+    public CountessAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile){
         super(card, playerHand, discardPile);
     }
 

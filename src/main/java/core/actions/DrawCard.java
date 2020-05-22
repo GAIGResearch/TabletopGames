@@ -58,8 +58,8 @@ public class DrawCard implements IAction {
     @Override
     public String toString() {
         return "DrawCard{" +
-                "deckFrom=" + deckFrom.getID() +
-                ", deckTo=" + deckTo.getID() +
+                "deckFrom=" + deckFrom.getComponentName() +
+                ", deckTo=" + deckTo.getComponentName() +
                 ", index=" + index +
                 '}';
     }
@@ -77,7 +77,7 @@ public class DrawCard implements IAction {
     }
 
     public Card getDrawCard() {
-        return deckFrom.getCards().get(index);
+        return deckFrom.getComponents().get(index);
     }
 
     @Override

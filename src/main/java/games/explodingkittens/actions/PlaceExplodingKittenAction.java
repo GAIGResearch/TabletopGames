@@ -1,15 +1,16 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 
-public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrintable {
+public class PlaceExplodingKittenAction<T extends Component> extends PlayCard<T> implements IPrintable {
     int targetIndex;
 
-    public PlaceExplodingKittenAction(T card, IDeck<T> playerDeck, IDeck<T> drawDeck, int targetIndex) {
+    public PlaceExplodingKittenAction(T card, Deck<T> playerDeck, Deck<T> drawDeck, int targetIndex) {
         super(card, playerDeck, drawDeck);
         this.targetIndex = targetIndex;
     }

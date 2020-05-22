@@ -23,7 +23,7 @@ public class ForceRPReaction extends RuleNode {
             Deck<Card> ph = (Deck<Card>) pgs.getComponent(playerHandHash, i);
             int nCards = ph.getSize();
             for (int cp = 0; cp < nCards; cp++) {
-                Card card = ph.getCards().get(cp);
+                Card card = ph.getComponents().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     ((PandemicTurnOrder)pgs.getTurnOrder()).addReactivePlayer(i);
                     pgs.setGamePhase(RPReaction);

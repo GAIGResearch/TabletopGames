@@ -2,8 +2,8 @@ package games.explodingkittens.actions;
 
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -12,10 +12,10 @@ import games.explodingkittens.cards.ExplodingKittenCard;
 public class GiveCardAction implements IAction, IPrintable {
 
     final ExplodingKittenCard card;
-    final IDeck<ExplodingKittenCard> giverDeck;
-    final IDeck<ExplodingKittenCard> receiverDeck;
+    final Deck<ExplodingKittenCard> giverDeck;
+    final Deck<ExplodingKittenCard> receiverDeck;
 
-    public GiveCardAction(ExplodingKittenCard card, IDeck<ExplodingKittenCard> giverDeck, IDeck<ExplodingKittenCard> receiverDeck) {
+    public GiveCardAction(ExplodingKittenCard card, Deck<ExplodingKittenCard> giverDeck, Deck<ExplodingKittenCard> receiverDeck) {
         this.card = card;
         this.giverDeck = giverDeck;
         this.receiverDeck = receiverDeck;

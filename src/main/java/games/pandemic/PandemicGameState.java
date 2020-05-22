@@ -35,7 +35,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     Deck<Card> tempDeck;
 
     // The main game board
-    Board world;
+    GraphBoard world;
     // Was a quiet night card played?
     boolean quietNight;
     // Was an epidemic card drawn?
@@ -110,7 +110,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         if (!((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value
                 && ! roleString.equals("Operations Expert")) {
             Card card_in_hand = null;
-            for (Card card : playerHand.getCards()) {
+            for (Card card : playerHand.getComponents()) {
                 Property cardName = card.getProperty(nameHash);
                 if (cardName.equals(playerLocationName)) {
                     card_in_hand = card;
@@ -143,7 +143,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
                 // Give card
                 for (int j = 0; j < playerHand.getSize(); j++) {
-                    Card card = playerHand.getCards().get(j);
+                    Card card = playerHand.getComponents().get(j);
                     // Researcher can give any card, others only the card that matches the city name
                     if (roleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
                         actions.add(new DrawCard(playerHand, otherDeck, j));
@@ -153,7 +153,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 // Take card
                 // Can take any card from the researcher or the card that matches the city if the player is in that city
                 for (int j = 0; j < otherDeck.getSize(); j++) {
-                    Card card = otherDeck.getCards().get(j);
+                    Card card = otherDeck.getComponents().get(j);
                     if (otherRoleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
                         actions.add(new DrawCard(otherDeck, playerHand, j));
                     }
@@ -163,7 +163,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
         // Discover a cure, cards of the same colour at a research station
         ArrayList<Card>[] colorCounter = new ArrayList[colors.length];
-        for (Card card: playerHand.getCards()){
+        for (Card card: playerHand.getComponents()){
             Property p  = card.getProperty(colorHash);
             if (p != null){
                 // Only city cards have colours, events don't
@@ -215,7 +215,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 } else {
                     // List all the other nodes with combination of all the city cards in hand
                     for (BoardNode bn : this.world.getBoardNodes()) {
-                        for (Card c : playerHand.getCards()) {
+                        for (Card c : playerHand.getComponents()) {
                             if (c.getProperty(colorHash) != null) {
                                 actions.add(new MovePlayerWithCard(playerIdx, ((PropertyString) bn.getProperty(nameHash)).value, c));
                             }
@@ -252,7 +252,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 if (plannerDeck.getSize() == 0) {
                     // then can pick up an event card
                     Deck<Card> infectionDiscardDeck = (Deck<Card>) getComponent(infectionDiscardHash);
-                    ArrayList<Card> infDiscard = infectionDiscardDeck.getCards();
+                    ArrayList<Card> infDiscard = infectionDiscardDeck.getComponents();
                     for (int i = 0; i < infDiscard.size(); i++) {
                         Card card = infDiscard.get(i);
                         if (card.getProperty(colorHash) != null) {
@@ -315,7 +315,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             String destination = ((PropertyString) bn.getProperty(nameHash)).value;
 
             if (!neighbours.contains(bn)) {  // Ignore neighbours, already covered in Drive/Ferry actions
-                for (Card card: playerHand.getCards()){
+                for (Card card: playerHand.getComponents()){
                     //  Check if card has country to determine if it is city card or not
                     if ((card.getProperty(countryHash)) != null){
                         String cardCity = ((PropertyString)card.getProperty(nameHash)).value;
@@ -373,7 +373,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         Deck<Card> ph = (Deck<Card>) getComponentActingPlayer(playerHandHash);
         int nCards = ph.getSize();
         for (int cp = 0; cp < nCards; cp++) {
-            Card card = ph.getCards().get(cp);
+            Card card = ph.getComponents().get(cp);
             if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                 for (int idx = 0; idx < nInfectDiscards; idx++) {
                     acts.add(new RemoveCardWithCard(infectionDiscard, idx, card));
@@ -395,7 +395,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         actions.add(new DoNothing());  // Can always do nothing
 
         Deck<Card> playerHand = ((Deck<Card>) getComponentActingPlayer(playerHandHash));
-        for (Card card: playerHand.getCards()){
+        for (Card card: playerHand.getComponents()){
             Property p  = card.getProperty(colorHash);
             if (p == null){
                 // Event cards don't have colour
@@ -542,7 +542,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         Card playerCard = ((Card) getComponent(playerCardHash, i));
         return ((PropertyString) playerCard.getProperty(nameHash)).value;
     }
-    public Board getWorld() {
+    public GraphBoard getWorld() {
         return world;
     }
     /*

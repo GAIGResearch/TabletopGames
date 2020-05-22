@@ -13,7 +13,6 @@ import java.util.Objects;
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 import static utilities.CoreConstants.playerHandHash;
 
-@SuppressWarnings("unchecked")
 public class RearrangeCardsWithCard implements IAction {
     private Deck<Card> deckFrom;
     private int[] newCardOrder;
@@ -32,8 +31,8 @@ public class RearrangeCardsWithCard implements IAction {
         for (int value : newCardOrder) {
             cards[value] = deckFrom.draw();
         }
-        Deck<Card> draws = new Deck<>("Temp Draws from: " + deckFrom.getID());
-        draws.setCards(new ArrayList<>(Arrays.asList(cards)));
+        Deck<Card> draws = new Deck<>("Temp Draws from: " + deckFrom.getComponentName());
+        draws.setComponents(new ArrayList<>(Arrays.asList(cards)));
         boolean result = deckFrom.add(draws);
 
         if (result) {
@@ -76,7 +75,7 @@ public class RearrangeCardsWithCard implements IAction {
     @Override
     public String toString() {
         return "RearrangeCardsWithCard{" +
-                "deck=" + deckFrom.getID() +
+                "deck=" + deckFrom.getComponentName() +
                 ", newCardOrder=" + Arrays.toString(newCardOrder) +
                 ", card=" + card.toString() +
                 '}';

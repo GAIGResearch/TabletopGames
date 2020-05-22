@@ -47,7 +47,7 @@ public class AddCardToDeck implements IAction {
     public String toString() {
         return "AddCardToDeck{" +
                 "card=" + card.toString() +
-                ", deck=" + deck.getID() +
+                ", deck=" + deck.getComponentName() +
                 ", index=" + index +
                 '}';
     }

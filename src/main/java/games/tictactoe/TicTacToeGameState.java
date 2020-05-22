@@ -3,7 +3,7 @@ package games.tictactoe;
 import core.ForwardModel;
 import core.actions.IAction;
 import core.actions.SetGridValueAction;
-import core.components.Grid;
+import core.components.GridBoard;
 import core.AbstractGameState;
 import core.gamestates.GridGameState;
 import core.observations.GridObservation;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class TicTacToeGameState extends AbstractGameState implements GridGameState<Character> {
 
-    Grid<Character> grid;
+    GridBoard<Character> gridBoard;
 
     public TicTacToeGameState(TicTacToeGameParameters gameParameters, ForwardModel model, int nPlayers){
         super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
@@ -25,7 +25,7 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
 
     @Override
     public IObservation getObservation(int player) {
-        return new GridObservation<>(grid.getGridValues());
+        return new GridObservation<>(gridBoard.getGridValues());
     }
 
     @Override
@@ -39,18 +39,18 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
         ArrayList<IAction> actions = new ArrayList<>();
         int player = turnOrder.getCurrentPlayer(this);
 
-        for (int x = 0; x < grid.getWidth(); x++){
-            for (int y = 0; y < grid.getHeight(); y++) {
-                if (grid.getElement(x, y) == ' ')
-                    actions.add(new SetGridValueAction<>(grid, x, y, player == 0 ? 'x' : 'o'));
+        for (int x = 0; x < gridBoard.getWidth(); x++){
+            for (int y = 0; y < gridBoard.getHeight(); y++) {
+                if (gridBoard.getElement(x, y) == ' ')
+                    actions.add(new SetGridValueAction<>(gridBoard, x, y, player == 0 ? 'x' : 'o'));
             }
         }
         return actions;
     }
 
     @Override
-    public Grid<Character> getGrid() {
-        return grid;
+    public GridBoard<Character> getGridBoard() {
+        return gridBoard;
     }
 
     /**

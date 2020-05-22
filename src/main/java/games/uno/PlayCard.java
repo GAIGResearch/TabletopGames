@@ -2,12 +2,13 @@ package games.uno;
 
 import core.actions.IAction;
 import core.components.Card;
+import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.uno.cards.CardEffect;
 
-public class PlayCard<T> implements IAction, IPrintable {
+public class PlayCard<T extends Component> implements IAction, IPrintable {
 
     private final Deck<T> sourceDeck;
     private final Deck<T> targetDeck;

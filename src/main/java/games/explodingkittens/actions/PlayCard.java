@@ -2,17 +2,18 @@ package games.explodingkittens.actions;
 
 import core.actions.IAction;
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 
 
-public class PlayCard<T> implements IAction {
+public class PlayCard<T extends Component> implements IAction {
 
     T card;
-    final IDeck<T> sourceDeck;
-    final IDeck<T> targetDeck;
+    final Deck<T> sourceDeck;
+    final Deck<T> targetDeck;
 
-    public PlayCard(T card, IDeck<T> sourceDeck, IDeck<T> targetDeck){
+    public PlayCard(T card, Deck<T> sourceDeck, Deck<T> targetDeck){
         this.card = card;
         this.sourceDeck = sourceDeck;
         this.targetDeck = targetDeck;

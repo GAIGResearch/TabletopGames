@@ -1,15 +1,16 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 import core.observations.IPrintable;
 import core.turnorder.TurnOrder;
 
-public class ShuffleAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
-    final IDeck<T> shuffleDeck;
+public class ShuffleAction<T extends Component> extends PlayCard<T> implements IsNopeable, IPrintable {
+    final Deck<T> shuffleDeck;
 
-    public ShuffleAction(T card, IDeck<T> playerDeck, IDeck<T> discardPile, IDeck<T> deckToShuffle) {
+    public ShuffleAction(T card, Deck<T> playerDeck, Deck<T> discardPile, Deck<T> deckToShuffle) {
         super(card, playerDeck, discardPile);
         shuffleDeck = deckToShuffle;
     }

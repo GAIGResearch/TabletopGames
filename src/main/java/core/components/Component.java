@@ -10,18 +10,39 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public abstract class Component {
-    protected ComponentType type;  // Type of this component
+    private static int ID = 0;  // All components receive a unique and final ID from this always increasing counter
+
+    protected final int componentID;  // Unique ID of this component
+    protected final ComponentType type;  // Type of this component
+    protected final HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
     protected int ownerId = -1;  // By default belongs to the game
-    protected HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
+    protected String componentName;  // Name of this component
+
+    public Component(ComponentType type, String name) {
+        this.componentID = ID++;
+        this.type = type;
+        this.componentName = name;
+        this.properties = new HashMap<>();
+    }
+
+    public Component(ComponentType type) {
+        this.componentID = ID++;
+        this.type = type;
+        this.componentName = type.toString();
+        this.properties = new HashMap<>();
+    }
+
+    /**
+     * To be implemented by subclass, all components should be able to create copies of themselves.
+     * @return - a new Component with the same properties.
+     */
+    public abstract Component copy();
 
     /**
      * Get and set the type of this component.
      */
     public ComponentType getType()                   {
         return this.type;
-    }
-    public void setType(ComponentType type) {
-        this.type = type;
     }
 
     /**
@@ -42,6 +63,37 @@ public abstract class Component {
     }
     public void setOwnerId(int ownerId) {
         this.ownerId = ownerId;
+    }
+
+    /**
+     * Get the ID of this component.
+     * @return - component ID.
+     */
+    public int getComponentID() {
+        return componentID;
+    }
+
+    /**
+     * @return name of this component.
+     */
+    public String getComponentName() {
+        return componentName;
+    }
+
+    /**
+     * Sets the name of this component.
+     * @param componentName - new name for this component.
+     */
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
+    }
+
+    /**
+     * Get the full map of properties.
+     * @return - mapping from property integer key to property objects.
+     */
+    public HashMap<Integer, Property> getProperties() {
+        return properties;
     }
 
     /**
@@ -130,13 +182,22 @@ public abstract class Component {
      */
     public void copyComponentTo(Component copyTo)
     {
-        for (int prop_key : this.properties.keySet())
-        {
+        copyTo.properties.clear();
+        for (int prop_key : this.properties.keySet()) {
             Property newProp = this.properties.get(prop_key).copy();
             copyTo.setProperty(prop_key, newProp);
         }
+    }
 
-        copyTo.type = this.type;
+    @Override
+    public String toString() {
+        return "Component{" +
+                "componentID=" + componentID +
+                ", type=" + type +
+                ", ownerId=" + ownerId +
+                ", componentName='" + componentName + '\'' +
+                ", properties=" + properties +
+                '}';
     }
 
     @Override
@@ -144,12 +205,14 @@ public abstract class Component {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Component component = (Component) o;
-        return type == component.type &&
+        return componentID == ((Component) o).componentID && ownerId == ((Component) o).ownerId &&
+                type == component.type &&
+                componentName.equals(((Component) o).componentName) &&
                 Objects.equals(properties, component.properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, properties);
+        return Objects.hash(componentID, componentName, ownerId, type, properties);
     }
 }

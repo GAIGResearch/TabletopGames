@@ -76,7 +76,7 @@ public class LoveLetterGameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++) {
             points = 0;
             if (playerResults[i] == Utils.GameResult.GAME_WIN)
-                for (LoveLetterCard card : playerDiscardCards.get(i).getCards())
+                for (LoveLetterCard card : playerDiscardCards.get(i).getComponents())
                     points += card.cardType.getValue();
             if (points > bestValue){
                 bestValue = points;
@@ -120,13 +120,13 @@ public class LoveLetterGameState extends AbstractGameState {
         Deck<LoveLetterCard> playerDiscardPile = playerDiscardCards.get(playerID);
 
         if (needToForceCountess(playerDeck)){
-            for (LoveLetterCard card : playerDeck.getCards()) {
+            for (LoveLetterCard card : playerDeck.getComponents()) {
                 if (card.cardType == LoveLetterCard.CardType.Countess)
                     actions.add(new CountessAction(card, playerDeck, playerDiscardPile));
             }
         }
         else {
-            for (LoveLetterCard card : playerDeck.getCards()) {
+            for (LoveLetterCard card : playerDeck.getComponents()) {
                 switch (card.cardType) {
                     case Priest:
                         for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
@@ -207,7 +207,7 @@ public class LoveLetterGameState extends AbstractGameState {
      */
     private boolean needToForceCountess(Deck<LoveLetterCard> playerDeck){
         boolean ownsCountess = false;
-        for (LoveLetterCard card : playerDeck.getCards()) {
+        for (LoveLetterCard card : playerDeck.getComponents()) {
             if (card.cardType == LoveLetterCard.CardType.Countess){
                 ownsCountess = true;
                 break;
@@ -217,7 +217,7 @@ public class LoveLetterGameState extends AbstractGameState {
         boolean forceCountess = false;
         if (ownsCountess)
         {
-            for (LoveLetterCard card: playerDeck.getCards()) {
+            for (LoveLetterCard card: playerDeck.getComponents()) {
                 if (card.cardType == LoveLetterCard.CardType.Prince || card.cardType == LoveLetterCard.CardType.King){
                     forceCountess = true;
                     break;
@@ -233,7 +233,7 @@ public class LoveLetterGameState extends AbstractGameState {
      */
     public void killPlayer(int playerID){
         setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
-        while (playerHandCards.get(playerID).getCards().size() > 0)
+        while (playerHandCards.get(playerID).getComponents().size() > 0)
             playerDiscardCards.get(playerID).add(playerHandCards.get(playerID).draw());
 
         int nPlayersActive = 0;
@@ -253,7 +253,7 @@ public class LoveLetterGameState extends AbstractGameState {
     public void setProtection(int playerID, boolean protection){
         effectProtection[playerID] = protection;
     }
-    public int getRemainingCards(){return drawPile.getCards().size();}
+    public int getRemainingCards(){return drawPile.getComponents().size();}
 
     /**
      * Prints the game state.

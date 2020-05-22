@@ -1,8 +1,9 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -10,11 +11,11 @@ import core.turnorder.TurnOrder;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Favor;
 
-public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
+public class FavorAction<T extends Component> extends PlayCard<T> implements IsNopeable, IPrintable {
     final int target;
     final int playerAskingForFavor;
 
-    public FavorAction(T card, IDeck<T> playerDeck, IDeck<T> discardPile, int target, int playerID) {
+    public FavorAction(T card, Deck<T> playerDeck, Deck<T> discardPile, int target, int playerID) {
         super(card, playerDeck, discardPile);
         this.target = target;
         this.playerAskingForFavor = playerID;

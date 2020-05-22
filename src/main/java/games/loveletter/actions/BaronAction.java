@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -14,11 +13,11 @@ import utilities.Utils;
 public class BaronAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
 
     private final Deck<LoveLetterCard> opponentDeck;
-    private final IDeck<LoveLetterCard> playerDeck;
+    private final Deck<LoveLetterCard> playerDeck;
     private final int playerID;
     private final int opponentID;
 
-    public BaronAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
+    public BaronAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
                         Deck<LoveLetterCard> opponentDeck, int opponentID, int ownPlayerID){
         super(card, playerHand, discardPile);
         this.opponentDeck = opponentDeck;

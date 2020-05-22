@@ -67,7 +67,7 @@ public class RemoveCardWithCard implements IAction {
     @Override
     public String toString() {
         return "RemoveCardWithCard{" +
-                "deck=" + deck.getID() +
+                "deck=" + deck.getComponentName() +
                 ", card=" + card.toString() +
                 ", removeCard=" + removeCard +
                 '}';

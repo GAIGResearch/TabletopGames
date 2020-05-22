@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -17,7 +16,7 @@ public class PrinceAction extends PlayCard<LoveLetterCard> implements IAction, I
     private final int opponentID;
     private final Deck<LoveLetterCard> opponentDiscardPile;
 
-    public PrinceAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
+    public PrinceAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
                        Deck<LoveLetterCard> opponentDeck, int opponentID, Deck<LoveLetterCard> drawPile,
                        Deck<LoveLetterCard> opponentDiscardPile){
         super(card, playerHand, discardPile);

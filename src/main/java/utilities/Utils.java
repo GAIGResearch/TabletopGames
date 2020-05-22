@@ -22,8 +22,10 @@ public abstract class Utils {
     }
 
     public enum ComponentType {
-        BOARD,
         DECK,
+        AREA,
+        BOARD,
+        BOARD_NODE,
         CARD,
         COUNTER,
         DICE,

@@ -1,17 +1,18 @@
 package games.explodingkittens.actions;
 
 import core.components.Card;
-import core.components.IDeck;
 import core.AbstractGameState;
+import core.components.Component;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import core.turnorder.TurnOrder;
 
 
-public class AttackAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
+public class AttackAction<T extends Component> extends PlayCard<T> implements IsNopeable, IPrintable {
     int attackTargetID;
 
-    public AttackAction(T card, IDeck<T> sourceDeck, IDeck<T> targetDeck, int attackTargetID) {
+    public AttackAction(T card, Deck<T> sourceDeck, Deck<T> targetDeck, int attackTargetID) {
         super(card, sourceDeck, targetDeck);
         this.attackTargetID = attackTargetID;
     }

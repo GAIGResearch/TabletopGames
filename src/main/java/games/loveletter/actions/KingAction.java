@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.IAction;
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
@@ -14,10 +13,10 @@ import games.loveletter.cards.LoveLetterCard;
 public class KingAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
 
     private final Deck<LoveLetterCard> opponentDeck;
-    private final IDeck<LoveLetterCard> playerDeck;
+    private final Deck<LoveLetterCard> playerDeck;
     private final int opponentID;
 
-    public KingAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
+    public KingAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
                        Deck<LoveLetterCard> opponentDeck, int opponentID){
         super(card, playerHand, discardPile);
         this.opponentDeck = opponentDeck;
@@ -30,11 +29,11 @@ public class KingAction extends PlayCard<LoveLetterCard> implements IAction, IPr
         super.execute(gs);
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp");
-            while (opponentDeck.getCards().size() > 0)
+            while (opponentDeck.getComponents().size() > 0)
                 tmpDeck.add(opponentDeck.draw());
-            while (playerDeck.getCards().size() > 0)
+            while (playerDeck.getComponents().size() > 0)
                 opponentDeck.add(playerDeck.draw());
-            while (tmpDeck.getCards().size() > 0)
+            while (tmpDeck.getComponents().size() > 0)
                 playerDeck.add(tmpDeck.draw());
         }
 

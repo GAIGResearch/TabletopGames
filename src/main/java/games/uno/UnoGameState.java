@@ -46,7 +46,7 @@ public class UnoGameState extends AbstractGameState {
         ArrayList<IAction> actions = new ArrayList<>();
         int player = turnOrder.getCurrentPlayer(this);
         Deck<UnoCard> playerDeck = playerDecks.get(player);
-        for (UnoCard card : playerDeck.getCards()){
+        for (UnoCard card : playerDeck.getComponents()){
             if (card.isPlayable(this))
             {
                 if (card instanceof UnoNumberCard)
