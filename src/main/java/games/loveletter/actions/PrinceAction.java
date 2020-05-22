@@ -1,34 +1,30 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
-public class PrinceAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+public class PrinceAction extends DrawCard implements IPrintable {
 
-    private final Deck<LoveLetterCard> opponentDeck;
-    private final Deck<LoveLetterCard> drawPile;
     private final int opponentID;
-    private final Deck<LoveLetterCard> opponentDiscardPile;
 
-    public PrinceAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
-                       Deck<LoveLetterCard> opponentDeck, int opponentID, Deck<LoveLetterCard> drawPile,
-                       Deck<LoveLetterCard> opponentDiscardPile){
-        super(card, playerHand, discardPile);
-        this.opponentDeck = opponentDeck;
-        this.drawPile = drawPile;
+    public PrinceAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
+        super(deckFrom, deckTo, fromIndex);
         this.opponentID = opponentID;
-        this.opponentDiscardPile = opponentDiscardPile;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
+        PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+        Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(opponentID);
+        Deck<LoveLetterCard> drawPile = llgs.getDrawPile();
+
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             LoveLetterCard card = opponentDeck.draw();
 
@@ -45,13 +41,10 @@ public class PrinceAction extends PlayCard<LoveLetterCard> implements IAction, I
 
         }
 
-        return false;
+        return super.execute(gs);
     }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     @Override
     public String toString(){

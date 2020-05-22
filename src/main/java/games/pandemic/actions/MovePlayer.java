@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Card;
 import core.content.*;
@@ -14,7 +14,7 @@ import static utilities.CoreConstants.nameHash;
 import static utilities.CoreConstants.playersHash;
 
 
-public class MovePlayer implements IAction {
+public class MovePlayer extends AbstractAction {
     int playerIdx;
     String destination;
 
@@ -32,10 +32,7 @@ public class MovePlayer implements IAction {
         return true;
     }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
         BoardNode bn = gs.getWorld().getNodeByStringProperty(nameHash, city);

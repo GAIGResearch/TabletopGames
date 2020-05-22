@@ -32,6 +32,22 @@ public abstract class Component {
         this.properties = new HashMap<>();
     }
 
+    // Copy constructors
+
+    protected Component(ComponentType type, String name, int componentID) {
+        this.componentID = componentID;
+        this.type = type;
+        this.componentName = name;
+        this.properties = new HashMap<>();
+    }
+
+    protected Component(ComponentType type, int componentID) {
+        this.componentID = componentID;
+        this.type = type;
+        this.componentName = type.toString();
+        this.properties = new HashMap<>();
+    }
+
     /**
      * To be implemented by subclass, all components should be able to create copies of themselves.
      * @return - a new Component with the same properties.

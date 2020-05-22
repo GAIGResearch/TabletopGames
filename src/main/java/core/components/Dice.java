@@ -24,6 +24,11 @@ public class Dice extends Component {
         this.nSides = nSides;
     }
 
+    private Dice(int nSides, int ID) {
+        super(ComponentType.DICE, ID);
+        this.nSides = nSides;
+    }
+
     /**
      * @return number of sides for this die.
      */
@@ -58,8 +63,7 @@ public class Dice extends Component {
 
     @Override
     public Dice copy() {
-        Dice copy = new Dice();
-        copy.nSides = nSides;
+        Dice copy = new Dice(nSides, componentID);
         copyComponentTo(copy);
         return copy;
     }

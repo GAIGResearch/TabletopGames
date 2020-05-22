@@ -2,7 +2,7 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.ForwardModel;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Train;
@@ -45,7 +45,7 @@ public class ColtExpressForwardModel extends ForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, IAction action) {
+    public void next(AbstractGameState gameState, AbstractAction action) {
         if (action != null) {
             System.out.println(action.toString());
             action.execute(gameState);

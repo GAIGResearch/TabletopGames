@@ -3,11 +3,12 @@ package core.components;
 import utilities.Utils;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * An Area is a collection of components such as Decks, Token, Dices, Cards and Boards, mapping to their IDs.
  */
-public class Area extends Component {
+public class Area<T extends Component> extends Component {
 
     // Collection of components stored in this area, mapping to their IDs
     protected HashMap<Integer, Component> components;
@@ -18,8 +19,14 @@ public class Area extends Component {
         this.ownerId = owner;
     }
 
+    private Area(int owner, String name, int ID) {
+        super(Utils.ComponentType.AREA, "", ID);
+        this.components = new HashMap<>();
+        this.ownerId = owner;
+    }
+
     public Area copy() {
-        Area new_area = new Area(ownerId, componentName);
+        Area new_area = new Area(ownerId, componentName, componentID);
         new_area.components = new HashMap<>();
         new_area.components.putAll(this.components);
         copyComponentTo(new_area);
@@ -58,5 +65,15 @@ public class Area extends Component {
      */
     public void putComponent(Component component) {
         this.components.put(component.getComponentID(), component);
+    }
+
+    public void putComponents(List<T> components) {
+        for (Component c: components) {
+            this.components.put(c.getComponentID(), c);
+        }
+    }
+
+    public void putComponents(Area area) {
+        this.components.putAll(area.components);
     }
 }

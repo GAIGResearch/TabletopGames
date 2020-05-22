@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Card;
 import core.components.Counter;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 
-public class AddResearchStation implements IAction {
+public class AddResearchStation extends AbstractAction {
     protected String city;
 
     public AddResearchStation(String city) {
@@ -36,10 +36,7 @@ public class AddResearchStation implements IAction {
         return false;
     }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     @Override
     public boolean equals(Object other)

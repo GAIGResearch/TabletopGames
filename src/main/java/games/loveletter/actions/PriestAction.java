@@ -1,43 +1,36 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
 import core.components.PartialObservableDeck;
 import games.loveletter.cards.LoveLetterCard;
 
-public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+import java.util.Objects;
 
-    private final PartialObservableDeck<LoveLetterCard> opponentDeck;
-    private final int playerID;
+public class PriestAction extends DrawCard implements IPrintable {
+
     private final int opponentID;
 
-    public PriestAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
-                        PartialObservableDeck<LoveLetterCard> opponentDeck, int opponentID, int ownPlayerID){
-        super(card, playerHand, discardPile);
-        this.opponentDeck = opponentDeck;
-        this.playerID = ownPlayerID;
+    public PriestAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
+        super(deckFrom, deckTo, fromIndex);
         this.opponentID = opponentID;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
+        PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             for (int i = 0; i < opponentDeck.getComponents().size(); i++)
                 opponentDeck.setVisibilityOfComponent(i, playerID, true);
         }
 
-        return false;
-    }
-
-    @Override
-    public Card getCard() {
-        return null;
+        return super.execute(gs);
     }
 
     @Override
@@ -48,5 +41,19 @@ public class PriestAction extends PlayCard<LoveLetterCard> implements IAction, I
     @Override
     public void printToConsole() {
         System.out.println(toString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PriestAction that = (PriestAction) o;
+        return opponentID == that.opponentID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), opponentID);
     }
 }

@@ -5,7 +5,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
@@ -60,7 +60,7 @@ public class LoveLetterForwardModel extends ForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, IAction action) {
+    public void next(AbstractGameState gameState, AbstractAction action) {
         if (VERBOSE) {
             System.out.println(action.toString());
         }

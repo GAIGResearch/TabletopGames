@@ -20,9 +20,13 @@ public class Token extends Component {
         super(ComponentType.TOKEN, name);
     }
 
+    public Token(String name, int ID){
+        super(ComponentType.TOKEN, name, ID);
+    }
+
     @Override
     public Token copy(){
-        Token copy = new Token(componentName);
+        Token copy = new Token(componentName, componentID);
         copy.tokenType = tokenType;
         copyComponentTo(copy);
         return copy;

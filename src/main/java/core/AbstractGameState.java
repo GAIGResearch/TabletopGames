@@ -1,6 +1,8 @@
 package core;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
+import core.components.Area;
+import core.components.Component;
 import core.gamephase.DefaultGamePhase;
 import core.gamephase.GamePhase;
 import core.observations.IObservation;
@@ -18,9 +20,10 @@ public abstract class AbstractGameState {
     protected final GameParameters gameParameters;
     protected ForwardModel forwardModel;
     protected TurnOrder turnOrder;
+    protected Area allComponents;
 
     // List of actions currently available for the player
-    protected List<IAction> availableActions;
+    protected List<AbstractAction> availableActions;
 
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected Utils.GameResult gameStatus;
@@ -42,6 +45,7 @@ public abstract class AbstractGameState {
         this.gameParameters = gameParameters;
         this.forwardModel = model;
         this.turnOrder = turnOrder;
+        this.allComponents = new Area(-1, "All Components");
     }
 
     // Setters
@@ -64,10 +68,10 @@ public abstract class AbstractGameState {
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == Utils.GameResult.GAME_ONGOING; }
-    public final List<IAction> getActions() {
+    public final List<AbstractAction> getActions() {
         return getActions(false);
     }
-    public final List<IAction> getActions(boolean forceCompute) {
+    public final List<AbstractAction> getActions(boolean forceCompute) {
         if (forceCompute || availableActions == null || availableActions.size() == 0) {
             availableActions = computeAvailableActions();
         }
@@ -78,6 +82,9 @@ public abstract class AbstractGameState {
     }
     public GameData getData() {
         return data;
+    }
+    public Component getComponentById(int id) {
+        return allComponents.getComponent(id);
     }
 
     /* Methods to be implemented by subclass */
@@ -100,7 +107,17 @@ public abstract class AbstractGameState {
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of IAction objects.
      */
-    public abstract List<IAction> computeAvailableActions();
+    public abstract List<AbstractAction> computeAvailableActions();
+
+    /**
+     * Must add all components used in the game to the allComponents area, mapping to their assigned component ID
+     * and NOT another game specific key. Use one of these functions for this functionality only:
+     *          - Area.putComponent(Component component)
+     *          - Area.putComponents(List<Component> components)
+     *          - Area.putComponents(Area area)
+     * Method is called after initialising the game state.
+     */
+    public abstract void addAllComponents();
 
     /*
     public AbstractGameState(AbstractGameState gameState) {

@@ -1,35 +1,21 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
-import core.components.Deck;
 import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.cards.LoveLetterCard;
 
-public class HandmaidAction  extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+public class HandmaidAction extends DrawCard implements IPrintable {
 
-    private final int playerID;
-
-    public HandmaidAction(LoveLetterCard card, Deck<LoveLetterCard> playerHand, Deck<LoveLetterCard> discardPile,
-                          int ownPlayerID){
-        super(card, playerHand, discardPile);
-        this.playerID = ownPlayerID;
+    public HandmaidAction(int deckFrom, int deckTo, int fromIndex) {
+        super(deckFrom, deckTo, fromIndex);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
 
-        ((LoveLetterGameState)gs).setProtection(playerID, true);
+        ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), true);
         return true;
-    }
-
-    @Override
-    public Card getCard() {
-        return null;
     }
 
     @Override

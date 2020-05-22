@@ -1,36 +1,29 @@
 package games.explodingkittens.actions;
 
-import core.components.Card;
+import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.components.Component;
-import core.components.Deck;
 import core.observations.IPrintable;
 import core.turnorder.TurnOrder;
+import games.explodingkittens.ExplodingKittensGameState;
 
-public class ShuffleAction<T extends Component> extends PlayCard<T> implements IsNopeable, IPrintable {
-    final Deck<T> shuffleDeck;
+import java.util.Random;
 
-    public ShuffleAction(T card, Deck<T> playerDeck, Deck<T> discardPile, Deck<T> deckToShuffle) {
-        super(card, playerDeck, discardPile);
-        shuffleDeck = deckToShuffle;
+public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
+
+    public ShuffleAction(int deckFrom, int deckTo, int fromIndex) {
+        super(deckFrom, deckTo, fromIndex);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        shuffleDeck.shuffle();
+        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(new Random(gs.getGameParameters().getGameSeed()));
         return super.execute(gs);
     }
 
     @Override
-    public Card getCard() {
-        return null;
-    }
-
-    @Override
     public String toString(){
-        return "Player shuffles the deck";
+        return "Player shuffles the draw pile";
     }
-
 
     @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {

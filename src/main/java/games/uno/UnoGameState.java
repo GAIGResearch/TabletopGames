@@ -1,7 +1,8 @@
 package games.uno;
 
 import core.ForwardModel;
-import core.actions.IAction;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.GameParameters;
@@ -19,6 +20,19 @@ public class UnoGameState extends AbstractGameState {
     Deck<UnoCard> drawPile;
     Deck<UnoCard> discardPile;
     UnoCard currentCard;
+
+    @Override
+    public void addAllComponents() {
+        allComponents.putComponent(drawPile);
+        allComponents.putComponent(discardPile);
+        allComponents.putComponent(currentCard);
+        allComponents.putComponents(drawPile.getComponents());
+        allComponents.putComponents(discardPile.getComponents());
+        allComponents.putComponents(playerDecks);
+        for (Deck<UnoCard> d: playerDecks) {
+            allComponents.putComponents(d.getComponents());
+        }
+    }
 
     public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
@@ -42,24 +56,26 @@ public class UnoGameState extends AbstractGameState {
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
-        ArrayList<IAction> actions = new ArrayList<>();
+    public List<AbstractAction> computeAvailableActions() {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = turnOrder.getCurrentPlayer(this);
         Deck<UnoCard> playerDeck = playerDecks.get(player);
-        for (UnoCard card : playerDeck.getComponents()){
+        for (int c = 0; c < playerDeck.getSize(); c++){
+            UnoCard card = playerDeck.getComponents().get(c);
             if (card.isPlayable(this))
             {
                 if (card instanceof UnoNumberCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile));
+                    actions.add(new PlayCard(playerDeck.getComponentID(), discardPile.getComponentID(), c));
                 if (card instanceof UnoSkipCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoSkipCard.SkipCardEffect()));
+                    actions.add(new PlayCard(playerDeck.getComponentID(), discardPile.getComponentID(), c, new UnoSkipCard.SkipCardEffect()));
                 if (card instanceof UnoReverseCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoReverseCard.ReverseCardEffect()));
+                    actions.add(new PlayCard(playerDeck.getComponentID(), discardPile.getComponentID(), c, new UnoReverseCard.ReverseCardEffect()));
             }
         }
-        actions.add(new DrawCards<>(drawPile, playerDecks.get(player), discardPile, 1));
+        actions.add(new DrawCard(drawPile.getComponentID(), playerDecks.get(player).getComponentID(), 0));
         return actions;
     }
+
 
     /**
      * Inform the game state this player has won.

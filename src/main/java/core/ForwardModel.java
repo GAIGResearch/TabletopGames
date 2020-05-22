@@ -1,6 +1,6 @@
 package core;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.gamephase.DefaultGamePhase;
 import utilities.Utils;
 
@@ -53,5 +53,5 @@ public abstract class ForwardModel {
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
-    public abstract void next(AbstractGameState currentState, IAction action);
+    public abstract void next(AbstractGameState currentState, AbstractAction action);
 }

@@ -3,10 +3,11 @@ package games.coltexpress;
 import core.AbstractGameState;
 import core.ForwardModel;
 import core.gamephase.GamePhase;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
+import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Train;
 import core.components.PartialObservableDeck;
 import utilities.Utils;
@@ -38,6 +39,22 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     // The train to loot
     Train train;
 
+    @Override
+    public void addAllComponents() {
+        allComponents.putComponent(cardStack);
+        allComponents.putComponent(train);
+        allComponents.putComponents(train.getCompartments());
+        for (Compartment t: train.getCompartments()) {
+            allComponents.putComponents(t.getLoot());
+        }
+        allComponents.putComponents(playerHandCards);
+        allComponents.putComponents(playerDecks);
+        for (int i = 0; i < getNPlayers(); i++) {
+            allComponents.putComponents(playerHandCards.get(i).getComponents());
+            allComponents.putComponents(playerDecks.get(i).getComponents());
+        }
+    }
+
     public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
         super(gameParameters, model, new ColtExpressTurnOrder(nPlayers));
         gamePhase = ColtExpressGamePhase.DrawCards;
@@ -55,9 +72,9 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
+    public List<AbstractAction> computeAvailableActions() {
 
-        ArrayList<IAction> actions;
+        ArrayList<AbstractAction> actions;
         if (ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
             actions = drawAction();
@@ -73,19 +90,20 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
         return actions;
     }
-    private ArrayList<IAction> drawAction(){
-        ArrayList<IAction> actions = new ArrayList<>();
+
+    private ArrayList<AbstractAction> drawAction(){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         return actions;
     }
 
-    public ArrayList<IAction> schemingActions(){
-        ArrayList<IAction> actions = new ArrayList<>();
+    public ArrayList<AbstractAction> schemingActions(){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         return actions;
     }
 
-    public ArrayList<IAction> stealingActions()
+    public ArrayList<AbstractAction> stealingActions()
     {
-        ArrayList<IAction> actions = new ArrayList<>();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         return actions;
     }
 

@@ -1,6 +1,6 @@
 package games.uno;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.AbstractGameState;
 import core.ForwardModel;
 import core.components.Deck;
@@ -56,7 +56,7 @@ public class UnoForwardModel extends ForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, IAction action) {
+    public void next(AbstractGameState gameState, AbstractAction action) {
         action.execute(gameState);
         gameState.getTurnOrder().endPlayerTurn(gameState);
         UnoGameParameters ugp = (UnoGameParameters) gameState.getGameParameters();

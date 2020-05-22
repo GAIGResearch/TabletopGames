@@ -1,7 +1,7 @@
 package games.tictactoe;
 
 import core.ForwardModel;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.AbstractGameState;
@@ -35,17 +35,22 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
-        ArrayList<IAction> actions = new ArrayList<>();
+    public List<AbstractAction> computeAvailableActions() {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = turnOrder.getCurrentPlayer(this);
 
         for (int x = 0; x < gridBoard.getWidth(); x++){
             for (int y = 0; y < gridBoard.getHeight(); y++) {
                 if (gridBoard.getElement(x, y) == ' ')
-                    actions.add(new SetGridValueAction<>(gridBoard, x, y, player == 0 ? 'x' : 'o'));
+                    actions.add(new SetGridValueAction(gridBoard.getComponentID(), x, y, player == 0 ? 'x' : 'o'));
             }
         }
         return actions;
+    }
+
+    @Override
+    public void addAllComponents() {
+        allComponents.putComponent(gridBoard);
     }
 
     @Override

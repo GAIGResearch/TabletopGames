@@ -1,14 +1,14 @@
 package games.pandemic.engine;
 
 import core.AbstractGameState;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 
 public abstract class Node {
     private static int nextID = 0;
 
     private int id;
     protected boolean actionNode = false;
-    protected IAction action;
+    protected AbstractAction action;
     protected Node parent;
 
     public Node() {
@@ -18,7 +18,7 @@ public abstract class Node {
     public abstract Node execute(AbstractGameState gs);
     public abstract Node getNext();
 
-    public final void setAction(IAction action) {
+    public final void setAction(AbstractAction action) {
         this.action = action;
     }
     public final boolean requireAction() { return actionNode; }

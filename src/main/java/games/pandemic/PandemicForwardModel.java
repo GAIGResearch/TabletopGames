@@ -114,7 +114,7 @@ public class PandemicForwardModel extends ForwardModel {
      * @param action - action requested to be played by a player.
      */
     @Override
-    public void next(AbstractGameState currentState, IAction action) {
+    public void next(AbstractGameState currentState, AbstractAction action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
 
         do {
@@ -227,13 +227,8 @@ public class PandemicForwardModel extends ForwardModel {
         int nTimes = pp.n_infections_setup;
         for (int j = 0; j < nTimes; j++) {
             for (int i = 0; i < nCards; i++) {
-                Card c = infectionDeck.draw();
-
                 // Place matching color (nTimes - j) cubes and place on matching city
-                new InfectCity(pp.max_cubes_per_city, c, nTimes - j).execute(state);
-
-                // Discard card
-                new AddCardToDeck(c, infectionDiscard).execute(state);
+                new InfectCity(infectionDeck.getComponentID(), infectionDiscard.getComponentID(), 0, pp.max_cubes_per_city, nTimes - j).execute(state);
             }
         }
 
@@ -260,7 +255,7 @@ public class PandemicForwardModel extends ForwardModel {
 
             playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {
-                new DrawCard(playerDeck, playerHandDeck).execute(state);
+                new DrawCard(playerDeck.getComponentID(), playerHandDeck.getComponentID()).execute(state);
             }
 
             for (Card card: playerHandDeck.getComponents()) {
@@ -285,7 +280,7 @@ public class PandemicForwardModel extends ForwardModel {
 
             Card card = new Card("Epidemic");
             card.setProperty(nameHash, new PropertyString("epidemic"));
-            new AddCardToDeck(card, playerDeck, index).execute(state);
+            playerDeck.add(card, index);
 
         }
 

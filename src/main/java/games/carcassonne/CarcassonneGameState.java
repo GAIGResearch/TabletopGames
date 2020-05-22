@@ -1,7 +1,7 @@
 package games.carcassonne;
 
 import core.ForwardModel;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
@@ -38,12 +38,12 @@ public class CarcassonneGameState extends AbstractGameState {
         //drawPile.add(new CarcassonneTile());
     }
 
-    private List<IAction> tileActions(){
+    private List<AbstractAction> tileActions(){
 
         return new ArrayList<>();
     }
 
-    private List<IAction> meepleActions(){
+    private List<AbstractAction> meepleActions(){
 
         return new ArrayList<>();
     }
@@ -64,9 +64,9 @@ public class CarcassonneGameState extends AbstractGameState {
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
+    public List<AbstractAction> computeAvailableActions() {
 
-        List<IAction> actions;
+        List<AbstractAction> actions;
         switch (gamePhase){
             case PlaceTile:
                 actions = tileActions();
@@ -81,6 +81,11 @@ public class CarcassonneGameState extends AbstractGameState {
 
         this.numAvailableActions = actions.size();
         return actions;
+    }
+
+    @Override
+    public void addAllComponents() {
+
     }
 
     private class CarcassonneBoard{
@@ -144,7 +149,7 @@ public class CarcassonneGameState extends AbstractGameState {
         private boolean fixedRotation = false;
 
         private CarcassonneTile(CarcassonneType[][] type){
-            super(Arrays.deepToString(type));
+            super();
             this.type = type;
         }
 

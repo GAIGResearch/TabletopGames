@@ -1,8 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
 import core.components.BoardNode;
-import core.components.Card;
 import core.content.PropertyBoolean;
 import core.AbstractGameState;
 import core.content.PropertyString;
@@ -14,7 +12,7 @@ import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 
 
-public class AddResearchStationFrom extends AddResearchStation implements IAction {
+public class AddResearchStationFrom extends AddResearchStation {
 
     protected String fromCity;
 
@@ -37,12 +35,6 @@ public class AddResearchStationFrom extends AddResearchStation implements IActio
 
         return success;
     }
-
-    @Override
-    public Card getCard() {
-        return null;
-    }
-
 
     @Override
     public boolean equals(Object other)

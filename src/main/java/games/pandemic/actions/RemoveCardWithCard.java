@@ -1,7 +1,7 @@
 package games.pandemic.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import games.pandemic.PandemicGameState;
@@ -12,7 +12,7 @@ import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
-public class RemoveCardWithCard implements IAction {
+public class RemoveCardWithCard extends AbstractAction {
     private Deck<Card> deck;
     private Card card; // card to be discarded from player hand after this action is executed
     private int removeCard;

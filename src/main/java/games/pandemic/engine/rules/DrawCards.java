@@ -1,7 +1,6 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.actions.AddCardToDeck;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
@@ -12,7 +11,6 @@ import static games.pandemic.PandemicConstants.playerDeckHash;
 import static utilities.CoreConstants.nameHash;
 import static utilities.CoreConstants.playerHandHash;
 
-@SuppressWarnings("unchecked")
 public class DrawCards extends RuleNode {
 
     @Override
@@ -24,7 +22,7 @@ public class DrawCards extends RuleNode {
         Deck<Card> tempDeck = pgs.getTempDeck();
 
         Deck<Card> playerDeck = (Deck<Card>) pgs.getComponent(playerDeckHash);
-        DrawCard action = new DrawCard(playerDeck, tempDeck);
+        DrawCard action = new DrawCard(playerDeck.getComponentID(), tempDeck.getComponentID(), 0);
         boolean drawn = action.execute(gs);
 
         if (drawn) {
@@ -36,7 +34,7 @@ public class DrawCards extends RuleNode {
                 epidemic = true;
             } else {  // Otherwise, give card to player
                 if (playerHand != null) {
-                    new AddCardToDeck(c, playerHand).execute(gs);
+                    playerHand.add(c);
                 }
             }
             ((PandemicGameState) gs).setEpidemic(epidemic);

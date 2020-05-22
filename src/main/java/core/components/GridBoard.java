@@ -37,6 +37,14 @@ public class GridBoard<T> extends Component {
         this.typeParameterClass = typeParameterClass;
     }
 
+    public GridBoard(T[][] grid, Class<T> typeParameterClass, int ID){
+        super(Utils.ComponentType.BOARD, ID);
+        this.width = grid.length;
+        this.height = grid[0].length;
+        this.grid = grid;
+        this.typeParameterClass = typeParameterClass;
+    }
+
     public GridBoard(GridBoard<T> orig){
         super(Utils.ComponentType.BOARD);
         this.width = orig.getWidth();
@@ -90,7 +98,7 @@ public class GridBoard<T> extends Component {
 
     @Override
     public GridBoard<T> copy() {
-        GridBoard<T> g = new GridBoard<>(grid, typeParameterClass);
+        GridBoard<T> g = new GridBoard<>(grid, typeParameterClass, componentID);
         copyComponentTo(g);
         return g;
     }

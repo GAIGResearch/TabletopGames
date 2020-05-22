@@ -1,6 +1,6 @@
 package core;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
 import players.HumanGUIPlayer;
@@ -38,6 +38,7 @@ public abstract class Game {
         this.forwardModel = model;
         this.gameState = gameState;
         this.forwardModel._setup(gameState);
+        this.gameState.addAllComponents();
     }
 
     /**
@@ -54,7 +55,7 @@ public abstract class Game {
             AbstractPlayer player = players.get(activePlayer);
 
             // Get actions for the player
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
+            List<AbstractAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
             if (observation != null && VERBOSE) {
                 ((IPrintable) observation).printToConsole();
@@ -94,7 +95,7 @@ public abstract class Game {
      * @param actions - list of actions available in the current game state.
      * @return - int, index of action chosen by player (from the list of actions).
      */
-    private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<IAction> actions) {
+    private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<AbstractAction> actions) {
         if (gui != null) {
             gui.update(player, gameState);
             try {

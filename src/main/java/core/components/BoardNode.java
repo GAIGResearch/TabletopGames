@@ -26,6 +26,13 @@ public class BoardNode extends Component {
         this(-1, "");
     }
 
+    private BoardNode(int maxNeighbours, String name, int ID) {
+        super(Utils.ComponentType.BOARD_NODE, name, ID);
+        this.maxNeighbours = maxNeighbours;
+        this.neighbours = new HashSet<>();
+        this.neighbourSideMapping = new HashMap<>();
+    }
+
     /**
      * Adds a neighbour for this node.
      * @param neighbour - new neighbour of this node.
@@ -73,7 +80,7 @@ public class BoardNode extends Component {
      */
     @Override
     public BoardNode copy() {
-        BoardNode copy = new BoardNode(maxNeighbours, componentName);
+        BoardNode copy = new BoardNode(maxNeighbours, componentName, componentID);
         copy.neighbours = new HashSet<>(neighbours);
         copy.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
 

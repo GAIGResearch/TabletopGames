@@ -1,6 +1,6 @@
 package games.tictactoe;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.GridBoard;
 import core.AbstractGameState;
 import core.ForwardModel;
@@ -16,7 +16,7 @@ public class TicTacToeForwardModel extends ForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState currentState, IAction action) {
+    public void next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
         if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridWidth * tttgp.gridHeight)) {

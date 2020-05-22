@@ -30,6 +30,13 @@ public class Deck<T extends Component> extends Component {
         this.components = new ArrayList<>();
         this.capacity = -1;
     }
+
+    private Deck(String name, int ID)
+    {
+        super(ComponentType.DECK, name, ID);
+        this.components = new ArrayList<>();
+        this.capacity = -1;
+    }
     
     /**
      * Draws the first component of the deck
@@ -247,7 +254,7 @@ public class Deck<T extends Component> extends Component {
      */
     public Deck<T> copy()
     {
-        Deck<T> dp = new Deck<>(componentName);
+        Deck<T> dp = new Deck<>(componentName, componentID);
         ArrayList<T> newComponents = new ArrayList<>();
         for (T c : components)
         {

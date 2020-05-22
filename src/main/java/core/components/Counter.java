@@ -27,11 +27,15 @@ public class Counter extends Component {
         this.maximum = maximum;
     }
 
+    private Counter(int value, int minimum, int maximum, String name, int ID) {
+        super(ComponentType.COUNTER, name, ID);
+        this.value = value;
+        this.minimum = minimum;
+        this.maximum = maximum;
+    }
+
     public Counter copy() {
-        Counter copy = new Counter();
-        copy.minimum = minimum;
-        copy.maximum = maximum;
-        copy.value = value;
+        Counter copy = new Counter(value, minimum, maximum, componentName, componentID);
         copyComponentTo(copy);
         return copy;
     }

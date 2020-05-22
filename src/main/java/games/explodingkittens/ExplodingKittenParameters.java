@@ -24,4 +24,5 @@ public class ExplodingKittenParameters extends GameParameters {
     }};
     public int nCardsPerPlayer = 7;
     public int nDifuseCards = 6;
+    public int nSeeFutureCards = 3;
 }

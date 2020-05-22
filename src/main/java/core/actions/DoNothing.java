@@ -5,7 +5,7 @@ import core.components.Card;
 
 import java.util.Objects;
 
-public class DoNothing implements IAction {
+public class DoNothing extends AbstractAction {
     private final int id = 0;
 
    @Override
@@ -13,10 +13,7 @@ public class DoNothing implements IAction {
        return true;
    }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     @Override
     public boolean equals(Object o) {

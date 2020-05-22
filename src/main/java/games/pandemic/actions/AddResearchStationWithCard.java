@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
@@ -9,62 +9,54 @@ import games.pandemic.PandemicGameState;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
-
-
 import static utilities.CoreConstants.playerHandHash;
 
 
-@SuppressWarnings("unchecked")
-public class AddResearchStationWithCard extends AddResearchStation implements IAction {
+public class AddResearchStationWithCard extends AddResearchStation {
 
-    private Card card;
+    private int cardIdx;
+    private int cardId;
+    private boolean executed;
 
-    public AddResearchStationWithCard(String city, Card c) {
+    public AddResearchStationWithCard(String city, int cardIdx) {
         super(city);
-        this.card = c;
+        this.cardIdx = cardIdx;
     }
 
     public boolean execute(AbstractGameState gs) {
-        boolean result = super.execute(gs);
-        PandemicGameState pgs = (PandemicGameState)gs;
+        executed = true;
+        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+        Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
+        cardId = playerHand.getComponents().get(cardIdx).getComponentID();
+        return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
+    }
 
-        if (result) {
-            // Discard the card played
-            Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-            playerHand.remove(card);
-            Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
-            result = discardDeck.add(card);
+    public Card getCard(AbstractGameState gs) {
+        if (!executed) {
+            Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+            return deck.getComponents().get(cardIdx);
         }
-
-        return result;
+        return (Card) gs.getComponentById(cardId);
     }
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        if(other instanceof AddResearchStationWithCard)
-        {
-            AddResearchStationWithCard otherAction = (AddResearchStationWithCard) other;
-            return card.equals(otherAction.card);
-
-        }else return false;
-    }
-
-    public Card getCard() {
-        return card;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AddResearchStationWithCard that = (AddResearchStationWithCard) o;
+        return cardIdx == that.cardIdx;
     }
 
     @Override
     public String toString() {
         return "AddResearchStationWithCard{" +
-                "card=" + card.toString() +
-                ", toCity='" + city + '\'' +
+                "cardIdx=" + cardIdx +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), card);
+        return Objects.hash(super.hashCode(), cardIdx);
     }
 }

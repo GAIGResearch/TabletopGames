@@ -1,6 +1,6 @@
 package games.explodingkittens;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.AbstractGameState;
 import core.ForwardModel;
 import core.components.Deck;
@@ -83,14 +83,14 @@ public class ExplodingKittensForwardModel extends ForwardModel {
      * @param action - action requested to be played by a player.
      */
     @Override
-    public void next(AbstractGameState gameState, IAction action) {
+    public void next(AbstractGameState gameState, AbstractAction action) {
         if (VERBOSE) {
             System.out.println(action.toString());
         }
 
         ExplodingKittenTurnOrder ekTurnOrder = (ExplodingKittenTurnOrder) gameState.getTurnOrder();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
-        Stack<IAction> actionStack = ekgs.getActionStack();
+        Stack<AbstractAction> actionStack = ekgs.getActionStack();
 
         if (actionStack.size() == 0){
             if (action instanceof IsNopeable) {
@@ -129,7 +129,7 @@ public class ExplodingKittensForwardModel extends ForwardModel {
                         }
 
                         //Action can be played
-                        IAction stackedAction = actionStack.get(0);
+                        AbstractAction stackedAction = actionStack.get(0);
                         stackedAction.execute(gameState);
                     }
                     actionStack.clear();

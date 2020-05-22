@@ -33,6 +33,18 @@ public class GraphBoard extends Component {
         boardNodes = new ArrayList<>();
     }
 
+    private GraphBoard(String name, int ID)
+    {
+        super(ComponentType.BOARD, name, ID);
+        boardNodes = new ArrayList<>();
+    }
+
+    private GraphBoard(int ID)
+    {
+        super(ComponentType.BOARD, ID);
+        boardNodes = new ArrayList<>();
+    }
+
     /**
      * Copy method, to be implemented by all subclasses.
      * @return - a new instance of this Board, deep copy.
@@ -40,7 +52,7 @@ public class GraphBoard extends Component {
     @Override
     public GraphBoard copy()
     {
-        GraphBoard b = new GraphBoard(componentName);
+        GraphBoard b = new GraphBoard(componentName, componentID);
         b.setBoardNodes(new ArrayList<>(boardNodes));
         return b;
     }
