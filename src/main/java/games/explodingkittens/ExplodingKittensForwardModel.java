@@ -5,8 +5,8 @@ import core.AbstractGameState;
 import core.ForwardModel;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.explodingkittens.actions.IsNope;
 import games.explodingkittens.actions.IsNopeable;
+import games.explodingkittens.actions.NopeAction;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import utilities.CoreConstants;
 
@@ -101,7 +101,7 @@ public class ExplodingKittensForwardModel extends ForwardModel {
             }
         } else {
             // action is either nope or pass
-            if (((IsNope) action).isNope()) {
+            if (action instanceof NopeAction) {
                 actionStack.add(action);
                 action.execute(gameState);
                 ekTurnOrder.registerNopeableActionByPlayer(ekgs);
@@ -115,7 +115,7 @@ public class ExplodingKittensForwardModel extends ForwardModel {
                             actionStack.pop();
                         }
                         //Action was successfully noped
-                        ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder);
+                        ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder); // TODO: this just executes super action (again), why?
                         if (VERBOSE) {
                             System.out.println("Action was successfully noped");
                         }
