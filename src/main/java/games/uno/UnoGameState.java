@@ -41,9 +41,8 @@ public class UnoGameState extends AbstractGameState {
         CreateCards();
 
         // Shuffle the deck
-        int seed = 1;                        // To be removed after debugging
-        //drawDeck.shuffle();
-        drawDeck.shuffle(new Random(seed));  // To be removed after debugging
+        drawDeck.shuffle();
+
 
         // Create the discard deck, at the beginning it is empty
         discardDeck = new Deck<>("DiscardDeck");
@@ -60,10 +59,8 @@ public class UnoGameState extends AbstractGameState {
         while (isWildCard(currentCard))
         {
             System.out.println("First card wild");
-            seed ++;                        // To be removed after debugging
             drawDeck.add(currentCard);
-            drawDeck.shuffle(new Random(seed));
-            //drawDeck.shuffle();
+            drawDeck.shuffle();
             currentCard = drawDeck.draw();
             currentColor = currentCard.color;
         }
@@ -258,19 +255,18 @@ public class UnoGameState extends AbstractGameState {
 
     // When draw deck is empty, all the cards of discard deck (less the current one) are inserted in the draw deck
     // and it is shuffle
+    // TODO: remove cards from discard deck. Check it
     public void drawDeckEmpty()
     {
         for (UnoCard card : discardDeck.getCards())
         {
-            if (card != currentCard)
+            if (card != currentCard) {
+                discardDeck.remove(card);  // do it work?
                 drawDeck.add(card);
+            }
         }
         drawDeck.shuffle();
     }
 
-    // Add a new action to next player, to believe or not to the previous player
-    /*public void setTrick(UnoWildDrawFourCard isTrick) {
-
-    }*/
 }
 
