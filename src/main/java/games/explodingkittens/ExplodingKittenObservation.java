@@ -43,7 +43,7 @@ public class ExplodingKittenObservation implements IPrintable, IObservation {
         printDeck(discardPile.getComponents());
     }
 
-    private void printDeck(ArrayList<ExplodingKittenCard> cards){
+    private void printDeck(List<ExplodingKittenCard> cards){
         StringBuilder sb = new StringBuilder();
 
         for (ExplodingKittenCard card : cards){

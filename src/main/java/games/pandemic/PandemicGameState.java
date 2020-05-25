@@ -262,7 +262,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 if (plannerDeck.getSize() == 0) {
                     // then can pick up an event card
                     Deck<Card> infectionDiscardDeck = (Deck<Card>) getComponent(infectionDiscardHash);
-                    ArrayList<Card> infDiscard = infectionDiscardDeck.getComponents();
+                    List<Card> infDiscard = infectionDiscardDeck.getComponents();
                     for (int i = 0; i < infDiscard.size(); i++) {
                         Card card = infDiscard.get(i);
                         if (card.getProperty(colorHash) != null) {

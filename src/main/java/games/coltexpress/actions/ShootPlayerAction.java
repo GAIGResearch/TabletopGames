@@ -69,6 +69,17 @@ public class ShootPlayerAction extends ColtExpressExecuteCardAction{
         return true;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
     public String toString(){
         if (targetID != -1)
             return "Player " + card.playerID + " shoots player " + targetID;

@@ -9,8 +9,10 @@ import utilities.Utils;
 
 import java.util.Objects;
 
-import static utilities.CoreConstants.VERBOSE;
 
+/**
+ * The Baron lets two players compare their hand card. The player with the lesser valued card is removed from the game.
+ */
 public class BaronAction extends DrawCard implements IPrintable {
     private final int opponentID;
 
@@ -26,6 +28,8 @@ public class BaronAction extends DrawCard implements IPrintable {
         Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
+        // compares the value of the player's hand card with another player's hand card
+        // the player with the lesser valued card will be removed from the game
         if (llgs.isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
             LoveLetterCard opponentCard = opponentDeck.peek();
             LoveLetterCard playerCard = playerDeck.peek();
@@ -35,9 +39,8 @@ public class BaronAction extends DrawCard implements IPrintable {
                 else if (playerCard.cardType.getValue() < opponentCard.cardType.getValue())
                     llgs.killPlayer(playerID);
             } else {
-                if (VERBOSE) {
-                    System.out.println();
-                }
+                throw new IllegalArgumentException("player with ID " + opponentID + " was targeted using a Baron card" +
+                        " but one of the players has now cards left.");
             }
         }
 

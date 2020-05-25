@@ -7,7 +7,6 @@ import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
@@ -69,8 +68,8 @@ public class PunchAction  extends ColtExpressExecuteCardAction{
         //drop loot
         LinkedList<Loot> potentialLoot = new LinkedList<>();
         if (lootType != null){
-            for (Loot loot : availableLoot.getCards()){
-                if (loot.getType() == lootType)
+            for (Loot loot : availableLoot.getComponents()){
+                if (loot.getLootType() == lootType)
                     potentialLoot.add(loot);
             }
 
@@ -86,6 +85,18 @@ public class PunchAction  extends ColtExpressExecuteCardAction{
         return true;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String toString(){
         if (opponentID == -1)
             return "Attempt to punch player, but no player is available.";

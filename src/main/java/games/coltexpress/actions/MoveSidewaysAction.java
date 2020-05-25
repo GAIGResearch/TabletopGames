@@ -39,6 +39,17 @@ public class MoveSidewaysAction extends ColtExpressExecuteCardAction {
         return true;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
     public String toString(){
         return "MoveSideways; player " + card.playerID;
     }

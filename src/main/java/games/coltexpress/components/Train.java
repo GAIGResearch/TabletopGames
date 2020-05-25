@@ -1,5 +1,8 @@
 package games.coltexpress.components;
 
+import core.components.Component;
+import utilities.Utils;
+
 import java.util.*;
 
 public class Train extends Component {
@@ -8,6 +11,7 @@ public class Train extends Component {
     private final LinkedList<Integer> remainingPurseValues;
 
     public Train(int nPlayers){
+        super(Utils.ComponentType.BOARD);
         remainingPurseValues = new LinkedList<>(
                 Arrays.asList(300,300,350,350,400,400,450,450,500,500));
         for (int i = 0; i < 8-nPlayers; i++){
@@ -27,12 +31,19 @@ public class Train extends Component {
     }
 
     public Train(Train original){
+        super(Utils.ComponentType.BOARD);
         // todo implement copy constructor
         throw new UnsupportedOperationException();
     }
 
     public int getSize(){
         return compartments.size();
+    }
+
+    @Override
+    public Component copy() {
+        throw new UnsupportedOperationException("not implemented yet");
+        //return new Train(this);
     }
 
     public String toString(){
@@ -48,6 +59,10 @@ public class Train extends Component {
         return sb.toString();
     }
 
+    public List<Compartment> getCompartments(){
+        return compartments;
+    }
+
     public Compartment getCompartment(int compartmentIndex){
         if (compartmentIndex < compartments.size() && compartmentIndex >= 0){
             return compartments.get(compartmentIndex);
@@ -56,6 +71,7 @@ public class Train extends Component {
     }
 
     public Loot getRandomPurse(){
-        return new Loot(Loot.LootType.Purse, remainingPurseValues.remove(new Random().nextInt(remainingPurseValues.size())));
+        return new Loot(Loot.LootType.Purse, remainingPurseValues.remove(
+                new Random().nextInt(remainingPurseValues.size())));
     }
 }

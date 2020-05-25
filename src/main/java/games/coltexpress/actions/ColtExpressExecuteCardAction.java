@@ -1,11 +1,11 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.coltexpress.cards.ColtExpressCard;
 
-public abstract class ColtExpressExecuteCardAction implements IAction {
+public abstract class ColtExpressExecuteCardAction extends AbstractAction {
 
     protected final ColtExpressCard card;
     protected final PartialObservableDeck<ColtExpressCard> playerDeck;

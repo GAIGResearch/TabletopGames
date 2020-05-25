@@ -4,9 +4,11 @@ import core.AbstractGameState;
 import core.ForwardModel;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
+import core.gamephase.GamePhase;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Train;
 import games.coltexpress.ColtExpressParameters.CharacterType;
+import static utilities.CoreConstants.VERBOSE;
 
 import java.util.*;
 
@@ -37,7 +39,7 @@ public class ColtExpressForwardModel extends ForwardModel {
                     new PartialObservableDeck<>("playerCards" + playerIndex, visibility);
             for (ColtExpressCard.CardType type : cep.cardCounts.keySet()){
                 for (int j = 0; j < cep.cardCounts.get(type); j++) {
-                    playerCards.add(new ColtExpressCard(type));
+                    playerCards.add(new ColtExpressCard(playerIndex, type));
                 }
             }
             cegs.playerDecks.add(playerCards);
@@ -58,19 +60,17 @@ public class ColtExpressForwardModel extends ForwardModel {
                     " doesn't have any targets available");
         }
 
-        switch (cegs.getGamePhase()){
-            case PlanActions:
-                ceto.endPlayerTurn(gameState);
-                break;
-            case ExecuteActions:
-                ceto.endPlayerTurn(gameState);
-                if (cegs.plannedActions.getSize() == 0)
-                    ceto.endRoundCard(gameState);
-                break;
-            case DraftCharacter:
-                break;
+        GamePhase gamePhase = cegs.getGamePhase();
+        if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
+            System.out.println("character drafting is not implemented yet");
+            throw new UnsupportedOperationException("not implemented yet");
+        } else if (ColtExpressGameState.ColtExpressGamePhase.PlanActions.equals(gamePhase)) {
+            ceto.endPlayerTurn(gameState);
+        } else if (ColtExpressGameState.ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
+            ceto.endPlayerTurn(gameState);
+            if (cegs.plannedActions.getSize() == 0)
+                ceto.endRoundCard(gameState);
         }
-
     }
 
     public CharacterType pickRandomCharacterType(HashSet<CharacterType> characters){

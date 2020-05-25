@@ -20,7 +20,7 @@ public abstract class AbstractGameState {
     protected final GameParameters gameParameters;
     protected ForwardModel forwardModel;
     protected TurnOrder turnOrder;
-    protected Area allComponents;
+    protected Area<Component> allComponents;
 
     // List of actions currently available for the player
     protected List<AbstractAction> availableActions;
@@ -45,7 +45,7 @@ public abstract class AbstractGameState {
         this.gameParameters = gameParameters;
         this.forwardModel = model;
         this.turnOrder = turnOrder;
-        this.allComponents = new Area(-1, "All Components");
+        this.allComponents = new Area<>(-1, "All Components");
     }
 
     // Setters

@@ -7,7 +7,6 @@ import core.actions.AbstractAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
 import games.coltexpress.actions.*;
-import games.coltexpress.cards.CharacterType;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
@@ -15,6 +14,7 @@ import games.coltexpress.components.Train;
 import core.components.PartialObservableDeck;
 import utilities.Utils;
 import games.coltexpress.ColtExpressParameters.CharacterType;
+import static utilities.CoreConstants.PARTIAL_OBSERVABLE;
 
 import java.util.*;
 
@@ -28,30 +28,35 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         DraftCharacter
     }
 
-    private List<PartialObservableDeck<ColtExpressCard>> playerHandCards;
-    private List<PartialObservableDeck<ColtExpressCard>> playerDecks;
-    private List<PartialObservableDeck<Loot>> playerLoot;
-    private int[] bulletsLeft;
-    protected PartialObservableDeck<ColtExpressCard> plannedActions;
-    private HashMap<Integer, CharacterType> playerCharacters;
-    private int playerPlayingBelle = -1;
+    List<PartialObservableDeck<ColtExpressCard>> playerHandCards;
+    List<PartialObservableDeck<ColtExpressCard>> playerDecks;
+    List<PartialObservableDeck<Loot>> playerLoot;
+    int[] bulletsLeft;
+    PartialObservableDeck<ColtExpressCard> plannedActions;
+    HashMap<Integer, CharacterType> playerCharacters;
+    int playerPlayingBelle = -1;
     // Cards in player hands
     // A deck for each player
     // The card stack built by players each round
     // The player characters available
     // The train to loot
 
-    private Train train;
+    Train train;
     public Train getTrain(){return train;}
     public PartialObservableDeck<Loot> getLoot(int playerID){return playerLoot.get(playerID);}
+
     @Override
     public void addAllComponents() {
-        allComponents.putComponent(cardStack);
+        allComponents.putComponent(plannedActions);
         allComponents.putComponent(train);
         allComponents.putComponents(train.getCompartments());
-        for (Compartment t: train.getCompartments()) {
-            allComponents.putComponents(t.getLoot());
+        for (Compartment compartment: train.getCompartments()) {
+            for (Loot loot : compartment.getLootInside().getComponents())
+                allComponents.putComponent(loot);
+            for (Loot loot  : compartment.getLootOnTop().getComponents())
+                allComponents.putComponent(loot);
         }
+
         allComponents.putComponents(playerHandCards);
         allComponents.putComponents(playerDecks);
         for (int i = 0; i < getNPlayers(); i++) {
@@ -65,6 +70,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         gamePhase = ColtExpressGamePhase.DrawCards;
     }
 
+    /*
     public void setComponents(ColtExpressParameters gameParameters) {
         train = new Train(getNPlayers());
         playerCharacters = new HashMap<>();
@@ -78,7 +84,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
         Arrays.fill(bulletsLeft, 6);
         for (int playerIndex = 0; playerIndex < getNPlayers(); playerIndex++) {
-            CharacterType characterType = gameParameters.pickRandomCharacterType();
+            CharacterType characterType = ((ColtExpressForwardModel)forwardModel).pickRandomCharacterType();
             playerCharacters.put(playerIndex, characterType);
             if (characterType == CharacterType.Belle)
                 playerPlayingBelle = playerIndex;
@@ -113,6 +119,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         }
         distributeCards();
     }
+    */
 
     public void distributeCards(){
         for (int playerIndex = 0; playerIndex < getNPlayers(); playerIndex++) {
@@ -159,12 +166,12 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
         int bestValue = 6;
         for (int i = 0; i < getNPlayers(); i++) {
-            for (Loot loot : playerLoot.get(i).getCards())
+            for (Loot loot : playerLoot.get(i).getComponents())
                 pointsPerPlayer[i] += loot.getValue();
-            for (ColtExpressCard card : playerDecks.get(i).getCards())
+            for (ColtExpressCard card : playerDecks.get(i).getComponents())
                 if (card.cardType == ColtExpressCard.CardType.Bullet)
                     bulletCardsPerPlayer[i]++;
-            for (ColtExpressCard card : playerHandCards.get(i).getCards())
+            for (ColtExpressCard card : playerHandCards.get(i).getComponents())
                 if (card.cardType == ColtExpressCard.CardType.Bullet)
                     bulletCardsPerPlayer[i]++;
 
@@ -217,9 +224,9 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 
     }
 
-    public ArrayList<IAction> schemingActions(int player){
-        ArrayList<IAction> actions = new ArrayList<>();
-        for (ColtExpressCard card : playerHandCards.get(player).getCards()){
+    public ArrayList<AbstractAction> schemingActions(int player){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        for (ColtExpressCard card : playerHandCards.get(player).getComponents()){
             if (card.cardType == ColtExpressCard.CardType.Bullet)
                 continue;
 
@@ -237,9 +244,9 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         return actions;
     }
 
-    public ArrayList<IAction> stealingActions(int player)
+    public ArrayList<AbstractAction> stealingActions(int player)
     {
-        ArrayList<IAction> actions = new ArrayList<>();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         if (plannedActions.getSize() == 0)
             return actions;
 
@@ -295,25 +302,25 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                         else if (compartment.playersInsideCompartment.contains(player))
                             availableLoot = compartment.lootInside;
                         if (availableLoot != null){
-                            for (Loot loot : availableLoot.getCards())
+                            for (Loot loot : availableLoot.getComponents())
                             {
-                                if (loot.getType() == Loot.LootType.Purse){
+                                if (loot.getLootType() == Loot.LootType.Purse){
                                     actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
                                             playerDecks.get(player), Loot.LootType.Purse, availableLoot));
                                     break;
                                 }
                             }
-                            for (Loot loot : availableLoot.getCards())
+                            for (Loot loot : availableLoot.getComponents())
                             {
-                                if (loot.getType() == Loot.LootType.Strongbox){
+                                if (loot.getLootType() == Loot.LootType.Strongbox){
                                     actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
                                             playerDecks.get(player), Loot.LootType.Strongbox, availableLoot));
                                     break;
                                 }
                             }
-                            for (Loot loot : availableLoot.getCards())
+                            for (Loot loot : availableLoot.getComponents())
                             {
-                                if (loot.getType() == Loot.LootType.Jewel){
+                                if (loot.getLootType() == Loot.LootType.Jewel){
                                     actions.add(new CollectMoneyAction(plannedActionCard, plannedActions,
                                             playerDecks.get(player), Loot.LootType.Jewel, availableLoot));
                                     break;
@@ -369,7 +376,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         return actions;
     }
 
-    private void createPunchingActions(ColtExpressCard card, ArrayList<IAction> actions, int player){
+    private void createPunchingActions(ColtExpressCard card, ArrayList<AbstractAction> actions, int player){
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
         HashSet<Integer> availableTargets = new HashSet<>();
@@ -413,18 +420,18 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                 PartialObservableDeck<Loot> availableLoot = playerLoot.get(targetPlayer);
 
                 if (availableLoot.getSize() > 0){
-                    for (Loot loot : availableLoot.getCards())
+                    for (Loot loot : availableLoot.getComponents())
                     {
-                        if (loot.getType() == Loot.LootType.Purse){
+                        if (loot.getLootType() == Loot.LootType.Purse){
                             actions.add(new PunchAction(card, plannedActions,
                                     playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
                                     Loot.LootType.Purse, availableLoot, playerIsCheyenne));
                             break;
                         }
                     }
-                    for (Loot loot : availableLoot.getCards())
+                    for (Loot loot : availableLoot.getComponents())
                     {
-                        if (loot.getType() == Loot.LootType.Strongbox){
+                        if (loot.getLootType() == Loot.LootType.Strongbox){
                             actions.add(new PunchAction(card, plannedActions,
                                     playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
                                     Loot.LootType.Purse, availableLoot, playerIsCheyenne));
@@ -432,9 +439,9 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                         }
                     }
 
-                    for (Loot loot : availableLoot.getCards())
+                    for (Loot loot : availableLoot.getComponents())
                     {
-                        if (loot.getType() == Loot.LootType.Jewel){
+                        if (loot.getLootType() == Loot.LootType.Jewel){
                             actions.add(new PunchAction(card, plannedActions,
                                     playerDecks.get(player), targetPlayer, playerCompartment, targetCompartment,
                                     Loot.LootType.Purse, availableLoot, playerIsCheyenne));
@@ -459,7 +466,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                     null, null, playerIsCheyenne));
     }
 
-    private void createShootingActions(ColtExpressCard card, ArrayList<IAction> actions, int player) {
+    private void createShootingActions(ColtExpressCard card, ArrayList<AbstractAction> actions, int player) {
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
         boolean playerOnTop = false;
@@ -580,8 +587,8 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         return actions;
     }
 
-//    private ArrayList<IAction> playerActions(int playerID) {
-//        ArrayList<IAction> actions = new ArrayList<>();
+//    private ArrayList<AbstractAction> playerActions(int playerID) {
+//        ArrayList<AbstractAction> actions = new ArrayList<>();
 //
 //        // add end turn by drawing a card
 //        return actions;

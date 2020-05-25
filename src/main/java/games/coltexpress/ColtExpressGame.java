@@ -7,38 +7,12 @@ import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ColtExpressGame extends Game {
 
     public ColtExpressGame(List<AbstractPlayer> agents, ForwardModel forwardModel, ColtExpressGameState gameState) {
         super(agents, forwardModel, gameState);
-    }
-
-    @Override
-    public void run(GUI gui) {
-        while (!gameState.isTerminal()){
-            //System.out.println();
-            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-            //((IPrintable) gameState).printToConsole();
-            // Get player to ask for actions next
-            int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
-            // Get actions for the player
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
-            IObservation observation = gameState.getObservation(activePlayer);
-            if (observation != null && VERBOSE) {
-                ((IPrintable) observation).printToConsole();
-            }
-
-            IAction action = actions.size() > 0 ? actions.get(players.get(activePlayer).getAction(observation, actions)) : null;
-            forwardModel.next(gameState, action);
-        }
-
-        gameState.endGame();
-
-        if (VERBOSE)
-            System.out.println("Game Over");
     }
 
     public static void main(String[] args){

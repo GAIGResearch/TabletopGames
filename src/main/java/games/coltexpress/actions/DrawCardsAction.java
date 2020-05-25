@@ -1,13 +1,13 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
 
 
-public class DrawCardsAction implements IAction, IPrintable {
+public class DrawCardsAction extends AbstractAction implements IPrintable {
 
     private final PartialObservableDeck<ColtExpressCard> handCards;
     private final PartialObservableDeck<ColtExpressCard> deckCards;
@@ -27,6 +27,17 @@ public class DrawCardsAction implements IAction, IPrintable {
                 handCards.add(c);
         }
         return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

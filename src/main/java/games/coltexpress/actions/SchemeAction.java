@@ -1,13 +1,13 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
 
 
-public class SchemeAction implements IAction, IPrintable {
+public class SchemeAction extends AbstractAction implements IPrintable {
 
     private final ColtExpressCard card;
     private final PartialObservableDeck<ColtExpressCard> handCards;
@@ -27,11 +27,22 @@ public class SchemeAction implements IAction, IPrintable {
         handCards.remove(card);
         if (hidden){
             actionList.add(card, actionList.getSize());
-            actionList.setVisibilityOfCard(actionList.getSize()-1, card.playerID, true);
+            actionList.setVisibilityOfComponent(actionList.getSize()-1, card.playerID, true);
         } else{
             actionList.add(card, actionList.getSize());
         }
         return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -13,6 +13,7 @@ public class EndCardHostage extends RoundCard {
     }
 
     @Override
+    public  void endRoundCardEvent(ColtExpressGameState gameState){
         Compartment locomotive = gameState.getTrain().getCompartment(gameState.getNPlayers());
         for (Integer playerID : locomotive.playersOnTopOfCompartment){
             gameState.addLoot(playerID, new Loot(Loot.LootType.Purse, 250));

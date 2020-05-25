@@ -7,6 +7,10 @@ import core.observations.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
+/**
+ * The targeted player discards its current and draws a new one.
+ * In case the discarded card is a princess, the targeted player is removed from the game.
+ */
 public class PrinceAction extends DrawCard implements IPrintable {
 
     private final int opponentID;
@@ -19,8 +23,6 @@ public class PrinceAction extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
-        Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
         Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(opponentID);
         Deck<LoveLetterCard> drawPile = llgs.getDrawPile();
@@ -28,10 +30,13 @@ public class PrinceAction extends DrawCard implements IPrintable {
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             LoveLetterCard card = opponentDeck.draw();
 
+            // if the discarded card is a princess, the targeted player loses the game
             if (card.cardType == LoveLetterCard.CardType.Princess)
                 ((LoveLetterGameState)gs).killPlayer(opponentID);
             else
             {
+                // draw a new card from the draw pile.
+                // in case the draw pile is empty the targeted player receives the reserve card
                 opponentDiscardPile.add(card);
                 LoveLetterCard cardDrawn = drawPile.draw();
                 if (cardDrawn == null)

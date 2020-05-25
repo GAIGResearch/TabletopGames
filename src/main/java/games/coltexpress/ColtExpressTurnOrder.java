@@ -75,7 +75,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     @Override
     public int nextPlayer(AbstractGameState gameState) {
-        if (((ColtExpressGameState) gameState).getGamePhase() != ColtExpressGameState.GamePhase.PlanActions)
+        if (((ColtExpressGameState) gameState).getGamePhase() != ColtExpressGameState.ColtExpressGamePhase.PlanActions)
             return (turnOwner+direction) % nPlayers;
 
         if (currentTurnType== RoundCard.TurnType.DoubleTurn)
@@ -93,7 +93,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
             if (currentRoundIndex < rounds.get(currentRoundCardIndex).turnTypes.length)
                 initRound(rounds.get(currentRoundCardIndex), currentRoundIndex);
             else
-                ((ColtExpressGameState) gameState).setGamePhase(ColtExpressGameState.GamePhase.ExecuteActions);
+                ((ColtExpressGameState) gameState).setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
         }
         return tmp;
     }
@@ -119,7 +119,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
             turnCounter = 0;
             turnOwner = firstPlayerOfRound;
             initRound(rounds.get(currentRoundCardIndex), 0);
-            ((ColtExpressGameState) gameState).setGamePhase(ColtExpressGameState.GamePhase.PlanActions);
+            ((ColtExpressGameState) gameState).setGamePhase(ColtExpressGameState.ColtExpressGamePhase.PlanActions);
             ((ColtExpressGameState) gameState).distributeCards();
         }
     }

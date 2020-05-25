@@ -25,8 +25,8 @@ public class EndCardPickPocket extends RoundCard {
 
             if (currentCompartment.playersInsideCompartment.size() == 1){
                 LinkedList<Loot> purses = new LinkedList<>();
-                for (Loot loot : currentCompartment.lootInside.getCards()){
-                    if (loot.getType() == Loot.LootType.Purse)
+                for (Loot loot : currentCompartment.lootInside.getComponents()){
+                    if (loot.getLootType() == Loot.LootType.Purse)
                         purses.add(loot);
                 }
                 if (purses.size() > 0){
@@ -37,8 +37,8 @@ public class EndCardPickPocket extends RoundCard {
 
             if (currentCompartment.playersOnTopOfCompartment.size() == 1){
                 LinkedList<Loot> purses = new LinkedList<>();
-                for (Loot loot : currentCompartment.lootOnTop.getCards()){
-                    if (loot.getType() == Loot.LootType.Purse)
+                for (Loot loot : currentCompartment.lootOnTop.getComponents()){
+                    if (loot.getLootType() == Loot.LootType.Purse)
                         purses.add(loot);
                 }
                 if (purses.size() > 0){

@@ -8,7 +8,9 @@ import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Objects;
 
-
+/**
+ * The King lets two player's swap their hand cards.
+ */
 public class KingAction extends DrawCard implements IPrintable {
 
     private final int opponentID;
@@ -20,11 +22,14 @@ public class KingAction extends DrawCard implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
+
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
         Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
+        // create a temporary deck to store cards in and then swap cards accordingly
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp");
             while (opponentDeck.getSize() > 0)
@@ -35,7 +40,7 @@ public class KingAction extends DrawCard implements IPrintable {
                 playerDeck.add(tmpDeck.draw());
         }
 
-        return super.execute(gs);
+        return true;
     }
 
     @Override

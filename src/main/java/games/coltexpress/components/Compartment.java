@@ -1,17 +1,31 @@
 package games.coltexpress.components;
 
+import core.components.Component;
 import core.components.PartialObservableDeck;
+import utilities.Utils;
 
 import java.util.HashSet;
 import java.util.Set;
 
+
+public class Compartment extends Component {
     public Set<Integer> playersInsideCompartment = new HashSet<>();
     public Set<Integer> playersOnTopOfCompartment = new HashSet<>();
 
     public boolean containsMarshal = false;
+
+    public PartialObservableDeck<Loot> getLootInside() {
+        return lootInside;
+    }
+
+    public PartialObservableDeck<Loot> getLootOnTop() {
+        return lootOnTop;
+    }
+
     public PartialObservableDeck<Loot> lootInside;
     public PartialObservableDeck<Loot> lootOnTop;
     public final int id;
+    private final int nPlayers;
 
     enum CompartmentType {
         COMPARTMENT_1,
@@ -23,9 +37,11 @@ import java.util.Set;
     }
 
     private Compartment(int nPlayers, int id){
+        super(Utils.ComponentType.BOARD_NODE);
         this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
         this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
         this.id = id;
+        this.nPlayers = nPlayers;
     }
 
     Compartment(Train train, int nPlayers, int id, CompartmentType type){
@@ -95,6 +111,16 @@ import java.util.Set;
     }
 
     @Override
+    public Component copy() {
+        Compartment newCompartment = new Compartment(this.nPlayers, this.id);
+        for (Loot loot : this.lootInside.getComponents())
+            newCompartment.lootInside.add((Loot) loot.copy());
+        for (Loot loot : this.lootOnTop.getComponents())
+            newCompartment.lootOnTop.add((Loot) loot.copy());
+        return newCompartment;
+    }
+
+    @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append("Compartment: Inside=");
@@ -110,5 +136,4 @@ import java.util.Set;
 
         return sb.toString();
     }
-import core.components.Component;
 }

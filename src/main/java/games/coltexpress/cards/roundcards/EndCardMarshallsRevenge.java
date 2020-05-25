@@ -22,8 +22,8 @@ public class EndCardMarshallsRevenge extends RoundCard{
                 for (Integer playerID : c.playersOnTopOfCompartment){
                     PartialObservableDeck<Loot> playerLoot = gameState.getLoot(playerID);
                     Loot lestValueablePurse = null;
-                    for (Loot loot : playerLoot.getCards()) {
-                        if (loot.getType() == Loot.LootType.Purse &&
+                    for (Loot loot : playerLoot.getComponents()) {
+                        if (loot.getLootType() == Loot.LootType.Purse &&
                                 (lestValueablePurse == null || lestValueablePurse.getValue() < loot.getValue()))
                             lestValueablePurse = loot;
                     }

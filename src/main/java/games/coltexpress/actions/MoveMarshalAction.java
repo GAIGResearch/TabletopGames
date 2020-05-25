@@ -33,6 +33,17 @@ public class MoveMarshalAction extends ColtExpressExecuteCardAction {
         return false;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
     public String toString(){
         return "MoveMarshal to compartment " + targetCompartment.id;
     }

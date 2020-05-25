@@ -4,13 +4,12 @@ import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
-import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 
 import java.util.LinkedList;
 import java.util.Random;
 
-public class CollectMoneyAction extends ColtExpressExecuteCardAction{
+public class CollectMoneyAction extends ColtExpressExecuteCardAction {
 
     private final PartialObservableDeck<Loot> availableLoot;
     private final Loot.LootType lootType;
@@ -30,8 +29,8 @@ public class CollectMoneyAction extends ColtExpressExecuteCardAction{
             return true;
 
         LinkedList<Loot> lootOfCorrectType = new LinkedList<>();
-        for (Loot loot : availableLoot.getCards()){
-            if (loot.getType() == lootType)
+        for (Loot loot : availableLoot.getComponents()){
+            if (loot.getLootType() == lootType)
                 lootOfCorrectType.add(loot);
         }
 
@@ -42,6 +41,17 @@ public class CollectMoneyAction extends ColtExpressExecuteCardAction{
                 lootOfCorrectType.get(new Random().nextInt(lootOfCorrectType.size())));
 
         return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException();
+        //return false;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
     }
 
     public String toString(){
