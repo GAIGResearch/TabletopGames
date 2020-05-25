@@ -1,6 +1,6 @@
 package core;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import players.ActionController;
 
 import javax.swing.*;
@@ -51,7 +51,7 @@ public abstract class GUI extends JFrame {
      * @param gameState - current game state to be used in updating visuals.
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        List<IAction> actions = gameState.getActions();
+        List<AbstractAction> actions = gameState.getActions();
         for (int i = 0; i < actions.size(); i++) {
             actionButtons[i].setVisible(true);
             actionButtons[i].setButtonAction(actions.get(i));
@@ -125,7 +125,7 @@ public abstract class GUI extends JFrame {
      */
     @SuppressWarnings("rawtypes")
     protected static class ActionButton extends JButton {
-        IAction action;
+        AbstractAction action;
         ActionButton[] actionButtons;
 
         public ActionButton(ActionController ac, Collection[] highlights) {
@@ -140,13 +140,13 @@ public abstract class GUI extends JFrame {
             });
         }
 
-        public void setButtonAction(IAction action) {
+        public void setButtonAction(AbstractAction action) {
             this.action = action;
             if (action != null) setText(action.toString());
             else setText("");
         }
 
-        public void setButtonAction(IAction action, String actionText) {
+        public void setButtonAction(AbstractAction action, String actionText) {
             this.action = action;
             setText(actionText);
         }

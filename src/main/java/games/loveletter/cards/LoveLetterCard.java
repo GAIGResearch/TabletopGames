@@ -24,6 +24,7 @@ public class LoveLetterCard extends Card {
     public CardType cardType;
 
     public LoveLetterCard(CardType cardType) {
+        super(cardType.toString());
         this.cardType = cardType;
     }
 

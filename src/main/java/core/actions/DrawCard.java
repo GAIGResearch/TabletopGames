@@ -6,83 +6,103 @@ import core.AbstractGameState;
 
 import java.util.Objects;
 
-public class DrawCard implements IAction {
+public class DrawCard extends AbstractAction {
 
-    private Deck<Card> deckFrom;
-    private Deck<Card> deckTo;
+    protected int deckFrom;
+    protected int deckTo;
+    protected int fromIndex;
+    protected int toIndex;
+    protected int cardId;
 
-    private int index;
+    protected boolean executed;
 
-    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo, int index) {
+    public DrawCard (int deckFrom, int deckTo, int fromIndex, int toIndex) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
-        this.index = index;
+        this.fromIndex = fromIndex;
+        this.toIndex = toIndex;
     }
 
-    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo) {
+    public DrawCard (int deckFrom, int deckTo, int fromIndex) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
+        this.fromIndex = fromIndex;
+        this.toIndex = 0;
+    }
+
+    public DrawCard (int deckFrom, int deckTo) {
+        this.deckFrom = deckFrom;
+        this.deckTo = deckTo;
+        this.fromIndex = 0;
+        this.toIndex = 0;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        Card card;
-        if (index != -1){
-            card = deckFrom.pick(index);
-        } else {
-            card = deckFrom.draw();
-        }
-        if (card == null) {
-            return false;
-        }
-        return deckTo.add(card);
+        executed = true;
+        Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
+        Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
+        Card card = from.pick(fromIndex);
+        return card != null && to.add(card, toIndex);
     }
 
     @Override
-    public Card getCard() {
-        return null;
+    public Card getCard(AbstractGameState gs) {
+        if (!executed) {
+            Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
+            return deck.getComponents().get(fromIndex);
+        }
+        return (Card) gs.getComponentById(cardId);
+    }
+
+    public int getCardId() {
+        return cardId;
+    }
+
+    public int getFromIndex() {
+        return fromIndex;
+    }
+
+    public int getToIndex() {
+        return toIndex;
+    }
+
+    public int getDeckFrom() {
+        return deckFrom;
+    }
+
+    public int getDeckTo() {
+        return deckTo;
     }
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        if(other instanceof DrawCard)
-        {
-            DrawCard otherAction = (DrawCard) other;
-            return deckFrom.equals(otherAction.deckFrom) && deckTo.equals(otherAction.deckTo);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DrawCard drawCard = (DrawCard) o;
+        return deckFrom == drawCard.deckFrom &&
+                deckTo == drawCard.deckTo &&
+                fromIndex == drawCard.fromIndex &&
+                toIndex == drawCard.toIndex &&
+                cardId == drawCard.cardId &&
+                executed == drawCard.executed;
+    }
 
-        }else return false;
+    @Override
+    public int hashCode() {
+        return Objects.hash(deckFrom, deckTo, fromIndex, toIndex, cardId, executed);
     }
 
     @Override
     public String toString() {
         return "DrawCard{" +
-                "deckFrom=" + deckFrom.getID() +
-                ", deckTo=" + deckTo.getID() +
-                ", index=" + index +
+                "deckFrom=" + deckFrom +
+                ", deckTo=" + deckTo +
+                ", fromIndex=" + fromIndex +
+                ", toIndex=" + toIndex +
+                ", cardId=" + cardId +
+                ", executed=" + executed +
                 '}';
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public Deck<Card> getDeckFrom() {
-        return deckFrom;
-    }
-
-    public Deck<Card> getDeckTo() {
-        return deckTo;
-    }
-
-    public Card getDrawCard() {
-        return deckFrom.getCards().get(index);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(deckFrom, deckTo, index);
     }
 }
 

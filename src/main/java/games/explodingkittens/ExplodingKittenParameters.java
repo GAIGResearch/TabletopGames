@@ -22,4 +22,7 @@ public class ExplodingKittenParameters extends GameParameters {
         put(ExplodingKittenCard.CardType.DEFUSE, 6);
         put(ExplodingKittenCard.CardType.EXPLODING_KITTEN, -1);
     }};
+    public int nCardsPerPlayer = 7;
+    public int nDifuseCards = 6;
+    public int nSeeFutureCards = 3;
 }

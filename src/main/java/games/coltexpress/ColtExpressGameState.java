@@ -3,7 +3,7 @@ package games.coltexpress;
 import core.AbstractGameState;
 import core.ForwardModel;
 import core.gamephase.GamePhase;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.observations.IObservation;
 import core.observations.IPrintable;
 import games.coltexpress.actions.*;
@@ -14,11 +14,13 @@ import games.coltexpress.components.Loot;
 import games.coltexpress.components.Train;
 import core.components.PartialObservableDeck;
 import utilities.Utils;
+import games.coltexpress.ColtExpressParameters.CharacterType;
 
 import java.util.*;
 
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
+    // Colt express adds 4 game phases
     public enum ColtExpressGamePhase implements GamePhase {
         DrawCards,
         PlanActions,
@@ -33,15 +35,33 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     protected PartialObservableDeck<ColtExpressCard> plannedActions;
     private HashMap<Integer, CharacterType> playerCharacters;
     private int playerPlayingBelle = -1;
+    // Cards in player hands
+    // A deck for each player
+    // The card stack built by players each round
+    // The player characters available
+    // The train to loot
 
     private Train train;
     public Train getTrain(){return train;}
     public PartialObservableDeck<Loot> getLoot(int playerID){return playerLoot.get(playerID);}
-
-    public static boolean PARTIAL_OBSERVABLE = false;
+    @Override
+    public void addAllComponents() {
+        allComponents.putComponent(cardStack);
+        allComponents.putComponent(train);
+        allComponents.putComponents(train.getCompartments());
+        for (Compartment t: train.getCompartments()) {
+            allComponents.putComponents(t.getLoot());
+        }
+        allComponents.putComponents(playerHandCards);
+        allComponents.putComponents(playerDecks);
+        for (int i = 0; i < getNPlayers(); i++) {
+            allComponents.putComponents(playerHandCards.get(i).getComponents());
+            allComponents.putComponents(playerDecks.get(i).getComponents());
+        }
+    }
 
     public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new ColtExpressTurnOrder(nPlayers));
+        super(gameParameters, model, new ColtExpressTurnOrder(nPlayers));
         gamePhase = ColtExpressGamePhase.DrawCards;
     }
 
@@ -525,20 +545,18 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
+    public List<AbstractAction> computeAvailableActions() {
 
-        ArrayList<IAction> actions;
-        int player = getTurnOrder().getCurrentPlayer(this);
+        ArrayList<AbstractAction> actions;
         if (ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
-
-            actions = drawAction(player);
+            actions = drawAction();
         } else if (ColtExpressGamePhase.DrawCards.equals(gamePhase)) {
-            actions = drawAction(player);
+            actions = drawAction();
         } else if (ColtExpressGamePhase.PlanActions.equals(gamePhase)) {
-            actions = schemingActions(player);
+            actions = schemingActions();
         } else if (ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
-            actions = stealingActions(player);
+            actions = stealingActions();
         } else {
             actions = new ArrayList<>();
         }
@@ -546,10 +564,28 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         return actions;
     }
 
-    @Override
-    public void setComponents() {
-
+    private ArrayList<AbstractAction> drawAction(){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        return actions;
     }
+
+    public ArrayList<AbstractAction> schemingActions(){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        return actions;
+    }
+
+    public ArrayList<AbstractAction> stealingActions()
+    {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        return actions;
+    }
+
+//    private ArrayList<IAction> playerActions(int playerID) {
+//        ArrayList<IAction> actions = new ArrayList<>();
+//
+//        // add end turn by drawing a card
+//        return actions;
+//    }
 
     @Override
     public void printToConsole() {

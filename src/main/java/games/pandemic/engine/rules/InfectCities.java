@@ -1,7 +1,6 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.actions.AddCardToDeck;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Counter;
@@ -11,7 +10,6 @@ import games.pandemic.actions.InfectCity;
 
 import static games.pandemic.PandemicConstants.*;
 
-@SuppressWarnings("unchecked")
 public class InfectCities extends RuleNode {
     int max_cubes_per_city;
     int n_cubes_infection;
@@ -34,13 +32,12 @@ public class InfectCities extends RuleNode {
             Deck<Card> tempDeck = pgs.getTempDeck();
             Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
             Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-            DrawCard action = new DrawCard(infectionDeck, tempDeck);
+            DrawCard action = new DrawCard(infectionDeck.getComponentID(), tempDeck.getComponentID(), 0);
             for (int i = 0; i < noCardsDrawn; i++) {  // Draw infection cards into a new deck
                 action.execute(gs);
             }
-            for (Card c : tempDeck.getCards()) {  // Check the drawn cards and infect cities
-                new InfectCity(max_cubes_per_city, c, n_cubes_infection).execute(gs);
-                new AddCardToDeck(c, infectionDiscardDeck).execute(gs);
+            for (int c = 0; c < tempDeck.getSize(); c++) {  // Check the drawn cards and infect cities
+                new InfectCity(tempDeck.getComponentID(), infectionDiscardDeck.getComponentID(), c, max_cubes_per_city, n_cubes_infection).execute(gs);
             }
             pgs.clearTempDeck();
             ((PandemicGameState) gs).setQuietNight(false);

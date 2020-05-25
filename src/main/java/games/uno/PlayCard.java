@@ -1,49 +1,56 @@
 package games.uno;
 
-import core.actions.IAction;
-import core.components.Card;
-import core.components.Deck;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.observations.IPrintable;
-import games.uno.cards.CardEffect;
 
-public class PlayCard<T> implements IAction, IPrintable {
+import java.util.Objects;
 
-    private final Deck<T> sourceDeck;
-    private final Deck<T> targetDeck;
-    private final T cardToBePlayed;
+public class PlayCard extends DrawCard implements IPrintable {
 
-    private final IAction postEffect;
+    private final AbstractAction postEffect;
 
-    public PlayCard(T card, Deck<T> sourceDeck, Deck<T> targetDeck){
-        cardToBePlayed = card;
-        this.sourceDeck = sourceDeck;
-        this.targetDeck = targetDeck;
-        postEffect = null;
+    public PlayCard(int deckFrom, int deckTo, int fromIndex) {
+        super(deckFrom, deckTo, fromIndex);
+        this.postEffect = null;
     }
 
-    public PlayCard(T card, Deck<T> sourceDeck, Deck<T> targetDeck, CardEffect postEffect){
-        cardToBePlayed = card;
-        this.sourceDeck = sourceDeck;
-        this.targetDeck = targetDeck;
+    public PlayCard(int deckFrom, int deckTo, int fromIndex, AbstractAction postEffect) {
+        super(deckFrom, deckTo, fromIndex);
         this.postEffect = postEffect;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        sourceDeck.remove(cardToBePlayed);
-        targetDeck.add(cardToBePlayed);
+        super.execute(gs);
         if (postEffect != null) postEffect.execute(gs);
         return true;
     }
 
     @Override
-    public Card getCard() {
-        return null;
+    public void printToConsole() {
+        System.out.println("Play card");
     }
 
     @Override
-    public void printToConsole() {
-        System.out.println("Play card: " + cardToBePlayed.toString());
+    public String toString() {
+        return "PlayCard{" +
+                "postEffect=" + (postEffect != null? postEffect.toString() : null) +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PlayCard playCard = (PlayCard) o;
+        return Objects.equals(postEffect, playCard.postEffect);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), postEffect);
     }
 }

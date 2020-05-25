@@ -17,6 +17,7 @@ public class ColtExpressCard extends Card {
     public final int playerID;
 
     public ColtExpressCard(int playerID, CardType cardType) {
+        super(cardType.toString());
         this.cardType = cardType;
         this.playerID = playerID;
     }

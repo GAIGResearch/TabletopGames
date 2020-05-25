@@ -2,7 +2,7 @@ package games.coltexpress.components;
 
 import java.util.*;
 
-public class Train {
+public class Train extends Component {
 
     private final LinkedList<Compartment> compartments = new LinkedList<>();
     private final LinkedList<Integer> remainingPurseValues;

@@ -1,32 +1,28 @@
 package games.explodingkittens.actions;
 
-import core.actions.IAction;
-import core.components.Card;
-import core.components.IDeck;
+import core.actions.DrawCard;
 import core.AbstractGameState;
+import core.components.Deck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
-public class GiveCardAction implements IAction, IPrintable {
+public class GiveCard extends DrawCard implements IPrintable {
 
-    final ExplodingKittenCard card;
-    final IDeck<ExplodingKittenCard> giverDeck;
-    final IDeck<ExplodingKittenCard> receiverDeck;
-
-    public GiveCardAction(ExplodingKittenCard card, IDeck<ExplodingKittenCard> giverDeck, IDeck<ExplodingKittenCard> receiverDeck) {
-        this.card = card;
-        this.giverDeck = giverDeck;
-        this.receiverDeck = receiverDeck;
+    public GiveCard(int deckFrom, int deckTo, int index) {
+        super(deckFrom, deckTo, index);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         ExplodingKittenTurnOrder ekto = ((ExplodingKittenTurnOrder) gs.getTurnOrder());
-        giverDeck.remove(card);
-        receiverDeck.add(card);
+        Deck<ExplodingKittenCard> from = ekgs.getPlayerHandCards().get(deckFrom);
+        Deck<ExplodingKittenCard> to = ekgs.getPlayerHandCards().get(deckTo);
+
+        ExplodingKittenCard c = from.pick(fromIndex);
+        to.add(c);
         gs.setMainGamePhase();
         ekto.endPlayerTurnStep(gs);
         ekto.addReactivePlayer(ekgs.getPlayerGettingAFavor());
@@ -34,14 +30,8 @@ public class GiveCardAction implements IAction, IPrintable {
     }
 
     @Override
-    public Card getCard() {
-        return null;
-    }
-
-    @Override
     public String toString(){
-        String cardtype = card.cardType.toString();
-        return String.format("Player gives %s Card for a favor", cardtype);
+        return "Player gives card for a favor";
     }
 
     @Override

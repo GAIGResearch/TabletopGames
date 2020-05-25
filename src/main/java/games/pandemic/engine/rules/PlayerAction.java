@@ -54,13 +54,13 @@ public class PlayerAction extends RuleNode {
             }
         } else if (action instanceof DrawCard) {
             // Player hand may be over capacity, set parameter to inform next decision
-            Deck<Card> deckTo = ((DrawCard) action).getDeckTo();
+            Deck<Card> deckTo = (Deck<Card>) gs.getComponentById(((DrawCard) action).getDeckTo());
             if (deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
             else playerHandOverCapacity = -1;
         }
 
         // Check if this was an event action. These actions are always played with the event card.
-        Card eventCard = action.getCard();
+        Card eventCard = action.getCard(gs);
         if (eventCard == null || eventCard.getProperty(countryHash) != null || pto.reactionsFinished()) {
             // Notify turn step only if an event card was not played, or if this was a reaction.
             // Event cards are free.

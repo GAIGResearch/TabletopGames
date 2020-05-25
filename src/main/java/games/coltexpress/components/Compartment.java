@@ -5,7 +5,6 @@ import core.components.PartialObservableDeck;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Compartment {
     public Set<Integer> playersInsideCompartment = new HashSet<>();
     public Set<Integer> playersOnTopOfCompartment = new HashSet<>();
 
@@ -111,4 +110,5 @@ public class Compartment {
 
         return sb.toString();
     }
+import core.components.Component;
 }

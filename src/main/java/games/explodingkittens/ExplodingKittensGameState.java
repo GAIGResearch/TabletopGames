@@ -3,9 +3,8 @@ package games.explodingkittens;
 import core.gamephase.GamePhase;
 import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.Deck;
-import core.components.IDeck;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.cards.ExplodingKittenCard;
@@ -14,12 +13,14 @@ import core.observations.IObservation;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
+
+import static utilities.Utils.generatePermutations;
 
 public class ExplodingKittensGameState extends AbstractGameState {
 
+    // Exploding kittens adds 4 phases on top of default ones.
     public enum ExplodingKittensGamePhase implements GamePhase {
         Nope,
         Defuse,
@@ -27,150 +28,93 @@ public class ExplodingKittensGameState extends AbstractGameState {
         SeeTheFuture
     }
 
+    // Cards in each player's hand, index corresponds to player ID
     private List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
+    // Cards in the draw pile
     private PartialObservableDeck<ExplodingKittenCard> drawPile;
+    // Cards in the discard pile
     private Deck<ExplodingKittenCard> discardPile;
+    // Player ID of the player currently getting a favor
     private int playerGettingAFavor = -1;
+    // Current stack of actions
+    private Stack<AbstractAction> actionStack;
 
-    public static boolean PARTIAL_OBSERVABLE = false;
-
-    public int getPlayerGettingAFavor() {
-        return playerGettingAFavor;
-    }
-
-    public void setPlayerGettingAFavor(int playerGettingAFavor) {
-        this.playerGettingAFavor = playerGettingAFavor;
-    }
-
-    public Deck<ExplodingKittenCard> getDiscardPile() {
-        return discardPile;
+    @Override
+    public void addAllComponents() {
+        allComponents.putComponent(drawPile);
+        allComponents.putComponent(discardPile);
+        allComponents.putComponents(playerHandCards);
+        allComponents.putComponents(drawPile.getComponents());
+        allComponents.putComponents(discardPile.getComponents());
+        for (Deck<ExplodingKittenCard> l: playerHandCards) {
+            allComponents.putComponents(l.getComponents());
+        }
     }
 
     public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new ExplodingKittenTurnOrder(nPlayers));
+        super(gameParameters, model, new ExplodingKittenTurnOrder(nPlayers));
     }
 
-    public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
-        int nPlayersActive = 0;
-        for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
-        }
-        if (nPlayersActive == 1) {
-            this.gameStatus = Utils.GameResult.GAME_END;
+    /**
+     * Retrieves an observation specific to the given player from this game state object. Components which are not
+     * observed by the player are removed, the rest are copied.
+     * @param player - player observing this game state.
+     * @return - IObservation, the observation for this player.
+     */
+    @Override
+    public IObservation getObservation(int player) {
+        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player);
+    }
+
+    /**
+     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
+     * The last thing to be called in the game loop, after the game is finished.
+     * Exploding kittens updates the status of players still alive as winners.
+     */
+    @Override
+    public void endGame() {
+        this.gameStatus = Utils.GameResult.GAME_END;
+        for (int i = 0; i < getNPlayers(); i++){
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING)
+                playerResults[i] = Utils.GameResult.GAME_WIN;
         }
     }
 
-    public void setComponents() {
-        ExplodingKittenParameters ekp = (ExplodingKittenParameters)gameParameters;
-        drawPile = new PartialObservableDeck<>("Draw Pile", getNPlayers());
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of IAction objects.
+     */
+    @Override
+    public List<AbstractAction> computeAvailableActions() {
 
-        // add all cards and distribute 7 random cards to each player
-        for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
-            if (entry.getKey() == ExplodingKittenCard.CardType.DEFUSE || entry.getKey() == ExplodingKittenCard.CardType.EXPLODING_KITTEN)
-                continue;
-            for (int i = 0; i < entry.getValue(); i++) {
-                ExplodingKittenCard card = new ExplodingKittenCard(entry.getKey());
-                drawPile.add(card);
-            }
+        ArrayList<AbstractAction> actions;
+        // todo the actions per player do not change a lot in between two turns
+        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
+        int player = getTurnOrder().getCurrentPlayer(this);
+        if (DefaultGamePhase.Main.equals(gamePhase)) {
+            actions = playerActions(player);
+        } else if (ExplodingKittensGamePhase.Defuse.equals(gamePhase)) {
+            actions = placeKittenActions(player);
+        } else if (ExplodingKittensGamePhase.Nope.equals(gamePhase)) {
+            actions = nopeActions(player);
+        } else if (ExplodingKittensGamePhase.Favor.equals(gamePhase)) {
+            actions = favorActions(player);
+        } else if (ExplodingKittensGamePhase.SeeTheFuture.equals(gamePhase)) {
+            actions = seeTheFutureActions(player);
+        } else {
+            actions = new ArrayList<>();
         }
-        drawPile.shuffle();
-
-        // For each player, initialize their own areas: they get a player hand and a player card
-        // give each player a defuse card and seven random cards from the deck
-        playerHandCards = new ArrayList<>(getNPlayers());
-        for (int i = 0; i < getNPlayers(); i++) {
-            boolean[] visibility = new boolean[getNPlayers()];
-            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
-            visibility[i] = true;
-
-            PartialObservableDeck<ExplodingKittenCard> playerCards =
-                    new PartialObservableDeck<>("Player Cards", visibility);
-            playerHandCards.add(playerCards);
-
-            //add defuse card
-            ExplodingKittenCard defuse =  new ExplodingKittenCard(ExplodingKittenCard.CardType.DEFUSE);
-            playerCards.add(defuse);
-
-            // add 7 random cards from the deck
-            for (int j = 0; j < 7; j++)
-                playerCards.add(drawPile.draw());
-        }
-
-        // add remaining defuse cards and exploding kitten cards to the deck and shuffle again
-        for (int i = getNPlayers(); i < 6; i++){
-            ExplodingKittenCard defuse =  new ExplodingKittenCard(ExplodingKittenCard.CardType.DEFUSE);
-            drawPile.add(defuse);
-        }
-        for (int i = 0; i < getNPlayers()-1; i++){
-            ExplodingKittenCard explodingKitten = new ExplodingKittenCard(ExplodingKittenCard.CardType.EXPLODING_KITTEN);
-            drawPile.add(explodingKitten);
-        }
-        drawPile.shuffle();
-
-        // setup discardPile area
-        discardPile = new Deck<>("Discard Pile");
-    }
-
-    private ArrayList<IAction> defuseActions(int playerID){
-        ArrayList<IAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
-        ExplodingKittenCard kitten = playerDeck.peek();
-        for (int i = 0; i <= drawPile.getSize(); i++){
-            actions.add(new PlaceExplodingKittenAction<>(kitten, playerDeck, drawPile, i));
-        }
-        return actions;
-    }
-
-    private ArrayList<IAction> nopeActions(int playerID){
-        ArrayList<IAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
-        for (ExplodingKittenCard card : playerDeck.getCards()) {
-            if (card.cardType == ExplodingKittenCard.CardType.NOPE) {
-                actions.add(new NopeAction<>(card, playerDeck, discardPile, playerID));
-            }
-            break;
-        }
-        actions.add(new PassAction(playerID));
-        return actions;
-    }
-
-    private ArrayList<IAction> favorActions(int playerID){
-        ArrayList<IAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
-        Deck<ExplodingKittenCard> receiverDeck = playerHandCards.get(playerGettingAFavor);
-        for (ExplodingKittenCard card : playerDeck.getCards()) {
-            actions.add(new GiveCardAction(card, playerDeck, receiverDeck));
-        }
-        return actions;
-    }
-
-    private ArrayList<IAction> seeTheFutureActions(int playerID){
-        ArrayList<IAction> actions = new ArrayList<>();
-        ArrayList<ExplodingKittenCard> cards = drawPile.getCards();
-        int numberOfCards = drawPile.getSize();
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >= numberOfCards ? null : cards.get(1),
-                2 >= numberOfCards ? null : cards.get(2), 3 >= numberOfCards? null : cards.get(3), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 1 >=numberOfCards ? null : cards.get(1),
-                3 >= numberOfCards ? null : cards.get(3), 2 >= numberOfCards? null : cards.get(2), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >=numberOfCards ? null : cards.get(2),
-                1 >= numberOfCards ? null : cards.get(1), 3 >= numberOfCards? null : cards.get(3), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 2 >=numberOfCards ? null : cards.get(2),
-                3 >= numberOfCards ? null : cards.get(3), 1 >= numberOfCards? null : cards.get(1), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >=numberOfCards ? null : cards.get(3),
-                1 >= numberOfCards ? null : cards.get(1), 2 >= numberOfCards? null : cards.get(2), playerID));
-        actions.add(new ChooseSeeTheFutureOrder(drawPile, 3 >=numberOfCards ? null : cards.get(3),
-                2 >= numberOfCards ? null : cards.get(2), 1 >= numberOfCards? null : cards.get(1), playerID));
 
         return actions;
     }
 
-    private ArrayList<IAction> playerActions(int playerID){
-        ArrayList<IAction> actions = new ArrayList<>();
+    private ArrayList<AbstractAction> playerActions(int playerID){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
 
         // todo: only add unique actions
-        for (ExplodingKittenCard card : playerDeck.getCards()) {
+        for (int c = 0; c < playerDeck.getSize(); c++) {
+            ExplodingKittenCard card = playerDeck.getComponents().get(c);
             switch (card.cardType) {
                 case DEFUSE:
                 case MELONCAT:
@@ -182,14 +126,14 @@ public class ExplodingKittensGameState extends AbstractGameState {
                 case EXPLODING_KITTEN:
                     break;
                 case SKIP:
-                    actions.add(new SkipAction<>(card, playerDeck, discardPile));
+                    actions.add(new SkipAction(playerDeck.getComponentID(), discardPile.getComponentID(), c));
                     break;
                 case FAVOR:
                     for (int player = 0; player < getNPlayers(); player++) {
                         if (player == playerID)
                             continue;
                         if (playerHandCards.get(player).getSize() > 0)
-                            actions.add(new FavorAction<>(card, playerDeck, discardPile, player, playerID));
+                            actions.add(new FavorAction(playerDeck.getComponentID(), discardPile.getComponentID(), c, player));
                     }
                     break;
                 case ATTACK:
@@ -198,17 +142,17 @@ public class ExplodingKittensGameState extends AbstractGameState {
                         if (targetPlayer == playerID || playerResults[targetPlayer] != Utils.GameResult.GAME_ONGOING)
                             continue;
 
-                        actions.add(new AttackAction<>(card, playerDeck, discardPile, targetPlayer));
+                        actions.add(new AttackAction(playerDeck.getComponentID(), discardPile.getComponentID(), c, targetPlayer));
                     }
                     break;
                 case SHUFFLE:
-                    actions.add(new ShuffleAction<>(card, playerDeck, discardPile, drawPile));
+                    actions.add(new ShuffleAction(playerDeck.getComponentID(), discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFutureAction<>(card, playerDeck, discardPile, playerID, drawPile));
+                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), discardPile.getComponentID(), c));
                     break;
                 default:
-                    System.out.println("No core.actions known for cardtype: " + card.cardType.toString());
+                    System.out.println("No actions known for cardtype: " + card.cardType.toString());
             }
         }
         /* todo add special combos
@@ -223,48 +167,123 @@ public class ExplodingKittensGameState extends AbstractGameState {
         }*/
 
         // add end turn by drawing a card
-        actions.add(new DrawExplodingKittenCard(playerID, drawPile, playerDeck));
+        actions.add(new DrawExplodingKittenCard(drawPile.getComponentID(), playerDeck.getComponentID()));
         return actions;
     }
 
-    @Override
-    public IObservation getObservation(int player) {
-        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player);
-    }
-
-    @Override
-    public void endGame() {
-        this.gameStatus = Utils.GameResult.GAME_END;
-        for (int i = 0; i < getNPlayers(); i++){
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING)
-                playerResults[i] = Utils.GameResult.GAME_WIN;
+    private ArrayList<AbstractAction> placeKittenActions(int playerID){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
+        int explodingKittenCard = -1;
+        for (int i = 0; i < playerDeck.getSize(); i++) {
+            if (playerDeck.getComponents().get(i).cardType == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
+                explodingKittenCard = i;
+                break;
+            }
         }
-    }
-
-    @Override
-    public List<IAction> computeAvailableActions() {
-
-        ArrayList<IAction> actions;
-        // todo the actions per player do not change a lot in between two turns
-        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
-        int player = getTurnOrder().getCurrentPlayer(this);
-        if (DefaultGamePhase.Main.equals(gamePhase)) {
-            actions = playerActions(player);
-        } else if (ExplodingKittensGamePhase.Defuse.equals(gamePhase)) {
-            actions = defuseActions(player);
-        } else if (ExplodingKittensGamePhase.Nope.equals(gamePhase)) {
-            actions = nopeActions(player);
-        } else if (ExplodingKittensGamePhase.Favor.equals(gamePhase)) {
-            actions = favorActions(player);
-        } else if (ExplodingKittensGamePhase.SeeTheFuture.equals(gamePhase)) {
-            actions = seeTheFutureActions(player);
-        } else {
-            actions = new ArrayList<>();
+        if (explodingKittenCard != -1) {
+            for (int i = 0; i <= drawPile.getSize(); i++) {
+                actions.add(new PlaceExplodingKitten(playerDeck.getComponentID(), drawPile.getComponentID(), explodingKittenCard, i));
+            }
         }
-
         return actions;
     }
 
+    private ArrayList<AbstractAction> nopeActions(int playerID){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
+        for (int c = 0; c < playerDeck.getSize(); c++) {
+            if (playerDeck.getComponents().get(c).cardType == ExplodingKittenCard.CardType.NOPE) {
+                actions.add(new NopeAction(playerDeck.getComponentID(), discardPile.getComponentID(), c));
+                break;
+            }
+        }
+        actions.add(new PassAction());
+        return actions;
+    }
+
+    private ArrayList<AbstractAction> favorActions(int playerID){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
+        Deck<ExplodingKittenCard> receiverDeck = playerHandCards.get(playerGettingAFavor);
+        for (int card = 0; card < playerDeck.getSize(); card++) {
+            actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
+        }
+        return actions;
+    }
+
+    private ArrayList<AbstractAction> seeTheFutureActions(int playerID){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
+        ArrayList<ExplodingKittenCard> cards = drawPile.getComponents();
+        int numberOfCards = drawPile.getSize();
+        int n = Math.max(((ExplodingKittenParameters)gameParameters).nSeeFutureCards, numberOfCards);
+        ArrayList<int[]> permutations = new ArrayList<>();
+        int[] order = new int[n];
+        for (int i = 0; i < n; i++) {
+            order[i] = i;
+        }
+        generatePermutations(n, order, permutations);
+        for (int c = 0; c < playerDeck.getSize(); c++) {
+            if (playerDeck.getComponents().get(c).cardType == ExplodingKittenCard.CardType.SEETHEFUTURE) {
+                for (int[] perm : permutations) {
+                    actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(), discardPile.getComponentID(), c, drawPile.getComponentID(), perm));
+                }
+            }
+        }
+        return actions;
+    }
+
+    /**
+     * Marks a player as dead.
+     * @param playerID - player who was killed in a kitten explosion.
+     */
+    public void killPlayer(int playerID){
+        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
+        int nPlayersActive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
+        }
+        if (nPlayersActive == 1) {
+            this.gameStatus = Utils.GameResult.GAME_END;
+        }
+    }
+
+    // Getters, setters
+    public int getPlayerGettingAFavor() {
+        return playerGettingAFavor;
+    }
+    public PartialObservableDeck<ExplodingKittenCard> getDrawPile() {
+        return drawPile;
+    }
+    public void setPlayerGettingAFavor(int playerGettingAFavor) {
+        this.playerGettingAFavor = playerGettingAFavor;
+    }
+    public Deck<ExplodingKittenCard> getDiscardPile() {
+        return discardPile;
+    }
+    public Stack<AbstractAction> getActionStack() {
+        return actionStack;
+    }
+    public List<PartialObservableDeck<ExplodingKittenCard>> getPlayerHandCards() {
+        return playerHandCards;
+    }
+
+    // Protected, only accessible in this package and subclasses
+    protected void setDiscardPile(Deck<ExplodingKittenCard> discardPile) {
+        this.discardPile = discardPile;
+    }
+    protected void setDrawPile(PartialObservableDeck<ExplodingKittenCard> drawPile) {
+        this.drawPile = drawPile;
+    }
+    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards) {
+        this.playerHandCards = playerHandCards;
+    }
+    protected void setActionStack(Stack<AbstractAction> actionStack) {
+        this.actionStack = actionStack;
+    }
+
+    // Printing functions for the game state and decks.
 
     public void print(ExplodingKittenTurnOrder turnOrder) {
         System.out.println("Exploding Kittens Game-State");
@@ -290,14 +309,21 @@ public class ExplodingKittensGameState extends AbstractGameState {
         System.out.println("Missing Draws: " + turnOrder.requiredDraws);
     }
 
-    public void printDeck(IDeck<ExplodingKittenCard> deck){
+    public void printDeck(Deck<ExplodingKittenCard> deck){
         StringBuilder sb = new StringBuilder();
-        for (ExplodingKittenCard card : deck.getCards()){
+        for (ExplodingKittenCard card : deck.getComponents()){
             sb.append(card.cardType.toString());
             sb.append(",");
         }
         if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
         System.out.println(sb.toString());
         //System.out.println();
+    }
+
+    private void printActionStack(){
+        System.out.print("Action Stack:");
+        for (AbstractAction a : actionStack) {
+            System.out.print(a.toString() + ",");
+        }
     }
 }

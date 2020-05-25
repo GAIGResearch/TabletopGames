@@ -1,6 +1,6 @@
 package games.carcassonne;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.ForwardModel;
 import core.AbstractGameState;
 
@@ -17,7 +17,7 @@ public class CarcassonneForwardModel extends ForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState currentState, IAction action) {
+    public void next(AbstractGameState currentState, AbstractAction action) {
 
     }
 

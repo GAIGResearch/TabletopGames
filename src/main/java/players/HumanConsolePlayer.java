@@ -1,7 +1,7 @@
 package players;
 
 import core.AbstractPlayer;
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.observations.IPrintable;
 import core.observations.IObservation;
 
@@ -22,9 +22,9 @@ public class HumanConsolePlayer extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(IObservation observation, List<IAction> actions) {
-        //if (observation instanceof IPrintable)
-        //   ((IPrintable) observation).printToConsole();
+    public int getAction(IObservation observation, List<AbstractAction> actions) {
+        if (observation instanceof IPrintable)
+            ((IPrintable) observation).printToConsole();
 
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) instanceof IPrintable) {

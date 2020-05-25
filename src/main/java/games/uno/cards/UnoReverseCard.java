@@ -2,6 +2,7 @@ package games.uno.cards;
 
 import core.AbstractGameState;
 import core.components.Card;
+import core.components.Component;
 import games.uno.UnoGameState;
 import core.turnorder.AlternatingTurnOrder;
 
@@ -26,8 +27,20 @@ public class UnoReverseCard extends UnoCard {
         }
 
         @Override
-        public Card getCard() {
+        public boolean equals(Object obj) {
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
             return null;
         }
+
+
     }
 }

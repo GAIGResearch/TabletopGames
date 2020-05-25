@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Card;
 import core.components.Counter;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.nameHash;
 
-public class TreatDisease implements IAction {
+public class TreatDisease extends AbstractAction {
 
     //PandemicParameters gp;
     private int initialDiseaseCubes;
@@ -45,7 +45,7 @@ public class TreatDisease implements IAction {
         Counter diseaseCubeCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color));
         int colorIdx = Utils.indexOf(colors, color);
 
-        BoardNode bn = pgs.world.getNode(nameHash, city);
+        BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, city);
         if (bn != null) {
             PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(infectionHash);
             int[] array = infectionArray.getValues();
@@ -69,12 +69,6 @@ public class TreatDisease implements IAction {
         }
         return false;
     }
-
-    @Override
-    public Card getCard() {
-        return null;
-    }
-
 
     @Override
     public boolean equals(Object other)

@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.DrawCard;
 import core.components.BoardNode;
 import core.components.Card;
 import core.components.Counter;
@@ -13,25 +13,28 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
 import static utilities.CoreConstants.*;
 
-public class InfectCity implements IAction {
+public class InfectCity extends DrawCard {
 
-    private Card infectingCard;
     private int count;
     private int maxCubesPerCity;
 
-    public InfectCity(int maxCubesPerCity, Card infectingCard, int count) {
+    public InfectCity(int deckFrom, int deckTo, int fromIndex, int maxCubesPerCity, int count) {
+        super(deckFrom, deckTo, fromIndex);
         this.maxCubesPerCity = maxCubesPerCity;
-        this.infectingCard = infectingCard;
         this.count = count;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
+
         PandemicGameState pgs = (PandemicGameState)gs;
+        Card infectingCard = getCard(gs);
         PropertyColor color = (PropertyColor) infectingCard.getProperty(colorHash);
         Counter diseaseCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color.valueStr));
 
@@ -41,7 +44,7 @@ public class InfectCity implements IAction {
             int colorIdx = Utils.indexOf(colors, color.valueStr);
             PropertyString city = (PropertyString) infectingCard.getProperty(nameHash);
 
-            BoardNode bn = pgs.world.getNode(nameHash, city.value);
+            BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, city.value);
             if (bn != null) {
                 // check if quarantine specialist is on that node
                 PropertyIntArrayList players = (PropertyIntArrayList)bn.getProperty(playersHash);
@@ -87,10 +90,7 @@ public class InfectCity implements IAction {
         return false;
     }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     private ArrayList<BoardNode> outbreak(BoardNode n, AbstractGameState gs, int colorIdx, Counter diseaseCubeCounter,
                                           Counter outbreakCounter) {
@@ -125,23 +125,6 @@ public class InfectCity implements IAction {
         return outbreaks;
     }
 
-
-    @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        if(other instanceof InfectCity)
-        {
-            InfectCity otherAction = (InfectCity) other;
-            return infectingCard == otherAction.infectingCard && count == otherAction.count && maxCubesPerCity == otherAction.maxCubesPerCity;
-
-        }else return false;
-    }
-
-    public Card getInfectingCard() {
-        return infectingCard;
-    }
-
     public int getCount() {
         return count;
     }
@@ -151,10 +134,17 @@ public class InfectCity implements IAction {
     }
 
     @Override
-    public String toString() {
-        return "InfectCity{" +
-                "infectingCard=" + infectingCard.toString() +
-                ", count=" + count +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        InfectCity that = (InfectCity) o;
+        return count == that.count &&
+                maxCubesPerCity == that.maxCubesPerCity;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), count, maxCubesPerCity);
     }
 }

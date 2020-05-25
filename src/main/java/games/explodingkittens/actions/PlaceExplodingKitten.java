@@ -4,32 +4,25 @@ import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import core.turnorder.TurnOrder;
 
-public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
+public class PlaceExplodingKitten extends DrawCard implements IPrintable {
 
-    public SkipAction(int deckFrom, int deckTo, int index) {
-        super(deckFrom, deckTo, index);
+    public PlaceExplodingKitten(int deckFrom, int deckTo, int index, int targetIndex) {
+        super(deckFrom, deckTo, index, targetIndex);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // Discard the card played
-        super.execute(gs);
-        // Execute action
+        boolean success = super.execute(gs);
+
         gs.setMainGamePhase();
         ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
-        return true;
+        return success;
     }
 
     @Override
     public String toString(){
-        return "Player skips its draw";
-    }
-
-    @Override
-    public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.execute(gs);
+        return String.format("Player defuses the kitten and places it at index  %d", toIndex);
     }
 
     @Override

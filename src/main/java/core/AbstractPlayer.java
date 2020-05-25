@@ -1,6 +1,6 @@
 package core;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.observations.IObservation;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public abstract class AbstractPlayer {
      * Initialize agent given an observation of the initial game-state.
      * @param observation observation of the initial game-state
      */
-    public abstract int getAction(IObservation observation, List<IAction> actions);
+    public abstract int getAction(IObservation observation, List<AbstractAction> actions);
 
     /**
      * Retrieves this player's ID, as set by the game.

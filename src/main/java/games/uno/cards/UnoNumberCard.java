@@ -13,9 +13,8 @@ public class UnoNumberCard extends UnoCard {
 
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        if (gameState.currentCard instanceof  UnoNumberCard){
-            if (this.number == ((UnoNumberCard) gameState.currentCard).number)
-                return true;
+        if (gameState.getCurrentCard() instanceof UnoNumberCard) {
+            return this.number == ((UnoNumberCard) gameState.getCurrentCard()).number;
         }
 
         return false;
