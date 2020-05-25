@@ -1,8 +1,10 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
+import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Counter;
+import core.components.Deck;
 import core.content.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -12,26 +14,31 @@ import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
+import static games.pandemic.PandemicConstants.countryHash;
 import static utilities.CoreConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
 
-    int n_initial_disease_cubes;
+    private int playerHandOverCapacity;
+    private int n_initial_disease_cubes;
+
     public PlayerAction(int n_initial_disease_cubes) {
         super(true);
         this.n_initial_disease_cubes = n_initial_disease_cubes;
+        this.playerHandOverCapacity = -1;
     }
 
     @Override
     protected boolean run(AbstractGameState gs) {
         action.execute(gs);
         PandemicGameState pgs = (PandemicGameState)gs;
+        PandemicTurnOrder pto = (PandemicTurnOrder) pgs.getTurnOrder();
 
         if (action instanceof QuietNight) {
             ((PandemicGameState)gs).setQuietNight(true);
         } else if (action instanceof MovePlayer){
             // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
-            int playerIdx = pgs.getTurnOrder().getCurrentPlayer(gs);
+            int playerIdx = pto.getCurrentPlayer(gs);
             Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
             String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
 
@@ -41,13 +48,32 @@ public class PlayerAction extends RuleNode {
                     String city = ((MovePlayer)action).getDestination();
                     boolean disease_cured = diseaseToken.getValue() > 0;
                     if (disease_cured){
-                        new TreatDisease(n_initial_disease_cubes, color, city, true);
+                        new TreatDisease(n_initial_disease_cubes, color, city, true).execute(gs);
                     }
                 }
             }
+        } else if (action instanceof DrawCard) {
+            // Player hand may be over capacity, set parameter to inform next decision
+            Deck<Card> deckTo = ((DrawCard) action).getDeckTo();
+            if (deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
+            else playerHandOverCapacity = -1;
         }
 
-        ((PandemicTurnOrder)gs.getTurnOrder()).endPlayerTurnStep();
+        // Check if this was an event action. These actions are always played with the event card.
+        Card eventCard = action.getCard();
+        if (eventCard == null || eventCard.getProperty(countryHash) != null || pto.reactionsFinished()) {
+            // Notify turn step only if an event card was not played, or if this was a reaction.
+            // Event cards are free.
+            pto.endPlayerTurnStep();
+        }
         return true;
+    }
+
+    public int getPlayerHandOverCapacity() {
+        return playerHandOverCapacity;
+    }
+
+    public void setPlayerHandOverCapacity(int playerHandOverCapacity) {
+        this.playerHandOverCapacity = playerHandOverCapacity;
     }
 }

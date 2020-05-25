@@ -5,7 +5,7 @@ import core.turnorder.ReactiveTurnOrder;
 import core.turnorder.TurnOrder;
 import utilities.Utils;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.NopePhase;
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 
 public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
     int requiredDraws = 1;
@@ -29,7 +29,7 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
 
     public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState){
         addAllReactivePlayersButCurrent(gameState);
-        gameState.setGamePhase(NopePhase);
+        gameState.setGamePhase(Nope);
     }
 
     public void registerFavorAction(int player){

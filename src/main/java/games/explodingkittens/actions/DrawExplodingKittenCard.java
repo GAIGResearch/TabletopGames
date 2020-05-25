@@ -1,6 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -8,7 +9,7 @@ import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.DefusePhase;
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse;
 
 public class DrawExplodingKittenCard implements IAction, IPrintable {
 
@@ -40,7 +41,7 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
                 }
             }
             if (defuseCard != null){
-                ((ExplodingKittensGameState) gs).setGamePhase(DefusePhase);
+                gs.setGamePhase(Defuse);
                 deckTo.remove(defuseCard);
                 deckTo.add(c);
             } else {
@@ -61,6 +62,11 @@ public class DrawExplodingKittenCard implements IAction, IPrintable {
             ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         }
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

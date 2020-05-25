@@ -9,6 +9,7 @@ public abstract class Node {
     private int id;
     protected boolean actionNode = false;
     protected IAction action;
+    protected Node parent;
 
     public Node() {
         id = nextID++;
@@ -22,6 +23,8 @@ public abstract class Node {
     }
     public final boolean requireAction() { return actionNode; }
     public final int getId() { return id; }
+    public final Node getParent() { return parent; }
+    public final void setParent(Node parent) { this.parent = parent; }
 
     @Override
     public final boolean equals(Object o) {

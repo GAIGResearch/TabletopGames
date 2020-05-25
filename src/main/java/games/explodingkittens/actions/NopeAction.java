@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -17,6 +18,11 @@ public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.components.IDeck;
 import core.observations.IPrintable;
@@ -38,6 +39,11 @@ public class KingAction extends PlayCard<LoveLetterCard> implements IAction, IPr
         }
 
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

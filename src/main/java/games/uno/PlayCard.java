@@ -1,6 +1,7 @@
 package games.uno;
 
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
@@ -34,6 +35,11 @@ public class PlayCard<T> implements IAction, IPrintable {
         targetDeck.add(cardToBePlayed);
         if (postEffect != null) postEffect.execute(gs);
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

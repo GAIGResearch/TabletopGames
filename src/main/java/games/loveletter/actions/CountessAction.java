@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.actions.PlayCard;
@@ -17,6 +18,11 @@ public class CountessAction extends PlayCard<LoveLetterCard> implements IAction,
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
 

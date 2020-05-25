@@ -2,13 +2,11 @@ package games.explodingkittens.actions;
 
 import core.actions.IAction;
 import core.AbstractGameState;
-import core.components.Deck;
+import core.components.Card;
 import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
-
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 
 public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
@@ -57,8 +55,13 @@ public class ChooseSeeTheFutureOrder implements IAction, IPrintable {
             }
             drawPile.setVisibilityOfCard(i, playerID, true);      // this player knows the first three cards
         }
-        ((ExplodingKittensGameState)gs).setGamePhase(PlayerMove);
+        gs.setMainGamePhase();
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     public String toString(){

@@ -1,12 +1,10 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import games.explodingkittens.ExplodingKittensGameState;
-
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
 
 public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrintable {
     int targetIndex;
@@ -18,11 +16,16 @@ public class PlaceExplodingKittenAction<T> extends PlayCard<T> implements IPrint
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        boolean succes = sourceDeck.remove(card);
+        boolean success = sourceDeck.remove(card);
         targetDeck.add(card, targetIndex);
-        ((ExplodingKittensGameState) gs).setGamePhase(PlayerMove);
+        gs.setMainGamePhase();
         ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
-        return succes;
+        return success;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override
