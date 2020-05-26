@@ -255,16 +255,18 @@ public class UnoGameState extends AbstractGameState {
 
     // When draw deck is empty, all the cards of discard deck (less the current one) are inserted in the draw deck
     // and it is shuffle
-    // TODO: remove cards from discard deck. Check it
+    // TODO:  Check it
     public void drawDeckEmpty()
     {
-        for (UnoCard card : discardDeck.getCards())
-        {
-            if (card != currentCard) {
-                discardDeck.remove(card);  // do it work?
-                drawDeck.add(card);
-            }
+        while (discardDeck.getSize()>0) {
+            UnoCard card = discardDeck.pick();
+            drawDeck.add(card);
         }
+
+        // Add the current card to the discardDeck
+        drawDeck.remove(currentCard);
+        discardDeck.add(currentCard);
+
         drawDeck.shuffle();
     }
 

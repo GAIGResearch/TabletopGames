@@ -237,12 +237,11 @@ public class VirusGameState extends AbstractGameState {
     }
 
     // Move all cards from discard deck to draw one and shuffle
-    // TODO: fix
+    // TODO: check it
     public void discardToDraw() {
-        for (VirusCard card : discardDeck.getCards())
-        {
-           discardDeck.remove(card);
-           drawDeck.add(card);
+        while (discardDeck.getSize()>0) {
+            VirusCard card = discardDeck.pick();
+            drawDeck.add(card);
         }
         drawDeck.shuffle();
     }
