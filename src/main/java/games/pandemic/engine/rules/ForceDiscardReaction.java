@@ -6,7 +6,7 @@ import core.components.Deck;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
 
-import static games.pandemic.PandemicGameState.GamePhase.DiscardReaction;
+import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
 import static utilities.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")

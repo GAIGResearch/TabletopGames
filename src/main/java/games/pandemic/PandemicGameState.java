@@ -1,5 +1,7 @@
 package games.pandemic;
 
+import core.gamephase.GamePhase;
+import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
 import core.actions.*;
 import core.components.*;
@@ -21,11 +23,9 @@ import static utilities.Utils.indexOf;
 
 public class PandemicGameState extends AbstractGameState implements IObservation {
 
-    public enum GamePhase {
-        Main,
+    public enum PandemicGamePhase implements GamePhase {
         DiscardReaction,
-        RPReaction,
-        EventReaction
+        RPReaction
     }
 
     private HashMap<Integer, Area> areas;
@@ -35,7 +35,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public Board world;
     private boolean quietNight;
     private boolean epidemic;
-    private GamePhase gamePhase;
     private int nCardsDrawn = 0;
 
     private ArrayList<String> researchStationLocations;
@@ -43,12 +42,13 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     public PandemicGameState(GameParameters pp, ForwardModel model, int nPlayers) {
         super(pp, model, nPlayers, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
         researchStationLocations = new ArrayList<>();
-        gamePhase = GamePhase.Main;
         _data = new PandemicData();
         _data.load(((PandemicParameters)gameParameters).getDataPath());
     }
 
     public void setComponents() {
+        PandemicParameters pp = (PandemicParameters)gameParameters;
+
         tempDeck = new Deck<>("Temp Deck");
         areas = new HashMap<>();
 
@@ -73,11 +73,16 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         world = _data.findBoard("cities"); //world.getNode("name","Valencia");
         gameArea.addComponent(pandemicBoardHash, world);
 
-        // Set up the counters
+        // Set up the counters and sync with game parameters
         Counter infection_rate = _data.findCounter("Infection Rate");
+        infection_rate.setMaximum(pp.infection_rate.length);
         Counter outbreaks = _data.findCounter("Outbreaks");
+        outbreaks.setMaximum(pp.lose_max_outbreak);
+        Counter researchStations = _data.findCounter("Research Stations");
+        researchStations.setMaximum(pp.n_research_stations);
         gameArea.addComponent(infectionRateHash, infection_rate);
         gameArea.addComponent(outbreaksHash, outbreaks);
+        gameArea.addComponent(PandemicConstants.researchStationHash, researchStations);
 
         for (String color : colors) {
             int hash = Hash.GetInstance().hash("Disease " + color);
@@ -87,6 +92,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
             hash = Hash.GetInstance().hash("Disease Cube " + color);
             Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
+            diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
             gameArea.addComponent(hash, diseaseCubeCounter);
         }
 
@@ -101,13 +107,12 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         gameArea.addComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
         gameArea.addComponent(PandemicConstants.infectionHash, _data.findDeck("Infections"));
         gameArea.addComponent(PandemicConstants.playerRolesHash, _data.findDeck("Player Roles"));
-        gameArea.addComponent(PandemicConstants.researchStationHash, _data.findCounter("Research Stations"));
     }
 
     void nextPlayer() {
         turnOrder.endPlayerTurn(this);
         nCardsDrawn = 0;
-        gamePhase = GamePhase.Main;
+        gamePhase = DefaultGamePhase.Main;
     }
 
     @Override
@@ -119,14 +124,14 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public List<IAction> computeAvailableActions() {
-        if (!((PandemicTurnOrder)turnOrder).reactionsRemaining()) {
-            gamePhase = GamePhase.Main;
+        if (((PandemicTurnOrder) turnOrder).reactionsFinished()) {
+            gamePhase = DefaultGamePhase.Main;
         }
-        if (gamePhase == GamePhase.DiscardReaction)
+        if (gamePhase == PandemicGamePhase.DiscardReaction)
             return getDiscardActions();
-        else if (gamePhase == GamePhase.RPReaction)
+        else if (gamePhase == PandemicGamePhase.RPReaction)
             return getRPactions();
-        else if (gamePhase == GamePhase.EventReaction)
+        else if (gamePhase == DefaultGamePhase.PlayerReaction)
             return getEventActions();
         else return getPlayerActions();
     }
@@ -276,13 +281,13 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             // Dispatcher special actions
             case "Dispatcher":
                 // Move any pawn, if its owner agrees, to any city containing another pawn.
-                String[] locations = new String[pp.n_players];
-                for (int i = 0; i < pp.n_players; i++) {
+                String[] locations = new String[turnOrder.nPlayers()];
+                for (int i = 0; i < turnOrder.nPlayers(); i++) {
                     locations[i] = ((PropertyString) getComponent(playerCardHash, i)
                             .getProperty(playerLocationHash)).value;
                 }
-                for (int j = 0; j < pp.n_players; j++) {
-                    for (int i = 0; i < pp.n_players; i++) {
+                for (int j = 0; j < turnOrder.nPlayers(); j++) {
+                    for (int i = 0; i < turnOrder.nPlayers(); i++) {
                         if (i != j) {
                             actions.add(new MovePlayer(i, locations[j]));
                         }
@@ -290,7 +295,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 }
 
                 // Move another player’s pawn, if its owner agrees, as if it were his own.
-                for (int i = 0; i < pp.n_players; i++) {
+                for (int i = 0; i < turnOrder.nPlayers(); i++) {
                     if (i != playerIdx) {
                         actions.addAll(getMoveActions(i, playerHand));
                     }
@@ -375,7 +380,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                             if (!destination.equals(playerLocationName)) {
                                 actions.add(new MovePlayerWithCard(playerId, destination, card));
                             }
-                        } else {
+                        } else if (destination.equals(cardCity)) {
                             // Direct Flight, discard city card and travel to that city
                             actions.add(new MovePlayerWithCard(playerId, cardCity, card));
                         }
@@ -575,14 +580,6 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     }
     public Deck<Card> getTempDeck() {
         return tempDeck;
-    }
-
-    public void setGamePhase(GamePhase gamePhase) {
-        this.gamePhase = gamePhase;
-    }
-
-    public GamePhase getGamePhase() {
-        return gamePhase;
     }
 
     /*

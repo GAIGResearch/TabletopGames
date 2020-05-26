@@ -1,6 +1,8 @@
 package core;
 
 import core.actions.IAction;
+import core.gamephase.DefaultGamePhase;
+import core.gamephase.GamePhase;
 import core.observations.IObservation;
 import core.turnorder.TurnOrder;
 import utilities.Utils;
@@ -22,6 +24,8 @@ public abstract class AbstractGameState {
     protected Utils.GameResult gameStatus;
     protected Utils.GameResult[] playerResults;
 
+    protected GamePhase gamePhase;
+
     public AbstractGameState(GameParameters gameParameters, ForwardModel model, int nPlayers, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
         this.forwardModel = model;
@@ -33,6 +37,8 @@ public abstract class AbstractGameState {
         this.gameStatus = Utils.GameResult.GAME_ONGOING;
         this.playerResults = new Utils.GameResult[nPlayers];
         Arrays.fill(this.playerResults, Utils.GameResult.GAME_ONGOING);
+
+        this.gamePhase = DefaultGamePhase.Main;
     }
 
     // Setters
@@ -41,6 +47,15 @@ public abstract class AbstractGameState {
     }
     public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
     public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
+    public final void setGamePhase(GamePhase gamePhase) {
+        this.gamePhase = gamePhase;
+    }
+    public final void setMainGamePhase() {
+        this.gamePhase = DefaultGamePhase.Main;
+    }
+    public final void setEndGamePhase() {
+        this.gamePhase = DefaultGamePhase.End;
+    }
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
@@ -59,6 +74,9 @@ public abstract class AbstractGameState {
             numAvailableActions = availableActions.size();
         }
         return availableActions;
+    }
+    public final GamePhase getGamePhase() {
+        return gamePhase;
     }
 
     /* Methods to be implemented by subclass */
@@ -109,4 +127,5 @@ public abstract class AbstractGameState {
         return false;
     }
      */
+
 }

@@ -1,17 +1,14 @@
 package games.loveletter;
 
 import core.AbstractGameState;
+import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
 import core.actions.IAction;
-import games.explodingkittens.actions.IsNope;
-import games.explodingkittens.actions.IsNopeable;
 import utilities.Utils;
 
 import java.util.Stack;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.NopePhase;
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
-
+import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 public class LoveLetterForwardModel extends ForwardModel {
 
@@ -28,10 +25,10 @@ public class LoveLetterForwardModel extends ForwardModel {
         LoveLetterTurnOrder llTurnOrder = (LoveLetterTurnOrder) gameState.getTurnOrder();
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
         action.execute(gameState);
-        if (llgs.getGamePhase() == LoveLetterGameState.GamePhase.DrawPhase)
-            llgs.setGamePhase(LoveLetterGameState.GamePhase.PlayerMove);
+        if (llgs.getGamePhase() == Draw)
+            llgs.setGamePhase(DefaultGamePhase.Main);
         else{
-            llgs.setGamePhase(LoveLetterGameState.GamePhase.DrawPhase);
+            llgs.setGamePhase(Draw);
             checkWinningCondition(llgs);
             if (llgs.getGameStatus() != Utils.GameResult.GAME_END)
                 llgs.getTurnOrder().endPlayerTurn(gameState);

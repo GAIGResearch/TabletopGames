@@ -31,7 +31,7 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new HumanGUIPlayer(ac));
 
-        PandemicParameters params = new PandemicParameters("data/");
+        PandemicParameters params = new PandemicParameters("data/pandemic/");
         ForwardModel forwardModel = new PandemicForwardModel(params, players.size());
         PandemicGameState gameState = new PandemicGameState(params, forwardModel, players.size());
 
@@ -49,7 +49,7 @@ public class PandemicGame extends Game {
             results.put(r, 0);
         }
 
-        PandemicParameters params = new PandemicParameters("data/");
+        PandemicParameters params = new PandemicParameters("data/pandemic/");
         for (int i = 0; i < 10000; i++) {
             PandemicGame game = new PandemicGame(players, model, new PandemicGameState(params, model, players.size()));
             game.run(null);

@@ -1,18 +1,16 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicTurnOrder;
+import core.turnorder.ReactiveTurnOrder;
 
-import static games.pandemic.PandemicGameState.GamePhase.EventReaction;
+import static core.gamephase.DefaultGamePhase.PlayerReaction;
 
 public class ForceAllEventReaction extends RuleNode {
 
     @Override
     protected boolean run(AbstractGameState gs) {
-        PandemicGameState pgs = (PandemicGameState)gs;
-        ((PandemicTurnOrder)pgs.getTurnOrder()).addAllReactivePlayers(gs);
-        pgs.setGamePhase(EventReaction);
+        ((ReactiveTurnOrder)gs.getTurnOrder()).addAllReactivePlayers(gs);
+        gs.setGamePhase(PlayerReaction);
         return false;
     }
 }

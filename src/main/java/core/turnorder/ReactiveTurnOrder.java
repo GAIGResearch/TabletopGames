@@ -32,8 +32,8 @@ public class ReactiveTurnOrder extends TurnOrder {
         return copyTo(to);
     }
 
-    public boolean reactionsRemaining(){
-        return reactivePlayers.size() > 0;
+    public boolean reactionsFinished(){
+        return reactivePlayers.size() <= 0;
     }
 
     public Queue<Integer> getReactivePlayers() {

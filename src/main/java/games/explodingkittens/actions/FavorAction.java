@@ -8,8 +8,7 @@ import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import core.turnorder.TurnOrder;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.FavorPhase;
-
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Favor;
 
 public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
     final int target;
@@ -26,7 +25,7 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
         super.execute(gs);
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
-        ekgs.setGamePhase(FavorPhase);
+        ekgs.setGamePhase(Favor);
         ekgs.setPlayerGettingAFavor(playerAskingForFavor);
 
         ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
