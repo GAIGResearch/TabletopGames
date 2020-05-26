@@ -4,6 +4,9 @@ import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.loveletter.LoveLetterGameState;
 
+/**
+ * At the beginning of each round the player draws a card and loses its protection status.
+ */
 public class DrawCard extends core.actions.DrawCard implements IPrintable {
 
     public DrawCard(int deckFrom, int deckTo, int fromIndex) {

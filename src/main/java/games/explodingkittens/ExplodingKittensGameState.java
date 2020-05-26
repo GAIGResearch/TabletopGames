@@ -215,7 +215,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     private ArrayList<AbstractAction> seeTheFutureActions(int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<ExplodingKittenCard> playerDeck = playerHandCards.get(playerID);
-        ArrayList<ExplodingKittenCard> cards = drawPile.getComponents();
+        List<ExplodingKittenCard> cards = drawPile.getComponents();
         int numberOfCards = drawPile.getSize();
         int n = Math.max(((ExplodingKittenParameters)gameParameters).nSeeFutureCards, numberOfCards);
         ArrayList<int[]> permutations = new ArrayList<>();

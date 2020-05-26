@@ -1,6 +1,9 @@
 package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
+import games.coltexpress.components.Train;
 
 public class RoundCardTakeItAll extends RoundCard{
 
@@ -20,7 +23,14 @@ public class RoundCardTakeItAll extends RoundCard{
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
-        // todo place the second strongbox in the car where the marshall currently is
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
+        Train train = gameState.getTrain();
+        for (int i = 0; i < train.getSize(); i++){
+            Compartment c = train.getCompartment(i);
+            if (c.containsMarshal){
+                c.lootInside.add(new Loot(Loot.LootType.Strongbox, 1000));
+                break;
+            }
+        }
     }
 }

@@ -67,13 +67,13 @@ public class Area<T extends Component> extends Component {
         this.components.put(component.getComponentID(), component);
     }
 
-    public void putComponents(List<T> components) {
+    public void putComponents(List<? extends Component> components) {
         for (Component c: components) {
             this.components.put(c.getComponentID(), c);
         }
     }
 
-    public void putComponents(Area area) {
+    public void putComponents(Area<T> area) {
         this.components.putAll(area.components);
     }
 }

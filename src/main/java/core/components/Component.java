@@ -32,8 +32,6 @@ public abstract class Component {
         this.properties = new HashMap<>();
     }
 
-    // Copy constructors
-
     protected Component(ComponentType type, String name, int componentID) {
         this.componentID = componentID;
         this.type = type;

@@ -4,6 +4,9 @@ import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.loveletter.LoveLetterGameState;
 
+/**
+ * In case the princess is discarded or played the player is immediately removed from the game.
+ */
 public class PrincessAction extends DrawCard implements IPrintable {
 
     public PrincessAction(int deckFrom, int deckTo, int fromIndex) {
@@ -12,6 +15,7 @@ public class PrincessAction extends DrawCard implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        // remove the player from the game
         ((LoveLetterGameState)gs).killPlayer(gs.getTurnOrder().getCurrentPlayer(gs));
         return super.execute(gs);
     }

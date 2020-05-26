@@ -7,7 +7,6 @@ import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ColtExpressGame extends Game {
@@ -32,9 +31,9 @@ public class ColtExpressGame extends Game {
             game.run(null);
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
-            gameState.printToConsole();
+            //gameState.printToConsole();
             // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
+            //System.out.println(Arrays.toString(gameState.getPlayerResults()));
 
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){

@@ -1,6 +1,9 @@
 package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
+import games.coltexpress.components.Train;
 
 public class RoundCardPassengerRebellion extends RoundCard {
 
@@ -22,7 +25,13 @@ public class RoundCardPassengerRebellion extends RoundCard {
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
-        //todo Passenger Rebellion - All bandits in the train receive one Neutral Bullet card.
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
+        Train train = gameState.getTrain();
+        for (int i = 0; i < train.getSize(); i++){
+            Compartment c = train.getCompartment(i);
+            for (Integer playerID : c.playersInsideCompartment){
+                gameState.addNeutralBullet(playerID);
+            }
+        }
     }
 }

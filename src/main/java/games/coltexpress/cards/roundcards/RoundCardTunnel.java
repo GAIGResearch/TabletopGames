@@ -16,7 +16,7 @@ public class RoundCardTunnel extends RoundCard {
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //
     }
 }

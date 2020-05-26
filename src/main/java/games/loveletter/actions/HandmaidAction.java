@@ -4,6 +4,9 @@ import core.AbstractGameState;
 import core.observations.IPrintable;
 import games.loveletter.LoveLetterGameState;
 
+/**
+ * The handmaid protects the player from any targeted effects until the next turn.
+ */
 public class HandmaidAction extends DrawCard implements IPrintable {
 
     public HandmaidAction(int deckFrom, int deckTo, int fromIndex) {
@@ -12,10 +15,9 @@ public class HandmaidAction extends DrawCard implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-
+        // set the player's protection status
         ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), true);
-        return true;
+        return super.execute(gs);
     }
 
     @Override

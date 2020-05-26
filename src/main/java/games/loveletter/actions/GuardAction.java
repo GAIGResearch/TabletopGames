@@ -8,6 +8,10 @@ import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Objects;
 
+/**
+ * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
+ * is removed from the game.
+ */
 public class GuardAction extends DrawCard implements IPrintable {
 
     private final int opponentID;
@@ -23,6 +27,8 @@ public class GuardAction extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+
+        // guess the opponent's card and remove the opponent from play if the guess was correct
         if (llgs.isNotProtected(opponentID)){
             LoveLetterCard card = opponentDeck.peek();
             if (card.cardType == this.cardType) {

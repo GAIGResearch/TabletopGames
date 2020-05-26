@@ -7,9 +7,12 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     // Number of players in the game
     protected final int nPlayers;
-    // Visibility of the deck, index of array corresponds to player ID (true if player can see the deck, false otherwise)
+
+    // Visibility of the deck, index of array corresponds to player ID
+    // (true if player can see the deck, false otherwise)
     protected boolean[] deckVisibility;
-    // Visibility of each component in the deck, order corresponds to order of elements in the deck; array of player visibility
+
+    // Visibility of each component in the deck, order corresponds to order of elements in the deck;
     protected ArrayList<boolean[]> elementVisibility = new ArrayList<>();
 
     public PartialObservableDeck(String id, boolean[] defaultVisibility) {

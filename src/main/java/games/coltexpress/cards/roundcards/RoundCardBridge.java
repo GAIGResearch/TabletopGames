@@ -14,7 +14,7 @@ public class RoundCardBridge extends RoundCard {
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
         //no special event
     }
 }

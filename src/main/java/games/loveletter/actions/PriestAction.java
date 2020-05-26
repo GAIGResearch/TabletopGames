@@ -1,7 +1,6 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.components.Deck;
 import core.observations.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import core.components.PartialObservableDeck;
@@ -9,6 +8,10 @@ import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Objects;
 
+/**
+ * The Priest allows a player to see another player's hand cards.
+ * This has no effect in case the game is fully observable.
+ */
 public class PriestAction extends DrawCard implements IPrintable {
 
     private final int opponentID;
@@ -22,9 +25,9 @@ public class PriestAction extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
-        Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
+        // set all cards to be visible by the current player
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             for (int i = 0; i < opponentDeck.getComponents().size(); i++)
                 opponentDeck.setVisibilityOfComponent(i, playerID, true);

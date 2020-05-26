@@ -207,7 +207,7 @@ public class Deck<T extends Component> extends Component {
     /**
      * @return all the components in this deck.
      */
-    public ArrayList<T> getComponents() {
+    public List<T> getComponents() {
         return components;
     }
 
@@ -314,7 +314,7 @@ public class Deck<T extends Component> extends Component {
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        for (T el : getComponents()){
+        for (T el : components){
             sb.append(el.toString());
             sb.append(",");
         }

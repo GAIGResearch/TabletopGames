@@ -8,7 +8,7 @@ import players.HumanGUIPlayer;
 import java.util.Collections;
 import java.util.List;
 
-import static utilities.CoreConstants.VERBOSE;
+import utilities.CoreConstants;
 
 public abstract class Game {
 
@@ -48,7 +48,7 @@ public abstract class Game {
     public final void run(GUI gui) {
 
         while (gameState.isNotTerminal()){
-            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+            if (CoreConstants.VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
 
             // Get player to ask for actions next
             int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
@@ -57,7 +57,7 @@ public abstract class Game {
             // Get actions for the player
             List<AbstractAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
-            if (observation != null && VERBOSE) {
+            if (observation != null && CoreConstants.VERBOSE) {
                 ((IPrintable) observation).printToConsole();
             }
 

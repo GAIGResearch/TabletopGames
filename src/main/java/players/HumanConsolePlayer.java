@@ -52,8 +52,8 @@ public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
     public void registerUpdatedObservation(IObservation observation) {
-        if (observation instanceof IPrintable)
-            ((IPrintable) observation).printToConsole();
+        //if (observation instanceof IPrintable)
+        //   ((IPrintable) observation).printToConsole();
         System.out.println("No actions available. End turn by pressing any key...");
         Scanner in = new Scanner(System.in);
         in.next();
