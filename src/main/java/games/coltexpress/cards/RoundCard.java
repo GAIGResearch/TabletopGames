@@ -1,10 +1,11 @@
-package games.coltexpress.cards.roundcards;
+package games.coltexpress.cards;
 
+import core.actions.AbstractAction;
 import games.coltexpress.ColtExpressGameState;
 
 import java.util.Arrays;
 
-public abstract class RoundCard {
+public class RoundCard {
     /*
     Round Cards
     - - - - - - - - - - - - - - 2-4 players - - - 5-6 players
@@ -51,9 +52,27 @@ public abstract class RoundCard {
         public String toString(){return type; }
     }
 
-    public TurnType[] turnTypes;
+    protected TurnType[] turnTypes;
+    protected AbstractAction endRoundCardEvent;
 
-    public abstract void endRoundCardEvent(ColtExpressGameState gameState);
+    public RoundCard(TurnType[] turnTypes, AbstractAction endRoundCardEvent) {
+        this.turnTypes = turnTypes;
+        this.endRoundCardEvent = endRoundCardEvent;
+    }
+
+    public final void endRoundCardEvent(ColtExpressGameState gameState) {
+        if (endRoundCardEvent != null) {
+            endRoundCardEvent.execute(gameState);
+        }
+    }
+
+    public AbstractAction getEndRoundCardEvent() {
+        return endRoundCardEvent;
+    }
+
+    public TurnType[] getTurnTypes() {
+        return turnTypes;
+    }
 
     public String toString(){
         return Arrays.toString(turnTypes);

@@ -1,20 +1,18 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.components.PartialObservableDeck;
+import core.actions.DrawCard;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 
-public class MoveMarshalAction extends ColtExpressExecuteCardAction {
+public class MoveMarshalAction extends DrawCard {
 
-    private final Compartment sourceCompartment;
-    private final Compartment targetCompartment;
+    private final int sourceCompartment;
+    private final int targetCompartment;
 
-    public MoveMarshalAction(ColtExpressCard card, PartialObservableDeck<ColtExpressCard> plannedActions,
-                              PartialObservableDeck<ColtExpressCard> playerDeck,
-                              Compartment sourceCompartment, Compartment targetCompartment){
-        super(card, plannedActions, playerDeck);
+    public MoveMarshalAction(int plannedActions, int playerDeck,
+                              int sourceCompartment, int targetCompartment){
+        super(plannedActions, playerDeck);
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
     }
@@ -23,14 +21,17 @@ public class MoveMarshalAction extends ColtExpressExecuteCardAction {
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
 
-        sourceCompartment.containsMarshal = false;
-        targetCompartment.containsMarshal = true;
-        for (Integer playerID : targetCompartment.playersInsideCompartment){
-            targetCompartment.playersOnTopOfCompartment.add(playerID);
+        Compartment source = (Compartment) gs.getComponentById(sourceCompartment);
+        Compartment target = (Compartment) gs.getComponentById(targetCompartment);
+
+        source.containsMarshal = false;
+        target.containsMarshal = true;
+        for (Integer playerID : target.playersInsideCompartment){
+            target.playersOnTopOfCompartment.add(playerID);
             ((ColtExpressGameState) gs).addNeutralBullet(playerID);
         }
-        targetCompartment.playersInsideCompartment.clear();
-        return false;
+        target.playersInsideCompartment.clear();
+        return true;
     }
 
     @Override
@@ -45,6 +46,6 @@ public class MoveMarshalAction extends ColtExpressExecuteCardAction {
     }
 
     public String toString(){
-        return "MoveMarshal to compartment " + targetCompartment.id;
+        return "MoveMarshal to compartment " + targetCompartment;
     }
 }

@@ -1,32 +1,26 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.components.PartialObservableDeck;
+import core.actions.DrawCard;
 import core.observations.IPrintable;
-import games.coltexpress.cards.ColtExpressCard;
 
 
-public class DrawCardsAction extends AbstractAction implements IPrintable {
+public class DrawCardsAction extends DrawCard implements IPrintable {
 
-    private final PartialObservableDeck<ColtExpressCard> handCards;
-    private final PartialObservableDeck<ColtExpressCard> deckCards;
+    private final int nCards;
 
-    public DrawCardsAction(PartialObservableDeck<ColtExpressCard> handCards,
-                           PartialObservableDeck<ColtExpressCard> deckCards){
-        this.handCards = handCards;
-        this.deckCards = deckCards;
+    public DrawCardsAction(int from, int to, int nCards){
+        super(from, to);
+        this.nCards = nCards;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        for (int i = 0; i < 3; i++)
-        {
-            ColtExpressCard c = deckCards.draw();
-            if (c != null)
-                handCards.add(c);
+        boolean success = true;
+        for (int i = 0; i < nCards; i++) {
+            success &= super.execute(gs);
         }
-        return true;
+        return success;
     }
 
     @Override
@@ -42,6 +36,6 @@ public class DrawCardsAction extends AbstractAction implements IPrintable {
 
     @Override
     public String toString(){
-        return "Draw 3 cards";
+        return "Draw " + nCards + " cards";
     }
 }

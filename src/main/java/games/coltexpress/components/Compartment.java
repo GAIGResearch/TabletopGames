@@ -2,96 +2,57 @@ package games.coltexpress.components;
 
 import core.components.Component;
 import core.components.PartialObservableDeck;
+import games.coltexpress.ColtExpressParameters;
 import utilities.Utils;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
 public class Compartment extends Component {
+
+    // TODO: remove references
+    public PartialObservableDeck<Loot> lootInside;
+    public PartialObservableDeck<Loot> lootOnTop;
     public Set<Integer> playersInsideCompartment = new HashSet<>();
     public Set<Integer> playersOnTopOfCompartment = new HashSet<>();
 
     public boolean containsMarshal = false;
-
-    public PartialObservableDeck<Loot> getLootInside() {
-        return lootInside;
-    }
-
-    public PartialObservableDeck<Loot> getLootOnTop() {
-        return lootOnTop;
-    }
-
-    public PartialObservableDeck<Loot> lootInside;
-    public PartialObservableDeck<Loot> lootOnTop;
-    public final int id;
     private final int nPlayers;
+    private final int compartmentID;
 
-    enum CompartmentType {
-        COMPARTMENT_1,
-        COMPARTMENT_2,
-        COMPARTMENT_3,
-        COMPARTMENT_4,
-        COMPARTMENT_5,
-        COMPARTMENT_6,
-    }
-
-    private Compartment(int nPlayers, int id){
+    private Compartment(int nPlayers, int compartmentID){
         super(Utils.ComponentType.BOARD_NODE);
         this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
         this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
-        this.id = id;
         this.nPlayers = nPlayers;
+        this.compartmentID = compartmentID;
     }
 
-    Compartment(Train train, int nPlayers, int id, CompartmentType type){
-        this(nPlayers, id);
+    public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
+        this(nPlayers, compartmentID);
 
-        switch (type){
-            case COMPARTMENT_1:
-                lootInside.add(train.getRandomPurse());
-                break;
-            case COMPARTMENT_2:
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(train.getRandomPurse());
-                break;
-            case COMPARTMENT_3:
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(train.getRandomPurse());
-                break;
-            case COMPARTMENT_4:
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(Loot.createJewel());
-                break;
-            case COMPARTMENT_5:
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(train.getRandomPurse());
-                lootInside.add(Loot.createJewel());
-                break;
-            case COMPARTMENT_6:
-                lootInside.add(Loot.createJewel());
-                lootInside.add(Loot.createJewel());
-                lootInside.add(Loot.createJewel());
-                break;
-            default:
-                throw new IllegalArgumentException("CompartmentType " + type + " not defined");
+        HashMap<ColtExpressParameters.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
+        for (Map.Entry<ColtExpressParameters.LootType, Integer> e : configuration.entrySet()) {
+            for (int i = 0; i < e.getValue(); i++) {
+                lootInside.add(new Loot(e.getKey(), e.getKey().getRandomValue(cep.getGameSeed())));
+            }
         }
+    }
+
+    public static Compartment createLocomotive(int nPlayers, ColtExpressParameters cep){
+        // Locomotive is always last in the list of compartment configurations
+        Compartment locomotive = new Compartment(nPlayers, nPlayers,cep.trainCompartmentConfigurations.size()-1, cep);
+        locomotive.containsMarshal = true;
+        return locomotive;
     }
 
     public boolean containsPlayer(int playerID) {
         if (playersInsideCompartment.contains(playerID))
             return true;
         return playersOnTopOfCompartment.contains(playerID);
-    }
-
-    static Compartment createLocomotive(int nPlayers, int id){
-        Compartment locomotive = new Compartment(nPlayers, id);
-        locomotive.lootInside.add(new Loot(Loot.LootType.Strongbox, 1000));
-        locomotive.containsMarshal = true;
-        return locomotive;
     }
 
     public void addPlayerInside(int playerID){
@@ -110,9 +71,21 @@ public class Compartment extends Component {
         playersOnTopOfCompartment.remove(playerID);
     }
 
+    public PartialObservableDeck<Loot> getLootInside() {
+        return lootInside;
+    }
+
+    public PartialObservableDeck<Loot> getLootOnTop() {
+        return lootOnTop;
+    }
+
+    public int getCompartmentID() {
+        return compartmentID;
+    }
+
     @Override
     public Component copy() {
-        Compartment newCompartment = new Compartment(this.nPlayers, this.id);
+        Compartment newCompartment = new Compartment(this.nPlayers, compartmentID);
         for (Loot loot : this.lootInside.getComponents())
             newCompartment.lootInside.add((Loot) loot.copy());
         for (Loot loot : this.lootOnTop.getComponents())

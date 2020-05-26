@@ -1,29 +1,30 @@
-package games.coltexpress.cards.roundcards;
+package games.coltexpress.actions.roundcardevents;
 
+import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
-import games.coltexpress.components.Train;
 
-public class EndCardMarshallsRevenge extends RoundCard{
+import java.util.LinkedList;
 
-    public EndCardMarshallsRevenge(){
-        turnTypes = new TurnType[] {TurnType.NormalTurn, TurnType.NormalTurn,
-        TurnType.HiddenTurn, TurnType.NormalTurn};
-    }
+public class EndCardMarshallsRevenge extends AbstractAction {
 
     @Override
-    public void endRoundCardEvent(ColtExpressGameState gameState) {
-        Train train = gameState.getTrain();
-        for (int i = 0; i < train.getSize(); i++){
-            Compartment c = train.getCompartment(i);
+    public boolean execute(AbstractGameState gs) {
+        ColtExpressGameState gameState = (ColtExpressGameState) gs;
+
+        LinkedList<Compartment> train = gameState.getTrainCompartments();
+        for (int i = 0; i < train.size(); i++){
+            Compartment c = train.get(i);
             if (c.containsMarshal){
                 for (Integer playerID : c.playersOnTopOfCompartment){
                     PartialObservableDeck<Loot> playerLoot = gameState.getLoot(playerID);
                     Loot lestValueablePurse = null;
                     for (Loot loot : playerLoot.getComponents()) {
-                        if (loot.getLootType() == Loot.LootType.Purse &&
+                        if (loot.getLootType() == ColtExpressParameters.LootType.Purse &&
                                 (lestValueablePurse == null || lestValueablePurse.getValue() < loot.getValue()))
                             lestValueablePurse = loot;
                     }
@@ -35,5 +36,21 @@ public class EndCardMarshallsRevenge extends RoundCard{
         }
 
         gameState.endGame();
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof EndCardMarshallsRevenge;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Marshall's Revenge";
     }
 }

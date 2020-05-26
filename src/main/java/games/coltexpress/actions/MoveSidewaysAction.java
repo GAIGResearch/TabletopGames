@@ -1,39 +1,43 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.components.PartialObservableDeck;
+import core.actions.DrawCard;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 
-public class MoveSidewaysAction extends ColtExpressExecuteCardAction {
+public class MoveSidewaysAction extends DrawCard {
 
-    private final Compartment targetArea;
-    private final Compartment sourceArea;
+    private final int sourceCompartment;
+    private final int targetCompartment;
 
-    public MoveSidewaysAction(ColtExpressCard card, PartialObservableDeck<ColtExpressCard> plannedActions,
-                              PartialObservableDeck<ColtExpressCard> playerDeck,
-                              Compartment sourceArea, Compartment targetArea){
-        super(card, plannedActions, playerDeck);
-        this.targetArea = targetArea;
-        this.sourceArea = sourceArea;
+    public MoveSidewaysAction(int plannedActions, int playerDeck,
+                             int sourceCompartment, int targetCompartment){
+        super(plannedActions, playerDeck);
+        this.sourceCompartment = sourceCompartment;
+        this.targetCompartment = targetCompartment;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        if (sourceArea.playersInsideCompartment.contains(card.playerID)){
-            sourceArea.playersInsideCompartment.remove(card.playerID);
-            if (targetArea.containsMarshal){
+
+        Compartment source = (Compartment) gs.getComponentById(sourceCompartment);
+        Compartment target = (Compartment) gs.getComponentById(targetCompartment);
+        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+
+        if (source.playersInsideCompartment.contains(card.playerID)){
+            source.playersInsideCompartment.remove(card.playerID);
+            if (target.containsMarshal){
                 ((ColtExpressGameState) gs).addNeutralBullet(card.playerID);
-                targetArea.playersOnTopOfCompartment.add(card.playerID);
+                target.playersOnTopOfCompartment.add(card.playerID);
             }
             else
-                targetArea.playersInsideCompartment.add(card.playerID);
+                target.playersInsideCompartment.add(card.playerID);
         }
         else{
-            sourceArea.playersOnTopOfCompartment.remove(card.playerID);
-            targetArea.playersOnTopOfCompartment.add(card.playerID);
+            source.playersOnTopOfCompartment.remove(card.playerID);
+            target.playersOnTopOfCompartment.add(card.playerID);
         }
 
         return true;
@@ -51,6 +55,6 @@ public class MoveSidewaysAction extends ColtExpressExecuteCardAction {
     }
 
     public String toString(){
-        return "MoveSideways; player " + card.playerID;
+        return "MoveSideways";
     }
 }

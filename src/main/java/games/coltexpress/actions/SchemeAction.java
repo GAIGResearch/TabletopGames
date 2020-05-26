@@ -1,36 +1,32 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import core.components.PartialObservableDeck;
 import core.observations.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
 
 
-public class SchemeAction extends AbstractAction implements IPrintable {
+public class SchemeAction extends DrawCard implements IPrintable {
 
-    private final ColtExpressCard card;
-    private final PartialObservableDeck<ColtExpressCard> handCards;
-    private final PartialObservableDeck<ColtExpressCard> actionList;
     private final boolean hidden;
 
-    public SchemeAction(ColtExpressCard card, PartialObservableDeck<ColtExpressCard> handCards,
-                        PartialObservableDeck<ColtExpressCard> actionList, boolean hidden){
-        this.card = card;
-        this.handCards = handCards;
-        this.actionList = actionList;
+    public SchemeAction(int handCards, int actionList, boolean hidden){
+        super(handCards, actionList);
         this.hidden = hidden;
     }
 
     @Override
     public boolean execute(AbstractGameState gs){
-        handCards.remove(card);
+        super.execute(gs);
+
+        PartialObservableDeck<ColtExpressCard> actionList = (PartialObservableDeck<ColtExpressCard>) gs.getComponentById(deckTo);
+        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+
         if (hidden){
-            actionList.add(card, actionList.getSize());
             actionList.setVisibilityOfComponent(actionList.getSize()-1, card.playerID, true);
-        } else{
-            actionList.add(card, actionList.getSize());
         }
+
         return true;
     }
 
@@ -48,8 +44,8 @@ public class SchemeAction extends AbstractAction implements IPrintable {
     @Override
     public String toString(){
         if (hidden)
-            return "PlayCard(hidden): " + card.cardType;
-        return "PlayCard: " + card.cardType;
+            return "PlayCard(hidden)";
+        return "PlayCard";
     }
 
 }

@@ -1,6 +1,8 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.DrawCard;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
@@ -12,28 +14,23 @@ import java.util.Random;
 import java.util.Set;
 
 
-public class PunchAction  extends ColtExpressExecuteCardAction{
+public class PunchAction  extends DrawCard {
 
     private final int opponentID;
-    private final Compartment sourceCompartment;
-    private final Compartment targetCompartment;
-    private final Loot.LootType lootType;
-    private final PartialObservableDeck<Loot> availableLoot;
+    private final int sourceCompartment;
+    private final int targetCompartment;
+    private final int loot;
+    private final int availableLoot;
     private final boolean playerIsCheyenne;
 
-    public PunchAction(ColtExpressCard card, PartialObservableDeck<ColtExpressCard> plannedActions,
-                       PartialObservableDeck<ColtExpressCard> playerDeck,
-                       Integer opponentID,
-                       Compartment sourceCompartment,
-                       Compartment targetCompartment,
-                       Loot.LootType lootType,
-                       PartialObservableDeck<Loot> availableLoot,
-                       boolean playerIsCheyenne) {
-        super(card, plannedActions, playerDeck);
+    public PunchAction(int plannedActions, int playerDeck,
+                       int opponentID, int sourceCompartment, int targetCompartment, int loot,
+                       int availableLoot, boolean playerIsCheyenne) {
+        super(plannedActions, playerDeck);
         this.opponentID = opponentID;
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
-        this.lootType = lootType;
+        this.loot = loot;
         this.availableLoot = availableLoot;
         this.playerIsCheyenne = playerIsCheyenne;
     }
@@ -42,35 +39,40 @@ public class PunchAction  extends ColtExpressExecuteCardAction{
     public boolean execute(AbstractGameState gameState) {
         super.execute(gameState);
         if (opponentID == -1)
-            return true;    //no player to punch
+            return false;    //no player to punch
+
+        Compartment source = (Compartment) gameState.getComponentById(sourceCompartment);
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        ColtExpressCard card = (ColtExpressCard) gameState.getComponentById(cardId);
+        Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
 
         //move player
         Set<Integer> sourceArea;
         Set<Integer> targetArea;
         PartialObservableDeck<Loot> targetLootArea;
-        if (sourceCompartment.playersOnTopOfCompartment.contains(opponentID)){
-            sourceArea = sourceCompartment.playersOnTopOfCompartment;
-            targetLootArea = sourceCompartment.lootOnTop;
-            targetArea = targetCompartment.playersOnTopOfCompartment;
+        if (source.playersOnTopOfCompartment.contains(opponentID)){
+            sourceArea = source.playersOnTopOfCompartment;
+            targetLootArea = source.lootOnTop;
+            targetArea = target.playersOnTopOfCompartment;
         } else {
-            sourceArea = sourceCompartment.playersInsideCompartment;
-            targetLootArea = sourceCompartment.lootInside;
-            if (targetCompartment.containsMarshal)
+            sourceArea = source.playersInsideCompartment;
+            targetLootArea = source.lootInside;
+            if (target.containsMarshal)
             {
-                targetArea = targetCompartment.playersOnTopOfCompartment;
+                targetArea = target.playersOnTopOfCompartment;
                 ((ColtExpressGameState) gameState).addNeutralBullet(opponentID);
             } else
-                targetArea = targetCompartment.playersInsideCompartment;
+                targetArea = target.playersInsideCompartment;
         }
         sourceArea.remove(opponentID);
         targetArea.add(opponentID);
 
         //drop loot
         LinkedList<Loot> potentialLoot = new LinkedList<>();
-        if (lootType != null){
-            for (Loot loot : availableLoot.getComponents()){
-                if (loot.getLootType() == lootType)
-                    potentialLoot.add(loot);
+        if (loot != -1){
+            for (Loot l : availableLootDeck.getComponents()){
+                if (l.getComponentID() == loot)
+                    potentialLoot.add(l);
             }
 
             if (potentialLoot.size() > 0){
@@ -79,7 +81,7 @@ public class PunchAction  extends ColtExpressExecuteCardAction{
                     ((ColtExpressGameState) gameState).addLoot(card.playerID, chosenLoot);
                 else
                     targetLootArea.add(chosenLoot);
-                availableLoot.remove(chosenLoot);
+                availableLootDeck.remove(chosenLoot);
             }
         }
         return true;
@@ -100,10 +102,10 @@ public class PunchAction  extends ColtExpressExecuteCardAction{
     public String toString(){
         if (opponentID == -1)
             return "Attempt to punch player, but no player is available.";
-        if (lootType == null)
+        if (loot == -1)
             return "Punch player " + opponentID + " without him dropping any loot.";
-        if (playerIsCheyenne && lootType == Loot.LootType.Purse)
-            return "Punch player " + opponentID + " and steal him a random Purse";
-        return "Punch player " + opponentID + " and let him drop " + lootType;
+        if (playerIsCheyenne)
+            return "Punch player " + opponentID + " and (maybe) steal him a random Purse";
+        return "Punch player " + opponentID + " and let him drop " + loot;
     }
 }

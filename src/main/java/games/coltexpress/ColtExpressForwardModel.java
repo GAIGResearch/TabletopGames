@@ -6,8 +6,10 @@ import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import core.gamephase.GamePhase;
 import games.coltexpress.cards.ColtExpressCard;
-import games.coltexpress.components.Train;
-import games.coltexpress.ColtExpressParameters.CharacterType;
+import games.coltexpress.components.Loot;
+import games.coltexpress.ColtExpressTypes.*;
+import utilities.Group;
+
 import static utilities.CoreConstants.VERBOSE;
 
 import java.util.*;
@@ -21,15 +23,25 @@ public class ColtExpressForwardModel extends ForwardModel {
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
 
-        cegs.train = new Train(cegs.getNPlayers());
+        cegs.setupTrain();
         cegs.playerCharacters = new HashMap<>();
 
         HashSet<CharacterType> characters = new HashSet<>();
         Collections.addAll(characters, CharacterType.values());
 
         cegs.playerDecks = new ArrayList<>(cegs.getNPlayers());
+        cegs.playerHandCards = new ArrayList<>(cegs.getNPlayers());
+        cegs.playerLoot = new ArrayList<>(cegs.getNPlayers());
+        cegs.bulletsLeft = new int[cegs.getNPlayers()];
+        cegs.plannedActions = new PartialObservableDeck<>("plannedActions", cegs.getNPlayers());
+
+        Arrays.fill(cegs.bulletsLeft, cep.nBulletsPerPlayer);
+
         for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
-            cegs.playerCharacters.put(playerIndex, pickRandomCharacterType(characters));
+            CharacterType characterType = pickRandomCharacterType(characters);
+            cegs.playerCharacters.put(playerIndex, characterType);
+            if (characterType == CharacterType.Belle)
+                cegs.playerPlayingBelle = playerIndex;
 
             boolean[] visibility = new boolean[cegs.getNPlayers()];
             Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
@@ -43,7 +55,30 @@ public class ColtExpressForwardModel extends ForwardModel {
                 }
             }
             cegs.playerDecks.add(playerCards);
+            playerCards.shuffle(new Random(cep.getGameSeed()));
+
+            PartialObservableDeck<ColtExpressCard> playerHand = new PartialObservableDeck<>(
+                    "playerHand" + playerIndex, visibility);
+
+            cegs.playerHandCards.add(playerHand);
+
+            PartialObservableDeck<Loot> loot = new PartialObservableDeck<>("playerLoot" + playerIndex, visibility);
+            for (Group<ColtExpressParameters.LootType, Integer, Integer> e: cep.playerStartLoot) {
+                ColtExpressParameters.LootType lootType = e.a;
+                int value = e.b;
+                int nLoot = e.c;
+                for (int i = 0; i < nLoot; i++) {
+                    loot.add(new Loot(lootType, value));
+                }
+            }
+            cegs.playerLoot.add(loot);
+
+            if (playerIndex % 2 == 0)
+                cegs.getTrainCompartments().get(0).addPlayerInside(playerIndex);
+            else
+                cegs.getTrainCompartments().get(1).addPlayerInside(playerIndex);
         }
+        distributeCards(cegs);
     }
 
     @Override
@@ -68,8 +103,10 @@ public class ColtExpressForwardModel extends ForwardModel {
             ceto.endPlayerTurn(gameState);
         } else if (ColtExpressGameState.ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
             ceto.endPlayerTurn(gameState);
-            if (cegs.plannedActions.getSize() == 0)
+            if (cegs.plannedActions.getSize() == 0) {
                 ceto.endRoundCard(gameState);
+                distributeCards((ColtExpressGameState) gameState);
+            }
         }
     }
 
@@ -89,6 +126,25 @@ public class ColtExpressForwardModel extends ForwardModel {
 
     public void pickCharacterType(CharacterType characterType, HashSet<CharacterType> characters){
         characters.remove(characterType);
+    }
+
+    public void distributeCards(ColtExpressGameState cegs){
+        for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
+            PartialObservableDeck<ColtExpressCard> playerHand = cegs.playerHandCards.get(playerIndex);
+            PartialObservableDeck<ColtExpressCard> playerDeck = cegs.playerDecks.get(playerIndex);
+
+            playerDeck.add(playerHand);
+            playerHand.clear();
+
+            for (int i = 0; i < ((ColtExpressParameters)cegs.getGameParameters()).nCardsInHand; i++) {
+                playerHand.add(playerDeck.draw());
+            }
+            if (cegs.playerCharacters.get(playerIndex) == CharacterType.Doc) {
+                for (int i = 0; i < ((ColtExpressParameters) cegs.getGameParameters()).nCardsInHandExtraDoc; i++) {
+                    playerHand.add(playerDeck.draw());
+                }
+            }
+        }
     }
 
 }

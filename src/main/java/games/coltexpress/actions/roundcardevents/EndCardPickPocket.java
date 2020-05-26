@@ -1,0 +1,65 @@
+package games.coltexpress.actions.roundcardevents;
+
+import core.AbstractGameState;
+import core.actions.AbstractAction;
+import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
+
+import java.util.LinkedList;
+import java.util.Random;
+
+public class EndCardPickPocket extends AbstractAction {
+
+    @Override
+    public boolean execute(AbstractGameState gs) {
+        ColtExpressGameState gameState = (ColtExpressGameState) gs;
+        Random random = new Random(gs.getGameParameters().getGameSeed());
+
+        LinkedList<Compartment> train = gameState.getTrainCompartments();
+        for (Compartment currentCompartment : train) {
+            if (currentCompartment.playersInsideCompartment.size() == 1) {
+                LinkedList<Loot> purses = new LinkedList<>();
+                for (Loot loot : currentCompartment.lootInside.getComponents()) {
+                    if (loot.getLootType() == ColtExpressParameters.LootType.Purse)
+                        purses.add(loot);
+                }
+                if (purses.size() > 0) {
+                    for (Integer playerID : currentCompartment.playersInsideCompartment)
+                        gameState.addLoot(playerID, purses.get(random.nextInt(purses.size())));
+                }
+            }
+
+            if (currentCompartment.playersOnTopOfCompartment.size() == 1) {
+                LinkedList<Loot> purses = new LinkedList<>();
+                for (Loot loot : currentCompartment.lootOnTop.getComponents()) {
+                    if (loot.getLootType() == ColtExpressParameters.LootType.Purse)
+                        purses.add(loot);
+                }
+                if (purses.size() > 0) {
+                    for (Integer playerID : currentCompartment.playersOnTopOfCompartment)
+                        gameState.addLoot(playerID, purses.get(random.nextInt(purses.size())));
+                }
+            }
+        }
+
+        gameState.endGame();
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof EndCardPickPocket;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Pick Pocket";
+    }
+}

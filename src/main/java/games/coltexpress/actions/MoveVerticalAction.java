@@ -1,19 +1,18 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.components.PartialObservableDeck;
+import core.actions.DrawCard;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 
-public class MoveVerticalAction extends ColtExpressExecuteCardAction {
+public class MoveVerticalAction extends DrawCard {
 
-    private final Compartment compartment;
+    private final int compartment;
     private final boolean climbRoof;
 
-    public MoveVerticalAction(ColtExpressCard card, PartialObservableDeck<ColtExpressCard> plannedActions,
-                              PartialObservableDeck<ColtExpressCard> playerDeck,
-                              Compartment compartment, boolean toRoof){
-        super(card, plannedActions, playerDeck);
+    public MoveVerticalAction(int plannedActions, int playerDeck,
+                              int compartment, boolean toRoof){
+        super(plannedActions, playerDeck);
         this.compartment = compartment;
         this.climbRoof = toRoof;
     }
@@ -21,14 +20,18 @@ public class MoveVerticalAction extends ColtExpressExecuteCardAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
+
+        Compartment comp = (Compartment) gs.getComponentById(compartment);
+        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+
         if (climbRoof){
-            compartment.playersInsideCompartment.remove(card.playerID);
-            compartment.playersOnTopOfCompartment.add(card.playerID);
+            comp.playersInsideCompartment.remove(card.playerID);
+            comp.playersOnTopOfCompartment.add(card.playerID);
         } else {
-            compartment.playersOnTopOfCompartment.remove(card.playerID);
-            compartment.playersInsideCompartment.add(card.playerID);
+            comp.playersOnTopOfCompartment.remove(card.playerID);
+            comp.playersInsideCompartment.add(card.playerID);
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -43,6 +46,6 @@ public class MoveVerticalAction extends ColtExpressExecuteCardAction {
     }
 
     public String toString(){
-        return "MoveVerticalAction: player " + card.playerID + "; climbRoof=" + climbRoof;
+        return "MoveVerticalAction: climbRoof=" + climbRoof;
     }
 }
