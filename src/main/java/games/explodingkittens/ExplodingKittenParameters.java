@@ -1,11 +1,11 @@
 package games.explodingkittens;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 import games.explodingkittens.cards.ExplodingKittenCard;
 
 import java.util.HashMap;
 
-public class ExplodingKittenParameters extends GameParameters {
+public class ExplodingKittenParameters extends AbstractGameParameters {
 
     HashMap<ExplodingKittenCard.CardType, Integer> cardCounts = new HashMap<ExplodingKittenCard.CardType, Integer>() {{
         put(ExplodingKittenCard.CardType.ATTACK, 4);

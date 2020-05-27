@@ -2,7 +2,6 @@ package games.pandemic;
 
 import core.actions.*;
 import core.components.*;
-import core.gamephase.DefaultGamePhase;
 import core.properties.*;
 import core.*;
 import games.pandemic.actions.*;
@@ -17,9 +16,10 @@ import java.util.*;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
-import static utilities.CoreConstants.*;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
-public class PandemicForwardModel extends ForwardModel {
+public class PandemicForwardModel extends AbstractForwardModel {
 
     // Rule executed last, rule to be executed next, and first rule to be executed in a turn (root)
     Node lastRule, nextRule, root;
@@ -150,7 +150,7 @@ public class PandemicForwardModel extends ForwardModel {
     public void setup(AbstractGameState firstState) {
         PandemicGameState state = (PandemicGameState) firstState;
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();
-        PandemicData _data = (PandemicData)state.getData();
+        PandemicData _data = state.getData();
 
         state.tempDeck = new Deck<>("Temp Deck");
         state.areas = new HashMap<>();
@@ -291,13 +291,12 @@ public class PandemicForwardModel extends ForwardModel {
         state.getTurnOrder().setStartingPlayer(startingPlayer);
     }
 
-
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of IAction objects.
      */
     @Override
-    public List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PandemicGameState pgs = (PandemicGameState) gameState;
         if (((PandemicTurnOrder) gameState.getTurnOrder()).reactionsFinished()) {
             gameState.setMainGamePhase();
@@ -306,7 +305,7 @@ public class PandemicForwardModel extends ForwardModel {
             return getDiscardActions(pgs);
         else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.RPReaction)
             return getRPactions(pgs);
-        else if (gameState.getGamePhase() == DefaultGamePhase.PlayerReaction)
+        else if (gameState.getGamePhase() == AbstractGameState.DefaultGamePhase.PlayerReaction)
             return getEventActions(pgs);
         else return getPlayerActions(pgs);
     }

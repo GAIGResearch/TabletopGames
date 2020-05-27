@@ -1,11 +1,11 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.ForwardModel;
-import core.gamephase.GamePhase;
+import core.AbstractForwardModel;
+import core.interfaces.IGamePhase;
 import core.actions.AbstractAction;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 import games.coltexpress.actions.*;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
@@ -20,7 +20,7 @@ import java.util.*;
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
     // Colt express adds 4 game phases
-    public enum ColtExpressGamePhase implements GamePhase {
+    public enum ColtExpressGamePhase implements IGamePhase {
         DrawCards,
         PlanActions,
         ExecuteActions,
@@ -64,7 +64,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
         }
     }
 
-    public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
+    public ColtExpressGameState(ColtExpressParameters gameParameters, AbstractForwardModel model, int nPlayers) {
         super(gameParameters, new ColtExpressTurnOrder(nPlayers));
         gamePhase = ColtExpressGamePhase.DrawCards;
     }

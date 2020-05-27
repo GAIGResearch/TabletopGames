@@ -1,12 +1,12 @@
 package games.pandemic;
 
-import core.GameData;
+import core.AbstractGameData;
 import core.components.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PandemicData extends GameData<Card> {
+public class PandemicData extends AbstractGameData<Card> {
 
     private List<GraphBoard> graphBoards;
     private List<Deck<Card>> decks;

@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.GUI;
+import core.AbstractGUI;
 import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -17,6 +17,7 @@ import games.pandemic.actions.*;
 import players.ActionController;
 import players.HumanGUIPlayer;
 import utilities.CounterView;
+import utilities.Hash;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -30,11 +31,11 @@ import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("rawtypes")
-public class PandemicGUI extends GUI {
+public class PandemicGUI extends AbstractGUI {
     PandemicCardView[] playerCards;
     ArrayList<PandemicCardView>[] playerHands;
     ArrayList<PandemicCardView> bufferDeck;
@@ -214,16 +215,16 @@ public class PandemicGUI extends GUI {
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
-        Counter cnY = gameState.getData().findCounter("Disease yellow");
+        Counter cnY = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
         JComponent cY = new CounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
-        Counter cnR = gameState.getData().findCounter("Disease red");
+        Counter cnR = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease red"));
         JComponent cR = new CounterView(cnR, Color.red, null);
         counterArea.add(cR);
-        Counter cnB = gameState.getData().findCounter("Disease blue");
+        Counter cnB = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease blue"));
         JComponent cB = new CounterView(cnB, Color.blue, null);
         counterArea.add(cB);
-        Counter cnK = gameState.getData().findCounter("Disease black");
+        Counter cnK = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease black"));
         JComponent cK = new CounterView(cnK, Color.black, null);
         counterArea.add(cK);
 

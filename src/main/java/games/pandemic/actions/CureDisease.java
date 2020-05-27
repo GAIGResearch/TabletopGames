@@ -11,7 +11,7 @@ import utilities.Hash;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class CureDisease extends AbstractAction {

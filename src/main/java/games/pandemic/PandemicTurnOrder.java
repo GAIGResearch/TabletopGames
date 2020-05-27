@@ -1,8 +1,8 @@
 package games.pandemic;
 
 import core.AbstractGameState;
-import core.turnorder.ReactiveTurnOrder;
-import core.turnorder.TurnOrder;
+import core.turnorders.ReactiveTurnOrder;
+import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 public class PandemicTurnOrder extends ReactiveTurnOrder {

@@ -1,4 +1,4 @@
-package core.observations;
+package core.interfaces;
 
 public interface IObservation {
 }

@@ -1,8 +1,8 @@
 package games.coltexpress;
 
 import core.AbstractPlayer;
-import core.ForwardModel;
-import core.Game;
+import core.AbstractForwardModel;
+import core.AbstractGame;
 
 import utilities.Utils;
 
@@ -13,10 +13,10 @@ public class ColtExpressRunner {
 
     public Utils.GameResult[] runGame(List<AbstractPlayer> agents) {
         ColtExpressParameters params = new ColtExpressParameters();
-        ForwardModel forwardModel = new ColtExpressForwardModel();
+        AbstractForwardModel forwardModel = new ColtExpressForwardModel();
         ColtExpressGameState gameState = new ColtExpressGameState(params, forwardModel, agents.size());
 
-        Game game = new ColtExpressGame(agents, forwardModel, gameState);
+        AbstractGame game = new ColtExpressGame(agents, forwardModel, gameState);
         game.run(null);
         return game.getGameState().getPlayerResults();
     }

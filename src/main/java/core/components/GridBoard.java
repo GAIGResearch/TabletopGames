@@ -96,9 +96,18 @@ public class GridBoard<T> extends Component {
         return grid;
     }
 
+    public T[] flattenGrid() {
+        int length = getHeight() * getWidth();
+        T[] array = (T[])Array.newInstance(typeParameterClass, length);
+        for (int i = 0; i < getHeight(); i++) {
+            System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
+        }
+        return array;
+    }
+
     @Override
     public GridBoard<T> copy() {
-        GridBoard<T> g = new GridBoard<>(grid, typeParameterClass, componentID);
+        GridBoard<T> g = new GridBoard<>(grid.clone(), typeParameterClass, componentID);
         copyComponentTo(g);
         return g;
     }

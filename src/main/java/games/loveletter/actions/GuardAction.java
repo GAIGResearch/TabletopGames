@@ -2,7 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.components.Deck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 

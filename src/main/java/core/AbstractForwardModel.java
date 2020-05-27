@@ -1,24 +1,22 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.gamephase.DefaultGamePhase;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public abstract class ForwardModel {
+public abstract class AbstractForwardModel {
 
     // Random generator for this game.
     protected Random rnd;
+
+    /* Limited access/Final methods */
 
     /**
      * Creates a new FM object with a given random seed.
      * @param seed - random seed or this forward model.
      */
-    protected ForwardModel(long seed) {
+    protected AbstractForwardModel(long seed) {
         rnd = new Random(seed);
     }
 
@@ -42,8 +40,10 @@ public abstract class ForwardModel {
         firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
         Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
 
-        firstState.gamePhase = DefaultGamePhase.Main;
+        firstState.gamePhase = AbstractGameState.DefaultGamePhase.Main;
     }
+
+    /* Methods to be implemented by subclasses, unavailable to AI players */
 
     /**
      * Performs initial game setup according to game rules
@@ -61,7 +61,20 @@ public abstract class ForwardModel {
      */
     protected void endGame(AbstractGameState gameState) {}
 
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of IAction objects.
+     */
+    protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
+
     /* Public API */
+
+    /**
+     * Applies the given action to the game state and executes any other game rules.
+     * @param currentState - current game state, to be modified by the action.
+     * @param action - action requested to be played by a player.
+     */
+    public abstract void next(AbstractGameState currentState, AbstractAction action);
 
     /**
      * Sets up the given game state for game start according to game rules, with a new random seed.
@@ -73,15 +86,13 @@ public abstract class ForwardModel {
     }
 
     /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * Computes the available actions and updates the game state accordingly.
+     * @param gameState - game state to update with the available actions.
+     * @return - the list of actions available.
      */
-    public abstract List<AbstractAction> computeAvailableActions(AbstractGameState gameState);
-
-    /**
-     * Applies the given action to the game state and executes any other game rules.
-     * @param currentState - current game state, to be modified by the action.
-     * @param action - action requested to be played by a player.
-     */
-    public abstract void next(AbstractGameState currentState, AbstractAction action);
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+        List<AbstractAction> actions = _computeAvailableActions(gameState);
+        gameState.setAvailableActions(actions);
+        return Collections.unmodifiableList(actions);
+    }
 }

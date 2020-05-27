@@ -3,7 +3,7 @@ package games.explodingkittens.actions;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.Deck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;

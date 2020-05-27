@@ -4,7 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends ForwardModel {
+public class TicTacToeForwardModel extends AbstractForwardModel {
 
     /**
      * Creates a new FM object with a given random seed.
@@ -26,11 +26,11 @@ public class TicTacToeForwardModel extends ForwardModel {
     @Override
     public void setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
-        ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(tttgp.gridWidth, tttgp.gridHeight, Character.class, ' ');
+        ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(tttgp.gridSize, tttgp.gridSize, Character.class, ' ');
     }
 
     @Override
-    public List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
@@ -48,7 +48,7 @@ public class TicTacToeForwardModel extends ForwardModel {
     public void next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
-        if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridWidth * tttgp.gridHeight)) {
+        if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridSize * tttgp.gridSize)) {
             currentState.setGameStatus(Utils.GameResult.GAME_END);
         }
 
@@ -58,44 +58,75 @@ public class TicTacToeForwardModel extends ForwardModel {
 
     /**
      * Checks if the game ended.
-     * // TODO: very hard-coded, should work for other value for widths/heights of grid.
      * @param gameState - game state to check game end.
      */
     private void checkGameEnd(TicTacToeGameState gameState){
         GridBoard<Character> gridBoard = gameState.getGridBoard();
 
-        //check rows
+        // Check columns
         for (int x = 0; x < gridBoard.getWidth(); x++){
-            if (gridBoard.getElement(x, 0).equals(gridBoard.getElement(x, 1)) &&
-                    gridBoard.getElement(x, 0).equals(gridBoard.getElement(x, 2)) &&
-                    !gridBoard.getElement(x, 0).equals(' ')){
-                registerWinner(gameState, gridBoard.getElement(x, 0));
-                return;
+            Character c = gridBoard.getElement(x, 0);
+            if (c != ' ') {
+                boolean win = true;
+                for (int y = 1; y < gridBoard.getHeight(); y++) {
+                    if (!gridBoard.getElement(x, y).equals(c)) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) {
+                    registerWinner(gameState, c);
+                    return;
+                }
             }
         }
 
-        // check columns
+        // Check rows
         for (int y = 0; y < gridBoard.getHeight(); y++){
-            if (gridBoard.getElement(0, y).equals(gridBoard.getElement(1, y)) &&
-                    gridBoard.getElement(0, y).equals(gridBoard.getElement(2, y)) &&
-                    !gridBoard.getElement(0, y).equals(' ')){
-                registerWinner(gameState, gridBoard.getElement(0, y));
+            Character c = gridBoard.getElement(0, y);
+            if (c != ' ') {
+                boolean win = true;
+                for (int x = 1; x < gridBoard.getWidth(); x++) {
+                    if (!gridBoard.getElement(x, y).equals(c)) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) {
+                    registerWinner(gameState, c);
+                    return;
+                }
+            }
+        }
+
+        // Check diagonals
+        // Primary
+        Character c = gridBoard.getElement(0, 0);
+        if (c != ' ') {
+            boolean win = true;
+            for (int i = 1; i < gridBoard.getWidth(); i++) {
+                if (gridBoard.getElement(i, i) != c) {
+                    win = false;
+                }
+            }
+            if (win) {
+                registerWinner(gameState, c);
                 return;
             }
         }
 
-        //check diagonals
-        if (gridBoard.getElement(0, 0).equals(gridBoard.getElement(1, 1)) &&
-                gridBoard.getElement(0, 0).equals(gridBoard.getElement(2, 2)) &&
-                !gridBoard.getElement(1, 1).equals(' ')){
-            registerWinner(gameState, gridBoard.getElement(1, 1));
-            return;
-        }
-
-        if (gridBoard.getElement(0, 2).equals(gridBoard.getElement(1, 1)) &&
-                gridBoard.getElement(0, 2).equals(gridBoard.getElement(2, 0)) &&
-                !gridBoard.getElement(0, 2).equals(' ')){
-            registerWinner(gameState, gridBoard.getElement(1, 1));
+        // Secondary
+        c = gridBoard.getElement(gridBoard.getWidth(), 0);
+        if (c != ' ') {
+            boolean win = true;
+            for (int i = 1; i < gridBoard.getWidth(); i++) {
+                if (gridBoard.getElement(gridBoard.getWidth()-i, i) != c) {
+                    win = false;
+                }
+            }
+            if (win) {
+                registerWinner(gameState, c);
+            }
         }
     }
 
@@ -111,13 +142,8 @@ public class TicTacToeForwardModel extends ForwardModel {
      */
     public void registerWinner(TicTacToeGameState gameState, char winnerSymbol){
         gameState.setGameStatus(Utils.GameResult.GAME_END);
-        if (winnerSymbol == 'o'){
-            gameState.setPlayerResult(Utils.GameResult.GAME_WIN, 1);
-            gameState.setPlayerResult(Utils.GameResult.GAME_LOSE, 0);
-        } else {
-            gameState.setPlayerResult(Utils.GameResult.GAME_WIN, 0);
-            gameState.setPlayerResult(Utils.GameResult.GAME_LOSE, 1);
-        }
+        int winningPlayer = gameState.playerMapping.indexOf(winnerSymbol);
+        gameState.setPlayerResult(Utils.GameResult.GAME_WIN, winningPlayer);
+        gameState.setPlayerResult(Utils.GameResult.GAME_LOSE, 1-winningPlayer);
     }
-
 }

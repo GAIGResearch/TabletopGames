@@ -79,7 +79,7 @@ public abstract class Utils {
         }
     }
 
-    private static void swap(int[] input, int a, int b) {
+    public static void swap(int[] input, int a, int b) {
         int tmp = input[a];
         input[a] = input[b];
         input[b] = tmp;

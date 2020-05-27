@@ -18,7 +18,7 @@ import java.util.List;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
 import static games.pandemic.gui.PandemicCardView.drawDeckBack;
-import static utilities.CoreConstants.*;
+import static core.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
     private Image background;
@@ -70,7 +70,7 @@ public class PandemicBoardView extends JComponent {
 
     public PandemicBoardView(AbstractGameState gs) {
         gameState = (PandemicGameState) gs;
-        this.graphBoard = ((PandemicGameState) gs).getData().findBoard("Cities");
+        this.graphBoard = ((PandemicGameState) gs).getWorld();
         String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
 
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);

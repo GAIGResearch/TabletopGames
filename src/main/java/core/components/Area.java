@@ -34,6 +34,13 @@ public class Area<T extends Component> extends Component {
     }
 
     /**
+     * Clears the collection of components.
+     */
+    public void clear() {
+        components.clear();
+    }
+
+    /**
      * Retrieve the collection of components in this area.
      * @return - HashMap, components mapped to their IDs
      */

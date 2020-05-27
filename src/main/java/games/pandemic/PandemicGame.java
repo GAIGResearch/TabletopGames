@@ -1,8 +1,8 @@
 package games.pandemic;
 
-import core.ForwardModel;
-import core.Game;
-import core.GUI;
+import core.AbstractForwardModel;
+import core.AbstractGame;
+import core.AbstractGUI;
 
 import java.util.List;
 import games.pandemic.gui.PandemicGUI;
@@ -14,11 +14,11 @@ import utilities.Utils;
 
 import java.util.*;
 
-public class PandemicGame extends Game {
+public class PandemicGame extends AbstractGame {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
         super(agents,
-                new ArrayList<ForwardModel>() {{
+                new ArrayList<AbstractForwardModel>() {{
                     for (int i = 0; i < agents.size(); i++) {
                         add(new PandemicForwardModel(params, agents.size(), System.currentTimeMillis()));
                     }
@@ -39,14 +39,14 @@ public class PandemicGame extends Game {
 
         PandemicParameters params = new PandemicParameters("data/pandemic/");
         PandemicGame game = new PandemicGame(players, params);
-        GUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
+        AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
         game.run(gui);
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);
     }
 
-    public static void runMany(List<AbstractPlayer> players, ForwardModel model) {
+    public static void runMany(List<AbstractPlayer> players, AbstractForwardModel model) {
         HashMap<Utils.GameResult, Integer> results = new HashMap<>();
         for (Utils.GameResult r: Utils.GameResult.values()) {
             results.put(r, 0);

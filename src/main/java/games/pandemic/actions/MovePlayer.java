@@ -10,8 +10,8 @@ import games.pandemic.PandemicConstants;
 
 import java.util.Objects;
 
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playersHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playersHash;
 
 
 public class MovePlayer extends AbstractAction {

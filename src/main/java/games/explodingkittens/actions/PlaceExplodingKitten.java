@@ -2,7 +2,7 @@ package games.explodingkittens.actions;
 
 import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 
 public class PlaceExplodingKitten extends DrawCard implements IPrintable {

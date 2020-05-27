@@ -1,8 +1,7 @@
 package games.tictactoe;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 
-public class TicTacToeGameParameters extends GameParameters {
-    public int gridWidth = 3;
-    public int gridHeight = 3;
+public class TicTacToeGameParameters extends AbstractGameParameters {
+    public int gridSize = 3;
 }

@@ -3,7 +3,7 @@ package games.coltexpress.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
 
 

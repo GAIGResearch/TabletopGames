@@ -1,10 +1,10 @@
 package games.pandemic;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 
 import java.util.HashMap;
 
-public class PandemicParameters extends GameParameters {
+public class PandemicParameters extends AbstractGameParameters {
 
     String dataPath;
 

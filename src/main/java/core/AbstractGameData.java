@@ -2,7 +2,7 @@ package core;
 
 import core.components.*;
 
-public abstract class GameData<T extends Component> {
+public abstract class AbstractGameData<T extends Component> {
     public abstract void load(String dataPath);
     public GraphBoard findBoard(String name) { return null; }
     public Counter findCounter(String name) { return null; }

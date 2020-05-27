@@ -15,8 +15,8 @@ import java.awt.*;
 
 import static games.pandemic.PandemicConstants.countryHash;
 import static games.pandemic.PandemicConstants.effectHash;
-import static utilities.CoreConstants.colorHash;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.colorHash;
+import static core.CoreConstants.nameHash;
 
 public class PandemicCardView extends JComponent {
     private Image background, secondaryBG;

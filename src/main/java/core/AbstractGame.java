@@ -1,23 +1,19 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import players.HumanGUIPlayer;
 
-import java.util.Collections;
 import java.util.List;
 
-import utilities.CoreConstants;
-
-public abstract class Game {
+public abstract class AbstractGame {
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
 
     // Real game state and forward model
     protected AbstractGameState gameState;
-    protected ForwardModel forwardModel;
+    protected AbstractForwardModel forwardModel;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -27,24 +23,22 @@ public abstract class Game {
      * @param realModel - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public Game(List<AbstractPlayer> players, List<ForwardModel> playerFMs, ForwardModel realModel, AbstractGameState gameState) {
-        this.players = players;
-        int id = 0;
-
+    public AbstractGame(List<AbstractPlayer> players, List<AbstractForwardModel> playerFMs, AbstractForwardModel realModel, AbstractGameState gameState) {
         this.gameState = gameState;
         this.forwardModel = realModel;
         this.forwardModel._setup(gameState);
         this.gameState.addAllComponents();
 
+        this.players = players;
+        int id = 0;
         for (AbstractPlayer player: players) {
             // Retrieve the FM for this player
             player.forwardModel = playerFMs.get(id);
             // Create initial state observation
-            IObservation observation = gameState.getObservation(id);
+            AbstractGameState observation = gameState._copy(id);
             // Give player their ID
             player.playerID = id++;
             // Allow player to initialize
-            player.initializePlayer(observation);
         }
     }
 
@@ -52,7 +46,7 @@ public abstract class Game {
      * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
      * @param gui - graphical user interface.
      */
-    public final void run(GUI gui) {
+    public final void run(AbstractGUI gui) {
 
         while (gameState.isNotTerminal()){
             if (CoreConstants.VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
@@ -63,9 +57,7 @@ public abstract class Game {
 
             // Get actions for the player
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
-            gameState.setAvailableActions(actions);
-            actions = Collections.unmodifiableList(actions);
-            IObservation observation = gameState.getObservation(activePlayer);
+            AbstractGameState observation = gameState._copy(activePlayer);
             if (observation != null && CoreConstants.VERBOSE) {
                 ((IPrintable) observation).printToConsole();
             }
@@ -75,10 +67,10 @@ public abstract class Game {
             if (actions.size() > 1) {
                 if (player instanceof HumanGUIPlayer) {
                     while (actionIdx == -1) {
-                        actionIdx = getPlayerAction(gui, player, observation, actions);
+                        actionIdx = getPlayerAction(gui, player, observation);
                     }
                 } else {
-                    actionIdx = getPlayerAction(gui, player, observation, actions);
+                    actionIdx = getPlayerAction(gui, player, observation);
                 }
             } else {
                 player.registerUpdatedObservation(observation);
@@ -97,7 +89,7 @@ public abstract class Game {
 
         // Allow players to terminate
         for (AbstractPlayer player: players) {
-            player.finalizePlayer(gameState.getObservation(player.getPlayerID()));
+            player.finalizePlayer(gameState._copy(player.getPlayerID()));
         }
     }
 
@@ -106,10 +98,9 @@ public abstract class Game {
      * @param gui - graphical user interface.
      * @param player - player being asked for an action.
      * @param observation - observation the player receives from the current game state.
-     * @param actions - list of actions available in the current game state.
      * @return - int, index of action chosen by player (from the list of actions).
      */
-    private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<AbstractAction> actions) {
+    private int getPlayerAction(AbstractGUI gui, AbstractPlayer player, AbstractGameState observation) {
         if (gui != null) {
             gui.update(player, gameState);
             try {
@@ -119,7 +110,7 @@ public abstract class Game {
             }
         }
 
-        return player.getAction(observation, actions);
+        return player.getAction(observation);
     }
 
     /**

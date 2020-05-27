@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static utilities.CoreConstants.imgHash;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.imgHash;
+import static core.CoreConstants.nameHash;
 
 public class GraphBoard extends Component {
 

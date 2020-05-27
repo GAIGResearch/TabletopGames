@@ -1,7 +1,7 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.turnorder.TurnOrder;
+import core.turnorders.TurnOrder;
 import games.coltexpress.cards.roundcards.EndCardMarshallsRevenge;
 import games.coltexpress.cards.roundcards.RoundCard;
 import games.coltexpress.cards.roundcards.RoundCardBridge;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.CoreConstants.VERBOSE;
+import static core.CoreConstants.VERBOSE;
 
 
 public class ColtExpressTurnOrder extends TurnOrder {

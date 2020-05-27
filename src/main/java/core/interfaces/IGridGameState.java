@@ -1,8 +1,8 @@
-package core.gamestates;
+package core.interfaces;
 
 import core.components.GridBoard;
 
-public interface GridGameState<T> {
+public interface IGridGameState<T> {
 
     default int getWidth() { return getGridBoard().getWidth(); }
 

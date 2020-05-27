@@ -1,20 +1,20 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
-import core.gamephase.GamePhase;
+import core.interfaces.IGamePhase;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Train;
 import games.coltexpress.ColtExpressParameters.CharacterType;
-import static utilities.CoreConstants.VERBOSE;
+import static core.CoreConstants.VERBOSE;
 
 import java.util.*;
 
-import static utilities.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
-public class ColtExpressForwardModel extends ForwardModel {
+public class ColtExpressForwardModel extends AbstractForwardModel {
 
     @Override
     public void setup(AbstractGameState firstState) {
@@ -60,7 +60,7 @@ public class ColtExpressForwardModel extends ForwardModel {
                     " doesn't have any targets available");
         }
 
-        GamePhase gamePhase = cegs.getGamePhase();
+        IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
             throw new UnsupportedOperationException("not implemented yet");

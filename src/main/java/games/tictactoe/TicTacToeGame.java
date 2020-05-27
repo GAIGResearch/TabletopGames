@@ -1,18 +1,18 @@
 package games.tictactoe;
 
-import core.ForwardModel;
-import core.Game;
+import core.AbstractForwardModel;
+import core.AbstractGame;
 import core.AbstractPlayer;
 import players.HumanConsolePlayer;
 import players.RandomPlayer;
 
 import java.util.*;
 
-public class TicTacToeGame extends Game {
+public class TicTacToeGame extends AbstractGame {
 
     public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
     {
-        super(agents, new ArrayList<ForwardModel>() {{
+        super(agents, new ArrayList<AbstractForwardModel>() {{
             for (int i = 0; i < agents.size(); i++) {
                 add(new TicTacToeForwardModel(System.currentTimeMillis()));
             }
@@ -25,7 +25,7 @@ public class TicTacToeGame extends Game {
         agents.add(new HumanConsolePlayer());
 
         TicTacToeGameParameters params = new TicTacToeGameParameters();
-        Game game = new TicTacToeGame(agents, params);
+        AbstractGame game = new TicTacToeGame(agents, params);
         game.run(null);
     }
 }

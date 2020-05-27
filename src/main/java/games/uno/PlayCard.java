@@ -3,7 +3,7 @@ package games.uno;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 
 import java.util.Objects;
 

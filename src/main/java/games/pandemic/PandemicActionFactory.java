@@ -16,10 +16,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static core.CoreConstants.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.PandemicConstants.infectionHash;
-import static utilities.CoreConstants.*;
-import static utilities.CoreConstants.nameHash;
 import static utilities.Utils.generatePermutations;
 import static utilities.Utils.indexOf;
 

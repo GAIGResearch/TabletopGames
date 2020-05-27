@@ -1,7 +1,7 @@
 package games.loveletter;
 
 import core.AbstractPlayer;
-import core.Game;
+import core.AbstractGame;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class LoveLetterGame extends Game {
+public class LoveLetterGame extends AbstractGame {
 
     public LoveLetterGame(List<AbstractPlayer> agents, LoveLetterForwardModel forwardModel, LoveLetterGameState gameState) {
         super(agents, forwardModel, gameState);
@@ -30,7 +30,7 @@ public class LoveLetterGame extends Game {
             LoveLetterParameters params = new LoveLetterParameters();
             LoveLetterForwardModel forwardModel = new LoveLetterForwardModel();
             LoveLetterGameState tmp_gameState = new LoveLetterGameState(params, forwardModel, agents.size());
-            Game game = new LoveLetterGame(agents, forwardModel, tmp_gameState);
+            AbstractGame game = new LoveLetterGame(agents, forwardModel, tmp_gameState);
 
             // run game
             game.run(null);

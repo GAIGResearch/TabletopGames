@@ -1,8 +1,8 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
-import core.turnorder.ReactiveTurnOrder;
-import core.turnorder.TurnOrder;
+import core.turnorders.ReactiveTurnOrder;
+import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
