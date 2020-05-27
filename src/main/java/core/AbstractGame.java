@@ -27,23 +27,45 @@ public abstract class AbstractGame {
     public AbstractGame(List<AbstractPlayer> players, AbstractForwardModel model, AbstractGameState gameState) {
         this.forwardModel = model;
         this.gameState = gameState;
-        this.players = players;
-        int id = 0;
-        for (AbstractPlayer player: players) {
-            player.playerID = id++;
-        }
+        reset(players);
+    }
 
+    /**
+     * Game constructor. Receives a forward model and a game state.
+     * Performs initialisation of the game state and forward model objects.
+     * @param model - forward model used to apply game rules.
+     * @param gameState - object used to track the state of the game in a moment in time.
+     */
+    public AbstractGame(AbstractForwardModel model, AbstractGameState gameState) {
+        this.forwardModel = model;
+        this.gameState = gameState;
         reset();
     }
 
     /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules, and initialises
-     * all players.
+     * Resets the game. Sets up the game state to the initial state as described by game rules,
+     * and initialises all players.
      */
     public final void reset() {
         forwardModel._setup(gameState);
         for (AbstractPlayer player: players) {
             IObservation observation = gameState.getObservation(player.getPlayerID());
+            player.initializePlayer(observation);
+        }
+    }
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
+     * and their IDs, and initialises all players.
+     * @param players - new players for the game
+     */
+    public final void reset(List<AbstractPlayer> players) {
+        forwardModel._setup(gameState);
+        this.players = players;
+        int id = 0;
+        for (AbstractPlayer player: this.players) {
+            IObservation observation = gameState.getObservation(player.getPlayerID());
+            player.playerID = id++;
             player.initializePlayer(observation);
         }
     }
@@ -127,4 +149,5 @@ public abstract class AbstractGame {
     public final AbstractGameState getGameState() {
         return gameState;
     }
+
 }

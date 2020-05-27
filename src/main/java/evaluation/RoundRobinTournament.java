@@ -1,7 +1,8 @@
 package evaluation;
 
+import core.AbstractGUI;
+import core.AbstractGame;
 import core.AbstractPlayer;
-import games.coltexpress.ColtExpressRunner;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -11,12 +12,15 @@ import java.util.LinkedList;
 public class RoundRobinTournament extends AbstractTournament {
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
-    ColtExpressRunner runner = new ColtExpressRunner();
     private final int gamesPerMatchup;
     private final int playersPerGame;
     private final boolean selfplay;
 
-    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, int playersPerGame, int gamesPerMatchup, boolean selfplay){
+    private AbstractGame game;
+    private AbstractGUI gui;
+
+    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, int playersPerGame, int gamesPerMatchup, boolean selfplay,
+                                Game gameToPlay){
         super(agents);
         if (!selfplay && playersPerGame >= this.agents.size())
             throw new IllegalArgumentException("Not enough agents to fill a match without selfplay." +
@@ -30,6 +34,10 @@ public class RoundRobinTournament extends AbstractTournament {
         this.playersPerGame = playersPerGame;
         this.selfplay = selfplay;
         this.pointsPerPlayer = new int[agents.size()];
+
+        this.game = AbstractTournament.createGameInstance(gameToPlay, playersPerGame);
+        if (this.game == null) throw new IllegalArgumentException("Chosen game not supported");
+        // TODO: init GUI if available
     }
 
     @Override
@@ -63,8 +71,10 @@ public class RoundRobinTournament extends AbstractTournament {
             matchupPlayers.add(this.agents.get(agentID));
 
         for (int i = 0; i < this.gamesPerMatchup; i++) {
-            Utils.GameResult[] results = this.runner.runGame(matchupPlayers);
-            for (int j = 0; j < matchupPlayers.size(); j++){
+            game.reset(matchupPlayers);
+            game.run(gui);
+            Utils.GameResult[] results = game.getGameState().getPlayerResults();
+            for (int j = 0; j < matchupPlayers.size(); j++) {
                 pointsPerPlayer[agentIDs.get(j)] += results[j] == Utils.GameResult.GAME_WIN ? 1 : 0;
             }
         }
@@ -76,7 +86,7 @@ public class RoundRobinTournament extends AbstractTournament {
             agents.add(new RandomPlayer());
         }
 
-        AbstractTournament tournament = new RoundRobinTournament(agents, 4, 100, false);
+        AbstractTournament tournament = new RoundRobinTournament(agents, 4, 100, false, Game.ColtExpress);
         tournament.runTournament();
     }
 }

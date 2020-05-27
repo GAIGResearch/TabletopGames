@@ -20,6 +20,9 @@ public class PandemicGame extends AbstractGame {
     public PandemicGame(List<AbstractPlayer> agents, AbstractForwardModel model, AbstractGameState gameState) {
         super(agents, model, gameState);
     }
+    public PandemicGame(AbstractForwardModel model, AbstractGameState gameState) {
+        super(model, gameState);
+    }
 
     public static void main(String[] args){
 

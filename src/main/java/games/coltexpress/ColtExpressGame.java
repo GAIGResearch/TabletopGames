@@ -1,5 +1,6 @@
 package games.coltexpress;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.AbstractForwardModel;
 import core.AbstractGame;
@@ -13,6 +14,10 @@ public class ColtExpressGame extends AbstractGame {
 
     public ColtExpressGame(List<AbstractPlayer> agents, AbstractForwardModel forwardModel, ColtExpressGameState gameState) {
         super(agents, forwardModel, gameState);
+    }
+
+    public ColtExpressGame(AbstractForwardModel forwardModel, AbstractGameState gameState) {
+        super(forwardModel, gameState);
     }
 
     public static void main(String[] args){
