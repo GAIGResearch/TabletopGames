@@ -1,5 +1,6 @@
 package games.explodingkittens;
 
+import core.actions.IAction;
 import core.components.Deck;
 import core.components.IDeck;
 import core.components.PartialObservableDeck;
@@ -59,4 +60,13 @@ public class ExplodingKittenObservation implements IPrintable, IObservation {
     }
 
 
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(IAction action) {
+        return null;
+    }
 }

@@ -1,5 +1,6 @@
 package games.uno;
 
+import core.actions.IAction;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.uno.cards.UnoCard;
@@ -39,5 +40,15 @@ public class UnoObservation implements IPrintable, IObservation {
         for (String s : strings){
             System.out.println(s);
         }
+    }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(IAction action) {
+        return null;
     }
 }

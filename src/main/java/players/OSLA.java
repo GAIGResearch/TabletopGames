@@ -16,17 +16,14 @@ public class OSLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
     private StateHeuristic stateHeuristic;
-    private ForwardModel fm;
     public double epsilon = 1e-6;
 
-    public OSLA(ForwardModel fm){
-        this.fm = fm;
+    public OSLA(){
         this.random = new Random();
     }
 
-    public OSLA(ForwardModel fm, Random random)
+    public OSLA(Random random)
     {
-        this.fm = fm;
         this.random = random;
     }
 
@@ -49,12 +46,9 @@ public class OSLA extends AbstractPlayer {
         IAction bestAction = null;
 
         for (IAction action : actions) {
-            AbstractGameState gsCopy = gs; // todo gs.copy()
-
-            fm.next((AbstractGameState)observation, action);
-
-//            gsCopy.next(action);
-            double valState = stateHeuristic.evaluateState(gsCopy);
+            IObservation gsCopy = gs.copy();
+            gsCopy.next(action);
+            double valState = stateHeuristic.evaluateState((AbstractGameState)gsCopy);
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
 

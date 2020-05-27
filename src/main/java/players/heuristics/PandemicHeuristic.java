@@ -2,7 +2,6 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.components.Deck;
 import games.pandemic.PandemicConstants;
-import games.pandemic.PandemicData;
 import games.pandemic.PandemicGameState;
 import utilities.Utils;
 
@@ -48,21 +47,22 @@ public class PandemicHeuristic extends StateHeuristic {
         double FACTOR_RS = 0.2;
 
         BoardStats(PandemicGameState gs) {
-            PandemicData data = gs.getData();
+            System.out.println("");
+//            int counterValue = gs.getComponent(PandemicConstants.infectionRateHash, -1);
             // iterate over the game state and get the value for the variables
 //            int counterValue = gs.findCounter("Disease counter").getValue();
-            nOutbreaks = data.findCounter("Outbreaks").getValue();
-            nCardsInPile = data.findDeck("Player Deck").getCards().size();
-            nCardsInHand = ((Deck)gs.getComponent(PandemicConstants.playerDeckHash)).getSize();
-
-            // get disease cubes
-            for (int i = 0; i < 4; i++){
-                nDiseaseCubes += data.findCounter("Disease cube " + PandemicConstants.colors[i]).getValue();
-                if (data.findCounter("Disease " + PandemicConstants.colors[i]).getValue() > 0)
-                    nCuresDiscovered += 1;
-            }
-
-            nResearchStations = data.findCounter("Research Stations").getValue();
+//            nOutbreaks = data.findCounter("Outbreaks").getValue();
+//            nCardsInPile = data.findDeck("Player Deck").getCards().size();
+//            nCardsInHand = ((Deck)gs.getComponent(PandemicConstants.playerDeckHash)).getSize();
+//
+//            // get disease cubes
+//            for (int i = 0; i < 4; i++){
+//                nDiseaseCubes += data.findCounter("Disease cube " + PandemicConstants.colors[i]).getValue();
+//                if (data.findCounter("Disease " + PandemicConstants.colors[i]).getValue() > 0)
+//                    nCuresDiscovered += 1;
+//            }
+//
+//            nResearchStations = data.findCounter("Research Stations").getValue();
 
 
         }

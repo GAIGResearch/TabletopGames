@@ -23,14 +23,10 @@ import static utilities.Utils.indexOf;
 
 public class PandemicGameState extends AbstractGameState implements IObservation {
 
-    public enum PandemicGamePhase implements GamePhase {
-        DiscardReaction,
-        RPReaction
-    }
-
     private HashMap<Integer, Area> areas;
     private PandemicData _data;
     private Deck<Card> tempDeck;
+    private ForwardModel model;
 
     public Board world;
     private boolean quietNight;
@@ -41,9 +37,28 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     public PandemicGameState(GameParameters pp, ForwardModel model, int nPlayers) {
         super(pp, model, nPlayers, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
+        this.model = model;
         researchStationLocations = new ArrayList<>();
         _data = new PandemicData();
         _data.load(((PandemicParameters)gameParameters).getDataPath());
+    }
+
+    // todo implement copy and next
+    @Override
+    public IObservation copy() {
+        // todo copy every single components
+        return this;
+    }
+
+    @Override
+    public IObservation next(IAction action) {
+        model.next(this, action);
+        return this;
+    }
+
+    public enum PandemicGamePhase implements GamePhase {
+        DiscardReaction,
+        RPReaction
     }
 
     public void setComponents() {

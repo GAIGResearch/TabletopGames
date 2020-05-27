@@ -1,5 +1,7 @@
 package core.observations;
 
+import core.actions.IAction;
+
 public class GridObservation<T> implements IObservation, IPrintable {
 
     private final T[][] grid;
@@ -14,5 +16,15 @@ public class GridObservation<T> implements IObservation, IPrintable {
             for (T t : ts) System.out.print(t.toString());
             System.out.println();
         }
+    }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(IAction action) {
+        return null;
     }
 }

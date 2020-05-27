@@ -10,6 +10,7 @@ import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
 import players.HumanGUIPlayer;
 import core.AbstractPlayer;
+import players.OSLA;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -29,7 +30,8 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLA());
 
         PandemicParameters params = new PandemicParameters("data/pandemic/");
         ForwardModel forwardModel = new PandemicForwardModel(params, players.size());

@@ -20,6 +20,16 @@ import java.util.List;
 
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(IAction action) {
+        return null;
+    }
+
     public enum ColtExpressGamePhase implements GamePhase {
         DrawCards,
         PlanActions,
