@@ -13,7 +13,6 @@ import java.util.Set;
 
 public class Compartment extends Component {
 
-    // TODO: remove references
     public PartialObservableDeck<Loot> lootInside;
     public PartialObservableDeck<Loot> lootOnTop;
     public Set<Integer> playersInsideCompartment = new HashSet<>();
