@@ -2,11 +2,11 @@ package core.observations;
 
 import java.util.Arrays;
 
-class ArrayObservation<T> implements IObservation, IPrintable {
+class VectorObservation<T> implements IObservation, IPrintable {
 
     private T[] values;
 
-    public ArrayObservation(T[] arrayValues){
+    public VectorObservation(T[] arrayValues){
         this.values = arrayValues;
     }
 
