@@ -30,15 +30,18 @@ public abstract class Game {
      * @param gameState - object used to track the state of the game in a moment in time.
      */
     public Game(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
-        this.players = players;
-        int id = 0;
-        for (AbstractPlayer player: players) {
-            player.playerID = id++;
-        }
         this.forwardModel = model;
         this.gameState = gameState;
         this.forwardModel._setup(gameState);
         this.gameState.addAllComponents();
+
+        this.players = players;
+        int id = 0;
+        for (AbstractPlayer player: players) {
+            IObservation observation = this.gameState.getObservation(id);
+            player.playerID = id++;
+            player.initializePlayer(observation);
+        }
     }
 
     /**
@@ -85,6 +88,11 @@ public abstract class Game {
         // Perform any end of game computations as required by the game
         gameState.endGame();
         System.out.println("Game Over");
+
+        // Terminate players
+        for (AbstractPlayer player: players) {
+            player.finalizePlayer(gameState.getObservation(player.getPlayerID()));
+        }
     }
 
     /**
