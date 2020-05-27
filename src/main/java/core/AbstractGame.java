@@ -1,23 +1,21 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 import players.HumanGUIPlayer;
 
 import java.util.Collections;
 import java.util.List;
 
-import utilities.CoreConstants;
-
-public abstract class Game {
+public abstract class AbstractGame {
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
 
     // Real game state and forward model
     protected AbstractGameState gameState;
-    protected ForwardModel forwardModel;
+    protected AbstractForwardModel forwardModel;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -26,7 +24,7 @@ public abstract class Game {
      * @param model - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public Game(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
+    public AbstractGame(List<AbstractPlayer> players, AbstractForwardModel model, AbstractGameState gameState) {
         this.forwardModel = model;
         this.gameState = gameState;
         this.forwardModel._setup(gameState);
@@ -45,7 +43,7 @@ public abstract class Game {
      * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
      * @param gui - graphical user interface.
      */
-    public final void run(GUI gui) {
+    public final void run(AbstractGUI gui) {
 
         while (gameState.isNotTerminal()){
             if (CoreConstants.VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
@@ -100,7 +98,7 @@ public abstract class Game {
      * @param actions - list of actions available in the current game state.
      * @return - int, index of action chosen by player (from the list of actions).
      */
-    private int getPlayerAction(GUI gui, AbstractPlayer player, IObservation observation, List<AbstractAction> actions) {
+    private int getPlayerAction(AbstractGUI gui, AbstractPlayer player, IObservation observation, List<AbstractAction> actions) {
         if (gui != null) {
             gui.update(player, gameState);
             try {

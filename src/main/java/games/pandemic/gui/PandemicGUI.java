@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.GUI;
+import core.AbstractGUI;
 import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -30,11 +30,11 @@ import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("rawtypes")
-public class PandemicGUI extends GUI {
+public class PandemicGUI extends AbstractGUI {
     PandemicCardView[] playerCards;
     ArrayList<PandemicCardView>[] playerHands;
     ArrayList<PandemicCardView> bufferDeck;

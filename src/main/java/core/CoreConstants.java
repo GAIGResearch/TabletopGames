@@ -1,4 +1,6 @@
-package utilities;
+package core;
+
+import utilities.Hash;
 
 public class CoreConstants {
     public final static boolean VERBOSE = true;

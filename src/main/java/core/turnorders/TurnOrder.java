@@ -1,4 +1,4 @@
-package core.turnorder;
+package core.turnorders;
 
 import core.AbstractGameState;
 import utilities.Utils;

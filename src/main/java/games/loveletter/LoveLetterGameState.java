@@ -1,13 +1,12 @@
 package games.loveletter;
 
 import core.AbstractGameState;
-import core.gamephase.GamePhase;
-import core.gamephase.DefaultGamePhase;
-import core.ForwardModel;
+import core.interfaces.IGamePhase;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
@@ -18,7 +17,7 @@ import java.util.List;
 public class LoveLetterGameState extends AbstractGameState {
 
     // Love letter adds one game phase on top of default phases
-    public enum LoveLetterGamePhase implements GamePhase {
+    public enum LoveLetterGamePhase implements IGamePhase {
         Draw
     }
 
@@ -59,7 +58,7 @@ public class LoveLetterGameState extends AbstractGameState {
         }
     }
 
-    public LoveLetterGameState(LoveLetterParameters gameParameters, ForwardModel model, int nPlayers) {
+    public LoveLetterGameState(LoveLetterParameters gameParameters, AbstractForwardModel model, int nPlayers) {
         super(gameParameters, model, new LoveLetterTurnOrder(nPlayers));
         gamePhase = LoveLetterGamePhase.Draw;
     }

@@ -9,13 +9,13 @@ import java.util.Collection;
 import java.util.List;
 
 @SuppressWarnings("rawtypes")
-public abstract class GUI extends JFrame {
+public abstract class AbstractGUI extends JFrame {
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
     protected JLabel gameStatus, turnOwner, turn, currentPlayer, gamePhase;
 
-    public GUI(ActionController ac, int maxActionSpace) {
+    public AbstractGUI(ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
         gameStatus = new JLabel();

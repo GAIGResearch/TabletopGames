@@ -2,7 +2,7 @@ package players;
 
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 import java.util.List;
 
 

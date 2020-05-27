@@ -1,10 +1,10 @@
 package games.carcassonne;
 
 import core.actions.AbstractAction;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 
-public class CarcassonneForwardModel extends ForwardModel {
+public class CarcassonneForwardModel extends AbstractForwardModel {
 
     public CarcassonneForwardModel(){
 

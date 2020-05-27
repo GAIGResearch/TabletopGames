@@ -12,7 +12,7 @@ import utilities.Utils;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.nameHash;
 
 public class TreatDisease extends AbstractAction {
 

@@ -17,10 +17,10 @@ import java.util.Random;
 
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
-public class PandemicForwardModel extends ForwardModel {
+public class PandemicForwardModel extends AbstractForwardModel {
 
     // Rule executed last, rule to be executed next, and first rule to be executed in a turn (root)
     Node lastRule, nextRule, root;

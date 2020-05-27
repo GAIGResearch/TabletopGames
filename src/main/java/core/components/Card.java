@@ -3,7 +3,7 @@ package core.components;
 import core.properties.PropertyString;
 import utilities.Utils.ComponentType;
 
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.nameHash;
 
 public class Card extends Component {
 

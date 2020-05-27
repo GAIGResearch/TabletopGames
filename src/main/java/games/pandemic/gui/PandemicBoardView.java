@@ -18,7 +18,7 @@ import java.util.List;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
 import static games.pandemic.gui.PandemicCardView.drawDeckBack;
-import static utilities.CoreConstants.*;
+import static core.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
     private Image background;

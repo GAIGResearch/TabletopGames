@@ -1,11 +1,11 @@
 package games.coltexpress;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 import games.coltexpress.cards.ColtExpressCard;
 
 import java.util.HashMap;
 
-public class ColtExpressParameters extends GameParameters {
+public class ColtExpressParameters extends AbstractGameParameters {
 
     HashMap<ColtExpressCard.CardType, Integer> cardCounts = new HashMap<ColtExpressCard.CardType, Integer>() {{
         put(ColtExpressCard.CardType.MoveSideways, 2);

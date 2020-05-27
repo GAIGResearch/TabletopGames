@@ -8,7 +8,7 @@ import games.pandemic.PandemicGameState;
 
 import java.util.Objects;
 
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class QuietNight extends AbstractAction {

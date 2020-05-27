@@ -1,7 +1,7 @@
 package games.coltexpress;
 
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 
 public class ColtExpressObservation implements IPrintable, IObservation {
 

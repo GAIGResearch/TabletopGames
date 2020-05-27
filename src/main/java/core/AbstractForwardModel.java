@@ -1,14 +1,13 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.gamephase.DefaultGamePhase;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-public abstract class ForwardModel {
+public abstract class AbstractForwardModel {
 
     // Random generator for this game.
     protected Random rnd;
@@ -35,7 +34,7 @@ public abstract class ForwardModel {
         firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
         Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
 
-        firstState.gamePhase = DefaultGamePhase.Main;
+        firstState.gamePhase = AbstractGameState.DefaultGamePhase.Main;
     }
 
     /**

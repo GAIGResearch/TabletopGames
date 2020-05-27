@@ -1,5 +1,8 @@
 package core.observations;
 
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
+
 import java.util.Arrays;
 
 class VectorObservation<T> implements IObservation, IPrintable {

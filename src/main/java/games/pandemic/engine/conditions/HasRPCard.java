@@ -6,8 +6,8 @@ import core.components.Deck;
 import core.properties.PropertyString;
 import games.pandemic.PandemicGameState;
 
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class HasRPCard extends ConditionNode {

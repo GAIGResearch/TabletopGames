@@ -3,10 +3,9 @@ package games.loveletter;
 import core.AbstractGameState;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.gamephase.DefaultGamePhase;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
-import core.gamephase.GamePhase;
+import core.interfaces.IGamePhase;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
@@ -15,11 +14,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
-import static utilities.CoreConstants.PARTIAL_OBSERVABLE;
-import static utilities.CoreConstants.VERBOSE;
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.VERBOSE;
 
 
-public class LoveLetterForwardModel extends ForwardModel {
+public class LoveLetterForwardModel extends AbstractForwardModel {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -83,10 +82,10 @@ public class LoveLetterForwardModel extends ForwardModel {
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
         action.execute(gameState);
 
-        GamePhase gamePhase = llgs.getGamePhase();
+        IGamePhase gamePhase = llgs.getGamePhase();
         if (gamePhase == Draw)
-            llgs.setGamePhase(DefaultGamePhase.Main);
-        else if (gamePhase == DefaultGamePhase.Main){
+            llgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        else if (gamePhase == AbstractGameState.DefaultGamePhase.Main){
             llgs.setGamePhase(Draw);
             checkEndOfGame(llgs);
             if (llgs.getGameStatus() != Utils.GameResult.GAME_END)

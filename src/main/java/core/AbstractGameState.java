@@ -3,10 +3,9 @@ package core;
 import core.actions.AbstractAction;
 import core.components.Area;
 import core.components.Component;
-import core.gamephase.DefaultGamePhase;
-import core.gamephase.GamePhase;
-import core.observations.IObservation;
-import core.turnorder.TurnOrder;
+import core.interfaces.IGamePhase;
+import core.interfaces.IObservation;
+import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import java.util.*;
@@ -16,9 +15,16 @@ import java.util.*;
  */
 public abstract class AbstractGameState {
 
+    // Default game phases: main, player reaction, end.
+    public enum DefaultGamePhase implements IGamePhase {
+        Main,
+        PlayerReaction,
+        End
+    }
+
     // Parameters, forward model and turn order for the game
-    protected final GameParameters gameParameters;
-    protected ForwardModel forwardModel;
+    protected final AbstractGameParameters gameParameters;
+    protected AbstractForwardModel forwardModel;
     protected TurnOrder turnOrder;
     protected Area<Component> allComponents;
 
@@ -30,10 +36,10 @@ public abstract class AbstractGameState {
     protected Utils.GameResult[] playerResults;
 
     // Current game phase
-    protected GamePhase gamePhase;
+    protected IGamePhase gamePhase;
 
     // Data for this game
-    protected GameData data;
+    protected AbstractGameData data;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -41,7 +47,7 @@ public abstract class AbstractGameState {
      * @param model - forward model.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(GameParameters gameParameters, ForwardModel model, TurnOrder turnOrder){
+    public AbstractGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
         this.forwardModel = model;
         this.turnOrder = turnOrder;
@@ -54,7 +60,7 @@ public abstract class AbstractGameState {
     }
     public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
     public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
-    public final void setGamePhase(GamePhase gamePhase) {
+    public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
     public final void setMainGamePhase() {
@@ -64,7 +70,7 @@ public abstract class AbstractGameState {
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
     public final Utils.GameResult getGameStatus() {  return gameStatus; }
-    public final GameParameters getGameParameters() { return this.gameParameters; }
+    public final AbstractGameParameters getGameParameters() { return this.gameParameters; }
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == Utils.GameResult.GAME_ONGOING; }
@@ -77,10 +83,10 @@ public abstract class AbstractGameState {
         }
         return availableActions;
     }
-    public final GamePhase getGamePhase() {
+    public final IGamePhase getGamePhase() {
         return gamePhase;
     }
-    public GameData getData() {
+    public AbstractGameData getData() {
         return data;
     }
     public Component getComponentById(int id) {
@@ -161,5 +167,4 @@ public abstract class AbstractGameState {
         return false;
     }
      */
-
 }

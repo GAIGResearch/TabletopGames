@@ -1,6 +1,6 @@
 package games.loveletter.actions;
 
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 
 /**
  * The Countess needs to be discarded in case the player also hold a King or a Prince card.

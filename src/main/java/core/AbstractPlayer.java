@@ -1,7 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 
 import java.util.List;
 

@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.*;
+import static core.CoreConstants.*;
 
 public class InfectCity extends DrawCard {
 

@@ -9,7 +9,7 @@ import games.pandemic.PandemicGameState;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class RemoveCardWithCard extends AbstractAction {

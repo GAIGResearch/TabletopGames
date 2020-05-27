@@ -1,21 +1,20 @@
 package games.pandemic;
 
-import core.gamephase.GamePhase;
-import core.gamephase.DefaultGamePhase;
-import core.ForwardModel;
+import core.interfaces.IGamePhase;
+import core.AbstractForwardModel;
 import core.actions.*;
 import core.components.*;
 import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
-import core.GameParameters;
-import core.observations.IObservation;
+import core.AbstractGameParameters;
+import core.interfaces.IObservation;
 import games.pandemic.actions.*;
 
 import java.util.*;
 
 import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.*;
+import static core.CoreConstants.*;
 import static utilities.Utils.generatePermutations;
 import static utilities.Utils.indexOf;
 
@@ -24,7 +23,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     // The Pandemic game phase enum distinguishes 2 more phases on top of the default ones for players forced to
     // discard cards, or an opportunity to play a "Resilient Population" event card.
-    public enum PandemicGamePhase implements GamePhase {
+    public enum PandemicGamePhase implements IGamePhase {
         DiscardReaction,
         RPReaction
     }
@@ -60,7 +59,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
      * @param model - forward model.
      * @param nPlayers - number of players.
      */
-    public PandemicGameState(GameParameters pp, ForwardModel model, int nPlayers) {
+    public PandemicGameState(AbstractGameParameters pp, AbstractForwardModel model, int nPlayers) {
         super(pp, model, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
         data = new PandemicData();
         data.load(((PandemicParameters)gameParameters).getDataPath());

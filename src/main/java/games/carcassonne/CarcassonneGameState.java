@@ -1,13 +1,13 @@
 package games.carcassonne;
 
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
-import core.GameParameters;
-import core.observations.IObservation;
-import core.turnorder.AlternatingTurnOrder;
+import core.AbstractGameParameters;
+import core.interfaces.IObservation;
+import core.turnorders.AlternatingTurnOrder;
 
 import java.awt.*;
 import java.util.*;
@@ -23,7 +23,7 @@ public class CarcassonneGameState extends AbstractGameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    public CarcassonneGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
+    public CarcassonneGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers) {
         super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 

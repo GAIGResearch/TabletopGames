@@ -1,15 +1,14 @@
 package games.explodingkittens;
 
-import core.gamephase.GamePhase;
-import core.gamephase.DefaultGamePhase;
-import core.ForwardModel;
+import core.interfaces.IGamePhase;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import games.explodingkittens.actions.*;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import static utilities.Utils.generatePermutations;
 public class ExplodingKittensGameState extends AbstractGameState {
 
     // Exploding kittens adds 4 phases on top of default ones.
-    public enum ExplodingKittensGamePhase implements GamePhase {
+    public enum ExplodingKittensGamePhase implements IGamePhase {
         Nope,
         Defuse,
         Favor,
@@ -51,7 +50,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
         }
     }
 
-    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, ForwardModel model, int nPlayers) {
+    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, AbstractForwardModel model, int nPlayers) {
         super(gameParameters, model, new ExplodingKittenTurnOrder(nPlayers));
     }
 

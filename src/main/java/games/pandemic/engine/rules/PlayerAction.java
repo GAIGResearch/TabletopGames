@@ -15,7 +15,7 @@ import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
 import static games.pandemic.PandemicConstants.countryHash;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.nameHash;
 
 public class PlayerAction extends RuleNode {
 

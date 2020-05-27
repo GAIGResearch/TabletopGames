@@ -2,20 +2,20 @@ package games.explodingkittens;
 
 import core.actions.AbstractAction;
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.actions.IsNopeable;
 import games.explodingkittens.actions.NopeAction;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import utilities.CoreConstants;
+import core.CoreConstants;
 
 import java.util.*;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
-import static utilities.CoreConstants.VERBOSE;
+import static core.CoreConstants.VERBOSE;
 
-public class ExplodingKittensForwardModel extends ForwardModel {
+public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
     /**
      * Performs initial game setup according to game rules.

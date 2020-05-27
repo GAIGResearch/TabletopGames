@@ -1,7 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.actions.DoNothing;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 
 public class PassAction extends DoNothing implements IPrintable {
 

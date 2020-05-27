@@ -9,7 +9,7 @@ import games.pandemic.PandemicGameState;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.nameHash;
 
 
 public class AddResearchStationFrom extends AddResearchStation {

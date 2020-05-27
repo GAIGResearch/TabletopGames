@@ -1,6 +1,6 @@
 package core;
 
-public abstract class GameParameters {
+public abstract class AbstractGameParameters {
 
     // Random seed for the game
     protected long gameSeed = System.currentTimeMillis(); //0;
