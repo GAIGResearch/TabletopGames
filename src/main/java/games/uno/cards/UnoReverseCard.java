@@ -1,10 +1,8 @@
 package games.uno.cards;
 
 import core.AbstractGameState;
-import core.components.Card;
-import core.components.Component;
 import games.uno.UnoGameState;
-import core.turnorder.AlternatingTurnOrder;
+import core.turnorders.AlternatingTurnOrder;
 
 public class UnoReverseCard extends UnoCard {
 

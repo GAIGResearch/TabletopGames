@@ -3,11 +3,11 @@ package games.pandemic.engine.conditions;
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicGameState;
 
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class HasRPCard extends ConditionNode {

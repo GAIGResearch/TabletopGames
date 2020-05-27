@@ -1,6 +1,5 @@
 package games.pandemic.actions;
 
-import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
@@ -10,7 +9,7 @@ import games.pandemic.PandemicGameState;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 
 @SuppressWarnings("unchecked")

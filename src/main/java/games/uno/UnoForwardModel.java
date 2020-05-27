@@ -2,7 +2,7 @@ package games.uno;
 
 import core.actions.AbstractAction;
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.components.Deck;
 import games.uno.cards.UnoCard;
 import games.uno.cards.UnoNumberCard;
@@ -12,7 +12,7 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 
-public class UnoForwardModel extends ForwardModel {
+public class UnoForwardModel extends AbstractForwardModel {
 
     @Override
     public void setup(AbstractGameState firstState) {

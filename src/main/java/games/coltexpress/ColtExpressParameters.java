@@ -1,6 +1,6 @@
 package games.coltexpress;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 import games.coltexpress.cards.ColtExpressCard;
 import utilities.Group;
 
@@ -15,7 +15,7 @@ import static games.coltexpress.ColtExpressTypes.RegularRoundCard.*;
 
 import utilities.Pair;
 
-public class ColtExpressParameters extends GameParameters {
+public class ColtExpressParameters extends AbstractGameParameters {
 
     // Other parameters
     public int nCardsInHand = 6;

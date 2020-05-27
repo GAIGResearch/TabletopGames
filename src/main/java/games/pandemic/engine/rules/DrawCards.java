@@ -4,12 +4,12 @@ import core.AbstractGameState;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import static games.pandemic.PandemicConstants.playerDeckHash;
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
 public class DrawCards extends RuleNode {
 

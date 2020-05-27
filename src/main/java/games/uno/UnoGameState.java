@@ -1,14 +1,14 @@
 package games.uno;
 
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
 import core.AbstractGameState;
-import core.GameParameters;
-import core.turnorder.AlternatingTurnOrder;
+import core.AbstractGameParameters;
+import core.turnorders.AlternatingTurnOrder;
 import games.uno.cards.*;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class UnoGameState extends AbstractGameState {
         }
     }
 
-    public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
+    public UnoGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers) {
         super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 

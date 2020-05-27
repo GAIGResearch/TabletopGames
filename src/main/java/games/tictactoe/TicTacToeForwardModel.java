@@ -3,11 +3,11 @@ package games.tictactoe;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import utilities.Utils;
 
 
-public class TicTacToeForwardModel extends ForwardModel {
+public class TicTacToeForwardModel extends AbstractForwardModel {
 
     @Override
     public void setup(AbstractGameState firstState) {

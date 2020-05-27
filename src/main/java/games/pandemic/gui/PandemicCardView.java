@@ -1,10 +1,10 @@
 package games.pandemic.gui;
 
 import core.components.Card;
-import core.content.Property;
-import core.content.PropertyColor;
-import core.content.PropertyLong;
-import core.content.PropertyString;
+import core.properties.Property;
+import core.properties.PropertyColor;
+import core.properties.PropertyLong;
+import core.properties.PropertyString;
 import org.davidmoten.text.utils.WordWrap;
 import utilities.Hash;
 import utilities.ImageIO;
@@ -15,8 +15,8 @@ import java.awt.*;
 
 import static games.pandemic.PandemicConstants.countryHash;
 import static games.pandemic.PandemicConstants.effectHash;
-import static utilities.CoreConstants.colorHash;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.colorHash;
+import static core.CoreConstants.nameHash;
 
 public class PandemicCardView extends JComponent {
     private Image background, secondaryBG;

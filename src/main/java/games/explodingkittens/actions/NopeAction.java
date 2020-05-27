@@ -1,7 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.actions.DrawCard;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 
 public class NopeAction extends DrawCard implements IPrintable {
 

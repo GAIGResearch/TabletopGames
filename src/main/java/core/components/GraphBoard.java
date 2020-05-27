@@ -1,6 +1,6 @@
 package core.components;
 
-import core.content.*;
+import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static utilities.CoreConstants.imgHash;
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.imgHash;
+import static core.CoreConstants.nameHash;
 
 public class GraphBoard extends Component {
 

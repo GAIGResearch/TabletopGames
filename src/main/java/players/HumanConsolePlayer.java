@@ -2,24 +2,14 @@ package players;
 
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.observations.IPrintable;
-import core.observations.IObservation;
+import core.interfaces.IPrintable;
+import core.interfaces.IObservation;
 
 import java.util.List;
 import java.util.Scanner;
 
 
 public class HumanConsolePlayer extends AbstractPlayer {
-
-    @Override
-    public void initializePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public void finalizePlayer(IObservation observation) {
-
-    }
 
     @Override
     public int getAction(IObservation observation, List<AbstractAction> actions) {
@@ -58,7 +48,6 @@ public class HumanConsolePlayer extends AbstractPlayer {
         Scanner in = new Scanner(System.in);
         in.next();
     }
-
 
 }
 

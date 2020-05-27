@@ -1,16 +1,16 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
-import core.ForwardModel;
-import core.Game;
+import core.AbstractForwardModel;
+import core.AbstractGame;
 import players.RandomPlayer;
 import core.AbstractPlayer;
 
 import java.util.*;
 
-public class ExplodingKittensGame extends Game {
+public class ExplodingKittensGame extends AbstractGame {
 
-    public ExplodingKittensGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState) {
+    public ExplodingKittensGame(List<AbstractPlayer> agents, AbstractForwardModel model, AbstractGameState gameState) {
         super(agents, model, gameState);
     }
 
@@ -22,10 +22,10 @@ public class ExplodingKittensGame extends Game {
         agents.add(new RandomPlayer());
 
         ExplodingKittenParameters params = new ExplodingKittenParameters();
-        ForwardModel forwardModel = new ExplodingKittensForwardModel();
+        AbstractForwardModel forwardModel = new ExplodingKittensForwardModel();
 
         for (int i=0; i<1000; i++) {
-            Game game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, forwardModel, agents.size()));
+            AbstractGame game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, forwardModel, agents.size()));
             game.run(null);
             ExplodingKittensGameState gameState = (ExplodingKittensGameState) game.getGameState();
 

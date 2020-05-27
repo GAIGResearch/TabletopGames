@@ -2,7 +2,7 @@ package games.coltexpress.actions;
 
 import core.AbstractGameState;
 import core.actions.DrawCard;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 
 
 public class DrawCardsAction extends DrawCard implements IPrintable {

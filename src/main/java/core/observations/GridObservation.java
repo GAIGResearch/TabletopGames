@@ -1,5 +1,8 @@
 package core.observations;
 
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
+
 public class GridObservation<T> implements IObservation, IPrintable {
 
     private final T[][] grid;

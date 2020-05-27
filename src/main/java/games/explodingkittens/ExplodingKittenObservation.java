@@ -2,11 +2,10 @@ package games.explodingkittens;
 
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExplodingKittenObservation implements IPrintable, IObservation {

@@ -1,7 +1,7 @@
 package core.actions;
 
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import core.components.GridBoard;
 
 import java.util.Objects;

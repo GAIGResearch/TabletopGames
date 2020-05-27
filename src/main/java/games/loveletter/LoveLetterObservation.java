@@ -1,10 +1,10 @@
 package games.loveletter;
 
-import core.gamephase.GamePhase;
+import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
@@ -19,7 +19,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
     private final boolean[] effectProtection;
     private final Utils.GameResult[] isAlive;
     private final int currentPlayer;
-    private final GamePhase gamePhase;
+    private final IGamePhase gamePhase;
 
     public LoveLetterObservation(List<PartialObservableDeck<LoveLetterCard>> playerDecks,
                                  List<Deck<LoveLetterCard>> playerDiscardCards,
@@ -27,7 +27,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
                                  PartialObservableDeck<LoveLetterCard> reserveCards,
                                  boolean[] effectProtection,
                                  int currentPlayer,
-                                 GamePhase gamePhase,
+                                 IGamePhase gamePhase,
                                  Utils.GameResult[] isAlive){
         this.playerHandCards = playerDecks;
         this.playerDiscardCards = playerDiscardCards;

@@ -3,7 +3,7 @@ package games.explodingkittens.actions;
 import core.AbstractGameState;
 import core.actions.RearrangeCardsWithCard;
 import core.components.PartialObservableDeck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittenCard;
 

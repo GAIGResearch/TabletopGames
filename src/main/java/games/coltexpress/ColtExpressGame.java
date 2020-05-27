@@ -1,17 +1,17 @@
 package games.coltexpress;
 
 import core.AbstractPlayer;
-import core.ForwardModel;
-import core.Game;
+import core.AbstractForwardModel;
+import core.AbstractGame;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColtExpressGame extends Game {
+public class ColtExpressGame extends AbstractGame {
 
-    public ColtExpressGame(List<AbstractPlayer> agents, ForwardModel forwardModel, ColtExpressGameState gameState) {
+    public ColtExpressGame(List<AbstractPlayer> agents, AbstractForwardModel forwardModel, ColtExpressGameState gameState) {
         super(agents, forwardModel, gameState);
     }
 
@@ -24,10 +24,10 @@ public class ColtExpressGame extends Game {
 
         for (int i=0; i<1; i++) {
             ColtExpressParameters params = new ColtExpressParameters();
-            ForwardModel forwardModel = new ColtExpressForwardModel();
+            AbstractForwardModel forwardModel = new ColtExpressForwardModel();
             ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, forwardModel, agents.size());
 
-            Game game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
+            AbstractGame game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
             game.run(null);
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 

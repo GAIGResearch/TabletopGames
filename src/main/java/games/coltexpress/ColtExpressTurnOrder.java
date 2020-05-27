@@ -2,8 +2,8 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.turnorder.TurnOrder;
 import games.coltexpress.cards.RoundCard;
+import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.CoreConstants.VERBOSE;
+import static core.CoreConstants.VERBOSE;
 
 
 public class ColtExpressTurnOrder extends TurnOrder {

@@ -3,15 +3,15 @@ package games.pandemic.actions;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Card;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicConstants;
 
 import java.util.Objects;
 
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playersHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playersHash;
 
 
 public class MovePlayer extends AbstractAction {

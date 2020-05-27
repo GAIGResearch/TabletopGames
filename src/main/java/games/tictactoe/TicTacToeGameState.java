@@ -1,25 +1,25 @@
 package games.tictactoe;
 
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.AbstractGameState;
-import core.gamestates.GridGameState;
+import core.interfaces.IGridGameState;
 import core.observations.GridObservation;
-import core.observations.IObservation;
-import core.turnorder.AlternatingTurnOrder;
+import core.interfaces.IObservation;
+import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
 
 import java.util.*;
 import java.util.List;
 
 
-public class TicTacToeGameState extends AbstractGameState implements GridGameState<Character> {
+public class TicTacToeGameState extends AbstractGameState implements IGridGameState<Character> {
 
     GridBoard<Character> gridBoard;
 
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters, ForwardModel model, int nPlayers){
+    public TicTacToeGameState(TicTacToeGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
         super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 

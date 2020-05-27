@@ -10,7 +10,7 @@ import games.coltexpress.components.Loot;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static utilities.CoreConstants.VERBOSE;
+import static core.CoreConstants.VERBOSE;
 
 public class CollectMoneyAction extends DrawCard {
 
