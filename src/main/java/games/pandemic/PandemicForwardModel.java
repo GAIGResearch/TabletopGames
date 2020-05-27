@@ -29,8 +29,8 @@ public class PandemicForwardModel extends AbstractForwardModel {
      * @param pp - parameters for the game.
      * @param nPlayers - number of players in the game.
      */
-    public PandemicForwardModel(PandemicParameters pp, int nPlayers, long seed) {
-        super(seed);
+    public PandemicForwardModel(PandemicParameters pp, int nPlayers) {
+        super(pp.getGameSeed());
 
         // Game over conditions
         GameOverCondition infectLose = new GameOverInfection();
@@ -106,6 +106,15 @@ public class PandemicForwardModel extends AbstractForwardModel {
 
         // draw tree from root
 //        new GameFlowDiagram(root);
+    }
+
+    /**
+     * Copy constructor from root node.
+     * @param root - root rule node.
+     */
+    public PandemicForwardModel(Node root) {
+        this.root = root;
+        this.nextRule = root;
     }
 
     /**
@@ -308,6 +317,11 @@ public class PandemicForwardModel extends AbstractForwardModel {
         else if (gameState.getGamePhase() == AbstractGameState.DefaultGamePhase.PlayerReaction)
             return getEventActions(pgs);
         else return getPlayerActions(pgs);
+    }
+
+    @Override
+    protected AbstractForwardModel getCopy() {
+        return new PandemicForwardModel(root);
     }
 
     /**

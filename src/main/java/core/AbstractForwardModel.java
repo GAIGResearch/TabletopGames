@@ -21,12 +21,18 @@ public abstract class AbstractForwardModel {
     }
 
     /**
+     * Empty constructor for copies.
+     */
+    protected AbstractForwardModel() {}
+
+    /**
      * Combines both super class and sub class setup methods. Called from the game loop.
      * @param firstState - initial state.
      */
     final void _setup(AbstractGameState firstState) {
         abstractSetup(firstState);
         setup(firstState);
+        firstState.addAllComponents();
     }
 
     /**
@@ -67,6 +73,12 @@ public abstract class AbstractForwardModel {
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
 
+    /**
+     * Gets a copy of the FM with a new random number generator.
+     * @return - new forward model with different random seed (keeping logic).
+     */
+    protected abstract AbstractForwardModel getCopy();
+
     /* Public API */
 
     /**
@@ -94,5 +106,15 @@ public abstract class AbstractForwardModel {
         List<AbstractAction> actions = _computeAvailableActions(gameState);
         gameState.setAvailableActions(actions);
         return Collections.unmodifiableList(actions);
+    }
+
+    /**
+     * Returns a copy of this forward model with a new random seed.
+     * @return a new Forward Model instance with a different random object.
+     */
+    public AbstractForwardModel copy() {
+        AbstractForwardModel model = getCopy();
+        model.rnd = new Random();
+        return model;
     }
 }

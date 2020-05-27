@@ -38,7 +38,7 @@ public class PandemicParameters extends AbstractGameParameters {
     int n_actions_per_turn = 4;
     int n_research_stations = 6;
 
-    protected PandemicParameters(String dataPath) {
+    public PandemicParameters(String dataPath) {
         this.dataPath = dataPath;
     }
 

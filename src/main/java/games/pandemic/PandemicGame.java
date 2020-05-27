@@ -1,14 +1,11 @@
 package games.pandemic;
 
-import core.AbstractForwardModel;
-import core.AbstractGame;
-import core.AbstractGUI;
+import core.*;
 
 import java.util.List;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
 import players.HumanGUIPlayer;
-import core.AbstractPlayer;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -17,14 +14,11 @@ import java.util.*;
 public class PandemicGame extends AbstractGame {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
-        super(agents,
-                new ArrayList<AbstractForwardModel>() {{
-                    for (int i = 0; i < agents.size(); i++) {
-                        add(new PandemicForwardModel(params, agents.size(), System.currentTimeMillis()));
-                    }
-                }},
-                new PandemicForwardModel(params, agents.size(), params.getGameSeed()),
+        super(agents, new PandemicForwardModel(params, agents.size()),
                 new PandemicGameState(params, agents.size()));
+    }
+    public PandemicGame(AbstractForwardModel model, AbstractGameState gameState) {
+        super(model, gameState);
     }
 
     public static void main(String[] args){

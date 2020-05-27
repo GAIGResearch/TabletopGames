@@ -1,6 +1,5 @@
 package games.tictactoe;
 
-import core.AbstractForwardModel;
 import core.AbstractGame;
 import core.AbstractPlayer;
 import players.HumanConsolePlayer;
@@ -12,11 +11,7 @@ public class TicTacToeGame extends AbstractGame {
 
     public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
     {
-        super(agents, new ArrayList<AbstractForwardModel>() {{
-            for (int i = 0; i < agents.size(); i++) {
-                add(new TicTacToeForwardModel(System.currentTimeMillis()));
-            }
-        }}, new TicTacToeForwardModel(params.getGameSeed()), new TicTacToeGameState(params, agents.size()));
+        super(agents, new TicTacToeForwardModel(params.getGameSeed()), new TicTacToeGameState(params, agents.size()));
     }
 
     public static void main(String[] args){

@@ -19,26 +19,57 @@ public abstract class AbstractGame {
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
      * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
      * @param players - players taking part in this game.
-     * @param playerFMs - forward models used to apply game rules, one for each player (with different random seeds).
      * @param realModel - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public AbstractGame(List<AbstractPlayer> players, List<AbstractForwardModel> playerFMs, AbstractForwardModel realModel, AbstractGameState gameState) {
+    public AbstractGame(List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
         this.gameState = gameState;
         this.forwardModel = realModel;
-        this.forwardModel._setup(gameState);
-        this.gameState.addAllComponents();
+        reset(players);
+    }
 
+    /**
+     * Game constructor. Receives a forward model and a game state.
+     * Performs initialisation of the game state and forward model objects.
+     * @param model - forward model used to apply game rules.
+     * @param gameState - object used to track the state of the game in a moment in time.
+     */
+    public AbstractGame(AbstractForwardModel model, AbstractGameState gameState) {
+        this.forwardModel = model;
+        this.gameState = gameState;
+        reset();
+    }
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules,
+     * and initialises all players.
+     */
+    public final void reset() {
+        forwardModel._setup(gameState);
+        for (AbstractPlayer player: players) {
+            AbstractGameState observation = gameState._copy(player.getPlayerID());
+            player.initializePlayer(observation);
+        }
+    }
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
+     * and their IDs, and initialises all players.
+     * @param players - new players for the game
+     */
+    public final void reset(List<AbstractPlayer> players) {
+        forwardModel._setup(gameState);
         this.players = players;
         int id = 0;
         for (AbstractPlayer player: players) {
-            // Retrieve the FM for this player
-            player.forwardModel = playerFMs.get(id);
+            // Create a FM copy for this player (different random seed)
+            player.forwardModel = this.forwardModel.copy();
             // Create initial state observation
             AbstractGameState observation = gameState._copy(id);
             // Give player their ID
             player.playerID = id++;
             // Allow player to initialize
+            player.initializePlayer(observation);
         }
     }
 
@@ -120,4 +151,5 @@ public abstract class AbstractGame {
     public final AbstractGameState getGameState() {
         return gameState;
     }
+
 }

@@ -1,9 +1,9 @@
 package players;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
-import core.interfaces.IObservation;
 
 import java.util.List;
 import java.util.Scanner;
@@ -12,7 +12,9 @@ import java.util.Scanner;
 public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
-    public int getAction(IObservation observation, List<AbstractAction> actions) {
+    public int getAction(AbstractGameState observation) {
+        List<AbstractAction> actions = observation.getActions();
+
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();
 
@@ -41,7 +43,7 @@ public class HumanConsolePlayer extends AbstractPlayer {
     }
 
     @Override
-    public void registerUpdatedObservation(IObservation observation) {
+    public void registerUpdatedObservation(AbstractGameState observation) {
         //if (observation instanceof IPrintable)
         //   ((IPrintable) observation).printToConsole();
         System.out.println("No actions available. End turn by pressing any key...");

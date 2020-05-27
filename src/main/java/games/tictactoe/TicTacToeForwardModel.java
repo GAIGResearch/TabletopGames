@@ -23,6 +23,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         super(seed);
     }
 
+    /**
+     * Constructor for copies, leaves random generator null.
+     */
+    protected TicTacToeForwardModel() { }
+
     @Override
     public void setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
@@ -42,6 +47,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
             }
         }
         return actions;
+    }
+
+    @Override
+    protected AbstractForwardModel getCopy() {
+        return new TicTacToeForwardModel();
     }
 
     @Override
