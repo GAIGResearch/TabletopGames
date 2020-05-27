@@ -1,6 +1,6 @@
 package core.components;
 
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import utilities.Utils.ComponentType;
 
 import static utilities.CoreConstants.nameHash;

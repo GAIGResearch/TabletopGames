@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import games.pandemic.PandemicTurnOrder;
 import core.components.Card;
 import core.components.Deck;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicGameState.PandemicGamePhase.RPReaction;

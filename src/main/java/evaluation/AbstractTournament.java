@@ -1,4 +1,4 @@
-package core.evaluation;
+package evaluation;
 
 import core.AbstractPlayer;
 

@@ -5,7 +5,7 @@ import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;

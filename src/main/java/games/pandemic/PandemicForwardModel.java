@@ -2,7 +2,7 @@ package games.pandemic;
 
 import core.actions.*;
 import core.components.*;
-import core.content.*;
+import core.properties.*;
 import core.*;
 import games.pandemic.actions.*;
 import games.pandemic.engine.*;

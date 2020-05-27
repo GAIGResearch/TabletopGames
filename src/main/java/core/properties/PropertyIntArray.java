@@ -1,46 +1,46 @@
-package core.content;
+package core.properties;
 
 import org.json.simple.JSONArray;
 import utilities.Hash;
 
 import java.util.Arrays;
 
-public class PropertyLongArray extends Property
+public class PropertyIntArray extends Property
 {
-    private long[] values;
+    private int[] values;
 
-    public PropertyLongArray(long[] values)
+    public PropertyIntArray(int[] values)
     {
         this.hashString = "";
         this.hashKey = Hash.GetInstance().hash(hashString);
-        this.values = new long[values.length];
+        this.values = new int[values.length];
         for(int i =0; i< values.length; ++i)
             this.values[i] =  values[i];
 
     }
 
-    public PropertyLongArray(String key, JSONArray values)
+    public PropertyIntArray(String key, JSONArray values)
     {
         this.hashString = key;
         this.hashKey = Hash.GetInstance().hash(hashString);
-        this.values = new long[values.size()];
+        this.values = new int[values.size()];
         for(int i =0; i< values.size(); ++i)
         {
-            this.values[i] = (long) values.get(i);
+            this.values[i] = ((Long) values.get(i)).intValue();
         }
 
     }
 
-    public PropertyLongArray(String key, int hashKey, long[] values)
+    public PropertyIntArray(String key, int hashKey, int[] values)
     {
         this.hashString = key;
         this.hashKey = hashKey;
-        this.values = new long[values.length];
+        this.values = new int[values.length];
         for(int i =0; i< values.length; ++i)
             this.values[i] = values[i];
     }
 
-    public long[] getValues() {
+    public int[] getValues() {
         return values;
     }
 
@@ -51,9 +51,9 @@ public class PropertyLongArray extends Property
 
     public boolean equals(Object other)
     {
-       if(other instanceof PropertyLongArray)
+       if(other instanceof PropertyIntArray)
        {
-           PropertyLongArray psto = (PropertyLongArray)(other);
+           PropertyIntArray psto = (PropertyIntArray)(other);
            if (psto.values.length == this.values.length)
            {
                for(int i =0; i< values.length; ++i) {
@@ -69,7 +69,7 @@ public class PropertyLongArray extends Property
 
     public Property copy()
     {
-        return new PropertyLongArray(hashString, hashKey, values);
+        return new PropertyIntArray(hashString, hashKey, values);
     }
 
 }

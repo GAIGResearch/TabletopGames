@@ -1,6 +1,6 @@
 package core.components;
 
-import core.content.*;
+import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

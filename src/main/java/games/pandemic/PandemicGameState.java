@@ -5,7 +5,7 @@ import core.gamephase.DefaultGamePhase;
 import core.ForwardModel;
 import core.actions.*;
 import core.components.*;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.GameParameters;

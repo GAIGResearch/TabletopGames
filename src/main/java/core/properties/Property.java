@@ -1,4 +1,4 @@
-package core.content;
+package core.properties;
 
 public abstract class Property
 {

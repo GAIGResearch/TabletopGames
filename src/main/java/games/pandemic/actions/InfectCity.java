@@ -4,7 +4,7 @@ import core.actions.DrawCard;
 import core.components.BoardNode;
 import core.components.Card;
 import core.components.Counter;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;

@@ -1,7 +1,7 @@
 package games.pandemic.gui;
 
 import core.components.*;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;

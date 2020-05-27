@@ -1,26 +1,26 @@
-package core.content;
+package core.properties;
 
 import utilities.Hash;
 
-public class PropertyInt extends Property
+public class PropertyString extends Property
 {
-    public int value;
+    public String value;
 
-    public PropertyInt(int value)
+    public PropertyString (String value)
     {
         this.hashString = "";
         this.hashKey = Hash.GetInstance().hash(hashString);
         this.value = value;
     }
 
-    public PropertyInt(String key, int value)
+    public PropertyString (String key, String value)
     {
         this.hashString = key;
         this.hashKey = Hash.GetInstance().hash(hashString);
         this.value = value;
     }
 
-    public PropertyInt(String key, int hashKey, int value)
+    public PropertyString (String key, int hashKey, String value)
     {
         this.hashString = key;
         this.hashKey = hashKey;
@@ -30,19 +30,19 @@ public class PropertyInt extends Property
 
     @Override
     public String toString() {
-        return ""+value;
+        return value;
     }
 
     public boolean equals(Object other)
     {
-       if(other instanceof PropertyInt)
-           return value == ((PropertyInt)(other)).value;
+       if(other instanceof PropertyString)
+           return value.equals(((PropertyString)(other)).value);
        return false;
     }
 
     public Property copy()
     {
-        return new PropertyInt(hashString, hashKey, value);
+        return new PropertyString(hashString, hashKey, value);
     }
 
 }

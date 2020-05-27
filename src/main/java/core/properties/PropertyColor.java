@@ -1,4 +1,4 @@
-package core.content;
+package core.properties;
 
 import utilities.Hash;
 import utilities.Utils;

@@ -1,9 +1,9 @@
 package games.pandemic.actions;
 
 import core.components.BoardNode;
-import core.content.PropertyBoolean;
+import core.properties.PropertyBoolean;
 import core.AbstractGameState;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicGameState;
 
 import java.util.Objects;

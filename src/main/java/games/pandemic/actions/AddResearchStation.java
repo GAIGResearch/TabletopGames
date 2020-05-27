@@ -2,11 +2,10 @@ package games.pandemic.actions;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
-import core.components.Card;
 import core.components.Counter;
-import core.content.PropertyBoolean;
+import core.properties.PropertyBoolean;
 import core.AbstractGameState;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 

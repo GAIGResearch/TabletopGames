@@ -1,4 +1,4 @@
-package core.content;
+package core.properties;
 
 import org.json.simple.JSONArray;
 import utilities.Hash;

@@ -2,9 +2,8 @@ package games.pandemic.actions;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
-import core.components.Card;
 import core.components.Counter;
-import core.content.PropertyIntArray;
+import core.properties.PropertyIntArray;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;

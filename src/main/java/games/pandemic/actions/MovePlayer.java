@@ -3,7 +3,7 @@ package games.pandemic.actions;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Card;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicConstants;
