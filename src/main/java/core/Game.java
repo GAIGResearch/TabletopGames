@@ -19,9 +19,6 @@ public abstract class Game {
     protected AbstractGameState gameState;
     protected ForwardModel forwardModel;
 
-    // GameState observations as seen by different players.
-    protected IObservation[] gameStateObservations;
-
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
      * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
