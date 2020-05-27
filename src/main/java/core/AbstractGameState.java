@@ -18,7 +18,7 @@ public abstract class AbstractGameState {
 
     // Parameters, forward model and turn order for the game
     protected final GameParameters gameParameters;
-    protected ForwardModel forwardModel;
+//    protected ForwardModel forwardModel;
     protected TurnOrder turnOrder;
     protected Area<Component> allComponents;
 
@@ -38,15 +38,15 @@ public abstract class AbstractGameState {
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
-     * @param model - forward model.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(GameParameters gameParameters, ForwardModel model, TurnOrder turnOrder){
+    public AbstractGameState(GameParameters gameParameters, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
-        this.forwardModel = model;
+//        this.forwardModel = model;
         this.turnOrder = turnOrder;
         this.allComponents = new Area<>(-1, "All Components");
     }
+
 
     // Setters
     public final void setTurnOrder(TurnOrder turnOrder) {
@@ -60,6 +60,9 @@ public abstract class AbstractGameState {
     public final void setMainGamePhase() {
         this.gamePhase = DefaultGamePhase.Main;
     }
+    public final void setAvailableActions(List<AbstractAction> availableActions) {
+        this.availableActions = availableActions;
+    }
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
@@ -69,12 +72,6 @@ public abstract class AbstractGameState {
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == Utils.GameResult.GAME_ONGOING; }
     public final List<AbstractAction> getActions() {
-        return getActions(false);
-    }
-    public final List<AbstractAction> getActions(boolean forceCompute) {
-        if (forceCompute || availableActions == null || availableActions.size() == 0) {
-            availableActions = computeAvailableActions();
-        }
         return availableActions;
     }
     public final GamePhase getGamePhase() {
@@ -90,24 +87,12 @@ public abstract class AbstractGameState {
     /* Methods to be implemented by subclass */
 
     /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
-     */
-    public void endGame() {}
-
-    /**
      * Retrieves an observation specific to the given player from this game state object. Components which are not
      * observed by the player are removed, the rest are copied.
      * @param player - player observing this game state.
      * @return - IObservation, the observation for this player.
      */
     public abstract IObservation getObservation(int player);
-
-    /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
-     */
-    public abstract List<AbstractAction> computeAvailableActions();
 
     /**
      * Must add all components used in the game to the allComponents area, mapping to their assigned component ID

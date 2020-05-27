@@ -1,6 +1,5 @@
 package games.tictactoe;
 
-import core.AbstractGameState;
 import core.ForwardModel;
 import core.Game;
 import core.AbstractPlayer;
@@ -11,9 +10,13 @@ import java.util.*;
 
 public class TicTacToeGame extends Game {
 
-    public TicTacToeGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState)
+    public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
     {
-        super(agents, model, gameState);
+        super(agents, new ArrayList<ForwardModel>() {{
+            for (int i = 0; i < agents.size(); i++) {
+                add(new TicTacToeForwardModel(System.currentTimeMillis()));
+            }
+        }}, new TicTacToeForwardModel(params.getGameSeed()), new TicTacToeGameState(params, agents.size()));
     }
 
     public static void main(String[] args){
@@ -21,9 +24,8 @@ public class TicTacToeGame extends Game {
         agents.add(new RandomPlayer());
         agents.add(new HumanConsolePlayer());
 
-        ForwardModel forwardModel = new TicTacToeForwardModel();
-        AbstractGameState gameState = new TicTacToeGameState(new TicTacToeGameParameters(), forwardModel, agents.size());
-        Game game = new TicTacToeGame(agents, forwardModel, gameState);
+        TicTacToeGameParameters params = new TicTacToeGameParameters();
+        Game game = new TicTacToeGame(agents, params);
         game.run(null);
     }
 }

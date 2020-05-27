@@ -19,26 +19,33 @@ public abstract class Game {
     protected AbstractGameState gameState;
     protected ForwardModel forwardModel;
 
-    // GameState observations as seen by different players.
-    protected IObservation[] gameStateObservations;
-
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
      * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
      * @param players - players taking part in this game.
-     * @param model - forward model used to apply game rules.
+     * @param playerFMs - forward models used to apply game rules, one for each player (with different random seeds).
+     * @param realModel - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public Game(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
+    public Game(List<AbstractPlayer> players, List<ForwardModel> playerFMs, ForwardModel realModel, AbstractGameState gameState) {
         this.players = players;
         int id = 0;
-        for (AbstractPlayer player: players) {
-            player.playerID = id++;
-        }
-        this.forwardModel = model;
+
         this.gameState = gameState;
+        this.forwardModel = realModel;
         this.forwardModel._setup(gameState);
         this.gameState.addAllComponents();
+
+        for (AbstractPlayer player: players) {
+            // Retrieve the FM for this player
+            player.forwardModel = playerFMs.get(id);
+            // Create initial state observation
+            IObservation observation = gameState.getObservation(id);
+            // Give player their ID
+            player.playerID = id++;
+            // Allow player to initialize
+            player.initializePlayer(observation);
+        }
     }
 
     /**
@@ -55,7 +62,9 @@ public abstract class Game {
             AbstractPlayer player = players.get(activePlayer);
 
             // Get actions for the player
-            List<AbstractAction> actions = Collections.unmodifiableList(gameState.getActions(true));
+            List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
+            gameState.setAvailableActions(actions);
+            actions = Collections.unmodifiableList(actions);
             IObservation observation = gameState.getObservation(activePlayer);
             if (observation != null && CoreConstants.VERBOSE) {
                 ((IPrintable) observation).printToConsole();
@@ -83,8 +92,13 @@ public abstract class Game {
         }
 
         // Perform any end of game computations as required by the game
-        gameState.endGame();
+        forwardModel.endGame(gameState);
         System.out.println("Game Over");
+
+        // Allow players to terminate
+        for (AbstractPlayer player: players) {
+            player.finalizePlayer(gameState.getObservation(player.getPlayerID()));
+        }
     }
 
     /**

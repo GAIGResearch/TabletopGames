@@ -60,7 +60,7 @@ public class LoveLetterGameState extends AbstractGameState {
     }
 
     public LoveLetterGameState(LoveLetterParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, new LoveLetterTurnOrder(nPlayers));
+        super(gameParameters, new LoveLetterTurnOrder(nPlayers));
         gamePhase = LoveLetterGamePhase.Draw;
     }
 

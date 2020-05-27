@@ -14,23 +14,9 @@ public class HumanGUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void initializePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public void finalizePlayer(IObservation observation) {
-
-    }
-
-    @Override
     public int getAction(IObservation observation, List<AbstractAction> actions) {
         return actions.indexOf(ac.getAction());
     }
 
-    @Override
-    public void registerUpdatedObservation(IObservation observation) {
-        
-    }
 }
 

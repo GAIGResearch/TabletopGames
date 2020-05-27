@@ -14,7 +14,6 @@ import games.coltexpress.components.Train;
 import core.components.PartialObservableDeck;
 import utilities.Utils;
 import games.coltexpress.ColtExpressParameters.CharacterType;
-import static utilities.CoreConstants.PARTIAL_OBSERVABLE;
 
 import java.util.*;
 
@@ -66,7 +65,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     }
 
     public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, new ColtExpressTurnOrder(nPlayers));
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers));
         gamePhase = ColtExpressGamePhase.DrawCards;
     }
 

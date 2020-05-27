@@ -12,16 +12,6 @@ import java.util.Scanner;
 public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
-    public void initializePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public void finalizePlayer(IObservation observation) {
-
-    }
-
-    @Override
     public int getAction(IObservation observation, List<AbstractAction> actions) {
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();
@@ -58,7 +48,5 @@ public class HumanConsolePlayer extends AbstractPlayer {
         Scanner in = new Scanner(System.in);
         in.next();
     }
-
-
 }
 

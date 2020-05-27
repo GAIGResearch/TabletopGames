@@ -35,7 +35,7 @@ public class UnoGameState extends AbstractGameState {
     }
 
     public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
     @Override

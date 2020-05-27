@@ -2,6 +2,7 @@ package games.pandemic;
 
 import core.actions.*;
 import core.components.*;
+import core.gamephase.DefaultGamePhase;
 import core.properties.*;
 import core.*;
 import games.pandemic.actions.*;
@@ -11,14 +12,12 @@ import games.pandemic.engine.gameOver.*;
 import games.pandemic.engine.rules.*;
 import utilities.Hash;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
+import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static utilities.CoreConstants.*;
 
 public class PandemicForwardModel extends ForwardModel {
 
@@ -30,7 +29,8 @@ public class PandemicForwardModel extends ForwardModel {
      * @param pp - parameters for the game.
      * @param nPlayers - number of players in the game.
      */
-    public PandemicForwardModel(PandemicParameters pp, int nPlayers) {
+    public PandemicForwardModel(PandemicParameters pp, int nPlayers, long seed) {
+        super(seed);
 
         // Game over conditions
         GameOverCondition infectLose = new GameOverInfection();
@@ -134,7 +134,7 @@ public class PandemicForwardModel extends ForwardModel {
         if (nextRule == null) {
             // if still null, end of turn:
             nextRule = root;
-            pgs.nextPlayer();
+            nextPlayer(pgs);
         }
     }
 
@@ -291,13 +291,32 @@ public class PandemicForwardModel extends ForwardModel {
         state.getTurnOrder().setStartingPlayer(startingPlayer);
     }
 
-    /*
-    @Override
-    public ForwardModel copy() {
-        PandemicForwardModel fm = new PandemicForwardModel(pp);
-        fm.rnd = new Random();
-        fm.pp = (PandemicParameters)pp.copy();
-        return fm;
-    }
+
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of IAction objects.
      */
+    @Override
+    public List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+        PandemicGameState pgs = (PandemicGameState) gameState;
+        if (((PandemicTurnOrder) gameState.getTurnOrder()).reactionsFinished()) {
+            gameState.setMainGamePhase();
+        }
+        if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.DiscardReaction)
+            return getDiscardActions(pgs);
+        else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.RPReaction)
+            return getRPactions(pgs);
+        else if (gameState.getGamePhase() == DefaultGamePhase.PlayerReaction)
+            return getEventActions(pgs);
+        else return getPlayerActions(pgs);
+    }
+
+    /**
+     * Informs turn order of a need to move to the next player and performs any beginning of round setup.
+     */
+    private void nextPlayer(PandemicGameState pgs) {
+        pgs.getTurnOrder().endPlayerTurn(pgs);
+        pgs.nCardsDrawn = 0;
+        pgs.setMainGamePhase();
+    }
 }

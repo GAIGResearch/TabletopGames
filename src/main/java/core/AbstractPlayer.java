@@ -8,20 +8,23 @@ import java.util.List;
 public abstract class AbstractPlayer {
 
     int playerID;
+    ForwardModel forwardModel;
 
     /**
-     * Initialize agent given an observation of the initial game-state.
-     * e.g. load weights, initialize neural network
-     * @param observation observation of the initial game-state
+     * Retrieves this player's ID, as set by the game.
+     * @return - int, player ID
      */
-    public abstract void initializePlayer(IObservation observation);
+    public final int getPlayerID() {
+        return playerID;
+    }
 
     /**
-     * Finalize agent given an observation of the final game-state.
-     * e.g. store variables after training, modify weights, etc.
-     * @param observation observation of the final game-state
+     * Retrieves the forward model for current game being played.
+     * @return - ForwardModel
      */
-    public abstract void finalizePlayer(IObservation observation);
+    public final ForwardModel getForwardModel() {
+        return forwardModel;
+    }
 
     /**
      * Initialize agent given an observation of the initial game-state.
@@ -30,15 +33,21 @@ public abstract class AbstractPlayer {
     public abstract int getAction(IObservation observation, List<AbstractAction> actions);
 
     /**
-     * Retrieves this player's ID, as set by the game.
-     * @return - int, player ID
+     * Initialize agent given an observation of the initial game-state.
+     * e.g. load weights, initialize neural network
+     * @param observation observation of the initial game-state
      */
-    public int getPlayerID() {
-        return playerID;
-    }
+    public void initializePlayer(IObservation observation) {}
 
     /**
      * Receive an updated game-state for which it is not required to respond with an action.
      */
-    public abstract void registerUpdatedObservation(IObservation observation);
+    public void registerUpdatedObservation(IObservation observation) {}
+
+    /**
+     * Finalize agent given an observation of the final game-state.
+     * e.g. store variables after training, modify weights, etc.
+     * @param observation observation of the final game-state
+     */
+    public void finalizePlayer(IObservation observation) {}
 }

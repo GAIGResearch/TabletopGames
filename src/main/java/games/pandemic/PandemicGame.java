@@ -1,6 +1,5 @@
 package games.pandemic;
 
-import core.AbstractGameState;
 import core.ForwardModel;
 import core.Game;
 import core.GUI;
@@ -17,8 +16,15 @@ import java.util.*;
 
 public class PandemicGame extends Game {
 
-    public PandemicGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState) {
-        super(agents, model, gameState);
+    public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
+        super(agents,
+                new ArrayList<ForwardModel>() {{
+                    for (int i = 0; i < agents.size(); i++) {
+                        add(new PandemicForwardModel(params, agents.size(), System.currentTimeMillis()));
+                    }
+                }},
+                new PandemicForwardModel(params, agents.size(), params.getGameSeed()),
+                new PandemicGameState(params, agents.size()));
     }
 
     public static void main(String[] args){
@@ -32,11 +38,8 @@ public class PandemicGame extends Game {
         players.add(new HumanGUIPlayer(ac));
 
         PandemicParameters params = new PandemicParameters("data/pandemic/");
-        ForwardModel forwardModel = new PandemicForwardModel(params, players.size());
-        PandemicGameState gameState = new PandemicGameState(params, forwardModel, players.size());
-
-        PandemicGame game = new PandemicGame(players, forwardModel, gameState);
-        GUI gui = new PandemicGUI(gameState, ac);
+        PandemicGame game = new PandemicGame(players, params);
+        GUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
         game.run(gui);
         System.out.println(game.gameState.getGameStatus());
 
@@ -51,7 +54,7 @@ public class PandemicGame extends Game {
 
         PandemicParameters params = new PandemicParameters("data/pandemic/");
         for (int i = 0; i < 10000; i++) {
-            PandemicGame game = new PandemicGame(players, model, new PandemicGameState(params, model, players.size()));
+            PandemicGame game = new PandemicGame(players, params);
             game.run(null);
             Utils.GameResult result = game.gameState.getGameStatus();
             int prevCount = results.get(result);

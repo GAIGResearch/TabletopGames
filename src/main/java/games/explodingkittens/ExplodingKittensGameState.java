@@ -52,7 +52,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
     public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, new ExplodingKittenTurnOrder(nPlayers));
+        super(gameParameters, new ExplodingKittenTurnOrder(nPlayers));
     }
 
     /**
