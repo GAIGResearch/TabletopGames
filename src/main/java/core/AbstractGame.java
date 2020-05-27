@@ -27,14 +27,23 @@ public abstract class AbstractGame {
     public AbstractGame(List<AbstractPlayer> players, AbstractForwardModel model, AbstractGameState gameState) {
         this.forwardModel = model;
         this.gameState = gameState;
-        this.forwardModel._setup(gameState);
-        this.gameState.addAllComponents();
-
         this.players = players;
         int id = 0;
         for (AbstractPlayer player: players) {
-            IObservation observation = this.gameState.getObservation(id);
             player.playerID = id++;
+        }
+
+        reset();
+    }
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules, and initialises
+     * all players.
+     */
+    public final void reset() {
+        forwardModel._setup(gameState);
+        for (AbstractPlayer player: players) {
+            IObservation observation = gameState.getObservation(player.getPlayerID());
             player.initializePlayer(observation);
         }
     }
