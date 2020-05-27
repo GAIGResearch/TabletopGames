@@ -1,5 +1,7 @@
 package games.loveletter;
 
+import core.AbstractForwardModel;
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.AbstractGame;
 import players.RandomPlayer;
@@ -14,6 +16,10 @@ public class LoveLetterGame extends AbstractGame {
 
     public LoveLetterGame(List<AbstractPlayer> agents, LoveLetterForwardModel forwardModel, LoveLetterGameState gameState) {
         super(agents, forwardModel, gameState);
+    }
+
+    public LoveLetterGame(AbstractForwardModel forwardModel, AbstractGameState gameState) {
+        super(forwardModel, gameState);
     }
 
     public static void main(String[] args){
