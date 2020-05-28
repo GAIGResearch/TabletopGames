@@ -86,7 +86,7 @@ public abstract class AbstractGame {
             // Get actions for the player
             List<AbstractAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
-            if (observation != null && CoreConstants.VERBOSE) {
+            if (CoreConstants.VERBOSE && observation instanceof IPrintable) {
                 ((IPrintable) observation).printToConsole();
             }
 
