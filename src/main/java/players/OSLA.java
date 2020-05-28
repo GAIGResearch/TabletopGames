@@ -28,16 +28,6 @@ public class OSLA extends AbstractPlayer {
     }
 
     @Override
-    public void initializePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public void finalizePlayer(IObservation observation) {
-
-    }
-
-    @Override
     public int getAction(IObservation observation, List<AbstractAction> actions) {
         stateHeuristic = new PandemicHeuristic((PandemicGameState)observation);
         PandemicGameState gs = (PandemicGameState)observation;
@@ -60,11 +50,6 @@ public class OSLA extends AbstractPlayer {
         }
 
         return actions.indexOf(bestAction);
-    }
-
-    @Override
-    public void registerUpdatedObservation(IObservation observation) {
-
     }
 
     public static double noise(double input, double epsilon, double random)
