@@ -1,7 +1,9 @@
 package games.uno;
 
+import core.AbstractGameParameters;
 
-import core.GameParameters;
-
-public class UnoGameParameters extends GameParameters {
+public class UnoGameParameters extends AbstractGameParameters {
+    public int nCardsPerColor = 10;
+    public int nCardsPerPlayer = 7;
+    public int nWildCards = 4;
 }

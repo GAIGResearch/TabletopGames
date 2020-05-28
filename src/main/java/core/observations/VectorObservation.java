@@ -1,14 +1,16 @@
 package core.observations;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 
 import java.util.Arrays;
 
-class ArrayObservation<T> implements IObservation, IPrintable {
+class VectorObservation<T> implements IObservation, IPrintable {
 
     private T[] values;
 
-    public ArrayObservation(T[] arrayValues){
+    public VectorObservation(T[] arrayValues){
         this.values = arrayValues;
     }
 
@@ -23,7 +25,7 @@ class ArrayObservation<T> implements IObservation, IPrintable {
     }
 
     @Override
-    public IObservation next(IAction action) {
+    public IObservation next(AbstractAction action) {
         return null;
     }
 }

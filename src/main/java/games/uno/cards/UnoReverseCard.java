@@ -1,33 +1,25 @@
 package games.uno.cards;
 
-import core.AbstractGameState;
-import core.components.Card;
 import games.uno.UnoGameState;
-import core.turnorder.AlternatingTurnOrder;
 
 public class UnoReverseCard extends UnoCard {
 
-    public UnoReverseCard(UnoCardColor color, UnoCardType type) {
-        super(color, type);
+    public UnoReverseCard(UnoCardColor color) {
+        super(color, UnoCardType.Reverse, -1);
     }
 
     @Override
-    public boolean isPlayable(UnoGameState gameState) {
-        return false;
+    public UnoCard copy() {
+        return new UnoReverseCard(color);
     }
 
-    public static class ReverseCardEffect extends CardEffect{
-        public ReverseCardEffect(){};
-
-        @Override
-        public boolean execute(AbstractGameState gs) {
-            ((AlternatingTurnOrder)gs.getTurnOrder()).reverse();
-            return true;
-        }
-
-        @Override
-        public Card getCard() {
-            return null;
-        }
+    // It is playable if the color is the same of the currentCard color or the currentCard is a Reverse one
+    @Override
+    public boolean isPlayable(UnoGameState gameState) {
+       return this.color == gameState.getCurrentColor() || gameState.getCurrentCard() instanceof UnoReverseCard;
+    }
+    @Override
+    public String toString() {
+        return color.toString() + "Reverse";
     }
 }

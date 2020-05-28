@@ -2,6 +2,8 @@ package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
 
+import java.util.Arrays;
+
 public abstract class RoundCard {
     /*
     Round Cards
@@ -39,14 +41,22 @@ public abstract class RoundCard {
     */
 
     public enum TurnType{
-        NormalTurn,
-        HiddenTurn,
-        DoubleTurn,
-        ReverseTurn
+        NormalTurn("O"),
+        HiddenTurn("X"),
+        DoubleTurn("2"),
+        ReverseTurn("R");
+
+        private final String type;
+        TurnType(String type){this.type = type; }
+        public String toString(){return type; }
     }
 
     public TurnType[] turnTypes;
 
-    public abstract void endTurnEvent(ColtExpressGameState gameState);
+    public abstract void endRoundCardEvent(ColtExpressGameState gameState);
+
+    public String toString(){
+        return Arrays.toString(turnTypes);
+    }
 
 }

@@ -1,8 +1,8 @@
 package games.coltexpress;
 
-import core.actions.IAction;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.actions.AbstractAction;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 
 public class ColtExpressObservation implements IPrintable, IObservation {
 
@@ -21,7 +21,7 @@ public class ColtExpressObservation implements IPrintable, IObservation {
     }
 
     @Override
-    public IObservation next(IAction action) {
+    public IObservation next(AbstractAction action) {
         return null;
     }
 }

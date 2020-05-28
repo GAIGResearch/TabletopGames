@@ -1,52 +1,23 @@
 package games.coltexpress;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.ForwardModel;
-import core.GUI;
-import core.Game;
-import core.actions.IAction;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.AbstractForwardModel;
+import core.AbstractGame;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static utilities.CoreConstants.VERBOSE;
+public class ColtExpressGame extends AbstractGame {
 
-public class ColtExpressGame extends Game {
-
-    public ColtExpressGame(List<AbstractPlayer> agents, ForwardModel forwardModel, ColtExpressGameState gameState) {
+    public ColtExpressGame(List<AbstractPlayer> agents, AbstractForwardModel forwardModel, ColtExpressGameState gameState) {
         super(agents, forwardModel, gameState);
     }
 
-    @Override
-    public void run(GUI gui) {
-        while (!gameState.isTerminal()){
-            System.out.println();
-            System.out.println();
-            if (VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-
-            // Get player to ask for actions next
-            int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
-            // Get actions for the player
-            List<IAction> actions = Collections.unmodifiableList(gameState.getActions(true));
-            IObservation observation = gameState.getObservation(activePlayer);
-            if (observation != null && VERBOSE) {
-                ((IPrintable) observation).printToConsole();
-            }
-
-            IAction action = actions.size() > 0 ? actions.get(players.get(activePlayer).getAction(observation, actions)) : null;
-            forwardModel.next(gameState, action);
-            break;
-        }
-
-        gameState.endGame();
-
-        System.out.println("Game Over");
+    public ColtExpressGame(AbstractForwardModel forwardModel, AbstractGameState gameState) {
+        super(forwardModel, gameState);
     }
 
     public static void main(String[] args){
@@ -58,16 +29,16 @@ public class ColtExpressGame extends Game {
 
         for (int i=0; i<1; i++) {
             ColtExpressParameters params = new ColtExpressParameters();
-            ForwardModel forwardModel = new ColtExpressForwardModel();
+            AbstractForwardModel forwardModel = new ColtExpressForwardModel();
             ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, forwardModel, agents.size());
 
-            Game game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
+            AbstractGame game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
             game.run(null);
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
-            gameState.printToConsole();
+            //gameState.printToConsole();
             // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
+            //System.out.println(Arrays.toString(gameState.getPlayerResults()));
 
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){

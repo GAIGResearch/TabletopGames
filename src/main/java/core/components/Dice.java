@@ -3,7 +3,6 @@ package core.components;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -13,38 +12,71 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Utils.ComponentType;
 
-public class Dice extends Component implements IDice {
-    private int number_of_sides;  //By default 1d6
+public class Dice extends Component {
+    private int nSides;  // Number of sides
 
     public Dice() {
-        super.type = ComponentType.DICE;
-        this.number_of_sides = 0;
-        this.properties = new HashMap<>();
+        this(6);  // By default d6
+    }
+
+    public Dice(int nSides) {
+        super(ComponentType.DICE);
+        this.nSides = nSides;
+    }
+
+    private Dice(int nSides, int ID) {
+        super(ComponentType.DICE, ID);
+        this.nSides = nSides;
+    }
+
+    /**
+     * @return number of sides for this die.
+     */
+    public int  getNumberOfSides() {
+        return this.nSides;
+    }
+
+    /**
+     * Sets the number of sides for this die.
+     * @param number_of_sides - new number of sides.
+     */
+    public void setNumberOfSides(int number_of_sides) {
+        this.nSides = number_of_sides;
+    }
+
+    /**
+     * Rolls the die and returns result for roll in range [1, nSides].
+     * @param r - random generator.
+     * @return - int, value of roll.
+     */
+    public int roll(Random r) {
+        return r.nextInt(this.nSides) + 1;
+    }
+
+    /**
+     * Rolls the die and returns result for roll in range [1, nSides].
+     * @return - int, value of roll.
+     */
+    public int roll() {
+        return new Random().nextInt(this.nSides) + 1;
     }
 
     @Override
-    public int  getNumberOfSides()                    { return this.number_of_sides;            }
-    @Override
-    public void setNumberOfSides(int number_of_sides) { this.number_of_sides = number_of_sides; }
-
-    @Override
     public Dice copy() {
-        Dice copy = new Dice();
-        copy.number_of_sides = number_of_sides;
+        Dice copy = new Dice(nSides, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
-    public void loadDice(JSONObject dice) {
-        this.number_of_sides = ((Long) ( (JSONArray) dice.get("count")).get(1)).intValue();
-        parseComponent(this, dice);
-    }
-
-
-    public static List<IDice> loadDice(String filename)
+    /**
+     * Loads all dice from a JSON file.
+     * @param filename - path to file.
+     * @return - List of Dice objects.
+     */
+    public static List<Dice> loadDice(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<IDice> dice = new ArrayList<>();
+        ArrayList<Dice> dice = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
@@ -52,7 +84,7 @@ public class Dice extends Component implements IDice {
             for(Object o : data) {
 
                 Dice newDice = new Dice();
-                newDice.loadDice((JSONObject) o);
+                newDice.loadDie((JSONObject) o);
                 dice.add(newDice);
             }
 
@@ -63,9 +95,12 @@ public class Dice extends Component implements IDice {
         return dice;
     }
 
-    @Override
-    public int roll(Random r) {
-        return r.nextInt(this.number_of_sides) + 1;
+    /**
+     * Creates a new Dice object with properties from a JSON object.
+     * @param dice - new Dice object parsed from JSON.
+     */
+    public void loadDie(JSONObject dice) {
+        this.nSides = ((Long) ( (JSONArray) dice.get("count")).get(1)).intValue();
+        parseComponent(this, dice);
     }
-
 }

@@ -1,14 +1,14 @@
 package games.pandemic;
 
-import core.GameData;
+import core.AbstractGameData;
 import core.components.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PandemicData implements GameData {
+public class PandemicData extends AbstractGameData<Card> {
 
-    private List<Board> boards;
+    private List<GraphBoard> graphBoards;
     private List<Deck<Card>> decks;
     private List<Token> tokens;
     private List<Counter> counters;
@@ -16,16 +16,16 @@ public class PandemicData implements GameData {
     @Override
     public void load(String dataPath)
     {
-        boards = Board.loadBoards(dataPath + "boards.json");
+        graphBoards = GraphBoard.loadBoards(dataPath + "boards.json");
         decks = Deck.loadDecksOfCards(dataPath + "decks.json");
         tokens = Token.loadTokens(dataPath + "tokens.json");
         counters = Counter.loadCounters(dataPath + "counters.json");
     }
 
     @Override
-    public Board findBoard(String name) {
-        for (Board c: boards) {
-            if (name.equalsIgnoreCase(c.getNameID())) {
+    public GraphBoard findBoard(String name) {
+        for (GraphBoard c: graphBoards) {
+            if (name.equalsIgnoreCase(c.getComponentName())) {
                 return c;
             }
         }
@@ -35,18 +35,8 @@ public class PandemicData implements GameData {
     @Override
     public Counter findCounter(String name) {
         for (Counter c: counters) {
-            if (name.equalsIgnoreCase(c.getID())) {
+            if (name.equalsIgnoreCase(c.getComponentName())) {
                 return c;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Token findToken(String name) {
-        for (Token t: tokens) {
-            if (name.equalsIgnoreCase(t.getNameID())) {
-                return t;
             }
         }
         return null;
@@ -55,7 +45,7 @@ public class PandemicData implements GameData {
     @Override
     public Deck<Card> findDeck(String name) {
         for (Deck<Card> d: decks) {
-            if (name.equalsIgnoreCase(d.getID())) {
+            if (name.equalsIgnoreCase(d.getComponentName())) {
                 return d;
             }
         }
@@ -66,8 +56,8 @@ public class PandemicData implements GameData {
     {
         PandemicData pd = new PandemicData();
 
-        pd.boards = new ArrayList<>();
-        for(Board b : boards) pd.boards.add(b.copy());
+        pd.graphBoards = new ArrayList<>();
+        for(GraphBoard b : graphBoards) pd.graphBoards.add(b.copy());
 
         pd.decks = new ArrayList<>();
         for(Deck<Card> d : decks) pd.decks.add(d.copy());

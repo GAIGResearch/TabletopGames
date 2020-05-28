@@ -1,33 +1,27 @@
 package games.uno.cards;
 
-import core.AbstractGameState;
-import core.components.Card;
 import games.uno.UnoGameState;
 
 
 public class UnoSkipCard extends UnoCard {
 
-    public UnoSkipCard(UnoCardColor color, UnoCardType type){
-        super(color, type);
+    public UnoSkipCard(UnoCardColor color) {
+        super(color, UnoCardType.Skip, -1);
     }
 
     @Override
-    public boolean isPlayable(UnoGameState gameState) {
-        return false;
+    public UnoCard copy() {
+        return new UnoSkipCard(color);
     }
 
-    public static class SkipCardEffect extends CardEffect{
-        public SkipCardEffect(){};
+    // It is playable if the color is the same of the currentCard color or the currentCard is a Skip one
+    @Override
+    public boolean isPlayable(UnoGameState gameState) {
+        return this.color == gameState.getCurrentColor() || gameState.getCurrentCard() instanceof UnoSkipCard;
+    }
 
-        @Override
-        public boolean execute(AbstractGameState gs) {
-            gs.getTurnOrder().endPlayerTurn(gs);
-            return true;
-        }
-
-        @Override
-        public Card getCard() {
-            return null;
-        }
+    @Override
+    public String toString() {
+        return color.toString() + "Skip";
     }
 }

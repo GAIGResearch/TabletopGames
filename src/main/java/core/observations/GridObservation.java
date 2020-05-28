@@ -1,6 +1,8 @@
 package core.observations;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 
 public class GridObservation<T> implements IObservation, IPrintable {
 
@@ -24,7 +26,7 @@ public class GridObservation<T> implements IObservation, IPrintable {
     }
 
     @Override
-    public IObservation next(IAction action) {
+    public IObservation next(AbstractAction action) {
         return null;
     }
 }

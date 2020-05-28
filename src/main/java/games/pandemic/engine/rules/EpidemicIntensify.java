@@ -28,9 +28,8 @@ public class EpidemicIntensify extends RuleNode {
         int nDiscards = infectionDiscard.getSize();
         // 3. shuffle infection discard deck, add back on top of infection deck
         infectionDiscard.shuffle(rnd);
-        for (int i = 0; i < nDiscards; i++) {
-            new DrawCard(infectionDiscard, infectionDeck).execute(gs);
-        }
+        infectionDeck.add(infectionDiscard);
+        infectionDiscard.clear();
         return true;
     }
 }

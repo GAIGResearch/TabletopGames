@@ -1,7 +1,7 @@
 package games.loveletter;
 
-import core.turnorder.AlternatingTurnOrder;
-import core.turnorder.TurnOrder;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 
 
 public class LoveLetterTurnOrder extends AlternatingTurnOrder {

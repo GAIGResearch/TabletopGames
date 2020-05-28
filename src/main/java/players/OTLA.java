@@ -1,10 +1,10 @@
 package players;
 
-import core.ForwardModel;
-import core.actions.IAction;
+import core.AbstractForwardModel;
+import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import players.heuristics.PandemicHeuristic;
@@ -21,34 +21,30 @@ public class OTLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
     private StateHeuristic stateHeuristic;
-    private ForwardModel fm;
     public double epsilon = 1e-6;
     public boolean rollN = true;
     public final static int time_to_act = 100; // in milliseconds
 
-    public OTLA(ForwardModel fm){
-        this.fm = fm;
+    public OTLA(){
         this.random = new Random();
     }
 
-    public OTLA(ForwardModel fm, Random random)
+    public OTLA(Random random)
     {
-        this.fm = fm;
         this.random = random;
     }
 
     @Override
-    public int getAction(IObservation observation, List<IAction> actions) {
+    public int getAction(IObservation observation, List<AbstractAction> actions) {
         // todo execute n actions and return the first action only
         PandemicGameState gs = (PandemicGameState)observation;
 
         stateHeuristic = new PandemicHeuristic(gs);
 
         double maxQ = Double.NEGATIVE_INFINITY;
-        IAction bestAction = null;
+        AbstractAction bestAction = null;
 
-//        GameState gsCopy = gameState.copy(); // todo
-        PandemicGameState gsCopy = gs;
+        IObservation gsCopy = gs.copy();
 
 
         ElapsedCpuTimer ect = new ElapsedCpuTimer();
@@ -70,10 +66,10 @@ public class OTLA extends AbstractPlayer {
                 // shuffle actions to avoid selecting the same actions twice
                 Collections.shuffle(actions);
                 int i = 0;
-                while (gs.getTurnOrder().getCurrentPlayer(gs) == this.getPlayerID() || gsCopy.getGameStatus() !=  Utils.GameResult.GAME_ONGOING) {
+                while (gs.getTurnOrder().getCurrentPlayer(gs) == this.getPlayerID() ){ // || gsCopy.getGameStatus() !=  Utils.GameResult.GAME_ONGOING) {
 //                    System.out.println("Active player = " + gameState.getActingPlayer() + " and acting player = "+ gameState.getActingPlayer());
                     // todo numbers are too large here
-                    fm.next(gsCopy, actions.get(i%actions.size()));
+                    gsCopy.next(actions.get(i%actions.size()));
                     System.out.println(i);
                     i++;
                 }
@@ -84,7 +80,7 @@ public class OTLA extends AbstractPlayer {
                 avgTimeTaken  = acumTimeTaken/numIters;
                 remaining = ect.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
-                double valState = stateHeuristic.evaluateState(gsCopy);
+                double valState = stateHeuristic.evaluateState((PandemicGameState)gsCopy);
                 double Q = noise(valState, this.epsilon, this.random.nextDouble());
 
                 if (Q > maxQ) {
@@ -101,10 +97,10 @@ public class OTLA extends AbstractPlayer {
         return actions.indexOf(bestAction);
     }
 
-    public void rollRnd(AbstractGameState gs, IAction[] actions){
-        for (IAction a: actions){
-            fm.next(gs, a);
-        }
+    public void rollRnd(AbstractGameState gs, AbstractAction[] actions){
+//        for (AbstractAction a: actions){
+//            gs.next(a);
+//        }
     }
 
 

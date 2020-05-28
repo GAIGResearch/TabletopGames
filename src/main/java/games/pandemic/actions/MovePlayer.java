@@ -1,20 +1,20 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Card;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicConstants;
 
 import java.util.Objects;
 
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playersHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playersHash;
 
 
-public class MovePlayer implements IAction {
+public class MovePlayer extends AbstractAction {
     int playerIdx;
     String destination;
 
@@ -32,13 +32,10 @@ public class MovePlayer implements IAction {
         return true;
     }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {
-        BoardNode bn = gs.world.getNode(nameHash, city);
+        BoardNode bn = gs.getWorld().getNodeByStringProperty(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().add(playerIdx);
 
@@ -47,7 +44,7 @@ public class MovePlayer implements IAction {
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
-        BoardNode bn = gs.world.getNode(nameHash, city);
+        BoardNode bn = gs.getWorld().getNodeByStringProperty(nameHash, city);
         PropertyIntArrayList prop = (PropertyIntArrayList) bn.getProperty(playersHash);
         prop.getValues().remove(Integer.valueOf(playerIdx));
 

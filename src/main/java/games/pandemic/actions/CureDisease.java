@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
@@ -11,10 +11,10 @@ import utilities.Hash;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
-public class CureDisease implements IAction {
+public class CureDisease extends AbstractAction {
     private String color;
     private ArrayList<Card> cards;
 
@@ -43,10 +43,7 @@ public class CureDisease implements IAction {
         return false;
     }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     @Override
     public boolean equals(Object other)

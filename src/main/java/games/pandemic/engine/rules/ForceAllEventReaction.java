@@ -1,9 +1,9 @@
 package games.pandemic.engine.rules;
 
 import core.AbstractGameState;
-import core.turnorder.ReactiveTurnOrder;
+import core.turnorders.ReactiveTurnOrder;
 
-import static core.gamephase.DefaultGamePhase.PlayerReaction;
+import static core.AbstractGameState.DefaultGamePhase.PlayerReaction;
 
 public class ForceAllEventReaction extends RuleNode {
 

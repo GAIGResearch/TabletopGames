@@ -1,13 +1,13 @@
 package games.carcassonne;
 
-import core.ForwardModel;
-import core.actions.IAction;
+import core.AbstractForwardModel;
+import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
-import core.GameParameters;
-import core.observations.IObservation;
-import core.turnorder.AlternatingTurnOrder;
+import core.AbstractGameParameters;
+import core.interfaces.IObservation;
+import core.turnorders.AlternatingTurnOrder;
 
 import java.awt.*;
 import java.util.*;
@@ -23,8 +23,8 @@ public class CarcassonneGameState extends AbstractGameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    public CarcassonneGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
+    public CarcassonneGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers) {
+        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 
     public void setComponents() {
@@ -38,12 +38,12 @@ public class CarcassonneGameState extends AbstractGameState {
         //drawPile.add(new CarcassonneTile());
     }
 
-    private List<IAction> tileActions(){
+    private List<AbstractAction> tileActions(){
 
         return new ArrayList<>();
     }
 
-    private List<IAction> meepleActions(){
+    private List<AbstractAction> meepleActions(){
 
         return new ArrayList<>();
     }
@@ -64,9 +64,9 @@ public class CarcassonneGameState extends AbstractGameState {
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
+    public List<AbstractAction> computeAvailableActions() {
 
-        List<IAction> actions;
+        List<AbstractAction> actions;
         switch (gamePhase){
             case PlaceTile:
                 actions = tileActions();
@@ -81,6 +81,11 @@ public class CarcassonneGameState extends AbstractGameState {
 
         this.numAvailableActions = actions.size();
         return actions;
+    }
+
+    @Override
+    public void addAllComponents() {
+
     }
 
     private class CarcassonneBoard{
@@ -144,6 +149,7 @@ public class CarcassonneGameState extends AbstractGameState {
         private boolean fixedRotation = false;
 
         private CarcassonneTile(CarcassonneType[][] type){
+            super();
             this.type = type;
         }
 

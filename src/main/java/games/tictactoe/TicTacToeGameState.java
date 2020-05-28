@@ -1,33 +1,31 @@
 package games.tictactoe;
 
-import core.ForwardModel;
-import core.actions.IAction;
+import core.AbstractForwardModel;
+import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.Grid;
+import core.components.GridBoard;
 import core.AbstractGameState;
-import core.gamestates.GridGameState;
+import core.interfaces.IGridGameState;
 import core.observations.GridObservation;
-import core.observations.IObservation;
-import core.turnorder.AlternatingTurnOrder;
+import core.interfaces.IObservation;
+import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
 
 import java.util.*;
 import java.util.List;
 
 
-public class TicTacToeGameState extends AbstractGameState implements GridGameState<Character> {
+public class TicTacToeGameState extends AbstractGameState implements IGridGameState<Character> {
 
-    private Grid<Character> grid = new Grid<>(3, 3, ' ');
+    GridBoard<Character> gridBoard;
 
-    //HashMap<AbstractPlayer, Character> playerSymbols = new HashMap<>();
-
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters, ForwardModel model, int nPlayers){
-        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
+    public TicTacToeGameState(TicTacToeGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
+        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
     }
 
     @Override
     public IObservation getObservation(int player) {
-        return new GridObservation<>(grid.getGridValues());
+        return new GridObservation<>(gridBoard.getGridValues());
     }
 
     @Override
@@ -37,29 +35,33 @@ public class TicTacToeGameState extends AbstractGameState implements GridGameSta
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
-        ArrayList<IAction> actions = new ArrayList<>();
+    public List<AbstractAction> computeAvailableActions() {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = turnOrder.getCurrentPlayer(this);
 
-        for (int x = 0; x < grid.getWidth(); x++){
-            for (int y = 0; y < grid.getHeight(); y++) {
-                if (grid.getElement(x, y) == ' ')
-                    actions.add(new SetGridValueAction<>(grid, x, y, player == 0 ? 'x' : 'o'));
+        for (int x = 0; x < gridBoard.getWidth(); x++){
+            for (int y = 0; y < gridBoard.getHeight(); y++) {
+                if (gridBoard.getElement(x, y) == ' ')
+                    actions.add(new SetGridValueAction(gridBoard.getComponentID(), x, y, player == 0 ? 'x' : 'o'));
             }
         }
         return actions;
     }
 
     @Override
-    public void setComponents() {
-
+    public void addAllComponents() {
+        allComponents.putComponent(gridBoard);
     }
 
     @Override
-    public Grid<Character> getGrid() {
-        return grid;
+    public GridBoard<Character> getGridBoard() {
+        return gridBoard;
     }
 
+    /**
+     * Inform the game this player has won.
+     * @param winnerSymbol - which player won.
+     */
     public void registerWinner(char winnerSymbol){
         gameStatus = Utils.GameResult.GAME_END;
         if (winnerSymbol == 'o'){

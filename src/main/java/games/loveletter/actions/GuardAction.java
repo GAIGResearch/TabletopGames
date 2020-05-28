@@ -1,46 +1,42 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
-import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
+import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
-public class GuardAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+import java.util.Objects;
 
-    private final Deck<LoveLetterCard> opponentDeck;
+/**
+ * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
+ * is removed from the game.
+ */
+public class GuardAction extends DrawCard implements IPrintable {
+
     private final int opponentID;
     private final LoveLetterCard.CardType cardType;
 
-    public GuardAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
-                        Deck<LoveLetterCard> opponentDeck, int opponentID, LoveLetterCard.CardType cardtype){
-        super(card, playerHand, discardPile);
-        this.opponentDeck = opponentDeck;
+    public GuardAction(int deckFrom, int deckTo, int fromIndex, int opponentID, LoveLetterCard.CardType cardtype) {
+        super(deckFrom, deckTo, fromIndex);
         this.opponentID = opponentID;
         this.cardType = cardtype;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-        if (!((LoveLetterGameState)gs).getProtection(opponentID)){
+        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+        Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+
+        // guess the opponent's card and remove the opponent from play if the guess was correct
+        if (llgs.isNotProtected(opponentID)){
             LoveLetterCard card = opponentDeck.peek();
-            if (card.cardType == this.cardType)
-                ((LoveLetterGameState) gs).killPlayer(opponentID);
+            if (card.cardType == this.cardType) {
+                llgs.killPlayer(opponentID);
+            }
         }
-
-        return false;
+        return super.execute(gs);
     }
-
-    @Override
-    public Card getCard() {
-        return null;
-    }
-
 
     @Override
     public String toString(){
@@ -49,6 +45,21 @@ public class GuardAction extends PlayCard<LoveLetterCard> implements IAction, IP
 
     @Override
     public void printToConsole() {
-        System.out.println();
+        System.out.println(this.toString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        GuardAction that = (GuardAction) o;
+        return opponentID == that.opponentID &&
+                cardType == that.cardType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), opponentID, cardType);
     }
 }

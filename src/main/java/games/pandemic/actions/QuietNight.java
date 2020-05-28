@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
@@ -8,10 +8,10 @@ import games.pandemic.PandemicGameState;
 
 import java.util.Objects;
 
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
-public class QuietNight implements IAction {
+public class QuietNight extends AbstractAction {
     Card card;
     public QuietNight(Card c) {
         this.card = c;
@@ -25,10 +25,7 @@ public class QuietNight implements IAction {
         return true;
    }
 
-    @Override
-    public Card getCard() {
-        return null;
-    }
+
 
     @Override
     public boolean equals(Object other)

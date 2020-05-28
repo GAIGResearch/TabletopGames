@@ -1,19 +1,20 @@
 package core.actions;
 
 import core.AbstractGameState;
-import core.components.Card;
-import core.observations.IPrintable;
-import core.components.Grid;
+import core.interfaces.IPrintable;
+import core.components.GridBoard;
 
-public class SetGridValueAction<T> implements IAction, IPrintable {
+import java.util.Objects;
 
-    private final Grid<T> grid;
+public class SetGridValueAction<T> extends AbstractAction implements IPrintable {
+
+    private final int gridBoard;
     private final int x;
     private final int y;
     private final T value;
 
-    public SetGridValueAction (Grid<T> grid, int x, int y, T value){
-        this.grid = grid;
+    public SetGridValueAction (int gridBoard, int x, int y, T value){
+        this.gridBoard = gridBoard;
         this.x = x;
         this.y = y;
         this.value = value;
@@ -26,16 +27,27 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        return grid.setElement(x, y, value);
+        return ((GridBoard<T>)gs.getComponentById(gridBoard)).setElement(x, y, value);
     }
 
     @Override
-    public Card getCard() {
-        return null;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SetGridValueAction<?> that = (SetGridValueAction<?>) o;
+        return gridBoard == that.gridBoard &&
+                x == that.x &&
+                y == that.y &&
+                Objects.equals(value, that.value);
     }
 
-    public Grid<T> getGrid() {
-        return grid;
+    @Override
+    public int hashCode() {
+        return Objects.hash(gridBoard, x, y, value);
+    }
+
+    public int getGridBoard() {
+        return gridBoard;
     }
 
     public int getX() {
@@ -53,7 +65,7 @@ public class SetGridValueAction<T> implements IAction, IPrintable {
     @Override
     public String toString() {
         return "SetGridValueAction{" +
-                "grid=" + grid.toString() +
+                "gridBoard=" + gridBoard +
                 ", x=" + x +
                 ", y=" + y +
                 ", value=" + value +

@@ -1,38 +1,43 @@
 package games.uno;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.Deck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.uno.cards.UnoCard;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class UnoObservation implements IPrintable, IObservation {
 
-    String[] strings = new String[5];
-    public UnoObservation(UnoCard currentCard, Deck<UnoCard> playerHand, Deck<UnoCard> discardPile, int[] cardsPerPlayer, int cardsInDeck){
-        strings[0] = "Current Card: " + currentCard.toString();
+    String[] strings = new String[6];
 
+    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, Deck<UnoCard> playerHand,
+                          Deck<UnoCard> discardDeck, int playerID, ArrayList<Integer> cardsLeft) {
+        String colorString = "";
+        if (currentColor == UnoCard.UnoCardColor.Red)
+            colorString = "Red";
+        else if (currentColor == UnoCard.UnoCardColor.Green)
+            colorString = "Green";
+        else if (currentColor == UnoCard.UnoCardColor.Blue)
+            colorString = "Blue";
+        else if (currentColor == UnoCard.UnoCardColor.Yellow)
+            colorString = "Yellow";
+
+        strings[0] = "----------------------------------------------------";
+        strings[1] = "Current Card: " + currentCard.toString() + " [" + colorString + "]";
+        strings[2] = "----------------------------------------------------";
+
+        strings[3] = "Player      : " + playerID;
         StringBuilder sb = new StringBuilder();
-        sb.append("Player Hand: ");
+        sb.append("Player Hand : ");
 
-        for (UnoCard card : playerHand.getCards()) {
+        for (UnoCard card : playerHand.getComponents()) {
             sb.append(card.toString());
-            sb.append("\t");
+            sb.append(" ");
         }
-        strings[1] = sb.toString();
-
-        sb = new StringBuilder();
-        sb.append("Discard Pile: ");
-        for (UnoCard card : discardPile.getCards()) {
-            sb.append(card.toString());
-            sb.append("\t");
-        }
-        strings[2] = sb.toString();
-
-        strings[3] = "Cards per player: " + Arrays.toString(cardsPerPlayer);
-        strings[4] = "Remaining cards in draw pile: " + Integer.toString(cardsInDeck);
+        strings[4] = sb.toString();
+        strings[5] = "----------------------------------------------------";
     }
 
     @Override
@@ -48,7 +53,7 @@ public class UnoObservation implements IPrintable, IObservation {
     }
 
     @Override
-    public IObservation next(IAction action) {
+    public IObservation next(AbstractAction action) {
         return null;
     }
 }

@@ -4,25 +4,23 @@ import games.uno.UnoGameState;
 
 public class UnoNumberCard extends UnoCard {
 
-    private final int number;
-
-    public UnoNumberCard(UnoCardColor color, UnoCardType type, int number) {
-        super(color, type);
-        this.number = number;
+     public UnoNumberCard(UnoCardColor color, int number) {
+        super(color, UnoCardType.Number, number);
     }
 
+    @Override
+    public UnoCard copy() {
+        return new UnoNumberCard(color, number);
+    }
+
+    // To be playable, the card number or color must to be the same than the current one
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        if (gameState.currentCard instanceof  UnoNumberCard){
-            if (this.number == ((UnoNumberCard) gameState.currentCard).number)
-                return true;
-        }
-
-        return false;
+        return this.number == gameState.getCurrentCard().number || this.color == gameState.getCurrentColor();
     }
 
     @Override
-    public String toString(){
+    public String toString() {
        return color.toString() + number;
     }
 }

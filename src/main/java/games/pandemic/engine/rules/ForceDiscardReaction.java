@@ -7,7 +7,7 @@ import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
 
 import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class ForceDiscardReaction extends RuleNode {

@@ -1,6 +1,8 @@
 package games.coltexpress.cards.roundcards;
 
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Train;
 
 public class RoundCardSwivelArm extends RoundCard{
 
@@ -15,7 +17,13 @@ public class RoundCardSwivelArm extends RoundCard{
     }
 
     @Override
-    public void endTurnEvent(ColtExpressGameState gameState) {
-        //todo: Swivel Arm - All bandits on the roof of the train are swept to the caboose.
+    public void endRoundCardEvent(ColtExpressGameState gameState) {
+        Train train = gameState.getTrain();
+        Compartment caboose = train.getCompartment(0);
+        for (int i = 0; i < train.getSize(); i++){
+            Compartment compartment = train.getCompartment(i);
+            caboose.playersOnTopOfCompartment.addAll(compartment.playersOnTopOfCompartment);
+            compartment.playersOnTopOfCompartment.clear();
+        }
     }
 }
