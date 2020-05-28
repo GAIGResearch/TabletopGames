@@ -26,12 +26,17 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " shuffles the draw pile.";
+    }
+
+    @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
         return super.execute(gs);
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }

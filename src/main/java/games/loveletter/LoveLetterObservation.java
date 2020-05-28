@@ -1,5 +1,6 @@
 package games.loveletter;
 
+import core.AbstractGameState;
 import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -40,7 +41,7 @@ public class LoveLetterObservation implements IPrintable, IObservation {
     }
 
 
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println("Love Letter Game-State");
         System.out.println("======================");
 

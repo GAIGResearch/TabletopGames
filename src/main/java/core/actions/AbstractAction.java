@@ -2,8 +2,9 @@ package core.actions;
 
 import core.AbstractGameState;
 import core.components.Card;
+import core.interfaces.IPrintable;
 
-public abstract class AbstractAction {
+public abstract class AbstractAction implements IPrintable {
 
     /**
      * Executes this action, applying its effect to the given game state.
@@ -34,5 +35,5 @@ public abstract class AbstractAction {
     public abstract int hashCode();
 
     @Override
-    public abstract String toString();
+    public abstract String getString(AbstractGameState gameState);
 }

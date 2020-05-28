@@ -35,7 +35,13 @@ public class GiveCard extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " gives card " + getCard(gameState).getComponentName()
+                + " for a favor";
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 

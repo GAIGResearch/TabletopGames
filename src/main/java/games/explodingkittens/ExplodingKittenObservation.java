@@ -1,5 +1,6 @@
 package games.explodingkittens;
 
+import core.AbstractGameState;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
@@ -26,7 +27,7 @@ public class ExplodingKittenObservation implements IPrintable, IObservation {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         for (int i = 0; i < playerHandCards.size(); i++){
             if (currentPlayer == i)
                 System.out.print(">>> Player " + i + ":");

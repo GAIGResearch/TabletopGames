@@ -26,7 +26,12 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public String getString(AbstractGameState gameState) {
+        return String.format("Player %d defuses the kitten and places it at index  %d", gameState.getCurrentPlayer(), toIndex);
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }

@@ -40,11 +40,11 @@ public class GuardAction extends DrawCard implements IPrintable {
 
     @Override
     public String toString(){
-        return "Guard - guess if player " + opponentID + " hold card " + cardType.name();
+        return "Guard - guess if player " + opponentID + " holds card " + cardType.name();
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 

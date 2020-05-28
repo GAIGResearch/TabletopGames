@@ -28,6 +28,7 @@ public abstract class UnoCard extends Card {
     public final int number;
 
     public UnoCard(UnoCardColor color, UnoCardType type, int number){
+        super(type.toString());
         this.color = color;
         this.type = type;
         this.number = number;

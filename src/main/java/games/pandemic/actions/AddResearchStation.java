@@ -35,8 +35,6 @@ public class AddResearchStation extends AbstractAction {
         return false;
     }
 
-
-
     @Override
     public boolean equals(Object other)
     {
@@ -63,5 +61,10 @@ public class AddResearchStation extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash(city);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

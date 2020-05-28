@@ -1,5 +1,6 @@
 package core.observations;
 
+import core.AbstractGameState;
 import core.interfaces.IObservation;
 import core.interfaces.IPrintable;
 
@@ -14,7 +15,7 @@ public class VectorObservation<T> implements IObservation, IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(Arrays.toString(values));
     }
 }

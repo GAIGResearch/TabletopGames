@@ -1,5 +1,6 @@
 package games.uno;
 
+import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.uno.cards.UnoCard;
@@ -40,7 +41,7 @@ public class UnoObservation implements IPrintable, IObservation {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         for (String s : strings){
             System.out.println(s);
         }

@@ -41,6 +41,11 @@ public class DrawCardsAction extends AbstractAction implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
     public String toString(){
         return "Draw 3 cards";
     }

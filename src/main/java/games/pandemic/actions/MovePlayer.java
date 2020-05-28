@@ -85,4 +85,9 @@ public class MovePlayer extends AbstractAction {
     public int hashCode() {
         return Objects.hash(playerIdx, destination);
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
 }

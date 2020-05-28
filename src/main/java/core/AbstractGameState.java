@@ -73,6 +73,7 @@ public abstract class AbstractGameState {
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
+    public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
     public final Utils.GameResult getGameStatus() {  return gameStatus; }
     public final AbstractGameParameters getGameParameters() { return this.gameParameters; }
     public final int getNPlayers() { return turnOrder.nPlayers(); }

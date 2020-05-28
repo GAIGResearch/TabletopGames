@@ -19,9 +19,9 @@ public class HumanConsolePlayer extends AbstractPlayer {
             ((IPrintable) observation).printToConsole();
 
         for (int i = 0; i < actions.size(); i++)
-            if (actions.get(i) instanceof IPrintable) {
+            if (actions.get(i) != null) {
                 System.out.print("Action " + i + ": ");
-                ((IPrintable) actions.get(i)).printToConsole();
+                actions.get(i).printToConsole();
             }
             else
                 System.out.println("action i: Action does not implement IPrintableAction");

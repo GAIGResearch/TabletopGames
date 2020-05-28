@@ -42,7 +42,7 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 
