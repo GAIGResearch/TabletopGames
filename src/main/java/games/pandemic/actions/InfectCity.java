@@ -147,4 +147,17 @@ public class InfectCity extends DrawCard {
     public int hashCode() {
         return Objects.hash(super.hashCode(), count, maxCubesPerCity);
     }
+
+    @Override
+    public String toString() {
+        return "InfectCity{" +
+                "count=" + count +
+                ", maxCubesPerCity=" + maxCubesPerCity +
+                '}';
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
 }

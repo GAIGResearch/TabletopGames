@@ -46,6 +46,11 @@ public class SchemeAction extends AbstractAction implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
     public String toString(){
         if (hidden)
             return "PlayCard(hidden): " + card.cardType;

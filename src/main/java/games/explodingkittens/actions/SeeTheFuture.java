@@ -26,12 +26,17 @@ public class SeeTheFuture extends DrawCard implements IsNopeable, IPrintable {
         return "Player wants to see the future // Not Implemented Yet";
     }
 
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
         return super.execute(gs);
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }

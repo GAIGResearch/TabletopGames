@@ -594,7 +594,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
 //    }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println("Colt Express Game-State");
         System.out.println("=======================");
 

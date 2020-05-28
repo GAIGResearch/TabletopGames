@@ -87,7 +87,7 @@ public abstract class AbstractGame {
             List<AbstractAction> actions = Collections.unmodifiableList(gameState.getActions(true));
             IObservation observation = gameState.getObservation(activePlayer);
             if (CoreConstants.VERBOSE && observation instanceof IPrintable) {
-                ((IPrintable) observation).printToConsole();
+                ((IPrintable) observation).printToConsole(gameState);
             }
 
             // Either ask player which action to use or, in case no actions are available, report the updated observation

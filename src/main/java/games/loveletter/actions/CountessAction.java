@@ -1,5 +1,6 @@
 package games.loveletter.actions;
 
+import core.AbstractGameState;
 import core.interfaces.IPrintable;
 
 /**
@@ -18,7 +19,7 @@ public class CountessAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
 }

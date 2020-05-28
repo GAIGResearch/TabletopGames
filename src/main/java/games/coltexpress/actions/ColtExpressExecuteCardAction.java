@@ -30,4 +30,8 @@ public abstract class ColtExpressExecuteCardAction extends AbstractAction {
         return "toString not implemented yet";
     }
 
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
 }

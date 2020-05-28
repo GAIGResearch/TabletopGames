@@ -9,6 +9,8 @@ import core.interfaces.IPrintable;
 import games.uno.UnoGameState;
 import games.uno.cards.UnoCard;
 
+import static core.CoreConstants.VERBOSE;
+
 public class NoCards extends AbstractAction implements IPrintable {
 
     // If the card drawn is playable, then play it
@@ -34,7 +36,9 @@ public class NoCards extends AbstractAction implements IPrintable {
 
         if (card.isPlayable((UnoGameState) gs)) {
             discardDeck.add(card);
-            System.out.println("It can be played. " + card.toString());
+            if (VERBOSE) {
+                System.out.println("It can be played. " + card.toString());
+            }
         }
         else
             playerDeck.add(card);
@@ -43,7 +47,7 @@ public class NoCards extends AbstractAction implements IPrintable {
 
     @Override
     public boolean equals(Object obj) {
-        return false;
+        return obj instanceof NoCards;
     }
 
     @Override
@@ -52,17 +56,12 @@ public class NoCards extends AbstractAction implements IPrintable {
     }
 
     @Override
-    public String toString() {
-        return null;
+    public String getString(AbstractGameState gameState) {
+        return "No playable cards. You must draw a card.";
     }
 
     @Override
-    public Card getCard(AbstractGameState gameState) {
-        return null;
-    }
-
-    @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println("No playable cards. You must draw a card.");
     }
 }

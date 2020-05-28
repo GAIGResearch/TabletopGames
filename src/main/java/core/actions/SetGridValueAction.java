@@ -21,7 +21,7 @@ public class SetGridValueAction<T> extends AbstractAction implements IPrintable 
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println("Set " + value.toString() + " at pos (" + x + ", " + y + ")");
     }
 
@@ -44,6 +44,16 @@ public class SetGridValueAction<T> extends AbstractAction implements IPrintable 
     @Override
     public int hashCode() {
         return Objects.hash(gridBoard, x, y, value);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "SetGridValueAction{" +
+                "gridBoard=" + gameState.getComponentById(gridBoard).getComponentName() +
+                ", x=" + x +
+                ", y=" + y +
+                ", value=" + value +
+                '}';
     }
 
     public int getGridBoard() {

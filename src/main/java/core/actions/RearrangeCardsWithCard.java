@@ -62,4 +62,13 @@ public class RearrangeCardsWithCard extends DrawCard {
                 ", rearrangeDeck=" + rearrangeDeck +
                 '}';
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "RearrangeCardsWithCard{" +
+                "newCardOrder=" + Arrays.toString(newCardOrder) +
+                ", rearrangeDeck=" + gameState.getComponentById(rearrangeDeck).getComponentName() +
+                ", card=" + gameState.getComponentById(cardId).getComponentName() +
+                '}';
+    }
 }

@@ -28,12 +28,17 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " skips its draw";
+    }
+
+    @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
         return super.execute(gs);
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }
