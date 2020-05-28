@@ -226,7 +226,7 @@ public abstract class Component {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(componentID, componentName, ownerId, type, properties);
+    public final int hashCode() {
+        return componentID;
     }
 }
