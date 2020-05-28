@@ -136,11 +136,6 @@ public class BoardNode extends Component {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), neighbours, neighbourSideMapping, maxNeighbours);
-    }
-
-    @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();

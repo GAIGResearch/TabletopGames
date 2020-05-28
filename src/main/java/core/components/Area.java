@@ -65,15 +65,24 @@ public class Area<T extends Component> extends Component {
      */
     public void putComponent(Component component) {
         this.components.put(component.getComponentID(), component);
+        if (component instanceof Deck) {
+            putComponents(((Deck) component).getComponents());
+        }
     }
 
     public void putComponents(List<? extends Component> components) {
         for (Component c: components) {
-            this.components.put(c.getComponentID(), c);
+            putComponent(c);
         }
     }
 
     public void putComponents(Area<T> area) {
-        this.components.putAll(area.components);
+        for (Component c: area.components.values()) {
+            putComponent(c);
+        }
+    }
+
+    public void clear() {
+        this.components.clear();
     }
 }

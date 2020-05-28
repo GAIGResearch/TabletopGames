@@ -1,12 +1,10 @@
 package games.uno.cards;
 
 
-import core.components.Component;
+import core.components.Card;
 import games.uno.UnoGameState;
-import utilities.Utils;
 
-
-public abstract class UnoCard extends Component {
+public abstract class UnoCard extends Card {
 
     public enum UnoCardColor {
         Red,
@@ -27,16 +25,14 @@ public abstract class UnoCard extends Component {
 
     public final UnoCardColor color;
     public final UnoCardType type;
+    public final int number;
 
-    public UnoCard(UnoCardColor color, UnoCardType type){
-        super(Utils.ComponentType.CARD, type.toString());
+    public UnoCard(UnoCardColor color, UnoCardType type, int number){
         this.color = color;
         this.type = type;
-    }
-    @Override
-    public Component copy() {
-        return null;
+        this.number = number;
     }
 
+    public abstract UnoCard copy();
     public abstract boolean isPlayable(UnoGameState gameState);
 }
