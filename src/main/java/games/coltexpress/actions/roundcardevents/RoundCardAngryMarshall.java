@@ -39,6 +39,11 @@ public class RoundCardAngryMarshall extends AbstractAction {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
     public String toString() {
         return "Angry Marshall";
     }

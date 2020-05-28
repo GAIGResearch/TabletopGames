@@ -42,7 +42,12 @@ public class ChooseSeeTheFutureOrder extends RearrangeCardsWithCard implements I
     }
 
     @Override
-    public void printToConsole() {
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
 }

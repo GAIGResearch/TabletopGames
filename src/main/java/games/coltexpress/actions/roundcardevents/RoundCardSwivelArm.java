@@ -31,6 +31,11 @@ public class RoundCardSwivelArm extends AbstractAction {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
     public String toString() {
         return "Swivel Arm";
     }

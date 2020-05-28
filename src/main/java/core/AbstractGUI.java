@@ -54,7 +54,7 @@ public abstract class AbstractGUI extends JFrame {
         List<AbstractAction> actions = gameState.getActions();
         for (int i = 0; i < actions.size(); i++) {
             actionButtons[i].setVisible(true);
-            actionButtons[i].setButtonAction(actions.get(i));
+            actionButtons[i].setButtonAction(actions.get(i), gameState);
         }
     }
 
@@ -140,9 +140,9 @@ public abstract class AbstractGUI extends JFrame {
             });
         }
 
-        public void setButtonAction(AbstractAction action) {
+        public void setButtonAction(AbstractAction action, AbstractGameState gameState) {
             this.action = action;
-            if (action != null) setText(action.toString());
+            if (action != null) setText(action.getString(gameState));
             else setText("");
         }
 
@@ -161,7 +161,7 @@ public abstract class AbstractGUI extends JFrame {
         private void resetActionButtons() {
             for (ActionButton actionButton : actionButtons) {
                 actionButton.setVisible(false);
-                actionButton.setButtonAction(null);
+                actionButton.setButtonAction(null, "");
             }
         }
     }

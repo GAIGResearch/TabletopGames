@@ -59,6 +59,11 @@ public class EndCardPickPocket extends AbstractAction {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
     public String toString() {
         return "Pick Pocket";
     }

@@ -57,7 +57,7 @@ public class PrinceAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
 }

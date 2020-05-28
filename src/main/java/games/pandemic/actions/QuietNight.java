@@ -43,4 +43,9 @@ public class QuietNight extends AbstractAction {
     public int hashCode() {
         return Objects.hash(card);
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
 }

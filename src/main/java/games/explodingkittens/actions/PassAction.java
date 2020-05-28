@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.AbstractGameState;
 import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 
@@ -11,7 +12,12 @@ public class PassAction extends DoNothing implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " passes.";
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }

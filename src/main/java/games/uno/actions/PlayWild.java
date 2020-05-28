@@ -15,7 +15,6 @@ public class PlayWild extends DrawCard implements IPrintable {
         this.color = color;
     }
 
-
     @Override
     public boolean execute(AbstractGameState gameState) {
         super.execute(gameState);
@@ -25,14 +24,19 @@ public class PlayWild extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
-        if (color == UnoCard.UnoCardColor.Red)
-            System.out.println("Wild. Change to color RED");
-        else if (color == UnoCard.UnoCardColor.Green)
-            System.out.println("Wild. Change to color GREEN");
-        else if (color == UnoCard.UnoCardColor.Blue)
-            System.out.println("Wild. Change to color BLUE");
-        else if (color == UnoCard.UnoCardColor.Yellow)
-            System.out.println("Wild. Change to color YELLOW");
+    public void printToConsole(AbstractGameState gameState) {
+        System.out.println("Wild. Change to color " + color);
+    }
+
+    @Override
+    public String toString() {
+        return "PlayWild{" +
+                "color=" + color +
+                '}';
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Wild. Change to color " + color;
     }
 }

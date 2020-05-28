@@ -27,6 +27,11 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return String.format("Player " + gameState.getCurrentPlayer() + " attacks player %d", attackTargetID);
+    }
+
+    @Override
     public String toString(){//overriding the toString() method
         return String.format("Player attacks player %d", attackTargetID);
     }
@@ -37,7 +42,7 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 

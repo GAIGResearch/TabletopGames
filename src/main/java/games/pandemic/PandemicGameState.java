@@ -381,6 +381,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         acts.add(new DoNothing());
 
         Deck<Card> infectionDiscard = (Deck<Card>) getComponent(infectionDiscardHash);
+        Deck<Card> playerDiscardDeck = (Deck<Card>) getComponent(playerDeckDiscardHash);
         int nInfectDiscards = infectionDiscard.getSize();
         Deck<Card> ph = (Deck<Card>) getComponentActingPlayer(playerHandHash);
         int nCards = ph.getSize();
@@ -388,7 +389,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             Card card = ph.getComponents().get(cp);
             if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                 for (int idx = 0; idx < nInfectDiscards; idx++) {
-                    acts.add(new RemoveCardWithCard(infectionDiscard, idx, card));
+                    acts.add(new RemoveCardWithCard(ph.getComponentID(), playerDiscardDeck.getComponentID(), cp, infectionDiscard.getComponentID(), idx));
                 }
                 break;
             }

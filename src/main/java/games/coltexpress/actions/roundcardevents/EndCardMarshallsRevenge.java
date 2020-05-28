@@ -50,6 +50,11 @@ public class EndCardMarshallsRevenge extends AbstractAction {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
     public String toString() {
         return "Marshall's Revenge";
     }

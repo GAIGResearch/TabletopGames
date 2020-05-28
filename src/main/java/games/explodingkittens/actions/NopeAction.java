@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.AbstractGameState;
 import core.actions.DrawCard;
 import core.interfaces.IPrintable;
 
@@ -15,7 +16,12 @@ public class NopeAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " nopes the previous action";
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }

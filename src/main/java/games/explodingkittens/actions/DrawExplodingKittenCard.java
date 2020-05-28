@@ -62,7 +62,12 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
     }
 
     @Override
-    public void printToConsole() {
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " draws a card";
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }
