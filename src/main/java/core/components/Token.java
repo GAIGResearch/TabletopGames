@@ -80,7 +80,7 @@ public class Token extends Component {
      */
     private void loadToken(JSONObject token) {
         this.tokenType = (String) ( (JSONArray) token.get("type")).get(1);
-        this.componentName = (String) ( (JSONArray) token.get("name")).get(1);
+        this.componentName = (String) token.get("id");
         parseComponent(this, token);
     }
 }

@@ -89,7 +89,7 @@ public abstract class AbstractGame {
             // Get actions for the player
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             AbstractGameState observation = gameState._copy(activePlayer);
-            if (observation != null && CoreConstants.VERBOSE) {
+            if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
                 ((IPrintable) observation).printToConsole();
             }
 

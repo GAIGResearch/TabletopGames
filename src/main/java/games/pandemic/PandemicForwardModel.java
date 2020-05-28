@@ -230,6 +230,8 @@ public class PandemicForwardModel extends AbstractForwardModel {
         gameArea.putComponent(PandemicConstants.infectionHash, infectionDeck);
         gameArea.putComponent(PandemicConstants.playerRolesHash, playerRoles);
 
+        firstState.addAllComponents();
+
         // Infection
         infectionDeck.shuffle(rnd);
         int nCards = pp.n_infection_cards_setup;

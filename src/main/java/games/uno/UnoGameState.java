@@ -1,103 +1,105 @@
 package games.uno;
 
-import core.AbstractForwardModel;
-import core.actions.AbstractAction;
-import core.actions.DrawCard;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.AbstractGameParameters;
-import core.turnorders.AlternatingTurnOrder;
+import core.observations.VectorObservation;
 import games.uno.cards.*;
-import core.interfaces.IObservation;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
+
 public class UnoGameState extends AbstractGameState {
-    List<Deck<UnoCard>> playerDecks;
-    Deck<UnoCard> drawPile;
-    Deck<UnoCard> discardPile;
-    UnoCard currentCard;
+    List<Deck<UnoCard>>  playerDecks;
+    Deck<UnoCard>        drawDeck;
+    Deck<UnoCard>        discardDeck;
+    UnoCard              currentCard;
+    UnoCard.UnoCardColor currentColor;
+
+    public UnoGameState(AbstractGameParameters gameParameters, int nPlayers){
+        super(gameParameters, new UnoTurnOrder(nPlayers));
+    }
 
     @Override
     public void addAllComponents() {
-        allComponents.putComponent(drawPile);
-        allComponents.putComponent(discardPile);
+        allComponents.putComponent(drawDeck);
+        allComponents.putComponent(discardDeck);
         allComponents.putComponent(currentCard);
-        allComponents.putComponents(drawPile.getComponents());
-        allComponents.putComponents(discardPile.getComponents());
+        allComponents.putComponents(drawDeck.getComponents());
+        allComponents.putComponents(discardDeck.getComponents());
         allComponents.putComponents(playerDecks);
         for (Deck<UnoCard> d: playerDecks) {
             allComponents.putComponents(d.getComponents());
         }
     }
 
-    public UnoGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+    @Override
+    protected AbstractGameState copy(int playerId) {
+        return null;
     }
 
     @Override
-    public IObservation getObservation(int player) {
-
-        int[] cardsPerPlayer = new int[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++)
-            cardsPerPlayer[i] = playerDecks.get(i).getSize();
-
-        return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
-                cardsPerPlayer, drawPile.getSize());
+    public VectorObservation getVectorObservation() {
+        return null;
     }
 
     @Override
-    public void endGame() {
-        gameStatus = Utils.GameResult.GAME_DRAW;
-        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
+    public double[] getDistanceFeatures(int playerId) {
+        return new double[0];
     }
 
     @Override
-    public List<AbstractAction> computeAvailableActions() {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = turnOrder.getCurrentPlayer(this);
-        Deck<UnoCard> playerDeck = playerDecks.get(player);
-        for (int c = 0; c < playerDeck.getSize(); c++){
-            UnoCard card = playerDeck.getComponents().get(c);
-            if (card.isPlayable(this))
-            {
-                if (card instanceof UnoNumberCard)
-                    actions.add(new PlayCard(playerDeck.getComponentID(), discardPile.getComponentID(), c));
-                if (card instanceof UnoSkipCard)
-                    actions.add(new PlayCard(playerDeck.getComponentID(), discardPile.getComponentID(), c, new UnoSkipCard.SkipCardEffect()));
-                if (card instanceof UnoReverseCard)
-                    actions.add(new PlayCard(playerDeck.getComponentID(), discardPile.getComponentID(), c, new UnoReverseCard.ReverseCardEffect()));
-            }
-        }
-        actions.add(new DrawCard(drawPile.getComponentID(), playerDecks.get(player).getComponentID(), 0));
-        return actions;
+    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+        return null;
     }
 
-
-    /**
-     * Inform the game state this player has won.
-     * @param playerID - ID of player who won.
-     */
-    public void registerWinner(int playerID){
-        gameStatus = Utils.GameResult.GAME_END;
-        for (int i = 0; i < getNPlayers(); i++)
-        {
-            if (i == playerID)
-                playerResults[i] = Utils.GameResult.GAME_WIN;
-            else
-                playerResults[i] = Utils.GameResult.GAME_LOSE;
-        }
+    @Override
+    public double getScore(int playerId) {
+        return 0;
     }
 
-    public Deck<UnoCard> getDiscardPile() {
-        return discardPile;
+    boolean isWildCard(UnoCard card) {
+        return card instanceof UnoWildCard || card instanceof UnoWildDrawFourCard;
     }
 
-    public Deck<UnoCard> getDrawPile() {
-        return drawPile;
+    boolean isNumberCard(UnoCard card) {
+        return card instanceof UnoNumberCard;
+    }
+
+//    @Override
+//    public AbstractGameState getObservation(int playerID) {
+//        Deck<UnoCard> playerHand = playerDecks.get(playerID);
+//        ArrayList<Integer> cardsLeft = new ArrayList<>();
+//        for( int i = 0; i < getNPlayers(); i++) {
+//            int nCards = playerDecks.get(playerID).getComponents().size();
+//            cardsLeft.add(nCards);
+//        }
+//        return this;
+//        return new UnoObservation(currentCard, currentColor, playerHand, discardDeck, playerID, cardsLeft);
+//    }
+
+    public int getCurrentPlayerID() {
+        return turnOrder.getTurnOwner();
+    }
+
+    public void updateCurrentCard(UnoCard card) {
+        currentCard  = card;
+        currentColor = card.color;
+    }
+
+    public void updateCurrentCard(UnoCard card, UnoCard.UnoCardColor color) {
+        currentCard  = card;
+        currentColor = color;
+    }
+
+    public Deck<UnoCard> getDrawDeck() {
+        return drawDeck;
+    }
+
+    public Deck<UnoCard> getDiscardDeck() {
+        return discardDeck;
     }
 
     public List<Deck<UnoCard>> getPlayerDecks() {
@@ -107,4 +109,9 @@ public class UnoGameState extends AbstractGameState {
     public UnoCard getCurrentCard() {
         return currentCard;
     }
+
+    public UnoCard.UnoCardColor getCurrentColor() {
+        return currentColor;
+    }
 }
+
