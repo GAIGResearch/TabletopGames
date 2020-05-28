@@ -6,6 +6,8 @@ import core.components.Deck;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 
+import java.util.Objects;
+
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 
 
@@ -59,5 +61,10 @@ public class AddResearchStationWithCard extends AddResearchStation implements IA
                 "card=" + card.toString() +
                 ", toCity='" + city + '\'' +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), card);
     }
 }

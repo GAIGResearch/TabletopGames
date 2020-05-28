@@ -2,8 +2,9 @@ package core.actions;
 
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.AbstractGameState;
+
+import java.util.Objects;
 
 public class DrawCard implements IAction {
 
@@ -38,6 +39,11 @@ public class DrawCard implements IAction {
     }
 
     @Override
+    public Card getCard() {
+        return null;
+    }
+
+    @Override
     public boolean equals(Object other)
     {
         if (this == other) return true;
@@ -66,8 +72,17 @@ public class DrawCard implements IAction {
         return deckFrom;
     }
 
-    public IDeck<Card> getDeckTo() {
+    public Deck<Card> getDeckTo() {
         return deckTo;
+    }
+
+    public Card getDrawCard() {
+        return deckFrom.getCards().get(index);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deckFrom, deckTo, index);
     }
 }
 

@@ -1,13 +1,13 @@
 package games.explodingkittens.actions;
 
+import core.components.Card;
 import core.components.Deck;
 import core.components.IDeck;
 import core.AbstractGameState;
 import core.observations.IPrintable;
-import games.explodingkittens.ExplodingKittensGameState;
 import core.turnorder.TurnOrder;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.SeeTheFuturePhase;
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture;
 
 public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
     private final Deck<T> drawPile;
@@ -22,8 +22,13 @@ public class SeeTheFutureAction<T> extends PlayCard<T> implements IsNopeable, IP
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        ((ExplodingKittensGameState)gs).setGamePhase(SeeTheFuturePhase);
+        gs.setGamePhase(SeeTheFuture);
         return false;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

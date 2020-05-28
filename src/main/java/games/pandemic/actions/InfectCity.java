@@ -87,6 +87,11 @@ public class InfectCity implements IAction {
         return false;
     }
 
+    @Override
+    public Card getCard() {
+        return null;
+    }
+
     private ArrayList<BoardNode> outbreak(BoardNode n, AbstractGameState gs, int colorIdx, Counter diseaseCubeCounter,
                                           Counter outbreakCounter) {
         PandemicGameState pgs = (PandemicGameState)gs;

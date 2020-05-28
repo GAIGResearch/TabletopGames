@@ -1,6 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.actions.IAction;
+import core.components.Card;
 import core.components.IDeck;
 import core.AbstractGameState;
 
@@ -22,5 +23,10 @@ public class PlayCard<T> implements IAction {
         boolean success = sourceDeck.remove(card);
         targetDeck.add(card);
         return success;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 }
