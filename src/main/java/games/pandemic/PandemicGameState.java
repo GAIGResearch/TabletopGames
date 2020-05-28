@@ -46,8 +46,8 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public void addAllComponents() {
-        for (Map.Entry<Integer, Area> e: areas.entrySet()) {
-            allComponents.putComponents(e.getValue());
+        for (Area a : areas.values()) {
+            allComponents.putComponents(a);
         }
         allComponents.putComponent(tempDeck);
         allComponents.putComponent(world);

@@ -74,7 +74,9 @@ public class Area<T extends Component> extends Component {
     }
 
     public void putComponents(Area<T> area) {
-        this.components.putAll(area.components);
+        for (Component c: area.components.values()) {
+            this.components.put(c.getComponentID(), c);
+        }
     }
 
     public void clear() {
