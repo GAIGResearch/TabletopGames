@@ -43,6 +43,9 @@ public class DrawCard extends AbstractAction {
         Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
         Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
         Card card = from.pick(fromIndex);
+        if (card != null) {
+            cardId = card.getComponentID();
+        }
         return card != null && to.add(card, toIndex);
     }
 
