@@ -2,6 +2,7 @@ package games.uno.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.uno.UnoGameState;
@@ -27,6 +28,11 @@ public class PlayWild<T>  implements IAction, IPrintable {
         discardDeck.add(cardToBePlayed);
         ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed, color);
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

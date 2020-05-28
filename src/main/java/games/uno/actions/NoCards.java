@@ -3,6 +3,7 @@ package games.uno.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.uno.UnoGameState;
@@ -34,6 +35,11 @@ public class NoCards implements IAction, IPrintable {
         else
             playerDeck.add(card);
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

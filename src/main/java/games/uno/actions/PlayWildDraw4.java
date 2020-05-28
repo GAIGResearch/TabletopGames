@@ -2,6 +2,7 @@ package games.uno.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.uno.UnoGameState;
@@ -28,6 +29,11 @@ public class PlayWildDraw4<T> implements IAction, IPrintable {
         ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed, color);
         ((UnoGameState) gameState).drawFour();
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

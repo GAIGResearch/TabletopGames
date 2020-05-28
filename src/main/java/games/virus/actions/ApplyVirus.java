@@ -2,6 +2,7 @@ package games.virus.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.virus.VirusBody;
@@ -51,6 +52,11 @@ public class ApplyVirus implements IAction, IPrintable {
             discardDeck.add(body.removeAnOrganCard(card));
         }
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

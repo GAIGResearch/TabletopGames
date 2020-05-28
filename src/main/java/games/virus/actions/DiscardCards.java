@@ -2,6 +2,7 @@ package games.virus.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.virus.VirusGameState;
@@ -58,6 +59,11 @@ public class DiscardCards implements IAction, IPrintable {
             playerHand.add(newCard);
         }
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override

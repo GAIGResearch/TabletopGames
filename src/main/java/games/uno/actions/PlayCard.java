@@ -3,6 +3,7 @@ package games.uno.actions;
 
 import core.AbstractGameState;
 import core.actions.IAction;
+import core.components.Card;
 import core.components.Deck;
 import core.observations.IPrintable;
 import games.uno.cards.UnoCard;
@@ -37,6 +38,11 @@ public class PlayCard<T> implements IAction, IPrintable {
             ((UnoGameState) gameState).drawTwo();
 
         return true;
+    }
+
+    @Override
+    public Card getCard() {
+        return null;
     }
 
     @Override
