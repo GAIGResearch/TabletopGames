@@ -2,52 +2,109 @@ package games.uno.actions;
 
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
+import core.actions.DrawCard;
 import core.components.Deck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
+import games.uno.UnoTurnOrder;
 import games.uno.cards.UnoCard;
-import games.uno.cards.UnoDrawTwoCard;
-import games.uno.cards.UnoReverseCard;
-import games.uno.cards.UnoSkipCard;
 import games.uno.UnoGameState;
 
-public class PlayCard<T> implements IAction, IPrintable {
+import java.util.List;
 
-    private final Deck<T> discardDeck;
-    private final Deck<T> playerDeck;
-    private final T cardToBePlayed;
+public class PlayCard extends DrawCard implements IPrintable {
 
-    public PlayCard(T card, Deck<T> discardDeck, Deck<T> playerDeck){
-        cardToBePlayed = card;
-        this.discardDeck = discardDeck;
-        this.playerDeck = playerDeck;
+    private String color;
+
+    public PlayCard(int deckFrom, int deckTo, int cardToBePlayed) {
+        super(deckFrom, deckTo, cardToBePlayed);
+    }
+    public PlayCard(int deckFrom, int deckTo, int cardToBePlayed, String color) {
+        super(deckFrom, deckTo, cardToBePlayed);
+        this.color = color;
     }
 
     @Override
     public boolean execute(AbstractGameState gameState) {
-        playerDeck.remove(cardToBePlayed);
-        discardDeck.add(cardToBePlayed);
-        ((UnoGameState) gameState).updateCurrentCard((UnoCard) cardToBePlayed);
+        UnoGameState ugs = (UnoGameState)gameState;
+        super.execute(gameState);
 
-        if (cardToBePlayed instanceof UnoReverseCard)
-            ((UnoGameState) gameState).reverseTurn();
-        else if (cardToBePlayed instanceof UnoSkipCard)
-            ((UnoGameState) gameState).skipTurn();
-        else if (cardToBePlayed instanceof UnoDrawTwoCard)
-            ((UnoGameState) gameState).drawTwo();
+        UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
+        ugs.updateCurrentCard(cardToBePlayed);
+
+        int nextPlayer = gameState.getTurnOrder().nextPlayer(gameState);
+        Deck<UnoCard> drawDeck = ugs.getDrawDeck();
+        Deck<UnoCard> discardDeck = ugs.getDiscardDeck();
+        List<Deck<UnoCard>> playerDecks = ugs.getPlayerDecks();
+
+        switch (cardToBePlayed.type) {
+            case Reverse:
+                ((UnoTurnOrder) gameState.getTurnOrder()).reverse();
+                break;
+            case Skip:
+                ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                break;
+            case Draw:
+                for (int i = 0; i < cardToBePlayed.drawN; i++) {
+                    if (drawDeck.getSize() == 0) {
+                        drawDeck.add(discardDeck);
+                        discardDeck.clear();
+
+                        // Add the current card to the discardDeck
+                        drawDeck.remove(ugs.getCurrentCard());
+                        discardDeck.add(ugs.getCurrentCard());
+
+                        drawDeck.shuffle();
+                    }
+                    playerDecks.get(nextPlayer).add(drawDeck.draw());
+                }
+                ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                break;
+            case Wild:
+                ugs.updateCurrentCard(cardToBePlayed, color);
+
+                for (int i = 0; i < cardToBePlayed.drawN; i ++) {
+                    if (drawDeck.getSize() == 0) {
+                        drawDeck.add(discardDeck);
+                        discardDeck.clear();
+
+                        // Add the current card to the discardDeck
+                        drawDeck.remove(ugs.getCurrentCard());
+                        discardDeck.add(ugs.getCurrentCard());
+
+                        drawDeck.shuffle();
+                    }
+                    playerDecks.get(nextPlayer).add(drawDeck.draw());
+                }
+                if (cardToBePlayed.drawN > 0) {
+                    ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                }
+                break;
+        }
 
         return true;
     }
 
     @Override
-    public Card getCard() {
-        return null;
+    public void printToConsole(AbstractGameState gameState) {
+        System.out.println(getString(gameState));
     }
 
     @Override
-    public void printToConsole() {
-        System.out.println("Play card: " + cardToBePlayed.toString());
+    public String toString() {
+        if (color != null && !color.equals("")) {
+            return "PlayWild{" +
+                    "color=" + color +
+                    '}';
+        }
+        return "Play card";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        if (color != null && !color.equals("")) {
+            return getCard(gameState).toString() + "; Change to color " + color;
+        }
+        return "Play card " + getCard(gameState).toString();
     }
 }
 

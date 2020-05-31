@@ -1,39 +1,23 @@
 package games.explodingkittens.actions;
 
-import core.actions.IAction;
 import core.AbstractGameState;
-import core.components.Card;
-import core.observations.IPrintable;
+import core.actions.DoNothing;
+import core.interfaces.IPrintable;
 
-public class PassAction implements IAction, IsNope, IPrintable {
-
-    private final int playerID;
-    public PassAction(int playerID){
-        this.playerID = playerID;
-    }
-
-    @Override
-    public boolean execute(AbstractGameState gs) {
-        return false;
-    }
-
-    @Override
-    public Card getCard() {
-        return null;
-    }
+public class PassAction extends DoNothing implements IPrintable {
 
     @Override
     public String toString(){//overriding the toString() method
-        return String.format("Player %d passes", playerID);
+        return "Player passes";
     }
 
     @Override
-    public boolean isNope() {
-        return false;
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " passes.";
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 }

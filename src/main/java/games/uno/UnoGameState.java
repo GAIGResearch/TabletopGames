@@ -1,146 +1,53 @@
 package games.uno;
 
-
-import core.AbstractGameState;
-import core.ForwardModel;
-import core.GameParameters;
-import core.actions.IAction;
+import core.AbstractForwardModel;
+import core.actions.AbstractAction;
 import core.components.Deck;
-import core.observations.IObservation;
+import core.AbstractGameState;
+import core.AbstractGameParameters;
+import games.uno.cards.*;
+import core.interfaces.IObservation;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
-import games.uno.actions.PlayWild;
-import games.uno.cards.*;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
 
 public class UnoGameState extends AbstractGameState {
-    public  List<Deck<UnoCard>>  playerDecks;
-    private Deck<UnoCard>        drawDeck;
-    private Deck<UnoCard>        discardDeck;
-    public  UnoCard              currentCard;
-    public  UnoCard.UnoCardColor currentColor;
-    private int                  nPlayers;
+    List<Deck<UnoCard>>  playerDecks;
+    Deck<UnoCard>        drawDeck;
+    Deck<UnoCard>        discardDeck;
+    UnoCard              currentCard;
+    String currentColor;
 
-    private final int initialNumberOfCardsForEachPLayer = 7;
-
-    public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers){
-        super(gameParameters, model, nPlayers, new UnoTurnOrder(nPlayers));
-
-        this.nPlayers = nPlayers;
+    public UnoGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
+        super(gameParameters, model, new UnoTurnOrder(nPlayers));
     }
 
-    private void gameSetUp()
-    {
-        // Create the draw deck with all the cards
-        drawDeck = new Deck<>("DrawDeck");
-        CreateCards();
-
-        // Shuffle the deck
-        drawDeck.shuffle();
-
-
-        // Create the discard deck, at the beginning it is empty
-        discardDeck = new Deck<>("DiscardDeck");
-
-        playerDecks = new ArrayList<>(nPlayers);
-        DrawCardsToPlayers();
-
-        // get current card and set the current card and color
-        currentCard  = drawDeck.draw();
-        currentColor = currentCard.color;
-
-        // The first card cannot be a wild.
-        // In case, add to draw deck and shuffle again
-        while (isWildCard(currentCard))
-        {
-            System.out.println("First card wild");
-            drawDeck.add(currentCard);
-            drawDeck.shuffle();
-            currentCard = drawDeck.draw();
-            currentColor = currentCard.color;
-        }
-
-        // If the first card is Skip, Reverse or DrawTwo, play the card
-        if (!isNumberCard(currentCard)) {
-            System.out.println("First card no number " + currentColor.toString());
-            if (currentCard instanceof UnoReverseCard) {
-                reverseTurn();
-            }
-            else if (currentCard instanceof UnoDrawTwoCard) {
-                int player = getCurrentPLayerID();
-                playerDecks.get(player).add(drawDeck.draw());
-                playerDecks.get(player).add(drawDeck.draw());
-            }
-            turnOrder.endPlayerTurn(this);
-        }
-
-        // add current card to discard deck
-        discardDeck.add(currentCard);
+    @Override
+    public void addAllComponents() {
+        allComponents.putComponents(playerDecks);
+        allComponents.putComponent(drawDeck);
+        allComponents.putComponent(discardDeck);
+        allComponents.putComponent(currentCard);
     }
 
-    private boolean isWildCard(UnoCard card) {
-        return card instanceof UnoWildCard || card instanceof UnoWildDrawFourCard;
+    boolean isWildCard(UnoCard card) {
+        return card.type == Wild;
     }
 
-    private boolean isNumberCard(UnoCard card) {
-        return card instanceof UnoNumberCard;
-    }
-
-    // Create all the cards and include them into the drawPile
-    private void CreateCards() {
-        // Create the number cards
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            // one card 0, two cards of 1, 2, ... 9
-            for (int number = 0; number<10; number++) {
-                drawDeck.add(new UnoNumberCard(color, number));
-                if (number > 0)
-                    drawDeck.add(new UnoNumberCard(color, number));
-            }
-        }
-
-        // Create the DrawTwo, Reverse and Skip cards for each color
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            drawDeck.add(new UnoSkipCard(color));
-            drawDeck.add(new UnoSkipCard(color));
-            drawDeck.add(new UnoReverseCard(color));
-            drawDeck.add(new UnoReverseCard(color));
-            drawDeck.add(new UnoDrawTwoCard(color));
-            drawDeck.add(new UnoDrawTwoCard(color));
-        }
-
-        // Create the wild cards, 4 of each type
-        for (int i = 0; i < 4; i++) {
-            drawDeck.add(new UnoWildCard());
-            drawDeck.add(new UnoWildDrawFourCard());
-        }
-
-    }
-
-    private void DrawCardsToPlayers() {
-        for (int player = 0; player < nPlayers; player++) {
-            String playerDeckName = "Player" + player + "Deck";
-            playerDecks.add(new Deck<>(playerDeckName));
-            for (int card = 0; card < initialNumberOfCardsForEachPLayer; card++) {
-                playerDecks.get(player).add(drawDeck.draw());
-            }
-        }
+    boolean isNumberCard(UnoCard card) {
+        return card.type == UnoCard.UnoCardType.Number;
     }
 
     @Override
     public void endGame() {
         System.out.println("Game Results:");
-        for (int playerID = 0; playerID < nPlayers; playerID++) {
+        for (int playerID = 0; playerID < getNPlayers(); playerID++) {
             if (playerResults[playerID] == Utils.GameResult.GAME_WIN) {
                 System.out.println("The winner is the player : " + playerID);
                 break;
@@ -149,64 +56,43 @@ public class UnoGameState extends AbstractGameState {
     }
 
     @Override
-    public List<IAction> computeAvailableActions() {
-        ArrayList<IAction> actions = new ArrayList<>();
-        int player = getCurrentPLayerID();
+    public List<AbstractAction> computeAvailableActions() {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int player = getCurrentPlayerID();
 
         Deck<UnoCard> playerHand = playerDecks.get(player);
-        for (UnoCard card : playerHand.getCards()) {
+        for (UnoCard card : playerHand.getComponents()) {
+            int cardIdx = playerHand.getComponents().indexOf(card);
             if (card.isPlayable(this)) {
                 if (isWildCard(card)) {
-                    actions.add(new PlayWild<>(card, discardDeck, playerHand, UnoCard.UnoCardColor.Red));
-                    actions.add(new PlayWild<>(card, discardDeck, playerHand, UnoCard.UnoCardColor.Blue));
-                    actions.add(new PlayWild<>(card, discardDeck, playerHand, UnoCard.UnoCardColor.Green));
-                    actions.add(new PlayWild<>(card, discardDeck, playerHand, UnoCard.UnoCardColor.Yellow));
+                    for (String color : ((UnoGameParameters)gameParameters).colors) {
+                        actions.add(new PlayCard(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
+                    }
                 }
                 else {
-                    actions.add(new PlayCard<>(card, discardDeck, playerHand));
+                    actions.add(new PlayCard(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx));
                 }
             }
         }
 
         if (actions.isEmpty())
-            actions.add(new NoCards(drawDeck, discardDeck, playerHand));
+            actions.add(new NoCards());
 
         return actions;
     }
 
     @Override
-    public void setComponents() {
-        gameSetUp();
-    }
-
-    @Override
     public IObservation getObservation(int playerID) {
         Deck<UnoCard> playerHand = playerDecks.get(playerID);
-        ArrayList<Integer> cardsLeft = new  ArrayList<Integer>();
-        for( int i = 0; i < nPlayers; i++) {
-            int nCards = playerDecks.get(playerID).getCards().size();
+        ArrayList<Integer> cardsLeft = new ArrayList<>();
+        for( int i = 0; i < getNPlayers(); i++) {
+            int nCards = playerDecks.get(playerID).getComponents().size();
             cardsLeft.add(nCards);
         }
         return new UnoObservation(currentCard, currentColor, playerHand, discardDeck, playerID, cardsLeft);
     }
 
-    // The game is ended if there is a player without cards
-    public void checkWinCondition() {
-        for (int playerID = 0; playerID < nPlayers; playerID++) {
-            int nCards = playerDecks.get(playerID).getCards().size();
-            if (nCards == 0) {
-                for (int i = 0; i < nPlayers; i++) {
-                    if (i == playerID)
-                        playerResults[i] = Utils.GameResult.GAME_WIN;
-                    else
-                        playerResults[i] = Utils.GameResult.GAME_LOSE;
-                }
-                gameStatus = Utils.GameResult.GAME_END;
-            }
-        }
-    }
-
-    public int getCurrentPLayerID() {
+    public int getCurrentPlayerID() {
         return turnOrder.getTurnOwner();
     }
 
@@ -215,60 +101,29 @@ public class UnoGameState extends AbstractGameState {
         currentColor = card.color;
     }
 
-    public void updateCurrentCard(UnoCard card, UnoCard.UnoCardColor color) {
+    public void updateCurrentCard(UnoCard card, String color) {
         currentCard  = card;
         currentColor = color;
     }
 
-    public void endTurn() {
-        turnOrder.endPlayerTurn(this);
+    public Deck<UnoCard> getDrawDeck() {
+        return drawDeck;
     }
 
-    public void reverseTurn() {
-        ((UnoTurnOrder) turnOrder).reverse();
+    public Deck<UnoCard> getDiscardDeck() {
+        return discardDeck;
     }
 
-    public void skipTurn() {
-        ((UnoTurnOrder) turnOrder).skip();
+    public List<Deck<UnoCard>> getPlayerDecks() {
+        return playerDecks;
     }
 
-    public void drawTwo() {
-        int nextPlayer = turnOrder.nextPlayer(this);
-        for (int i=  0; i < 2; i ++) {
-            if (drawDeck.getSize() == 0)
-                drawDeckEmpty();
-            playerDecks.get(nextPlayer).add(drawDeck.draw());
-        }
-        ((UnoTurnOrder) turnOrder).skip();
+    public UnoCard getCurrentCard() {
+        return currentCard;
     }
 
-    public void drawFour() {
-        int nextPlayer = turnOrder.nextPlayer(this);
-        for (int i = 0; i < 4; i ++) {
-            if (drawDeck.getSize() == 0)
-                drawDeckEmpty();
-            playerDecks.get(nextPlayer).add(drawDeck.draw());
-        }
-
-        ((UnoTurnOrder) turnOrder).skip();
+    public String getCurrentColor() {
+        return currentColor;
     }
-
-    // When draw deck is empty, all the cards of discard deck (less the current one) are inserted in the draw deck
-    // and it is shuffle
-    // TODO:  Check it
-    public void drawDeckEmpty()
-    {
-        while (discardDeck.getSize()>0) {
-            UnoCard card = discardDeck.pick();
-            drawDeck.add(card);
-        }
-
-        // Add the current card to the discardDeck
-        drawDeck.remove(currentCard);
-        discardDeck.add(currentCard);
-
-        drawDeck.shuffle();
-    }
-
 }
 

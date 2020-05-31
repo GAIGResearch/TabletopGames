@@ -1,7 +1,7 @@
 package games.pandemic.gui;
 
 import core.components.*;
-import core.content.*;
+import core.properties.*;
 import core.AbstractGameState;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -18,11 +18,11 @@ import java.util.List;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
 import static games.pandemic.gui.PandemicCardView.drawDeckBack;
-import static utilities.CoreConstants.*;
+import static core.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
     private Image background;
-    private Board board;
+    private GraphBoard graphBoard;
     private int width;
     private int height;
 
@@ -70,10 +70,10 @@ public class PandemicBoardView extends JComponent {
 
     public PandemicBoardView(AbstractGameState gs) {
         gameState = (PandemicGameState) gs;
-        this.board = ((PandemicGameState) gs).getData().findBoard("Cities");
+        this.graphBoard = ((PandemicGameState) gs).getData().findBoard("Cities");
         String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
 
-        this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString)board.getProperty(imgHash)).value);
+        this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);
         // infection rate marker
         Counter infectionRateCounter = (Counter) gameState.getComponent(PandemicConstants.infectionRateHash);
         this.infectionRateCounterImg = ImageIO.GetInstance().getImage(dataPath +
@@ -100,7 +100,7 @@ public class PandemicBoardView extends JComponent {
         playerLocations = new Rectangle[gs.getNPlayers()];
         highlights = new HashMap<>();
 
-        List<BoardNode> bList = board.getBoardNodes();
+        List<BoardNode> bList = graphBoard.getBoardNodes();
         for (BoardNode b : bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
@@ -173,7 +173,7 @@ public class PandemicBoardView extends JComponent {
         drawImage(g, background, 0, 0);
 
         // Draw nodes
-        java.util.List<BoardNode> bList = board.getBoardNodes();
+        java.util.List<BoardNode> bList = graphBoard.getBoardNodes();
         for (BoardNode b: bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));

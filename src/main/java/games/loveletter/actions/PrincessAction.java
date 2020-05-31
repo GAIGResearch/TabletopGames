@@ -1,34 +1,23 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
-import core.components.IDeck;
-import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
+import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.cards.LoveLetterCard;
 
-public class PrincessAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+/**
+ * In case the princess is discarded or played the player is immediately removed from the game.
+ */
+public class PrincessAction extends DrawCard implements IPrintable {
 
-    private final int playerID;
-
-    public PrincessAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
-                          int playerIndex){
-        super(card, playerHand, discardPile);
-        this.playerID = playerIndex;
+    public PrincessAction(int deckFrom, int deckTo, int fromIndex) {
+        super(deckFrom, deckTo, fromIndex);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-        ((LoveLetterGameState)gs).killPlayer(playerID);
-        return false;
-    }
-
-    @Override
-    public Card getCard() {
-        return null;
+        // remove the player from the game
+        ((LoveLetterGameState)gs).killPlayer(gs.getTurnOrder().getCurrentPlayer(gs));
+        return super.execute(gs);
     }
 
     @Override
@@ -37,7 +26,7 @@ public class PrincessAction extends PlayCard<LoveLetterCard> implements IAction,
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
 }

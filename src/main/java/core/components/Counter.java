@@ -9,73 +9,125 @@ import utilities.Utils.ComponentType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-public class Counter extends Component implements ICounter {
-    private int count;      //By default, counters go from min to max, and are initialized at min.
-    private int minimum;
-    private int maximum;
-    private String id;
+public class Counter extends Component {
+    private int value;  // Current value of this counter
+    private int minimum;  // Minimum value (inclusive)
+    private int maximum;  // Maximum value (inclusive)
 
     public Counter() {
-        super.type = ComponentType.COUNTER;
-        this.properties = new HashMap<>();
+        this(0, 0, 0, "");
     }
 
-    @Override
+    public Counter(int value, int minimum, int maximum, String name) {
+        super(ComponentType.COUNTER, name);
+        this.value = value;
+        this.minimum = minimum;
+        this.maximum = maximum;
+    }
+
+    private Counter(int value, int minimum, int maximum, String name, int ID) {
+        super(ComponentType.COUNTER, name, ID);
+        this.value = value;
+        this.minimum = minimum;
+        this.maximum = maximum;
+    }
+
     public Counter copy() {
-        Counter copy = new Counter();
-        copy.minimum = minimum;
-        copy.maximum = maximum;
-        copy.count = count;
+        Counter copy = new Counter(value, minimum, maximum, componentName, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
-    @Override
-    public Boolean isMinimum()  { return this.count == this.minimum; }
-    @Override
-    public Boolean isMaximum()  { return this.count == this.maximum; }
-    @Override
-    public int getValue() { return this.count;                 }
-
-    @Override
+    /**
+     * Increment the value of this counter by the specified value.
+     * @param value - how much to add to this counter.
+     */
     public void increment(int value) {
-        this.count += value;
-        if (this.count > this.maximum) {
-            this.count = this.maximum;
+        this.value += value;
+        if (this.value > this.maximum) {
+            this.value = this.maximum;
         }
     }
 
-    @Override
+    /**
+     * Decrement the value of this counter.
+     * @param value - how much to decrease this counter by.
+     */
     public void decrement(int value) {
-        this.count -= value;
-        if (this.count < this.minimum) {
-            this.count = this.minimum;
+        this.value -= value;
+        if (this.value < this.minimum) {
+            this.value = this.minimum;
         }
     }
 
-    @Override
+    /**
+     * Checks if this counter is at its minimum value.
+     * @return true if minimum value, false otherwise.
+     */
+    public Boolean isMinimum()  {
+        return this.value == this.minimum;
+    }
+
+    /**
+     * Checks if this counter is at its maximum value.
+     * @return true if maximum value, false otherwise.
+     */
+    public Boolean isMaximum()  {
+        return this.value == this.maximum;
+    }
+
+    /**
+     * @return minimum value of this counter.
+     */
+    public int getMinimum() {
+        return minimum;
+    }
+
+    /**
+     * @return maximum value of this counter.
+     */
+    public int getMaximum() {
+        return maximum;
+    }
+
+    /**
+     * @return the value of this counter.
+     */
+    public int getValue() {
+        return this.value;
+    }
+
+    /**
+     * Sets the maximum value for this counter.
+     * @param maximum - new maximum value.
+     */
+    public void setMaximum(int maximum) {
+        this.maximum = maximum;
+    }
+
+    /**
+     * Sets the maximum value for this counter.
+     * @param minimum - new minimum value.
+     */
+    public void setMinimum(int minimum) {
+        this.minimum = minimum;
+    }
+
+    /**
+     * Sets the value of this counter.
+     * @param i - new value for the counter.
+     */
     public void setValue(int i) {
-        this.count = i;
+        this.value = i;
     }
 
-
-    public void loadCounter(JSONObject counter) {
-
-        this.minimum = ((Long) ( (JSONArray) counter.get("min")).get(1)).intValue();
-        this.maximum = ((Long) ( (JSONArray) counter.get("max")).get(1)).intValue();
-        this.id = (String) counter.get("id");
-
-        if(counter.get("count") == null)
-            this.count = this.minimum;
-        else
-            this.count = ((Long) ( (JSONArray) counter.get("count")).get(1)).intValue();
-
-        parseComponent(this, counter);
-    }
-
+    /**
+     * Loads all counter from a JSON file.
+     * @param filename - path to file.
+     * @return - List of Counter objects.
+     */
     public static List<Counter> loadCounters(String filename)
     {
         JSONParser jsonParser = new JSONParser();
@@ -98,24 +150,21 @@ public class Counter extends Component implements ICounter {
         return counters;
     }
 
-    @Override
-    public String getID() {
-        return id;
-    }
+    /**
+     * Creates a new Counter object from a JSON object.
+     * @param counter - JSON to parse into a Counter object.
+     */
+    public void loadCounter(JSONObject counter) {
+        this.minimum = ((Long) ( (JSONArray) counter.get("min")).get(1)).intValue();
+        this.maximum = ((Long) ( (JSONArray) counter.get("max")).get(1)).intValue();
+        this.componentName = (String) counter.get("id");
 
-    public int getMinimum() {
-        return minimum;
-    }
+        // By default, counters go from min to max, and are initialized at min.
+        if (counter.get("count") == null)
+            this.value = this.minimum;
+        else
+            this.value = ((Long) ( (JSONArray) counter.get("count")).get(1)).intValue();
 
-    public int getMaximum() {
-        return maximum;
-    }
-
-    public void setMaximum(int maximum) {
-        this.maximum = maximum;
-    }
-
-    public void setMinimum(int minimum) {
-        this.minimum = minimum;
+        parseComponent(this, counter);
     }
 }

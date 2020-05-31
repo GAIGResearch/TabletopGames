@@ -1,32 +1,32 @@
 package players;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 public class ActionController {
 
-    private Queue<IAction> actionsQueue;
-    private IAction lastActionPlayed;
+    private Queue<AbstractAction> actionsQueue;
+    private AbstractAction lastActionPlayed;
 
     public ActionController()
     {
         actionsQueue = new ArrayDeque<>();
     }
 
-    public void addAction(IAction candidate) {
+    public void addAction(AbstractAction candidate) {
         if (candidate != null) {
             actionsQueue.add(candidate);
         }
     }
 
-    public IAction getAction() {
+    public AbstractAction getAction() {
         lastActionPlayed = actionsQueue.poll();
         return lastActionPlayed;
     }
 
-    private ActionController(Queue<IAction> otherQueue) {
+    private ActionController(Queue<AbstractAction> otherQueue) {
         actionsQueue = new ArrayDeque<>(otherQueue);
     }
 
@@ -38,11 +38,11 @@ public class ActionController {
         actionsQueue.clear();
     }
 
-    public IAction getLastActionPlayed() {
+    public AbstractAction getLastActionPlayed() {
         return lastActionPlayed;
     }
 
-    public void setLastActionPlayed(IAction a) {
+    public void setLastActionPlayed(AbstractAction a) {
         lastActionPlayed = a;
     }
 }

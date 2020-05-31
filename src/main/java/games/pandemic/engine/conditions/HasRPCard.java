@@ -3,11 +3,11 @@ package games.pandemic.engine.conditions;
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicGameState;
 
-import static utilities.CoreConstants.nameHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.nameHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class HasRPCard extends ConditionNode {
@@ -19,7 +19,7 @@ public class HasRPCard extends ConditionNode {
             Deck<Card> ph = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, i);
             int nCards = ph.getSize();
             for (int cp = 0; cp < nCards; cp++) {
-                Card card = ph.getCards().get(cp);
+                Card card = ph.getComponents().get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     return true;
                 }

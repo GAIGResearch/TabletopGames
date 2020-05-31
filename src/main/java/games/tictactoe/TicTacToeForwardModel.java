@@ -1,63 +1,72 @@
 package games.tictactoe;
 
-import core.actions.IAction;
-import core.components.Grid;
+import core.actions.AbstractAction;
+import core.components.GridBoard;
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
+import utilities.Utils;
 
 
-public class TicTacToeForwardModel extends ForwardModel {
+public class TicTacToeForwardModel extends AbstractForwardModel {
 
     @Override
     public void setup(AbstractGameState firstState) {
-
+        TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
+        ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(tttgp.gridWidth, tttgp.gridHeight, Character.class, ' ');
     }
 
     @Override
-    public void next(AbstractGameState currentState, IAction action) {
+    public void next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
-        if (currentState.getTurnOrder().getRoundCounter() == 9)
-            currentState.endGame();
+        TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
+        if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridWidth * tttgp.gridHeight)) {
+            currentState.setGameStatus(Utils.GameResult.GAME_END);
+        }
 
-        checkWinCondition((TicTacToeGameState) currentState);
+        checkGameEnd((TicTacToeGameState) currentState);
         currentState.getTurnOrder().endPlayerTurn(currentState);
     }
 
-    private void checkWinCondition(TicTacToeGameState gameState){
-        Grid<Character> grid = gameState.getGrid();
+    /**
+     * Checks if the game ended.
+     * // TODO: very hard-coded, should work for other value for widths/heights of grid.
+     * @param gameState - game state to check game end.
+     */
+    private void checkGameEnd(TicTacToeGameState gameState){
+        GridBoard<Character> gridBoard = gameState.getGridBoard();
 
         //check rows
-        for (int x = 0; x < grid.getWidth(); x++){
-            if (grid.getElement(x, 0).equals(grid.getElement(x, 1)) &&
-                    grid.getElement(x, 0).equals(grid.getElement(x, 2)) &&
-                    !grid.getElement(x, 0).equals(' ')){
-                gameState.registerWinner(grid.getElement(x, 0));
+        for (int x = 0; x < gridBoard.getWidth(); x++){
+            if (gridBoard.getElement(x, 0).equals(gridBoard.getElement(x, 1)) &&
+                    gridBoard.getElement(x, 0).equals(gridBoard.getElement(x, 2)) &&
+                    !gridBoard.getElement(x, 0).equals(' ')){
+                gameState.registerWinner(gridBoard.getElement(x, 0));
                 return;
             }
         }
 
         // check columns
-        for (int y = 0; y < grid.getHeight(); y++){
-            if (grid.getElement(0, y).equals(grid.getElement(1, y)) &&
-                    grid.getElement(0, y).equals(grid.getElement(2, y)) &&
-                    !grid.getElement(0, y).equals(' ')){
-                gameState.registerWinner(grid.getElement(0, y));
+        for (int y = 0; y < gridBoard.getHeight(); y++){
+            if (gridBoard.getElement(0, y).equals(gridBoard.getElement(1, y)) &&
+                    gridBoard.getElement(0, y).equals(gridBoard.getElement(2, y)) &&
+                    !gridBoard.getElement(0, y).equals(' ')){
+                gameState.registerWinner(gridBoard.getElement(0, y));
                 return;
             }
         }
 
         //check diagonals
-        if (grid.getElement(0, 0).equals(grid.getElement(1, 1)) &&
-                grid.getElement(0, 0).equals(grid.getElement(2, 2)) &&
-                !grid.getElement(1, 1).equals(' ')){
-            gameState.registerWinner(grid.getElement(1, 1));
+        if (gridBoard.getElement(0, 0).equals(gridBoard.getElement(1, 1)) &&
+                gridBoard.getElement(0, 0).equals(gridBoard.getElement(2, 2)) &&
+                !gridBoard.getElement(1, 1).equals(' ')){
+            gameState.registerWinner(gridBoard.getElement(1, 1));
             return;
         }
 
-        if (grid.getElement(0, 2).equals(grid.getElement(1, 1)) &&
-                grid.getElement(0, 2).equals(grid.getElement(2, 0)) &&
-                !grid.getElement(0, 2).equals(' ')){
-            gameState.registerWinner(grid.getElement(1, 1));
+        if (gridBoard.getElement(0, 2).equals(gridBoard.getElement(1, 1)) &&
+                gridBoard.getElement(0, 2).equals(gridBoard.getElement(2, 0)) &&
+                !gridBoard.getElement(0, 2).equals(' ')){
+            gameState.registerWinner(gridBoard.getElement(1, 1));
         }
     }
 }

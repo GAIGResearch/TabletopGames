@@ -1,49 +1,46 @@
 package games.virus.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
-import core.components.Deck;
-import core.observations.IPrintable;
-import games.virus.VirusBody;
-import games.virus.VirusGameState;
+import core.interfaces.IPrintable;
 import games.virus.cards.VirusCard;
 
+import java.util.Objects;
 
-public class AddOrgan implements IAction, IPrintable {
-    private VirusCard       card;
-    private VirusBody       body;
-    private Deck<VirusCard> playerHand;
-    private Deck<VirusCard> drawDeck;
-    private int             playerId;
 
-    public AddOrgan(VirusCard card, VirusBody body, Deck<VirusCard> playerHand, int playerId,  Deck<VirusCard> drawDeck) {
-        this.card       = card;
-        this.body       = body;
-        this.playerHand = playerHand;
-        this.drawDeck   = drawDeck;
-        this.playerId   = playerId;
+public class AddOrgan extends PlayVirusCard implements IPrintable {
+
+    public AddOrgan(int deckFrom, int deckTo, int fromIndex, int bodyId) {
+        super(deckFrom, deckTo, fromIndex, bodyId);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        playerHand.remove(card);
-        body.addOrgan(card);
-        if (drawDeck.getSize() == 0)
-            ((VirusGameState) gs).discardToDraw();
-
-        VirusCard newCard = drawDeck.draw();
-        playerHand.add(newCard);
+        super.execute(gs);
+        getBody(gs).addOrgan((VirusCard)getCard(gs));
         return true;
     }
 
     @Override
-    public Card getCard() {
-        return null;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AddOrgan addOrgan = (AddOrgan) o;
+        return bodyId == addOrgan.bodyId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), bodyId);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Add " + getCard(gameState).toString() + " on body of player " + gameState.getCurrentPlayer();
     }
 
     @Override
     public void printToConsole() {
-        System.out.println("Add " + card.toString() + " on body of player " + playerId);
+        System.out.println("Add organ on body of player");
     }
 }

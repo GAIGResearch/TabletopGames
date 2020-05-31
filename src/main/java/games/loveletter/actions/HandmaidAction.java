@@ -1,36 +1,23 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
-import core.components.Deck;
-import core.components.IDeck;
-import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
+import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.cards.LoveLetterCard;
 
-public class HandmaidAction  extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+/**
+ * The handmaid protects the player from any targeted effects until the next turn.
+ */
+public class HandmaidAction extends DrawCard implements IPrintable {
 
-    private final int playerID;
-
-    public HandmaidAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
-                            int ownPlayerID){
-        super(card, playerHand, discardPile);
-        this.playerID = ownPlayerID;
+    public HandmaidAction(int deckFrom, int deckTo, int fromIndex) {
+        super(deckFrom, deckTo, fromIndex);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-
-        ((LoveLetterGameState)gs).setProtection(playerID, true);
-        return true;
-    }
-
-    @Override
-    public Card getCard() {
-        return null;
+        // set the player's protection status
+        ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), true);
+        return super.execute(gs);
     }
 
     @Override
@@ -39,7 +26,7 @@ public class HandmaidAction  extends PlayCard<LoveLetterCard> implements IAction
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
 }

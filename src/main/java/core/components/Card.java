@@ -1,28 +1,27 @@
 package core.components;
 
-import java.util.HashMap;
-
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import utilities.Utils.ComponentType;
 
-import static utilities.CoreConstants.nameHash;
+import static core.CoreConstants.nameHash;
 
-public class Card extends Component implements Cloneable{
+public class Card extends Component {
 
-    //private int occurenceCount; //This was here once. Not sure why?
+    public Card() {
+        super(ComponentType.CARD);
+    }
+    public Card(String name){
+        super(ComponentType.CARD, name);
+    }
 
-    public Card(){
-        this.properties = new HashMap<>();
-        super.type = ComponentType.CARD;
+    private Card(String name, int ID){
+        super(ComponentType.CARD, name, ID);
     }
 
     @Override
-    public Card clone(){
-        Card copy = new Card();
-        copy.type = type;
-
+    public Card copy(){
+        Card copy = new Card(componentName, componentID);
         copyComponentTo(copy);
-
         return copy;
     }
 

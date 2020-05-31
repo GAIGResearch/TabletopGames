@@ -7,17 +7,23 @@ public class ColtExpressCard extends Card {
         MoveSideways,
         CollectMoney,
         Punch,
-        MoveSheriff,
+        MoveMarshal,
         MoveUp,
         Shoot,
         Bullet
     }
 
     public CardType cardType;
+    public final int playerID;
 
-    public ColtExpressCard(CardType cardType) {
+    public ColtExpressCard(int playerID, CardType cardType) {
+        super(cardType.toString());
         this.cardType = cardType;
+        this.playerID = playerID;
     }
 
+    public String toString(){
+        return cardType.toString() + "(" + playerID + ")";
+    }
 
 }

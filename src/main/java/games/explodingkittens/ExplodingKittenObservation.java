@@ -1,13 +1,12 @@
 package games.explodingkittens;
 
+import core.AbstractGameState;
 import core.components.Deck;
-import core.components.IDeck;
 import core.components.PartialObservableDeck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import core.observations.IObservation;
+import core.interfaces.IObservation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExplodingKittenObservation implements IPrintable, IObservation {
@@ -28,23 +27,23 @@ public class ExplodingKittenObservation implements IPrintable, IObservation {
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         for (int i = 0; i < playerHandCards.size(); i++){
             if (currentPlayer == i)
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ":");
-            printDeck(playerHandCards.get(i).getVisibleCards(currentPlayer));
+            printDeck(playerHandCards.get(i).getVisibleComponents(currentPlayer));
         }
 
         System.out.print("DrawPile" + ":");
-        printDeck(drawPile.getVisibleCards(currentPlayer));
+        printDeck(drawPile.getVisibleComponents(currentPlayer));
 
         System.out.print("DiscardPile" + ":");
-        printDeck(discardPile.getCards());
+        printDeck(discardPile.getComponents());
     }
 
-    private void printDeck(ArrayList<ExplodingKittenCard> cards){
+    private void printDeck(List<ExplodingKittenCard> cards){
         StringBuilder sb = new StringBuilder();
 
         for (ExplodingKittenCard card : cards){

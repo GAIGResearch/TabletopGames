@@ -1,59 +1,73 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
-import core.observations.IPrintable;
-import games.explodingkittens.actions.PlayCard;
+import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
-public class BaronAction extends PlayCard<LoveLetterCard> implements IAction, IPrintable {
+import java.util.Objects;
 
-    private final Deck<LoveLetterCard> opponentDeck;
-    private final IDeck<LoveLetterCard> playerDeck;
-    private final int playerID;
+
+/**
+ * The Baron lets two players compare their hand card. The player with the lesser valued card is removed from the game.
+ */
+public class BaronAction extends DrawCard implements IPrintable {
     private final int opponentID;
 
-    public BaronAction(LoveLetterCard card, IDeck<LoveLetterCard> playerHand, IDeck<LoveLetterCard> discardPile,
-                        Deck<LoveLetterCard> opponentDeck, int opponentID, int ownPlayerID){
-        super(card, playerHand, discardPile);
-        this.opponentDeck = opponentDeck;
-        this.playerDeck = playerHand;
-        this.playerID = ownPlayerID;
+    public BaronAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
+        super(deckFrom, deckTo, fromIndex);
         this.opponentID = opponentID;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-        if (!((LoveLetterGameState)gs).getProtection(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
-            if (opponentDeck.peek() == null || playerDeck.peek() == null)
-                System.out.println();
-            if (opponentDeck.peek().cardType.getValue() < playerDeck.peek().cardType.getValue())
-                ((LoveLetterGameState) gs).killPlayer(opponentID);
-            else if (playerDeck.peek().cardType.getValue() < opponentDeck.peek().cardType.getValue())
-                ((LoveLetterGameState) gs).killPlayer(playerID);
+        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
+        Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+
+        // compares the value of the player's hand card with another player's hand card
+        // the player with the lesser valued card will be removed from the game
+        if (llgs.isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
+            LoveLetterCard opponentCard = opponentDeck.peek();
+            LoveLetterCard playerCard = playerDeck.peek();
+            if (opponentCard != null && playerCard != null) {
+                if (opponentCard.cardType.getValue() < playerCard.cardType.getValue())
+                    llgs.killPlayer(opponentID);
+                else if (playerCard.cardType.getValue() < opponentCard.cardType.getValue())
+                    llgs.killPlayer(playerID);
+            } else {
+                throw new IllegalArgumentException("player with ID " + opponentID + " was targeted using a Baron card" +
+                        " but one of the players has now cards left.");
+            }
         }
 
-        return false;
-    }
-
-    @Override
-    public Card getCard() {
-        return null;
+        return super.execute(gs);
     }
 
     @Override
     public String toString(){
-        return "Baron - compare the cards with player "+ opponentID;
+        return "Baron - compare the cards with player " + opponentID;
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        BaronAction that = (BaronAction) o;
+        return opponentID == that.opponentID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), opponentID);
     }
 }

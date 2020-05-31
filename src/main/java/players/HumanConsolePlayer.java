@@ -1,9 +1,9 @@
 package players;
 
 import core.AbstractPlayer;
-import core.actions.IAction;
-import core.observations.IPrintable;
-import core.observations.IObservation;
+import core.actions.AbstractAction;
+import core.interfaces.IPrintable;
+import core.interfaces.IObservation;
 
 import java.util.List;
 import java.util.Scanner;
@@ -12,24 +12,14 @@ import java.util.Scanner;
 public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
-    public void initializePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public void finalizePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public int getAction(IObservation observation, List<IAction> actions) {
+    public int getAction(IObservation observation, List<AbstractAction> actions) {
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();
 
         for (int i = 0; i < actions.size(); i++)
-            if (actions.get(i) instanceof IPrintable) {
+            if (actions.get(i) != null) {
                 System.out.print("Action " + i + ": ");
-                ((IPrintable) actions.get(i)).printToConsole();
+                actions.get(i).printToConsole();
             }
             else
                 System.out.println("action i: Action does not implement IPrintableAction");
@@ -42,7 +32,7 @@ public class HumanConsolePlayer extends AbstractPlayer {
             playerAction = in.nextInt();
             if (playerAction < 0 || playerAction >= actions.size())
                 System.out.println("Chosen index" + playerAction + " is invalid. " +
-                        "Choose any number in the range of [0, "+ actions.size()+ "]:");
+                        "Choose any number in the range of [0, "+ (actions.size()-1)+ "]:");
             else
                 invalid = false;
         }
@@ -52,13 +42,12 @@ public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
     public void registerUpdatedObservation(IObservation observation) {
-        if (observation instanceof IPrintable)
-            ((IPrintable) observation).printToConsole();
+        //if (observation instanceof IPrintable)
+        //   ((IPrintable) observation).printToConsole();
         System.out.println("No actions available. End turn by pressing any key...");
         Scanner in = new Scanner(System.in);
         in.next();
     }
-
 
 }
 

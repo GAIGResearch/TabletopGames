@@ -1,6 +1,6 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
@@ -9,63 +9,60 @@ import games.pandemic.PandemicGameState;
 import java.util.Objects;
 
 import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 
 @SuppressWarnings("unchecked")
-public class MovePlayerWithCard extends MovePlayer implements IAction {
+public class MovePlayerWithCard extends MovePlayer {
 
-    private Card card;
+    private int cardIdx;
+    private int cardId;
+    private boolean executed;
 
-    public MovePlayerWithCard(int playerIdx, String city, Card c) {
+    public MovePlayerWithCard(int playerIdx, String city, int cardIdx) {
         super(playerIdx, city);
-        this.card = c;
+        this.cardIdx = cardIdx;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        boolean result = super.execute(gs);
-        PandemicGameState pgs = (PandemicGameState)gs;
-
-        if (result) {
-            // Discard the card played
-            Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-            result = playerHand.remove(card);
-            Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
-            result &= discardDeck.add(card);
-        }
-
-        return result;
+        executed = true;
+        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+        Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
+        cardId = playerHand.getComponents().get(cardIdx).getComponentID();
+        return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
     }
 
+    public Card getCard(AbstractGameState gs) {
+        if (!executed) {
+            Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+            return deck.getComponents().get(cardIdx);
+        }
+        return (Card) gs.getComponentById(cardId);
+    }
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        if(other instanceof MovePlayerWithCard)
-        {
-            MovePlayerWithCard otherAction = (MovePlayerWithCard) other;
-            return card.equals(otherAction.card);
-
-        }else return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MovePlayerWithCard that = (MovePlayerWithCard) o;
+        return cardIdx == that.cardIdx &&
+                cardId == that.cardId &&
+                executed == that.executed;
     }
 
-    public Card getCard() {
-        return card;
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), cardIdx, cardId, executed);
     }
 
     @Override
     public String toString() {
         return "MovePlayerWithCard{" +
-                "card=" + card.toString() +
-                ", player=" + playerIdx +
-                ", destination='" + destination + '\'' +
+                "cardIdx=" + cardIdx +
+                ", cardId=" + cardId +
+                ", executed=" + executed +
                 '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), card);
     }
 }

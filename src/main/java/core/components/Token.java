@@ -10,76 +10,48 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Utils.ComponentType;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 
-public class Token extends Component implements IToken {
-    // position should be reference to a graph
-    private int position;           // todo graph
-    private HashSet<Integer> owner; // owner
+public class Token extends Component {
+    private String tokenType;
 
-    private String token_type;      // string type
-    private String nameID;            // name (id)
-    private int occurenceLimit;     // occurence limit
+    public Token(String name){
+        super(ComponentType.TOKEN, name);
+    }
 
-    public Token(){
-        super.type = ComponentType.TOKEN;
-        properties = new HashMap<>();
+    public Token(String name, int ID){
+        super(ComponentType.TOKEN, name, ID);
     }
 
     @Override
     public Token copy(){
-        Token copy = new Token();
-        copy.position = position;
-        copy.token_type = new String(token_type);
-        copy.owner = (HashSet)owner.clone();
-        copy.occurenceLimit = occurenceLimit;
-
-        //copy type and component.
+        Token copy = new Token(componentName, componentID);
+        copy.tokenType = tokenType;
         copyComponentTo(copy);
-
         return copy;
     }
 
-    @Override
-    public HashSet<Integer> getOwner() {
-        return owner;
+    /**
+     * @return - the type of this token.
+     */
+    public String getTokenType() {
+        return tokenType;
     }
 
-    @Override
-    public void setOwner(HashSet<Integer> owner) {
-        this.owner = owner;
+    /**
+     * Sets the type of this token.
+     * @param tokenType - new type for this token.
+     */
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 
-    @Override
-    public int getOccurenceLimit() {
-        return occurenceLimit;
-    }
-
-    @Override
-    public void setOccurenceLimit(int occurenceLimit) {
-        this.occurenceLimit = occurenceLimit;
-    }
-
-    @Override
-    public String getNameID() {
-        return nameID;
-    }
-
-
-
-    private void loadToken(JSONObject token) {
-
-        this.nameID = (String) token.get("id");
-        this.token_type = (String) ( (JSONArray) token.get("type")).get(1);
-        this.occurenceLimit = ((Long) ( (JSONArray) token.get("count")).get(1)).intValue();
-
-        parseComponent(this, token);
-    }
-
-
+    /**
+     * Loads all tokens from a JSON file.
+     * @param filename - path to file.
+     * @return - List of Token objects.
+     */
     public static List<Token> loadTokens(String filename)
     {
         JSONParser jsonParser = new JSONParser();
@@ -90,7 +62,7 @@ public class Token extends Component implements IToken {
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for(Object o : data) {
 
-                Token newToken = new Token();
+                Token newToken = new Token("");
                 newToken.loadToken((JSONObject) o);
                 tokens.add(newToken);
             }
@@ -100,5 +72,15 @@ public class Token extends Component implements IToken {
         }
 
         return tokens;
+    }
+
+    /**
+     * Creates a Token objects from a JSON object.
+     * @param token - JSON to parse into Token object.
+     */
+    private void loadToken(JSONObject token) {
+        this.tokenType = (String) ( (JSONArray) token.get("type")).get(1);
+        this.componentName = (String) token.get("id");
+        parseComponent(this, token);
     }
 }

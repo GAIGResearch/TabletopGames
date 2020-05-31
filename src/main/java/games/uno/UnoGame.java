@@ -2,13 +2,12 @@ package games.uno;
 
 import core.*;
 import players.HumanConsolePlayer;
-import players.RandomPlayer;
 
 import java.util.*;
 
-public class UnoGame extends Game {
+public class UnoGame extends AbstractGame {
 
-    public UnoGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState) {
+    public UnoGame(List<AbstractPlayer> agents, AbstractForwardModel model, AbstractGameState gameState) {
         super(agents, model, gameState);
     }
 
@@ -19,10 +18,10 @@ public class UnoGame extends Game {
         agents.add(new HumanConsolePlayer());
         agents.add(new HumanConsolePlayer());
 
-        ForwardModel      forwardModel   = new UnoForwardModel();
-        GameParameters    gameParameters = new UnoGameParameters();
-        AbstractGameState gameState      = new UnoGameState(gameParameters, forwardModel, agents.size());
-        Game              game           = new UnoGame(agents, forwardModel, gameState);
+        AbstractForwardModel      forwardModel   = new UnoForwardModel();
+        AbstractGameParameters    gameParameters = new UnoGameParameters();
+        AbstractGameState         gameState      = new UnoGameState(gameParameters, forwardModel, agents.size());
+        AbstractGame              game           = new UnoGame(agents, forwardModel, gameState);
 
         game.run(null);
     }

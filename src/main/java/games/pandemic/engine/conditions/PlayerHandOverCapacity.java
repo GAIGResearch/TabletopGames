@@ -6,7 +6,7 @@ import core.components.Deck;
 import games.pandemic.PandemicGameState;
 import games.pandemic.engine.rules.PlayerAction;
 
-import static utilities.CoreConstants.playerHandHash;
+import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class PlayerHandOverCapacity extends ConditionNode {

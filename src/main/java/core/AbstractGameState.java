@@ -1,44 +1,57 @@
 package core;
 
-import core.actions.IAction;
-import core.gamephase.DefaultGamePhase;
-import core.gamephase.GamePhase;
-import core.observations.IObservation;
-import core.turnorder.TurnOrder;
+import core.actions.AbstractAction;
+import core.components.Area;
+import core.components.Component;
+import core.interfaces.IGamePhase;
+import core.interfaces.IObservation;
+import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import java.util.*;
 
 /**
- * Placeholder class. Will contain all game state information.
+ * Contains all game state information.
  */
 public abstract class AbstractGameState {
 
-    protected final GameParameters gameParameters;
-    protected ForwardModel forwardModel;
+    // Default game phases: main, player reaction, end.
+    public enum DefaultGamePhase implements IGamePhase {
+        Main,
+        PlayerReaction,
+        End
+    }
+
+    // Parameters, forward model and turn order for the game
+    protected final AbstractGameParameters gameParameters;
+    protected AbstractForwardModel forwardModel;
     protected TurnOrder turnOrder;
+    protected Area<Component> allComponents;
 
-    protected int numAvailableActions;
-    protected List<IAction> availableActions;
+    // List of actions currently available for the player
+    protected List<AbstractAction> availableActions;
 
+    // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected Utils.GameResult gameStatus;
     protected Utils.GameResult[] playerResults;
 
-    protected GamePhase gamePhase;
+    // Current game phase
+    protected IGamePhase gamePhase;
 
-    public AbstractGameState(GameParameters gameParameters, ForwardModel model, int nPlayers, TurnOrder turnOrder){
+    // Data for this game
+    protected AbstractGameData data;
+
+    /**
+     * Constructor. Initialises some generic game state variables.
+     * @param gameParameters - game parameters.
+     * @param model - forward model.
+     * @param turnOrder - turn order for this game.
+     */
+    public AbstractGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
         this.forwardModel = model;
         this.turnOrder = turnOrder;
-
-        numAvailableActions = 0;
-        availableActions = new ArrayList<>();
-
-        this.gameStatus = Utils.GameResult.GAME_ONGOING;
-        this.playerResults = new Utils.GameResult[nPlayers];
-        Arrays.fill(this.playerResults, Utils.GameResult.GAME_ONGOING);
-
-        this.gamePhase = DefaultGamePhase.Main;
+        this.allComponents = new Area<>(-1, "All Components");
     }
 
     // Setters
@@ -47,43 +60,71 @@ public abstract class AbstractGameState {
     }
     public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
     public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
-    public final void setGamePhase(GamePhase gamePhase) {
+    public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
     public final void setMainGamePhase() {
         this.gamePhase = DefaultGamePhase.Main;
     }
-    public final void setEndGamePhase() {
-        this.gamePhase = DefaultGamePhase.End;
-    }
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
+    public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
     public final Utils.GameResult getGameStatus() {  return gameStatus; }
-    public final GameParameters getGameParameters() { return this.gameParameters; }
+    public final AbstractGameParameters getGameParameters() { return this.gameParameters; }
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
-    public final boolean isTerminal(){ return gameStatus != Utils.GameResult.GAME_ONGOING; }
-    public final int nPossibleActions() { return numAvailableActions; }
-    public final List<IAction> getActions() {
+    public final boolean isNotTerminal(){ return gameStatus == Utils.GameResult.GAME_ONGOING; }
+    public final List<AbstractAction> getActions() {
         return getActions(false);
     }
-    public final List<IAction> getActions(boolean forceCompute) {
+    public final List<AbstractAction> getActions(boolean forceCompute) {
         if (forceCompute || availableActions == null || availableActions.size() == 0) {
             availableActions = computeAvailableActions();
-            numAvailableActions = availableActions.size();
         }
         return availableActions;
     }
-    public final GamePhase getGamePhase() {
+    public final IGamePhase getGamePhase() {
         return gamePhase;
+    }
+    public AbstractGameData getData() {
+        return data;
+    }
+    public Component getComponentById(int id) {
+        return allComponents.getComponent(id);
     }
 
     /* Methods to be implemented by subclass */
+
+    /**
+     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
+     * The last thing to be called in the game loop, after the game is finished.
+     */
     public void endGame() {}
+
+    /**
+     * Retrieves an observation specific to the given player from this game state object. Components which are not
+     * observed by the player are removed, the rest are copied.
+     * @param player - player observing this game state.
+     * @return - IObservation, the observation for this player.
+     */
     public abstract IObservation getObservation(int player);
-    public abstract List<IAction> computeAvailableActions();
-    public abstract void setComponents();
+
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of AbstractAction objects.
+     */
+    public abstract List<AbstractAction> computeAvailableActions();
+
+    /**
+     * Must add all components used in the game to the allComponents area, mapping to their assigned component ID
+     * and NOT another game specific key. Use one of these functions for this functionality only:
+     *          - Area.putComponent(Component component)
+     *          - Area.putComponents(List<Component> components)
+     *          - Area.putComponents(Area area)
+     * Method is called after initialising the game state.
+     */
+    public abstract void addAllComponents();
 
     /*
     public AbstractGameState(AbstractGameState gameState) {
@@ -127,5 +168,4 @@ public abstract class AbstractGameState {
         return false;
     }
      */
-
 }

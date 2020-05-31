@@ -2,35 +2,42 @@ package games.uno.actions;
 
 
 import core.AbstractGameState;
-import core.actions.IAction;
-import core.components.Card;
+import core.actions.AbstractAction;
 import core.components.Deck;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.uno.UnoGameState;
 import games.uno.cards.UnoCard;
 
-public class NoCards implements IAction, IPrintable {
-    private final Deck<UnoCard> drawDeck;
-    private final Deck<UnoCard> discardDeck;
-    private final Deck<UnoCard> playerDeck;
+import static core.CoreConstants.VERBOSE;
 
-    public NoCards(Deck<UnoCard> drawDeck, Deck<UnoCard> discardDeck, Deck<UnoCard> playerDeck){
-        this.drawDeck    = drawDeck;
-        this.discardDeck = discardDeck;
-        this.playerDeck  = playerDeck;
-    }
+public class NoCards extends AbstractAction implements IPrintable {
 
     // If the card drawn is playable, then play it
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (drawDeck.getSize() == 0)
-            ((UnoGameState) gs).drawDeckEmpty();
+        UnoGameState ugs = (UnoGameState)gs;
+        Deck<UnoCard> drawDeck = ugs.getDrawDeck();
+        Deck<UnoCard> discardDeck = ugs.getDiscardDeck();
+        Deck<UnoCard> playerDeck = ugs.getPlayerDecks().get(ugs.getTurnOrder().getCurrentPlayer(gs));
+
+        if (drawDeck.getSize() == 0) {
+            drawDeck.add(discardDeck);
+            discardDeck.clear();
+
+            // Add the current card to the discardDeck
+            drawDeck.remove(ugs.getCurrentCard());
+            discardDeck.add(ugs.getCurrentCard());
+
+            drawDeck.shuffle();
+        }
 
         UnoCard card = drawDeck.draw();
 
         if (card.isPlayable((UnoGameState) gs)) {
             discardDeck.add(card);
-            System.out.println("It can be played. " + card.toString());
+            if (VERBOSE) {
+                System.out.println("It can be played. " + card.toString());
+            }
         }
         else
             playerDeck.add(card);
@@ -38,12 +45,22 @@ public class NoCards implements IAction, IPrintable {
     }
 
     @Override
-    public Card getCard() {
-        return null;
+    public boolean equals(Object obj) {
+        return obj instanceof NoCards;
     }
 
     @Override
-    public void printToConsole() {
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "No playable cards. You must draw a card.";
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println("No playable cards. You must draw a card.");
     }
 }

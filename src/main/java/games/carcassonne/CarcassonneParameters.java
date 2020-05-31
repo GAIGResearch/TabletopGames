@@ -1,12 +1,12 @@
 package games.carcassonne;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 
 import java.util.HashMap;
 
 import static games.carcassonne.CarcassonneGameState.CarcassonneType;
 
-public class CarcassonneParameters extends GameParameters {
+public class CarcassonneParameters extends AbstractGameParameters {
     HashMap<CarcassonneType[][], Integer> tiles = new HashMap<>();
     public CarcassonneParameters(){
         // church

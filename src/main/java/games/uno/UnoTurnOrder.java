@@ -1,7 +1,7 @@
 package games.uno;
 
 import core.AbstractGameState;
-import core.turnorder.AlternatingTurnOrder;
+import core.turnorders.AlternatingTurnOrder;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
