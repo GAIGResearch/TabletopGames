@@ -46,16 +46,10 @@ public class LoveLetterGameState extends AbstractGameState {
      */
     @Override
     public void addAllComponents() {
-        allComponents.putComponent(drawPile);
-        allComponents.putComponents(drawPile.getComponents());
-        allComponents.putComponent(reserveCards);
-        allComponents.putComponents(reserveCards.getComponents());
         allComponents.putComponents(playerHandCards);
         allComponents.putComponents(playerDiscardCards);
-        for (int i = 0; i < playerHandCards.size(); i++) {
-            allComponents.putComponents(playerHandCards.get(i).getComponents());
-            allComponents.putComponents(playerDiscardCards.get(i).getComponents());
-        }
+        allComponents.putComponent(drawPile);
+        allComponents.putComponent(reserveCards);
     }
 
     public LoveLetterGameState(LoveLetterParameters gameParameters, AbstractForwardModel model, int nPlayers) {

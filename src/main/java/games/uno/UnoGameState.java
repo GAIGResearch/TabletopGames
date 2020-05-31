@@ -29,15 +29,10 @@ public class UnoGameState extends AbstractGameState {
 
     @Override
     public void addAllComponents() {
+        allComponents.putComponents(playerDecks);
         allComponents.putComponent(drawDeck);
         allComponents.putComponent(discardDeck);
         allComponents.putComponent(currentCard);
-        allComponents.putComponents(drawDeck.getComponents());
-        allComponents.putComponents(discardDeck.getComponents());
-        allComponents.putComponents(playerDecks);
-        for (Deck<UnoCard> d: playerDecks) {
-            allComponents.putComponents(d.getComponents());
-        }
     }
 
     boolean isWildCard(UnoCard card) {

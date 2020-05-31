@@ -64,12 +64,9 @@ public class Area<T extends Component> extends Component {
      * @param component - component to add to the collection.
      */
     public void putComponent(Component component) {
-        this.components.put(component.getComponentID(), component);
-        if (component instanceof Deck) {
-            putComponents(((Deck) component).getComponents());
-        } else if (component instanceof Area) {
-            putComponents((Area) component);
-        }
+        if (component instanceof Deck) putComponents((Deck)component);
+        else if (component instanceof Area) putComponents((Area)component);
+        else this.components.put(component.getComponentID(), component);
     }
 
     /**
@@ -87,7 +84,10 @@ public class Area<T extends Component> extends Component {
      * @param deck - deck to add to the collection.
      */
     public void putComponents(Deck<T> deck) {
-        putComponents(deck.getComponents());
+        this.components.put(deck.getComponentID(), deck);
+        for (Component c: deck.getComponents()) {
+            putComponent(c);
+        }
     }
 
     /**
@@ -95,6 +95,7 @@ public class Area<T extends Component> extends Component {
      * @param area - area to add to the collection.
      */
     public void putComponents(Area<T> area) {
+        this.components.put(area.getComponentID(), area);
         for (Component c: area.components.values()) {
             putComponent(c);
         }

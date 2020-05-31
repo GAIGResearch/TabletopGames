@@ -32,7 +32,7 @@ public class HumanConsolePlayer extends AbstractPlayer {
             playerAction = in.nextInt();
             if (playerAction < 0 || playerAction >= actions.size())
                 System.out.println("Chosen index" + playerAction + " is invalid. " +
-                        "Choose any number in the range of [0, "+ actions.size()+ "]:");
+                        "Choose any number in the range of [0, "+ (actions.size()-1)+ "]:");
             else
                 invalid = false;
         }

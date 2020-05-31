@@ -40,14 +40,9 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     @Override
     public void addAllComponents() {
+        allComponents.putComponents(playerHandCards);
         allComponents.putComponent(drawPile);
         allComponents.putComponent(discardPile);
-        allComponents.putComponents(playerHandCards);
-        allComponents.putComponents(drawPile.getComponents());
-        allComponents.putComponents(discardPile.getComponents());
-        for (Deck<ExplodingKittenCard> l: playerHandCards) {
-            allComponents.putComponents(l.getComponents());
-        }
     }
 
     public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, AbstractForwardModel model, int nPlayers) {
