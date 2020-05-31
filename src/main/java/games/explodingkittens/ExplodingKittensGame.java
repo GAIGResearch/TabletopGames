@@ -25,7 +25,7 @@ public class ExplodingKittensGame extends AbstractGame {
         AbstractForwardModel forwardModel = new ExplodingKittensForwardModel();
 
         for (int i=0; i<1000; i++) {
-            AbstractGame game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, forwardModel, agents.size()));
+            AbstractGame game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, agents.size()));
             game.run(null);
             ExplodingKittensGameState gameState = (ExplodingKittensGameState) game.getGameState();
 

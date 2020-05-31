@@ -51,11 +51,20 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         allComponents.putComponent(world);
     }
 
+    /**
+     * Retrieves an observation specific to the given player from this game state object. Components which are not
+     * observed by the player are removed, the rest are copied.
+     * @return - IObservation, the observation for this player.
+     */
     @Override
     public VectorObservation getVectorObservation() {
         return null;
     }
 
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of AbstractAction objects.
+     */
     @Override
     public double[] getDistanceFeatures(int playerId) {
         // Win if all disease counters >= 1
@@ -159,6 +168,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
     }
     public String getPlayerRoleActingPlayer() {
         return getPlayerRole(turnOrder.getCurrentPlayer(this));
+
     }
     public String getPlayerRole(int i) {
         Card playerCard = ((Card) getComponent(playerCardHash, i));
@@ -196,11 +206,4 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
         return gs;
     }
-
-    /*
-    public AbstractGameState createNewGameState() {
-        return new PandemicGameState((PandemicParameters) this.gameParameters);
-    }
-     */
-
 }

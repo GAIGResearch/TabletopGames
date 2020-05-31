@@ -43,27 +43,23 @@ public class ExplodingKittensGameState extends AbstractGameState {
         allComponents.putComponent(drawPile);
         allComponents.putComponent(discardPile);
         allComponents.putComponents(playerHandCards);
-        allComponents.putComponents(drawPile.getComponents());
-        allComponents.putComponents(discardPile.getComponents());
-        for (Deck<ExplodingKittenCard> l: playerHandCards) {
-            allComponents.putComponents(l.getComponents());
-        }
     }
 
-    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, AbstractForwardModel model, int nPlayers) {
+    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, int nPlayers) {
         super(gameParameters, new ExplodingKittenTurnOrder(nPlayers));
     }
 
-    /**
-     * Retrieves an observation specific to the given player from this game state object. Components which are not
-     * observed by the player are removed, the rest are copied.
-     * @param player - player observing this game state.
-     * @return - IObservation, the observation for this player.
-     */
-    @Override
-    public IObservation getObservation(int player) {
-        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player);
-    }
+//
+//    /**
+//     * Retrieves an observation specific to the given player from this game state object. Components which are not
+//     * observed by the player are removed, the rest are copied.
+//     * @param player - player observing this game state.
+//     * @return - IObservation, the observation for this player.
+//     */
+//    @Override
+//    public IObservation getObservation(int player) {
+//        return new ExplodingKittenObservation(playerHandCards, drawPile, discardPile, player);
+//    }
 
     /**
      * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
@@ -81,7 +77,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * @return - List of AbstractAction objects.
      */
     @Override
     public List<AbstractAction> computeAvailableActions() {

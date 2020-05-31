@@ -1,13 +1,13 @@
 package games.carcassonne;
 
-import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.AbstractGameParameters;
-import core.interfaces.IObservation;
+import core.observations.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
+import utilities.Utils;
 
 import java.awt.*;
 import java.util.*;
@@ -23,7 +23,7 @@ public class CarcassonneGameState extends AbstractGameState {
     private CarcassonneBoard gameBoard;
     private CarcassonneGamePhase gamePhase;
 
-    public CarcassonneGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers) {
+    public CarcassonneGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
@@ -53,39 +53,35 @@ public class CarcassonneGameState extends AbstractGameState {
         return this.gameBoard.toString();
     }
 
-    @Override
-    public IObservation getObservation(int player) {
-        return null;
-    }
-
-    @Override
-    public void endGame() {
-
-    }
-
-    @Override
-    public List<AbstractAction> computeAvailableActions() {
-
-        List<AbstractAction> actions;
-        switch (gamePhase){
-            case PlaceTile:
-                actions = tileActions();
-                break;
-            case PlaceCharacter:
-                actions = meepleActions();
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
-        }
-
-        this.numAvailableActions = actions.size();
-        return actions;
-    }
 
     @Override
     public void addAllComponents() {
 
+    }
+
+    @Override
+    protected AbstractGameState copy(int playerId) {
+        return null;
+    }
+
+    @Override
+    public VectorObservation getVectorObservation() {
+        return null;
+    }
+
+    @Override
+    public double[] getDistanceFeatures(int playerId) {
+        return new double[0];
+    }
+
+    @Override
+    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+        return null;
+    }
+
+    @Override
+    public double getScore(int playerId) {
+        return 0;
     }
 
     private class CarcassonneBoard{

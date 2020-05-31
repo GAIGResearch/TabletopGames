@@ -6,7 +6,6 @@ import core.AbstractForwardModel;
 import core.components.Deck;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
-import games.uno.actions.PlayWild;
 import games.uno.cards.*;
 import utilities.Utils;
 
@@ -54,12 +53,12 @@ public class UnoForwardModel extends AbstractForwardModel {
         // If the first card is Skip, Reverse or DrawTwo, play the card
         if (!ugs.isNumberCard(ugs.currentCard)) {
             if (VERBOSE) {
-                System.out.println("First card no number " + ugs.currentColor.toString());
+                System.out.println("First card no number " + ugs.currentColor);
             }
-            if (ugs.currentCard instanceof UnoReverseCard) {
+            if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
                 ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
             }
-            else if (ugs.currentCard instanceof UnoDrawTwoCard) {
+            else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
                 int player = ugs.getCurrentPlayerID();
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
@@ -81,38 +80,38 @@ public class UnoForwardModel extends AbstractForwardModel {
 
     // Create all the cards and include them into the drawPile
     private void createCards(UnoGameState ugs) {
-        // Create the number cards
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
+        UnoGameParameters ugp = (UnoGameParameters)ugs.getGameParameters();
+        for (String color : ugp.colors) {
+            if (!color.equals("Wild")) {
 
-            // one card 0, two cards of 1, 2, ... 9
-            for (int number = 0; number < ((UnoGameParameters)ugs.getGameParameters()).nCardsPerColor; number++) {
-                ugs.drawDeck.add(new UnoNumberCard(color, number));
-                if (number > 0)
-                    ugs.drawDeck.add(new UnoNumberCard(color, number));
+                // Create the number cards
+                for (int number = 0; number < ugp.nNumberCards; number++) {
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Number, color, number));
+                    if (number > 0)
+                        ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Number, color, number));
+                }
+
+                // Create the DrawTwo, Reverse and Skip cards for each color
+                for (int i = 0; i < ugp.nSkipCards; i++) {
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Skip, color));
+                }
+                for (int i = 0; i < ugp.nReverseCards; i++) {
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Reverse, color));
+                }
+                for (int i = 0; i < ugp.nDrawCards; i++) {
+                    for (int n : ugp.specialDrawCards) {
+                        ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Draw, color, n));
+                    }
+                }
             }
         }
 
-        // Create the DrawTwo, Reverse and Skip cards for each color
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            ugs.drawDeck.add(new UnoSkipCard(color));
-            ugs.drawDeck.add(new UnoSkipCard(color));
-            ugs.drawDeck.add(new UnoReverseCard(color));
-            ugs.drawDeck.add(new UnoReverseCard(color));
-            ugs.drawDeck.add(new UnoDrawTwoCard(color));
-            ugs.drawDeck.add(new UnoDrawTwoCard(color));
+        // Create the wild cards, N of each type
+        for (int i = 0; i < ugp.nWildCards; i++) {
+            for (int n : ugp.specialWildDrawCards) {
+                ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Wild, "Wild", n));
+            }
         }
-
-        // Create the wild cards, 4 of each type
-        for (int i = 0; i < ((UnoGameParameters)ugs.getGameParameters()).nWildCards; i++) {
-            ugs.drawDeck.add(new UnoWildCard());
-            ugs.drawDeck.add(new UnoWildDrawFourCard());
-        }
-
     }
 
     private void drawCardsToPlayers(UnoGameState ugs) {
@@ -142,19 +141,8 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void endGame(AbstractGameState gameState) {
-        System.out.println("Game Results:");
-        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.GAME_WIN) {
-                System.out.println("The winner is the player : " + playerID);
-                break;
-            }
-        }
-    }
-
-    @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        UnoGameState ugs = (UnoGameState) gameState;
+        UnoGameState ugs = (UnoGameState)gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = ugs.getCurrentPlayerID();
 
@@ -163,8 +151,8 @@ public class UnoForwardModel extends AbstractForwardModel {
             int cardIdx = playerHand.getComponents().indexOf(card);
             if (card.isPlayable(ugs)) {
                 if (ugs.isWildCard(card)) {
-                    for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-                        actions.add(new PlayWild(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx, color));
+                    for (String color : ((UnoGameParameters)ugs.getGameParameters()).colors) {
+                        actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx, color));
                     }
                 }
                 else {
@@ -177,6 +165,17 @@ public class UnoForwardModel extends AbstractForwardModel {
             actions.add(new NoCards());
 
         return actions;
+    }
+
+    @Override
+    public void endGame(AbstractGameState gameState) {
+        System.out.println("Game Results:");
+        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
+            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.GAME_WIN) {
+                System.out.println("The winner is the player : " + playerID);
+                break;
+            }
+        }
     }
 
     @Override

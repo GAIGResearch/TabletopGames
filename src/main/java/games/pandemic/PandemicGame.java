@@ -1,8 +1,6 @@
 package games.pandemic;
 
 import core.*;
-
-import java.util.List;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
 import players.HumanGUIPlayer;
@@ -34,6 +32,7 @@ public class PandemicGame extends AbstractGame {
         PandemicParameters params = new PandemicParameters("data/pandemic/");
         PandemicGame game = new PandemicGame(players, params);
         AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
+
         game.run(gui);
         System.out.println(game.gameState.getGameStatus());
 

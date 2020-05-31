@@ -20,11 +20,10 @@ public class HumanConsolePlayer extends AbstractPlayer {
 
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) != null) {
-                System.out.print("Action " + i + ": ");
-                actions.get(i).printToConsole();
+                System.out.println("Action " + i + ": " + actions.get(i).getString(observation));
             }
             else
-                System.out.println("action i: Action does not implement IPrintableAction");
+                System.out.println("Null action");
 
         System.out.println("Type the index of your desired action:");
         Scanner in = new Scanner(System.in);
@@ -34,7 +33,7 @@ public class HumanConsolePlayer extends AbstractPlayer {
             playerAction = in.nextInt();
             if (playerAction < 0 || playerAction >= actions.size())
                 System.out.println("Chosen index" + playerAction + " is invalid. " +
-                        "Choose any number in the range of [0, "+ actions.size()+ "]:");
+                        "Choose any number in the range of [0, "+ (actions.size()-1)+ "]:");
             else
                 invalid = false;
         }

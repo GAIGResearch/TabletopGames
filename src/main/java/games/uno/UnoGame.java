@@ -8,7 +8,7 @@ import java.util.*;
 public class UnoGame extends AbstractGame {
 
     public UnoGame(List<AbstractPlayer> agents, AbstractGameParameters gameParameters) {
-        super(agents, new UnoForwardModel(), new UnoGameState(gameParameters, agents.size()));
+        super(agents, new UnoForwardModel(), new UnoGameState(gameParameters, new UnoTurnOrder(agents.size())));
     }
 
     public static void main(String[] args) {

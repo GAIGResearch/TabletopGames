@@ -6,8 +6,8 @@ import players.HumanConsolePlayer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VirusGame extends Game {
-    public VirusGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState) {
+public class VirusGame extends AbstractGame {
+    public VirusGame(List<AbstractPlayer> agents, AbstractForwardModel model, AbstractGameState gameState) {
         super(agents, model, gameState);
     }
 
@@ -18,10 +18,10 @@ public class VirusGame extends Game {
         agents.add(new HumanConsolePlayer());
         agents.add(new HumanConsolePlayer());
 
-        ForwardModel      forwardModel   = new VirusForwardModel();
-        GameParameters    gameParameters = new VirusGameParameters();
-        AbstractGameState gameState      = new VirusGameState(gameParameters, forwardModel, agents.size());
-        Game              game           = new VirusGame(agents, forwardModel, gameState);
+        AbstractForwardModel      forwardModel   = new VirusForwardModel();
+        AbstractGameParameters    gameParameters = new VirusGameParameters();
+        AbstractGameState         gameState      = new VirusGameState(gameParameters, forwardModel, agents.size());
+        AbstractGame              game           = new VirusGame(agents, forwardModel, gameState);
 
         game.run(null);
     }

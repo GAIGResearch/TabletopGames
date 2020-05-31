@@ -69,6 +69,7 @@ public abstract class AbstractGame {
             // Give player their ID
             player.playerID = id++;
             // Allow player to initialize
+
             player.initializePlayer(observation);
         }
     }
@@ -90,6 +91,7 @@ public abstract class AbstractGame {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             AbstractGameState observation = gameState._copy(activePlayer);
             if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
+
                 ((IPrintable) observation).printToConsole(gameState);
             }
 

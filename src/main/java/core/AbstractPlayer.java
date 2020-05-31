@@ -1,5 +1,6 @@
 package core;
 
+
 public abstract class AbstractPlayer {
 
     int playerID;
@@ -34,6 +35,7 @@ public abstract class AbstractPlayer {
      */
     public void initializePlayer(AbstractGameState observation) {}
 
+
     /**
      * Finalize agent given an observation of the final game-state.
      * e.g. store variables after training, modify weights, etc.
@@ -41,8 +43,10 @@ public abstract class AbstractPlayer {
      */
     public void finalizePlayer(AbstractGameState observation) {}
 
+
     /**
      * Receive an updated game-state for which it is not required to respond with an action.
      */
     public void registerUpdatedObservation(AbstractGameState observation) {}
+
 }

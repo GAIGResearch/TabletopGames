@@ -3,7 +3,6 @@ package games.uno.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.uno.UnoGameState;
@@ -43,6 +42,11 @@ public class NoCards extends AbstractAction implements IPrintable {
         else
             playerDeck.add(card);
         return true;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new NoCards();
     }
 
     @Override

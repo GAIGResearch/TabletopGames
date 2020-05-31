@@ -1,9 +1,6 @@
 package games.pandemic;
 
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import core.actions.DrawCard;
-import core.actions.RearrangeCardsWithCard;
+import core.actions.*;
 import core.components.BoardNode;
 import core.components.Card;
 import core.components.Counter;
@@ -311,12 +308,13 @@ class PandemicActionFactory {
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         int nInfectDiscards = infectionDiscard.getSize();
         Deck<Card> ph = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
+        Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponentActingPlayer(playerDeckDiscardHash);
         int nCards = ph.getSize();
         for (int cp = 0; cp < nCards; cp++) {
             Card card = ph.getComponents().get(cp);
             if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                 for (int idx = 0; idx < nInfectDiscards; idx++) {
-                    acts.add(new RemoveCardWithCard(infectionDiscard, idx, card));
+                    acts.add(new RemoveComponentFromDeck<Card>(ph.getComponentID(), playerDiscard.getComponentID(), cp, infectionDiscard.getComponentID(), idx));
                 }
                 break;
             }
@@ -423,7 +421,7 @@ class PandemicActionFactory {
                 }
                 generatePermutations(n, order, permutations);
                 for (int[] perm: permutations) {
-                    actions.add(new RearrangeCardsWithCard(deckFrom, deckTo, cardIdx, infectionDeck.getComponentID(), perm));
+                    actions.add(new RearrangeDeckOfCards(deckFrom, deckTo, cardIdx, infectionDeck.getComponentID(), perm));
                 }
                 break;
         }
