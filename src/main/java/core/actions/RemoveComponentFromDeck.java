@@ -57,7 +57,7 @@ public class RemoveComponentFromDeck<T extends Component> extends DrawCard {
                 '}';
     }
 
-    public int getComponent() {
+    public int getComponentIdx() {
         return componentIdx;
     }
 
