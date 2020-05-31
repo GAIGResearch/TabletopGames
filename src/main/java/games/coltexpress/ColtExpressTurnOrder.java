@@ -56,7 +56,6 @@ public class ColtExpressTurnOrder extends TurnOrder {
         rounds.add(getRandomEndRoundCard(cep));
     }
 
-
     public int getCurrentRoundIndex(){return currentRoundIndex;}
     public int getCurrentRoundCardIndex(){return currentRoundCardIndex;}
 
@@ -114,6 +113,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
                 initRound(rounds.get(currentRoundCardIndex), currentRoundIndex);
             else
                 gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
+
         }
         return tmp;
     }

@@ -48,6 +48,7 @@ public class Compartment extends Component {
         return locomotive;
     }
 
+
     public boolean containsPlayer(int playerID) {
         if (playersInsideCompartment.contains(playerID))
             return true;
@@ -85,6 +86,7 @@ public class Compartment extends Component {
     @Override
     public Component copy() {
         Compartment newCompartment = new Compartment(this.nPlayers, compartmentID);
+
         for (Loot loot : this.lootInside.getComponents())
             newCompartment.lootInside.add((Loot) loot.copy());
         for (Loot loot : this.lootOnTop.getComponents())

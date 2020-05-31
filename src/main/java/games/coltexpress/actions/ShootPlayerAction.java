@@ -58,6 +58,7 @@ public class ShootPlayerAction extends DrawCard {
                 // django's shots can move the player
                 if (target.playersInsideCompartment.contains(targetID)) {
                     target.playersInsideCompartment.remove(targetID);
+
                     if (movementCompartment.containsMarshal) {
                         cegs.addNeutralBullet(targetID);
                         movementCompartment.playersOnTopOfCompartment.add(targetID);

@@ -64,24 +64,47 @@ public class Area<T extends Component> extends Component {
      * @param component - component to add to the collection.
      */
     public void putComponent(Component component) {
-        this.components.put(component.getComponentID(), component);
-        if (component instanceof Deck) {
-            putComponents(((Deck) component).getComponents());
-        }
+        if (component instanceof Deck) putComponents((Deck)component);
+        else if (component instanceof Area) putComponents((Area)component);
+        else this.components.put(component.getComponentID(), component);
     }
 
+    /**
+     * Adds all components in a list to the collection, using their own component IDs as the keys in the map.
+     * @param components - list of components to add to the collection.
+     */
     public void putComponents(List<? extends Component> components) {
         for (Component c: components) {
             putComponent(c);
         }
     }
 
+    /**
+     * Adds all components from a deck to the collection, using their own component IDs as the keys in the map.
+     * @param deck - deck to add to the collection.
+     */
+    public void putComponents(Deck<T> deck) {
+        this.components.put(deck.getComponentID(), deck);
+        for (Component c: deck.getComponents()) {
+            putComponent(c);
+        }
+    }
+
+    /**
+     * Adds all components in an area to the collection, using their own component IDs as the keys in the map.
+     * @param area - area to add to the collection.
+     */
     public void putComponents(Area<T> area) {
+        this.components.put(area.getComponentID(), area);
         for (Component c: area.components.values()) {
             putComponent(c);
         }
     }
 
+
+    /**
+     * Clears all components in this area.
+     */
     public void clear() {
         this.components.clear();
     }

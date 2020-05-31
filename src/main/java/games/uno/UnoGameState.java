@@ -9,19 +9,19 @@ import games.uno.cards.*;
 import core.interfaces.IObservation;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
-import games.uno.actions.PlayWild;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
 public class UnoGameState extends AbstractGameState {
     List<Deck<UnoCard>>  playerDecks;
     Deck<UnoCard>        drawDeck;
     Deck<UnoCard>        discardDeck;
     UnoCard              currentCard;
-    UnoCard.UnoCardColor currentColor;
+    String currentColor;
 
     public UnoGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
         super(gameParameters, model, new UnoTurnOrder(nPlayers));
@@ -29,23 +29,18 @@ public class UnoGameState extends AbstractGameState {
 
     @Override
     public void addAllComponents() {
+        allComponents.putComponents(playerDecks);
         allComponents.putComponent(drawDeck);
         allComponents.putComponent(discardDeck);
         allComponents.putComponent(currentCard);
-        allComponents.putComponents(drawDeck.getComponents());
-        allComponents.putComponents(discardDeck.getComponents());
-        allComponents.putComponents(playerDecks);
-        for (Deck<UnoCard> d: playerDecks) {
-            allComponents.putComponents(d.getComponents());
-        }
     }
 
     boolean isWildCard(UnoCard card) {
-        return card instanceof UnoWildCard || card instanceof UnoWildDrawFourCard;
+        return card.type == Wild;
     }
 
     boolean isNumberCard(UnoCard card) {
-        return card instanceof UnoNumberCard;
+        return card.type == UnoCard.UnoCardType.Number;
     }
 
     @Override
@@ -69,8 +64,8 @@ public class UnoGameState extends AbstractGameState {
             int cardIdx = playerHand.getComponents().indexOf(card);
             if (card.isPlayable(this)) {
                 if (isWildCard(card)) {
-                    for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-                        actions.add(new PlayWild(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
+                    for (String color : ((UnoGameParameters)gameParameters).colors) {
+                        actions.add(new PlayCard(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
                     }
                 }
                 else {
@@ -105,7 +100,7 @@ public class UnoGameState extends AbstractGameState {
         currentColor = card.color;
     }
 
-    public void updateCurrentCard(UnoCard card, UnoCard.UnoCardColor color) {
+    public void updateCurrentCard(UnoCard card, String color) {
         currentCard  = card;
         currentColor = color;
     }
@@ -126,7 +121,7 @@ public class UnoGameState extends AbstractGameState {
         return currentCard;
     }
 
-    public UnoCard.UnoCardColor getCurrentColor() {
+    public String getCurrentColor() {
         return currentColor;
     }
 }

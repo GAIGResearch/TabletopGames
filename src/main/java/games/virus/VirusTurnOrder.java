@@ -1,8 +1,9 @@
 package games.virus;
 
-import core.turnorder.TurnOrder;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 
-public class VirusTurnOrder extends TurnOrder {
+public class VirusTurnOrder extends AlternatingTurnOrder {
     public VirusTurnOrder(int nPlayers) {
         super(nPlayers);
     }

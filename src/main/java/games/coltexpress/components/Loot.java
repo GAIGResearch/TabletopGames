@@ -10,9 +10,18 @@ public class Loot extends Component {
     private ColtExpressParameters.LootType type;
 
     public Loot(ColtExpressParameters.LootType type, int value){
+
         super(Utils.ComponentType.TOKEN, type.toString());
         this.type = type;
         this.value = value;
+    }
+
+    public static Loot createJewel(){
+        return new Loot(ColtExpressParameters.LootType.Jewel, 500);
+    }
+
+    public static Loot createStrongbox(){
+        return new Loot(ColtExpressParameters.LootType.Strongbox, 1000);
     }
 
     public int getValue(){

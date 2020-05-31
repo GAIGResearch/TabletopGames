@@ -16,6 +16,7 @@ public class MoveSidewaysAction extends DrawCard {
         super(plannedActions, playerDeck);
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
+
     }
 
     @Override
@@ -38,6 +39,7 @@ public class MoveSidewaysAction extends DrawCard {
         else{
             source.playersOnTopOfCompartment.remove(card.playerID);
             target.playersOnTopOfCompartment.add(card.playerID);
+
         }
 
         return true;

@@ -31,6 +31,7 @@ public class PunchAction  extends DrawCard {
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
         this.loot = loot;
+
         this.availableLoot = availableLoot;
         this.playerIsCheyenne = playerIsCheyenne;
     }
@@ -63,6 +64,7 @@ public class PunchAction  extends DrawCard {
                 ((ColtExpressGameState) gameState).addNeutralBullet(opponentID);
             } else
                 targetArea = target.playersInsideCompartment;
+
         }
         sourceArea.remove(opponentID);
         targetArea.add(opponentID);

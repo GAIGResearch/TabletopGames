@@ -1,11 +1,12 @@
 package games.coltexpress.cards;
 
 import core.actions.AbstractAction;
+import core.components.Card;
 import games.coltexpress.ColtExpressGameState;
 
 import java.util.Arrays;
 
-public class RoundCard {
+public class RoundCard extends Card {
     /*
     Round Cards
     - - - - - - - - - - - - - - 2-4 players - - - 5-6 players

@@ -1,8 +1,10 @@
-package games.virus;
+package games.virus.components;
 
+import core.components.Component;
 import games.virus.cards.VirusCard;
+import utilities.Utils;
 
-public class VirusBody {
+public class VirusBody extends Component {
     public VirusOrgan hearth;
     public VirusOrgan brain;
     public VirusOrgan stomach;
@@ -10,10 +12,17 @@ public class VirusBody {
 
     public VirusBody()
     {
+        super(Utils.ComponentType.TOKEN);
         hearth  = new VirusOrgan();
         brain   = new VirusOrgan();
         stomach = new VirusOrgan();
         bone    = new VirusOrgan();
+    }
+
+    @Override
+    public Component copy() {
+        // TODO
+        return null;
     }
 
     @Override

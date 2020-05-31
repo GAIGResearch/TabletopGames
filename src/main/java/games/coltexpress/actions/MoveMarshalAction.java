@@ -13,6 +13,7 @@ public class MoveMarshalAction extends DrawCard {
     public MoveMarshalAction(int plannedActions, int playerDeck,
                               int sourceCompartment, int targetCompartment){
         super(plannedActions, playerDeck);
+
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
     }
@@ -32,6 +33,7 @@ public class MoveMarshalAction extends DrawCard {
         }
         target.playersInsideCompartment.clear();
         return true;
+
     }
 
     @Override

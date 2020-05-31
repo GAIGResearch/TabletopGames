@@ -386,11 +386,11 @@ public class PandemicGUI extends AbstractGUI {
                         }
                     }
                 }
-            } else if (action instanceof RearrangeCardsWithCard) {  // Event
+            } else if (action instanceof RearrangeDeckOfCards) {  // Event
                 Card eventCard = action.getCard(gameState);
-                int[] cardOrder = ((RearrangeCardsWithCard) action).getNewCardOrder();
+                int[] cardOrder = ((RearrangeDeckOfCards) action).getNewCardOrder();
                 int nCards = cardOrder.length;
-                Deck<Card> deckFrom = (Deck<Card>) gameState.getComponentById(((RearrangeCardsWithCard) action).getDeckFrom());
+                Deck<Card> deckFrom = (Deck<Card>) gameState.getComponentById(((RearrangeDeckOfCards) action).getDeckFrom());
 
                 if (isCardHighlighted(eventCard, id)) {
                     // event card is highlighted
@@ -417,10 +417,11 @@ public class PandemicGUI extends AbstractGUI {
                         }
                     }
                 }
-            } else if (action instanceof RemoveCardWithCard) {  // Event
+
+            } else if (action instanceof RemoveComponentFromDeck) {  // Event
                 Card eventCard = action.getCard(gameState);
-                int infectionCard = ((RemoveCardWithCard) action).getRemoveCard();
-                Deck<Card> deck = (Deck<Card>) gameState.getComponentById(((RemoveCardWithCard) action).getDeck());
+                int infectionCard = ((RemoveComponentFromDeck) action).getComponentIdx();
+                Deck<Card> deck = (Deck<Card>) gameState.getComponentById(((RemoveComponentFromDeck) action).getDeck());
 
                 if (isCardHighlighted(eventCard, id)) {
                     // event card in hand selected

@@ -9,11 +9,11 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
-public class RearrangeCardsWithCard extends DrawCard {
+public class RearrangeDeckOfCards extends DrawCard {
     protected int[] newCardOrder;
     protected int rearrangeDeck;
 
-    public RearrangeCardsWithCard(int deckFrom, int deckTo, int fromIndex, int rearrangeDeck, int[] newCardOrder) {
+    public RearrangeDeckOfCards(int deckFrom, int deckTo, int fromIndex, int rearrangeDeck, int[] newCardOrder) {
         super(deckFrom, deckTo, fromIndex);
         this.rearrangeDeck = rearrangeDeck;
         this.newCardOrder = newCardOrder;
@@ -43,7 +43,7 @@ public class RearrangeCardsWithCard extends DrawCard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        RearrangeCardsWithCard that = (RearrangeCardsWithCard) o;
+        RearrangeDeckOfCards that = (RearrangeDeckOfCards) o;
         return rearrangeDeck == that.rearrangeDeck &&
                 Arrays.equals(newCardOrder, that.newCardOrder);
     }

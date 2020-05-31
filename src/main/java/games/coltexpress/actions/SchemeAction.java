@@ -13,6 +13,7 @@ public class SchemeAction extends DrawCard implements IPrintable {
 
     public SchemeAction(int handCards, int actionList, boolean hidden){
         super(handCards, actionList);
+
         this.hidden = hidden;
     }
 

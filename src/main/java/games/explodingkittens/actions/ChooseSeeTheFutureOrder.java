@@ -1,7 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.AbstractGameState;
-import core.actions.RearrangeCardsWithCard;
+import core.actions.RearrangeDeckOfCards;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -10,7 +10,7 @@ import games.explodingkittens.cards.ExplodingKittenCard;
 import java.util.Arrays;
 
 
-public class ChooseSeeTheFutureOrder extends RearrangeCardsWithCard implements IPrintable {
+public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPrintable {
 
     public ChooseSeeTheFutureOrder(int deckFrom, int deckTo, int fromIndex, int rearrangeDeck, int[] newCardOrder) {
         super(deckFrom, deckTo, fromIndex, rearrangeDeck, newCardOrder);

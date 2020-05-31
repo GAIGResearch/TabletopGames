@@ -9,6 +9,7 @@ import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 import games.coltexpress.ColtExpressTypes.*;
 import utilities.Group;
+
 import static core.CoreConstants.VERBOSE;
 
 import java.util.*;
@@ -78,6 +79,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 cegs.getTrainCompartments().get(1).addPlayerInside(playerIndex);
         }
         distributeCards(cegs);
+
     }
 
     @Override
@@ -143,6 +145,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     playerHand.add(playerDeck.draw());
                 }
             }
+
         }
     }
 

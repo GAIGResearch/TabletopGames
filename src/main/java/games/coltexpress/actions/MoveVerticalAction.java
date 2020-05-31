@@ -13,6 +13,7 @@ public class MoveVerticalAction extends DrawCard {
     public MoveVerticalAction(int plannedActions, int playerDeck,
                               int compartment, boolean toRoof){
         super(plannedActions, playerDeck);
+
         this.compartment = compartment;
         this.climbRoof = toRoof;
     }
@@ -32,6 +33,7 @@ public class MoveVerticalAction extends DrawCard {
             comp.playersInsideCompartment.add(card.playerID);
         }
         return true;
+
     }
 
     @Override
@@ -47,5 +49,6 @@ public class MoveVerticalAction extends DrawCard {
 
     public String toString(){
         return "MoveVerticalAction: climbRoof=" + climbRoof;
+
     }
 }

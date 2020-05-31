@@ -1,14 +1,13 @@
-package games.virus;
+package games.virus.components;
 
+import core.components.Component;
 import core.components.Deck;
 import games.virus.cards.VirusCard;
-import games.virus.cards.VirusMedicineCard;
-import games.virus.cards.VirusOrganCard;
-import games.virus.cards.VirusVirusCard;
+import utilities.Utils;
 
 import java.util.List;
 
-public class VirusOrgan {
+public class VirusOrgan extends Component {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -23,13 +22,28 @@ public class VirusOrgan {
     }
 
     public Deck<VirusCard> cards;
-
     public VirusOrganState state;
 
     public VirusOrgan()
     {
+        super(Utils.ComponentType.TOKEN);
         state = VirusOrganState.None;
-        cards = new Deck<VirusCard>("DeckOnOrgan");
+        cards = new Deck<>("DeckOnOrgan");
+    }
+
+    public void applyCard(VirusCard card)
+    {
+        switch (card.type) {
+            case Organ:
+                initialiseOrgan();
+                break;
+            case Medicine:
+                applyMedicine();
+                break;
+            case Virus:
+                applyVirus();
+                break;
+        }
     }
 
     public void initialiseOrgan()
@@ -59,26 +73,13 @@ public class VirusOrgan {
         return state;
     }
 
-    public void applyCard(VirusCard card)
-    {
-        if (card instanceof VirusOrganCard) {
-            initialiseOrgan();
-        }
-        else if (card instanceof VirusMedicineCard) {
-            applyMedicine();
-        }
-        else if (card instanceof VirusVirusCard) {
-            applyVirus();
-        }
-    }
-
     // Remove from deck a Virus Card.
     // Return the removed card
     public VirusCard removeAVirusCard() {
-        List<VirusCard> cardsOnOrgan = cards.getCards();
+        List<VirusCard> cardsOnOrgan = cards.getComponents();
 
         for (VirusCard card: cardsOnOrgan) {
-            if (card instanceof  VirusVirusCard) {
+            if (card.type == VirusCard.VirusCardType.Virus) {
                 cards.remove(card);
                 return card;
             }
@@ -89,10 +90,10 @@ public class VirusOrgan {
     // Remove from deck a Medicine Card.
     // Return the removed card
     public VirusCard removeAMedicineCard() {
-        List<VirusCard> cardsOnOrgan = cards.getCards();
+        List<VirusCard> cardsOnOrgan = cards.getComponents();
 
         for (VirusCard card: cardsOnOrgan) {
-            if (card instanceof  VirusMedicineCard) {
+            if (card.type == VirusCard.VirusCardType.Medicine) {
                 cards.remove(card);
                 return card;
             }
@@ -103,14 +104,20 @@ public class VirusOrgan {
     // Remove from deck an Organ Card.
     // Return the removed card
     public VirusCard removeAnOrganCard() {
-        List<VirusCard> cardsOnOrgan = cards.getCards();
+        List<VirusCard> cardsOnOrgan = cards.getComponents();
 
         for (VirusCard card: cardsOnOrgan) {
-            if (card instanceof  VirusOrganCard) {
+            if (card.type == VirusCard.VirusCardType.Organ) {
                 cards.remove(card);
                 return card;
             }
         }
+        return null;
+    }
+
+    @Override
+    public Component copy() {
+        // TODO
         return null;
     }
 

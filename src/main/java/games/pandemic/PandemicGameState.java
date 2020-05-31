@@ -80,7 +80,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * @return - List of AbstractAction objects.
      */
     @Override
     public List<AbstractAction> computeAvailableActions() {
@@ -389,7 +389,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
             Card card = ph.getComponents().get(cp);
             if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                 for (int idx = 0; idx < nInfectDiscards; idx++) {
-                    acts.add(new RemoveCardWithCard(ph.getComponentID(), playerDiscardDeck.getComponentID(), cp, infectionDiscard.getComponentID(), idx));
+                    acts.add(new RemoveComponentFromDeck<Card>(ph.getComponentID(), playerDiscardDeck.getComponentID(), cp, infectionDiscard.getComponentID(), idx));
                 }
                 break;
             }
@@ -495,7 +495,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
                 }
                 generatePermutations(n, order, permutations);
                 for (int[] perm: permutations) {
-                    actions.add(new RearrangeCardsWithCard(deckFrom, deckTo, cardIdx, infectionDeck.getComponentID(), perm));
+                    actions.add(new RearrangeDeckOfCards(deckFrom, deckTo, cardIdx, infectionDeck.getComponentID(), perm));
                 }
                 break;
         }

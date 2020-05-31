@@ -163,5 +163,6 @@ public class ColtExpressParameters extends AbstractGameParameters {
             }
             return -1;
         }
+
     }
 }

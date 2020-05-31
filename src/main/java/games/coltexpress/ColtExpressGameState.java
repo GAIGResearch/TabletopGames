@@ -16,7 +16,6 @@ import games.coltexpress.ColtExpressTypes.*;
 
 import java.util.*;
 
-
 public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
 
     // Colt express adds 4 game phases
@@ -318,6 +317,7 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
                 playerCompartment = compartment;
                 break;
             }
+
         }
 
         if (availableTargets.size() > 1)
@@ -488,6 +488,13 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
     public List<PartialObservableDeck<ColtExpressCard>> getPlayerDecks() {
         return playerDecks;
     }
+
+//    private ArrayList<AbstractAction> playerActions(int playerID) {
+//        ArrayList<AbstractAction> actions = new ArrayList<>();
+//
+//        // add end turn by drawing a card
+//        return actions;
+//    }
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
