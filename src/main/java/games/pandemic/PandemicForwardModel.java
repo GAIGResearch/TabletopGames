@@ -9,6 +9,7 @@ import games.pandemic.engine.*;
 import games.pandemic.engine.conditions.*;
 import games.pandemic.engine.gameOver.*;
 import games.pandemic.engine.rules.*;
+import games.pandemic.engine.rules.DrawCards;
 import utilities.Hash;
 
 import java.util.ArrayList;

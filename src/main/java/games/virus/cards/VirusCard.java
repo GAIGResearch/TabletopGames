@@ -1,13 +1,15 @@
 package games.virus.cards;
 
-import games.virus.VirusOrgan;
+import core.components.Card;
 
-public abstract class VirusCard {
+
+public class VirusCard extends Card {
     public enum VirusCardOrgan {
         Hearth,
         Brain,
         Stomach,
         Bone,
+        Wild,
         None
     }
 
@@ -22,7 +24,13 @@ public abstract class VirusCard {
     public final VirusCardType type;
 
     public VirusCard(VirusCardOrgan organ, VirusCardType type) {
+        super(type.toString());
         this.organ = organ;
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "VirusCard{" + type + ": " + organ + '}';
     }
 }

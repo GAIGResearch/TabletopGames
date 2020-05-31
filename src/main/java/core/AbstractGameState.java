@@ -112,7 +112,7 @@ public abstract class AbstractGameState {
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * @return - List of AbstractAction objects.
      */
     public abstract List<AbstractAction> computeAvailableActions();
 

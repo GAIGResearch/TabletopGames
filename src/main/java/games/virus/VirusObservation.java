@@ -1,9 +1,10 @@
 package games.virus;
 
 import core.components.Deck;
-import core.observations.IObservation;
-import core.observations.IPrintable;
+import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
 import games.virus.cards.VirusCard;
+import games.virus.components.VirusBody;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class VirusObservation implements IPrintable, IObservation {
         StringBuilder sb = new StringBuilder();
         sb.append("Player Hand -> ");
 
-        for (VirusCard card : playerHand.getCards()) {
+        for (VirusCard card : playerHand.getComponents()) {
             sb.append(card.toString());
             sb.append(" ");
         }

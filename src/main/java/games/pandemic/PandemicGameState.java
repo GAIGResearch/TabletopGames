@@ -80,7 +80,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * @return - List of AbstractAction objects.
      */
     @Override
     public List<AbstractAction> computeAvailableActions() {

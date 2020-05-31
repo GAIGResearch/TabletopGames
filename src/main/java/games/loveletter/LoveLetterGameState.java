@@ -124,7 +124,7 @@ public class LoveLetterGameState extends AbstractGameState {
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * @return - List of AbstractAction objects.
      */
     @Override
     public List<AbstractAction> computeAvailableActions() {
@@ -144,7 +144,7 @@ public class LoveLetterGameState extends AbstractGameState {
     /**
      * Computes actions available for the given player.
      * @param playerID - ID of player to calculate actions for.
-     * @return - ArrayList of IAction objects.
+     * @return - ArrayList of AbstractAction objects.
      */
     private ArrayList<AbstractAction> playerActions(int playerID) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
