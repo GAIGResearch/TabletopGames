@@ -5,7 +5,7 @@ import games.uno.UnoGameState;
 
 public class UnoWildDrawFourCard extends UnoCard {
     public UnoWildDrawFourCard() {
-        super(UnoCard.UnoCardColor.Wild, UnoCardType.WildDrawFour, -1);
+        super("Wild", UnoCardType.WildDrawFour, -1);
     }
 
     @Override
@@ -19,7 +19,7 @@ public class UnoWildDrawFourCard extends UnoCard {
         int playerID = gameState.getCurrentPlayerID();
         Deck<UnoCard> playerHand = gameState.getPlayerDecks().get(playerID);
         for (UnoCard card : playerHand.getComponents()) {
-            if (card.color == gameState.getCurrentColor())
+            if (card.color.equals(gameState.getCurrentColor()))
                  return false;
         }
         return true;

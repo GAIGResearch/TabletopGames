@@ -12,20 +12,11 @@ public class UnoObservation implements IPrintable, IObservation {
 
     String[] strings = new String[6];
 
-    public UnoObservation(UnoCard currentCard, UnoCard.UnoCardColor currentColor, Deck<UnoCard> playerHand,
+    public UnoObservation(UnoCard currentCard, String currentColor, Deck<UnoCard> playerHand,
                           Deck<UnoCard> discardDeck, int playerID, ArrayList<Integer> cardsLeft) {
-        String colorString = "";
-        if (currentColor == UnoCard.UnoCardColor.Red)
-            colorString = "Red";
-        else if (currentColor == UnoCard.UnoCardColor.Green)
-            colorString = "Green";
-        else if (currentColor == UnoCard.UnoCardColor.Blue)
-            colorString = "Blue";
-        else if (currentColor == UnoCard.UnoCardColor.Yellow)
-            colorString = "Yellow";
 
         strings[0] = "----------------------------------------------------";
-        strings[1] = "Current Card: " + currentCard.toString() + " [" + colorString + "]";
+        strings[1] = "Current Card: " + currentCard.toString() + " [" + currentColor + "]";
         strings[2] = "----------------------------------------------------";
 
         strings[3] = "Player      : " + playerID;

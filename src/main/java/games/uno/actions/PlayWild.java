@@ -8,9 +8,9 @@ import games.uno.cards.UnoCard;
 
 public class PlayWild extends DrawCard implements IPrintable {
 
-    private final UnoCard.UnoCardColor color;
+    private final String color;
 
-    public PlayWild(int deckFrom, int deckTo, int fromIndex, UnoCard.UnoCardColor color) {
+    public PlayWild(int deckFrom, int deckTo, int fromIndex, String color) {
         super(deckFrom, deckTo, fromIndex);
         this.color = color;
     }

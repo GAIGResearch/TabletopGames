@@ -21,7 +21,7 @@ public class UnoGameState extends AbstractGameState {
     Deck<UnoCard>        drawDeck;
     Deck<UnoCard>        discardDeck;
     UnoCard              currentCard;
-    UnoCard.UnoCardColor currentColor;
+    String currentColor;
 
     public UnoGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
         super(gameParameters, model, new UnoTurnOrder(nPlayers));
@@ -69,7 +69,7 @@ public class UnoGameState extends AbstractGameState {
             int cardIdx = playerHand.getComponents().indexOf(card);
             if (card.isPlayable(this)) {
                 if (isWildCard(card)) {
-                    for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
+                    for (String color : ((UnoGameParameters)gameParameters).colors) {
                         actions.add(new PlayWild(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
                     }
                 }
@@ -105,7 +105,7 @@ public class UnoGameState extends AbstractGameState {
         currentColor = card.color;
     }
 
-    public void updateCurrentCard(UnoCard card, UnoCard.UnoCardColor color) {
+    public void updateCurrentCard(UnoCard card, String color) {
         currentCard  = card;
         currentColor = color;
     }
@@ -126,7 +126,7 @@ public class UnoGameState extends AbstractGameState {
         return currentCard;
     }
 
-    public UnoCard.UnoCardColor getCurrentColor() {
+    public String getCurrentColor() {
         return currentColor;
     }
 }

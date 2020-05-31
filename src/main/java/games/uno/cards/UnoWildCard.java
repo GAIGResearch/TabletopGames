@@ -5,7 +5,7 @@ import games.uno.UnoGameState;
 public class UnoWildCard extends UnoCard {
 
     public UnoWildCard() {
-        super(UnoCardColor.Wild, UnoCardType.Wild, -1);
+        super("Wild", UnoCardType.Wild, -1);
     }
 
     @Override

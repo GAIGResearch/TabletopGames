@@ -58,7 +58,7 @@ public class PlayCard extends DrawCard implements IPrintable {
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println("Play card");
+        System.out.println(getString(gameState));
     }
 
     @Override

@@ -3,7 +3,6 @@ package games.uno.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.uno.UnoGameState;

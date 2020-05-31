@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PlayWildDraw4 extends PlayWild implements IPrintable {
 
-    public PlayWildDraw4(int deckFrom, int deckTo, int fromIndex, UnoCard.UnoCardColor color) {
+    public PlayWildDraw4(int deckFrom, int deckTo, int fromIndex, String color) {
         super(deckFrom, deckTo, fromIndex, color);
     }
 

@@ -50,7 +50,7 @@ public class UnoForwardModel extends AbstractForwardModel {
         // If the first card is Skip, Reverse or DrawTwo, play the card
         if (!ugs.isNumberCard(ugs.currentCard)) {
             if (VERBOSE) {
-                System.out.println("First card no number " + ugs.currentColor.toString());
+                System.out.println("First card no number " + ugs.currentColor);
             }
             if (ugs.currentCard instanceof UnoReverseCard) {
                 ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
@@ -77,34 +77,32 @@ public class UnoForwardModel extends AbstractForwardModel {
 
     // Create all the cards and include them into the drawPile
     private void createCards(UnoGameState ugs) {
-        // Create the number cards
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
+        UnoGameParameters ugp = (UnoGameParameters)ugs.getGameParameters();
+        for (String color : ugp.colors) {
+            if (!color.equals("Wild")) {
 
-            // one card 0, two cards of 1, 2, ... 9
-            for (int number = 0; number < ((UnoGameParameters)ugs.getGameParameters()).nCardsPerColor; number++) {
-                ugs.drawDeck.add(new UnoNumberCard(color, number));
-                if (number > 0)
+                // Create the number cards
+                for (int number = 0; number < ugp.nNumberCards; number++) {
                     ugs.drawDeck.add(new UnoNumberCard(color, number));
+                    if (number > 0)
+                        ugs.drawDeck.add(new UnoNumberCard(color, number));
+                }
+
+                // Create the DrawTwo, Reverse and Skip cards for each color
+                for (int i = 0; i < ugp.nSkipCards; i++) {
+                    ugs.drawDeck.add(new UnoSkipCard(color));
+                }
+                for (int i = 0; i < ugp.nReverseCards; i++) {
+                    ugs.drawDeck.add(new UnoReverseCard(color));
+                }
+                for (int i = 0; i < ugp.nDrawCards; i++) {
+                    ugs.drawDeck.add(new UnoDrawTwoCard(color));
+                }
             }
         }
 
-        // Create the DrawTwo, Reverse and Skip cards for each color
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values()) {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            ugs.drawDeck.add(new UnoSkipCard(color));
-            ugs.drawDeck.add(new UnoSkipCard(color));
-            ugs.drawDeck.add(new UnoReverseCard(color));
-            ugs.drawDeck.add(new UnoReverseCard(color));
-            ugs.drawDeck.add(new UnoDrawTwoCard(color));
-            ugs.drawDeck.add(new UnoDrawTwoCard(color));
-        }
-
-        // Create the wild cards, 4 of each type
-        for (int i = 0; i < ((UnoGameParameters)ugs.getGameParameters()).nWildCards; i++) {
+        // Create the wild cards, N of each type
+        for (int i = 0; i < ugp.nWildCards; i++) {
             ugs.drawDeck.add(new UnoWildCard());
             ugs.drawDeck.add(new UnoWildDrawFourCard());
         }

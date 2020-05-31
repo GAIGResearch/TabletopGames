@@ -1,6 +1,5 @@
 package players;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;

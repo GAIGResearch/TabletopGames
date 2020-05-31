@@ -5,7 +5,7 @@ import games.uno.UnoGameState;
 
 public class UnoSkipCard extends UnoCard {
 
-    public UnoSkipCard(UnoCardColor color) {
+    public UnoSkipCard(String color) {
         super(color, UnoCardType.Skip, -1);
     }
 
@@ -17,11 +17,11 @@ public class UnoSkipCard extends UnoCard {
     // It is playable if the color is the same of the currentCard color or the currentCard is a Skip one
     @Override
     public boolean isPlayable(UnoGameState gameState) {
-        return this.color == gameState.getCurrentColor() || gameState.getCurrentCard() instanceof UnoSkipCard;
+        return this.color.equals(gameState.getCurrentColor()) || gameState.getCurrentCard() instanceof UnoSkipCard;
     }
 
     @Override
     public String toString() {
-        return color.toString() + "Skip";
+        return "Skip{" + color + "}";
     }
 }
