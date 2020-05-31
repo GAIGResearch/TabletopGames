@@ -9,11 +9,12 @@ import games.uno.cards.*;
 import core.interfaces.IObservation;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
-import games.uno.actions.PlayWild;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
 
 public class UnoGameState extends AbstractGameState {
@@ -36,11 +37,11 @@ public class UnoGameState extends AbstractGameState {
     }
 
     boolean isWildCard(UnoCard card) {
-        return card instanceof UnoWildCard || card instanceof UnoWildDrawFourCard;
+        return card.type == Wild;
     }
 
     boolean isNumberCard(UnoCard card) {
-        return card instanceof UnoNumberCard;
+        return card.type == UnoCard.UnoCardType.Number;
     }
 
     @Override
@@ -65,7 +66,7 @@ public class UnoGameState extends AbstractGameState {
             if (card.isPlayable(this)) {
                 if (isWildCard(card)) {
                     for (String color : ((UnoGameParameters)gameParameters).colors) {
-                        actions.add(new PlayWild(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
+                        actions.add(new PlayCard(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
                     }
                 }
                 else {

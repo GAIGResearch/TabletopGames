@@ -52,10 +52,10 @@ public class UnoForwardModel extends AbstractForwardModel {
             if (VERBOSE) {
                 System.out.println("First card no number " + ugs.currentColor);
             }
-            if (ugs.currentCard instanceof UnoReverseCard) {
+            if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
                 ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
             }
-            else if (ugs.currentCard instanceof UnoDrawTwoCard) {
+            else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
                 int player = ugs.getCurrentPlayerID();
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
@@ -83,30 +83,32 @@ public class UnoForwardModel extends AbstractForwardModel {
 
                 // Create the number cards
                 for (int number = 0; number < ugp.nNumberCards; number++) {
-                    ugs.drawDeck.add(new UnoNumberCard(color, number));
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Number, color, number));
                     if (number > 0)
-                        ugs.drawDeck.add(new UnoNumberCard(color, number));
+                        ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Number, color, number));
                 }
 
                 // Create the DrawTwo, Reverse and Skip cards for each color
                 for (int i = 0; i < ugp.nSkipCards; i++) {
-                    ugs.drawDeck.add(new UnoSkipCard(color));
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Skip, color));
                 }
                 for (int i = 0; i < ugp.nReverseCards; i++) {
-                    ugs.drawDeck.add(new UnoReverseCard(color));
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Reverse, color));
                 }
                 for (int i = 0; i < ugp.nDrawCards; i++) {
-                    ugs.drawDeck.add(new UnoDrawTwoCard(color));
+                    for (int n : ugp.specialDrawCards) {
+                        ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Draw, color, n));
+                    }
                 }
             }
         }
 
         // Create the wild cards, N of each type
         for (int i = 0; i < ugp.nWildCards; i++) {
-            ugs.drawDeck.add(new UnoWildCard());
-            ugs.drawDeck.add(new UnoWildDrawFourCard());
+            for (int n : ugp.specialWildDrawCards) {
+                ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Wild, "Wild", n));
+            }
         }
-
     }
 
     private void drawCardsToPlayers(UnoGameState ugs) {

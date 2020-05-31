@@ -9,11 +9,12 @@ public class UnoGameParameters extends AbstractGameParameters {
     public int nSkipCards = 2;
     public int nReverseCards = 2;
     public int nDrawCards = 2;
+    public int[] specialDrawCards = new int[]{2};  // DrawTwo card
+    public int[] specialWildDrawCards = new int[]{0, 4};  // Wild, WildDrawFour card
     public String[] colors = new String[]{
             "Red",
             "Blue",
             "Green",
-            "Yellow",
-            "Wild"
+            "Yellow"
     };
 }
