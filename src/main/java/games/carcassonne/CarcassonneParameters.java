@@ -53,4 +53,8 @@ public class CarcassonneParameters extends AbstractGameParameters {
 
     }
 
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new CarcassonneParameters();
+    }
 }

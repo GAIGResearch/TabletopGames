@@ -2,7 +2,6 @@ package games.carcassonne;
 
 import core.actions.AbstractAction;
 import core.components.Card;
-import core.components.Deck;
 import core.AbstractGameState;
 import core.AbstractGameParameters;
 import core.observations.VectorObservation;
@@ -16,26 +15,20 @@ import java.util.List;
 
 public class CarcassonneGameState extends AbstractGameState {
 
-    private int[] points;
-    private int[] unusedMeeple;
-    private int numAvailableActions;
+    public enum CarcassonneGamePhase {
+        PlaceTile,
+        PlaceCharacter
+    }
 
-    private CarcassonneBoard gameBoard;
-    private CarcassonneGamePhase gamePhase;
+    int[] points;
+    int[] unusedMeeple;
+    int numAvailableActions;
+
+    CarcassonneBoard gameBoard;
+    CarcassonneGamePhase gamePhase;
 
     public CarcassonneGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers));
-    }
-
-    public void setComponents() {
-        points = new int[getNPlayers()];
-        unusedMeeple = new int[getNPlayers()];
-        Arrays.fill(unusedMeeple, 7);
-        gameBoard = new CarcassonneBoard();
-
-        Deck<CarcassonneTile> drawPile = new Deck<>("Draw Pile");
-
-        //drawPile.add(new CarcassonneTile());
     }
 
     private List<AbstractAction> tileActions(){
@@ -56,39 +49,44 @@ public class CarcassonneGameState extends AbstractGameState {
 
     @Override
     public void addAllComponents() {
-
+        // TODO
     }
 
     @Override
     protected AbstractGameState copy(int playerId) {
+        // TODO
         return null;
     }
 
     @Override
     public VectorObservation getVectorObservation() {
+        // TODO
         return null;
     }
 
     @Override
     public double[] getDistanceFeatures(int playerId) {
+        // TODO
         return new double[0];
     }
 
     @Override
     public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+        // TODO
         return null;
     }
 
     @Override
     public double getScore(int playerId) {
+        // TODO
         return 0;
     }
 
-    private class CarcassonneBoard{
+    static class CarcassonneBoard{
         HashMap<Point, CarcassonneTile> placedTiles = new HashMap<>();
         HashSet<Point> openPositions = new HashSet<>();
 
-        private CarcassonneBoard(){
+        CarcassonneBoard(){
             placedTiles.put(new Point(0,0), new CarcassonneTile(new CarcassonneType[][]{
                     {CarcassonneType.Grass, CarcassonneType.CastleGrass, CarcassonneType.Grass},
                     {CarcassonneType.Street, CarcassonneType.Street, CarcassonneType.Street},
@@ -138,7 +136,7 @@ public class CarcassonneGameState extends AbstractGameState {
         }
     }
 
-    private class CarcassonneTile extends Card {
+    static class CarcassonneTile extends Card {
         private CarcassonneTile[] neighbors = new CarcassonneTile[4];
         private CarcassonneType[][] type; //3x3 array
         private int rotation = 0;
