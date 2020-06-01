@@ -18,12 +18,12 @@ public class PropertyColor extends Property
         this.valueStr = valStr;
     }
 
-    public PropertyColor(String key, int hashKey, Color value)
+    public PropertyColor(String key, int hashKey, Color value, String valueStr)
     {
         this.hashString = key;
         this.hashKey = hashKey;
         this.value = value;
-        this.valueStr = value.toString();
+        this.valueStr = valueStr;
     }
 
     @Override
@@ -40,6 +40,6 @@ public class PropertyColor extends Property
 
     @Override
     public Property copy() {
-        return new PropertyColor(hashString, hashKey, value);
+        return new PropertyColor(hashString, hashKey, value, valueStr);
     }
 }
