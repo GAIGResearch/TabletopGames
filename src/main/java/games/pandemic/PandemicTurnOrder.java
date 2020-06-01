@@ -72,6 +72,6 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         pto.reactivePlayers = new LinkedList<>(reactivePlayers);
         pto.turnStep = turnStep;
         pto.nStepsPerTurn = nStepsPerTurn;
-        return pto;
+        return copyTo(pto);
     }
 }
