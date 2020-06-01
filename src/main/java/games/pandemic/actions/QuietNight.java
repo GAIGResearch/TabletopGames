@@ -25,6 +25,10 @@ public class QuietNight extends AbstractAction {
         return true;
    }
 
+    @Override
+    public AbstractAction copy() {
+        return null; // TODO
+    }
 
 
     @Override

@@ -32,6 +32,10 @@ public class MovePlayer extends AbstractAction {
         return true;
     }
 
+    @Override
+    public AbstractAction copy() {
+        return null; // TODO
+    }
 
 
     public static void placePlayer(PandemicGameState gs, String city, int playerIdx) {

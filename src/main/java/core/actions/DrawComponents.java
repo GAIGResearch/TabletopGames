@@ -9,11 +9,18 @@ import java.util.Objects;
 
 
 public class DrawComponents<T extends Component> extends AbstractAction {
-    private boolean executed;
-    private int[] fromIds;
 
     protected int deckFrom, deckTo, nComponents;
 
+    private int[] componentIds;  // Component IDs for all components moved from one deck to the other
+    private boolean executed;  // Indicates if the action executed
+
+    /**
+     * Moves the first N components from one deck to another.
+     * @param deckFrom - origin deck from which to move components.
+     * @param deckTo - destination deck to which to move components.
+     * @param nComponents - how many components should be moved.
+     */
     public DrawComponents(int deckFrom, int deckTo, int nComponents) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
@@ -28,7 +35,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
         for (int i = 0; i < nComponents; i++) {
             T component = from.pick();
-            fromIds[i] = component.getComponentID();
+            componentIds[i] = component.getComponentID();
             to.add(component);
         }
 
@@ -42,7 +49,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
     public T getComponent(AbstractGameState gs, int idx) {
         if (executed) {
-            return (T) gs.getComponentById(fromIds[idx]);
+            return (T) gs.getComponentById(componentIds[idx]);
         } else {
             return ((Deck<T>) gs.getComponentById(deckFrom)).getComponents().get(idx);
         }
@@ -57,23 +64,50 @@ public class DrawComponents<T extends Component> extends AbstractAction {
                 deckFrom == that.deckFrom &&
                 deckTo == that.deckTo &&
                 nComponents == that.nComponents &&
-                Arrays.equals(fromIds, that.fromIds);
+                Arrays.equals(componentIds, that.componentIds);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(executed, deckFrom, deckTo, nComponents);
-        result = 31 * result + Arrays.hashCode(fromIds);
+        result = 31 * result + Arrays.hashCode(componentIds);
         return result;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        String components = "{";
+        for (int id: componentIds) {
+            components += gameState.getComponentById(id).getComponentName() + ", ";
+        }
+        components += "}";
+        components = components.replace(", }", "}");
+        return "DrawComponents{" +
+                "deckFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
+                ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
+                ", nComponents=" + nComponents +
+                ", components=" + components +
+                '}';
+    }
+
+    @Override
+    public String toString() {
+        return "DrawComponents{" +
+                "deckFrom=" + deckFrom +
+                ", deckTo=" + deckTo +
+                ", nComponents=" + nComponents +
+                ", fromIds=" + Arrays.toString(componentIds) +
+                ", executed=" + executed +
+                '}';
+    }
+
+    @Override
+    public void printToConsole(AbstractGameState gameState) {
+        System.out.println(getString(gameState));
     }
 
     @Override
     public void printToConsole() {
-        System.out.println("Draw components");
+        System.out.println(toString());
     }
 }

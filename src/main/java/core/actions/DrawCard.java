@@ -65,29 +65,26 @@ public class DrawCard extends AbstractAction {
         return (Card) gs.getComponentById(cardId);
     }
 
-    @Override
-    public AbstractAction copy() {
-        return new DrawCard(deckFrom, deckTo, fromIndex, toIndex);
-    }
-
+    // Getters
     public int getCardId() {
         return cardId;
     }
-
     public int getFromIndex() {
         return fromIndex;
     }
-
     public int getToIndex() {
         return toIndex;
     }
-
     public int getDeckFrom() {
         return deckFrom;
     }
-
     public int getDeckTo() {
         return deckTo;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DrawCard(deckFrom, deckTo, fromIndex, toIndex);
     }
 
     @Override
@@ -110,7 +107,12 @@ public class DrawCard extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "DrawCard{" +
+                "deckFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
+                ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
+                ", card=" + getCard(gameState).getComponentName() +
+                ", toIndex=" + toIndex +
+                '}';
     }
 
     @Override

@@ -70,6 +70,11 @@ public class TreatDisease extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return null; // TODO
+    }
+
+    @Override
     public boolean equals(Object other)
     {
         if (this == other) return true;

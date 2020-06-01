@@ -43,6 +43,10 @@ public class CureDisease extends AbstractAction {
         return false;
     }
 
+    @Override
+    public AbstractAction copy() {
+        return null; // TODO
+    }
 
 
     @Override
