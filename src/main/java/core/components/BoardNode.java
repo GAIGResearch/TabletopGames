@@ -26,7 +26,7 @@ public class BoardNode extends Component {
         this(-1, "");
     }
 
-    private BoardNode(int maxNeighbours, String name, int ID) {
+    BoardNode(int maxNeighbours, String name, int ID) {
         super(Utils.ComponentType.BOARD_NODE, name, ID);
         this.maxNeighbours = maxNeighbours;
         this.neighbours = new HashSet<>();
@@ -80,14 +80,8 @@ public class BoardNode extends Component {
      */
     @Override
     public BoardNode copy() {
-        BoardNode copy = new BoardNode(maxNeighbours, componentName, componentID);
-        copy.neighbours = new HashSet<>(neighbours);
-        copy.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
-
-        //copy type and component.
-        copyComponentTo(copy);
-
-        return copy;
+        // WARNING: DO not copy this directly, the GraphBoard copies it to correctly assign neighbour references!
+        return null;
     }
 
     /**
