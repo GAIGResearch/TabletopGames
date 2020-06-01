@@ -5,6 +5,8 @@ import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
+import java.util.LinkedList;
+
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 
 public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
@@ -44,7 +46,8 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
 
     @Override
     public TurnOrder copy() {
-        ExplodingKittenTurnOrder to = (ExplodingKittenTurnOrder) super.copy();
+        ExplodingKittenTurnOrder to = new ExplodingKittenTurnOrder(nPlayers);
+        to.reactivePlayers = new LinkedList<>(reactivePlayers);
         to.requiredDraws = requiredDraws;
         return copyTo(to);
     }

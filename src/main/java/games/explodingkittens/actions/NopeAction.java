@@ -1,6 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.interfaces.IPrintable;
 
@@ -23,5 +24,10 @@ public class NopeAction extends DrawCard implements IPrintable {
     @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new NopeAction(deckFrom, deckTo, fromIndex);
     }
 }

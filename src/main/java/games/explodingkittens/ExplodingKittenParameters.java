@@ -25,4 +25,9 @@ public class ExplodingKittenParameters extends AbstractGameParameters {
     public int nCardsPerPlayer = 7;
     public int nDifuseCards = 6;
     public int nSeeFutureCards = 3;
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new ExplodingKittenParameters();
+    }
 }

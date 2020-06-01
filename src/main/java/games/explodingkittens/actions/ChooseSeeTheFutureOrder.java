@@ -1,6 +1,7 @@
 package games.explodingkittens.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.RearrangeDeckOfCards;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
@@ -49,5 +50,10 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
     @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new ChooseSeeTheFutureOrder(deckFrom, deckTo, fromIndex, rearrangeDeck, newCardOrder.clone());
     }
 }
