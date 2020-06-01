@@ -118,7 +118,7 @@ public abstract class AbstractForwardModel {
      */
     public AbstractForwardModel copy() {
         AbstractForwardModel model = getCopy();
-        model.rnd = new Random();
+        model.rnd = new Random();  // TODO: there are 2 random sources: given by gameSeed in GameParameters, and here
         return model;
     }
 }

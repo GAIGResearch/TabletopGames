@@ -31,7 +31,7 @@ public class Deck<T extends Component> extends Component {
         this.capacity = -1;
     }
 
-    private Deck(String name, int ID)
+    protected Deck(String name, int ID)
     {
         super(ComponentType.DECK, name, ID);
         this.components = new ArrayList<>();
@@ -255,17 +255,21 @@ public class Deck<T extends Component> extends Component {
     public Deck<T> copy()
     {
         Deck<T> dp = new Deck<>(componentName, componentID);
+        copyTo(dp);
+        return dp;
+    }
+
+    protected void copyTo(Deck<T> deck) {
         ArrayList<T> newComponents = new ArrayList<>();
         for (T c : components)
         {
             newComponents.add((T)c.copy());
         }
-        dp.components = newComponents;
-        dp.capacity = capacity;
+        deck.components = newComponents;
+        deck.capacity = capacity;
 
         //copy type and component.
-        copyComponentTo(dp);
-        return dp;
+        copyComponentTo(deck);
     }
 
     /**

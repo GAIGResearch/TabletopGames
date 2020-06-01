@@ -140,6 +140,7 @@ public abstract class TurnOrder {
 
     public TurnOrder copyTo (TurnOrder turnOrder) {
         turnOrder.turnOwner = turnOwner;
+        turnOrder.turnCounter = turnCounter;
         turnOrder.roundCounter = roundCounter;
         turnOrder.firstPlayer = firstPlayer;
         turnOrder.nMaxRounds = nMaxRounds;

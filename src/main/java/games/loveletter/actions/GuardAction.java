@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
@@ -61,5 +62,10 @@ public class GuardAction extends DrawCard implements IPrintable {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), opponentID, cardType);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new GuardAction(deckFrom, deckTo, fromIndex, opponentID, cardType);
     }
 }

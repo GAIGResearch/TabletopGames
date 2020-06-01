@@ -34,4 +34,8 @@ public class LoveLetterCard extends Card {
         return cardType.toString();
     }
 
+    @Override
+    public Card copy() {
+        return new LoveLetterCard(cardType);
+    }
 }
