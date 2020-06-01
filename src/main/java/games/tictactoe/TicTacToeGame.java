@@ -3,6 +3,7 @@ package games.tictactoe;
 import core.AbstractGame;
 import core.AbstractPlayer;
 import players.HumanConsolePlayer;
+import players.OSLA;
 import players.RandomPlayer;
 
 import java.util.*;
@@ -17,7 +18,7 @@ public class TicTacToeGame extends AbstractGame {
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer());
-        agents.add(new HumanConsolePlayer());
+        agents.add(new OSLA());
 
         TicTacToeGameParameters params = new TicTacToeGameParameters();
         AbstractGame game = new TicTacToeGame(agents, params);
