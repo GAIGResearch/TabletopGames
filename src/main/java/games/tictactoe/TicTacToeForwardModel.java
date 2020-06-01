@@ -82,7 +82,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
             if (c != ' ') {
                 boolean win = true;
                 for (int y = 1; y < gridBoard.getHeight(); y++) {
-                    if (!gridBoard.getElement(x, y).equals(c)) {
+                    if (gridBoard.getElement(x, y) != c) {
                         win = false;
                         break;
                     }
@@ -100,7 +100,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
             if (c != ' ') {
                 boolean win = true;
                 for (int x = 1; x < gridBoard.getWidth(); x++) {
-                    if (!gridBoard.getElement(x, y).equals(c)) {
+                    if (gridBoard.getElement(x, y) != c) {
                         win = false;
                         break;
                     }
@@ -147,8 +147,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
 
     @Override
     public void endGame(AbstractGameState gameState) {
-        gameState.setGameStatus(Utils.GameResult.GAME_DRAW);
-        Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.GAME_DRAW);
+        if (gameState.getPlayerResults()[0] == Utils.GameResult.GAME_ONGOING) {
+            gameState.setGameStatus(Utils.GameResult.GAME_DRAW);
+            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.GAME_DRAW);
+        }
+        System.out.println(Arrays.toString(gameState.getPlayerResults()));
     }
 
     /**

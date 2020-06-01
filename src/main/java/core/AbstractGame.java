@@ -117,6 +117,11 @@ public abstract class AbstractGame {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
+
+        // Print last state
+        if (gameState instanceof IPrintable && CoreConstants.VERBOSE) {
+            ((IPrintable) gameState).printToConsole();
+        }
         System.out.println("Game Over");
 
         // Allow players to terminate
