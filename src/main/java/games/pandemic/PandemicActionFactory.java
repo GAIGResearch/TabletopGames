@@ -96,7 +96,7 @@ class PandemicActionFactory {
         }
 
         // Discover a cure, cards of the same colour at a research station
-        ArrayList<Card>[] colorCounter = new ArrayList[colors.length];
+        ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
         for (Card card: playerHand.getComponents()){
             Property p  = card.getProperty(colorHash);
             if (p != null){
@@ -105,7 +105,7 @@ class PandemicActionFactory {
                 int idx = indexOf(colors, color);
                 if (colorCounter[idx] == null)
                     colorCounter[idx] = new ArrayList<>();
-                colorCounter[idx].add(card);
+                colorCounter[idx].add(card.getComponentID());
             }
         }
         for (int i = 0 ; i < colorCounter.length; i++){

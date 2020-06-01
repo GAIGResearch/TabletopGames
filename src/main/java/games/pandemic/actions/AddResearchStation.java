@@ -37,7 +37,7 @@ public class AddResearchStation extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null; // TODO
+        return new AddResearchStation(this.city);
     }
 
     @Override

@@ -202,8 +202,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         gs.epidemic = epidemic;
         gs.nCardsDrawn = nCardsDrawn;
 
-        researchStationLocations = new ArrayList<>(researchStationLocations);
-//        gs.addAllComponents();
+        gs.researchStationLocations = new ArrayList<>(researchStationLocations);
 
         return gs;
     }

@@ -362,10 +362,10 @@ public class PandemicGUI extends AbstractGUI {
                 actionButtons[k].setVisible(true);
                 actionButtons[k++].setButtonAction(action, gameState);
             } else if (action instanceof CureDisease) {
-                ArrayList<Card> cards = ((CureDisease) action).getCards();
+                ArrayList<Integer> cards = ((CureDisease) action).getCards();
                 boolean allSelected = true;
-                for (Card c: cards) {
-                    if (isCardHighlighted(c, id)) {
+                for (Integer cardId: cards) {
+                    if (isCardHighlighted((Card)gameState.getComponentById(cardId), id)) {
                         allSelected = false;
                         break;
                     }

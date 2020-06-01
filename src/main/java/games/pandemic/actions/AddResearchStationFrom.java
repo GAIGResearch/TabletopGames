@@ -1,5 +1,6 @@
 package games.pandemic.actions;
 
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.properties.PropertyBoolean;
 import core.AbstractGameState;
@@ -54,6 +55,11 @@ public class AddResearchStationFrom extends AddResearchStation {
                 "fromCity='" + fromCity + '\'' +
                 ", toCity='" + city + '\'' +
                 '}';
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new AddResearchStationFrom(this.fromCity, this.city);
     }
 
     public String getFromCity() {
