@@ -59,7 +59,7 @@ public class GraphBoard extends Component {
         // Copy board nodes
         for (BoardNode bn: boardNodes) {
             BoardNode bnCopy = new BoardNode(bn.getMaxNeighbours(), "", bn.getComponentID());
-            copyComponentTo(bnCopy);
+            bn.copyComponentTo(bnCopy);
             nodeCopies.put(bn.getComponentID(), bnCopy);
         }
         // Assign neighbours
