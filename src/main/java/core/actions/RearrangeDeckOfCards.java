@@ -71,4 +71,9 @@ public class RearrangeDeckOfCards extends DrawCard {
                 ", card=" + gameState.getComponentById(cardId).getComponentName() +
                 '}';
     }
+
+    @Override
+    public AbstractAction copy() {
+        return new RearrangeDeckOfCards(deckFrom, deckTo, fromIndex, rearrangeDeck, newCardOrder);
+    }
 }

@@ -46,4 +46,24 @@ public class ReplaceComponents<T extends Component> extends DrawComponents {
     public void printToConsole() {
         System.out.println("Replace components");
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "ReplaceComponents{" +
+                "playedCard=" + getCard(gameState).getComponentName() +
+                "drawFrom=" + gameState.getComponentById(deckDraw).getComponentName() +
+                '}';
+    }
+
+    @Override
+    public String toString() {
+        return "ReplaceComponents{" +
+                "deckDraw=" + deckDraw +
+                '}';
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new ReplaceComponents<T>(deckFrom, deckTo, nComponents, deckDraw);
+    }
 }

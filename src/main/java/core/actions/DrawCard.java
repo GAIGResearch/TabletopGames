@@ -12,10 +12,17 @@ public class DrawCard extends AbstractAction {
     protected int deckTo;
     protected int fromIndex;
     protected int toIndex;
-    protected int cardId;
 
-    protected boolean executed;
+    protected int cardId;  // Component ID of the card moved, updated after the action is executed
+    protected boolean executed;  // Indicates whether the action executed or not
 
+    /**
+     * This action moves one card (given by index in its origin deck) from a deck to another.
+     * @param deckFrom - origin deck from which card will be moved.
+     * @param deckTo - destination deck to which card will be moved.
+     * @param fromIndex - index in the origin deck where the card can be found.
+     * @param toIndex - index in the destination deck where the card should be placed.
+     */
     public DrawCard (int deckFrom, int deckTo, int fromIndex, int toIndex) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
@@ -60,10 +67,7 @@ public class DrawCard extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        DrawCard action = new DrawCard(deckFrom, deckTo, fromIndex, toIndex);
-        action.cardId = cardId;
-        action.executed = executed;
-        return action;
+        return new DrawCard(deckFrom, deckTo, fromIndex, toIndex);
     }
 
     public int getCardId() {

@@ -35,6 +35,11 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         return true;
     }
 
+    @Override
+    public AbstractAction copy() {
+        return new DrawComponents<T>(deckFrom, deckTo, nComponents);
+    }
+
     public T getComponent(AbstractGameState gs, int idx) {
         if (executed) {
             return (T) gs.getComponentById(fromIds[idx]);
