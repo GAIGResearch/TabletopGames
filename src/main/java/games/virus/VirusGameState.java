@@ -1,20 +1,19 @@
 package games.virus;
 
-import core.AbstractForwardModel;
 import core.AbstractGameParameters;
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.components.Deck;
-import core.interfaces.IObservation;
-import games.virus.actions.*;
+import core.interfaces.IPrintable;
+import core.observations.VectorObservation;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class VirusGameState extends AbstractGameState {
+public class VirusGameState extends AbstractGameState implements IPrintable {
     List<VirusBody>       playerBodies;   // Each player has a body
     List<Deck<VirusCard>> playerDecks;    // Each player has a deck withh 3 cards
     Deck<VirusCard>       drawDeck;       // The deck with the not yet played cards, It is not visible for any player
@@ -26,66 +25,54 @@ public class VirusGameState extends AbstractGameState {
         allComponents.putComponents(playerDecks);
         allComponents.putComponent(drawDeck);
         allComponents.putComponent(discardDeck);
+        for (VirusBody b: playerBodies) {
+            allComponents.putComponents(new ArrayList<>(b.getOrgans().values()));
+//            for (VirusOrgan o: b.getOrgans().values()) {
+//                allComponents.putComponents(o.getCards());  // TODO: error
+//            }
+        }
+    }
+
+    @Override
+    protected AbstractGameState copy(int playerId) {
+        VirusGameState vgs = new VirusGameState(gameParameters.copy(), getNPlayers());
+        vgs.drawDeck = drawDeck.copy();
+        vgs.discardDeck = discardDeck.copy();
+        vgs.playerDecks = new ArrayList<>();
+        vgs.playerBodies = new ArrayList<>();
+        for (int i = 0; i < getNPlayers(); i++) {
+            vgs.playerDecks.add(playerDecks.get(i).copy());
+            vgs.playerBodies.add((VirusBody) playerBodies.get(i).copy());
+        }
+        return vgs;
+    }
+
+    @Override
+    public VectorObservation getVectorObservation() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public double[] getDistanceFeatures(int playerId) {
+        // TODO
+        return new double[0];
+    }
+
+    @Override
+    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public double getScore(int playerId) {
+        // TODO
+        return 0;
     }
 
     public VirusGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new VirusTurnOrder(nPlayers));
-    }
-
-//    @Override
-//    public IObservation getObservation(int playerID) {
-//        Deck<VirusCard> playerHand = playerDecks.get(playerID);
-//        return new VirusObservation(playerBodies, playerHand);
-//    }
-
-    @Override
-    public List<AbstractAction> computeAvailableActions() {
-        ArrayList<AbstractAction> actions    = new ArrayList<>();
-        VirusGameParameters vgp = (VirusGameParameters) gameParameters;
-        int                player     = getCurrentPlayer();
-        Deck<VirusCard>    playerHand = playerDecks.get(player);
-        List<VirusCard>    cards      = playerHand.getComponents();
-
-        for (int i = 0; i < vgp.maxCardsDiscard; i++) {
-            // Playable cards actions:
-            addActionsForCard(playerHand.peek(i), actions, playerHand);
-
-            // Create DiscardCard actions. The player can always discard 1, 2 or 3 cards
-            actions.add(new ReplaceCards(playerHand.getComponentID(), discardDeck.getComponentID(), i, drawDeck.getComponentID()));
-        }
-
-        return actions;
-    }
-
-    // Organ:    Add if it does not exit yet in the player's body
-    // Medicine: Apply only in own body if organ exists and it is not immunised yet.
-    // Virus:    It can be applied in other players' organ, if exist and they are not immunised yet.
-    private void addActionsForCard(VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
-        int playerID = getCurrentPlayer();
-        int cardIdx = playerHand.getComponents().indexOf(card);
-        switch (card.type) {
-            case Organ: {
-                VirusBody myBody = playerBodies.get(playerID);
-                if (!myBody.hasOrgan(card.organ))
-                    actions.add(new AddOrgan(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, myBody.getComponentID()));
-                break;
-            }
-            case Medicine: {
-                VirusBody myBody = playerBodies.get(playerID);
-                if (myBody.hasOrgan(card.organ) && !myBody.hasOrganImmunised(card.organ))
-                    actions.add(new ApplyMedicine(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, myBody.getComponentID()));
-                break;
-            }
-            case Virus:
-                for (int i = 0; i < getNPlayers(); i++) {
-                    if (i != playerID) {
-                        VirusBody itsBody = playerBodies.get(i);
-                        if (itsBody.hasOrgan(card.organ) && !itsBody.hasOrganImmunised(card.organ))
-                            actions.add(new ApplyVirus(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, itsBody.getComponentID()));
-                    }
-                }
-                break;
-        }
     }
 
     public Deck<VirusCard> getDiscardDeck() {
@@ -105,13 +92,27 @@ public class VirusGameState extends AbstractGameState {
     }
 
     @Override
-    public void endGame() {
-        System.out.println("Game Results:");
-        for (int playerID = 0; playerID < getNPlayers(); playerID++) {
-            if (playerResults[playerID] == Utils.GameResult.GAME_WIN) {
-                System.out.println("The winner is the player : " + playerID);
-                break;
-            }
+    public void printToConsole() {
+        int nPlayers = playerBodies.size();
+        String[] stringStr = new String[nPlayers+3];
+
+        stringStr[0] = "----------------------------------------------------";
+
+        for (int i=0; i<nPlayers; i++)
+            stringStr[i+1] = "Player " + i + "    -> Body: " + playerBodies.get(i).toString();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Player Hand -> ");
+
+        for (VirusCard card : playerDecks.get(getCurrentPlayer()).getComponents()) {
+            sb.append(card.toString());
+            sb.append(" ");
+        }
+        stringStr[nPlayers+1] = sb.toString();
+        stringStr[nPlayers+2] = "----------------------------------------------------";
+
+        for (String s : stringStr){
+            System.out.println(s);
         }
     }
 }

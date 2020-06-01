@@ -31,6 +31,13 @@ public class VirusOrgan extends Component {
         cards = new Deck<>("DeckOnOrgan");
     }
 
+    protected VirusOrgan(int ID)
+    {
+        super(Utils.ComponentType.TOKEN, ID);
+        state = VirusOrganState.None;
+        cards = new Deck<>("DeckOnOrgan");
+    }
+
     public void applyCard(VirusCard card)
     {
         switch (card.type) {
@@ -117,8 +124,10 @@ public class VirusOrgan extends Component {
 
     @Override
     public Component copy() {
-        // TODO
-        return null;
+        VirusOrgan organ = new VirusOrgan(componentID);
+        organ.state = state;
+        organ.cards = cards.copy();
+        return organ;
     }
 
     @Override
@@ -134,5 +143,9 @@ public class VirusOrgan extends Component {
 
     public boolean isHealthy() {
         return state == VirusOrganState.Neutral || state == VirusOrganState.Vaccinated || state == VirusOrganState.Immunised;
+    }
+
+    public Deck<VirusCard> getCards() {
+        return cards;
     }
 }

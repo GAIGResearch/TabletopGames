@@ -30,6 +30,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         executed = true;
+        componentIds = new int[nComponents];
         Deck<T> from = (Deck<T>) gs.getComponentById(deckFrom);
         Deck<T> to = (Deck<T>) gs.getComponentById(deckTo);
 
@@ -76,14 +77,21 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        Deck<T> from = (Deck<T>) gameState.getComponentById(deckFrom);
         String components = "{";
-        for (int id: componentIds) {
-            components += gameState.getComponentById(id).getComponentName() + ", ";
+        if (executed) {
+            for (int id : componentIds) {
+                components += gameState.getComponentById(id).getComponentName() + ", ";
+            }
+        } else {
+            for (int i = 0; i < nComponents; i++) {
+                components += from.peek(i).getComponentName() + ", ";
+            }
         }
         components += "}";
         components = components.replace(", }", "}");
         return "DrawComponents{" +
-                "deckFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
+                "deckFrom=" + from.getComponentName() +
                 ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
                 ", nComponents=" + nComponents +
                 ", components=" + components +
