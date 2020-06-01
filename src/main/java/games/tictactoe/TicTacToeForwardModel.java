@@ -60,9 +60,12 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
         if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridSize * tttgp.gridSize)) {
             currentState.setGameStatus(Utils.GameResult.GAME_END);
+            return;
         }
 
-        checkGameEnd((TicTacToeGameState) currentState);
+        if (checkGameEnd((TicTacToeGameState) currentState)) {
+            return;
+        }
         currentState.getTurnOrder().endPlayerTurn(currentState);
     }
 
@@ -70,7 +73,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
      * Checks if the game ended.
      * @param gameState - game state to check game end.
      */
-    private void checkGameEnd(TicTacToeGameState gameState){
+    private boolean checkGameEnd(TicTacToeGameState gameState){
         GridBoard<Character> gridBoard = gameState.getGridBoard();
 
         // Check columns
@@ -86,7 +89,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
                 }
                 if (win) {
                     registerWinner(gameState, c);
-                    return;
+                    return true;
                 }
             }
         }
@@ -104,7 +107,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
                 }
                 if (win) {
                     registerWinner(gameState, c);
-                    return;
+                    return true;
                 }
             }
         }
@@ -121,7 +124,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
             }
             if (win) {
                 registerWinner(gameState, c);
-                return;
+                return true;
             }
         }
 
@@ -136,8 +139,10 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
             }
             if (win) {
                 registerWinner(gameState, c);
+                return true;
             }
         }
+        return false;
     }
 
     @Override
