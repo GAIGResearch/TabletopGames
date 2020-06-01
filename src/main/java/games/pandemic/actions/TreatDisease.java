@@ -71,7 +71,7 @@ public class TreatDisease extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null; // TODO
+        return new TreatDisease(initialDiseaseCubes, color, city, treatAll);
     }
 
     @Override

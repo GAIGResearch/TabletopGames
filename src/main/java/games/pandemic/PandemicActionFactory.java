@@ -405,7 +405,7 @@ class PandemicActionFactory {
             case "One quiet night":
 //                System.out.println("One quiet night");
 //            System.out.println("Skip the next Infect Cities step (do not flip over any Infection cards).");
-                actions.add(new QuietNight(card));
+                actions.add(new QuietNight(deckFrom, deckTo, cardIdx));
                 break;
             case "Forecast":
 //                System.out.println("Forecast");

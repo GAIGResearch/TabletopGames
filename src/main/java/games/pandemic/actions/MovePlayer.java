@@ -34,7 +34,7 @@ public class MovePlayer extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null; // TODO
+        return new MovePlayer(playerIdx, destination);
     }
 
 
