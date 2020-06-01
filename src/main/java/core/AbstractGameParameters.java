@@ -8,4 +8,12 @@ public abstract class AbstractGameParameters {
     public long getGameSeed() {
         return gameSeed;
     }
+
+    protected abstract AbstractGameParameters _copy();
+
+    public AbstractGameParameters copy() {
+        AbstractGameParameters copy = _copy();
+        copy.gameSeed = System.currentTimeMillis();
+        return copy;
+    }
 }

@@ -17,4 +17,9 @@ public class UnoGameParameters extends AbstractGameParameters {
             "Green",
             "Yellow"
     };
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new UnoGameParameters();
+    }
 }

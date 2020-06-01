@@ -31,7 +31,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     protected AbstractGameState copy(int playerId) {
-        TicTacToeGameState s = new TicTacToeGameState((TicTacToeGameParameters)gameParameters, getNPlayers());
+        TicTacToeGameState s = new TicTacToeGameState((TicTacToeGameParameters)gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
     }

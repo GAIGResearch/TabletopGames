@@ -59,7 +59,7 @@ public class UnoForwardModel extends AbstractForwardModel {
                 ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
             }
             else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
-                int player = ugs.getCurrentPlayerID();
+                int player = ugs.getCurrentPlayer();
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
             }
@@ -144,7 +144,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         UnoGameState ugs = (UnoGameState)gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = ugs.getCurrentPlayerID();
+        int player = ugs.getCurrentPlayer();
 
         Deck<UnoCard> playerHand = ugs.playerDecks.get(player);
         for (UnoCard card : playerHand.getComponents()) {

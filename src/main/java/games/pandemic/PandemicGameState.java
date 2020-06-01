@@ -190,7 +190,7 @@ public class PandemicGameState extends AbstractGameState implements IObservation
         // TODO copy all components based on what this player observes
         // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them for RearrangeCardWithCards action
 
-        PandemicGameState gs = new PandemicGameState(gameParameters, getNPlayers());
+        PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
 
         gs.areas = new HashMap<>();
         for(int key : areas.keySet())

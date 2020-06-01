@@ -141,4 +141,9 @@ public class PandemicParameters extends AbstractGameParameters {
     }
 
     public String getDataPath(){return dataPath;}
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new PandemicParameters(this);
+    }
 }

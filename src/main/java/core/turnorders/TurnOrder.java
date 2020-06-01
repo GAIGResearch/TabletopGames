@@ -70,7 +70,6 @@ public abstract class TurnOrder {
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnOwner = nextPlayer(gameState);
-            System.out.println(turnOwner);
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
             }

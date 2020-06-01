@@ -17,8 +17,8 @@ public class TicTacToeGame extends AbstractGame {
 
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomPlayer());
         agents.add(new OSLA());
+        agents.add(new RandomPlayer());
 
         TicTacToeGameParameters params = new TicTacToeGameParameters();
         AbstractGame game = new TicTacToeGame(agents, params);
