@@ -18,4 +18,14 @@ public class VectorObservation<T> implements IObservation, IPrintable {
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(Arrays.toString(values));
     }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(AbstractAction action) {
+        return null;
+    }
 }

@@ -70,4 +70,14 @@ public class LoveLetterObservation implements IPrintable, IObservation {
         System.out.println("Current GamePhase: " + gamePhase);
         System.out.println();
     }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(AbstractAction action) {
+        return null;
+    }
 }

@@ -16,6 +16,16 @@ import java.util.*;
 
 public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 
+    @Override
+    public IObservation next(AbstractAction action) {
+        return this;
+    }
+
+    @Override
+    public IObservation copy() {
+        return this;
+    }
+
     // Colt express adds 4 game phases
     public enum ColtExpressGamePhase implements IGamePhase {
         DrawCards,

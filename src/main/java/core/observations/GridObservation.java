@@ -19,4 +19,14 @@ public class GridObservation<T> implements IObservation, IPrintable {
             System.out.println();
         }
     }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(AbstractAction action) {
+        return null;
+    }
 }

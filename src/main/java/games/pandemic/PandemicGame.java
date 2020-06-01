@@ -27,7 +27,8 @@ public class PandemicGame extends AbstractGame {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLA());
 
         PandemicParameters params = new PandemicParameters("data/pandemic/");
         PandemicGame game = new PandemicGame(players, params);

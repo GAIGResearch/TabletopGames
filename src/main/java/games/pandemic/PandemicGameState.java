@@ -19,6 +19,37 @@ import static core.CoreConstants.*;
 
 public class PandemicGameState extends AbstractGameState implements IObservation {
 
+    @Override
+    public IObservation next(AbstractAction action) {
+        forwardModel.next(this, action);
+        return this;
+    }
+
+    @Override
+    public IObservation copy() {
+        // TODO copy all components based on what this player observes
+        // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them for RearrangeCardWithCards action
+        PandemicGameState gs = new PandemicGameState(gameParameters, forwardModel, getNPlayers());
+
+        gs.areas = new HashMap<>();
+        for(int key : areas.keySet())
+        {
+            Area a = areas.get(key);
+            gs.areas.put(key, a.copy());
+        }
+        gs.tempDeck = tempDeck.copy();
+
+        gs.world = world.copy();
+        gs.quietNight = quietNight;
+        gs.epidemic = epidemic;
+        gs.nCardsDrawn = nCardsDrawn;
+
+        researchStationLocations = new ArrayList<>(researchStationLocations);
+        gs.addAllComponents();
+
+        return gs;
+    }
+
     // The Pandemic game phase enum distinguishes 2 more phases on top of the default ones for players forced to
     // discard cards, or an opportunity to play a "Resilient Population" event card.
     public enum PandemicGamePhase implements IGamePhase {

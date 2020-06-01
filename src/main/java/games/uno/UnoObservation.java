@@ -37,4 +37,14 @@ public class UnoObservation implements IPrintable, IObservation {
             System.out.println(s);
         }
     }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(AbstractAction action) {
+        return null;
+    }
 }

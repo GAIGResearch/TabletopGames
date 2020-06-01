@@ -14,4 +14,14 @@ public class ColtExpressObservation implements IPrintable, IObservation {
     public void printToConsole(AbstractGameState gameState) {
 
     }
+
+    @Override
+    public IObservation copy() {
+        return null;
+    }
+
+    @Override
+    public IObservation next(AbstractAction action) {
+        return null;
+    }
 }
