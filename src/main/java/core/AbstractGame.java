@@ -91,8 +91,7 @@ public abstract class AbstractGame {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             AbstractGameState observation = gameState._copy(activePlayer);
             if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
-
-                ((IPrintable) observation).printToConsole(gameState);
+                ((IPrintable) observation).printToConsole();
             }
 
             // Either ask player which action to use or, in case no actions are available, report the updated observation

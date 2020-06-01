@@ -111,4 +111,17 @@ public class GridBoard<T> extends Component {
         copyComponentTo(g);
         return g;
     }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (T[] ts : grid) {
+            for (T t : ts) {
+                if (t instanceof Character && t.equals(' ')) s += '.';
+                else s += t;
+            }
+            s += "\n";
+        }
+        return s;
+    }
 }

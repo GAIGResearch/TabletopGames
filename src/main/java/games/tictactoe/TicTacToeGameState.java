@@ -3,6 +3,7 @@ package games.tictactoe;
 import core.components.GridBoard;
 import core.AbstractGameState;
 import core.interfaces.IGridGameState;
+import core.interfaces.IPrintable;
 import core.observations.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IGridGameState<Character> {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character> {
 
     GridBoard<Character> gridBoard;
     final ArrayList<Character> playerMapping = new ArrayList<Character>() {{
@@ -64,5 +65,10 @@ public class TicTacToeGameState extends AbstractGameState implements IGridGameSt
     @Override
     public GridBoard<Character> getGridBoard() {
         return gridBoard;
+    }
+
+    @Override
+    public void printToConsole() {
+        System.out.println(gridBoard.toString());
     }
 }
