@@ -4,6 +4,7 @@ import utilities.Utils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An Area is a collection of components such as Decks, Token, Dices, Cards and Boards, mapping to their IDs.
@@ -28,7 +29,9 @@ public class Area<T extends Component> extends Component {
     public Area copy() {
         Area new_area = new Area(ownerId, componentName, componentID);
         new_area.components = new HashMap<>();
-        new_area.components.putAll(this.components);
+        for (Map.Entry<Integer, Component> c: this.components.entrySet()){
+            new_area.components.put(c.getKey(), c.getValue().copy());
+        }
         copyComponentTo(new_area);
         return new_area;
     }
