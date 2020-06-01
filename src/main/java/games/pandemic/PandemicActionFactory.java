@@ -308,7 +308,7 @@ class PandemicActionFactory {
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         int nInfectDiscards = infectionDiscard.getSize();
         Deck<Card> ph = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-        Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponentActingPlayer(playerDeckDiscardHash);
+        Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
         int nCards = ph.getSize();
         for (int cp = 0; cp < nCards; cp++) {
             Card card = ph.getComponents().get(cp);
