@@ -19,13 +19,4 @@ public class VectorObservation<T> implements IObservation, IPrintable {
         System.out.println(Arrays.toString(values));
     }
 
-    @Override
-    public IObservation copy() {
-        return null;
-    }
-
-    @Override
-    public IObservation next(AbstractAction action) {
-        return null;
-    }
 }

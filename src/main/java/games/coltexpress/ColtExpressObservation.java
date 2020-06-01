@@ -15,13 +15,4 @@ public class ColtExpressObservation implements IPrintable, IObservation {
 
     }
 
-    @Override
-    public IObservation copy() {
-        return null;
-    }
-
-    @Override
-    public IObservation next(AbstractAction action) {
-        return null;
-    }
 }

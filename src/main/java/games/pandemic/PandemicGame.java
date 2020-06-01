@@ -4,6 +4,7 @@ import core.*;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
 import players.HumanGUIPlayer;
+import players.OSLA;
 import players.RandomPlayer;
 import utilities.Utils;
 

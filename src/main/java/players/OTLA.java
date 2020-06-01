@@ -35,7 +35,7 @@ public class OTLA extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(IObservation observation, List<AbstractAction> actions) {
+    public int getAction(AbstractGameState observation) {
         // todo execute n actions and return the first action only
         PandemicGameState gs = (PandemicGameState)observation;
 
@@ -44,7 +44,8 @@ public class OTLA extends AbstractPlayer {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
 
-        IObservation gsCopy = gs.copy();
+        AbstractGameState gsCopy = gs.copy();
+        List<AbstractAction> actions = gsCopy.getActions();
 
 
         ElapsedCpuTimer ect = new ElapsedCpuTimer();
@@ -69,7 +70,7 @@ public class OTLA extends AbstractPlayer {
                 while (gs.getTurnOrder().getCurrentPlayer(gs) == this.getPlayerID() ){ // || gsCopy.getGameStatus() !=  Utils.GameResult.GAME_ONGOING) {
 //                    System.out.println("Active player = " + gameState.getActingPlayer() + " and acting player = "+ gameState.getActingPlayer());
                     // todo numbers are too large here
-                    gsCopy.next(actions.get(i%actions.size()));
+                    getForwardModel().next(gsCopy, actions.get(i%actions.size()));
                     System.out.println(i);
                     i++;
                 }
@@ -111,21 +112,5 @@ public class OTLA extends AbstractPlayer {
         }else {
             return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
         }
-    }
-
-    @Override
-    public void initializePlayer(IObservation observation) {
-
-    }
-
-    @Override
-    public void finalizePlayer(IObservation observation) {
-
-    }
-
-
-    @Override
-    public void registerUpdatedObservation(IObservation observation) {
-
     }
 }

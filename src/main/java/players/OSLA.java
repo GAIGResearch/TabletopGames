@@ -28,16 +28,17 @@ public class OSLA extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(IObservation observation, List<AbstractAction> actions) {
+    public int getAction(AbstractGameState observation ) {
         stateHeuristic = new PandemicHeuristic((PandemicGameState)observation);
         PandemicGameState gs = (PandemicGameState)observation;
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
+        List<AbstractAction> actions = gs.getActions();
 
         for (AbstractAction action : actions) {
-            IObservation gsCopy = gs.copy();
-            gsCopy.next(action);
+            AbstractGameState gsCopy = gs.copy();
+            getForwardModel().next(gsCopy, action);
             double valState = stateHeuristic.evaluateState((AbstractGameState)gsCopy);
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
