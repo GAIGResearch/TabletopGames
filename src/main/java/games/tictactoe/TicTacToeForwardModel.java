@@ -126,11 +126,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         }
 
         // Secondary
-        c = gridBoard.getElement(gridBoard.getWidth(), 0);
+        c = gridBoard.getElement(gridBoard.getWidth()-1, 0);
         if (c != ' ') {
             boolean win = true;
             for (int i = 1; i < gridBoard.getWidth(); i++) {
-                if (gridBoard.getElement(gridBoard.getWidth()-i, i) != c) {
+                if (gridBoard.getElement(gridBoard.getWidth()-1-i, i) != c) {
                     win = false;
                 }
             }
