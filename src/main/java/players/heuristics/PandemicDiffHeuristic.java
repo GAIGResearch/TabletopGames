@@ -8,11 +8,11 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
-public class PandemicHeuristic extends StateHeuristic {
-    AbstractGameState pgs;
+public class PandemicDiffHeuristic extends StateHeuristic {
+    private BoardStats rootBoardStats;
 
-    public PandemicHeuristic(AbstractGameState gs) {
-        this.pgs = gs;
+    public PandemicDiffHeuristic(AbstractGameState root) {
+        rootBoardStats = new BoardStats((PandemicGameState)root);
     }
 
     @Override
@@ -20,8 +20,8 @@ public class PandemicHeuristic extends StateHeuristic {
         Utils.GameResult gamestatus = gs.getGameStatus();
 
         // Compute a score relative to the root's state.
-        BoardStats boardStats = new BoardStats((PandemicGameState)gs);
-        double rawScore = boardStats.score();
+        BoardStats lastBoardState = new BoardStats((PandemicGameState)gs);
+        double rawScore = rootBoardStats.score(lastBoardState);
 
         if(gamestatus == Utils.GameResult.GAME_LOSE)
             rawScore = -1;
@@ -65,16 +65,17 @@ public class PandemicHeuristic extends StateHeuristic {
 
         /**
          * Computes score for a game, in relation to the initial state at the root.
+         * @param futureState the stats of the board at the end of the rollout.
          * @return a score [0, 1]
          */
-        double score()
+        double score(BoardStats futureState)
         {
-            int diffCures = this.nCuresDiscovered;
-            int diffCardsInHand = this.nCardsInHand;
-            int diffCubes = this.nDiseaseCubes;
-            int diffCardsInPile = this.nCardsInPile;
-            int diffOutbreaks = this.nOutbreaks;
-            int diffResearchStations = this.nResearchStations;
+            int diffCures = futureState.nCuresDiscovered - this.nCuresDiscovered;
+            int diffCardsInHand = futureState.nCardsInHand - this.nCardsInHand;
+            int diffCubes = futureState.nDiseaseCubes - this.nDiseaseCubes;
+            int diffCardsInPile = futureState.nCardsInPile - this.nCardsInPile;
+            int diffOutbreaks = futureState.nOutbreaks - this.nOutbreaks;
+            int diffResearchStations = futureState.nResearchStations - this.nResearchStations;
 
             double score = diffCures * FACTOR_CURES + diffCardsInHand * FACTOR_CARDS_IN_HAND + diffCubes * FACTOR_CUBES +
                     diffCardsInPile * FACTOR_CARDS_IN_PILE + diffOutbreaks * FACTOR_OUTBREAKS + diffResearchStations * FACTOR_RS;

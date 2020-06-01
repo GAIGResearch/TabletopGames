@@ -1,16 +1,12 @@
 package players;
 
-import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
-import core.interfaces.IObservation;
-import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
-import players.heuristics.PandemicHeuristic;
+import players.heuristics.PandemicDiffHeuristic;
 import players.heuristics.StateHeuristic;
 import utilities.ElapsedCpuTimer;
-import utilities.Utils;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +35,7 @@ public class OTLA extends AbstractPlayer {
         // todo execute n actions and return the first action only
         PandemicGameState gs = (PandemicGameState)observation;
 
-        stateHeuristic = new PandemicHeuristic(gs);
+        stateHeuristic = new PandemicDiffHeuristic(gs);
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;

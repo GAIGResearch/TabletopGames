@@ -1,12 +1,10 @@
 package players;
 
-import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
-import core.interfaces.IObservation;
 import games.pandemic.PandemicGameState;
-import players.heuristics.PandemicHeuristic;
+import players.heuristics.PandemicDiffHeuristic;
 import players.heuristics.StateHeuristic;
 
 import java.util.List;
@@ -29,7 +27,7 @@ public class OSLA extends AbstractPlayer {
 
     @Override
     public int getAction(AbstractGameState observation ) {
-        stateHeuristic = new PandemicHeuristic((PandemicGameState)observation);
+        stateHeuristic = new PandemicDiffHeuristic((PandemicGameState)observation);
         PandemicGameState gs = (PandemicGameState)observation;
 
         double maxQ = Double.NEGATIVE_INFINITY;
@@ -39,7 +37,7 @@ public class OSLA extends AbstractPlayer {
         for (AbstractAction action : actions) {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);
-            double valState = stateHeuristic.evaluateState((AbstractGameState)gsCopy);
+            double valState = observation.getScore(this.getPlayerID()); //stateHeuristic.evaluateState((AbstractGameState)gsCopy);
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
 

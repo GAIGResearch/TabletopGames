@@ -31,6 +31,7 @@ public class PandemicGame extends AbstractGame {
 //        players.add(new HumanGUIPlayer(ac));
         players.add(new OSLA());
 
+
         PandemicParameters params = new PandemicParameters("data/pandemic/");
         PandemicGame game = new PandemicGame(players, params);
         AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);

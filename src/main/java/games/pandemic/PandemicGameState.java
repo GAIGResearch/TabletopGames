@@ -8,6 +8,8 @@ import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractGameParameters;
 import core.interfaces.IObservation;
+import players.heuristics.PandemicDiffHeuristic;
+import players.heuristics.PandemicHeuristic;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -109,8 +111,9 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     public double getScore(int playerId) {
-        // TODO: Martin's heuristic.
-        return 0;
+        // Martin's heuristic. // TODO maybe improvements?
+        PandemicHeuristic ph = new PandemicHeuristic(this);
+        return ph.evaluateState(this);
     }
 
     /**
