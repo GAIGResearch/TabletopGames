@@ -13,6 +13,14 @@ public class RearrangeDeckOfCards extends DrawCard {
     protected int[] newCardOrder;
     protected int rearrangeDeck;
 
+    /**
+     * Changes the order of the first N cards in a deck, by playing a card.
+     * @param deckFrom - origin deck of card played for this action
+     * @param deckTo - destination deck for card played for this action (after discarded)
+     * @param fromIndex - index from origin deck of card played for this action
+     * @param rearrangeDeck - deck containing cards to rearrange
+     * @param newCardOrder - new order for the first N cards, where N = length of the order array
+     */
     public RearrangeDeckOfCards(int deckFrom, int deckTo, int fromIndex, int rearrangeDeck, int[] newCardOrder) {
         super(deckFrom, deckTo, fromIndex);
         this.rearrangeDeck = rearrangeDeck;
@@ -34,8 +42,12 @@ public class RearrangeDeckOfCards extends DrawCard {
         return result & rd.add(draws);
     }
 
+    // Getters
     public int[] getNewCardOrder() {
         return newCardOrder;
+    }
+    public int getRearrangeDeck() {
+        return rearrangeDeck;
     }
 
     @Override
