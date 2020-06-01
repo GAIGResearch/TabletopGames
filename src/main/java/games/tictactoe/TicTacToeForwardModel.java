@@ -142,15 +142,24 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
                 return true;
             }
         }
-        return false;
+        boolean tie = true;
+        for (Character[] row: gridBoard.getGridValues()){
+            for (Character field: row){
+                if (field.equals(' ')){
+                    tie = false;
+                }
+            }
+        }
+        if (tie){
+            gameState.setGameStatus(Utils.GameResult.GAME_DRAW);
+            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.GAME_DRAW);
+        }
+
+        return tie;
     }
 
     @Override
     public void endGame(AbstractGameState gameState) {
-        if (gameState.getPlayerResults()[0] == Utils.GameResult.GAME_ONGOING) {
-            gameState.setGameStatus(Utils.GameResult.GAME_DRAW);
-            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.GAME_DRAW);
-        }
         System.out.println(Arrays.toString(gameState.getPlayerResults()));
     }
 

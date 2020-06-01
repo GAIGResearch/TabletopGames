@@ -53,13 +53,22 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     public double getScore(int playerId) {
-        int nChars = 0;
-        for (int i = 0; i < gridBoard.getWidth(); i++) {
-            for (int j = 0; j < gridBoard.getHeight(); j++) {
-                if (gridBoard.getElement(i, j) == playerMapping.get(playerId)) nChars++;
-            }
-        }
-        return nChars;
+        if (getGameStatus() == Utils.GameResult.GAME_WIN)
+            return 1;
+        else if (getGameStatus() == Utils.GameResult.GAME_DRAW)
+            return 0;
+        else if (getGameStatus() == Utils.GameResult.GAME_LOSE)
+            return -1;
+        else
+            return 0;
+
+//        int nChars = 0;
+//        for (int i = 0; i < gridBoard.getWidth(); i++) {
+//            for (int j = 0; j < gridBoard.getHeight(); j++) {
+//                if (gridBoard.getElement(i, j) == playerMapping.get(playerId)) nChars++;
+//            }
+//        }
+//        return nChars;
     }
 
     @Override
