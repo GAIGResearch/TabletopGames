@@ -107,7 +107,11 @@ public class GridBoard<T> extends Component {
 
     @Override
     public GridBoard<T> copy() {
-        GridBoard<T> g = new GridBoard<>(grid.clone(), typeParameterClass, componentID);
+        T[][] gridCopy = (T[][])Array.newInstance(typeParameterClass, getWidth(), getHeight());
+        for (int i = 0; i < width; i++) {
+            if (height >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, height);
+        }
+        GridBoard<T> g = new GridBoard<>(gridCopy, typeParameterClass, componentID);
         copyComponentTo(g);
         return g;
     }
