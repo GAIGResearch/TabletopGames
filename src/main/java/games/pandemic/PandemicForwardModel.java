@@ -322,6 +322,8 @@ public class PandemicForwardModel extends AbstractForwardModel {
             return getRPactions(pgs);
         else if (gameState.getGamePhase() == AbstractGameState.DefaultGamePhase.PlayerReaction)
             return getEventActions(pgs);
+        else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.Forecast)
+            return getForecastActions(pgs);
         else return getPlayerActions(pgs);
     }
 

@@ -1,12 +1,11 @@
 package core.observations;
 
 import core.AbstractGameState;
-import core.interfaces.IObservation;
 import core.interfaces.IPrintable;
 
 import java.util.Arrays;
 
-public class VectorObservation<T> implements IObservation, IPrintable {
+public class VectorObservation<T> implements IPrintable {
 
     private T[] values;
 

@@ -409,23 +409,35 @@ class PandemicActionFactory {
                 break;
             case "Forecast":
 //                System.out.println("Forecast");
-//            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
-                // Generate all permutations. Each one is a potential action.
-                Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
-                int nInfectCards = infectionDeck.getSize();
-                int n = Math.min(nInfectCards, pp.n_forecast_cards);
-                ArrayList<int[]> permutations = new ArrayList<>();
-                int[] order = new int[n];
-                for (int i = 0; i < n; i++) {
-                    order[i] = i;
-                }
-                generatePermutations(n, order, permutations);
-                for (int[] perm: permutations) {
-                    actions.add(new RearrangeDeckOfCards(deckFrom, deckTo, cardIdx, infectionDeck.getComponentID(), perm));
-                }
+                actions.add(new Forecast(deckFrom, deckTo, cardIdx));
                 break;
         }
 
+        return new ArrayList<>(actions);
+    }
+
+    static List<AbstractAction> getForecastActions(PandemicGameState pgs) {
+//            System.out.println("Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top.");
+        // Generate all permutations. Each one is a potential action.
+        PandemicParameters pp = (PandemicParameters) pgs.getGameParameters();
+        Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
+        Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
+        int deckFrom = playerHand.getComponentID();
+        int deckTo = playerDiscard.getComponentID();
+
+        Set<AbstractAction> actions = new HashSet<>();
+        Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
+        int nInfectCards = infectionDeck.getSize();
+        int n = Math.min(nInfectCards, pp.n_forecast_cards);
+        ArrayList<int[]> permutations = new ArrayList<>();
+        int[] order = new int[n];
+        for (int i = 0; i < n; i++) {
+            order[i] = i;
+        }
+        generatePermutations(n, order, permutations);
+        for (int[] perm: permutations) {
+            actions.add(new RearrangeDeckOfCards(infectionDeck.getComponentID(), perm));
+        }
         return new ArrayList<>(actions);
     }
 }

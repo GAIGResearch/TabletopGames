@@ -27,10 +27,20 @@ public class RearrangeDeckOfCards extends DrawCard {
         this.newCardOrder = newCardOrder;
     }
 
+    /**
+     * Rearranging the deck without playing a card.
+     * @param rearrangeDeck - deck to rearrange.
+     * @param newCardOrder - new order for first N cards in the deck, where N = length of the order array
+     */
+    public RearrangeDeckOfCards(int rearrangeDeck, int[] newCardOrder) {
+        this(-1, -1, -1, rearrangeDeck, newCardOrder);
+    }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         // Discard card played
-        boolean result = super.execute(gs);
+        boolean result = true;
+        if (deckFrom != -1) result = super.execute(gs);
         Deck<Card> rd = (Deck<Card>) gs.getComponentById(rearrangeDeck);
 
         Card[] cards = new Card[newCardOrder.length];

@@ -7,8 +7,6 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractGameParameters;
-import core.interfaces.IObservation;
-import players.heuristics.PandemicDiffHeuristic;
 import players.heuristics.PandemicHeuristic;
 import utilities.Hash;
 import utilities.Utils;
@@ -17,14 +15,17 @@ import java.util.*;
 
 import static games.pandemic.PandemicConstants.*;
 import static core.CoreConstants.*;
+import static games.pandemic.PandemicGameState.PandemicGamePhase.Forecast;
 
 
-public class PandemicGameState extends AbstractGameState implements IObservation {
+public class PandemicGameState extends AbstractGameState {
 
-    // The Pandemic game phase enum distinguishes 2 more phases on top of the default ones for players forced to
-    // discard cards, or an opportunity to play a "Resilient Population" event card.
+    // The Pandemic game phase enum distinguishes 3 more phases on top of the default ones for players forced to
+    // discard cards, a player wishing to play a "Forecast" event card
+    // or an opportunity to play a "Resilient Population" event card.
     public enum PandemicGamePhase implements IGamePhase {
         DiscardReaction,
+        Forecast,
         RPReaction
     }
 
@@ -187,15 +188,31 @@ public class PandemicGameState extends AbstractGameState implements IObservation
 
     @Override
     protected AbstractGameState copy(int playerId) {
-        // TODO copy all components based on what this player observes
-        // TODO partial observability: leave the top 6 cards as in the real game to allow player to see them for RearrangeCardWithCards action
-
         PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
 
         gs.areas = new HashMap<>();
         for(int key : areas.keySet())
         {
             Area a = areas.get(key);
+            if (playerId != -1 && key == -1) {
+                // Hiding face-down decks in game area
+                a = new Area(key, "Game area");
+                HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
+                for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
+                    if (e.getKey() == playerDeckHash || e.getKey() == infectionHash) {
+                        Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
+                        if (gamePhase == Forecast && e.getKey() == infectionHash) {
+                            // Top N cards should be left the same, the rest shuffled
+                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).n_forecast_cards, hiddenDeck.getSize());
+                        } else {
+                            hiddenDeck.shuffle();  // We know what cards are in there, a simple shuffle is enough
+                        }
+                        a.putComponent(e.getKey(), hiddenDeck);
+                    } else {
+                        a.putComponent(e.getKey(), e.getValue().copy());
+                    }
+                }
+            }
             gs.areas.put(key, a.copy());
         }
         gs.tempDeck = tempDeck.copy();

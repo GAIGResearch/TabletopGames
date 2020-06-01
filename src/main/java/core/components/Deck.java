@@ -202,6 +202,16 @@ public class Deck<T extends Component> extends Component {
         this.shuffle(new Random());
     }
 
+    public void shuffle(int fromIndex, int toIndex) {
+        List<T> subList = components.subList(fromIndex, toIndex);
+        Collections.shuffle(subList, new Random());
+        int i = 0;
+        for (T component: subList) {
+            components.set(fromIndex + i, component);
+            i++;
+        }
+    }
+
     // Getters, Setters
 
     /**
