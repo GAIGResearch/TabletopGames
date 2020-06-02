@@ -24,7 +24,7 @@ public class OSLA extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(AbstractGameState gs ) {
+    public AbstractAction getAction(AbstractGameState gs ) {
 //        stateHeuristic = new PandemicDiffHeuristic((PandemicGameState)observation);
 
         double maxQ = Double.NEGATIVE_INFINITY;
@@ -45,7 +45,7 @@ public class OSLA extends AbstractPlayer {
 
         }
 
-        return actions.indexOf(bestAction);
+        return bestAction;
     }
 
     public static double noise(double input, double epsilon, double random)

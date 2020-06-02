@@ -2,6 +2,7 @@ package players;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 
 
 public class HumanGUIPlayer extends AbstractPlayer {
@@ -12,8 +13,8 @@ public class HumanGUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(AbstractGameState observation) {
-        return observation.getActions().indexOf(ac.getAction());
+    public AbstractAction getAction(AbstractGameState observation) {
+        return ac.getAction();
     }
 }
 

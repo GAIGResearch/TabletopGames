@@ -1,7 +1,6 @@
 package games.virus;
 
 import core.*;
-import evaluation.Run;
 import players.OSLA;
 
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.List;
 
 public class VirusGame extends Game {
     public VirusGame(List<AbstractPlayer> agents, AbstractGameParameters gameParameters) {
-        super(Run.GameType.Virus, agents, new VirusForwardModel(), new VirusGameState(gameParameters, agents.size()));
+        super(GameType.Virus, agents, new VirusForwardModel(), new VirusGameState(gameParameters, agents.size()));
     }
 
     public static void main(String[] args) {

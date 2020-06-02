@@ -1,18 +1,14 @@
 package games.explodingkittens;
 
-import core.AbstractGameState;
-import core.AbstractForwardModel;
-import core.Game;
-import evaluation.Run;
+import core.*;
 import players.RandomPlayer;
-import core.AbstractPlayer;
 
 import java.util.*;
 
 public class ExplodingKittensGame extends Game {
 
     public ExplodingKittensGame(List<AbstractPlayer> agents, AbstractForwardModel model, AbstractGameState gameState) {
-        super(Run.GameType.ExplodingKittens, agents, model, gameState);
+        super(GameType.ExplodingKittens, agents, model, gameState);
     }
 
     public static void main(String[] args){

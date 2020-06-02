@@ -22,12 +22,12 @@ public abstract class AbstractTournament {
      * @param gameToPlay - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(LinkedList<AbstractPlayer> agents, Run.GameType gameToPlay, int nPlayerPerGame){
+    public AbstractTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame){
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();
 
-        Game g = Run.createGameInstance(gameToPlay, nPlayerPerGame);
+        Game g = Game.createGameInstance(gameToPlay, nPlayerPerGame);
         if (g == null) throw new IllegalArgumentException("Chosen game not supported");
         else {
             this.games.add(g);
@@ -40,13 +40,13 @@ public abstract class AbstractTournament {
      * @param agents - list of players taking part in the tournament.
      * @param gamesToPlay - list of games to play in the tournament, in pairs of (GameType, nPlayerPerGame).
      */
-    public AbstractTournament(LinkedList<AbstractPlayer> agents, List<Pair<Run.GameType, Integer>> gamesToPlay) {
+    public AbstractTournament(LinkedList<AbstractPlayer> agents, List<Pair<GameType, Integer>> gamesToPlay) {
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();
 
-        for (Pair<Run.GameType, Integer> gameToPlay: gamesToPlay) {
-            Game g = Run.createGameInstance(gameToPlay.a, gameToPlay.b);
+        for (Pair<GameType, Integer> gameToPlay: gamesToPlay) {
+            Game g = Game.createGameInstance(gameToPlay.a, gameToPlay.b);
             if (g == null) throw new IllegalArgumentException("Chosen game not supported");
             else {
                 this.games.add(g);

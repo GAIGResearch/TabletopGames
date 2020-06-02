@@ -2,7 +2,7 @@ package games.tictactoe;
 
 import core.Game;
 import core.AbstractPlayer;
-import evaluation.Run;
+import core.GameType;
 import players.OSLA;
 import players.RandomPlayer;
 
@@ -12,7 +12,7 @@ public class TicTacToeGame extends Game {
 
     public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
     {
-        super(Run.GameType.TicTacToe, agents, new TicTacToeForwardModel(), new TicTacToeGameState(params, agents.size()));
+        super(GameType.TicTacToe, agents, new TicTacToeForwardModel(), new TicTacToeGameState(params, agents.size()));
     }
 
     public static void main(String[] args){

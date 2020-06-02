@@ -79,8 +79,14 @@ public abstract class AbstractForwardModel {
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
-    public final void next(AbstractGameState currentState, AbstractAction action) {
-        _next(currentState, action);
+    public final boolean next(AbstractGameState currentState, AbstractAction action) {
+        if (action != null && currentState.getActions().contains(action)) {
+            _next(currentState, action);
+            return true;
+        } else {
+            System.out.println("Invalid action.");
+            return false;
+        }
     }
 
     /**

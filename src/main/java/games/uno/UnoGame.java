@@ -1,7 +1,6 @@
 package games.uno;
 
 import core.*;
-import evaluation.Run;
 import players.OSLA;
 
 import java.util.*;
@@ -9,7 +8,7 @@ import java.util.*;
 public class UnoGame extends Game {
 
     public UnoGame(List<AbstractPlayer> agents, AbstractGameParameters gameParameters) {
-        super(Run.GameType.Uno, agents, new UnoForwardModel(), new UnoGameState(gameParameters, agents.size()));
+        super(GameType.Uno, agents, new UnoForwardModel(), new UnoGameState(gameParameters, agents.size()));
     }
 
     public static void main(String[] args) {

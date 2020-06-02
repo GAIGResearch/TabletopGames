@@ -2,14 +2,21 @@ package core;
 
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
-import evaluation.Run;
+import players.ActionController;
 import players.HumanGUIPlayer;
+import players.OSLA;
+import players.RandomPlayer;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import static core.GameType.Virus;
 
 public class Game {
+
     // Type of game
-    private Run.GameType gameType;
+    private GameType gameType;
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
@@ -25,7 +32,7 @@ public class Game {
      * @param realModel - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public Game(Run.GameType type, List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
+    public Game(GameType type, List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
         this.gameType = type;
         this.gameState = gameState;
         this.forwardModel = realModel;
@@ -38,7 +45,7 @@ public class Game {
      * @param model - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public Game(Run.GameType type, AbstractForwardModel model, AbstractGameState gameState) {
+    public Game(GameType type, AbstractForwardModel model, AbstractGameState gameState) {
         this.gameType = type;
         this.forwardModel = model;
         this.gameState = gameState;
@@ -106,24 +113,29 @@ public class Game {
             }
 
             // Either ask player which action to use or, in case no actions are available, report the updated observation
-            int actionIdx = -1;
+            AbstractAction action = null;
             if (actions.size() > 1) {
                 if (player instanceof HumanGUIPlayer) {
-                    while (actionIdx == -1) {
-                        actionIdx = getPlayerAction(gui, player, observation);
+                    while (action == null) {
+                        action = getPlayerAction(gui, player, observation);
                     }
                 } else {
-                    actionIdx = getPlayerAction(gui, player, observation);
+                    action = getPlayerAction(gui, player, observation);
                 }
             } else {
                 player.registerUpdatedObservation(observation);
                 // Can only do 1 action, so do it.
-                if (actions.size() == 1) actionIdx = 0;
+                if (actions.size() == 1) action = actions.get(0);
             }
 
             // Resolve actions and game rules for the turn
-            if (actionIdx != -1)
-                forwardModel.next(gameState, actions.get(actionIdx));
+            boolean executed = forwardModel.next(gameState, action);
+            if (!executed) {
+                // Tried to execute illegal action, disqualify player or play random valid action instead
+//                disqualifyPlayer(player);
+                int randomAction = new Random(gameState.getGameParameters().getGameSeed()).nextInt(actions.size());
+                forwardModel.next(gameState, actions.get(randomAction));
+            }
         }
 
         // Print last state
@@ -148,7 +160,7 @@ public class Game {
      * @param observation - observation the player receives from the current game state.
      * @return - int, index of action chosen by player (from the list of actions).
      */
-    private int getPlayerAction(AbstractGUI gui, AbstractPlayer player, AbstractGameState observation) {
+    private AbstractAction getPlayerAction(AbstractGUI gui, AbstractPlayer player, AbstractGameState observation) {
         if (gui != null) {
             gui.update(player, gameState);
             try {
@@ -159,6 +171,14 @@ public class Game {
         }
 
         return player.getAction(observation);
+    }
+
+    /**
+     * This player is disqualified. Automatic loss and no more playing.
+     * @param player - player to be disqualified.
+     */
+    private void disqualifyPlayer(AbstractPlayer player) {
+        // TODO
     }
 
     /**
@@ -173,12 +193,64 @@ public class Game {
      * Which game is this?
      * @return type of game.
      */
-    public Run.GameType getGameType() {
+    public GameType getGameType() {
         return gameType;
     }
 
     @Override
     public String toString() {
         return gameType.toString();
+    }
+
+
+    /**
+     * Main class used to run the framework. The user must specify:
+     *      1. Game type to play
+     *      2. Visuals on/off
+     *      3. Random seed for the game
+     *      4. Players for the game
+     * and then run this class.
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static void main(String[] args) {
+        // Action controller for GUI interactions
+        ActionController ac = new ActionController();
+
+        /* 1. Choose game to play */
+        GameType gameToPlay = Virus;
+
+        /* 2. Running with visuals? */
+        boolean visuals = false;
+
+        /* 3. Game seed */
+        long seed = System.currentTimeMillis(); //0;
+
+        /* 4. Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new OSLA());
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+
+        // Creating game instance (null if not implemented)
+        Game game = gameToPlay.createGameInstance(players.size(), seed);
+        if (game != null) {
+            AbstractGUI gui = null;
+
+            // Reset game instance, passing the players for this game
+            game.reset(players);
+
+            if (visuals) {
+                // Create GUI (null if not implemented; running without visuals)
+                gui = gameToPlay.createGUI(game.getGameState(), ac);
+            }
+
+            // Run!
+            game.run(gui);
+        } else {
+            System.out.println("Game " + gameToPlay + " not yet implemented!");
+        }
     }
 }

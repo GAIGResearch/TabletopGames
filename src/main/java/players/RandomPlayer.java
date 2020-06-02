@@ -2,6 +2,8 @@ package players;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
+
 import java.util.Random;
 
 public class RandomPlayer extends AbstractPlayer {
@@ -22,7 +24,8 @@ public class RandomPlayer extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(AbstractGameState observation) {
-        return rnd.nextInt(observation.getActions().size());
+    public AbstractAction getAction(AbstractGameState observation) {
+        int randomAction = rnd.nextInt(observation.getActions().size());
+        return observation.getActions().get(randomAction);
     }
 }

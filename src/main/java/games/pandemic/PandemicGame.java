@@ -1,7 +1,6 @@
 package games.pandemic;
 
 import core.*;
-import evaluation.Run;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
 import players.OSLA;
@@ -13,11 +12,11 @@ import java.util.*;
 public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
-        super(Run.GameType.Pandemic, agents, new PandemicForwardModel(params, agents.size()),
+        super(GameType.Pandemic, agents, new PandemicForwardModel(params, agents.size()),
                 new PandemicGameState(params, agents.size()));
     }
     public PandemicGame(AbstractForwardModel model, AbstractGameState gameState) {
-        super(Run.GameType.Pandemic, model, gameState);
+        super(GameType.Pandemic, model, gameState);
     }
 
     public static void main(String[] args){

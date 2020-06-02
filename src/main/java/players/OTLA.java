@@ -31,7 +31,7 @@ public class OTLA extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(AbstractGameState observation) {
+    public AbstractAction getAction(AbstractGameState observation) {
         // todo execute n actions and return the first action only
         PandemicGameState gs = (PandemicGameState)observation;
 
@@ -91,7 +91,7 @@ public class OTLA extends AbstractPlayer {
             }
         }
 
-        return actions.indexOf(bestAction);
+        return bestAction;
     }
 
     public void rollRnd(AbstractGameState gs, AbstractAction[] actions){

@@ -1,6 +1,8 @@
 package core;
 
 
+import core.actions.AbstractAction;
+
 public abstract class AbstractPlayer {
 
     // ID of this player, assigned by the game
@@ -29,30 +31,32 @@ public abstract class AbstractPlayer {
     /* Methods that should be implemented in subclass */
 
     /**
-     * Initialize agent given an observation of the initial game-state.
-     * @param observation observation of the initial game-state
+     * Generate a valid action to play in the game. Valid actions can be found by accessing
+     * AbstractGameState.getActions()
+     * @param gameState observation of the current game state
      */
-    public abstract int getAction(AbstractGameState observation);
+    public abstract AbstractAction getAction(AbstractGameState gameState);
 
     /* Methods that can be implemented in subclass */
 
     /**
-     * Initialize agent given an observation of the initial game-state.
+     * Initialize agent given an observation of the initial game state.
      * e.g. load weights, initialize neural network
-     * @param observation observation of the initial game-state
+     * @param gameState observation of the initial game state
      */
-    public void initializePlayer(AbstractGameState observation) {}
+    public void initializePlayer(AbstractGameState gameState) {}
 
     /**
-     * Finalize agent given an observation of the final game-state.
+     * Finalize agent given an observation of the final game state.
      * e.g. store variables after training, modify weights, etc.
-     * @param observation observation of the final game-state
+     * @param gameState observation of the final game state
      */
-    public void finalizePlayer(AbstractGameState observation) {}
+    public void finalizePlayer(AbstractGameState gameState) {}
 
     /**
-     * Receive an updated game-state for which it is not required to respond with an action.
+     * Receive an updated game state for which it is not required to respond with an action.
+     * @param gameState observation of the current game state
      */
-    public void registerUpdatedObservation(AbstractGameState observation) {}
+    public void registerUpdatedObservation(AbstractGameState gameState) {}
 
 }

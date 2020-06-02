@@ -1,12 +1,13 @@
 package evaluation;
 
 import core.AbstractPlayer;
+import core.GameType;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.LinkedList;
 
-import static evaluation.Run.GameType.*;
+import static core.GameType.*;
 
 
 public class RoundRobinTournament extends AbstractTournament {
@@ -21,7 +22,7 @@ public class RoundRobinTournament extends AbstractTournament {
     @SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
     public static void main(String[] args){
         /* 1. Settings for the tournament */
-        Run.GameType gameToPlay = Virus;
+        GameType gameToPlay = Virus;
         int nPlayersTotal = 5;
         int nPlayersPerGame = 4;
         int nGamesPerMatchUp = 100;
@@ -46,7 +47,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay - true if agents are allowed to play copies of themselves.
      */
-    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, Run.GameType gameToPlay, int playersPerGame,
+    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, boolean selfPlay){
         super(agents, gameToPlay, playersPerGame);
         if (!selfPlay && playersPerGame >= this.agents.size()) {
