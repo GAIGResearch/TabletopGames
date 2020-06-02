@@ -89,7 +89,7 @@ public class RoundCard extends Card {
 
     @Override
     public Card copy() {
-        return new RoundCard(componentName, turnTypes.clone(), endRoundCardEvent.copy(), componentID);
+        return new RoundCard(componentName, turnTypes.clone(), (endRoundCardEvent != null? endRoundCardEvent.copy() : null), componentID);
     }
 
     @Override

@@ -35,7 +35,7 @@ public class ShootPlayerAction extends DrawCard {
 
         Compartment player = (Compartment) gs.getComponentById(playerCompartment);
         Compartment target = (Compartment) gs.getComponentById(targetCompartment);
-        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+        ColtExpressCard card = (ColtExpressCard) getCard(gs);
 
         ColtExpressGameState cegs = ((ColtExpressGameState) gs);
         cegs.addBullet(targetID, card.playerID);

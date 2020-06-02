@@ -1,14 +1,9 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 import static core.CoreConstants.VERBOSE;
@@ -16,9 +11,8 @@ import static core.CoreConstants.VERBOSE;
 
 public class ColtExpressTurnOrder extends TurnOrder {
 
-    List<RoundCard> rounds;
     private int firstPlayerOfRound;
-    private RoundCard.TurnType firstTurnType;
+    ColtExpressParameters gameParameters;
 
     private int currentRoundIndex;
     private int currentRoundCardIndex;
@@ -29,20 +23,20 @@ public class ColtExpressTurnOrder extends TurnOrder {
     private boolean evalPhase;
 
     public ColtExpressTurnOrder(int nPlayers, ColtExpressParameters cep){
+        this.gameParameters = cep;
         this.nPlayers = nPlayers;
         this.nMaxRounds = cep.nMaxRounds;
         firstPlayer = 0;
         turnOwner = 0;
         turnCounter = 0;
         roundCounter = 0;
-        setStartingPlayer(0);
         firstPlayerOfRound = 0;
         currentRoundIndex = 0;
         currentRoundCardIndex = 0;
         direction = 1;
         firstAction = true;
         evalPhase = false;
-        setupRounds(nPlayers, nMaxRounds, cep);
+        setStartingPlayer(0);
     }
 
     private ColtExpressTurnOrder(int nPlayers, int nMaxRounds) {
@@ -60,31 +54,20 @@ public class ColtExpressTurnOrder extends TurnOrder {
         direction = 1;
         firstAction = true;
         evalPhase = false;
-        currentTurnType = rounds.get(0).getTurnTypes()[0];
     }
 
     @Override
     protected TurnOrder _copy() {
-        return null;
-    }
-
-    private void setupRounds(int nPlayers, int nMaxRounds, ColtExpressParameters cep){
-        rounds = new ArrayList<>(nMaxRounds);
-
-        // Add random round cards
-        ArrayList<Integer> availableRounds = new ArrayList<>();
-        for (int i = 0; i < cep.roundCards.length; i++) {
-            availableRounds.add(i);
-        }
-        Random r = new Random(cep.getGameSeed());
-        for (int i = 0; i < nMaxRounds-1; i++) {
-            int choice = r.nextInt(availableRounds.size());
-            rounds.add(getRoundCard(cep, choice, nPlayers));
-            availableRounds.remove(Integer.valueOf(choice));
-        }
-
-        // Add 1 random end round card
-        rounds.add(getRandomEndRoundCard(cep));
+        ColtExpressTurnOrder ceto = new ColtExpressTurnOrder(nPlayers, gameParameters);
+        ceto.firstPlayerOfRound = firstPlayerOfRound;
+        ceto.gameParameters = (ColtExpressParameters) gameParameters.copy();
+        ceto.currentRoundIndex = currentRoundIndex;
+        ceto.currentRoundCardIndex = currentRoundCardIndex;
+        ceto.currentTurnType = currentTurnType;
+        ceto.direction = direction;
+        ceto.firstAction = firstAction;
+        ceto.evalPhase = evalPhase;
+        return ceto;
     }
 
     public int getCurrentRoundIndex(){return currentRoundIndex;}
@@ -126,7 +109,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     @Override
     public int nextPlayer(AbstractGameState gameState) {
         if (gameState.getGamePhase() != ColtExpressGameState.ColtExpressGamePhase.PlanActions)
-            return (turnOwner+direction) % nPlayers;
+            return (nPlayers + turnOwner + direction) % nPlayers;
 
         if (currentTurnType == RoundCard.TurnType.DoubleTurn)
         {
@@ -137,11 +120,11 @@ public class ColtExpressTurnOrder extends TurnOrder {
         }
 
         firstAction = true;
-        int tmp = (turnOwner+direction) % nPlayers;
+        int tmp = (nPlayers+turnOwner+direction) % nPlayers;
         if (tmp == firstPlayerOfRound){
             currentRoundIndex++;
-            if (currentRoundIndex < rounds.get(currentRoundCardIndex).getTurnTypes().length)
-                initRound(rounds.get(currentRoundCardIndex), currentRoundIndex);
+            if (currentRoundIndex < ((ColtExpressGameState)gameState).getRounds().get(currentRoundCardIndex).getTurnTypes().length)
+                initRound(((ColtExpressGameState)gameState).getRounds().get(currentRoundCardIndex), currentRoundIndex);
             else
                 gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
 
@@ -161,93 +144,15 @@ public class ColtExpressTurnOrder extends TurnOrder {
         }
     }
 
-    public void endRoundCard(AbstractGameState gameState){
-        rounds.get(currentRoundCardIndex).endRoundCardEvent((ColtExpressGameState) gameState);
+    public void endRoundCard(ColtExpressGameState gameState){
+        gameState.getRounds().get(currentRoundCardIndex).endRoundCardEvent(gameState);
         currentRoundCardIndex++;
-        if (currentRoundCardIndex < rounds.size()) {
+        if (currentRoundCardIndex < gameState.getRounds().size()) {
             firstPlayerOfRound = (firstPlayerOfRound + 1) % nPlayers;
             turnCounter = 0;
             turnOwner = firstPlayerOfRound;
-            initRound(rounds.get(currentRoundCardIndex), 0);
+            initRound(gameState.getRounds().get(currentRoundCardIndex), 0);
             gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.PlanActions);
         }
     }
-
-    public String toString(){
-        StringBuilder sb = new StringBuilder();
-        sb.append("ColtExpressTurnOrder: ");
-        int i = 0;
-        for (RoundCard round : rounds){
-            if (i == currentRoundCardIndex) {
-                sb.append("->");
-            }
-            sb.append(round.toString());
-            sb.append(", ");
-            i++;
-        }
-
-        sb.deleteCharAt(sb.length()-2);
-        return sb.toString();
-    }
-
-
-    /**
-     * Helper getter methods for round card composition.
-     */
-
-    public RoundCard getRandomEndRoundCard(ColtExpressParameters cep) {
-        int nEndCards = cep.endRoundCards.length;
-        int choice = new Random(cep.getGameSeed()).nextInt(nEndCards);
-        return getEndRoundCard(cep, choice);
-    }
-
-    public RoundCard getEndRoundCard(ColtExpressParameters cep, String key) {
-        int idx = -1;
-        int nEndCards = cep.endRoundCards.length;
-        for (int i = 0; i < nEndCards; i++) {
-            if (cep.endRoundCards[i].getKey().equals(key)) {
-                idx = i;
-                break;
-            }
-        }
-        return getEndRoundCard(cep, idx);
-    }
-
-    public RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
-        if (idx >= 0 && idx < cep.endRoundCards.length) {
-            RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
-            AbstractAction event = cep.endRoundCards[idx].getEndCardEvent();
-            return new RoundCard(cep.endRoundCards[idx].name(), turnTypes, event);
-        }
-        return null;
-    }
-
-
-    public RoundCard getRandomRoundCard(ColtExpressParameters cep, int nPlayers, int seed) {
-        int nEndCards = cep.roundCards.length;
-        int choice = new Random(seed).nextInt(nEndCards);
-        return getRoundCard(cep, choice, nPlayers);
-    }
-
-    public RoundCard getRoundCard(ColtExpressParameters cep, String key, int nPlayers) {
-        int idx = -1;
-        int nEndCards = cep.roundCards.length;
-        for (int i = 0; i < nEndCards; i++) {
-            if (cep.roundCards[i].getKey().equals(key)) {
-                idx = i;
-                break;
-            }
-        }
-        return getRoundCard(cep, idx, nPlayers);
-    }
-
-    public RoundCard getRoundCard(ColtExpressParameters cep, int idx, int nPlayers) {
-        if (idx >= 0 && idx < cep.roundCards.length) {
-            RoundCard.TurnType[] turnTypes = cep.roundCards[idx].getTurnTypeSequence(nPlayers);
-            AbstractAction event = cep.roundCards[idx].getEndCardEvent();
-            return new RoundCard(cep.roundCards[idx].name(), turnTypes, event);
-        }
-        return null;
-    }
-
 }

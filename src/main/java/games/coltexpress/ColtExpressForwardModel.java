@@ -3,6 +3,7 @@ package games.coltexpress;
 import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.actions.DrawComponents;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
@@ -19,6 +20,7 @@ import static core.CoreConstants.VERBOSE;
 import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
 
 public class ColtExpressForwardModel extends AbstractForwardModel {
 
@@ -28,6 +30,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
 
+        setupRounds(cegs, cep);
         setupTrain(cegs);
         cegs.playerCharacters = new HashMap<>();
 
@@ -85,11 +88,31 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         }
         distributeCards(cegs);
 
+        firstState.setGamePhase(PlanActions);
+    }
+
+    private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
+        cegs.rounds = new ArrayList<>(cep.nMaxRounds);
+
+        // Add random round cards
+        ArrayList<Integer> availableRounds = new ArrayList<>();
+        for (int i = 0; i < cep.roundCards.length; i++) {
+            availableRounds.add(i);
+        }
+        Random r = new Random(cep.getGameSeed());
+        for (int i = 0; i < cep.nMaxRounds-1; i++) {
+            int choice = r.nextInt(availableRounds.size());
+            cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
+            availableRounds.remove(Integer.valueOf(choice));
+        }
+
+        // Add 1 random end round card
+        cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
     }
 
     @Override
     protected AbstractForwardModel _copy() {
-        return null;
+        return new ColtExpressForwardModel();
     }
 
     @Override
@@ -110,12 +133,12 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
             throw new UnsupportedOperationException("not implemented yet");
-        } else if (ColtExpressGameState.ColtExpressGamePhase.PlanActions.equals(gamePhase)) {
+        } else if (PlanActions.equals(gamePhase)) {
             ceto.endPlayerTurn(gameState);
         } else if (ColtExpressGameState.ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
             ceto.endPlayerTurn(gameState);
             if (cegs.plannedActions.getSize() == 0) {
-                ceto.endRoundCard(gameState);
+                ceto.endRoundCard((ColtExpressGameState) gameState);
                 distributeCards((ColtExpressGameState) gameState);
             }
         }
@@ -238,9 +261,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gameState.getGamePhase())) {
             System.out.println("character drafting is not implemented yet");
 //            actions = drawAction();
-        } else if (ColtExpressGameState.ColtExpressGamePhase.DrawCards.equals(gameState.getGamePhase())) {
-//            actions = drawAction(); TODO: this done automatically?
-        } else if (ColtExpressGameState.ColtExpressGamePhase.PlanActions.equals(gameState.getGamePhase())) {
+        } else if (PlanActions.equals(gameState.getGamePhase())) {
             actions = schemingActions(cegs);
         } else if (ColtExpressGameState.ColtExpressGamePhase.ExecuteActions.equals(gameState.getGamePhase())) {
             actions = stealingActions(cegs);
@@ -273,10 +294,12 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     {
         int player = cegs.getTurnOrder().getCurrentPlayer(cegs);
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        if (cegs.plannedActions.getSize() == 0)
+        if (cegs.plannedActions.getSize() == 0) {
+            actions.add(new DoNothing());
             return actions;
+        }
 
-        ColtExpressCard plannedActionCard = cegs.plannedActions.peek(0);
+        ColtExpressCard plannedActionCard = cegs.plannedActions.pick(0);
         if (player == plannedActionCard.playerID)
         {
             switch (plannedActionCard.cardType){

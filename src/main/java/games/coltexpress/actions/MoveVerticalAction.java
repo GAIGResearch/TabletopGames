@@ -26,7 +26,7 @@ public class MoveVerticalAction extends DrawCard {
         super.execute(gs);
 
         Compartment comp = (Compartment) gs.getComponentById(compartment);
-        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+        ColtExpressCard card = (ColtExpressCard) getCard(gs);
 
         if (climbRoof){
             comp.playersInsideCompartment.remove(card.playerID);

@@ -154,22 +154,25 @@ public class Game {
 
             // Either ask player which action to use or, in case no actions are available, report the updated observation
             AbstractAction action = null;
-            if (actions.size() > 1) {
-                if (player instanceof HumanGUIPlayer) {
-                    while (action == null) {
+            if (actions.size() > 0) {
+                if (actions.size() == 1) {
+                    // Can only do 1 action, so do it.
+                    action = actions.get(0);
+                } else {
+                    if (player instanceof HumanGUIPlayer) {
+                        while (action == null) {
+                            action = getPlayerAction(gui, player, observation);
+                        }
+                    } else {
                         action = getPlayerAction(gui, player, observation);
                     }
-                } else {
-                    action = getPlayerAction(gui, player, observation);
                 }
+
+                // Resolve action and game rules
+                forwardModel.next(gameState, action);
             } else {
                 player.registerUpdatedObservation(observation);
-                // Can only do 1 action, so do it.
-                if (actions.size() == 1) action = actions.get(0);
             }
-
-            // Resolve actions and game rules for the turn
-            forwardModel.next(gameState, action);
         }
 
         // Print last state

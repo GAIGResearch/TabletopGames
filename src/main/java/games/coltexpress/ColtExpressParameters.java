@@ -134,10 +134,11 @@ public class ColtExpressParameters extends AbstractGameParameters {
 
         LootType(ArrayList<Pair<Integer, Integer>> valueList){
             this.valueList = valueList;
-            pickedCount = new ArrayList<>(valueList.size());
+            pickedCount = new ArrayList<>();
             stillAvailableIdx = new ArrayList<>();
             for (int i = 0; i < valueList.size(); i++) {
                 stillAvailableIdx.add(i);
+                pickedCount.add(0);
             }
         }
 
