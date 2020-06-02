@@ -27,7 +27,7 @@ public abstract class AbstractTournament {
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();
 
-        Game g = Game.createGameInstance(gameToPlay, nPlayerPerGame);
+        Game g = gameToPlay.createGameInstance(nPlayerPerGame);
         if (g == null) throw new IllegalArgumentException("Chosen game not supported");
         else {
             this.games.add(g);
@@ -46,7 +46,7 @@ public abstract class AbstractTournament {
         this.playersPerGame = new ArrayList<>();
 
         for (Pair<GameType, Integer> gameToPlay: gamesToPlay) {
-            Game g = Game.createGameInstance(gameToPlay.a, gameToPlay.b);
+            Game g = gameToPlay.a.createGameInstance(gameToPlay.b);
             if (g == null) throw new IllegalArgumentException("Chosen game not supported");
             else {
                 this.games.add(g);

@@ -24,35 +24,73 @@ import players.ActionController;
 import java.util.ArrayList;
 import java.util.List;
 
-import static core.GameType.Topic.*;
+import static core.GameType.Category.*;
+import static core.GameType.Mechanic.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
+ * All games further include a list of categories and mechanics, which can be used to filter the game collection.
  */
 public enum GameType {
 
-    Pandemic(2, 4, new ArrayList<Topic>() {{ add(Strategy); }}),
-    TicTacToe (2, 2, new ArrayList<Topic>() {{ add(Simple); }}),
-    ExplodingKittens (2, 5, new ArrayList<Topic>() {{ add(Cards); }}),
-    LoveLetter (2, 4, new ArrayList<Topic>() {{ add(Cards); }}),
-    Uno (2, 10, new ArrayList<Topic>() {{ add(Cards); }}),
-    Virus (2, 6, new ArrayList<Topic>() {{ add(Cards); }}),
-    ColtExpress (2, 6, new ArrayList<Topic>() {{ add(Strategy); add(Planning); }}),
-    Carcassonne (2, 5, new ArrayList<Topic>() {{ add(Strategy); }});
+    Pandemic(2, 4,
+            new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
+            new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
+            add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }}),
+    TicTacToe (2, 2,
+            new ArrayList<Category>() {{ add(Simple); add(Abstract); }},
+            new ArrayList<Mechanic>() {{ add(PatternBuilding); }}),
+    ExplodingKittens (2, 5,
+            new ArrayList<Category>() {{ add(Strategy); add(Animals); add(Cards); add(ComicBook); add(Humour); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(HotPotato); add(PlayerElimination); add(PushYourLuck);
+            add(SetCollection); add(TakeThat); }}),
+    LoveLetter (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Deduction); add(Renaissance); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(PlayerElimination); }}),
+    Uno (2, 10,
+            new ArrayList<Category>() {{ add(Cards); add(ComicBook); add(Number); add(MoviesTVRadio); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(LoseATurn); add(TakeThat); }}),
+    Virus (2, 6,
+            new ArrayList<Category>() {{ add(Cards); add(Medical); }},
+            new ArrayList<Mechanic>() {{ add(CardDrafting); add(SetCollection); add(TakeThat); }}),
+    ColtExpress (2, 6,
+            new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
+            new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+    Carcassonne (2, 5,
+            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
+            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }});
 
     private int minPlayers, maxPlayers;
-    private ArrayList<Topic> topics;
 
-    public enum Topic {
+    // boardgamegeek.com topic classification of games
+    private ArrayList<Category> categories;
+    private ArrayList<Mechanic> mechanics;
+
+    public enum Category {
         Strategy,
         Simple,
+        Abstract,
+        Animals,
         Cards,
-        Planning;
+        ComicBook,
+        Humour,
+        Medical,
+        Deduction,
+        Renaissance,
+        MoviesTVRadio,
+        Number,
+        AmericanWest,
+        Fighting,
+        Trains,
+        CityBuilding,
+        Medieval,
+        TerritoryBuilding;
 
-        public List<GameType> getAllGamesOfTopic() {
+        public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
             for (GameType gt: GameType.values()) {
-                if (gt.getTopics().contains(this)) {
+                if (gt.getCategories().contains(this)) {
                     games.add(gt);
                 }
             }
@@ -60,10 +98,45 @@ public enum GameType {
         }
     }
 
-    GameType(int minPlayers, int maxPlayers, ArrayList<Topic> topics) {
+    public enum Mechanic {
+        Cooperative,
+        ActionPoints,
+        HandManagement,
+        PointToPointMovement,
+        SetCollection,
+        Trading,
+        VariablePlayerPowers,
+        HotPotato,
+        PlayerElimination,
+        PushYourLuck,
+        TakeThat,
+        LoseATurn,
+        CardDrafting,
+        ActionQueue,
+        Memory,
+        SimultaneousActionSelection,
+        ProgrammedEvent,
+        Influence,
+        MapAddition,
+        TilePlacement,
+        PatternBuilding;
+
+        public List<GameType> getAllGames() {
+            ArrayList<GameType> games = new ArrayList<>();
+            for (GameType gt: GameType.values()) {
+                if (gt.getMechanics().contains(this)) {
+                    games.add(gt);
+                }
+            }
+            return games;
+        }
+    }
+
+    GameType(int minPlayers, int maxPlayers, ArrayList<Category> categories, ArrayList<Mechanic> mechanics) {
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
-        this.topics = topics;
+        this.categories = categories;
+        this.mechanics = mechanics;
     }
 
     public int getMinPlayers() {
@@ -74,8 +147,12 @@ public enum GameType {
         return maxPlayers;
     }
 
-    public ArrayList<Topic> getTopics() {
-        return topics;
+    public ArrayList<Category> getCategories() {
+        return categories;
+    }
+
+    public ArrayList<Mechanic> getMechanics() {
+        return mechanics;
     }
 
     public GameType stringToGameType(String game) {

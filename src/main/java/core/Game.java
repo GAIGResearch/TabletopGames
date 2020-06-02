@@ -218,6 +218,7 @@ public class Game {
 
         /* 1. Choose game to play */
         GameType gameToPlay = Virus;
+//        List<GameType> games = GameType.Mechanic.Cooperative.getAllGames();
 
         /* 2. Running with visuals? */
         boolean visuals = false;
