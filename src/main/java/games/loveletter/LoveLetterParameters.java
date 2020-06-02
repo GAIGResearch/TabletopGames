@@ -25,8 +25,12 @@ public class LoveLetterParameters extends AbstractGameParameters {
     // set how many cards each player draws
     public int nCardsPerPlayer = 1;
 
+    public LoveLetterParameters(long seed) {
+        super(seed);
+    }
+
     @Override
     protected AbstractGameParameters _copy() {
-        return new LoveLetterParameters();
+        return new LoveLetterParameters(System.currentTimeMillis());
     }
 }

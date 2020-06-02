@@ -1,23 +1,23 @@
 package games.pandemic;
 
 import core.*;
+import evaluation.Run;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
-import players.HumanGUIPlayer;
 import players.OSLA;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.*;
 
-public class PandemicGame extends AbstractGame {
+public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
-        super(agents, new PandemicForwardModel(params, agents.size()),
+        super(Run.GameType.Pandemic, agents, new PandemicForwardModel(params, agents.size()),
                 new PandemicGameState(params, agents.size()));
     }
     public PandemicGame(AbstractForwardModel model, AbstractGameState gameState) {
-        super(model, gameState);
+        super(Run.GameType.Pandemic, model, gameState);
     }
 
     public static void main(String[] args){
@@ -32,7 +32,7 @@ public class PandemicGame extends AbstractGame {
         players.add(new OSLA());
 
 
-        PandemicParameters params = new PandemicParameters("data/pandemic/");
+        PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         PandemicGame game = new PandemicGame(players, params);
 
         AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
@@ -50,7 +50,7 @@ public class PandemicGame extends AbstractGame {
             results.put(r, 0);
         }
 
-        PandemicParameters params = new PandemicParameters("data/pandemic/");
+        PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         for (int i = 0; i < 10000; i++) {
             PandemicGame game = new PandemicGame(players, params);
             game.run(null);

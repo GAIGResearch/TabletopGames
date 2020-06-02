@@ -6,7 +6,6 @@ import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import core.observations.VectorObservation;
-import core.turnorders.TurnOrder;
 import games.uno.cards.*;
 import utilities.Utils;
 
@@ -27,10 +26,10 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param turnOrder      - turn order for this game.
+     * @param nPlayers      - number of players for this game.
      */
-    public UnoGameState(AbstractGameParameters gameParameters, TurnOrder turnOrder) {
-        super(gameParameters, turnOrder);
+    public UnoGameState(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters, new UnoTurnOrder(nPlayers));
     }
 
     @Override
@@ -85,7 +84,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     @Override
     protected AbstractGameState copy(int playerId) {
         // TODO: partial observability
-        UnoGameState copy = new UnoGameState(gameParameters.copy(), turnOrder.copy());
+        UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
         for (Deck<UnoCard> d: playerDecks) {
             copy.playerDecks.add(d.copy());

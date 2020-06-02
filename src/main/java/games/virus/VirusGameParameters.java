@@ -9,8 +9,12 @@ public class VirusGameParameters extends AbstractGameParameters {
     public int nCardsPerTreatment = 2;
     public int maxCardsDiscard = 3;
 
+    public VirusGameParameters(long seed) {
+        super(seed);
+    }
+
     @Override
     protected AbstractGameParameters _copy() {
-        return new VirusGameParameters();
+        return new VirusGameParameters(System.currentTimeMillis());
     }
 }

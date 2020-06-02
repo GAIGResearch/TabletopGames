@@ -30,11 +30,12 @@ public class PandemicForwardModel extends AbstractForwardModel {
 
     /**
      * Constructor. Creates the rules for the game and sets up the game rule graph.
-     * @param pp - parameters for the game.
+     * @param gameParameters - parameters for the game.
      * @param nPlayers - number of players in the game.
      */
-    public PandemicForwardModel(PandemicParameters pp, int nPlayers) {
-        super(pp.getGameSeed());
+    public PandemicForwardModel(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters.getGameSeed());
+        PandemicParameters pp = (PandemicParameters) gameParameters;
 
         // Game over conditions
         GameOverCondition infectLose = new GameOverInfection();

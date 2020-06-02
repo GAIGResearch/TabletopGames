@@ -26,6 +26,11 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         return turnStep;
     }
 
+    @Override
+    protected void _reset() {
+        super._reset();
+        turnStep = 0;
+    }
 
     /**
      * Method executed after a player's turn is finished.

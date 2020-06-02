@@ -1,15 +1,15 @@
 package games.uno;
 
 import core.*;
-import players.HumanConsolePlayer;
+import evaluation.Run;
 import players.OSLA;
 
 import java.util.*;
 
-public class UnoGame extends AbstractGame {
+public class UnoGame extends Game {
 
     public UnoGame(List<AbstractPlayer> agents, AbstractGameParameters gameParameters) {
-        super(agents, new UnoForwardModel(), new UnoGameState(gameParameters, new UnoTurnOrder(agents.size())));
+        super(Run.GameType.Uno, agents, new UnoForwardModel(), new UnoGameState(gameParameters, agents.size()));
     }
 
     public static void main(String[] args) {
@@ -24,8 +24,8 @@ public class UnoGame extends AbstractGame {
         agents.add(new OSLA());
         agents.add(new OSLA());
 
-        AbstractGameParameters    gameParameters = new UnoGameParameters();
-        AbstractGame              game           = new UnoGame(agents, gameParameters);
+        AbstractGameParameters    gameParameters = new UnoGameParameters(System.currentTimeMillis());
+        Game game           = new UnoGame(agents, gameParameters);
 
         game.run(null);
     }

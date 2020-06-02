@@ -54,6 +54,13 @@ public abstract class AbstractGameState {
         this.allComponents = new Area<>(-1, "All Components");
     }
 
+    /**
+     * Resets variables initialised for this game state.
+     */
+    void reset() {
+        turnOrder.reset();
+        allComponents.clear();
+    }
 
     // Setters
     public final void setTurnOrder(TurnOrder turnOrder) {

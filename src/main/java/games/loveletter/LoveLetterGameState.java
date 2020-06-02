@@ -1,5 +1,6 @@
 package games.loveletter;
 
+import core.AbstractGameParameters;
 import core.AbstractGameState;
 import core.components.Component;
 import core.interfaces.IGamePhase;
@@ -36,7 +37,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // if true: player cannot be effected by any card effects
     boolean[] effectProtection;
 
-    public LoveLetterGameState(LoveLetterParameters gameParameters, int nPlayers) {
+    public LoveLetterGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new LoveLetterTurnOrder(nPlayers));
         gamePhase = LoveLetterGamePhase.Draw;
     }
@@ -54,7 +55,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     @Override
     protected AbstractGameState copy(int playerId) {
         // TODO make sure PO
-        LoveLetterGameState llgs = new LoveLetterGameState((LoveLetterParameters) gameParameters.copy(), getNPlayers());
+        LoveLetterGameState llgs = new LoveLetterGameState(gameParameters.copy(), getNPlayers());
         llgs.drawPile = drawPile.copy();
         llgs.reserveCards = reserveCards.copy();
         llgs.playerHandCards = new ArrayList<>();

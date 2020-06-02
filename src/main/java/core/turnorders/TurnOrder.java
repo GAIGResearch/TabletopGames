@@ -30,14 +30,13 @@ public abstract class TurnOrder {
         this.nPlayers = nPlayers;
     }
 
-    private void reset() {
+    public void reset() {
+        _reset();
         firstPlayer = 0;
         turnOwner = 0;
         turnCounter = 0;
         roundCounter = 0;
-        nMaxRounds = -1;
     }
-
 
     public final void setStartingPlayer(int player) {
         firstPlayer = player;
@@ -120,6 +119,11 @@ public abstract class TurnOrder {
      * @return - copy of TurnOrder.
      */
     public abstract TurnOrder copy();
+
+    /**
+     * Resets the state of this turn order object to its initial state.
+     */
+    protected abstract void _reset();
 
     @Override
     public boolean equals(Object o) {

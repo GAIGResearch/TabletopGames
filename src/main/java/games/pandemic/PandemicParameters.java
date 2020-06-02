@@ -38,12 +38,13 @@ public class PandemicParameters extends AbstractGameParameters {
     int n_actions_per_turn = 4;
     int n_research_stations = 6;
 
-    public PandemicParameters(String dataPath) {
+    public PandemicParameters(String dataPath, long seed) {
+        super(seed);
         this.dataPath = dataPath;
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {
-        this(pandemicParameters.dataPath);
+        this(pandemicParameters.dataPath, System.currentTimeMillis());
 
         this.gameSeed = pandemicParameters.getGameSeed();
         this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;

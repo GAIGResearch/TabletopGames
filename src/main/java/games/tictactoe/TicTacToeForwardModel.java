@@ -26,7 +26,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     /**
      * Constructor for copies, leaves random generator null.
      */
-    protected TicTacToeForwardModel() { }
+    public TicTacToeForwardModel() { }
 
     @Override
     public void setup(AbstractGameState firstState) {

@@ -1,5 +1,6 @@
 package games.tictactoe;
 
+import core.AbstractGameParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.AbstractGameState;
@@ -22,7 +23,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         add('o');
     }};
 
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters, int nPlayers){
+    public TicTacToeGameState(AbstractGameParameters gameParameters, int nPlayers){
         super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
@@ -33,7 +34,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     protected AbstractGameState copy(int playerId) {
-        TicTacToeGameState s = new TicTacToeGameState((TicTacToeGameParameters)gameParameters.copy(), getNPlayers());
+        TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
     }

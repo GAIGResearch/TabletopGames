@@ -10,10 +10,17 @@ import java.util.LinkedList;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 
 public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
-    int requiredDraws = 1;
+    int requiredDraws;
 
     public ExplodingKittenTurnOrder(int nPlayers){
         super(nPlayers);
+        requiredDraws = 1;
+    }
+
+    @Override
+    protected void _reset() {
+        super._reset();
+        requiredDraws = 1;
     }
 
     public void endPlayerTurnStep(AbstractGameState gameState) {

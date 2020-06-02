@@ -18,8 +18,12 @@ public class UnoGameParameters extends AbstractGameParameters {
             "Yellow"
     };
 
+    public UnoGameParameters(long seed) {
+        super(seed);
+    }
+
     @Override
     protected AbstractGameParameters _copy() {
-        return new UnoGameParameters();
+        return new UnoGameParameters(System.currentTimeMillis());
     }
 }

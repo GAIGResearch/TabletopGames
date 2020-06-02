@@ -3,10 +3,11 @@ package core.turnorders;
 import core.AbstractGameState;
 
 public class AlternatingTurnOrder extends TurnOrder {
-    protected int direction = 1;
+    protected int direction;
 
     public AlternatingTurnOrder(int nPlayers){
         super(nPlayers);
+        direction = 1;
     }
 
     @Override
@@ -14,6 +15,11 @@ public class AlternatingTurnOrder extends TurnOrder {
         AlternatingTurnOrder to = new AlternatingTurnOrder(nPlayers);
         to.direction = direction;
         return copyTo(to);
+    }
+
+    @Override
+    protected void _reset() {
+        direction = 1;
     }
 
     @Override

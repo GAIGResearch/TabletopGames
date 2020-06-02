@@ -53,12 +53,13 @@ public class PandemicGUI extends AbstractGUI {
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUI(PandemicGameState gameState, ActionController ac) {
+    public PandemicGUI(AbstractGameState gameState, ActionController ac) {
         super(ac, 721);
+
 
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
-        this.gameState = gameState;
+        this.gameState = (PandemicGameState) gameState;
         boardView = new PandemicBoardView(gameState);
 
         handCardHighlights = new ArrayList[nPlayers];

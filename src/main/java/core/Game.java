@@ -2,11 +2,14 @@ package core;
 
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
+import evaluation.Run;
 import players.HumanGUIPlayer;
 
 import java.util.List;
 
-public abstract class AbstractGame {
+public class Game {
+    // Type of game
+    private Run.GameType gameType;
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
@@ -22,7 +25,8 @@ public abstract class AbstractGame {
      * @param realModel - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public AbstractGame(List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
+    public Game(Run.GameType type, List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
+        this.gameType = type;
         this.gameState = gameState;
         this.forwardModel = realModel;
         reset(players);
@@ -34,7 +38,8 @@ public abstract class AbstractGame {
      * @param model - forward model used to apply game rules.
      * @param gameState - object used to track the state of the game in a moment in time.
      */
-    public AbstractGame(AbstractForwardModel model, AbstractGameState gameState) {
+    public Game(Run.GameType type, AbstractForwardModel model, AbstractGameState gameState) {
+        this.gameType = type;
         this.forwardModel = model;
         this.gameState = gameState;
         reset();
@@ -43,21 +48,27 @@ public abstract class AbstractGame {
     /**
      * Resets the game. Sets up the game state to the initial state as described by game rules,
      * and initialises all players.
+     * TODO: change random seed
      */
     public final void reset() {
+        gameState.reset();
         forwardModel._setup(gameState);
-        for (AbstractPlayer player: players) {
-            AbstractGameState observation = gameState._copy(player.getPlayerID());
-            player.initializePlayer(observation);
+        if (players != null) {
+            for (AbstractPlayer player : players) {
+                AbstractGameState observation = gameState._copy(player.getPlayerID());
+                player.initializePlayer(observation);
+            }
         }
     }
 
     /**
      * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
      * and their IDs, and initialises all players.
+     * TODO: change random seed
      * @param players - new players for the game
      */
     public final void reset(List<AbstractPlayer> players) {
+        gameState.reset();
         forwardModel._setup(gameState);
         this.players = players;
         int id = 0;
@@ -158,4 +169,16 @@ public abstract class AbstractGame {
         return gameState;
     }
 
+    /**
+     * Which game is this?
+     * @return type of game.
+     */
+    public Run.GameType getGameType() {
+        return gameType;
+    }
+
+    @Override
+    public String toString() {
+        return gameType.toString();
+    }
 }

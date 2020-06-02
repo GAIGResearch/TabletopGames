@@ -14,6 +14,12 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         skipTurn = false;
     }
 
+    @Override
+    protected void _reset() {
+        super._reset();
+        skipTurn = false;
+    }
+
     public void skip()
     {
         skipTurn = true;

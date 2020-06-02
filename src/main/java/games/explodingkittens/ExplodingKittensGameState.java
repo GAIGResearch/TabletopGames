@@ -1,5 +1,6 @@
 package games.explodingkittens;
 
+import core.AbstractGameParameters;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.actions.AbstractAction;
@@ -37,7 +38,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Current stack of actions
     Stack<AbstractAction> actionStack;
 
-    public ExplodingKittensGameState(ExplodingKittenParameters gameParameters, int nPlayers) {
+    public ExplodingKittensGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new ExplodingKittenTurnOrder(nPlayers));
     }
 
@@ -52,7 +53,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     @Override
     protected AbstractGameState copy(int playerId) {
-        ExplodingKittensGameState ekgs = new ExplodingKittensGameState((ExplodingKittenParameters) gameParameters.copy(), getNPlayers());
+        ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.drawPile = drawPile.copy();
         ekgs.discardPile = discardPile.copy();
         ekgs.playerGettingAFavor = playerGettingAFavor;

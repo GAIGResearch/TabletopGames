@@ -8,7 +8,8 @@ import static games.carcassonne.CarcassonneGameState.CarcassonneType;
 
 public class CarcassonneParameters extends AbstractGameParameters {
     HashMap<CarcassonneType[][], Integer> tiles = new HashMap<>();
-    public CarcassonneParameters(){
+    public CarcassonneParameters(long seed){
+        super(seed);
         // church
          tiles.put(new CarcassonneType[][]{
                  {CarcassonneType.Grass, CarcassonneType.Grass, CarcassonneType.Grass},
@@ -55,6 +56,6 @@ public class CarcassonneParameters extends AbstractGameParameters {
 
     @Override
     protected AbstractGameParameters _copy() {
-        return new CarcassonneParameters();
+        return new CarcassonneParameters(System.currentTimeMillis());
     }
 }
