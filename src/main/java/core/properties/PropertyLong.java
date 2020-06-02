@@ -1,29 +1,18 @@
 package core.properties;
 
-import utilities.Hash;
-
 public class PropertyLong extends Property
 {
     public long value;
 
-    public PropertyLong(long value)
+    public PropertyLong(String hashString, long value)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.value = value;
     }
 
-    public PropertyLong(String key, long value)
+    public PropertyLong(String hashString, int hashKey, long value)
     {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
-        this.value = value;
-    }
-
-    public PropertyLong(String key, int hashKey, long value)
-    {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.value = value;
     }
 
@@ -33,6 +22,7 @@ public class PropertyLong extends Property
         return ""+value;
     }
 
+    @Override
     public boolean equals(Object other)
     {
        if(other instanceof PropertyLong)
@@ -40,7 +30,8 @@ public class PropertyLong extends Property
        return false;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyLong(hashString, hashKey, value);
     }

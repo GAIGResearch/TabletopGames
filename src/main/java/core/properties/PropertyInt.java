@@ -1,29 +1,21 @@
 package core.properties;
 
-import utilities.Hash;
+
+import java.util.Objects;
 
 public class PropertyInt extends Property
 {
     public int value;
 
-    public PropertyInt(int value)
+    public PropertyInt(String hashString, int value)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.value = value;
     }
 
-    public PropertyInt(String key, int value)
+    private PropertyInt(String hashString, int hashKey, int value)
     {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
-        this.value = value;
-    }
-
-    public PropertyInt(String key, int hashKey, int value)
-    {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.value = value;
     }
 
@@ -40,7 +32,8 @@ public class PropertyInt extends Property
        return false;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyInt(hashString, hashKey, value);
     }

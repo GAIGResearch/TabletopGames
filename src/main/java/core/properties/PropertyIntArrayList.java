@@ -1,7 +1,6 @@
 package core.properties;
 
 import org.json.simple.JSONArray;
-import utilities.Hash;
 
 import java.util.ArrayList;
 
@@ -9,18 +8,9 @@ public class PropertyIntArrayList extends Property
 {
     private ArrayList<Integer> values;
 
-    public PropertyIntArrayList(ArrayList<Integer> values)
+    public PropertyIntArrayList(String hashString, JSONArray values)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
-        this.values = new ArrayList<>();
-        this.values.addAll(values);
-    }
-
-    public PropertyIntArrayList(String key, JSONArray values)
-    {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.values = new ArrayList<>();
         for (Object value : values) {
             this.values.add((int) value);
@@ -28,10 +18,9 @@ public class PropertyIntArrayList extends Property
 
     }
 
-    public PropertyIntArrayList(String key, int hashKey, ArrayList<Integer> values)
+    private PropertyIntArrayList(String hashString, int hashKey, ArrayList<Integer> values)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.values = new ArrayList<>();
         this.values.addAll(values);
     }
@@ -45,6 +34,7 @@ public class PropertyIntArrayList extends Property
         return values.toString();
     }
 
+    @Override
     public boolean equals(Object other)
     {
        if(other instanceof PropertyIntArrayList)
@@ -52,18 +42,19 @@ public class PropertyIntArrayList extends Property
            PropertyIntArrayList psto = (PropertyIntArrayList)(other);
            if (psto.values.size() == this.values.size())
            {
-               for(int i =0; i< values.size(); ++i) {
+               for (int i = 0; i < values.size(); i++) {
                    if (! (this.values.get(i).equals(psto.values.get(i))))
                        return false;
                }
-           }else return false;
+           } else return false;
 
-       }else return false;
+       } else return false;
 
        return true;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyIntArrayList(hashString, hashKey, values);
     }

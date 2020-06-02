@@ -9,35 +9,22 @@ public class PropertyLongArray extends Property
 {
     private long[] values;
 
-    public PropertyLongArray(long[] values)
+    public PropertyLongArray(String hashString, JSONArray values)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
-        this.values = new long[values.length];
-        for(int i =0; i< values.length; ++i)
-            this.values[i] =  values[i];
-
-    }
-
-    public PropertyLongArray(String key, JSONArray values)
-    {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.values = new long[values.size()];
-        for(int i =0; i< values.size(); ++i)
+        for(int i = 0; i < values.size(); i++)
         {
             this.values[i] = (long) values.get(i);
         }
 
     }
 
-    public PropertyLongArray(String key, int hashKey, long[] values)
+    public PropertyLongArray(String hashString, int hashKey, long[] values)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.values = new long[values.length];
-        for(int i =0; i< values.length; ++i)
-            this.values[i] = values[i];
+        System.arraycopy(values, 0, this.values, 0, values.length);
     }
 
     public long[] getValues() {
@@ -49,25 +36,27 @@ public class PropertyLongArray extends Property
         return Arrays.toString(values);
     }
 
+    @Override
     public boolean equals(Object other)
     {
-       if(other instanceof PropertyLongArray)
+       if (other instanceof PropertyLongArray)
        {
            PropertyLongArray psto = (PropertyLongArray)(other);
            if (psto.values.length == this.values.length)
            {
-               for(int i =0; i< values.length; ++i) {
+               for (int i = 0; i < values.length; i++) {
                    if (! (this.values[i] == psto.values[i]))
                        return false;
                }
-           }else return false;
+           } else return false;
 
-       }else return false;
+       } else return false;
 
        return true;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyLongArray(hashString, hashKey, values);
     }

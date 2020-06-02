@@ -1,27 +1,25 @@
 package core.properties;
 
-import utilities.Hash;
 import utilities.Utils;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class PropertyColor extends Property
 {
     public String valueStr;
     private Color value;
 
-    public PropertyColor (String hashKey, String valStr)
+    public PropertyColor(String hashString, String valStr)
     {
-        this.hashString = hashKey;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.value = Utils.stringToColor(valStr);
         this.valueStr = valStr;
     }
 
-    public PropertyColor(String key, int hashKey, Color value, String valueStr)
+    private PropertyColor(String hashString, int hashKey, Color value, String valueStr)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.value = value;
         this.valueStr = valueStr;
     }
@@ -39,7 +37,7 @@ public class PropertyColor extends Property
     }
 
     @Override
-    public Property copy() {
+    protected Property _copy() {
         return new PropertyColor(hashString, hashKey, value, valueStr);
     }
 }
