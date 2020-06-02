@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static core.CoreConstants.DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED;
+
 public abstract class AbstractForwardModel {
 
     /* Limited access/Final methods */
@@ -63,6 +65,21 @@ public abstract class AbstractForwardModel {
      */
     protected void endGame(AbstractGameState gameState) {}
 
+    /**
+     * Current player tried to play an illegal action. Either disqualify (Automatic loss and no more playing),
+     * or play a random action for them instead.
+     * Subclasses can overwrite for their own behaviour.
+     * @param gameState - game state in which illegal action was attempted.
+     */
+    protected void illegalActionPlayed(AbstractGameState gameState) {
+        if (DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED) {
+            gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
+            gameState.turnOrder.endPlayerTurn(gameState);
+        } else {
+            int randomAction = new Random(gameState.getGameParameters().getGameSeed()).nextInt(gameState.getActions().size());
+            next(gameState, gameState.getActions().get(randomAction));
+        }
+    }
 
     /* ###### Public API for AI players ###### */
 
@@ -79,13 +96,12 @@ public abstract class AbstractForwardModel {
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
-    public final boolean next(AbstractGameState currentState, AbstractAction action) {
+    public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null && currentState.getActions().contains(action)) {
             _next(currentState, action);
-            return true;
         } else {
             System.out.println("Invalid action.");
-            return false;
+            illegalActionPlayed(currentState);
         }
     }
 

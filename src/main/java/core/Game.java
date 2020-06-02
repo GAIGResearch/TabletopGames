@@ -7,7 +7,6 @@ import players.ActionController;
 import players.HumanGUIPlayer;
 import players.OSLA;
 import players.RandomPlayer;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,13 +168,7 @@ public class Game {
             }
 
             // Resolve actions and game rules for the turn
-            boolean executed = forwardModel.next(gameState, action);
-            if (!executed) {
-                // Tried to execute illegal action, disqualify player or play random valid action instead
-//                disqualifyPlayer(player);
-                int randomAction = new Random(gameState.getGameParameters().getGameSeed()).nextInt(actions.size());
-                forwardModel.next(gameState, actions.get(randomAction));
-            }
+            forwardModel.next(gameState, action);
         }
 
         // Print last state
@@ -211,16 +204,6 @@ public class Game {
         }
 
         return player.getAction(observation);
-    }
-
-    /**
-     * This player is disqualified. Automatic loss and no more playing.
-     * TODO: make sure games are happy for a player to be disqualified. Could move this on FM and allow overwrite
-     * @param player - player to be disqualified.
-     */
-    private void disqualifyPlayer(AbstractPlayer player) {
-        gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, player.getPlayerID());
-        gameState.turnOrder.endPlayerTurn(gameState);
     }
 
     /**
