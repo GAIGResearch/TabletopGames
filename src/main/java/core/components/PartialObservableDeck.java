@@ -5,9 +5,6 @@ import java.util.*;
 
 public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
-    // Number of players in the game
-    protected final int nPlayers;
-
     // Visibility of the deck, index of array corresponds to player ID
     // (true if player can see the deck, false otherwise)
     protected boolean[] deckVisibility;
@@ -18,7 +15,11 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     public PartialObservableDeck(String id, boolean[] defaultVisibility) {
         super(id);
         this.deckVisibility = defaultVisibility;
-        this.nPlayers = defaultVisibility.length;
+    }
+
+    public PartialObservableDeck(String name, boolean[] defaultVisibility, int ID) {
+        super(name, ID);
+        this.deckVisibility = defaultVisibility;
     }
 
     public PartialObservableDeck(String id, int nPlayers) {
@@ -31,8 +32,8 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @return - ArrayList of components observed by the player.
      */
     public ArrayList<T> getVisibleComponents(int playerID) {
-        if (playerID >= 0 && playerID > nPlayers)
-            throw new IllegalArgumentException("playerID "+ playerID + "needs to be in range [0," + nPlayers +"]");
+        if (playerID < 0 && playerID >= deckVisibility.length)
+            throw new IllegalArgumentException("playerID "+ playerID + " needs to be in range [0," + (deckVisibility.length-1) +"]");
 
         ArrayList<T> visibleComponents = new ArrayList<>(components.size());
         for (int i = 0; i < components.size(); i++) {
@@ -63,8 +64,8 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      */
     public void setVisibility(ArrayList<boolean[]> visibility) {
         for (boolean[] b : visibility)
-            if (b.length != this.nPlayers)
-                throw new IllegalArgumentException("All entries of visibility need to have length " + nPlayers +
+            if (b.length != this.deckVisibility.length)
+                throw new IllegalArgumentException("All entries of visibility need to have length " + deckVisibility.length +
                         " but at least one entry is of length " + b.length);
         this.elementVisibility = visibility;
     }
@@ -77,10 +78,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      */
     public void setVisibilityOfComponent(int index, int playerID, boolean visibility) {
         if (index >= 0 && index < elementVisibility.size()) {
-            if (playerID >= 0 && playerID < nPlayers)
+            if (playerID >= 0 && playerID < deckVisibility.length)
                 this.elementVisibility.get(index)[playerID] = visibility;
             else
-                throw new IllegalArgumentException("playerID "+ playerID + "needs to be in range [0," + nPlayers +"]");
+                throw new IllegalArgumentException("playerID "+ playerID + "needs to be in range [0," + deckVisibility.length +"]");
         } else {
             throw new IllegalArgumentException("component index "+ index + " needs to be in range [0," + components.size() +"]");
         }
@@ -119,7 +120,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         if (d == null)
             throw new IllegalArgumentException("d cannot be null");
         elementVisibility.addAll(d.elementVisibility);
-        for (int i = 0; i < nPlayers; i++) {
+        for (int i = 0; i < deckVisibility.length; i++) {
             deckVisibility[i] &= d.deckVisibility[i];
         }
         return super.add(d);
@@ -198,7 +199,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     @Override
     public PartialObservableDeck<T> copy()
     {
-        PartialObservableDeck<T> dp = (PartialObservableDeck<T>)super.copy();
+        PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, deckVisibility, componentID);
+        this.copyTo(dp); // Copy super
+
         dp.deckVisibility = deckVisibility.clone();
 
         ArrayList<boolean[]> newVisibility = new ArrayList<>();

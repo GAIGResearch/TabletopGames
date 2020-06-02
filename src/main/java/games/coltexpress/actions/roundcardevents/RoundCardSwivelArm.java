@@ -21,6 +21,11 @@ public class RoundCardSwivelArm extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new RoundCardSwivelArm();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof RoundCardSwivelArm;
     }

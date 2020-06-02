@@ -15,23 +15,33 @@ public class Compartment extends Component {
 
     public PartialObservableDeck<Loot> lootInside;
     public PartialObservableDeck<Loot> lootOnTop;
-    public Set<Integer> playersInsideCompartment = new HashSet<>();
-    public Set<Integer> playersOnTopOfCompartment = new HashSet<>();
+    public Set<Integer> playersInsideCompartment;
+    public Set<Integer> playersOnTopOfCompartment;
 
-    public boolean containsMarshal = false;
+    public boolean containsMarshal;
     private final int nPlayers;
     private final int compartmentID;
 
-    private Compartment(int nPlayers, int compartmentID){
+    private Compartment(int nPlayers, int compartmentID, int ID){
+        super(Utils.ComponentType.BOARD_NODE, ID);
+        this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
+        this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
+        this.nPlayers = nPlayers;
+        this.compartmentID = compartmentID;
+        playersInsideCompartment = new HashSet<>();
+        playersOnTopOfCompartment = new HashSet<>();
+        containsMarshal = false;
+    }
+
+    public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
         super(Utils.ComponentType.BOARD_NODE);
         this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
         this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
-    }
-
-    public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
-        this(nPlayers, compartmentID);
+        playersInsideCompartment = new HashSet<>();
+        playersOnTopOfCompartment = new HashSet<>();
+        containsMarshal = false;
 
         HashMap<ColtExpressParameters.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
         for (Map.Entry<ColtExpressParameters.LootType, Integer> e : configuration.entrySet()) {
@@ -85,12 +95,14 @@ public class Compartment extends Component {
 
     @Override
     public Component copy() {
-        Compartment newCompartment = new Compartment(this.nPlayers, compartmentID);
-
+        Compartment newCompartment = new Compartment(this.nPlayers, compartmentID, componentID);
         for (Loot loot : this.lootInside.getComponents())
             newCompartment.lootInside.add((Loot) loot.copy());
         for (Loot loot : this.lootOnTop.getComponents())
             newCompartment.lootOnTop.add((Loot) loot.copy());
+        newCompartment.containsMarshal = containsMarshal;
+        newCompartment.playersOnTopOfCompartment.addAll(playersOnTopOfCompartment);
+        newCompartment.playersInsideCompartment.addAll(playersInsideCompartment);
         return newCompartment;
     }
 
@@ -110,4 +122,5 @@ public class Compartment extends Component {
 
         return sb.toString();
     }
+
 }

@@ -4,11 +4,14 @@ import core.actions.AbstractAction;
 import core.components.Area;
 import core.components.Component;
 import core.interfaces.IGamePhase;
-import core.interfaces.IObservation;
+import core.observations.VectorObservation;
 import core.turnorders.TurnOrder;
+import utilities.Distance;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
+
 
 /**
  * Contains all game state information.
@@ -24,9 +27,8 @@ public abstract class AbstractGameState {
 
     // Parameters, forward model and turn order for the game
     protected final AbstractGameParameters gameParameters;
-    protected AbstractForwardModel forwardModel;
     protected TurnOrder turnOrder;
-    protected Area<Component> allComponents;
+    private Area<Component> allComponents;
 
     // List of actions currently available for the player
     protected List<AbstractAction> availableActions;
@@ -44,14 +46,28 @@ public abstract class AbstractGameState {
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
-     * @param model - forward model.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, TurnOrder turnOrder){
+    public AbstractGameState(AbstractGameParameters gameParameters, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
-        this.forwardModel = model;
         this.turnOrder = turnOrder;
         this.allComponents = new Area<>(-1, "All Components");
+    }
+
+    /**
+     * Resets variables initialised for this game state.
+     */
+    void reset() {
+        turnOrder.reset();
+        allComponents.clear();
+    }
+
+    /**
+     * Resets variables initialised for this game state.
+     */
+    void reset(long seed) {
+        gameParameters.gameSeed = seed;
+        reset();
     }
 
     // Setters
@@ -66,6 +82,9 @@ public abstract class AbstractGameState {
     public final void setMainGamePhase() {
         this.gamePhase = DefaultGamePhase.Main;
     }
+    public final void setAvailableActions(List<AbstractAction> availableActions) {
+        this.availableActions = availableActions;
+    }
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
@@ -76,96 +95,195 @@ public abstract class AbstractGameState {
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == Utils.GameResult.GAME_ONGOING; }
     public final List<AbstractAction> getActions() {
-        return getActions(false);
-    }
-    public final List<AbstractAction> getActions(boolean forceCompute) {
-        if (forceCompute || availableActions == null || availableActions.size() == 0) {
-            availableActions = computeAvailableActions();
-        }
-        return availableActions;
+        return Collections.unmodifiableList(availableActions);
     }
     public final IGamePhase getGamePhase() {
         return gamePhase;
-    }
-    public AbstractGameData getData() {
-        return data;
     }
     public Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
 
-    /* Methods to be implemented by subclass */
+    /* Limited access final methods */
 
     /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
+     * Adds all components given by the game to the allComponents map in the correct way, first clearing the map.
      */
-    public void endGame() {}
-
-    /**
-     * Retrieves an observation specific to the given player from this game state object. Components which are not
-     * observed by the player are removed, the rest are copied.
-     * @param player - player observing this game state.
-     * @return - IObservation, the observation for this player.
-     */
-    public abstract IObservation getObservation(int player);
-
-    /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of AbstractAction objects.
-     */
-    public abstract List<AbstractAction> computeAvailableActions();
-
-    /**
-     * Must add all components used in the game to the allComponents area, mapping to their assigned component ID
-     * and NOT another game specific key. Use one of these functions for this functionality only:
-     *          - Area.putComponent(Component component)
-     *          - Area.putComponents(List<Component> components)
-     *          - Area.putComponents(Area area)
-     * Method is called after initialising the game state.
-     */
-    public abstract void addAllComponents();
-
-    /*
-    public AbstractGameState(AbstractGameState gameState) {
-        this(gameState.gameParameters);
-        this.activePlayer = gameState.activePlayer;
-        this.nPlayers = gameState.nPlayers;
-        this.roundStep = gameState.roundStep;
-        this.gameStatus = gameState.gameStatus;
+    protected final void addAllComponents() {
+        allComponents.clear();
+        allComponents.putComponents(_getAllComponents());
     }
 
-    protected AbstractGameState _copy()
-    {
-        AbstractGameState gsCopy = this.createNewGameState();
-        return gsCopy;
-    }
+    /**
+     * Copies the current game state, including super class methods, given player ID.
+     * Reduces state variables to only those that the player observes.
+     * @param playerId - player observing the state
+     * @return - reduced copy of the game state.
+     */
+    final AbstractGameState copy(int playerId) {
+        AbstractGameState s = _copy(playerId);
+        // Copy super class things
+        s.turnOrder = turnOrder.copy();
+        s.allComponents.clear();
+        s.gameStatus = gameStatus;
+        s.playerResults = playerResults.clone();
+        s.gamePhase = gamePhase;
+        s.data = data;  // Should never be modified
 
-    public abstract AbstractGameState createNewGameState();
-
-    public abstract void copyTo(AbstractGameState dest, int playerId);
-
-    public abstract void setComponents(String dataPath);
-
-    void setForwardModel(ForwardModel fm) { this.forwardModel = fm; }
-    ForwardModel getModel() {return this.forwardModel;}
-
-
-    void setGameParameters(GameParameters gp) { this.gameParameters = gp; }
-
-    public int getActingPlayer() {  // Returns player taking an action (or possibly a reaction) next
-        if (reactivePlayers.size() == 0)
-            return activePlayer;
-        else return reactivePlayers.get(0);
-    }
-    public ArrayList<Integer> getReactivePlayers() { return reactivePlayers; }  // Returns players queued to react
-    public void addReactivePlayer(int player) { reactivePlayers.add(player); }
-    public boolean removeReactivePlayer() {
-        if (reactivePlayers.size() > 0) {
-            reactivePlayers.remove(0);
-            return true;
+        s.availableActions = new ArrayList<>();
+        for (AbstractAction a: availableActions) {
+            s.availableActions.add(a.copy());
         }
-        return false;
+
+        // Update the list of components for ID matching in actions.
+        s.addAllComponents();
+        return s;
     }
+
+    /* Methods to be implemented by subclass, protected access. */
+
+    /**
+     * Returns all components used in the game and referred to by componentId from actions or rules.
+     * This method is called after initialising the game state.
+     * @return - List of components in the game.
      */
+    protected abstract List<Component> _getAllComponents();
+
+    /**
+     * Create a copy of the game state containing only those components the given player can observe (if partial
+     * observable).
+     * @param playerId - player observing this game state.
+     */
+    protected abstract AbstractGameState _copy(int playerId);
+
+    /**
+     * Encode the game state into a vector (fixed length during game).
+     * @return - a vector observation.
+     */
+    protected abstract VectorObservation _getVectorObservation();
+
+    /**
+     * Create a double vector representation, where each element represents a feature in the game space by which
+     * distance to another game state can be measured (in feature space), e.g.:
+     *      - game score
+     *      - player position
+     *      - event counter value
+     *      - round number
+     * @param playerId - player observing the state
+     * @return - int array, vector of features.
+     */
+    protected abstract double[] _getDistanceFeatures(int playerId);
+
+    /**
+     * Return all distance feature vectors which describe final game states, with associated result for the given player.
+     * Includes a mapping from feature index (as given in getDistanceFeatures() method) to feature value, and
+     * associated game result.
+     * When features in distance feature vectors extracted from a state coincide with any of these values,
+     * the game state is terminal.
+     * @param playerId - player observing the state.
+     * @return - map from terminal feature vector to game result.
+     */
+    protected abstract HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId);
+
+    /**
+     * Provide a simple numerical assessment of the current game state, the bigger the better.
+     * Subjective heuristic function definition.
+     * @param playerId - player observing the state.
+     * @return - double, score of current state.
+     */
+    protected abstract double _getScore(int playerId);
+
+
+    /* ####### Public AI agent API ####### */
+
+    /**
+     * Public access copy method, which always does a full copy of the game state.
+     * @return - full copy of this game state.
+     */
+    public final AbstractGameState copy() {
+        return copy(-1);
+    }
+
+    /**
+     * Provide a numerical assessment of the current game state's distance to the other game state provided.
+     * @param playerId - the player to calculate the score for.
+     * @return double, distance to the other state provided.
+     */
+    public final double getDistance(AbstractGameState otherState, int playerId) {
+        double[] features = _getDistanceFeatures(playerId);
+        double[] otherFeatures = otherState._getDistanceFeatures(playerId);
+        return Distance.manhattan_distance(features, otherFeatures);
+    }
+
+    /**
+     * Provide a numerical assessment of the current game state's distance to the other distance features provided.
+     * @param playerId - the player to calculate the score for.
+     * @return double, distance to the other features vector.
+     */
+    public final double getDistance(double[] otherFeatures, int playerId) {
+        double[] features = _getDistanceFeatures(playerId);
+        assert otherFeatures.length == features.length;
+        return Distance.manhattan_distance(features, otherFeatures);
+    }
+
+    /**
+     * Calculates the distances to all terminal states, returning a list of pairs (Distance, GameResult).
+     * @param playerId - player observing the state.
+     * @return - list of (distance, game result) pairs.
+     */
+    public final ArrayList<Pair<Double, Utils.GameResult>> getDistanceToTerminalStates(int playerId) {
+        ArrayList<Pair<Double, Utils.GameResult>> distances = new ArrayList<>();
+        double[] features = _getDistanceFeatures(playerId);
+
+        HashMap<HashMap<Integer, Double>, Utils.GameResult> terminalFeatures = _getTerminalFeatures(playerId);
+        for (Map.Entry<HashMap<Integer, Double>, Utils.GameResult> e: terminalFeatures.entrySet()) {
+            double[] otherFeatures = new double[features.length];
+            for (Map.Entry<Integer, Double> m : e.getKey().entrySet()) {
+                otherFeatures[m.getKey()] = m.getValue();
+            }
+            distances.add(new Pair<>(Distance.manhattan_distance(features, otherFeatures), e.getValue()));
+        }
+        return distances;
+    }
+
+    /**
+     * Encodes the game state into a vector (fixed length during game).
+     * @return - a vector observation.
+     */
+    public final VectorObservation getVectorObservation() {
+        return _getVectorObservation();
+    }
+
+    /**
+     * Retrieves a double vector representation, where each element represents a feature in the game space by which
+     * distance to another game state can be measured (in feature space)
+     * @param playerId - player observing the state
+     * @return - int array, vector of features.
+     */
+    public final double[] getDistanceFeatures(int playerId) {
+        return _getDistanceFeatures(playerId);
+    }
+
+    /**
+     * Returns all distance feature vectors which describe final game states, with associated result for the given player.
+     * Includes a mapping from feature index (as given in getDistanceFeatures() method) to feature value, and
+     * associated game result.
+     * When features in distance feature vectors extracted from a state coincide with any of these values,
+     * the game state is terminal.
+     * @param playerId - player observing the state.
+     * @return - map from terminal feature vector to game result.
+     */
+    public final HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+        return _getTerminalFeatures(playerId);
+    }
+
+    /**
+     * Provide a simple numerical assessment of the current game state, the bigger the better.
+     * Subjective heuristic function definition.
+     * @param playerId - player observing the state.
+     * @return - double, score of current state.
+     */
+    public final double getScore(int playerId) {
+        return _getScore(playerId);
+    }
 }

@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
@@ -58,5 +59,10 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), attackTargetID);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new AttackAction(deckFrom, deckTo, fromIndex, attackTargetID);
     }
 }

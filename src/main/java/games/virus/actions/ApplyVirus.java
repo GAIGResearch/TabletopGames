@@ -1,6 +1,7 @@
 package games.virus.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.virus.components.VirusBody;
 import games.virus.VirusGameState;
@@ -39,5 +40,10 @@ public class ApplyVirus extends PlayVirusCard implements IPrintable {
     @Override
     public void printToConsole() {
         System.out.println("Apply virus");
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new ApplyVirus(deckFrom, deckTo, fromIndex, bodyId);
     }
 }

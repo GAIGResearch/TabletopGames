@@ -9,18 +9,9 @@ public class PropertyLongArrayList extends Property
 {
     private ArrayList<Long> values;
 
-    public PropertyLongArrayList(ArrayList<Long> values)
+    public PropertyLongArrayList(String hashString, JSONArray values)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
-        this.values = new ArrayList<>();
-        this.values.addAll(values);
-    }
-
-    public PropertyLongArrayList(String key, JSONArray values)
-    {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.values = new ArrayList<>();
         for (Object value : values) {
             this.values.add((long) value);
@@ -28,10 +19,9 @@ public class PropertyLongArrayList extends Property
 
     }
 
-    public PropertyLongArrayList(String key, int hashKey, ArrayList<Long> values)
+    public PropertyLongArrayList(String hashString, int hashKey, ArrayList<Long> values)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.values = new ArrayList<>();
         this.values.addAll(values);
     }
@@ -45,25 +35,27 @@ public class PropertyLongArrayList extends Property
         return values.toString();
     }
 
+    @Override
     public boolean equals(Object other)
     {
-       if(other instanceof PropertyLongArrayList)
+       if (other instanceof PropertyLongArrayList)
        {
            PropertyLongArrayList psto = (PropertyLongArrayList)(other);
            if (psto.values.size() == this.values.size())
            {
-               for(int i =0; i< values.size(); ++i) {
+               for(int i = 0; i < values.size(); i++) {
                    if (! (this.values.get(i).equals(psto.values.get(i))))
                        return false;
                }
-           }else return false;
+           } else return false;
 
-       }else return false;
+       } else return false;
 
        return true;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyLongArrayList(hashString, hashKey, values);
     }

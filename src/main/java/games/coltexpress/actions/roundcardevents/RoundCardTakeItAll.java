@@ -25,6 +25,11 @@ public class RoundCardTakeItAll extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new RoundCardTakeItAll();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof RoundCardTakeItAll;
     }

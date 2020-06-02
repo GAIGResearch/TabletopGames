@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.Deck;
@@ -18,8 +19,8 @@ public class GiveCard extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         ExplodingKittenTurnOrder ekto = ((ExplodingKittenTurnOrder) gs.getTurnOrder());
-        Deck<ExplodingKittenCard> from = ekgs.getPlayerHandCards().get(deckFrom);
-        Deck<ExplodingKittenCard> to = ekgs.getPlayerHandCards().get(deckTo);
+        Deck<ExplodingKittenCard> from = (Deck<ExplodingKittenCard>) ekgs.getComponentById(deckFrom);
+        Deck<ExplodingKittenCard> to = (Deck<ExplodingKittenCard>) ekgs.getComponentById(deckTo);
 
         ExplodingKittenCard c = from.pick(fromIndex);
         to.add(c);
@@ -45,4 +46,8 @@ public class GiveCard extends DrawCard implements IPrintable {
         System.out.println(this.toString());
     }
 
+    @Override
+    public AbstractAction copy() {
+        return new GiveCard(deckFrom, deckTo, fromIndex);
+    }
 }

@@ -1,38 +1,46 @@
 package games.uno;
 
-import core.AbstractForwardModel;
-import core.actions.AbstractAction;
+import core.AbstractGameParameters;
+import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
-import core.AbstractGameParameters;
+import core.interfaces.IPrintable;
+import core.observations.VectorObservation;
 import games.uno.cards.*;
-import core.interfaces.IObservation;
-import games.uno.actions.NoCards;
-import games.uno.actions.PlayCard;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
-public class UnoGameState extends AbstractGameState {
+public class UnoGameState extends AbstractGameState implements IPrintable {
     List<Deck<UnoCard>>  playerDecks;
     Deck<UnoCard>        drawDeck;
     Deck<UnoCard>        discardDeck;
     UnoCard              currentCard;
     String currentColor;
 
-    public UnoGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
-        super(gameParameters, model, new UnoTurnOrder(nPlayers));
+    /**
+     * Constructor. Initialises some generic game state variables.
+     *
+     * @param gameParameters - game parameters.
+     * @param nPlayers      - number of players for this game.
+     */
+    public UnoGameState(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters, new UnoTurnOrder(nPlayers));
     }
 
     @Override
-    public void addAllComponents() {
-        allComponents.putComponents(playerDecks);
-        allComponents.putComponent(drawDeck);
-        allComponents.putComponent(discardDeck);
-        allComponents.putComponent(currentCard);
+    protected List<Component> _getAllComponents()
+    {
+        return new ArrayList<Component>() {{
+            addAll(playerDecks);
+            add(drawDeck);
+            add(discardDeck);
+            add(currentCard);
+        }};
     }
 
     boolean isWildCard(UnoCard card) {
@@ -41,58 +49,6 @@ public class UnoGameState extends AbstractGameState {
 
     boolean isNumberCard(UnoCard card) {
         return card.type == UnoCard.UnoCardType.Number;
-    }
-
-    @Override
-    public void endGame() {
-        System.out.println("Game Results:");
-        for (int playerID = 0; playerID < getNPlayers(); playerID++) {
-            if (playerResults[playerID] == Utils.GameResult.GAME_WIN) {
-                System.out.println("The winner is the player : " + playerID);
-                break;
-            }
-        }
-    }
-
-    @Override
-    public List<AbstractAction> computeAvailableActions() {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = getCurrentPlayerID();
-
-        Deck<UnoCard> playerHand = playerDecks.get(player);
-        for (UnoCard card : playerHand.getComponents()) {
-            int cardIdx = playerHand.getComponents().indexOf(card);
-            if (card.isPlayable(this)) {
-                if (isWildCard(card)) {
-                    for (String color : ((UnoGameParameters)gameParameters).colors) {
-                        actions.add(new PlayCard(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx, color));
-                    }
-                }
-                else {
-                    actions.add(new PlayCard(playerHand.getComponentID(), discardDeck.getComponentID(), cardIdx));
-                }
-            }
-        }
-
-        if (actions.isEmpty())
-            actions.add(new NoCards());
-
-        return actions;
-    }
-
-    @Override
-    public IObservation getObservation(int playerID) {
-        Deck<UnoCard> playerHand = playerDecks.get(playerID);
-        ArrayList<Integer> cardsLeft = new ArrayList<>();
-        for( int i = 0; i < getNPlayers(); i++) {
-            int nCards = playerDecks.get(playerID).getComponents().size();
-            cardsLeft.add(nCards);
-        }
-        return new UnoObservation(currentCard, currentColor, playerHand, discardDeck, playerID, cardsLeft);
-    }
-
-    public int getCurrentPlayerID() {
-        return turnOrder.getTurnOwner();
     }
 
     public void updateCurrentCard(UnoCard card) {
@@ -123,6 +79,70 @@ public class UnoGameState extends AbstractGameState {
 
     public String getCurrentColor() {
         return currentColor;
+    }
+
+    @Override
+    protected AbstractGameState _copy(int playerId) {
+        // TODO: partial observability
+        UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
+        copy.playerDecks = new ArrayList<>();
+        for (Deck<UnoCard> d: playerDecks) {
+            copy.playerDecks.add(d.copy());
+        }
+        copy.drawDeck = drawDeck.copy();
+        copy.discardDeck = discardDeck.copy();
+        copy.currentCard = (UnoCard) currentCard.copy();
+        copy.currentColor = currentColor;
+        return copy;
+    }
+
+    @Override
+    protected VectorObservation _getVectorObservation() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    protected double[] _getDistanceFeatures(int playerId) {
+        // TODO
+        return new double[0];
+    }
+
+    @Override
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    protected double _getScore(int playerId) {
+        // TODO: heuristic
+        return 0;
+    }
+
+    @Override
+    public void printToConsole() {
+
+        String[] strings = new String[6];
+
+        strings[0] = "----------------------------------------------------";
+        strings[1] = "Current Card: " + currentCard.toString() + " [" + currentColor + "]";
+        strings[2] = "----------------------------------------------------";
+
+        strings[3] = "Player      : " + getCurrentPlayer();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Player Hand : ");
+
+        for (UnoCard card : playerDecks.get(getCurrentPlayer()).getComponents()) {
+            sb.append(card.toString());
+            sb.append(" ");
+        }
+        strings[4] = sb.toString();
+        strings[5] = "----------------------------------------------------";
+
+        for (String s : strings){
+            System.out.println(s);
+        }
     }
 }
 

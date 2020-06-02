@@ -5,6 +5,8 @@ import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
+import java.util.LinkedList;
+
 public class PandemicTurnOrder extends ReactiveTurnOrder {
     protected int nStepsPerTurn;  // Number of steps in a turn before player's turn is finished
     protected int turnStep;  // 1 turn = n steps (by default n = 1)
@@ -24,6 +26,11 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         return turnStep;
     }
 
+    @Override
+    protected void _reset() {
+        super._reset();
+        turnStep = 0;
+    }
 
     /**
      * Method executed after a player's turn is finished.
@@ -65,8 +72,9 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
-        PandemicTurnOrder pto = (PandemicTurnOrder) super.copy();
+    protected TurnOrder _copy() {
+        PandemicTurnOrder pto = new PandemicTurnOrder(nPlayers, nStepsPerTurn);
+        pto.reactivePlayers = new LinkedList<>(reactivePlayers);
         pto.turnStep = turnStep;
         pto.nStepsPerTurn = nStepsPerTurn;
         return pto;

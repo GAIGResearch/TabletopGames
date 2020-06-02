@@ -201,6 +201,8 @@ public abstract class Component {
             Property newProp = this.properties.get(prop_key).copy();
             copyTo.setProperty(prop_key, newProp);
         }
+        copyTo.ownerId = ownerId;
+        copyTo.componentName = componentName;
     }
 
     @Override

@@ -1,10 +1,13 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
+
+import java.util.Objects;
 
 
 public class SchemeAction extends DrawCard implements IPrintable {
@@ -32,14 +35,17 @@ public class SchemeAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SchemeAction that = (SchemeAction) o;
+        return hidden == that.hidden;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), hidden);
     }
 
     @Override
@@ -54,4 +60,8 @@ public class SchemeAction extends DrawCard implements IPrintable {
         return "PlayCard";
     }
 
+    @Override
+    public AbstractAction copy() {
+        return new SchemeAction(deckFrom, deckTo, hidden);
+    }
 }

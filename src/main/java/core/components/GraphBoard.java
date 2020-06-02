@@ -11,7 +11,9 @@ import utilities.Utils.ComponentType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static core.CoreConstants.imgHash;
 import static core.CoreConstants.nameHash;
@@ -53,7 +55,27 @@ public class GraphBoard extends Component {
     public GraphBoard copy()
     {
         GraphBoard b = new GraphBoard(componentName, componentID);
-        b.setBoardNodes(new ArrayList<>(boardNodes));
+        HashMap<Integer, BoardNode> nodeCopies = new HashMap<>();
+        // Copy board nodes
+        for (BoardNode bn: boardNodes) {
+            BoardNode bnCopy = new BoardNode(bn.getMaxNeighbours(), "", bn.getComponentID());
+            bn.copyComponentTo(bnCopy);
+            nodeCopies.put(bn.getComponentID(), bnCopy);
+        }
+        // Assign neighbours
+        for (BoardNode bn: boardNodes) {
+            BoardNode bnCopy = nodeCopies.get(bn.getComponentID());
+            for (BoardNode neighbour: bn.getNeighbours()) {
+                bnCopy.addNeighbour(nodeCopies.get(neighbour.getComponentID()));
+            }
+            for (Map.Entry<BoardNode, Integer> e: bn.getNeighbourSideMapping().entrySet()) {
+                bnCopy.addNeighbour(nodeCopies.get(e.getKey().componentID), e.getValue());
+            }
+        }
+        // Assign new neighbours
+        b.setBoardNodes(new ArrayList<>(nodeCopies.values()));
+        // Copy properties
+        copyComponentTo(b);
         return b;
     }
 

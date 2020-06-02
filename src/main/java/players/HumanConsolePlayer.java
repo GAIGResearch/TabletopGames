@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
-import core.interfaces.IObservation;
 
 import java.util.List;
 import java.util.Scanner;
@@ -13,17 +12,18 @@ import java.util.Scanner;
 public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
-    public int getAction(IObservation observation, List<AbstractAction> actions) {
+    public AbstractAction getAction(AbstractGameState observation) {
+        List<AbstractAction> actions = observation.getActions();
+
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();
 
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) != null) {
-                System.out.print("Action " + i + ": ");
-                actions.get(i).printToConsole();
+                System.out.println("Action " + i + ": " + actions.get(i).getString(observation));
             }
             else
-                System.out.println("action i: Action does not implement IPrintableAction");
+                System.out.println("Null action");
 
         System.out.println("Type the index of your desired action:");
         Scanner in = new Scanner(System.in);
@@ -38,17 +38,16 @@ public class HumanConsolePlayer extends AbstractPlayer {
                 invalid = false;
         }
 
-        return playerAction;
+        return actions.get(playerAction);
     }
 
     @Override
-    public void registerUpdatedObservation(IObservation observation) {
+    public void registerUpdatedObservation(AbstractGameState observation) {
         //if (observation instanceof IPrintable)
         //   ((IPrintable) observation).printToConsole();
         System.out.println("No actions available. End turn by pressing any key...");
         Scanner in = new Scanner(System.in);
         in.next();
     }
-
 }
 

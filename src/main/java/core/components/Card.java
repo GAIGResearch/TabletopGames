@@ -14,7 +14,7 @@ public class Card extends Component {
         super(ComponentType.CARD, name);
     }
 
-    private Card(String name, int ID){
+    protected Card(String name, int ID){
         super(ComponentType.CARD, name, ID);
     }
 

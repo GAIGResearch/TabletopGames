@@ -1,56 +1,77 @@
 package games.tictactoe;
 
-import core.AbstractForwardModel;
-import core.actions.AbstractAction;
-import core.actions.SetGridValueAction;
+import core.AbstractGameParameters;
+import core.components.Component;
 import core.components.GridBoard;
 import core.AbstractGameState;
 import core.interfaces.IGridGameState;
-import core.observations.GridObservation;
-import core.interfaces.IObservation;
+import core.interfaces.IPrintable;
+import core.observations.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IGridGameState<Character> {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character> {
 
     GridBoard<Character> gridBoard;
+    final ArrayList<Character> playerMapping = new ArrayList<Character>() {{
+        add('x');
+        add('o');
+    }};
 
-    public TicTacToeGameState(TicTacToeGameParameters gameParameters, AbstractForwardModel model, int nPlayers){
-        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
+    public TicTacToeGameState(AbstractGameParameters gameParameters, int nPlayers){
+        super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
     @Override
-    public IObservation getObservation(int player) {
-        return new GridObservation<>(gridBoard.getGridValues());
+    protected List<Component> _getAllComponents() {
+        return new ArrayList<Component>(){{ add(gridBoard); }};
     }
 
     @Override
-    public void endGame() {
-        gameStatus = Utils.GameResult.GAME_DRAW;
-        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
+    protected AbstractGameState _copy(int playerId) {
+        TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
+        s.gridBoard = gridBoard.copy();
+        return s;
     }
 
     @Override
-    public List<AbstractAction> computeAvailableActions() {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = turnOrder.getCurrentPlayer(this);
-
-        for (int x = 0; x < gridBoard.getWidth(); x++){
-            for (int y = 0; y < gridBoard.getHeight(); y++) {
-                if (gridBoard.getElement(x, y) == ' ')
-                    actions.add(new SetGridValueAction(gridBoard.getComponentID(), x, y, player == 0 ? 'x' : 'o'));
-            }
-        }
-        return actions;
+    protected VectorObservation _getVectorObservation() {
+        return new VectorObservation<>(gridBoard.flattenGrid());
     }
 
     @Override
-    public void addAllComponents() {
-        allComponents.putComponent(gridBoard);
+    protected double[] _getDistanceFeatures(int playerId) {
+        return new double[0];
+    }
+
+    @Override
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
+        return null;
+    }
+
+    @Override
+    protected double _getScore(int playerId) {
+        if (getGameStatus() == Utils.GameResult.WIN)
+            return 1;
+        else if (getGameStatus() == Utils.GameResult.DRAW)
+            return 0;
+        else if (getGameStatus() == Utils.GameResult.LOSE)
+            return -1;
+        else
+            return 0;
+
+//        int nChars = 0;
+//        for (int i = 0; i < gridBoard.getWidth(); i++) {
+//            for (int j = 0; j < gridBoard.getHeight(); j++) {
+//                if (gridBoard.getElement(i, j) == playerMapping.get(playerId)) nChars++;
+//            }
+//        }
+//        return nChars;
     }
 
     @Override
@@ -58,18 +79,8 @@ public class TicTacToeGameState extends AbstractGameState implements IGridGameSt
         return gridBoard;
     }
 
-    /**
-     * Inform the game this player has won.
-     * @param winnerSymbol - which player won.
-     */
-    public void registerWinner(char winnerSymbol){
-        gameStatus = Utils.GameResult.GAME_END;
-        if (winnerSymbol == 'o'){
-            playerResults[1] = Utils.GameResult.GAME_WIN;
-            playerResults[0] = Utils.GameResult.GAME_LOSE;
-        } else {
-            playerResults[0] = Utils.GameResult.GAME_WIN;
-            playerResults[1] = Utils.GameResult.GAME_LOSE;
-        }
+    @Override
+    public void printToConsole() {
+        System.out.println(gridBoard.toString());
     }
 }

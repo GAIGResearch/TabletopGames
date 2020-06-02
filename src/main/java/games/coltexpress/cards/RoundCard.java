@@ -5,6 +5,7 @@ import core.components.Card;
 import games.coltexpress.ColtExpressGameState;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class RoundCard extends Card {
     /*
@@ -56,7 +57,14 @@ public class RoundCard extends Card {
     protected TurnType[] turnTypes;
     protected AbstractAction endRoundCardEvent;
 
-    public RoundCard(TurnType[] turnTypes, AbstractAction endRoundCardEvent) {
+    public RoundCard(String name, TurnType[] turnTypes, AbstractAction endRoundCardEvent) {
+        super(name);
+        this.turnTypes = turnTypes;
+        this.endRoundCardEvent = endRoundCardEvent;
+    }
+
+    public RoundCard(String name, TurnType[] turnTypes, AbstractAction endRoundCardEvent, int ID) {
+        super(name, ID);
         this.turnTypes = turnTypes;
         this.endRoundCardEvent = endRoundCardEvent;
     }
@@ -77,6 +85,21 @@ public class RoundCard extends Card {
 
     public String toString(){
         return Arrays.toString(turnTypes);
+    }
+
+    @Override
+    public Card copy() {
+        return new RoundCard(componentName, turnTypes.clone(), endRoundCardEvent.copy(), componentID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RoundCard roundCard = (RoundCard) o;
+        return Arrays.equals(turnTypes, roundCard.turnTypes) &&
+                Objects.equals(endRoundCardEvent, roundCard.endRoundCardEvent);
     }
 
 }

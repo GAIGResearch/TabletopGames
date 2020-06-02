@@ -12,8 +12,9 @@ public class LoveLetterTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
-        LoveLetterTurnOrder to = (LoveLetterTurnOrder) super.copy();
-        return copyTo(to);
+    protected TurnOrder _copy() {
+        LoveLetterTurnOrder to = new LoveLetterTurnOrder(nPlayers);
+        to.direction = direction;
+        return to;
     }
 }

@@ -99,6 +99,15 @@ public class ColtExpressParameters extends AbstractGameParameters {
         add(new Group<>(Purse, 250, 1));
     }};
 
+    public ColtExpressParameters(long seed) {
+        super(seed);
+    }
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new ColtExpressParameters(System.currentTimeMillis());
+    }
+
     // Loot types available for this game. The types should not change, but the values can.
     // Each type has a list of pairs:
     // - a: what value

@@ -1,10 +1,13 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
+
+import java.util.Objects;
 
 public class ShootPlayerAction extends DrawCard {
 
@@ -72,19 +75,30 @@ public class ShootPlayerAction extends DrawCard {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ShootPlayerAction that = (ShootPlayerAction) o;
+        return targetID == that.targetID &&
+                playerCompartment == that.playerCompartment &&
+                targetCompartment == that.targetCompartment &&
+                isDjango == that.isDjango;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), targetID, playerCompartment, targetCompartment, isDjango);
     }
 
     public String toString(){
         if (targetID != -1)
             return "Shoot player " + targetID;
         return "Player attempts to shoot but has not target available";
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new ShootPlayerAction(deckFrom, deckTo, playerCompartment, targetCompartment, targetID, isDjango);
     }
 }

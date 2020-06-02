@@ -12,10 +12,17 @@ public class DrawCard extends AbstractAction {
     protected int deckTo;
     protected int fromIndex;
     protected int toIndex;
-    protected int cardId;
 
-    protected boolean executed;
+    protected int cardId;  // Component ID of the card moved, updated after the action is executed
+    protected boolean executed;  // Indicates whether the action executed or not
 
+    /**
+     * This action moves one card (given by index in its origin deck) from a deck to another.
+     * @param deckFrom - origin deck from which card will be moved.
+     * @param deckTo - destination deck to which card will be moved.
+     * @param fromIndex - index in the origin deck where the card can be found.
+     * @param toIndex - index in the destination deck where the card should be placed.
+     */
     public DrawCard (int deckFrom, int deckTo, int fromIndex, int toIndex) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
@@ -58,24 +65,26 @@ public class DrawCard extends AbstractAction {
         return (Card) gs.getComponentById(cardId);
     }
 
+    // Getters
     public int getCardId() {
         return cardId;
     }
-
     public int getFromIndex() {
         return fromIndex;
     }
-
     public int getToIndex() {
         return toIndex;
     }
-
     public int getDeckFrom() {
         return deckFrom;
     }
-
     public int getDeckTo() {
         return deckTo;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DrawCard(deckFrom, deckTo, fromIndex, toIndex);
     }
 
     @Override
@@ -98,7 +107,12 @@ public class DrawCard extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "DrawCard{" +
+                "deckFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
+                ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
+                ", card=" + getCard(gameState).getComponentName() +
+                ", toIndex=" + toIndex +
+                '}';
     }
 
     @Override

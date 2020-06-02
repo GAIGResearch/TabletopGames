@@ -22,6 +22,11 @@ public class RoundCardPassengerRebellion extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new RoundCardPassengerRebellion();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof RoundCardPassengerRebellion;
     }

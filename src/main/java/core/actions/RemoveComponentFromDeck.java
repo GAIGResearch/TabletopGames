@@ -11,10 +11,10 @@ public class RemoveComponentFromDeck<T extends Component> extends DrawCard {
     private int deck;
     private int componentIdx;
 
-    public RemoveComponentFromDeck(int deckFrom, int deckTo, int fromIndex, int deckRemove, int componentRemove) {
+    public RemoveComponentFromDeck(int deckFrom, int deckTo, int fromIndex, int deckRemoveId, int componentRemoveIdx) {
         super(deckFrom, deckTo, fromIndex);
-        this.deck = deckRemove;
-        this.componentIdx = componentRemove;
+        this.deck = deckRemoveId;
+        this.componentIdx = componentRemoveIdx;
     }
 
     @Override
@@ -63,5 +63,10 @@ public class RemoveComponentFromDeck<T extends Component> extends DrawCard {
 
     public int getDeck() {
         return deck;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new RemoveComponentFromDeck<T>(deckFrom, deckTo, fromIndex, deck, componentIdx);
     }
 }

@@ -22,8 +22,12 @@ public class EndCardHostage extends AbstractAction {
             gameState.addLoot(playerID, new Loot(Purse, Purse.getDefaultValue()));
         }
         gameState.setGameStatus(Utils.GameResult.GAME_END);
-        gameState.endGame();
         return true;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new EndCardHostage();
     }
 
     @Override

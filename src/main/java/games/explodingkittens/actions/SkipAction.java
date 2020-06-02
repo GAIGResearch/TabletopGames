@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
@@ -40,5 +41,10 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
     @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new SkipAction(deckFrom, deckTo, fromIndex);
     }
 }

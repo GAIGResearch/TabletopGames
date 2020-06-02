@@ -7,11 +7,9 @@ import utilities.Utils;
 
 import java.util.List;
 
+import static core.CoreConstants.*;
+
 public class VirusOrgan extends Component {
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_BLUE = "\u001B[34m";
 
     public enum VirusOrganState {
         None,
@@ -27,6 +25,13 @@ public class VirusOrgan extends Component {
     public VirusOrgan()
     {
         super(Utils.ComponentType.TOKEN);
+        state = VirusOrganState.None;
+        cards = new Deck<>("DeckOnOrgan");
+    }
+
+    protected VirusOrgan(int ID)
+    {
+        super(Utils.ComponentType.TOKEN, ID);
         state = VirusOrganState.None;
         cards = new Deck<>("DeckOnOrgan");
     }
@@ -117,8 +122,10 @@ public class VirusOrgan extends Component {
 
     @Override
     public Component copy() {
-        // TODO
-        return null;
+        VirusOrgan organ = new VirusOrgan(componentID);
+        organ.state = state;
+        organ.cards = cards.copy();
+        return organ;
     }
 
     @Override
@@ -134,5 +141,9 @@ public class VirusOrgan extends Component {
 
     public boolean isHealthy() {
         return state == VirusOrganState.Neutral || state == VirusOrganState.Vaccinated || state == VirusOrganState.Immunised;
+    }
+
+    public Deck<VirusCard> getCards() {
+        return cards;
     }
 }

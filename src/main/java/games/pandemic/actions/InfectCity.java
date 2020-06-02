@@ -1,5 +1,6 @@
 package games.pandemic.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.BoardNode;
 import core.components.Card;
@@ -27,6 +28,11 @@ public class InfectCity extends DrawCard {
         super(deckFrom, deckTo, fromIndex);
         this.maxCubesPerCity = maxCubesPerCity;
         this.count = count;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new InfectCity(this.deckFrom, this.deckTo, this.fromIndex, this.maxCubesPerCity, this.count);
     }
 
     @Override

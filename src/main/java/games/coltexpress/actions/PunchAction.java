@@ -1,6 +1,7 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -10,6 +11,7 @@ import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -90,14 +92,22 @@ public class PunchAction  extends DrawCard {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PunchAction that = (PunchAction) o;
+        return opponentID == that.opponentID &&
+                sourceCompartment == that.sourceCompartment &&
+                targetCompartment == that.targetCompartment &&
+                loot == that.loot &&
+                availableLoot == that.availableLoot &&
+                playerIsCheyenne == that.playerIsCheyenne;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
     }
 
     @Override
@@ -109,5 +119,10 @@ public class PunchAction  extends DrawCard {
         if (playerIsCheyenne)
             return "Punch player " + opponentID + " and (maybe) steal him a random Purse";
         return "Punch player " + opponentID + " and let him drop " + loot;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new PunchAction(deckFrom, deckTo, opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
     }
 }

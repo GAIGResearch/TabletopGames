@@ -1,9 +1,12 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.components.Compartment;
+
+import java.util.Objects;
 
 public class MoveMarshalAction extends DrawCard {
 
@@ -37,17 +40,26 @@ public class MoveMarshalAction extends DrawCard {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MoveMarshalAction that = (MoveMarshalAction) o;
+        return sourceCompartment == that.sourceCompartment &&
+                targetCompartment == that.targetCompartment;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), sourceCompartment, targetCompartment);
     }
 
     public String toString(){
         return "MoveMarshal to compartment " + targetCompartment;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new MoveMarshalAction(deckFrom, deckTo, sourceCompartment, targetCompartment);
     }
 }

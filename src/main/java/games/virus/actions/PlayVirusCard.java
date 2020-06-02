@@ -1,6 +1,7 @@
 package games.virus.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
@@ -66,5 +67,10 @@ public class PlayVirusCard extends DrawCard {
             vgs.getDrawDeck().add(card);
         }
         vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getGameSeed()));
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new PlayVirusCard(deckFrom, deckTo, fromIndex, bodyId);
     }
 }

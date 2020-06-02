@@ -12,10 +12,12 @@ import games.pandemic.engine.rules.*;
 import games.pandemic.engine.rules.DrawCards;
 import utilities.Hash;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
 import static core.CoreConstants.nameHash;
@@ -28,10 +30,11 @@ public class PandemicForwardModel extends AbstractForwardModel {
 
     /**
      * Constructor. Creates the rules for the game and sets up the game rule graph.
-     * @param pp - parameters for the game.
+     * @param gameParameters - parameters for the game.
      * @param nPlayers - number of players in the game.
      */
-    public PandemicForwardModel(PandemicParameters pp, int nPlayers) {
+    public PandemicForwardModel(AbstractGameParameters gameParameters, int nPlayers) {
+        PandemicParameters pp = (PandemicParameters) gameParameters;
 
         // Game over conditions
         GameOverCondition infectLose = new GameOverInfection();
@@ -110,12 +113,21 @@ public class PandemicForwardModel extends AbstractForwardModel {
     }
 
     /**
+     * Copy constructor from root node.
+     * @param root - root rule node.
+     */
+    public PandemicForwardModel(Node root) {
+        this.root = root;
+        this.nextRule = root;
+    }
+
+    /**
      * Applies the given action to the game state and executes any other game rules.
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
     @Override
-    public void next(AbstractGameState currentState, AbstractAction action) {
+    protected void _next(AbstractGameState currentState, AbstractAction action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
 
         do {
@@ -135,7 +147,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
         if (nextRule == null) {
             // if still null, end of turn:
             nextRule = root;
-            pgs.nextPlayer();
+            nextPlayer(pgs);
         }
     }
 
@@ -148,10 +160,12 @@ public class PandemicForwardModel extends AbstractForwardModel {
      * @param firstState - the state to be modified to the initial game state.
      */
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
+        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+
         PandemicGameState state = (PandemicGameState) firstState;
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();
-        PandemicData _data = (PandemicData)state.getData();
+        PandemicData _data = state.getData();
 
         state.tempDeck = new Deck<>("Temp Deck");
         state.areas = new HashMap<>();
@@ -222,7 +236,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
         gameArea.putComponent(PandemicConstants.infectionHash, infectionDeck);
         gameArea.putComponent(PandemicConstants.playerRolesHash, playerRoles);
 
-        firstState.addAllComponents();
+        state.addComponents();
 
         // Infection
         infectionDeck.shuffle(rnd);
@@ -294,13 +308,38 @@ public class PandemicForwardModel extends AbstractForwardModel {
         state.getTurnOrder().setStartingPlayer(startingPlayer);
     }
 
-    /*
-    @Override
-    public ForwardModel copy() {
-        PandemicForwardModel fm = new PandemicForwardModel(pp);
-        fm.rnd = new Random();
-        fm.pp = (PandemicParameters)pp.copy();
-        return fm;
-    }
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of IAction objects.
      */
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        PandemicGameState pgs = (PandemicGameState) gameState;
+        if (((PandemicTurnOrder) gameState.getTurnOrder()).reactionsFinished()) {
+            gameState.setMainGamePhase();
+        }
+        if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.DiscardReaction)
+            return getDiscardActions(pgs);
+        else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.RPReaction)
+            return getRPactions(pgs);
+        else if (gameState.getGamePhase() == AbstractGameState.DefaultGamePhase.PlayerReaction)
+            return getEventActions(pgs);
+        else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.Forecast)
+            return getForecastActions(pgs);
+        else return getPlayerActions(pgs);
+    }
+
+    @Override
+    protected AbstractForwardModel _copy() {
+        return new PandemicForwardModel(root);
+    }
+
+    /**
+     * Informs turn order of a need to move to the next player and performs any beginning of round setup.
+     */
+    private void nextPlayer(PandemicGameState pgs) {
+        pgs.getTurnOrder().endPlayerTurn(pgs);
+        pgs.nCardsDrawn = 0;
+        pgs.setMainGamePhase();
+    }
 }

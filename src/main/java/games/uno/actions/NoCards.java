@@ -45,6 +45,11 @@ public class NoCards extends AbstractAction implements IPrintable {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new NoCards();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof NoCards;
     }

@@ -7,6 +7,7 @@ import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
+import utilities.Utils;
 
 import java.util.LinkedList;
 
@@ -17,10 +18,9 @@ public class EndCardMarshallsRevenge extends AbstractAction {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
 
         LinkedList<Compartment> train = gameState.getTrainCompartments();
-        for (int i = 0; i < train.size(); i++){
-            Compartment c = train.get(i);
-            if (c.containsMarshal){
-                for (Integer playerID : c.playersOnTopOfCompartment){
+        for (Compartment c : train) {
+            if (c.containsMarshal) {
+                for (Integer playerID : c.playersOnTopOfCompartment) {
                     PartialObservableDeck<Loot> playerLoot = gameState.getLoot(playerID);
                     Loot lestValueablePurse = null;
                     for (Loot loot : playerLoot.getComponents()) {
@@ -35,8 +35,13 @@ public class EndCardMarshallsRevenge extends AbstractAction {
             }
         }
 
-        gameState.endGame();
+        gameState.setGameStatus(Utils.GameResult.GAME_END);
         return true;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new EndCardMarshallsRevenge();
     }
 
     @Override

@@ -2,6 +2,7 @@ package games.uno;
 
 import core.AbstractGameState;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
@@ -11,6 +12,12 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
 
     public UnoTurnOrder(int nPlayers) {
         super(nPlayers);
+        skipTurn = false;
+    }
+
+    @Override
+    protected void _reset() {
+        super._reset();
         skipTurn = false;
     }
 
@@ -38,6 +45,14 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
             turnOwner = nextPlayer(gameState);
         }
+    }
+
+    @Override
+    protected TurnOrder _copy() {
+        UnoTurnOrder uto = new UnoTurnOrder(nPlayers);
+        uto.skipTurn = skipTurn;
+        uto.direction = direction;
+        return uto;
     }
 }
 

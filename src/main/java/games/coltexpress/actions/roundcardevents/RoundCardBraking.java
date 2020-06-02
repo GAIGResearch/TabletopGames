@@ -24,6 +24,11 @@ public class RoundCardBraking extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new RoundCardBraking();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return false;
     }

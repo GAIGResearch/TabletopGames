@@ -1,6 +1,5 @@
 package games.uno.cards;
 
-
 import core.components.Card;
 import core.components.Deck;
 import games.uno.UnoGameState;
@@ -33,7 +32,6 @@ public class UnoCard extends Card {
         }
     }
 
-
     public UnoCard(UnoCardType type, String color){
         super(type.toString());
         this.color = color;
@@ -42,11 +40,18 @@ public class UnoCard extends Card {
         this.drawN = -1;
     }
 
-    @Override
-    public Card copy() {
-        return new UnoCard(type, color, number);
+    public UnoCard(UnoCardType type, String color, int number, int drawN) {
+        super(type.toString());
+        this.color = color;
+        this.type = type;
+        this.number = number;
+        this.drawN = drawN;
     }
 
+    @Override
+    public Card copy() {
+        return new UnoCard(type, color, number, drawN);
+    }
 
     public boolean isPlayable(UnoGameState gameState) {
         switch (type) {
@@ -58,7 +63,7 @@ public class UnoCard extends Card {
                 return this.color.equals(gameState.getCurrentColor());
             case Wild:
                 if (this.drawN >= 1) {
-                    int playerID = gameState.getCurrentPlayerID();
+                    int playerID = gameState.getCurrentPlayer();
                     Deck<UnoCard> playerHand = gameState.getPlayerDecks().get(playerID);
                     for (UnoCard card : playerHand.getComponents()) {
                         if (card.color.equals(gameState.getCurrentColor()))

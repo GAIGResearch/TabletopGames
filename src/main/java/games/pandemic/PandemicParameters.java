@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 public class PandemicParameters extends AbstractGameParameters {
 
-    private String dataPath;
-    public String getDataPath(){return dataPath;}
+    String dataPath;
+
     int lose_max_outbreak = 8;
 
     int max_cubes_per_city = 3;  // More cause outbreak
@@ -38,12 +38,13 @@ public class PandemicParameters extends AbstractGameParameters {
     int n_actions_per_turn = 4;
     int n_research_stations = 6;
 
-    public PandemicParameters(String dataPath) {
+    public PandemicParameters(String dataPath, long seed) {
+        super(seed);
         this.dataPath = dataPath;
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {
-        this(pandemicParameters.dataPath);
+        this(pandemicParameters.dataPath, System.currentTimeMillis());
 
         this.gameSeed = pandemicParameters.getGameSeed();
         this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
@@ -138,5 +139,12 @@ public class PandemicParameters extends AbstractGameParameters {
 
     public int getN_research_stations() {
         return n_research_stations;
+    }
+
+    public String getDataPath(){return dataPath;}
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new PandemicParameters(this);
     }
 }

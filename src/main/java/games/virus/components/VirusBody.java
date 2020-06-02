@@ -4,173 +4,107 @@ import core.components.Component;
 import games.virus.cards.VirusCard;
 import utilities.Utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class VirusBody extends Component {
-    public VirusOrgan hearth;
-    public VirusOrgan brain;
-    public VirusOrgan stomach;
-    public VirusOrgan bone;
+    public HashMap<VirusCard.VirusCardOrgan, VirusOrgan> organs;
 
     public VirusBody()
     {
         super(Utils.ComponentType.TOKEN);
-        hearth  = new VirusOrgan();
-        brain   = new VirusOrgan();
-        stomach = new VirusOrgan();
-        bone    = new VirusOrgan();
+        organs = new HashMap<>();
+        for (VirusCard.VirusCardOrgan oType : VirusCard.VirusCardOrgan.values()) {
+            if (oType != VirusCard.VirusCardOrgan.None && oType != VirusCard.VirusCardOrgan.Wild) {
+                organs.put(oType, new VirusOrgan());
+            }
+        }
+    }
+
+    protected VirusBody(int ID)
+    {
+        super(Utils.ComponentType.TOKEN, ID);
+        organs = new HashMap<>();
+        for (VirusCard.VirusCardOrgan oType : VirusCard.VirusCardOrgan.values()) {
+            if (oType != VirusCard.VirusCardOrgan.None && oType != VirusCard.VirusCardOrgan.Wild) {
+                organs.put(oType, new VirusOrgan());
+            }
+        }
     }
 
     @Override
     public Component copy() {
-        // TODO
-        return null;
+        VirusBody vb = new VirusBody(componentID);
+        vb.organs = new HashMap<>();
+        for (Map.Entry<VirusCard.VirusCardOrgan, VirusOrgan> e: organs.entrySet()) {
+            vb.organs.put(e.getKey(), (VirusOrgan) e.getValue().copy());
+        }
+        return vb;
     }
 
     @Override
     public String toString() {
-        return "Hearth: " + hearth.toString() + " Brain: " + brain.toString() +" Stomach: " + stomach.toString() + " Bone: " + bone.toString();
+        String s = "";
+        for (Map.Entry<VirusCard.VirusCardOrgan, VirusOrgan> e: organs.entrySet()) {
+            s += e.getKey() + ": " + e.getValue().toString() + " ";
+        }
+        return s;
+    }
+
+    public HashMap<VirusCard.VirusCardOrgan, VirusOrgan> getOrgans() {
+        return organs;
     }
 
     public boolean hasOrgan(VirusCard.VirusCardOrgan organ) {
-        if (organ == VirusCard.VirusCardOrgan.Hearth)
-            return hearth.state != VirusOrgan.VirusOrganState.None;
-        else if (organ == VirusCard.VirusCardOrgan.Stomach)
-            return stomach.state != VirusOrgan.VirusOrganState.None;
-        else if (organ == VirusCard.VirusCardOrgan.Brain)
-            return brain.state != VirusOrgan.VirusOrganState.None;
-        else if (organ == VirusCard.VirusCardOrgan.Bone)
-            return bone.state != VirusOrgan.VirusOrganState.None;
-        return false;
+        return organs.get(organ).state != VirusOrgan.VirusOrganState.None;
     }
 
     public boolean hasOrganImmunised(VirusCard.VirusCardOrgan organ) {
-        if (organ == VirusCard.VirusCardOrgan.Hearth)
-            return hearth.state == VirusOrgan.VirusOrganState.Immunised;
-        else if (organ == VirusCard.VirusCardOrgan.Stomach)
-            return stomach.state == VirusOrgan.VirusOrganState.Immunised;
-        else if (organ == VirusCard.VirusCardOrgan.Brain)
-            return brain.state == VirusOrgan.VirusOrganState.Immunised;
-        else if (organ == VirusCard.VirusCardOrgan.Bone)
-            return bone.state == VirusOrgan.VirusOrganState.Immunised;
-        return false;
+        return organs.get(organ).state != VirusOrgan.VirusOrganState.Immunised;
     }
 
     public void addOrgan(VirusCard card) {
-        if (card.organ == VirusCard.VirusCardOrgan.Hearth) {
-            hearth.initialiseOrgan();
-            hearth.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Stomach) {
-            stomach.initialiseOrgan();
-            stomach.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Brain) {
-            brain.initialiseOrgan();
-            brain.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Bone) {
-            bone.initialiseOrgan();
-            bone.cards.add(card);
-        }
+        organs.get(card.organ).initialiseOrgan();
+        organs.get(card.organ).cards.add(card);
     }
 
     public VirusOrgan.VirusOrganState applyMedicine(VirusCard card) {
-        VirusOrgan.VirusOrganState newState = VirusOrgan.VirusOrganState.None;
-        if (card.organ == VirusCard.VirusCardOrgan.Hearth) {
-            newState = hearth.applyMedicine();
-            hearth.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Stomach) {
-            newState = stomach.applyMedicine();
-            stomach.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Brain) {
-            newState = brain.applyMedicine();
-            brain.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Bone) {
-            newState = bone.applyMedicine();
-            bone.cards.add(card);
-        }
+        VirusOrgan.VirusOrganState newState = organs.get(card.organ).applyMedicine();
+        organs.get(card.organ).cards.add(card);
         return newState;
     }
 
     public VirusOrgan.VirusOrganState applyVirus(VirusCard card) {
-        VirusOrgan.VirusOrganState newState = VirusOrgan.VirusOrganState.None;
-
-        if (card.organ == VirusCard.VirusCardOrgan.Hearth) {
-            newState = hearth.applyVirus();
-            hearth.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Stomach) {
-            newState = stomach.applyVirus();
-            stomach.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Brain) {
-            newState = brain.applyVirus();
-            brain.cards.add(card);
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Bone) {
-            newState = bone.applyVirus();
-            bone.cards.add(card);
-        }
+        VirusOrgan.VirusOrganState newState = organs.get(card.organ).applyVirus();
+        organs.get(card.organ).cards.add(card);
         return newState;
     }
 
     public VirusCard removeAVirusCard(VirusCard card)
     {
-        if (card.organ == VirusCard.VirusCardOrgan.Hearth) {
-            return hearth.removeAVirusCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Stomach) {
-            return stomach.removeAVirusCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Brain) {
-            return brain.removeAVirusCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Bone) {
-            return bone.removeAVirusCard();
-        }
-        return null;
+        return organs.get(card.organ).removeAVirusCard();
     }
 
     public VirusCard removeAMedicineCard(VirusCard card)
     {
-        if (card.organ == VirusCard.VirusCardOrgan.Hearth) {
-            return hearth.removeAMedicineCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Stomach) {
-            return stomach.removeAMedicineCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Brain) {
-            return brain.removeAMedicineCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Bone) {
-            return bone.removeAMedicineCard();
-        }
-        return null;
+        return organs.get(card.organ).removeAMedicineCard();
     }
 
     public VirusCard removeAnOrganCard(VirusCard card)
     {
-        if (card.organ == VirusCard.VirusCardOrgan.Hearth) {
-            return hearth.removeAnOrganCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Stomach) {
-            return stomach.removeAnOrganCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Brain) {
-            return brain.removeAnOrganCard();
-        }
-        else if (card.organ == VirusCard.VirusCardOrgan.Bone) {
-            return bone.removeAnOrganCard();
-        }
-        return null;
+        return organs.get(card.organ).removeAnOrganCard();
     }
 
     // Return true if the body has all organs and they are healthy
     public boolean areAllOrganHealthy()
     {
-        return hearth.isHealthy() && stomach.isHealthy() && brain.isHealthy() && bone.isHealthy();
+        boolean allHealthy = true;
+        for (VirusOrgan organ: organs.values()) {
+            if (!organ.isHealthy()) {
+                allHealthy = false;
+            }
+        }
+        return allHealthy;
     }
 
 }

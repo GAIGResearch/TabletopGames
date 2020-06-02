@@ -17,24 +17,55 @@ import static core.CoreConstants.VERBOSE;
 public class ColtExpressTurnOrder extends TurnOrder {
 
     List<RoundCard> rounds;
-    private int firstPlayerOfRound = 0;
+    private int firstPlayerOfRound;
+    private RoundCard.TurnType firstTurnType;
 
-    private int currentRoundIndex = 0;
-    private int currentRoundCardIndex = 0;
+    private int currentRoundIndex;
+    private int currentRoundCardIndex;
     private RoundCard.TurnType currentTurnType;
-    private int direction = 1;
+    private int direction;
 
-    private boolean firstAction = true;
-    private boolean evalPhase = false;
+    private boolean firstAction;
+    private boolean evalPhase;
 
     public ColtExpressTurnOrder(int nPlayers, ColtExpressParameters cep){
-        super(nPlayers, cep.nMaxRounds);
+        this.nPlayers = nPlayers;
+        this.nMaxRounds = cep.nMaxRounds;
+        firstPlayer = 0;
+        turnOwner = 0;
+        turnCounter = 0;
+        roundCounter = 0;
         setStartingPlayer(0);
+        firstPlayerOfRound = 0;
+        currentRoundIndex = 0;
+        currentRoundCardIndex = 0;
+        direction = 1;
+        firstAction = true;
+        evalPhase = false;
         setupRounds(nPlayers, nMaxRounds, cep);
     }
 
     private ColtExpressTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
+    }
+
+    @Override
+    protected void _reset() {
+        firstPlayer = 0;
+        turnOwner = 0;
+        turnCounter = 0;
+        roundCounter = 0;
+        currentRoundCardIndex = 0;
+        currentRoundIndex = 0;
+        direction = 1;
+        firstAction = true;
+        evalPhase = false;
+        currentTurnType = rounds.get(0).getTurnTypes()[0];
+    }
+
+    @Override
+    protected TurnOrder _copy() {
+        return null;
     }
 
     private void setupRounds(int nPlayers, int nMaxRounds, ColtExpressParameters cep){
@@ -97,7 +128,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         if (gameState.getGamePhase() != ColtExpressGameState.ColtExpressGamePhase.PlanActions)
             return (turnOwner+direction) % nPlayers;
 
-        if (currentTurnType== RoundCard.TurnType.DoubleTurn)
+        if (currentTurnType == RoundCard.TurnType.DoubleTurn)
         {
             if (firstAction) {
                 firstAction = false;
@@ -140,13 +171,6 @@ public class ColtExpressTurnOrder extends TurnOrder {
             initRound(rounds.get(currentRoundCardIndex), 0);
             gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.PlanActions);
         }
-    }
-
-    @Override
-    public TurnOrder copy() {
-        ColtExpressTurnOrder to = new ColtExpressTurnOrder(nPlayers, nMaxRounds);
-        copyTo(to);
-        throw new IllegalArgumentException("ColtExpressTurnOrder.copy not implemented yet");
     }
 
     public String toString(){
@@ -193,7 +217,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         if (idx >= 0 && idx < cep.endRoundCards.length) {
             RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
             AbstractAction event = cep.endRoundCards[idx].getEndCardEvent();
-            return new RoundCard(turnTypes, event);
+            return new RoundCard(cep.endRoundCards[idx].name(), turnTypes, event);
         }
         return null;
     }
@@ -221,7 +245,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         if (idx >= 0 && idx < cep.roundCards.length) {
             RoundCard.TurnType[] turnTypes = cep.roundCards[idx].getTurnTypeSequence(nPlayers);
             AbstractAction event = cep.roundCards[idx].getEndCardEvent();
-            return new RoundCard(turnTypes, event);
+            return new RoundCard(cep.roundCards[idx].name(), turnTypes, event);
         }
         return null;
     }

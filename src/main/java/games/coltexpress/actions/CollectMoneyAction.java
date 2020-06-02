@@ -1,6 +1,7 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
 import games.coltexpress.ColtExpressGameState;
@@ -8,6 +9,7 @@ import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Random;
 
 import static core.CoreConstants.VERBOSE;
@@ -49,19 +51,28 @@ public class CollectMoneyAction extends DrawCard {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        CollectMoneyAction that = (CollectMoneyAction) o;
+        return availableLoot == that.availableLoot &&
+                loot == that.loot;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), availableLoot, loot);
     }
 
     public String toString(){
         if (loot == -1)
             return "Attempt to collect loot but no loot is available";
         return "Collect loot";
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new CollectMoneyAction(deckFrom, deckTo, loot, availableLoot);
     }
 }

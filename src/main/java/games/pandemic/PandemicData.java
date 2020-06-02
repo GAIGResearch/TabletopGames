@@ -10,7 +10,6 @@ public class PandemicData extends AbstractGameData<Card> {
 
     private List<GraphBoard> graphBoards;
     private List<Deck<Card>> decks;
-    private List<Token> tokens;
     private List<Counter> counters;
 
     @Override
@@ -18,7 +17,6 @@ public class PandemicData extends AbstractGameData<Card> {
     {
         graphBoards = GraphBoard.loadBoards(dataPath + "boards.json");
         decks = Deck.loadDecksOfCards(dataPath + "decks.json");
-        tokens = Token.loadTokens(dataPath + "tokens.json");
         counters = Counter.loadCounters(dataPath + "counters.json");
     }
 
@@ -26,7 +24,7 @@ public class PandemicData extends AbstractGameData<Card> {
     public GraphBoard findBoard(String name) {
         for (GraphBoard c: graphBoards) {
             if (name.equalsIgnoreCase(c.getComponentName())) {
-                return c;
+                return c.copy();
             }
         }
         return null;
@@ -36,7 +34,7 @@ public class PandemicData extends AbstractGameData<Card> {
     public Counter findCounter(String name) {
         for (Counter c: counters) {
             if (name.equalsIgnoreCase(c.getComponentName())) {
-                return c;
+                return c.copy();
             }
         }
         return null;
@@ -46,7 +44,7 @@ public class PandemicData extends AbstractGameData<Card> {
     public Deck<Card> findDeck(String name) {
         for (Deck<Card> d: decks) {
             if (name.equalsIgnoreCase(d.getComponentName())) {
-                return d;
+                return d.copy();
             }
         }
         return null;
@@ -61,9 +59,6 @@ public class PandemicData extends AbstractGameData<Card> {
 
         pd.decks = new ArrayList<>();
         for(Deck<Card> d : decks) pd.decks.add(d.copy());
-
-        pd.tokens = new ArrayList<>();
-        for(Token t : tokens) pd.tokens.add(t.copy());
 
         pd.counters = new ArrayList<>();
         for(Counter c : counters) pd.counters.add(c.copy());

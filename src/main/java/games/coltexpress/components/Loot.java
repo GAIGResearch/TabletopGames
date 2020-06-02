@@ -4,14 +4,21 @@ import core.components.Component;
 import games.coltexpress.ColtExpressParameters;
 import utilities.Utils;
 
+import java.util.Objects;
+
 public class Loot extends Component {
 
     private int value;
     private ColtExpressParameters.LootType type;
 
     public Loot(ColtExpressParameters.LootType type, int value){
-
         super(Utils.ComponentType.TOKEN, type.toString());
+        this.type = type;
+        this.value = value;
+    }
+
+    private Loot(ColtExpressParameters.LootType type, int value, int ID){
+        super(Utils.ComponentType.TOKEN, type.toString(), ID);
         this.type = type;
         this.value = value;
     }
@@ -38,7 +45,17 @@ public class Loot extends Component {
 
     @Override
     public Component copy() {
-        return null;
+        return new Loot(type, value, componentID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Loot loot = (Loot) o;
+        return value == loot.value &&
+                type == loot.type;
     }
 
 }

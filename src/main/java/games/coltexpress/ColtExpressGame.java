@@ -3,21 +3,22 @@ package games.coltexpress;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.AbstractForwardModel;
-import core.AbstractGame;
+import core.Game;
+import games.GameType;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColtExpressGame extends AbstractGame {
+public class ColtExpressGame extends Game {
 
     public ColtExpressGame(List<AbstractPlayer> agents, AbstractForwardModel forwardModel, ColtExpressGameState gameState) {
-        super(agents, forwardModel, gameState);
+        super(GameType.ColtExpress, agents, forwardModel, gameState);
     }
 
     public ColtExpressGame(AbstractForwardModel forwardModel, AbstractGameState gameState) {
-        super(forwardModel, gameState);
+        super(GameType.ColtExpress, forwardModel, gameState);
     }
 
     public static void main(String[] args){
@@ -28,11 +29,11 @@ public class ColtExpressGame extends AbstractGame {
         agents.add(new RandomPlayer());
 
         for (int i=0; i<1; i++) {
-            ColtExpressParameters params = new ColtExpressParameters();
+            ColtExpressParameters params = new ColtExpressParameters(System.currentTimeMillis());
             AbstractForwardModel forwardModel = new ColtExpressForwardModel();
-            ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, forwardModel, agents.size());
+            ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, agents.size());
 
-            AbstractGame game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
+            Game game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
             game.run(null);
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
@@ -42,7 +43,7 @@ public class ColtExpressGame extends AbstractGame {
 
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){
-                if (playerResults[j] == Utils.GameResult.GAME_WIN)
+                if (playerResults[j] == Utils.GameResult.WIN)
                     System.out.println("Player " + j + " won");
             }
         }

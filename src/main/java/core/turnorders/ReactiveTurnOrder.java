@@ -9,10 +9,11 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class ReactiveTurnOrder extends TurnOrder {
 
-    protected Queue<Integer> reactivePlayers = new LinkedList<>();
+    protected Queue<Integer> reactivePlayers;
 
     public ReactiveTurnOrder(int nPlayers){
         super(nPlayers);
+        reactivePlayers = new LinkedList<>();
     }
 
     public ReactiveTurnOrder(int nPlayers, int nMaxRounds) {
@@ -26,10 +27,15 @@ public class ReactiveTurnOrder extends TurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
+    protected TurnOrder _copy() {
         ReactiveTurnOrder to = new ReactiveTurnOrder(nPlayers);
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
-        return copyTo(to);
+        return to;
+    }
+
+    @Override
+    protected void _reset() {
+        reactivePlayers = new LinkedList<>();
     }
 
     public boolean reactionsFinished(){

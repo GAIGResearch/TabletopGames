@@ -1,44 +1,62 @@
 package core;
 
-import core.actions.AbstractAction;
-import core.interfaces.IObservation;
 
-import java.util.List;
+import core.actions.AbstractAction;
 
 public abstract class AbstractPlayer {
 
+    // ID of this player, assigned by the game
     int playerID;
+    // Forward model for the game
+    AbstractForwardModel forwardModel;
+
+    /* Final methods */
 
     /**
      * Retrieves this player's ID, as set by the game.
      * @return - int, player ID
      */
-    public int getPlayerID() {
+    public final int getPlayerID() {
         return playerID;
     }
 
     /**
-     * Initialize agent given an observation of the initial game-state.
-     * @param observation observation of the initial game-state
+     * Retrieves the forward model for current game being played.
+     * @return - ForwardModel
      */
-    public abstract int getAction(IObservation observation, List<AbstractAction> actions);
+    public final AbstractForwardModel getForwardModel() {
+        return forwardModel;
+    }
+
+    /* Methods that should be implemented in subclass */
 
     /**
-     * Initialize agent given an observation of the initial game-state.
+     * Generate a valid action to play in the game. Valid actions can be found by accessing
+     * AbstractGameState.getActions()
+     * @param gameState observation of the current game state
+     */
+    public abstract AbstractAction getAction(AbstractGameState gameState);
+
+    /* Methods that can be implemented in subclass */
+
+    /**
+     * Initialize agent given an observation of the initial game state.
      * e.g. load weights, initialize neural network
-     * @param observation observation of the initial game-state
+     * @param gameState observation of the initial game state
      */
-    public void initializePlayer(IObservation observation) {}
+    public void initializePlayer(AbstractGameState gameState) {}
 
     /**
-     * Finalize agent given an observation of the final game-state.
+     * Finalize agent given an observation of the final game state.
      * e.g. store variables after training, modify weights, etc.
-     * @param observation observation of the final game-state
+     * @param gameState observation of the final game state
      */
-    public void finalizePlayer(IObservation observation) {}
+    public void finalizePlayer(AbstractGameState gameState) {}
 
     /**
-     * Receive an updated game-state for which it is not required to respond with an action.
+     * Receive an updated game state for which it is not required to respond with an action.
+     * @param gameState observation of the current game state
      */
-    public void registerUpdatedObservation(IObservation observation) {}
+    public void registerUpdatedObservation(AbstractGameState gameState) {}
+
 }

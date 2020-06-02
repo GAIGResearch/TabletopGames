@@ -96,10 +96,36 @@ public class GridBoard<T> extends Component {
         return grid;
     }
 
+    public T[] flattenGrid() {
+        int length = getHeight() * getWidth();
+        T[] array = (T[])Array.newInstance(typeParameterClass, length);
+        for (int i = 0; i < getHeight(); i++) {
+            System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
+        }
+        return array;
+    }
+
     @Override
     public GridBoard<T> copy() {
-        GridBoard<T> g = new GridBoard<>(grid, typeParameterClass, componentID);
+        T[][] gridCopy = (T[][])Array.newInstance(typeParameterClass, getWidth(), getHeight());
+        for (int i = 0; i < width; i++) {
+            if (height >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, height);
+        }
+        GridBoard<T> g = new GridBoard<>(gridCopy, typeParameterClass, componentID);
         copyComponentTo(g);
         return g;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (T[] ts : grid) {
+            for (T t : ts) {
+                if (t instanceof Character && t.equals(' ')) s += '.';
+                else s += t;
+            }
+            s += "\n";
+        }
+        return s;
     }
 }

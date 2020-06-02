@@ -26,5 +26,8 @@ public class ExplodingKittenCard extends Card {
         this.cardType = cardType;
     }
 
-
+    @Override
+    public Card copy() {
+        return new ExplodingKittenCard(cardType);
+    }
 }

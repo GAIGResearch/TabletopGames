@@ -29,6 +29,11 @@ public class RoundCardAngryMarshall extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new RoundCardAngryMarshall();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof RoundCardAngryMarshall;
     }

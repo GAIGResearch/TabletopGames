@@ -6,6 +6,7 @@ import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
+import utilities.Utils;
 
 import java.util.LinkedList;
 import java.util.Random;
@@ -44,8 +45,13 @@ public class EndCardPickPocket extends AbstractAction {
             }
         }
 
-        gameState.endGame();
+        gameState.setGameStatus(Utils.GameResult.GAME_END);
         return true;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new EndCardPickPocket();
     }
 
     @Override

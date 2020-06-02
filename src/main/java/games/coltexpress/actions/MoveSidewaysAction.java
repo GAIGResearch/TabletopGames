@@ -1,10 +1,13 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
+
+import java.util.Objects;
 
 public class MoveSidewaysAction extends DrawCard {
 
@@ -46,17 +49,26 @@ public class MoveSidewaysAction extends DrawCard {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MoveSidewaysAction that = (MoveSidewaysAction) o;
+        return sourceCompartment == that.sourceCompartment &&
+                targetCompartment == that.targetCompartment;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), sourceCompartment, targetCompartment);
     }
 
     public String toString(){
         return "MoveSideways";
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new MoveSidewaysAction(deckFrom, deckTo, sourceCompartment, targetCompartment);
     }
 }
