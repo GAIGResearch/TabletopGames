@@ -61,6 +61,7 @@ public enum GameType {
             new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
             new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }});
 
+    // Minimum and maximum number of players supported in this game
     private int minPlayers, maxPlayers;
 
     // boardgamegeek.com topic classification of games
@@ -87,10 +88,28 @@ public enum GameType {
         Medieval,
         TerritoryBuilding;
 
+        /**
+         * Retrieves a list of all games within this category.
+         * @return - list of game types.
+         */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
             for (GameType gt: GameType.values()) {
                 if (gt.getCategories().contains(this)) {
+                    games.add(gt);
+                }
+            }
+            return games;
+        }
+
+        /**
+         * Retrieves a list of all games that are NOT within this category.
+         * @return - list of game types.
+         */
+        public List<GameType> getAllGamesExcluding() {
+            ArrayList<GameType> games = new ArrayList<>();
+            for (GameType gt: GameType.values()) {
+                if (!gt.getCategories().contains(this)) {
                     games.add(gt);
                 }
             }
@@ -121,10 +140,28 @@ public enum GameType {
         TilePlacement,
         PatternBuilding;
 
+        /**
+         * Retrieves a list of all games using this mechanic.
+         * @return - list of game types.
+         */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
             for (GameType gt: GameType.values()) {
                 if (gt.getMechanics().contains(this)) {
+                    games.add(gt);
+                }
+            }
+            return games;
+        }
+
+        /**
+         * Retrieves a list of all games that do NOT use this mechanic.
+         * @return - list of game types.
+         */
+        public List<GameType> getAllGamesExcluding() {
+            ArrayList<GameType> games = new ArrayList<>();
+            for (GameType gt: GameType.values()) {
+                if (!gt.getMechanics().contains(this)) {
                     games.add(gt);
                 }
             }
@@ -139,22 +176,25 @@ public enum GameType {
         this.mechanics = mechanics;
     }
 
+    // Getters
     public int getMinPlayers() {
         return minPlayers;
     }
-
     public int getMaxPlayers() {
         return maxPlayers;
     }
-
     public ArrayList<Category> getCategories() {
         return categories;
     }
-
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
 
+    /**
+     * Converts a given string to the enum type corresponding to the game.
+     * @param game - string of a game type
+     * @return - GameType corresponding to String
+     */
     public GameType stringToGameType(String game) {
         switch (game.toLowerCase()) {
             case "pandemic":
