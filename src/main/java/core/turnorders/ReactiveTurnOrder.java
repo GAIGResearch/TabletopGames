@@ -35,7 +35,7 @@ public class ReactiveTurnOrder extends TurnOrder {
 
     @Override
     protected void _reset() {
-        reactivePlayers.clear();
+        reactivePlayers = new LinkedList<>();
     }
 
     public boolean reactionsFinished(){

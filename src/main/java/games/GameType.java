@@ -25,6 +25,7 @@ import players.ActionController;
 import java.util.ArrayList;
 import java.util.List;
 
+import static core.CoreConstants.*;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 
@@ -310,5 +311,28 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers) {
         return createGameInstance(nPlayers, System.currentTimeMillis());
+    }
+
+    @Override
+    public String toString() {
+        boolean implemented = (createGameInstance(minPlayers) != null);
+        boolean gui = (createGUI(null, null) != null);
+        return (gui? ANSI_BLUE : implemented? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
+                "\n\tminPlayers = " + minPlayers +
+                "\n\tmaxPlayers = " + maxPlayers +
+                "\n\tcategories = " + categories +
+                "\n\tmechanics = " + mechanics +
+                (implemented? ANSI_GREEN: ANSI_RED) +
+                "\n\timplemented = " + implemented + ANSI_RESET +
+                (gui? ANSI_BLUE: ANSI_RED) +
+                "\n\tGUI = " + gui + ANSI_RESET +
+                "\n}\n";
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Games available in the framework: \n");
+        for (GameType gt: GameType.values()) {
+            System.out.println(gt.toString());
+        }
     }
 }
