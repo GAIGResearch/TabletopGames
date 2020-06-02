@@ -25,24 +25,14 @@ public abstract class AbstractGUI extends JFrame {
         currentPlayer = new JLabel();
     }
 
+    /* Methods that should/can be implemented by subclass */
+
     /**
      * Updates all GUI elements. Must be implemented by subclass.
      * @param player - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
     protected abstract void _update(AbstractPlayer player, AbstractGameState gameState);
-
-    /**
-     * Updates the GUI, public method called from the Game class. Updates game state info panels, resets action buttons
-     * and then calls the _update() method to allow subclasses to update their inner state.
-     * @param player - current player acting.
-     * @param gameState - current game state to be used in updating visuals.
-     */
-    public void update(AbstractPlayer player, AbstractGameState gameState){
-        updateGameStateInfo(gameState);
-//        resetActionButtons();
-        _update(player, gameState);
-    }
 
     /**
      * Updates which action buttons should be visible to the players, and which should not.
@@ -119,8 +109,25 @@ public abstract class AbstractGUI extends JFrame {
         currentPlayer.setText("Current player: " + gameState.getTurnOrder().getCurrentPlayer(gameState));
     }
 
+
+    /* Public API */
+
     /**
-     * Helper class, JButton with an associated action. This action is added to the human agent action queue for execution
+     * Updates the GUI, public method called from the Game class. Updates game state info panels, resets action buttons
+     * and then calls the _update() method to allow subclasses to update their inner state.
+     * @param player - current player acting.
+     * @param gameState - current game state to be used in updating visuals.
+     */
+    public void update(AbstractPlayer player, AbstractGameState gameState){
+        updateGameStateInfo(gameState);
+//        resetActionButtons();
+        _update(player, gameState);
+    }
+
+    /* Helper class */
+
+    /**
+     * JButton with an associated action. This action is added to the human agent action queue for execution
      * in the game when the button is clicked. Any associated highlights from the GUI are cleared.
      */
     @SuppressWarnings("rawtypes")

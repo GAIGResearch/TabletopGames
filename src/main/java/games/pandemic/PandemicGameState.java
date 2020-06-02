@@ -199,7 +199,7 @@ public class PandemicGameState extends AbstractGameState {
                 a = new Area(key, "Game area");
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
-                    if (e.getKey() == playerDeckHash || e.getKey() == infectionHash) {
+                    if (PARTIAL_OBSERVABLE && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled
