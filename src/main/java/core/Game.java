@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
+import games.GameType;
 import players.ActionController;
 import players.HumanGUIPlayer;
 import players.OSLA;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static core.GameType.Virus;
+import static games.GameType.Virus;
 
 public class Game {
 

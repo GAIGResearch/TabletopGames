@@ -1,6 +1,7 @@
 package evaluation;
 
 import core.*;
+import games.GameType;
 import utilities.Pair;
 
 import java.util.ArrayList;

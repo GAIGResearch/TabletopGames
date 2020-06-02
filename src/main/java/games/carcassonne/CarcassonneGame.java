@@ -1,6 +1,7 @@
 package games.carcassonne;
 
 import core.*;
+import games.GameType;
 
 import java.util.List;
 

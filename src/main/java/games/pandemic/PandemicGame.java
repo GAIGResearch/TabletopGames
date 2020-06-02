@@ -1,6 +1,7 @@
 package games.pandemic;
 
 import core.*;
+import games.GameType;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
 import players.OSLA;

@@ -1,6 +1,7 @@
 package games.virus;
 
 import core.*;
+import games.GameType;
 import players.OSLA;
 
 import java.util.ArrayList;

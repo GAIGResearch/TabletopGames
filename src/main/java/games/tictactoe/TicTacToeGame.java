@@ -2,7 +2,7 @@ package games.tictactoe;
 
 import core.Game;
 import core.AbstractPlayer;
-import core.GameType;
+import games.GameType;
 import players.OSLA;
 import players.RandomPlayer;
 

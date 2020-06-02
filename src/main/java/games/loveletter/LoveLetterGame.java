@@ -1,6 +1,7 @@
 package games.loveletter;
 
 import core.*;
+import games.GameType;
 import players.OSLA;
 import players.RandomPlayer;
 

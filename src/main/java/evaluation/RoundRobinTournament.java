@@ -1,13 +1,13 @@
 package evaluation;
 
 import core.AbstractPlayer;
-import core.GameType;
+import games.GameType;
 import players.RandomPlayer;
 import utilities.Utils;
 
 import java.util.LinkedList;
 
-import static core.GameType.*;
+import static games.GameType.*;
 
 
 public class RoundRobinTournament extends AbstractTournament {

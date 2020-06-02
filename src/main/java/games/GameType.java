@@ -1,5 +1,6 @@
-package core;
+package games;
 
+import core.*;
 import games.explodingkittens.ExplodingKittenParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -24,8 +25,8 @@ import players.ActionController;
 import java.util.ArrayList;
 import java.util.List;
 
-import static core.GameType.Category.*;
-import static core.GameType.Mechanic.*;
+import static games.GameType.Category.*;
+import static games.GameType.Mechanic.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.

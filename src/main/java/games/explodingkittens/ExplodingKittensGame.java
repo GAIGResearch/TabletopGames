@@ -1,6 +1,7 @@
 package games.explodingkittens;
 
 import core.*;
+import games.GameType;
 import players.RandomPlayer;
 
 import java.util.*;
