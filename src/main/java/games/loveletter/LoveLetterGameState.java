@@ -124,7 +124,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * @param playerID - ID of player dead
      */
     public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
+        setPlayerResult(Utils.GameResult.LOSE, playerID);
 
         // a losing player needs to discard all cards
         while (playerHandCards.get(playerID).getSize() > 0)

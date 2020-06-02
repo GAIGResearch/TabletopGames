@@ -31,7 +31,7 @@ public class BaronAction extends DrawCard implements IPrintable {
 
         // compares the value of the player's hand card with another player's hand card
         // the player with the lesser valued card will be removed from the game
-        if (llgs.isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.GAME_LOSE){
+        if (llgs.isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.LOSE){
             LoveLetterCard opponentCard = opponentDeck.peek();
             LoveLetterCard playerCard = playerDeck.peek();
             if (opponentCard != null && playerCard != null) {

@@ -117,7 +117,7 @@ public class RoundRobinTournament extends AbstractTournament {
             games.get(gameIdx).run(null);  // Always running tournaments without visuals
             Utils.GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
             for (int j = 0; j < matchUpPlayers.size(); j++) {
-                pointsPerPlayer[agentIDs.get(j)] += results[j] == Utils.GameResult.GAME_WIN ? 1 : 0;
+                pointsPerPlayer[agentIDs.get(j)] += results[j] == Utils.GameResult.WIN ? 1 : 0;
             }
         }
     }

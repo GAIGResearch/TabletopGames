@@ -7,6 +7,7 @@ import players.ActionController;
 import players.HumanGUIPlayer;
 import players.OSLA;
 import players.RandomPlayer;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,6 @@ public class Game {
     /**
      * Resets the game. Sets up the game state to the initial state as described by game rules,
      * and initialises all players.
-     * TODO: change random seed
      */
     public final void reset() {
         gameState.reset();
@@ -70,13 +70,52 @@ public class Game {
     }
 
     /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules,
+     * and initialises all players.
+     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
+     */
+    public final void reset(long newRandomSeed) {
+        gameState.reset(newRandomSeed);
+        forwardModel.abstractSetup(gameState);
+        if (players != null) {
+            for (AbstractPlayer player : players) {
+                AbstractGameState observation = gameState.copy(player.getPlayerID());
+                player.initializePlayer(observation);
+            }
+        }
+    }
+
+    /**
      * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
      * and their IDs, and initialises all players.
-     * TODO: change random seed
      * @param players - new players for the game
      */
     public final void reset(List<AbstractPlayer> players) {
         gameState.reset();
+        forwardModel.abstractSetup(gameState);
+        this.players = players;
+        int id = 0;
+        for (AbstractPlayer player: players) {
+            // Create a FM copy for this player (different random seed)
+            player.forwardModel = this.forwardModel.copy();
+            // Create initial state observation
+            AbstractGameState observation = gameState.copy(id);
+            // Give player their ID
+            player.playerID = id++;
+            // Allow player to initialize
+
+            player.initializePlayer(observation);
+        }
+    }
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
+     * and their IDs, and initialises all players.
+     * @param players - new players for the game
+     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
+     */
+    public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
+        gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
         this.players = players;
         int id = 0;
@@ -176,10 +215,12 @@ public class Game {
 
     /**
      * This player is disqualified. Automatic loss and no more playing.
+     * TODO: make sure games are happy for a player to be disqualified. Could move this on FM and allow overwrite
      * @param player - player to be disqualified.
      */
     private void disqualifyPlayer(AbstractPlayer player) {
-        // TODO
+        gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, player.getPlayerID());
+        gameState.turnOrder.endPlayerTurn(gameState);
     }
 
     /**

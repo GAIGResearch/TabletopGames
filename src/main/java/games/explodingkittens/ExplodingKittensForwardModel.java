@@ -155,7 +155,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         gameState.setGameStatus(Utils.GameResult.GAME_END);
         for (int i = 0; i < gameState.getNPlayers(); i++){
             if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING)
-                gameState.setPlayerResult(Utils.GameResult.GAME_WIN, i);
+                gameState.setPlayerResult(Utils.GameResult.WIN, i);
         }
 
         // Print end game result

@@ -33,10 +33,11 @@ public abstract class Utils {
     }
 
     public enum GameResult {
-        GAME_WIN(2),
-        GAME_DRAW(1),
-        GAME_ONGOING(0),
-        GAME_LOSE(-1),
+        WIN(1),
+        DRAW(0),
+        LOSE(-1),
+        DISQUALIFY(-2),
+        GAME_ONGOING(2),
         GAME_END(3);
 
         public final int value;

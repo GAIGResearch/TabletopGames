@@ -8,7 +8,7 @@ import utilities.Hash;
 import utilities.Utils;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.Utils.GameResult.GAME_WIN;
+import static utilities.Utils.GameResult.WIN;
 
 public class GameOverDiseasesCured extends GameOverCondition {
     @Override
@@ -19,7 +19,7 @@ public class GameOverDiseasesCured extends GameOverCondition {
         }
         if (all_cured) {
 //            System.out.println("WIN!");
-            return GAME_WIN;
+            return WIN;
         }
         return GAME_ONGOING;
     }

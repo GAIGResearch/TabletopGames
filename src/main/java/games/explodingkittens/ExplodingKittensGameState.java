@@ -97,7 +97,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      * @param playerID - player who was killed in a kitten explosion.
      */
     public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
+        setPlayerResult(Utils.GameResult.LOSE, playerID);
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
             if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;

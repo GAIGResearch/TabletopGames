@@ -131,9 +131,9 @@ public class UnoForwardModel extends AbstractForwardModel {
             if (nCards == 0) {
                 for (int i = 0; i < ugs.getNPlayers(); i++) {
                     if (i == playerID)
-                        ugs.setPlayerResult(Utils.GameResult.GAME_WIN, i);
+                        ugs.setPlayerResult(Utils.GameResult.WIN, i);
                     else
-                        ugs.setPlayerResult(Utils.GameResult.GAME_LOSE, i);
+                        ugs.setPlayerResult(Utils.GameResult.LOSE, i);
                 }
                 ugs.setGameStatus(Utils.GameResult.GAME_END);
             }
@@ -171,7 +171,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     protected void endGame(AbstractGameState gameState) {
         System.out.println("Game Results:");
         for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.GAME_WIN) {
+            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
                 System.out.println("The winner is the player : " + playerID);
                 break;
             }

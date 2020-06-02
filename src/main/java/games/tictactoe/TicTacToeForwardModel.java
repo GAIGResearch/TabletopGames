@@ -138,8 +138,8 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
             }
         }
         if (tie){
-            gameState.setGameStatus(Utils.GameResult.GAME_DRAW);
-            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.GAME_DRAW);
+            gameState.setGameStatus(Utils.GameResult.DRAW);
+            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.DRAW);
         }
 
         return tie;
@@ -157,7 +157,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     private void registerWinner(TicTacToeGameState gameState, char winnerSymbol){
         gameState.setGameStatus(Utils.GameResult.GAME_END);
         int winningPlayer = gameState.playerMapping.indexOf(winnerSymbol);
-        gameState.setPlayerResult(Utils.GameResult.GAME_WIN, winningPlayer);
-        gameState.setPlayerResult(Utils.GameResult.GAME_LOSE, 1-winningPlayer);
+        gameState.setPlayerResult(Utils.GameResult.WIN, winningPlayer);
+        gameState.setPlayerResult(Utils.GameResult.LOSE, 1-winningPlayer);
     }
 }

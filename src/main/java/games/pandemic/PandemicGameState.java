@@ -97,14 +97,14 @@ public class PandemicGameState extends AbstractGameState {
     @Override
     protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
         HashMap<HashMap<Integer, Double>, Utils.GameResult> terminals = new HashMap<>();
-        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.GAME_WIN);
-        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.GAME_LOSE);
+        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.WIN);
+        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.LOSE);
         terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).lose_max_outbreak); }},
-                Utils.GameResult.GAME_LOSE);
+                Utils.GameResult.LOSE);
         int i = 3;
         for (String color: colors) {
             int id = i;
-            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, Utils.GameResult.GAME_LOSE);
+            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, Utils.GameResult.LOSE);
             i++;
         }
         return terminals;

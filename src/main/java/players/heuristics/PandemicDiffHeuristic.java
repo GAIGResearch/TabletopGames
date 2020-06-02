@@ -23,10 +23,10 @@ public class PandemicDiffHeuristic extends StateHeuristic {
         BoardStats lastBoardState = new BoardStats((PandemicGameState)gs);
         double rawScore = rootBoardStats.score(lastBoardState);
 
-        if(gamestatus == Utils.GameResult.GAME_LOSE)
+        if(gamestatus == Utils.GameResult.LOSE)
             rawScore = -1;
 
-        if(gamestatus == Utils.GameResult.GAME_WIN)
+        if(gamestatus == Utils.GameResult.WIN)
             rawScore = 1;
 
         return rawScore;

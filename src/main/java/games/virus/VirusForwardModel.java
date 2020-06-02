@@ -121,9 +121,9 @@ public class VirusForwardModel extends AbstractForwardModel {
             if (vgs.playerBodies.get(i).areAllOrganHealthy()) {
                 for (int j = 0; j < vgs.getNPlayers(); j++) {
                     if (i == j)
-                        vgs.setPlayerResult(Utils.GameResult.GAME_WIN, i);
+                        vgs.setPlayerResult(Utils.GameResult.WIN, i);
                     else
-                        vgs.setPlayerResult(Utils.GameResult.GAME_LOSE, j);
+                        vgs.setPlayerResult(Utils.GameResult.LOSE, j);
                 }
                 vgs.setGameStatus(Utils.GameResult.GAME_END);
                 break;
@@ -191,7 +191,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     protected void endGame(AbstractGameState gameState) {
         System.out.println("Game Results:");
         for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.GAME_WIN) {
+            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
                 System.out.println("The winner is the player : " + playerID);
                 break;
             }

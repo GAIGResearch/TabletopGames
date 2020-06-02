@@ -7,7 +7,7 @@ import games.pandemic.PandemicGameState;
 import utilities.Utils;
 
 import static games.pandemic.PandemicConstants.playerDeckHash;
-import static utilities.Utils.GameResult.GAME_LOSE;
+import static utilities.Utils.GameResult.LOSE;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 @SuppressWarnings("unchecked")
@@ -20,7 +20,7 @@ public class GameOverDrawCards extends GameOverCondition {
         // if the deck is empty -> GAME OVER
         if (!canDraw){
             System.out.println("No more cards to draw");
-            return GAME_LOSE;
+            return LOSE;
         }
         return GAME_ONGOING;
     }

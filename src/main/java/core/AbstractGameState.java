@@ -62,6 +62,14 @@ public abstract class AbstractGameState {
         allComponents.clear();
     }
 
+    /**
+     * Resets variables initialised for this game state.
+     */
+    void reset(long seed) {
+        gameParameters.gameSeed = seed;
+        reset();
+    }
+
     // Setters
     public final void setTurnOrder(TurnOrder turnOrder) {
         this.turnOrder = turnOrder;

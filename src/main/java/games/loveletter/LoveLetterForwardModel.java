@@ -105,7 +105,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         // count the number of active players
         int playersAlive = 0;
         for (Utils.GameResult result : llgs.getPlayerResults())
-            if (result != Utils.GameResult.GAME_LOSE)
+            if (result != Utils.GameResult.LOSE)
                 playersAlive += 1;
 
         // game ends because only a single player is left
@@ -132,7 +132,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         int bestValue = 0;
         int points;
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (gameState.getPlayerResults()[i] != Utils.GameResult.GAME_LOSE)
+            if (gameState.getPlayerResults()[i] != Utils.GameResult.LOSE)
                 points = llgs.playerHandCards.get(i).peek().cardType.getValue();
             else
                 points = 0;
@@ -149,16 +149,16 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         // if just a single player is alive, the player immediately wins the game
         if (bestPlayers.size() == 1){
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                gameState.setPlayerResult(Utils.GameResult.GAME_LOSE, i);
+                gameState.setPlayerResult(Utils.GameResult.LOSE, i);
             }
-            gameState.setPlayerResult(Utils.GameResult.GAME_WIN, bestPlayers.get(0));
+            gameState.setPlayerResult(Utils.GameResult.WIN, bestPlayers.get(0));
         } else {
             // else, the player with the higher sum of card values in its discard pile wins
             // in case two or more players have the same value, they all win
             bestValue = 0;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 points = 0;
-                if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_WIN)
+                if (gameState.getPlayerResults()[i] == Utils.GameResult.WIN)
                     for (LoveLetterCard card : llgs.playerDiscardCards.get(i).getComponents())
                         points += card.cardType.getValue();
                 if (points > bestValue) {
@@ -171,17 +171,17 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             }
 
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                gameState.setPlayerResult(Utils.GameResult.GAME_LOSE, i);
+                gameState.setPlayerResult(Utils.GameResult.LOSE, i);
             }
             for (Integer playerID : bestPlayers)
-                gameState.setPlayerResult(Utils.GameResult.GAME_WIN, playerID);
+                gameState.setPlayerResult(Utils.GameResult.WIN, playerID);
         }
 
         // Print game result
         System.out.println(Arrays.toString(gameState.getPlayerResults()));
         Utils.GameResult[] playerResults = gameState.getPlayerResults();
         for (int j = 0; j < gameState.getNPlayers(); j++){
-            if (playerResults[j] == Utils.GameResult.GAME_WIN)
+            if (playerResults[j] == Utils.GameResult.WIN)
                 System.out.println("Player " + j + " won");
         }
     }
@@ -236,7 +236,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
                 switch (playerDeck.getComponents().get(card).cardType) {
                     case Priest:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.GAME_LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             actions.add(new PriestAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -245,7 +245,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Guard:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.GAME_LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
                                 actions.add(new GuardAction(playerDeck.getComponentID(),
@@ -255,7 +255,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Baron:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.GAME_LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             actions.add(new BaronAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -269,7 +269,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.GAME_LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             actions.add(new PrinceAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -278,7 +278,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case King:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.GAME_LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             actions.add(new KingAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
