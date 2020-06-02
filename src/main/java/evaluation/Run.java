@@ -173,7 +173,7 @@ public class Run {
                 break;
             case ExplodingKittens:
                 params = new ExplodingKittenParameters(seed);
-                forwardModel = new ExplodingKittensForwardModel(params.getGameSeed());
+                forwardModel = new ExplodingKittensForwardModel();
                 gameState = new ExplodingKittensGameState(params, nPlayers);
                 break;
             case LoveLetter:

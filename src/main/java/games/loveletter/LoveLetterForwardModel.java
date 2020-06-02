@@ -27,7 +27,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
      * @param firstState - state to be modified
      */
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
         LoveLetterGameState llgs = (LoveLetterGameState)firstState;
         LoveLetterParameters llp = (LoveLetterParameters)firstState.getGameParameters();
 
@@ -74,7 +74,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, AbstractAction action) {
+    protected void _next(AbstractGameState gameState, AbstractAction action) {
         if (VERBOSE) {
             System.out.println(action.toString());
         }
@@ -123,7 +123,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
      * Sets the game-state to be terminal and determines the result of each player.
      */
     @Override
-    public void endGame(AbstractGameState gameState) {
+    protected void endGame(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
         gameState.setGameStatus(Utils.GameResult.GAME_END);
 
@@ -191,7 +191,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
      * @return - List of AbstractAction objects.
      */
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         ArrayList<AbstractAction> actions;
         int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
@@ -209,7 +209,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel getCopy() {
+    protected AbstractForwardModel _copy() {
         return new LoveLetterForwardModel();
     }
 

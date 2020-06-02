@@ -12,7 +12,7 @@ public class TicTacToeGame extends Game {
 
     public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
     {
-        super(Run.GameType.TicTacToe, agents, new TicTacToeForwardModel(params.getGameSeed()), new TicTacToeGameState(params, agents.size()));
+        super(Run.GameType.TicTacToe, agents, new TicTacToeForwardModel(), new TicTacToeGameState(params, agents.size()));
     }
 
     public static void main(String[] args){

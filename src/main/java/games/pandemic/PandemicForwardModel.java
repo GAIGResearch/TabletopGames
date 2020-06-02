@@ -34,7 +34,6 @@ public class PandemicForwardModel extends AbstractForwardModel {
      * @param nPlayers - number of players in the game.
      */
     public PandemicForwardModel(AbstractGameParameters gameParameters, int nPlayers) {
-        super(gameParameters.getGameSeed());
         PandemicParameters pp = (PandemicParameters) gameParameters;
 
         // Game over conditions
@@ -128,7 +127,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
      * @param action - action requested to be played by a player.
      */
     @Override
-    public void next(AbstractGameState currentState, AbstractAction action) {
+    protected void _next(AbstractGameState currentState, AbstractAction action) {
         PandemicGameState pgs = (PandemicGameState)currentState;
 
         do {
@@ -161,7 +160,9 @@ public class PandemicForwardModel extends AbstractForwardModel {
      * @param firstState - the state to be modified to the initial game state.
      */
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
+        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+
         PandemicGameState state = (PandemicGameState) firstState;
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();
         PandemicData _data = state.getData();
@@ -329,7 +330,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel getCopy() {
+    protected AbstractForwardModel _copy() {
         return new PandemicForwardModel(root);
     }
 

@@ -14,22 +14,8 @@ import java.util.List;
 
 public class TicTacToeForwardModel extends AbstractForwardModel {
 
-    /**
-     * Creates a new FM object with a given random seed.
-     *
-     * @param seed - random seed or this forward model.
-     */
-    protected TicTacToeForwardModel(long seed) {
-        super(seed);
-    }
-
-    /**
-     * Constructor for copies, leaves random generator null.
-     */
-    public TicTacToeForwardModel() { }
-
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
         ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(tttgp.gridSize, tttgp.gridSize, Character.class, ' ');
     }
@@ -50,12 +36,12 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel getCopy() {
+    protected AbstractForwardModel _copy() {
         return new TicTacToeForwardModel();
     }
 
     @Override
-    public void next(AbstractGameState currentState, AbstractAction action) {
+    protected void _next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
         if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridSize * tttgp.gridSize)) {
@@ -145,8 +131,9 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         boolean tie = true;
         for (Character[] row: gridBoard.getGridValues()){
             for (Character field: row){
-                if (field.equals(' ')){
+                if (field.equals(' ')) {
                     tie = false;
+                    break;
                 }
             }
         }
@@ -159,7 +146,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void endGame(AbstractGameState gameState) {
+    protected void endGame(AbstractGameState gameState) {
         System.out.println(Arrays.toString(gameState.getPlayerResults()));
     }
 
@@ -167,7 +154,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
      * Inform the game this player has won.
      * @param winnerSymbol - which player won.
      */
-    public void registerWinner(TicTacToeGameState gameState, char winnerSymbol){
+    private void registerWinner(TicTacToeGameState gameState, char winnerSymbol){
         gameState.setGameStatus(Utils.GameResult.GAME_END);
         int winningPlayer = gameState.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(Utils.GameResult.GAME_WIN, winningPlayer);

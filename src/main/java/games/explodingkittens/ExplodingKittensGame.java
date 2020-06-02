@@ -23,7 +23,7 @@ public class ExplodingKittensGame extends Game {
         agents.add(new RandomPlayer());
 
         ExplodingKittenParameters params = new ExplodingKittenParameters(System.currentTimeMillis());
-        AbstractForwardModel forwardModel = new ExplodingKittensForwardModel(params.getGameSeed());
+        AbstractForwardModel forwardModel = new ExplodingKittensForwardModel();
 
         for (int i=0; i<1000; i++) {
             Game game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, agents.size()));

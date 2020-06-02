@@ -52,10 +52,10 @@ public class Game {
      */
     public final void reset() {
         gameState.reset();
-        forwardModel._setup(gameState);
+        forwardModel.abstractSetup(gameState);
         if (players != null) {
             for (AbstractPlayer player : players) {
-                AbstractGameState observation = gameState._copy(player.getPlayerID());
+                AbstractGameState observation = gameState.copy(player.getPlayerID());
                 player.initializePlayer(observation);
             }
         }
@@ -69,14 +69,14 @@ public class Game {
      */
     public final void reset(List<AbstractPlayer> players) {
         gameState.reset();
-        forwardModel._setup(gameState);
+        forwardModel.abstractSetup(gameState);
         this.players = players;
         int id = 0;
         for (AbstractPlayer player: players) {
             // Create a FM copy for this player (different random seed)
             player.forwardModel = this.forwardModel.copy();
             // Create initial state observation
-            AbstractGameState observation = gameState._copy(id);
+            AbstractGameState observation = gameState.copy(id);
             // Give player their ID
             player.playerID = id++;
             // Allow player to initialize
@@ -100,7 +100,7 @@ public class Game {
 
             // Get actions for the player
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
-            AbstractGameState observation = gameState._copy(activePlayer);
+            AbstractGameState observation = gameState.copy(activePlayer);
             if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
                 ((IPrintable) observation).printToConsole();
             }
@@ -137,7 +137,7 @@ public class Game {
 
         // Allow players to terminate
         for (AbstractPlayer player: players) {
-            player.finalizePlayer(gameState._copy(player.getPlayerID()));
+            player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
     }
 

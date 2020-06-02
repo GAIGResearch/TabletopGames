@@ -6,63 +6,27 @@ import utilities.Utils;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 public abstract class AbstractForwardModel {
 
-    // Random generator for this game.
-    protected Random rnd;
-
     /* Limited access/Final methods */
-
-    /**
-     * Creates a new FM object with a given random seed.
-     * @param seed - random seed or this forward model.
-     */
-    protected AbstractForwardModel(long seed) {
-        rnd = new Random(seed);
-    }
-
-    /**
-     * Empty constructor for copies.
-     */
-    protected AbstractForwardModel() {}
 
     /**
      * Combines both super class and sub class setup methods. Called from the game loop.
      * @param firstState - initial state.
      */
-    final void _setup(AbstractGameState firstState) {
-        abstractSetup(firstState);
-        setup(firstState);
-        firstState.addAllComponents();
-    }
-
-    /**
-     * Performs initialisation of variables in the abstract game state.
-     * @param firstState - the initial game state.
-     */
-    private void abstractSetup(AbstractGameState firstState) {
+    final void abstractSetup(AbstractGameState firstState) {
         firstState.availableActions = new ArrayList<>();
-
         firstState.gameStatus = Utils.GameResult.GAME_ONGOING;
         firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
         Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
-
         firstState.gamePhase = AbstractGameState.DefaultGamePhase.Main;
+
+        _setup(firstState);
+        firstState.addAllComponents();
     }
 
     /* Methods to be implemented by subclasses, unavailable to AI players */
-
-    /**
-     * Performs initial game setup according to game rules
-     *  - sets up decks and shuffles
-     *  - gives player cards
-     *  - places tokens on boards
-     *  etc.
-     * @param firstState - the state to be modified to the initial game state.
-     */
-    protected abstract void setup(AbstractGameState firstState);
 
     /**
      * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
@@ -80,24 +44,43 @@ public abstract class AbstractForwardModel {
      * Gets a copy of the FM with a new random number generator.
      * @return - new forward model with different random seed (keeping logic).
      */
-    protected abstract AbstractForwardModel getCopy();
+    protected abstract AbstractForwardModel _copy();
 
-    /* Public API */
+    /**
+     * Performs initial game setup according to game rules
+     *  - sets up decks and shuffles
+     *  - gives player cards
+     *  - places tokens on boards
+     *  etc.
+     * @param firstState - the state to be modified to the initial game state.
+     */
+    protected abstract void _setup(AbstractGameState firstState);
 
     /**
      * Applies the given action to the game state and executes any other game rules.
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
-    public abstract void next(AbstractGameState currentState, AbstractAction action);
+    protected abstract void _next(AbstractGameState currentState, AbstractAction action);
+
+
+    /* ###### Public API for AI players ###### */
 
     /**
      * Sets up the given game state for game start according to game rules, with a new random seed.
      * @param gameState - game state to be modified.
      */
-    public final void setupGameState(AbstractGameState gameState) {
+    public final void setup(AbstractGameState gameState) {
         abstractSetup(gameState);
-        setup(gameState);
+    }
+
+    /**
+     * Applies the given action to the game state and executes any other game rules.
+     * @param currentState - current game state, to be modified by the action.
+     * @param action - action requested to be played by a player.
+     */
+    public final void next(AbstractGameState currentState, AbstractAction action) {
+        _next(currentState, action);
     }
 
     /**
@@ -108,16 +91,14 @@ public abstract class AbstractForwardModel {
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = _computeAvailableActions(gameState);
         gameState.setAvailableActions(actions);
-        return Collections.unmodifiableList(actions);
+        return actions;
     }
 
     /**
      * Returns a copy of this forward model with a new random seed.
      * @return a new Forward Model instance with a different random object.
      */
-    public AbstractForwardModel copy() {
-        AbstractForwardModel model = getCopy();
-        model.rnd = new Random();  // TODO: there are 2 random sources: given by gameSeed in GameParameters, and here
-        return model;
+    public final AbstractForwardModel copy() {
+        return _copy();
     }
 }

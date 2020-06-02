@@ -22,7 +22,7 @@ import static games.virus.cards.VirusCard.VirusCardOrgan.None;
 public class VirusForwardModel extends AbstractForwardModel {
 
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
         // 1. Each player has a body
         // 2. Each player has a deck with 3 cards
         // 3. There is a draw deck with 68 cards at the beginning.
@@ -53,7 +53,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, AbstractAction action) {
+    protected void _next(AbstractGameState gameState, AbstractAction action) {
         action.execute(gameState);
         checkGameEnd((VirusGameState)gameState);
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
@@ -132,7 +132,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         VirusGameState vgs = (VirusGameState) gameState;
         ArrayList<AbstractAction> actions    = new ArrayList<>();
         VirusGameParameters vgp = (VirusGameParameters) vgs.getGameParameters();
@@ -152,7 +152,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel getCopy() {
+    protected AbstractForwardModel _copy() {
         return new VirusForwardModel();
     }
 
@@ -188,7 +188,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void endGame(AbstractGameState gameState) {
+    protected void endGame(AbstractGameState gameState) {
         System.out.println("Game Results:");
         for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
             if (gameState.getPlayerResults()[playerID] == Utils.GameResult.GAME_WIN) {

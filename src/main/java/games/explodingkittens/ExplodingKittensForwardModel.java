@@ -18,17 +18,13 @@ import static utilities.Utils.generatePermutations;
 
 public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
-    public ExplodingKittensForwardModel(long seed) {
-        super(seed);
-    }
-
-    public ExplodingKittensForwardModel() {}
-
     /**
      * Performs initial game setup according to game rules.
      * @param firstState - the state to be modified to the initial game state.
      */
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
+        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
         ExplodingKittenParameters ekp = (ExplodingKittenParameters)firstState.getGameParameters();
 
@@ -90,7 +86,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      * @param action - action requested to be played by a player.
      */
     @Override
-    public void next(AbstractGameState gameState, AbstractAction action) {
+    protected void _next(AbstractGameState gameState, AbstractAction action) {
         if (VERBOSE) {
             System.out.println(action.toString());
         }
@@ -155,7 +151,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      * Exploding kittens updates the status of players still alive as winners.
      */
     @Override
-    public void endGame(AbstractGameState gameState) {
+    protected void endGame(AbstractGameState gameState) {
         gameState.setGameStatus(Utils.GameResult.GAME_END);
         for (int i = 0; i < gameState.getNPlayers(); i++){
             if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING)
@@ -174,7 +170,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      * @return - List of AbstractAction objects.
      */
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         ArrayList<AbstractAction> actions;
         // todo the actions per player do not change a lot in between two turns
@@ -198,7 +194,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel getCopy() {
+    protected AbstractForwardModel _copy() {
         return new ExplodingKittensForwardModel();
     }
 

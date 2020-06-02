@@ -17,7 +17,7 @@ import static core.CoreConstants.VERBOSE;
 public class UnoForwardModel extends AbstractForwardModel {
 
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
         UnoGameState ugs = (UnoGameState) firstState;
 
         // Create the draw deck with all the cards
@@ -71,7 +71,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, AbstractAction action) {
+    protected void _next(AbstractGameState gameState, AbstractAction action) {
         action.execute(gameState);
         checkGameEnd((UnoGameState)gameState);
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
@@ -141,7 +141,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         UnoGameState ugs = (UnoGameState)gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = ugs.getCurrentPlayer();
@@ -168,7 +168,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void endGame(AbstractGameState gameState) {
+    protected void endGame(AbstractGameState gameState) {
         System.out.println("Game Results:");
         for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
             if (gameState.getPlayerResults()[playerID] == Utils.GameResult.GAME_WIN) {
@@ -179,7 +179,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel getCopy() {
+    protected AbstractForwardModel _copy() {
         return new UnoForwardModel();
     }
 }
