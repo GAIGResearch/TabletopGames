@@ -29,24 +29,6 @@ public abstract class AbstractForwardModel {
     /* Methods to be implemented by subclasses, unavailable to AI players */
 
     /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
-     */
-    protected void endGame(AbstractGameState gameState) {}
-
-    /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
-     */
-    protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
-
-    /**
-     * Gets a copy of the FM with a new random number generator.
-     * @return - new forward model with different random seed (keeping logic).
-     */
-    protected abstract AbstractForwardModel _copy();
-
-    /**
      * Performs initial game setup according to game rules
      *  - sets up decks and shuffles
      *  - gives player cards
@@ -62,6 +44,24 @@ public abstract class AbstractForwardModel {
      * @param action - action requested to be played by a player.
      */
     protected abstract void _next(AbstractGameState currentState, AbstractAction action);
+
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of IAction objects.
+     */
+    protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
+
+    /**
+     * Gets a copy of the FM with a new random number generator.
+     * @return - new forward model with different random seed (keeping logic).
+     */
+    protected abstract AbstractForwardModel _copy();
+
+    /**
+     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
+     * The last thing to be called in the game loop, after the game is finished.
+     */
+    protected void endGame(AbstractGameState gameState) {}
 
 
     /* ###### Public API for AI players ###### */
