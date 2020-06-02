@@ -60,6 +60,7 @@ public class PandemicGameState extends AbstractGameState {
      */
     @Override
     public VectorObservation getVectorObservation() {
+        // TODO
         return null;
     }
 
