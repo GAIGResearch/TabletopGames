@@ -34,7 +34,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     int[] bulletsLeft;
     // The player characters available
     HashMap<Integer, CharacterType> playerCharacters;
-    int playerPlayingBelle = -1;
+    int playerPlayingBelle;
 
     // The card stack built by players each round
     PartialObservableDeck<ColtExpressCard> plannedActions;
@@ -111,10 +111,25 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return 0;// TODO
     }
 
+    @Override
+    protected void _reset() {
+        playerHandCards = new ArrayList<>();
+        playerDecks = new ArrayList<>();
+        playerLoot = new ArrayList<>();
+        bulletsLeft = new int[getNPlayers()];
+        playerCharacters = new HashMap<>();
+        playerPlayingBelle = -1;
+        plannedActions = null;
+        trainCompartments = new LinkedList<>();
+        rounds = new ArrayList<>();
+        gamePhase = ColtExpressGamePhase.PlanActions;
+    }
+
     public ColtExpressGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new ColtExpressTurnOrder(nPlayers, (ColtExpressParameters) gameParameters));
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
+        playerPlayingBelle = -1;
     }
 
     public void addLoot(Integer playerID, Loot loot) {

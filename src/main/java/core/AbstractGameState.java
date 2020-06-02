@@ -12,6 +12,8 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static utilities.Utils.GameResult.GAME_ONGOING;
+
 
 /**
  * Contains all game state information.
@@ -51,7 +53,6 @@ public abstract class AbstractGameState {
     public AbstractGameState(AbstractGameParameters gameParameters, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
-        this.allComponents = new Area<>(-1, "All Components");
     }
 
     /**
@@ -59,7 +60,13 @@ public abstract class AbstractGameState {
      */
     void reset() {
         turnOrder.reset();
-        allComponents.clear();
+        allComponents = new Area<>(-1, "All Components");
+        availableActions = new ArrayList<>();
+        gameStatus = GAME_ONGOING;
+        playerResults = new Utils.GameResult[getNPlayers()];
+        Arrays.fill(playerResults, GAME_ONGOING);
+        gamePhase = DefaultGamePhase.Main;
+        _reset();
     }
 
     /**
@@ -93,7 +100,7 @@ public abstract class AbstractGameState {
     public final AbstractGameParameters getGameParameters() { return this.gameParameters; }
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
-    public final boolean isNotTerminal(){ return gameStatus == Utils.GameResult.GAME_ONGOING; }
+    public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
     public final List<AbstractAction> getActions() {
         return Collections.unmodifiableList(availableActions);
     }
@@ -124,7 +131,7 @@ public abstract class AbstractGameState {
         AbstractGameState s = _copy(playerId);
         // Copy super class things
         s.turnOrder = turnOrder.copy();
-        s.allComponents.clear();
+        s.allComponents = new Area<>(-1, "All components");
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;
@@ -192,6 +199,11 @@ public abstract class AbstractGameState {
      * @return - double, score of current state.
      */
     protected abstract double _getScore(int playerId);
+
+    /**
+     * Resets variables initialised for this game state.
+     */
+    protected abstract void _reset();
 
 
     /* ####### Public AI agent API ####### */

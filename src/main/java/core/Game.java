@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static games.GameType.ColtExpress;
-import static games.GameType.Virus;
+import static games.GameType.*;
 
 public class Game {
 
