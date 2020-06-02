@@ -3,8 +3,6 @@ package players;
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
-import games.pandemic.PandemicGameState;
-import players.heuristics.PandemicDiffHeuristic;
 import players.heuristics.StateHeuristic;
 
 import java.util.List;

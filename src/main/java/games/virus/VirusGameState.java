@@ -21,7 +21,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     @Override
-    public List<Component> _getAllComponents() {
+    protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{
             addAll(playerBodies);
             addAll(playerDecks);
@@ -31,7 +31,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected AbstractGameState copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         VirusGameState vgs = new VirusGameState(gameParameters.copy(), getNPlayers());
         vgs.drawDeck = drawDeck.copy();
         vgs.discardDeck = discardDeck.copy();
@@ -45,25 +45,25 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    public VectorObservation getVectorObservation() {
+    protected VectorObservation _getVectorObservation() {
         // TODO
         return null;
     }
 
     @Override
-    public double[] getDistanceFeatures(int playerId) {
+    protected double[] _getDistanceFeatures(int playerId) {
         // TODO
         return new double[0];
     }
 
     @Override
-    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
         // TODO
         return null;
     }
 
     @Override
-    public double getScore(int playerId) {
+    protected double _getScore(int playerId) {
         // TODO
         return 0;
     }

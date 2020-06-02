@@ -59,7 +59,7 @@ public class PandemicGameState extends AbstractGameState {
      * @return - IObservation, the observation for this player.
      */
     @Override
-    public VectorObservation getVectorObservation() {
+    protected VectorObservation _getVectorObservation() {
         // TODO
         return null;
     }
@@ -69,7 +69,7 @@ public class PandemicGameState extends AbstractGameState {
      * @return - List of AbstractAction objects.
      */
     @Override
-    public double[] getDistanceFeatures(int playerId) {
+    protected double[] _getDistanceFeatures(int playerId) {
         // Win if all disease counters >= 1
         // Lose if player deck is empty
         // Lose if too many outbreaks
@@ -95,7 +95,7 @@ public class PandemicGameState extends AbstractGameState {
     }
 
     @Override
-    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
         HashMap<HashMap<Integer, Double>, Utils.GameResult> terminals = new HashMap<>();
         terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.GAME_WIN);
         terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.GAME_LOSE);
@@ -111,7 +111,7 @@ public class PandemicGameState extends AbstractGameState {
     }
 
     @Override
-    public double getScore(int playerId) {
+    protected double _getScore(int playerId) {
         // Martin's heuristic. // TODO maybe improvements?
         PandemicHeuristic ph = new PandemicHeuristic(this);
         return ph.evaluateState(this);
@@ -187,7 +187,7 @@ public class PandemicGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
 
         gs.areas = new HashMap<>();
@@ -225,5 +225,9 @@ public class PandemicGameState extends AbstractGameState {
         gs.researchStationLocations = new ArrayList<>(researchStationLocations);
 
         return gs;
+    }
+
+    void addComponents() {
+        super.addAllComponents();
     }
 }

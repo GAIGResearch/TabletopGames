@@ -33,29 +33,29 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected AbstractGameState copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
     }
 
     @Override
-    public VectorObservation getVectorObservation() {
+    protected VectorObservation _getVectorObservation() {
         return new VectorObservation<>(gridBoard.flattenGrid());
     }
 
     @Override
-    public double[] getDistanceFeatures(int playerId) {
+    protected double[] _getDistanceFeatures(int playerId) {
         return new double[0];
     }
 
     @Override
-    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
         return null;
     }
 
     @Override
-    public double getScore(int playerId) {
+    protected double _getScore(int playerId) {
         if (getGameStatus() == Utils.GameResult.GAME_WIN)
             return 1;
         else if (getGameStatus() == Utils.GameResult.GAME_DRAW)

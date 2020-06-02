@@ -30,7 +30,7 @@ public abstract class TurnOrder {
         this.nPlayers = nPlayers;
     }
 
-    public void reset() {
+    public final void reset() {
         _reset();
         firstPlayer = 0;
         turnOwner = 0;

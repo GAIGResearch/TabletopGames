@@ -43,7 +43,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    public List<Component> _getAllComponents() {
+    protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{
             add(drawPile);
             add(discardPile);
@@ -52,7 +52,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    protected AbstractGameState copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.drawPile = drawPile.copy();
         ekgs.discardPile = discardPile.copy();
@@ -69,25 +69,25 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    public VectorObservation getVectorObservation() {
+    protected VectorObservation _getVectorObservation() {
         // TODO
         return null;
     }
 
     @Override
-    public double[] getDistanceFeatures(int playerId) {
+    protected double[] _getDistanceFeatures(int playerId) {
         // TODO
         return new double[0];
     }
 
     @Override
-    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
         // TODO
         return null;
     }
 
     @Override
-    public double getScore(int playerId) {
+    protected double _getScore(int playerId) {
         // TODO heuristic
         return 0;
     }
