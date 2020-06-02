@@ -1,5 +1,6 @@
 package games.explodingkittens;
 
+import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -41,10 +42,12 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    public void addAllComponents() {
-        allComponents.putComponent(drawPile);
-        allComponents.putComponent(discardPile);
-        allComponents.putComponents(playerHandCards);
+    public List<Component> _getAllComponents() {
+        return new ArrayList<Component>() {{
+            add(drawPile);
+            add(discardPile);
+            addAll(playerHandCards);
+        }};
     }
 
     @Override

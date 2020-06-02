@@ -46,12 +46,11 @@ public class PandemicGameState extends AbstractGameState {
     ArrayList<String> researchStationLocations;
 
     @Override
-    public void addAllComponents() {
-        for (Area a : areas.values()) {
-            allComponents.putComponents(a);
-        }
-        allComponents.putComponent(tempDeck);
-        allComponents.putComponent(world);
+    protected List<Component> _getAllComponents() {
+        List<Component> components = new ArrayList<>(areas.values());
+        components.add(tempDeck);
+        components.add(world);
+        return components;
     }
 
     /**

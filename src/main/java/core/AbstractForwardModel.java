@@ -35,7 +35,6 @@ public abstract class AbstractForwardModel {
     final void _setup(AbstractGameState firstState) {
         abstractSetup(firstState);
         setup(firstState);
-        firstState.allComponents.clear();
         firstState.addAllComponents();
     }
 

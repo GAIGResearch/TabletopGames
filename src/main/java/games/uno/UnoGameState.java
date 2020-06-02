@@ -1,6 +1,7 @@
 package games.uno;
 
 import core.AbstractGameParameters;
+import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
@@ -32,12 +33,15 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         super(gameParameters, turnOrder);
     }
 
-    public void addAllComponents()
+    @Override
+    protected List<Component> _getAllComponents()
     {
-        allComponents.putComponents(playerDecks);
-        allComponents.putComponent(drawDeck);
-        allComponents.putComponent(discardDeck);
-        allComponents.putComponent(currentCard);
+        return new ArrayList<Component>() {{
+            addAll(playerDecks);
+            add(drawDeck);
+            add(discardDeck);
+            add(currentCard);
+        }};
     }
 
     boolean isWildCard(UnoCard card) {

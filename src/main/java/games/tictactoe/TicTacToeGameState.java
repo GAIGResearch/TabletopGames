@@ -1,5 +1,6 @@
 package games.tictactoe;
 
+import core.components.Component;
 import core.components.GridBoard;
 import core.AbstractGameState;
 import core.interfaces.IGridGameState;
@@ -10,6 +11,7 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character> {
@@ -25,8 +27,8 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    public void addAllComponents() {
-        allComponents.putComponent(gridBoard);
+    protected List<Component> _getAllComponents() {
+        return new ArrayList<Component>(){{ add(gridBoard); }};
     }
 
     @Override

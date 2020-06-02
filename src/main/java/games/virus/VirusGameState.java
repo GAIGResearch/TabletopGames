@@ -2,6 +2,7 @@ package games.virus;
 
 import core.AbstractGameParameters;
 import core.AbstractGameState;
+import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.observations.VectorObservation;
@@ -20,17 +21,13 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     @Override
-    public void addAllComponents() {
-        allComponents.putComponents(playerBodies);
-        allComponents.putComponents(playerDecks);
-        allComponents.putComponent(drawDeck);
-        allComponents.putComponent(discardDeck);
-        for (VirusBody b: playerBodies) {
-            allComponents.putComponents(new ArrayList<>(b.getOrgans().values()));
-//            for (VirusOrgan o: b.getOrgans().values()) {
-//                allComponents.putComponents(o.getCards());  // TODO: error
-//            }
-        }
+    public List<Component> _getAllComponents() {
+        return new ArrayList<Component>() {{
+            addAll(playerBodies);
+            addAll(playerDecks);
+            add(drawDeck);
+            add(discardDeck);
+        }};
     }
 
     @Override

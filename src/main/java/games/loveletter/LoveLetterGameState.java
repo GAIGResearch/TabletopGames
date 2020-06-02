@@ -1,6 +1,7 @@
 package games.loveletter;
 
 import core.AbstractGameState;
+import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -40,20 +41,14 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         gamePhase = LoveLetterGamePhase.Draw;
     }
 
-    /**
-     * Must add all components used in the game to the allComponents area, mapping to their assigned component ID
-     * and NOT another game specific key. Use one of these functions for this functionality only:
-     *          - Area.putComponent(Component component)
-     *          - Area.putComponents(List<Component> components)
-     *          - Area.putComponents(Area area)
-     * Method is called after initialising the game state.
-     */
     @Override
-    public void addAllComponents() {
-        allComponents.putComponents(playerHandCards);
-        allComponents.putComponents(playerDiscardCards);
-        allComponents.putComponent(drawPile);
-        allComponents.putComponent(reserveCards);
+    protected List<Component> _getAllComponents() {
+        List<Component> components = new ArrayList<>();
+        components.addAll(playerHandCards);
+        components.addAll(playerDiscardCards);
+        components.add(drawPile);
+        components.add(reserveCards);
+        return components;
     }
 
     @Override

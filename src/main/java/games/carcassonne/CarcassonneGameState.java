@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import core.AbstractGameState;
 import core.AbstractGameParameters;
+import core.components.Component;
 import core.observations.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
@@ -48,8 +49,9 @@ public class CarcassonneGameState extends AbstractGameState {
 
 
     @Override
-    public void addAllComponents() {
+    protected List<Component> _getAllComponents() {
         // TODO
+        return null;
     }
 
     @Override

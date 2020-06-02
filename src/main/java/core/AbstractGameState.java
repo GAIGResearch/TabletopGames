@@ -28,7 +28,7 @@ public abstract class AbstractGameState {
     // Parameters, forward model and turn order for the game
     protected final AbstractGameParameters gameParameters;
     protected TurnOrder turnOrder;
-    protected Area<Component> allComponents;
+    private Area<Component> allComponents;
 
     // List of actions currently available for the player
     protected List<AbstractAction> availableActions;
@@ -167,17 +167,22 @@ public abstract class AbstractGameState {
         return distances;
     }
 
+    /**
+     * Adds all components given by the game to the allComponents map in the correct way, first clearing the map.
+     */
+    public final void addAllComponents() {
+        allComponents.clear();
+        allComponents.putComponents(_getAllComponents());
+    }
+
     /* Methods to be implemented by subclass */
 
     /**
-     * Must add all components used in the game to the allComponents area, mapping to their assigned component ID
-     * and NOT another game specific key. Use one of these functions for this functionality only:
-     *          - Area.putComponent(Component component)
-     *          - Area.putComponents(List<Component> components)
-     *          - Area.putComponents(Area area)
-     * Method is called after initialising the game state.
+     * Returns all components used in the game and referred to by componentId from actions or rules.
+     * This method is called after initialising the game state.
+     * @return - List of components in the game.
      */
-    public abstract void addAllComponents();
+    protected abstract List<Component> _getAllComponents();
 
     /**
      * Create a copy of the game state containing only those components the given player can observe (if partial
