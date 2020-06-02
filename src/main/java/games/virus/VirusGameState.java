@@ -68,6 +68,14 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         return 0;
     }
 
+    @Override
+    protected void _reset() {
+        playerBodies = new ArrayList<>();
+        playerDecks = new ArrayList<>();
+        drawDeck = null;
+        discardDeck = null;
+    }
+
     public VirusGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new VirusTurnOrder(nPlayers));
     }

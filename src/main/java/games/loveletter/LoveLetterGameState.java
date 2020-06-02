@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
+
 public class LoveLetterGameState extends AbstractGameState implements IPrintable {
 
     // Love letter adds one game phase on top of default phases
@@ -39,7 +41,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
     public LoveLetterGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new LoveLetterTurnOrder(nPlayers));
-        gamePhase = LoveLetterGamePhase.Draw;
+        gamePhase = Draw;
     }
 
     @Override
@@ -90,6 +92,16 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     protected double _getScore(int playerId) {
         // TODO heuristic
         return 0;
+    }
+
+    @Override
+    protected void _reset() {
+        gamePhase = Draw;
+        playerHandCards = new ArrayList<>();
+        playerDiscardCards = new ArrayList<>();
+        drawPile = null;
+        reserveCards = null;
+        effectProtection = new boolean[getNPlayers()];
     }
 
     /**

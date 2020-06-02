@@ -117,6 +117,17 @@ public class PandemicGameState extends AbstractGameState {
         return ph.evaluateState(this);
     }
 
+    @Override
+    protected void _reset() {
+        areas = null;
+        tempDeck = null;
+        world = null;
+        quietNight = false;
+        epidemic = false;
+        nCardsDrawn = 0;
+        researchStationLocations = new ArrayList<>();
+    }
+
     /**
      * Constructor. Calls super with objects corresponding to this game and loads the data for the game.
      * @param pp - Game parameters.

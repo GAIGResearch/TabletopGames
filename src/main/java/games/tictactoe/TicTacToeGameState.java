@@ -75,6 +75,11 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
+    protected void _reset() {
+        gridBoard = null;
+    }
+
+    @Override
     public GridBoard<Character> getGridBoard() {
         return gridBoard;
     }

@@ -34,12 +34,13 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Cards in the discard pile
     Deck<ExplodingKittenCard> discardPile;
     // Player ID of the player currently getting a favor
-    int playerGettingAFavor = -1;
+    int playerGettingAFavor;
     // Current stack of actions
     Stack<AbstractAction> actionStack;
 
     public ExplodingKittensGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new ExplodingKittenTurnOrder(nPlayers));
+        playerGettingAFavor = -1;
     }
 
     @Override
@@ -90,6 +91,15 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     protected double _getScore(int playerId) {
         // TODO heuristic
         return 0;
+    }
+
+    @Override
+    protected void _reset() {
+        playerHandCards = new ArrayList<>();
+        drawPile = null;
+        discardPile = null;
+        playerGettingAFavor = -1;
+        actionStack = null;
     }
 
     /**
