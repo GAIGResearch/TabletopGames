@@ -27,10 +27,10 @@ public class ReactiveTurnOrder extends TurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
+    protected TurnOrder _copy() {
         ReactiveTurnOrder to = new ReactiveTurnOrder(nPlayers);
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
-        return copyTo(to);
+        return to;
     }
 
     @Override

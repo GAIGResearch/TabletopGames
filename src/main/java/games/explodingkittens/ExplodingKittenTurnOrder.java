@@ -52,10 +52,10 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
+    protected TurnOrder _copy() {
         ExplodingKittenTurnOrder to = new ExplodingKittenTurnOrder(nPlayers);
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         to.requiredDraws = requiredDraws;
-        return copyTo(to);
+        return to;
     }
 }

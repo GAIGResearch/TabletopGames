@@ -11,10 +11,10 @@ public class AlternatingTurnOrder extends TurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
+    protected TurnOrder _copy() {
         AlternatingTurnOrder to = new AlternatingTurnOrder(nPlayers);
         to.direction = direction;
-        return copyTo(to);
+        return to;
     }
 
     @Override

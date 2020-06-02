@@ -72,11 +72,11 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
+    protected TurnOrder _copy() {
         PandemicTurnOrder pto = new PandemicTurnOrder(nPlayers, nStepsPerTurn);
         pto.reactivePlayers = new LinkedList<>(reactivePlayers);
         pto.turnStep = turnStep;
         pto.nStepsPerTurn = nStepsPerTurn;
-        return copyTo(pto);
+        return pto;
     }
 }

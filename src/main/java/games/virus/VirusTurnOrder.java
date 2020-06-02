@@ -9,9 +9,8 @@ public class VirusTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
-        VirusTurnOrder to = new VirusTurnOrder(nPlayers);
-        return copyTo(to);
+    protected TurnOrder _copy() {
+        return new VirusTurnOrder(nPlayers);
     }
 
 }
