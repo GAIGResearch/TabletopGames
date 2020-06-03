@@ -32,7 +32,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @return - ArrayList of components observed by the player.
      */
     public ArrayList<T> getVisibleComponents(int playerID) {
-        if (playerID < 0 && playerID >= deckVisibility.length)
+        if (playerID < 0 || playerID >= deckVisibility.length)
             throw new IllegalArgumentException("playerID "+ playerID + " needs to be in range [0," + (deckVisibility.length-1) +"]");
 
         ArrayList<T> visibleComponents = new ArrayList<>(components.size());
@@ -127,6 +127,16 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     @Override
+    public boolean add(Deck<T> d) {
+        if (d == null)
+            throw new IllegalArgumentException("d cannot be null");
+        for (int i = 0; i < d.getSize(); i++) {
+            elementVisibility.add(deckVisibility.clone());
+        }
+        return super.add(d);
+    }
+
+    @Override
     public void setComponents(ArrayList<T> components) {
         super.setComponents(components);
 
@@ -194,6 +204,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     @Override
     public void shuffle() {
         this.shuffle(new Random());
+    }
+
+    public boolean[] getDeckVisibility() {
+        return deckVisibility;
     }
 
     @Override

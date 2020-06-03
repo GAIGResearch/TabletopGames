@@ -26,8 +26,13 @@ public class ExplodingKittenCard extends Card {
         this.cardType = cardType;
     }
 
+    public ExplodingKittenCard(CardType cardType, int ID) {
+        super(cardType.toString(), ID);
+        this.cardType = cardType;
+    }
+
     @Override
     public Card copy() {
-        return new ExplodingKittenCard(cardType);
+        return new ExplodingKittenCard(cardType, componentID);
     }
 }
