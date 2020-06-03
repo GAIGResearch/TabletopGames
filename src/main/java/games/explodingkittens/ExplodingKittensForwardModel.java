@@ -239,7 +239,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     actions.add(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+                    actions.add(new SeeTheFuture());
                     break;
                 default:
                     System.out.println("No actions known for cardtype: " + card.cardType.toString());
