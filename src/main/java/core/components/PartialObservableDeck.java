@@ -17,13 +17,13 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         this.deckVisibility = defaultVisibility;
     }
 
-    public PartialObservableDeck(String name, boolean[] defaultVisibility, int ID) {
-        super(name, ID);
-        this.deckVisibility = defaultVisibility;
-    }
-
     public PartialObservableDeck(String id, int nPlayers) {
         this(id, new boolean[nPlayers]);
+    }
+
+    private PartialObservableDeck(String name, boolean[] defaultVisibility, int ID) {
+        super(name, ID);
+        this.deckVisibility = defaultVisibility;
     }
 
     /**

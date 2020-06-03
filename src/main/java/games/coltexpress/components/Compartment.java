@@ -125,10 +125,8 @@ public class Compartment extends Component {
     @Override
     public Component copy() {
         Compartment newCompartment = new Compartment(this.nPlayers, compartmentID, componentID);
-        for (Loot loot : this.lootInside.getComponents())
-            newCompartment.lootInside.add((Loot) loot.copy());
-        for (Loot loot : this.lootOnTop.getComponents())
-            newCompartment.lootOnTop.add((Loot) loot.copy());
+        newCompartment.lootInside = lootInside.copy();
+        newCompartment.lootOnTop = lootOnTop.copy();
         newCompartment.containsMarshal = containsMarshal;
         newCompartment.playersOnTopOfCompartment.addAll(playersOnTopOfCompartment);
         newCompartment.playersInsideCompartment.addAll(playersInsideCompartment);

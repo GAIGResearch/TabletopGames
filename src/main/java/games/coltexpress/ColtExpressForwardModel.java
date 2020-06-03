@@ -251,6 +251,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
         for (Integer playerID : potentialWinnerByBulletCards)
             cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
+
+        System.out.println(Arrays.toString(cegs.getPlayerResults()));
     }
 
     @Override
@@ -299,7 +301,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             return actions;
         }
 
-        ColtExpressCard plannedActionCard = cegs.plannedActions.pick(0);
+        ColtExpressCard plannedActionCard = cegs.plannedActions.peek(0);
         if (player == plannedActionCard.playerID)
         {
             switch (plannedActionCard.cardType){
@@ -399,6 +401,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                             " unknown to ColtExpressGameState");
             }
 
+        } else {
+            actions.add(new DoNothing());
         }
         return actions;
     }
