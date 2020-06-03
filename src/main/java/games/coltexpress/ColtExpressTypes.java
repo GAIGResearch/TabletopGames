@@ -110,4 +110,11 @@ public class ColtExpressTypes {
             return content.c;
         }
     }
+
+    // Loot types available for this game.
+    public enum LootType {
+        Purse,
+        Jewel,
+        Strongbox
+    }
 }

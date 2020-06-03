@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Utils;
@@ -24,7 +24,7 @@ public class EndCardMarshallsRevenge extends AbstractAction {
                     PartialObservableDeck<Loot> playerLoot = gameState.getLoot(playerID);
                     Loot lestValueablePurse = null;
                     for (Loot loot : playerLoot.getComponents()) {
-                        if (loot.getLootType() == ColtExpressParameters.LootType.Purse &&
+                        if (loot.getLootType() == ColtExpressTypes.LootType.Purse &&
                                 (lestValueablePurse == null || lestValueablePurse.getValue() < loot.getValue()))
                             lestValueablePurse = loot;
                     }

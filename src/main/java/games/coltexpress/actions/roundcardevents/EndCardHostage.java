@@ -3,11 +3,12 @@ package games.coltexpress.actions.roundcardevents;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Utils;
 
-import static games.coltexpress.ColtExpressParameters.LootType.Purse;
+import static games.coltexpress.ColtExpressTypes.LootType.Purse;
 
 public class EndCardHostage extends AbstractAction {
 
@@ -15,11 +16,12 @@ public class EndCardHostage extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
         Compartment locomotive = gameState.getTrainCompartments().get(gameState.getNPlayers());
+        int reward = ((ColtExpressParameters)gs.getGameParameters()).nCardHostageReward;
         for (Integer playerID : locomotive.playersOnTopOfCompartment){
-            gameState.addLoot(playerID, new Loot(Purse, Purse.getDefaultValue()));
+            gameState.addLoot(playerID, new Loot(Purse, reward));
         }
         for (Integer playerID : locomotive.playersInsideCompartment){
-            gameState.addLoot(playerID, new Loot(Purse, Purse.getDefaultValue()));
+            gameState.addLoot(playerID, new Loot(Purse, reward));
         }
         gameState.setGameStatus(Utils.GameResult.GAME_END);
         return true;

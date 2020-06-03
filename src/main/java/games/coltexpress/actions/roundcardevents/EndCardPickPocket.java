@@ -3,7 +3,7 @@ package games.coltexpress.actions.roundcardevents;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Utils;
@@ -23,7 +23,7 @@ public class EndCardPickPocket extends AbstractAction {
             if (currentCompartment.playersInsideCompartment.size() == 1) {
                 LinkedList<Loot> purses = new LinkedList<>();
                 for (Loot loot : currentCompartment.lootInside.getComponents()) {
-                    if (loot.getLootType() == ColtExpressParameters.LootType.Purse)
+                    if (loot.getLootType() == ColtExpressTypes.LootType.Purse)
                         purses.add(loot);
                 }
                 if (purses.size() > 0) {
@@ -35,7 +35,7 @@ public class EndCardPickPocket extends AbstractAction {
             if (currentCompartment.playersOnTopOfCompartment.size() == 1) {
                 LinkedList<Loot> purses = new LinkedList<>();
                 for (Loot loot : currentCompartment.lootOnTop.getComponents()) {
-                    if (loot.getLootType() == ColtExpressParameters.LootType.Purse)
+                    if (loot.getLootType() == ColtExpressTypes.LootType.Purse)
                         purses.add(loot);
                 }
                 if (purses.size() > 0) {

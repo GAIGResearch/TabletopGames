@@ -71,8 +71,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             cegs.playerHandCards.add(playerHand);
 
             PartialObservableDeck<Loot> loot = new PartialObservableDeck<>("playerLoot" + playerIndex, visibility);
-            for (Group<ColtExpressParameters.LootType, Integer, Integer> e: cep.playerStartLoot) {
-                ColtExpressParameters.LootType lootType = e.a;
+            for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
+                LootType lootType = e.a;
                 int value = e.b;
                 int nLoot = e.c;
                 for (int i = 0; i < nLoot; i++) {

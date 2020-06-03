@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 
@@ -14,10 +15,11 @@ public class RoundCardTakeItAll extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         LinkedList<Compartment> train = ((ColtExpressGameState)gs).getTrainCompartments();
+        int reward = ((ColtExpressParameters)gs.getGameParameters()).nCardTakeItAllReward;
         for (Compartment c : train) {
             if (c.containsMarshal) {
-                ColtExpressParameters.LootType strongBox = ColtExpressParameters.LootType.Strongbox;
-                c.lootInside.add(new Loot(strongBox, strongBox.getDefaultValue()));
+                ColtExpressTypes.LootType strongBox = ColtExpressTypes.LootType.Strongbox;
+                c.lootInside.add(new Loot(strongBox, reward));
                 break;
             }
         }

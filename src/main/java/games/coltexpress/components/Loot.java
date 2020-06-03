@@ -1,40 +1,38 @@
 package games.coltexpress.components;
 
 import core.components.Component;
-import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.ColtExpressTypes;
 import utilities.Utils;
-
-import java.util.Objects;
 
 public class Loot extends Component {
 
     private int value;
-    private ColtExpressParameters.LootType type;
+    private ColtExpressTypes.LootType type;
 
-    public Loot(ColtExpressParameters.LootType type, int value){
+    public Loot(ColtExpressTypes.LootType type, int value){
         super(Utils.ComponentType.TOKEN, type.toString());
         this.type = type;
         this.value = value;
     }
 
-    private Loot(ColtExpressParameters.LootType type, int value, int ID){
+    private Loot(ColtExpressTypes.LootType type, int value, int ID){
         super(Utils.ComponentType.TOKEN, type.toString(), ID);
         this.type = type;
         this.value = value;
     }
 
     public static Loot createJewel(){
-        return new Loot(ColtExpressParameters.LootType.Jewel, 500);
+        return new Loot(ColtExpressTypes.LootType.Jewel, 500);
     }
 
     public static Loot createStrongbox(){
-        return new Loot(ColtExpressParameters.LootType.Strongbox, 1000);
+        return new Loot(ColtExpressTypes.LootType.Strongbox, 1000);
     }
 
     public int getValue(){
         return value;
     }
-    public ColtExpressParameters.LootType getLootType(){
+    public ColtExpressTypes.LootType getLootType(){
         return type;
     }
 

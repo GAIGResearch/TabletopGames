@@ -3,12 +3,10 @@ package games.coltexpress.components;
 import core.components.Component;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.ColtExpressTypes;
 import utilities.Utils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class Compartment extends Component {
@@ -21,6 +19,9 @@ public class Compartment extends Component {
     public boolean containsMarshal;
     private final int nPlayers;
     private final int compartmentID;
+
+    private HashMap<ColtExpressTypes.LootType, ArrayList<Integer>> pickedCount;
+    private HashMap<ColtExpressTypes.LootType, ArrayList<Integer>> stillAvailableIdx;
 
     private Compartment(int nPlayers, int compartmentID, int ID){
         super(Utils.ComponentType.BOARD_NODE, ID);
@@ -43,12 +44,40 @@ public class Compartment extends Component {
         playersOnTopOfCompartment = new HashSet<>();
         containsMarshal = false;
 
-        HashMap<ColtExpressParameters.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
-        for (Map.Entry<ColtExpressParameters.LootType, Integer> e : configuration.entrySet()) {
-            for (int i = 0; i < e.getValue(); i++) {
-                lootInside.add(new Loot(e.getKey(), e.getKey().getRandomValue(cep.getGameSeed())));
+        // Loot distribution setup
+        pickedCount = new HashMap<>();
+        stillAvailableIdx = new HashMap<>();
+        for (ColtExpressTypes.LootType t: ColtExpressTypes.LootType.values()) {
+            stillAvailableIdx.put(t, new ArrayList<>());
+            pickedCount.put(t, new ArrayList<>());
+            for (int i = 0; i < cep.loot.get(t).size(); i++) {
+                stillAvailableIdx.get(t).add(i);
+                pickedCount.get(t).add(0);
             }
         }
+
+        // Set loot
+        HashMap<ColtExpressTypes.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
+        for (Map.Entry<ColtExpressTypes.LootType, Integer> e : configuration.entrySet()) {
+            for (int i = 0; i < e.getValue(); i++) {
+                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), cep.getGameSeed())));
+            }
+        }
+    }
+
+    private int getRandomLootValue(ColtExpressParameters cep, ColtExpressTypes.LootType t, long seed) {
+        Random r = new Random(seed);
+        if (stillAvailableIdx.get(t).size() > 0) {
+            int idx = stillAvailableIdx.get(t).get(r.nextInt(stillAvailableIdx.get(t).size()));
+            if (stillAvailableIdx.get(t).contains(idx)) {
+                pickedCount.get(t).set(idx, pickedCount.get(t).get(idx) + 1);
+                if (pickedCount.get(t).get(idx) >= cep.loot.get(t).get(idx).b) {
+                    stillAvailableIdx.get(t).remove(Integer.valueOf(idx));
+                }
+                return cep.loot.get(t).get(idx).a;
+            }
+        }
+        return -1;
     }
 
     public static Compartment createLocomotive(int nPlayers, ColtExpressParameters cep){
@@ -103,6 +132,8 @@ public class Compartment extends Component {
         newCompartment.containsMarshal = containsMarshal;
         newCompartment.playersOnTopOfCompartment.addAll(playersOnTopOfCompartment);
         newCompartment.playersInsideCompartment.addAll(playersInsideCompartment);
+        newCompartment.pickedCount = new HashMap<>();  // Copies never need to know this information
+        newCompartment.stillAvailableIdx = new HashMap<>();  // Copies never need to know this information
         return newCompartment;
     }
 
