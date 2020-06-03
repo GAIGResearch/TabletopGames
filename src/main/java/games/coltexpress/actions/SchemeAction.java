@@ -14,8 +14,8 @@ public class SchemeAction extends DrawCard implements IPrintable {
 
     private final boolean hidden;
 
-    public SchemeAction(int handCards, int actionList, boolean hidden){
-        super(handCards, actionList);
+    public SchemeAction(int handCards, int actionList, int cardIdx, boolean hidden){
+        super(handCards, actionList, cardIdx);
 
         this.hidden = hidden;
     }
@@ -25,7 +25,7 @@ public class SchemeAction extends DrawCard implements IPrintable {
         super.execute(gs);
 
         PartialObservableDeck<ColtExpressCard> actionList = (PartialObservableDeck<ColtExpressCard>) gs.getComponentById(deckTo);
-        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+        ColtExpressCard card = (ColtExpressCard) getCard(gs);
 
         if (hidden){
             actionList.setVisibilityOfComponent(actionList.getSize()-1, card.playerID, true);
@@ -62,6 +62,6 @@ public class SchemeAction extends DrawCard implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new SchemeAction(deckFrom, deckTo, hidden);
+        return new SchemeAction(deckFrom, deckTo, fromIndex, hidden);
     }
 }

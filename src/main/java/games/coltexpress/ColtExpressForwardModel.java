@@ -280,13 +280,14 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (c.cardType == ColtExpressCard.CardType.Bullet)
                 continue;
 
+            int cardIdx = cegs.playerHandCards.get(player).getComponents().indexOf(c);
             // ghost can play a card hidden during the first turn
             boolean hidden = ((ColtExpressTurnOrder) cegs.getTurnOrder()).isHiddenTurn() ||
                     (cegs.playerCharacters.get(player) == CharacterType.Ghost &&
                             ((ColtExpressTurnOrder) cegs.getTurnOrder()).getCurrentRoundCardIndex() == 0);
 
             actions.add(new SchemeAction(cegs.playerHandCards.get(player).getComponentID(),
-                    cegs.plannedActions.getComponentID(), hidden));
+                    cegs.plannedActions.getComponentID(), cardIdx, hidden));
         }
         actions.add(new DrawComponents<ColtExpressCard>(cegs.playerHandCards.get(player).getComponentID(), cegs.playerDecks.get(player).getComponentID(), cep.nCardsDraw));
         return actions;
@@ -302,6 +303,10 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         }
 
         ColtExpressCard plannedActionCard = cegs.plannedActions.peek(0);
+        if (plannedActionCard.playerID == -1 || plannedActionCard.cardType == ColtExpressCard.CardType.Bullet) {
+            int a = 0;
+            throw new IllegalArgumentException("Player on planned action card is -1: " + plannedActionCard.toString());
+        }
         if (player == plannedActionCard.playerID)
         {
             switch (plannedActionCard.cardType){
