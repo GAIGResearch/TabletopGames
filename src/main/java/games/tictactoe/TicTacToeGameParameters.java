@@ -11,6 +11,8 @@ public class TicTacToeGameParameters extends AbstractGameParameters {
 
     @Override
     protected AbstractGameParameters _copy() {
-        return new TicTacToeGameParameters(System.currentTimeMillis());
+        TicTacToeGameParameters tttgp = new TicTacToeGameParameters(System.currentTimeMillis());
+        tttgp.gridSize = gridSize;
+        return tttgp;
     }
 }

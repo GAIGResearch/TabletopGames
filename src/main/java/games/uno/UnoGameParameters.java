@@ -24,6 +24,16 @@ public class UnoGameParameters extends AbstractGameParameters {
 
     @Override
     protected AbstractGameParameters _copy() {
-        return new UnoGameParameters(System.currentTimeMillis());
+        UnoGameParameters ugp = new UnoGameParameters(System.currentTimeMillis());
+        ugp.nNumberCards = nNumberCards;
+        ugp.nCardsPerPlayer = nCardsPerPlayer;
+        ugp.nWildCards = nWildCards;
+        ugp.nSkipCards = nSkipCards;
+        ugp.nReverseCards = nReverseCards;
+        ugp.nDrawCards = nDrawCards;
+        ugp.specialDrawCards = specialDrawCards.clone();
+        ugp.specialWildDrawCards = specialWildDrawCards.clone();
+        ugp.colors = colors.clone();
+        return ugp;
     }
 }

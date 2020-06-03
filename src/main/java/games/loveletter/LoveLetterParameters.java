@@ -31,6 +31,9 @@ public class LoveLetterParameters extends AbstractGameParameters {
 
     @Override
     protected AbstractGameParameters _copy() {
-        return new LoveLetterParameters(System.currentTimeMillis());
+        LoveLetterParameters llp = new LoveLetterParameters(System.currentTimeMillis());
+        llp.cardCounts = new HashMap<>(cardCounts);
+        llp.nCardsPerPlayer = nCardsPerPlayer;
+        return llp;
     }
 }
