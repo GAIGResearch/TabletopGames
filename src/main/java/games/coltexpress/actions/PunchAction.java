@@ -46,7 +46,7 @@ public class PunchAction  extends DrawCard {
 
         Compartment source = (Compartment) gameState.getComponentById(sourceCompartment);
         Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
-        ColtExpressCard card = (ColtExpressCard) gameState.getComponentById(cardId);
+        ColtExpressCard card = (ColtExpressCard) getCard(gameState);
         Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
 
         //move player

@@ -28,7 +28,7 @@ public class MoveSidewaysAction extends DrawCard {
 
         Compartment source = (Compartment) gs.getComponentById(sourceCompartment);
         Compartment target = (Compartment) gs.getComponentById(targetCompartment);
-        ColtExpressCard card = (ColtExpressCard) gs.getComponentById(cardId);
+        ColtExpressCard card = (ColtExpressCard) getCard(gs);
 
         if (source.playersInsideCompartment.contains(card.playerID)){
             source.playersInsideCompartment.remove(card.playerID);
