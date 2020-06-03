@@ -46,7 +46,6 @@ public class PandemicParameters extends AbstractGameParameters {
     public PandemicParameters(PandemicParameters pandemicParameters) {
         this(pandemicParameters.dataPath, System.currentTimeMillis());
 
-        this.gameSeed = pandemicParameters.getGameSeed();
         this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
         this.max_cubes_per_city = pandemicParameters.max_cubes_per_city;  // More cause outbreak
         this.n_epidemic_cards = pandemicParameters.n_epidemic_cards;

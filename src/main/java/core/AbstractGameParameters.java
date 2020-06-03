@@ -3,7 +3,7 @@ package core;
 public abstract class AbstractGameParameters {
 
     // Random seed for the game
-    protected long gameSeed;
+    private long gameSeed;
 
     public AbstractGameParameters(long seed) {
         this.gameSeed = seed;

@@ -15,6 +15,12 @@ public class VirusGameParameters extends AbstractGameParameters {
 
     @Override
     protected AbstractGameParameters _copy() {
-        return new VirusGameParameters(System.currentTimeMillis());
+        VirusGameParameters vgp = new VirusGameParameters(System.currentTimeMillis());
+        vgp.nCardsPerOrgan = nCardsPerOrgan;
+        vgp.nCardsPerVirus = nCardsPerVirus;
+        vgp.nCardsPerMedicine = nCardsPerMedicine;
+        vgp.nCardsPerTreatment = nCardsPerTreatment;
+        vgp.maxCardsDiscard = maxCardsDiscard;
+        return vgp;
     }
 }
