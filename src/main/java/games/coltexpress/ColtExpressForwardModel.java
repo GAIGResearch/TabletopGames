@@ -232,25 +232,25 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         {
             for (Integer playerID : potentialWinnersByPoints)
                 cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
-            return;
-        }
+        } else {
 
-        //In case of a tie, the winner is the tied player who has received the fewest
-        // Bullet cards from other players and Events during the game.
-        LinkedList<Integer> potentialWinnerByBulletCards = new LinkedList<>();
-        bestValue = -1;
-        for (Integer potentialWinner : potentialWinnersByPoints) {
-            if (bestValue == -1 || bulletCardsPerPlayer[potentialWinner] < bestValue){
-                bestValue = bulletCardsPerPlayer[potentialWinner];
-                potentialWinnerByBulletCards.clear();
-                potentialWinnerByBulletCards.add(potentialWinner);
-            } else if (bulletCardsPerPlayer[potentialWinner] == bestValue) {
-                potentialWinnerByBulletCards.add(potentialWinner);
+            //In case of a tie, the winner is the tied player who has received the fewest
+            // Bullet cards from other players and Events during the game.
+            LinkedList<Integer> potentialWinnerByBulletCards = new LinkedList<>();
+            bestValue = -1;
+            for (Integer potentialWinner : potentialWinnersByPoints) {
+                if (bestValue == -1 || bulletCardsPerPlayer[potentialWinner] < bestValue) {
+                    bestValue = bulletCardsPerPlayer[potentialWinner];
+                    potentialWinnerByBulletCards.clear();
+                    potentialWinnerByBulletCards.add(potentialWinner);
+                } else if (bulletCardsPerPlayer[potentialWinner] == bestValue) {
+                    potentialWinnerByBulletCards.add(potentialWinner);
+                }
             }
-        }
 
-        for (Integer playerID : potentialWinnerByBulletCards)
-            cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
+            for (Integer playerID : potentialWinnerByBulletCards)
+                cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
+        }
 
         System.out.println(Arrays.toString(cegs.getPlayerResults()));
     }
