@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
@@ -59,5 +60,10 @@ public class PrinceAction extends DrawCard implements IPrintable {
     @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new PriestAction(deckFrom, deckTo, fromIndex, opponentID);
     }
 }

@@ -1,5 +1,6 @@
 package games.pandemic.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
@@ -64,5 +65,10 @@ public class MovePlayerWithCard extends MovePlayer {
                 ", cardId=" + cardId +
                 ", executed=" + executed +
                 '}';
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new MovePlayerWithCard(playerIdx, destination, cardIdx);
     }
 }

@@ -1,5 +1,6 @@
 package games.pandemic.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
@@ -55,6 +56,11 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), cardIdx, cardId, executed);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new AddResearchStationWithCardFrom(this.fromCity, this.city, this.cardIdx);
     }
 
     @Override

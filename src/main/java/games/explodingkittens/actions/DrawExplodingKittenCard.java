@@ -1,5 +1,6 @@
 package games.explodingkittens.actions;
 
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.Deck;
@@ -69,5 +70,10 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
     @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DrawExplodingKittenCard(deckFrom, deckTo);
     }
 }

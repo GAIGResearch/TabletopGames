@@ -17,4 +17,23 @@ public class UnoGameParameters extends AbstractGameParameters {
             "Green",
             "Yellow"
     };
+
+    public UnoGameParameters(long seed) {
+        super(seed);
+    }
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        UnoGameParameters ugp = new UnoGameParameters(System.currentTimeMillis());
+        ugp.nNumberCards = nNumberCards;
+        ugp.nCardsPerPlayer = nCardsPerPlayer;
+        ugp.nWildCards = nWildCards;
+        ugp.nSkipCards = nSkipCards;
+        ugp.nReverseCards = nReverseCards;
+        ugp.nDrawCards = nDrawCards;
+        ugp.specialDrawCards = specialDrawCards.clone();
+        ugp.specialWildDrawCards = specialWildDrawCards.clone();
+        ugp.colors = colors.clone();
+        return ugp;
+    }
 }

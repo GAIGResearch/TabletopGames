@@ -1,25 +1,22 @@
 package games.loveletter;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.AbstractGame;
+import core.*;
+import games.GameType;
+import players.OSLA;
 import players.RandomPlayer;
-import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
-public class LoveLetterGame extends AbstractGame {
+public class LoveLetterGame extends Game {
 
-    public LoveLetterGame(List<AbstractPlayer> agents, LoveLetterForwardModel forwardModel, LoveLetterGameState gameState) {
-        super(agents, forwardModel, gameState);
+    public LoveLetterGame(List<AbstractPlayer> agents, LoveLetterParameters params) {
+        super(GameType.LoveLetter, agents, new LoveLetterForwardModel(), new LoveLetterGameState(params, agents.size()));
     }
 
     public LoveLetterGame(AbstractForwardModel forwardModel, AbstractGameState gameState) {
-        super(forwardModel, gameState);
+        super(GameType.LoveLetter, forwardModel, gameState);
     }
 
     public static void main(String[] args){
@@ -29,27 +26,15 @@ public class LoveLetterGame extends AbstractGame {
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
-        agents.add(new RandomPlayer());
+        agents.add(new OSLA());
 
         for (int i=0; i<1; i++) {
             // setup game
-            LoveLetterParameters params = new LoveLetterParameters();
-            LoveLetterForwardModel forwardModel = new LoveLetterForwardModel();
-            LoveLetterGameState tmp_gameState = new LoveLetterGameState(params, forwardModel, agents.size());
-            AbstractGame game = new LoveLetterGame(agents, forwardModel, tmp_gameState);
+            LoveLetterParameters params = new LoveLetterParameters(System.currentTimeMillis());
+            Game game = new LoveLetterGame(agents, params);
 
             // run game
             game.run(null);
-
-            // evaluate result
-            LoveLetterGameState finalGameState = (LoveLetterGameState) game.getGameState();
-            finalGameState.print((LoveLetterTurnOrder) finalGameState.getTurnOrder());
-            System.out.println(Arrays.toString(finalGameState.getPlayerResults()));
-            Utils.GameResult[] playerResults = finalGameState.getPlayerResults();
-            for (int j = 0; j < finalGameState.getNPlayers(); j++){
-                if (playerResults[j] == Utils.GameResult.GAME_WIN)
-                    System.out.println("Player " + j + " won");
-            }
         }
     }
 

@@ -5,7 +5,7 @@ import core.components.Card;
 
 public class VirusCard extends Card {
     public enum VirusCardOrgan {
-        Hearth,
+        Heart,
         Brain,
         Stomach,
         Bone,
@@ -28,9 +28,20 @@ public class VirusCard extends Card {
         this.organ = organ;
         this.type = type;
     }
+    
+    public VirusCard(VirusCardOrgan organ, VirusCardType type, int ID) {
+        super(type.toString(), ID);
+        this.organ = organ;
+        this.type = type;
+    }
 
     @Override
     public String toString() {
         return "VirusCard{" + type + ": " + organ + '}';
+    }
+
+    @Override
+    public Card copy() {
+        return new VirusCard(organ, type, componentID);
     }
 }

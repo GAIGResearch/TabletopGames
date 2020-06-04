@@ -1,65 +1,63 @@
 package evaluation;
 
 import core.*;
-import games.coltexpress.ColtExpressForwardModel;
-import games.coltexpress.ColtExpressGame;
-import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
-import games.loveletter.LoveLetterForwardModel;
-import games.loveletter.LoveLetterGame;
-import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
-import games.pandemic.PandemicForwardModel;
-import games.pandemic.PandemicGame;
-import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
+import games.GameType;
+import utilities.Pair;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public abstract class AbstractTournament {
+    // List of players taking part in the tournament
+    protected LinkedList<AbstractPlayer> agents;
+    // Games to play
+    protected List<Game> games;
+    // Number of players in the games, index matches the games list
+    protected List<Integer> playersPerGame;
 
-    public enum Game {
-        Carcassonne,
-        ColtExpress,
-        ExplodingKittens,
-        LoveLetter,
-        Pandemic,
-        TicTacToe,
-        Uno
-    }
-
-    LinkedList<AbstractPlayer> agents;
-
-    public AbstractTournament(LinkedList<AbstractPlayer> agents){
+    /**
+     * Constructor, initialises the tournament given a list of players, a game to play and the number of players
+     * in the game.
+     * @param agents - players taking part in this tournament.
+     * @param gameToPlay - game to play in this tournament.
+     * @param nPlayerPerGame - number of players per game.
+     */
+    public AbstractTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame){
         this.agents = agents;
-    }
+        this.games = new ArrayList<>();
+        this.playersPerGame = new ArrayList<>();
 
-    public abstract void runTournament();
-
-    public static AbstractGame createGameInstance(Game game, int nPlayers) {
-        AbstractGameParameters params;
-        AbstractForwardModel forwardModel;
-        AbstractGameState gameState;
-
-        switch(game){
-            case Pandemic:
-                params = new PandemicParameters("data/pandemic/");
-                forwardModel = new PandemicForwardModel((PandemicParameters) params, nPlayers);
-                gameState = new PandemicGameState(params, forwardModel, nPlayers);
-                return new PandemicGame(forwardModel, gameState);
-            case LoveLetter:
-                params = new LoveLetterParameters();
-                forwardModel = new LoveLetterForwardModel();
-                gameState = new LoveLetterGameState((LoveLetterParameters) params, forwardModel, nPlayers);
-                return new LoveLetterGame(forwardModel, gameState);
-            case ColtExpress:
-                params = new ColtExpressParameters();
-                forwardModel = new ColtExpressForwardModel();
-                gameState = new ColtExpressGameState((ColtExpressParameters)params, forwardModel, nPlayers);
-                return new ColtExpressGame(forwardModel, gameState);
+        Game g = gameToPlay.createGameInstance(nPlayerPerGame);
+        if (g == null) throw new IllegalArgumentException("Chosen game not supported");
+        else {
+            this.games.add(g);
+            this.playersPerGame.add(nPlayerPerGame);
         }
-
-        return null;
     }
 
+    /**
+     * Constructor, initialises the tournament given a list of players and a list of games to play.
+     * @param agents - list of players taking part in the tournament.
+     * @param gamesToPlay - list of games to play in the tournament, in pairs of (GameType, nPlayerPerGame).
+     */
+    public AbstractTournament(LinkedList<AbstractPlayer> agents, List<Pair<GameType, Integer>> gamesToPlay) {
+        this.agents = agents;
+        this.games = new ArrayList<>();
+        this.playersPerGame = new ArrayList<>();
+
+        for (Pair<GameType, Integer> gameToPlay: gamesToPlay) {
+            Game g = gameToPlay.a.createGameInstance(gameToPlay.b);
+            if (g == null) throw new IllegalArgumentException("Chosen game not supported");
+            else {
+                this.games.add(g);
+                this.playersPerGame.add(gameToPlay.b);
+            }
+        }
+    }
+
+    /**
+     * Runs the tournament in the given game, with the given players.
+     */
+    public abstract void runTournament();
 }

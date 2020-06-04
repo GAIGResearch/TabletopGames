@@ -1,11 +1,11 @@
 package games.virus.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.virus.cards.VirusCard;
 
 import java.util.Objects;
-
 
 public class AddOrgan extends PlayVirusCard implements IPrintable {
 
@@ -42,5 +42,10 @@ public class AddOrgan extends PlayVirusCard implements IPrintable {
     @Override
     public void printToConsole() {
         System.out.println("Add organ on body of player");
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new AddOrgan(deckFrom, deckTo, fromIndex, bodyId);
     }
 }

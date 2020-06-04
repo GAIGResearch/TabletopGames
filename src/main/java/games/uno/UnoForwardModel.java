@@ -4,17 +4,20 @@ import core.actions.AbstractAction;
 import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.components.Deck;
+import games.uno.actions.NoCards;
+import games.uno.actions.PlayCard;
 import games.uno.cards.*;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static core.CoreConstants.VERBOSE;
 
 public class UnoForwardModel extends AbstractForwardModel {
 
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
         UnoGameState ugs = (UnoGameState) firstState;
 
         // Create the draw deck with all the cards
@@ -56,7 +59,7 @@ public class UnoForwardModel extends AbstractForwardModel {
                 ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
             }
             else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
-                int player = ugs.getCurrentPlayerID();
+                int player = ugs.getCurrentPlayer();
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
                 ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
             }
@@ -68,7 +71,7 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    public void next(AbstractGameState gameState, AbstractAction action) {
+    protected void _next(AbstractGameState gameState, AbstractAction action) {
         action.execute(gameState);
         checkGameEnd((UnoGameState)gameState);
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
@@ -128,14 +131,56 @@ public class UnoForwardModel extends AbstractForwardModel {
             if (nCards == 0) {
                 for (int i = 0; i < ugs.getNPlayers(); i++) {
                     if (i == playerID)
-                        ugs.setPlayerResult(Utils.GameResult.GAME_WIN, i);
+                        ugs.setPlayerResult(Utils.GameResult.WIN, i);
                     else
-                        ugs.setPlayerResult(Utils.GameResult.GAME_LOSE, i);
+                        ugs.setPlayerResult(Utils.GameResult.LOSE, i);
                 }
                 ugs.setGameStatus(Utils.GameResult.GAME_END);
             }
         }
     }
 
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        UnoGameState ugs = (UnoGameState)gameState;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int player = ugs.getCurrentPlayer();
+
+        Deck<UnoCard> playerHand = ugs.playerDecks.get(player);
+        for (UnoCard card : playerHand.getComponents()) {
+            int cardIdx = playerHand.getComponents().indexOf(card);
+            if (card.isPlayable(ugs)) {
+                if (ugs.isWildCard(card)) {
+                    for (String color : ((UnoGameParameters)ugs.getGameParameters()).colors) {
+                        actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx, color));
+                    }
+                }
+                else {
+                    actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx));
+                }
+            }
+        }
+
+        if (actions.isEmpty())
+            actions.add(new NoCards());
+
+        return actions;
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
+        System.out.println("Game Results:");
+        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
+            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
+                System.out.println("The winner is the player : " + playerID);
+                break;
+            }
+        }
+    }
+
+    @Override
+    protected AbstractForwardModel _copy() {
+        return new UnoForwardModel();
+    }
 }
 

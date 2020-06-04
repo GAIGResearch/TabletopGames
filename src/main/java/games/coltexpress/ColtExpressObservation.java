@@ -14,4 +14,5 @@ public class ColtExpressObservation implements IPrintable, IObservation {
     public void printToConsole(AbstractGameState gameState) {
 
     }
+
 }

@@ -1,14 +1,12 @@
 package games.carcassonne;
 
-import core.AbstractGameState;
-import core.AbstractForwardModel;
-import core.AbstractGame;
-import core.AbstractPlayer;
+import core.*;
+import games.GameType;
 
 import java.util.List;
 
-public class CarcassonneGame extends AbstractGame {
+public class CarcassonneGame extends Game {
     public CarcassonneGame(List<AbstractPlayer> players, AbstractForwardModel model, AbstractGameState gameState) {
-        super(players, model, gameState);
+        super(GameType.Carcassonne, players, model, gameState);
     }
 }

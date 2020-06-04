@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import core.components.PartialObservableDeck;
@@ -58,5 +59,10 @@ public class PriestAction extends DrawCard implements IPrintable {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), opponentID);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new PriestAction(deckFrom, deckTo, fromIndex, opponentID);
     }
 }

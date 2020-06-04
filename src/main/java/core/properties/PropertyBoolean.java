@@ -1,6 +1,5 @@
 package core.properties;
 
-import utilities.Hash;
 
 public class PropertyBoolean extends Property
 {
@@ -8,25 +7,21 @@ public class PropertyBoolean extends Property
 
     public PropertyBoolean(boolean value)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super("");
         this.value = value;
     }
 
-    public PropertyBoolean(String key, boolean value)
+    public PropertyBoolean(String hashString, boolean value)
     {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.value = value;
     }
 
-    public PropertyBoolean(String key, int hashKey, boolean value)
+    private PropertyBoolean(String hashString, int hashKey, boolean value)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.value = value;
     }
-
 
     @Override
     public String toString() {
@@ -40,7 +35,8 @@ public class PropertyBoolean extends Property
        return false;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyBoolean(hashString, hashKey, value);
     }

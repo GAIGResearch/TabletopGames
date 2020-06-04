@@ -17,6 +17,7 @@ import games.pandemic.actions.*;
 import players.ActionController;
 import players.HumanGUIPlayer;
 import utilities.CounterView;
+import utilities.Hash;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -52,12 +53,13 @@ public class PandemicGUI extends AbstractGUI {
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUI(PandemicGameState gameState, ActionController ac) {
+    public PandemicGUI(AbstractGameState gameState, ActionController ac) {
         super(ac, 721);
+        if (gameState == null || ac == null) return;
 
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
-        this.gameState = gameState;
+        this.gameState = (PandemicGameState) gameState;
         boardView = new PandemicBoardView(gameState);
 
         handCardHighlights = new ArrayList[nPlayers];
@@ -214,16 +216,16 @@ public class PandemicGUI extends AbstractGUI {
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
-        Counter cnY = gameState.getData().findCounter("Disease yellow");
+        Counter cnY = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
         JComponent cY = new CounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
-        Counter cnR = gameState.getData().findCounter("Disease red");
+        Counter cnR = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease red"));
         JComponent cR = new CounterView(cnR, Color.red, null);
         counterArea.add(cR);
-        Counter cnB = gameState.getData().findCounter("Disease blue");
+        Counter cnB = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease blue"));
         JComponent cB = new CounterView(cnB, Color.blue, null);
         counterArea.add(cB);
-        Counter cnK = gameState.getData().findCounter("Disease black");
+        Counter cnK = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease black"));
         JComponent cK = new CounterView(cnK, Color.black, null);
         counterArea.add(cK);
 
@@ -361,10 +363,10 @@ public class PandemicGUI extends AbstractGUI {
                 actionButtons[k].setVisible(true);
                 actionButtons[k++].setButtonAction(action, gameState);
             } else if (action instanceof CureDisease) {
-                ArrayList<Card> cards = ((CureDisease) action).getCards();
+                ArrayList<Integer> cards = ((CureDisease) action).getCards();
                 boolean allSelected = true;
-                for (Card c: cards) {
-                    if (isCardHighlighted(c, id)) {
+                for (Integer cardId: cards) {
+                    if (isCardHighlighted((Card)gameState.getComponentById(cardId), id)) {
                         allSelected = false;
                         break;
                     }
@@ -386,6 +388,7 @@ public class PandemicGUI extends AbstractGUI {
                         }
                     }
                 }
+
             } else if (action instanceof RearrangeDeckOfCards) {  // Event
                 Card eventCard = action.getCard(gameState);
                 int[] cardOrder = ((RearrangeDeckOfCards) action).getNewCardOrder();
@@ -417,6 +420,7 @@ public class PandemicGUI extends AbstractGUI {
                         }
                     }
                 }
+
             } else if (action instanceof RemoveComponentFromDeck) {  // Event
                 Card eventCard = action.getCard(gameState);
                 int infectionCard = ((RemoveComponentFromDeck) action).getComponentIdx();

@@ -1,20 +1,21 @@
 package games.loveletter;
 
+import core.AbstractGameParameters;
 import core.AbstractGameState;
+import core.components.Component;
 import core.interfaces.IGamePhase;
-import core.AbstractForwardModel;
-import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.IObservation;
-import games.loveletter.actions.*;
+import core.interfaces.IPrintable;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoveLetterGameState extends AbstractGameState {
+import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
+
+public class LoveLetterGameState extends AbstractGameState implements IPrintable {
 
     // Love letter adds one game phase on top of default phases
     public enum LoveLetterGamePhase implements IGamePhase {
@@ -36,213 +37,51 @@ public class LoveLetterGameState extends AbstractGameState {
     // if true: player cannot be effected by any card effects
     boolean[] effectProtection;
 
-    /**
-     * Must add all components used in the game to the allComponents area, mapping to their assigned component ID
-     * and NOT another game specific key. Use one of these functions for this functionality only:
-     *          - Area.putComponent(Component component)
-     *          - Area.putComponents(List<Component> components)
-     *          - Area.putComponents(Area area)
-     * Method is called after initialising the game state.
-     */
-    @Override
-    public void addAllComponents() {
-        allComponents.putComponents(playerHandCards);
-        allComponents.putComponents(playerDiscardCards);
-        allComponents.putComponent(drawPile);
-        allComponents.putComponent(reserveCards);
-    }
-
-    public LoveLetterGameState(LoveLetterParameters gameParameters, AbstractForwardModel model, int nPlayers) {
-        super(gameParameters, model, new LoveLetterTurnOrder(nPlayers));
-        gamePhase = LoveLetterGamePhase.Draw;
+    public LoveLetterGameState(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters, new LoveLetterTurnOrder(nPlayers));
+        gamePhase = Draw;
     }
 
     @Override
-    public IObservation getObservation(int player) {
-        return new LoveLetterObservation(playerHandCards, playerDiscardCards, drawPile, reserveCards,
-                effectProtection, player, gamePhase, playerResults);
+    protected List<Component> _getAllComponents() {
+        List<Component> components = new ArrayList<>();
+        components.addAll(playerHandCards);
+        components.addAll(playerDiscardCards);
+        components.add(drawPile);
+        components.add(reserveCards);
+        return components;
     }
 
-    /**
-     * Sets the game-state to be terminal and determines the result of each player.
-     */
     @Override
-    public void endGame() {
-        this.gameStatus = Utils.GameResult.GAME_END;
-
-        // determine which player has the card with the highest value
-        List<Integer> bestPlayers = new ArrayList<>();
-        int bestValue = 0;
-        int points;
+    protected AbstractGameState _copy(int playerId) {
+        // TODO make sure PO
+        LoveLetterGameState llgs = new LoveLetterGameState(gameParameters.copy(), getNPlayers());
+        llgs.drawPile = drawPile.copy();
+        llgs.reserveCards = reserveCards.copy();
+        llgs.playerHandCards = new ArrayList<>();
+        llgs.playerDiscardCards = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] != Utils.GameResult.GAME_LOSE)
-                points = playerHandCards.get(i).peek().cardType.getValue();
-            else
-                points = 0;
-
-            if (points > bestValue){
-                bestValue = points;
-                bestPlayers.clear();
-                bestPlayers.add(i);
-            } else if (points == bestValue) {
-                bestPlayers.add(i);
-            }
+            llgs.playerHandCards.add(playerHandCards.get(i).copy());
+            llgs.playerDiscardCards.add(playerDiscardCards.get(i).copy());
         }
-
-        // if just a single player is alive, the player immediately wins the game
-        if (bestPlayers.size() == 1){
-            for (int i = 0; i < getNPlayers(); i++) {
-                playerResults[i] = Utils.GameResult.GAME_LOSE;
-            }
-            playerResults[bestPlayers.get(0)] = Utils.GameResult.GAME_WIN;
-            return;
-        }
-
-        // else, the player with the higher sum of card values in its discard pile wins
-        // in case two or more players have the same value, they all win
-        bestValue = 0;
-        for (int i = 0; i < getNPlayers(); i++) {
-            points = 0;
-            if (playerResults[i] == Utils.GameResult.GAME_WIN)
-                for (LoveLetterCard card : playerDiscardCards.get(i).getComponents())
-                    points += card.cardType.getValue();
-            if (points > bestValue){
-                bestValue = points;
-                bestPlayers.clear();
-                bestPlayers.add(i);
-            } else if (points == bestValue) {
-                bestPlayers.add(i);
-            }
-        }
-
-        for (int i = 0; i < getNPlayers(); i++) {
-            playerResults[i] = Utils.GameResult.GAME_LOSE;
-        }
-        for (Integer playerID : bestPlayers)
-            playerResults[playerID] = Utils.GameResult.GAME_WIN;
+        llgs.effectProtection = effectProtection.clone();
+        return llgs;
     }
 
-    /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of AbstractAction objects.
-     */
     @Override
-    public List<AbstractAction> computeAvailableActions() {
-        ArrayList<AbstractAction> actions;
-        int player = getTurnOrder().getCurrentPlayer(this);
-        if (gamePhase.equals(DefaultGamePhase.Main)) {
-            actions = playerActions(player);
-        } else if (gamePhase.equals(LoveLetterGamePhase.Draw)) {
-            actions = drawAction(player);
-        } else {
-            throw new IllegalArgumentException(gamePhase.toString() + " is unknown to LoveLetterGameState");
-        }
-
-        return actions;
+    protected double _getScore(int playerId) {
+        // TODO heuristic
+        return 0;
     }
 
-    /**
-     * Computes actions available for the given player.
-     * @param playerID - ID of player to calculate actions for.
-     * @return - ArrayList of AbstractAction objects.
-     */
-    private ArrayList<AbstractAction> playerActions(int playerID) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<LoveLetterCard> playerDeck = playerHandCards.get(playerID);
-        Deck<LoveLetterCard> playerDiscardPile = playerDiscardCards.get(playerID);
-
-        // in case a player holds the countess and either the king or the prince, the countess needs to be played
-        if (needToForceCountess(playerDeck)){
-            for (int c = 0; c < playerDeck.getSize(); c++) {
-                if (playerDeck.getComponents().get(c).cardType == LoveLetterCard.CardType.Countess)
-                    actions.add(new CountessAction(playerDeck.getComponentID(), playerDiscardPile.getComponentID(), c));
-            }
-        }
-        // else: we create the respective actions for each card on the player's hand
-        else {
-            for (int card = 0; card < playerDeck.getSize(); card++) {
-                switch (playerDeck.getComponents().get(card).cardType) {
-                    case Priest:
-                        for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
-                                continue;
-                            actions.add(new PriestAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
-                        }
-                        break;
-
-                    case Guard:
-                        for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
-                                continue;
-                            for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
-                                actions.add(new GuardAction(playerDeck.getComponentID(),
-                                        playerDiscardPile.getComponentID(), card, targetPlayer, type));
-                        }
-                        break;
-
-                    case Baron:
-                        for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
-                                continue;
-                            actions.add(new BaronAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
-                        }
-                        break;
-
-                    case Handmaid:
-                        actions.add(new HandmaidAction(playerDeck.getComponentID(),
-                                playerDiscardPile.getComponentID(), card));
-                        break;
-
-                    case Prince:
-                        for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
-                                continue;
-                            actions.add(new PrinceAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
-                        }
-                        break;
-
-                    case King:
-                        for (int targetPlayer = 0; targetPlayer < getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || playerResults[targetPlayer] == Utils.GameResult.GAME_LOSE)
-                                continue;
-                            actions.add(new KingAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
-                        }
-                        break;
-
-                    case Countess:
-                        actions.add(new CountessAction(playerDeck.getComponentID(),
-                                playerDiscardPile.getComponentID(), card));
-                        break;
-
-                    case Princess:
-                        actions.add(new PrincessAction(playerDeck.getComponentID(),
-                                playerDiscardPile.getComponentID(), card));
-                        break;
-
-                    default:
-                        throw new IllegalArgumentException("No core actions known for cardtype: " +
-                                playerDeck.getComponents().get(card).cardType.toString());
-                }
-            }
-        }
-
-        // add end turn by drawing a card
-        return actions;
-    }
-
-    /**
-     * In draw phase, the players can only draw cards. This returns draw actions.
-     * @param player - ID of player who should be drawing a card.
-     * @return - ArrayList of DrawCard actions.
-     */
-    private ArrayList<AbstractAction> drawAction(int player){
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DrawCard(drawPile.getComponentID(), playerHandCards.get(player).getComponentID(), 0));
-        return actions;
+    @Override
+    protected void _reset() {
+        gamePhase = Draw;
+        playerHandCards = new ArrayList<>();
+        playerDiscardCards = new ArrayList<>();
+        drawPile = null;
+        reserveCards = null;
+        effectProtection = new boolean[getNPlayers()];
     }
 
     /**
@@ -250,7 +89,7 @@ public class LoveLetterGameState extends AbstractGameState {
      * @param playerDeck - deck of player to check
      * @return - true if countess should be forced, false otherwise.
      */
-    private boolean needToForceCountess(Deck<LoveLetterCard> playerDeck){
+    boolean needToForceCountess(Deck<LoveLetterCard> playerDeck){
         boolean ownsCountess = false;
         for (LoveLetterCard card : playerDeck.getComponents()) {
             if (card.cardType == LoveLetterCard.CardType.Countess){
@@ -277,7 +116,7 @@ public class LoveLetterGameState extends AbstractGameState {
      * @param playerID - ID of player dead
      */
     public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.GAME_LOSE, playerID);
+        setPlayerResult(Utils.GameResult.LOSE, playerID);
 
         // a losing player needs to discard all cards
         while (playerHandCards.get(playerID).getSize() > 0)
@@ -313,34 +152,35 @@ public class LoveLetterGameState extends AbstractGameState {
 
     /**
      * Prints the game state.
-     * @param turnOrder - turn order for this game.
      */
-    public void print(LoveLetterTurnOrder turnOrder) {
+    public void printToConsole() {
         System.out.println("Love Letter Game-State");
         System.out.println("======================");
 
-        int currentPlayer = turnOrder.getCurrentPlayer(this);
-
-        for (int i = 0; i < getNPlayers(); i++){
-            if (currentPlayer == i)
+        for (int i = 0; i < playerHandCards.size(); i++){
+            if (getCurrentPlayer() == i)
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ": ");
-            System.out.print(playerHandCards.get(i).toString(currentPlayer));
-            System.out.print("; Discarded: ");
+            System.out.print(playerHandCards.get(i).toString(getCurrentPlayer()));
+            System.out.print(";\t Discarded: ");
             System.out.print(playerDiscardCards.get(i));
-            System.out.print("; Protected: ");
-            System.out.println(effectProtection[i]);
         }
 
+        System.out.print(";\t Protected: ");
+        System.out.print(effectProtection[getCurrentPlayer()]);
+        System.out.print(";\t Status: ");
+        System.out.println(playerResults[getCurrentPlayer()]);
+
         System.out.print("DrawPile" + ":");
-        System.out.print(drawPile.toString(currentPlayer));
+        System.out.print(drawPile);
         System.out.println();
 
         System.out.print("ReserveCards" + ":");
-        System.out.println(reserveCards.toString(currentPlayer));
+        System.out.println(reserveCards.toString(getCurrentPlayer()));
         System.out.println();
 
         System.out.println("Current GamePhase: " + gamePhase);
+        System.out.println();
     }
 }

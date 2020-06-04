@@ -1,9 +1,8 @@
 package players;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IObservation;
-import java.util.List;
 
 
 public class HumanGUIPlayer extends AbstractPlayer {
@@ -14,8 +13,8 @@ public class HumanGUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public int getAction(IObservation observation, List<AbstractAction> actions) {
-        return actions.indexOf(ac.getAction());
+    public AbstractAction getAction(AbstractGameState observation) {
+        return ac.getAction();
     }
 }
 

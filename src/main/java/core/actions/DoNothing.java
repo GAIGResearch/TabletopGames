@@ -5,12 +5,20 @@ import core.components.Card;
 
 import java.util.Objects;
 
+/**
+ * This action executes successfully automatically, it makes not changes to the game state.
+ */
 public class DoNothing extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
        return true;
    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DoNothing();
+    }
 
     @Override
     public boolean equals(Object o) {

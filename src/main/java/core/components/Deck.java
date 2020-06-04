@@ -31,7 +31,7 @@ public class Deck<T extends Component> extends Component {
         this.capacity = -1;
     }
 
-    private Deck(String name, int ID)
+    protected Deck(String name, int ID)
     {
         super(ComponentType.DECK, name, ID);
         this.components = new ArrayList<>();
@@ -202,6 +202,21 @@ public class Deck<T extends Component> extends Component {
         this.shuffle(new Random());
     }
 
+    /**
+     * Shuffles part of the deck, given by range [fromIndex, toIndex), leaving the rest the same.
+     * @param fromIndex - index from where to start shuffling, inclusive
+     * @param toIndex - index where to stop shuffling, exclusive
+     */
+    public void shuffle(int fromIndex, int toIndex) {
+        List<T> subList = components.subList(fromIndex, toIndex);
+        Collections.shuffle(subList, new Random());
+        int i = 0;
+        for (T component: subList) {
+            components.set(fromIndex + i, component);
+            i++;
+        }
+    }
+
     // Getters, Setters
 
     /**
@@ -255,17 +270,21 @@ public class Deck<T extends Component> extends Component {
     public Deck<T> copy()
     {
         Deck<T> dp = new Deck<>(componentName, componentID);
+        copyTo(dp);
+        return dp;
+    }
+
+    protected void copyTo(Deck<T> deck) {
         ArrayList<T> newComponents = new ArrayList<>();
         for (T c : components)
         {
             newComponents.add((T)c.copy());
         }
-        dp.components = newComponents;
-        dp.capacity = capacity;
+        deck.components = newComponents;
+        deck.capacity = capacity;
 
         //copy type and component.
-        copyComponentTo(dp);
-        return dp;
+        copyComponentTo(deck);
     }
 
     /**

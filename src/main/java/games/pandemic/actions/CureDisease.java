@@ -8,6 +8,7 @@ import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -16,11 +17,11 @@ import static core.CoreConstants.playerHandHash;
 @SuppressWarnings("unchecked")
 public class CureDisease extends AbstractAction {
     private String color;
-    private ArrayList<Card> cards;
+    private ArrayList<Integer> cardIds;
 
-    public CureDisease(String color, ArrayList<Card> cards) {
+    public CureDisease(String color, ArrayList<Integer> cardIds) {
         this.color = color;
-        this.cards = cards;
+        this.cardIds = cardIds;
     }
 
     @Override
@@ -33,8 +34,8 @@ public class CureDisease extends AbstractAction {
 
             // Discard cards from player hand
             Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-            for (Card c: cards) {
-                playerHand.remove(c);
+            for (Integer cardId: cardIds) {
+                playerHand.remove((Card)gs.getComponentById(cardId));
             }
 
             return true;
@@ -43,28 +44,24 @@ public class CureDisease extends AbstractAction {
         return false;
     }
 
+    @Override
+    public AbstractAction copy() {
+        ArrayList<Integer> cardIds = new ArrayList(this.cardIds);
+        return new CureDisease(this.color, cardIds);
+    }
 
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        if(other instanceof CureDisease)
-        {
-            CureDisease otherAction = (CureDisease) other;
-            if(!color.equals(otherAction.color)) return false;
-            if(cards.size() != otherAction.cards.size()) return false;
-
-            for(Card c : cards)
-                if(!otherAction.cards.contains(c))  return false;
-
-            return true;
-
-        }else return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CureDisease that = (CureDisease) o;
+        return Objects.equals(color, that.color) &&
+                Objects.equals(cardIds, that.cardIds);
     }
 
-    public ArrayList<Card> getCards() {
-        return cards;
+    public ArrayList<Integer> getCards() {
+        return cardIds;
     }
 
     public String getColor() {
@@ -75,13 +72,13 @@ public class CureDisease extends AbstractAction {
     public String toString() {
         return "CureDisease{" +
                 "color='" + color + '\'' +
-                ", cards=" + cards.toString() +
+                ", cards=" + cardIds.toString() +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(color, cards);
+        return Objects.hash(color, cardIds);
     }
 
     @Override

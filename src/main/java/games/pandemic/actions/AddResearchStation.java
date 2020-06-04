@@ -36,6 +36,11 @@ public class AddResearchStation extends AbstractAction {
     }
 
     @Override
+    public AbstractAction copy() {
+        return new AddResearchStation(this.city);
+    }
+
+    @Override
     public boolean equals(Object other)
     {
         if (this == other) return true;

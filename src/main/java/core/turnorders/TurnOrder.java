@@ -11,10 +11,10 @@ public abstract class TurnOrder {
 
     // Fixed
     protected int nPlayers;  // Number of players in the game
-    protected int firstPlayer;  // ID of first player to get a turn in a round
     protected int nMaxRounds;  // Number of rounds until the game is finished; -1 if infinite
 
     // Variable
+    protected int firstPlayer;  // ID of first player to get a turn in a round
     protected int turnOwner;  // Owner of current turn
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
@@ -29,15 +29,6 @@ public abstract class TurnOrder {
         reset();
         this.nPlayers = nPlayers;
     }
-
-    private void reset() {
-        firstPlayer = 0;
-        turnOwner = 0;
-        turnCounter = 0;
-        roundCounter = 0;
-        nMaxRounds = -1;
-    }
-
 
     public final void setStartingPlayer(int player) {
         firstPlayer = player;
@@ -57,7 +48,59 @@ public abstract class TurnOrder {
     }
 
 
-    /* The following can be overwritten by subclasses */
+    /* Limited access or final methods */
+
+    /**
+     * Resets the state of this turn order object to its initial state.
+     */
+    protected abstract void _reset();
+
+    /**
+     * Returns a copy of this TurnOrder object.
+     * - Create a new object of the class.
+     * - Copy subclass parameters.
+     * @return - copy of TurnOrder.
+     */
+    protected abstract TurnOrder _copy();
+
+    /**
+     * Copies the properties of the super turn order class into the given instance.
+     * @param turnOrder - instance of a turn order.
+     * @return - the instance of the turn order with the properties of the super class copied.
+     */
+    protected final TurnOrder copyTo (TurnOrder turnOrder) {
+        turnOrder.turnOwner = turnOwner;
+        turnOrder.turnCounter = turnCounter;
+        turnOrder.roundCounter = roundCounter;
+        turnOrder.firstPlayer = firstPlayer;
+        turnOrder.nMaxRounds = nMaxRounds;
+        return turnOrder;
+    }
+
+    /**
+     * Resets this turn order object (only the variables that can change, not the fixed ones).
+     */
+    public final void reset() {
+        _reset();
+        firstPlayer = 0;
+        turnOwner = 0;
+        turnCounter = 0;
+        roundCounter = 0;
+    }
+
+    /**
+     * Returns a copy of this TurnOrder object.
+     * - Create a new object of a class.
+     * - Copy subclass parameters.
+     * - Call TurnOrder.copyTo(object) method to copy super class parameters and return result.
+     * @return - copy of TurnOrder.
+     */
+    public final TurnOrder copy() {
+        TurnOrder to = _copy();
+        return copyTo(to);
+    }
+
+    /* Public API. Can be overwritten by subclasses */
 
     /**
      * Method executed after a player's turn is finished.
@@ -70,7 +113,6 @@ public abstract class TurnOrder {
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnOwner = nextPlayer(gameState);
-            System.out.println(turnOwner);
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
             }
@@ -113,15 +155,6 @@ public abstract class TurnOrder {
         return (turnOwner+1) % nPlayers;
     }
 
-    /**
-     * Returns a copy of this TurnOrder object.
-     * - Create a new object of a class.
-     * - Copy subclass parameters.
-     * - Call TurnOrder.copyTo(object) method to copy super class parameters and return result.
-     * @return - copy of TurnOrder.
-     */
-    public abstract TurnOrder copy();
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -137,13 +170,5 @@ public abstract class TurnOrder {
     @Override
     public int hashCode() {
         return Objects.hash(nPlayers, turnOwner, roundCounter, firstPlayer, nMaxRounds);
-    }
-
-    public TurnOrder copyTo (TurnOrder turnOrder) {
-        turnOrder.turnOwner = turnOwner;
-        turnOrder.roundCounter = roundCounter;
-        turnOrder.firstPlayer = firstPlayer;
-        turnOrder.nMaxRounds = nMaxRounds;
-        return turnOrder;
     }
 }

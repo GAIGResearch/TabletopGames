@@ -1,17 +1,15 @@
 package games.explodingkittens;
 
-import core.AbstractGameState;
-import core.AbstractForwardModel;
-import core.AbstractGame;
+import core.*;
+import games.GameType;
 import players.RandomPlayer;
-import core.AbstractPlayer;
 
 import java.util.*;
 
-public class ExplodingKittensGame extends AbstractGame {
+public class ExplodingKittensGame extends Game {
 
     public ExplodingKittensGame(List<AbstractPlayer> agents, AbstractForwardModel model, AbstractGameState gameState) {
-        super(agents, model, gameState);
+        super(GameType.ExplodingKittens, agents, model, gameState);
     }
 
     public static void main(String[] args){
@@ -21,21 +19,12 @@ public class ExplodingKittensGame extends AbstractGame {
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
 
-        ExplodingKittenParameters params = new ExplodingKittenParameters();
+        ExplodingKittenParameters params = new ExplodingKittenParameters(System.currentTimeMillis());
         AbstractForwardModel forwardModel = new ExplodingKittensForwardModel();
 
         for (int i=0; i<1000; i++) {
-            AbstractGame game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, forwardModel, agents.size()));
+            Game game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, agents.size()));
             game.run(null);
-            ExplodingKittensGameState gameState = (ExplodingKittensGameState) game.getGameState();
-
-            gameState.print((ExplodingKittenTurnOrder) gameState.getTurnOrder());
-            // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-
-            for (int j = 0; j < gameState.getNPlayers(); j++){
-                System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);
-            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package games.virus.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawComponents;
 import core.components.Deck;
 import games.virus.VirusGameState;
@@ -61,5 +62,10 @@ public class ReplaceCards extends DrawComponents {
             vgs.getDrawDeck().add(card);
         }
         vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getGameSeed()));
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new ReplaceCards(deckFrom, deckTo, nComponents, deckDraw);
     }
 }

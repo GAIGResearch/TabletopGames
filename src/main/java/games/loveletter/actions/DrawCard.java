@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 
@@ -32,5 +33,10 @@ public class DrawCard extends core.actions.DrawCard implements IPrintable {
     @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DrawCard(deckFrom, deckTo, fromIndex);
     }
 }

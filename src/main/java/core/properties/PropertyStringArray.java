@@ -9,35 +9,22 @@ public class PropertyStringArray extends Property
 {
     private String[] values;
 
-    public PropertyStringArray (String[] values)
+    public PropertyStringArray(String hashString, JSONArray values)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
-        this.values = new String[values.length];
-        for(int i =0; i< values.length; ++i)
-            this.values[i] = values[i];
-
-    }
-
-    public PropertyStringArray(String key, JSONArray values)
-    {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.values = new String[values.size()];
-        for(int i =0; i< values.size(); ++i)
+        for(int i = 0; i < values.size(); i++)
         {
             this.values[i] = (String) values.get(i);
         }
 
     }
 
-    public PropertyStringArray(String key, int hashKey, String[] values)
+    public PropertyStringArray(String hashString, int hashKey, String[] values)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.values = new String[values.length];
-        for(int i =0; i< values.length; ++i)
-            this.values[i] = values[i];
+        System.arraycopy(values, 0, this.values, 0, values.length);
     }
 
     public String[] getValues() {
@@ -49,6 +36,7 @@ public class PropertyStringArray extends Property
         return Arrays.toString(values);
     }
 
+    @Override
     public boolean equals(Object other)
     {
        if(other instanceof PropertyStringArray)
@@ -56,7 +44,7 @@ public class PropertyStringArray extends Property
            PropertyStringArray psto = (PropertyStringArray)(other);
            if (psto.values.length == this.values.length)
            {
-               for(int i =0; i< values.length; ++i) {
+               for(int i = 0; i < values.length; i++) {
                    if (! this.values[i].equals(psto.values[i]))
                        return false;
                }
@@ -67,7 +55,8 @@ public class PropertyStringArray extends Property
        return true;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyStringArray(hashString, hashKey, values);
     }

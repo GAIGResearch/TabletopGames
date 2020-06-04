@@ -4,31 +4,21 @@ import org.json.simple.JSONArray;
 import utilities.Hash;
 import utilities.Vector2D;
 
+import java.util.Objects;
+
 public class PropertyVector2D extends Property
 {
     public Vector2D values;
 
-//    public PropertyVector2D(String[] values)
-//    {
-//        this.hashString = "";
-//        this.hashKey = Hash.GetInstance().hash(hashString);
-//        this.values = new String[values.length];
-//        for(int i =0; i< values.length; ++i)
-//            this.values[i] = values[i];
-//
-//    }
-
-    public PropertyVector2D(String key, JSONArray values)
+    public PropertyVector2D(String hashString, JSONArray values)
     {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.values = new Vector2D((int)(long)values.get(0), (int)(long)values.get(1));
     }
 
-    public PropertyVector2D(String key, int hashKey, Vector2D v)
+    public PropertyVector2D(String hashString, int hashKey, Vector2D v)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.values = new Vector2D(v.getX(), v.getY());
     }
 
@@ -38,12 +28,16 @@ public class PropertyVector2D extends Property
         return values.toString();
     }
 
-    public boolean equals(Object other)
-    {
-        return this.values.equals(((PropertyVector2D)other).values);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PropertyVector2D that = (PropertyVector2D) o;
+        return Objects.equals(values, that.values);
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyVector2D(hashString, hashKey, values);
     }

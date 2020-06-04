@@ -1,13 +1,13 @@
 package games.carcassonne;
 
-import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.Card;
-import core.components.Deck;
 import core.AbstractGameState;
 import core.AbstractGameParameters;
-import core.interfaces.IObservation;
+import core.components.Component;
+import core.observations.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
+import utilities.Utils;
 
 import java.awt.*;
 import java.util.*;
@@ -16,26 +16,20 @@ import java.util.List;
 
 public class CarcassonneGameState extends AbstractGameState {
 
-    private int[] points;
-    private int[] unusedMeeple;
-    private int numAvailableActions;
-
-    private CarcassonneBoard gameBoard;
-    private CarcassonneGamePhase gamePhase;
-
-    public CarcassonneGameState(AbstractGameParameters gameParameters, AbstractForwardModel model, int nPlayers) {
-        super(gameParameters, model, new AlternatingTurnOrder(nPlayers));
+    public enum CarcassonneGamePhase {
+        PlaceTile,
+        PlaceCharacter
     }
 
-    public void setComponents() {
-        points = new int[getNPlayers()];
-        unusedMeeple = new int[getNPlayers()];
-        Arrays.fill(unusedMeeple, 7);
-        gameBoard = new CarcassonneBoard();
+    int[] points;
+    int[] unusedMeeple;
+    int numAvailableActions;
 
-        Deck<CarcassonneTile> drawPile = new Deck<>("Draw Pile");
+    CarcassonneBoard gameBoard;
+    CarcassonneGamePhase gamePhase;
 
-        //drawPile.add(new CarcassonneTile());
+    public CarcassonneGameState(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
     private List<AbstractAction> tileActions(){
@@ -53,46 +47,48 @@ public class CarcassonneGameState extends AbstractGameState {
         return this.gameBoard.toString();
     }
 
+
     @Override
-    public IObservation getObservation(int player) {
+    protected List<Component> _getAllComponents() {
+        // TODO
         return null;
     }
 
     @Override
-    public void endGame() {
-
+    protected AbstractGameState _copy(int playerId) {
+        // TODO
+        return null;
     }
 
     @Override
-    public List<AbstractAction> computeAvailableActions() {
-
-        List<AbstractAction> actions;
-        switch (gamePhase){
-            case PlaceTile:
-                actions = tileActions();
-                break;
-            case PlaceCharacter:
-                actions = meepleActions();
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
-        }
-
-        this.numAvailableActions = actions.size();
-        return actions;
+    protected VectorObservation _getVectorObservation() {
+        // TODO
+        return null;
     }
 
     @Override
-    public void addAllComponents() {
-
+    protected double[] _getDistanceFeatures(int playerId) {
+        // TODO
+        return new double[0];
     }
 
-    private class CarcassonneBoard{
+    @Override
+    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    protected double _getScore(int playerId) {
+        // TODO
+        return 0;
+    }
+
+    static class CarcassonneBoard{
         HashMap<Point, CarcassonneTile> placedTiles = new HashMap<>();
         HashSet<Point> openPositions = new HashSet<>();
 
-        private CarcassonneBoard(){
+        CarcassonneBoard(){
             placedTiles.put(new Point(0,0), new CarcassonneTile(new CarcassonneType[][]{
                     {CarcassonneType.Grass, CarcassonneType.CastleGrass, CarcassonneType.Grass},
                     {CarcassonneType.Street, CarcassonneType.Street, CarcassonneType.Street},
@@ -142,7 +138,7 @@ public class CarcassonneGameState extends AbstractGameState {
         }
     }
 
-    private class CarcassonneTile extends Card {
+    static class CarcassonneTile extends Card {
         private CarcassonneTile[] neighbors = new CarcassonneTile[4];
         private CarcassonneType[][] type; //3x3 array
         private int rotation = 0;

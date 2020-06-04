@@ -1,6 +1,5 @@
 package core.properties;
 
-import utilities.Hash;
 
 public class PropertyString extends Property
 {
@@ -8,22 +7,19 @@ public class PropertyString extends Property
 
     public PropertyString (String value)
     {
-        this.hashString = "";
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super("");
         this.value = value;
     }
 
-    public PropertyString (String key, String value)
+    public PropertyString (String hashString, String value)
     {
-        this.hashString = key;
-        this.hashKey = Hash.GetInstance().hash(hashString);
+        super(hashString);
         this.value = value;
     }
 
-    public PropertyString (String key, int hashKey, String value)
+    public PropertyString (String hashString, int hashKey, String value)
     {
-        this.hashString = key;
-        this.hashKey = hashKey;
+        super(hashString, hashKey);
         this.value = value;
     }
 
@@ -33,6 +29,7 @@ public class PropertyString extends Property
         return value;
     }
 
+    @Override
     public boolean equals(Object other)
     {
        if(other instanceof PropertyString)
@@ -40,7 +37,8 @@ public class PropertyString extends Property
        return false;
     }
 
-    public Property copy()
+    @Override
+    protected Property _copy()
     {
         return new PropertyString(hashString, hashKey, value);
     }
