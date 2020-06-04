@@ -107,7 +107,7 @@ public abstract class AbstractGameState {
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
-    public Component getComponentById(int id) {
+    public final Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
 
