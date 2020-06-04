@@ -3,7 +3,6 @@ package core.actions;
 import core.components.Card;
 import core.components.Deck;
 import core.AbstractGameState;
-import core.components.PartialObservableDeck;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +48,6 @@ public class RearrangeDeckOfCards extends DrawCard {
             cards[value] = rd.draw();
         }
         Deck<Card> draws = new Deck<>("Temp Draws from: " + rd.getComponentName());
-
         draws.setComponents(new ArrayList<>(Arrays.asList(cards)));
         return result & rd.add(draws);
     }

@@ -35,9 +35,13 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         Deck<T> to = (Deck<T>) gs.getComponentById(deckTo);
 
         for (int i = 0; i < nComponents; i++) {
-            T component = from.pick();
-            componentIds[i] = component.getComponentID();
-            to.add(component);
+            if (from.getSize() > 0) {
+                T component = from.pick();
+                componentIds[i] = component.getComponentID();
+                to.add(component);
+            } else {
+                return false;
+            }
         }
 
         return true;

@@ -1,10 +1,13 @@
-package games.coltexpress.cards.roundcards;
+package games.coltexpress.cards;
 
+import core.actions.AbstractAction;
+import core.components.Card;
 import games.coltexpress.ColtExpressGameState;
 
 import java.util.Arrays;
+import java.util.Objects;
 
-public abstract class RoundCard {
+public class RoundCard extends Card {
     /*
     Round Cards
     - - - - - - - - - - - - - - 2-4 players - - - 5-6 players
@@ -51,12 +54,52 @@ public abstract class RoundCard {
         public String toString(){return type; }
     }
 
-    public TurnType[] turnTypes;
+    protected TurnType[] turnTypes;
+    protected AbstractAction endRoundCardEvent;
 
-    public abstract void endRoundCardEvent(ColtExpressGameState gameState);
+    public RoundCard(String name, TurnType[] turnTypes, AbstractAction endRoundCardEvent) {
+        super(name);
+        this.turnTypes = turnTypes;
+        this.endRoundCardEvent = endRoundCardEvent;
+    }
+
+    public RoundCard(String name, TurnType[] turnTypes, AbstractAction endRoundCardEvent, int ID) {
+        super(name, ID);
+        this.turnTypes = turnTypes;
+        this.endRoundCardEvent = endRoundCardEvent;
+    }
+
+    public final void endRoundCardEvent(ColtExpressGameState gameState) {
+        if (endRoundCardEvent != null) {
+            endRoundCardEvent.execute(gameState);
+        }
+    }
+
+    public AbstractAction getEndRoundCardEvent() {
+        return endRoundCardEvent;
+    }
+
+    public TurnType[] getTurnTypes() {
+        return turnTypes;
+    }
 
     public String toString(){
         return Arrays.toString(turnTypes);
+    }
+
+    @Override
+    public Card copy() {
+        return new RoundCard(componentName, turnTypes.clone(), (endRoundCardEvent != null? endRoundCardEvent.copy() : null), componentID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RoundCard roundCard = (RoundCard) o;
+        return Arrays.equals(turnTypes, roundCard.turnTypes) &&
+                Objects.equals(endRoundCardEvent, roundCard.endRoundCardEvent);
     }
 
 }

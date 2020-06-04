@@ -1,6 +1,9 @@
 package games;
 
 import core.*;
+import games.coltexpress.ColtExpressForwardModel;
+import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.explodingkittens.ExplodingKittenParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -146,6 +149,10 @@ public enum GameType {
                 forwardModel = new VirusForwardModel();
                 gameState = new VirusGameState(params, nPlayers);
                 break;
+            case ColtExpress:
+                params = new ColtExpressParameters(seed);
+                forwardModel = new ColtExpressForwardModel();
+                gameState = new ColtExpressGameState(params, nPlayers);
         }
 
         if (forwardModel != null) {

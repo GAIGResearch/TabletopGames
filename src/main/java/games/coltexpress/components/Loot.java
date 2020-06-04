@@ -1,48 +1,59 @@
 package games.coltexpress.components;
 
 import core.components.Component;
+import games.coltexpress.ColtExpressTypes;
 import utilities.Utils;
 
 public class Loot extends Component {
 
-    public enum LootType {
-        Purse,
-        Jewel,
-        Strongbox
-    }
-
     private int value;
-    private LootType type;
+    private ColtExpressTypes.LootType type;
 
-    public Loot(LootType type, int value){
+    public Loot(ColtExpressTypes.LootType type, int value){
         super(Utils.ComponentType.TOKEN, type.toString());
         this.type = type;
         this.value = value;
     }
 
+    private Loot(ColtExpressTypes.LootType type, int value, int ID){
+        super(Utils.ComponentType.TOKEN, type.toString(), ID);
+        this.type = type;
+        this.value = value;
+    }
+
     public static Loot createJewel(){
-        return new Loot(LootType.Jewel, 500);
+        return new Loot(ColtExpressTypes.LootType.Jewel, 500);
     }
 
     public static Loot createStrongbox(){
-        return new Loot(LootType.Strongbox, 1000);
+        return new Loot(ColtExpressTypes.LootType.Strongbox, 1000);
     }
 
     public int getValue(){
         return value;
     }
-    public LootType getLootType(){
+    public ColtExpressTypes.LootType getLootType(){
         return type;
     }
 
     @Override
     public String toString(){
-        return this.type.toString() + "_" + this.value;
+        return this.type + "_" + this.value;
     }
 
     @Override
     public Component copy() {
-        return null;
+        return new Loot(type, value, componentID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Loot loot = (Loot) o;
+        return value == loot.value &&
+                type == loot.type;
     }
 
 }

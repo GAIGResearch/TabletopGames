@@ -99,6 +99,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         return terminals;
     }
 
+
     @Override
     protected double _getScore(int playerId) {
         // Martin's heuristic. // TODO maybe improvements?

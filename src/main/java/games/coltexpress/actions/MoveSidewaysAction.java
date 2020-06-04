@@ -1,56 +1,74 @@
 package games.coltexpress.actions;
 
 import core.AbstractGameState;
-import core.components.PartialObservableDeck;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 
-public class MoveSidewaysAction extends ColtExpressExecuteCardAction {
+import java.util.Objects;
 
-    private final Compartment targetArea;
-    private final Compartment sourceArea;
+public class MoveSidewaysAction extends DrawCard {
 
-    public MoveSidewaysAction(ColtExpressCard card, PartialObservableDeck<ColtExpressCard> plannedActions,
-                              PartialObservableDeck<ColtExpressCard> playerDeck,
-                              Compartment sourceArea, Compartment targetArea){
-        super(card, plannedActions, playerDeck);
-        this.targetArea = targetArea;
-        this.sourceArea = sourceArea;
+    private final int sourceCompartment;
+    private final int targetCompartment;
+
+    public MoveSidewaysAction(int plannedActions, int playerDeck,
+                             int sourceCompartment, int targetCompartment){
+        super(plannedActions, playerDeck);
+        this.sourceCompartment = sourceCompartment;
+        this.targetCompartment = targetCompartment;
+
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        if (sourceArea.playersInsideCompartment.contains(card.playerID)){
-            sourceArea.playersInsideCompartment.remove(card.playerID);
-            if (targetArea.containsMarshal){
+
+        Compartment source = (Compartment) gs.getComponentById(sourceCompartment);
+        Compartment target = (Compartment) gs.getComponentById(targetCompartment);
+        ColtExpressCard card = (ColtExpressCard) getCard(gs);
+
+        if (source.playersInsideCompartment.contains(card.playerID)){
+            source.playersInsideCompartment.remove(card.playerID);
+            if (target.containsMarshal){
                 ((ColtExpressGameState) gs).addNeutralBullet(card.playerID);
-                targetArea.playersOnTopOfCompartment.add(card.playerID);
+                target.playersOnTopOfCompartment.add(card.playerID);
             }
             else
-                targetArea.playersInsideCompartment.add(card.playerID);
+                target.playersInsideCompartment.add(card.playerID);
         }
         else{
-            sourceArea.playersOnTopOfCompartment.remove(card.playerID);
-            targetArea.playersOnTopOfCompartment.add(card.playerID);
+            source.playersOnTopOfCompartment.remove(card.playerID);
+            target.playersOnTopOfCompartment.add(card.playerID);
+
         }
 
         return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        throw new UnsupportedOperationException();
-        //return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MoveSidewaysAction that = (MoveSidewaysAction) o;
+        return sourceCompartment == that.sourceCompartment &&
+                targetCompartment == that.targetCompartment;
     }
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException();
+        return Objects.hash(super.hashCode(), sourceCompartment, targetCompartment);
     }
 
     public String toString(){
-        return "MoveSideways; player " + card.playerID;
+        return "MoveSideways";
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new MoveSidewaysAction(deckFrom, deckTo, sourceCompartment, targetCompartment);
     }
 }

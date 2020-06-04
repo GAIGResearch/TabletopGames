@@ -1,8 +1,8 @@
 package games.uno.cards;
 
 import core.components.Card;
-import games.uno.UnoGameState;
 import core.components.Deck;
+import games.uno.UnoGameState;
 
 public class UnoCard extends Card {
 

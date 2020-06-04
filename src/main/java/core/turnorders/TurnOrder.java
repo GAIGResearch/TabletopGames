@@ -30,6 +30,8 @@ public abstract class TurnOrder {
         this.nPlayers = nPlayers;
     }
 
+    public TurnOrder() {}
+
     public final void setStartingPlayer(int player) {
         firstPlayer = player;
         turnOwner = player;
