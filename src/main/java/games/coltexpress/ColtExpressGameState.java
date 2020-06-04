@@ -6,13 +6,11 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.observations.VectorObservation;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import core.components.PartialObservableDeck;
-import utilities.Utils;
 import games.coltexpress.ColtExpressTypes.*;
 
 import java.util.*;
@@ -81,7 +79,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             copy.trainCompartments.add((Compartment) d.copy());
         }
         copy.bulletsLeft = bulletsLeft.clone();
-        copy.playerCharacters = (HashMap<Integer, CharacterType>) playerCharacters.clone();
+        copy.playerCharacters = new HashMap<>(playerCharacters);
         copy.playerPlayingBelle = playerPlayingBelle;
         copy.plannedActions = plannedActions.copy();
         copy.rounds = new ArrayList<>();
@@ -89,21 +87,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             copy.rounds.add((RoundCard) c.copy());
         }
         return copy;
-    }
-
-    @Override
-    protected VectorObservation _getVectorObservation() {
-        return null;// TODO
-    }
-
-    @Override
-    protected double[] _getDistanceFeatures(int playerId) {
-        return new double[0];// TODO
-    }
-
-    @Override
-    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
-        return null;// TODO
     }
 
     @Override
@@ -228,18 +211,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return getEndRoundCard(cep, choice);
     }
 
-    RoundCard getEndRoundCard(ColtExpressParameters cep, String key) {
-        int idx = -1;
-        int nEndCards = cep.endRoundCards.length;
-        for (int i = 0; i < nEndCards; i++) {
-            if (cep.endRoundCards[i].getKey().equals(key)) {
-                idx = i;
-                break;
-            }
-        }
-        return getEndRoundCard(cep, idx);
-    }
-
     RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
         if (idx >= 0 && idx < cep.endRoundCards.length) {
             RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
@@ -247,24 +218,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             return new RoundCard(cep.endRoundCards[idx].name(), turnTypes, event);
         }
         return null;
-    }
-
-    RoundCard getRandomRoundCard(ColtExpressParameters cep, int nPlayers, int seed) {
-        int nEndCards = cep.roundCards.length;
-        int choice = new Random(seed).nextInt(nEndCards);
-        return getRoundCard(cep, choice, nPlayers);
-    }
-
-    RoundCard getRoundCard(ColtExpressParameters cep, String key, int nPlayers) {
-        int idx = -1;
-        int nEndCards = cep.roundCards.length;
-        for (int i = 0; i < nEndCards; i++) {
-            if (cep.roundCards[i].getKey().equals(key)) {
-                idx = i;
-                break;
-            }
-        }
-        return getRoundCard(cep, idx, nPlayers);
     }
 
     RoundCard getRoundCard(ColtExpressParameters cep, int idx, int nPlayers) {

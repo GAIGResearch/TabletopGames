@@ -158,10 +158,6 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         return null;
     }
 
-    private void pickCharacterType(CharacterType characterType, HashSet<CharacterType> characters){
-        characters.remove(characterType);
-    }
-
     private void distributeCards(ColtExpressGameState cegs){
         for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
             PartialObservableDeck<ColtExpressCard> playerHand = cegs.playerHandCards.get(playerIndex);
@@ -304,20 +300,19 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
         ColtExpressCard plannedActionCard = cegs.plannedActions.peek(0);
         if (plannedActionCard.playerID == -1 || plannedActionCard.cardType == ColtExpressCard.CardType.Bullet) {
-            int a = 0;
             throw new IllegalArgumentException("Player on planned action card is -1: " + plannedActionCard.toString());
         }
         if (player == plannedActionCard.playerID)
         {
             switch (plannedActionCard.cardType){
                 case Punch:
-                    createPunchingActions(cegs, plannedActionCard, actions, player);
+                    createPunchingActions(cegs, actions, player);
                     break;
                 case Shoot:
                     if (cegs.bulletsLeft[player] <= 0)
                         break;
                     else
-                        createShootingActions(cegs, plannedActionCard, actions, player);
+                        createShootingActions(cegs, actions, player);
                     break;
                 case MoveUp:
                     for (Compartment compartment : cegs.trainCompartments) {
@@ -399,8 +394,6 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                         }
                     }
                     break;
-                case Bullet:
-                    throw new IllegalArgumentException("Bullets cannot be played!");
                 default:
                     throw new IllegalArgumentException("cardType " + plannedActionCard.cardType + "" +
                             " unknown to ColtExpressGameState");
@@ -412,7 +405,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         return actions;
     }
 
-    private void createPunchingActions(ColtExpressGameState cegs, ColtExpressCard card, ArrayList<AbstractAction> actions, int player){
+    private void createPunchingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player){
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
         HashSet<Integer> availableTargets = new HashSet<>();
@@ -479,7 +472,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     -1, -1, playerIsCheyenne));
     }
 
-    private void createShootingActions(ColtExpressGameState cegs, ColtExpressCard card, ArrayList<AbstractAction> actions, int player) {
+    private void createShootingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player) {
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
         boolean playerOnTop = false;
