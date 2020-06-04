@@ -4,10 +4,7 @@ import core.actions.AbstractAction;
 import core.components.Area;
 import core.components.Component;
 import core.interfaces.IGamePhase;
-import core.observations.VectorObservation;
 import core.turnorders.TurnOrder;
-import utilities.Distance;
-import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
@@ -107,7 +104,7 @@ public abstract class AbstractGameState {
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
-    public Component getComponentById(int id) {
+    public final Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
 
@@ -164,35 +161,6 @@ public abstract class AbstractGameState {
     protected abstract AbstractGameState _copy(int playerId);
 
     /**
-     * Encode the game state into a vector (fixed length during game).
-     * @return - a vector observation.
-     */
-    protected abstract VectorObservation _getVectorObservation();
-
-    /**
-     * Create a double vector representation, where each element represents a feature in the game space by which
-     * distance to another game state can be measured (in feature space), e.g.:
-     *      - game score
-     *      - player position
-     *      - event counter value
-     *      - round number
-     * @param playerId - player observing the state
-     * @return - int array, vector of features.
-     */
-    protected abstract double[] _getDistanceFeatures(int playerId);
-
-    /**
-     * Return all distance feature vectors which describe final game states, with associated result for the given player.
-     * Includes a mapping from feature index (as given in getDistanceFeatures() method) to feature value, and
-     * associated game result.
-     * When features in distance feature vectors extracted from a state coincide with any of these values,
-     * the game state is terminal.
-     * @param playerId - player observing the state.
-     * @return - map from terminal feature vector to game result.
-     */
-    protected abstract HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId);
-
-    /**
      * Provide a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * @param playerId - player observing the state.
@@ -217,79 +185,6 @@ public abstract class AbstractGameState {
     }
 
     /**
-     * Provide a numerical assessment of the current game state's distance to the other game state provided.
-     * @param playerId - the player to calculate the score for.
-     * @return double, distance to the other state provided.
-     */
-    public final double getDistance(AbstractGameState otherState, int playerId) {
-        double[] features = _getDistanceFeatures(playerId);
-        double[] otherFeatures = otherState._getDistanceFeatures(playerId);
-        return Distance.manhattan_distance(features, otherFeatures);
-    }
-
-    /**
-     * Provide a numerical assessment of the current game state's distance to the other distance features provided.
-     * @param playerId - the player to calculate the score for.
-     * @return double, distance to the other features vector.
-     */
-    public final double getDistance(double[] otherFeatures, int playerId) {
-        double[] features = _getDistanceFeatures(playerId);
-        assert otherFeatures.length == features.length;
-        return Distance.manhattan_distance(features, otherFeatures);
-    }
-
-    /**
-     * Calculates the distances to all terminal states, returning a list of pairs (Distance, GameResult).
-     * @param playerId - player observing the state.
-     * @return - list of (distance, game result) pairs.
-     */
-    public final ArrayList<Pair<Double, Utils.GameResult>> getDistanceToTerminalStates(int playerId) {
-        ArrayList<Pair<Double, Utils.GameResult>> distances = new ArrayList<>();
-        double[] features = _getDistanceFeatures(playerId);
-
-        HashMap<HashMap<Integer, Double>, Utils.GameResult> terminalFeatures = _getTerminalFeatures(playerId);
-        for (Map.Entry<HashMap<Integer, Double>, Utils.GameResult> e: terminalFeatures.entrySet()) {
-            double[] otherFeatures = new double[features.length];
-            for (Map.Entry<Integer, Double> m : e.getKey().entrySet()) {
-                otherFeatures[m.getKey()] = m.getValue();
-            }
-            distances.add(new Pair<>(Distance.manhattan_distance(features, otherFeatures), e.getValue()));
-        }
-        return distances;
-    }
-
-    /**
-     * Encodes the game state into a vector (fixed length during game).
-     * @return - a vector observation.
-     */
-    public final VectorObservation getVectorObservation() {
-        return _getVectorObservation();
-    }
-
-    /**
-     * Retrieves a double vector representation, where each element represents a feature in the game space by which
-     * distance to another game state can be measured (in feature space)
-     * @param playerId - player observing the state
-     * @return - int array, vector of features.
-     */
-    public final double[] getDistanceFeatures(int playerId) {
-        return _getDistanceFeatures(playerId);
-    }
-
-    /**
-     * Returns all distance feature vectors which describe final game states, with associated result for the given player.
-     * Includes a mapping from feature index (as given in getDistanceFeatures() method) to feature value, and
-     * associated game result.
-     * When features in distance feature vectors extracted from a state coincide with any of these values,
-     * the game state is terminal.
-     * @param playerId - player observing the state.
-     * @return - map from terminal feature vector to game result.
-     */
-    public final HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
-        return _getTerminalFeatures(playerId);
-    }
-
-    /**
      * Provide a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * @param playerId - player observing the state.
@@ -298,4 +193,5 @@ public abstract class AbstractGameState {
     public final double getScore(int playerId) {
         return _getScore(playerId);
     }
+
 }

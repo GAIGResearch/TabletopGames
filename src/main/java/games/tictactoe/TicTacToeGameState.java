@@ -6,16 +6,16 @@ import core.components.GridBoard;
 import core.AbstractGameState;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.observations.VectorObservation;
+import core.interfaces.IVectorObservation;
+import utilities.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character> {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character>, IVectorObservation {
 
     GridBoard<Character> gridBoard;
     final ArrayList<Character> playerMapping = new ArrayList<Character>() {{
@@ -40,18 +40,8 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected VectorObservation _getVectorObservation() {
+    public VectorObservation getVectorObservation() {
         return new VectorObservation<>(gridBoard.flattenGrid());
-    }
-
-    @Override
-    protected double[] _getDistanceFeatures(int playerId) {
-        return new double[0];
-    }
-
-    @Override
-    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
-        return null;
     }
 
     @Override

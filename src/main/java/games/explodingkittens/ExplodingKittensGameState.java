@@ -8,12 +8,10 @@ import core.components.Deck;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import core.observations.VectorObservation;
 import games.explodingkittens.cards.ExplodingKittenCard;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -67,24 +65,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.playerHandCards.add(d.copy());
         }
         return ekgs;
-    }
-
-    @Override
-    protected VectorObservation _getVectorObservation() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    protected double[] _getDistanceFeatures(int playerId) {
-        // TODO
-        return new double[0];
-    }
-
-    @Override
-    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
-        // TODO
-        return null;
     }
 
     @Override
