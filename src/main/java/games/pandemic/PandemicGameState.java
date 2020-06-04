@@ -1,8 +1,8 @@
 package games.pandemic;
 
+import core.interfaces.IFeatureRepresentation;
 import core.interfaces.IGamePhase;
 import core.components.*;
-import core.observations.VectorObservation;
 import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
@@ -18,7 +18,7 @@ import static core.CoreConstants.*;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.Forecast;
 
 
-public class PandemicGameState extends AbstractGameState {
+public class PandemicGameState extends AbstractGameState implements IFeatureRepresentation {
 
     // The Pandemic game phase enum distinguishes 3 more phases on top of the default ones for players forced to
     // discard cards, a player wishing to play a "Forecast" event card
@@ -54,22 +54,11 @@ public class PandemicGameState extends AbstractGameState {
     }
 
     /**
-     * Retrieves an observation specific to the given player from this game state object. Components which are not
-     * observed by the player are removed, the rest are copied.
-     * @return - IObservation, the observation for this player.
-     */
-    @Override
-    protected VectorObservation _getVectorObservation() {
-        // TODO
-        return null;
-    }
-
-    /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of AbstractAction objects.
      */
     @Override
-    protected double[] _getDistanceFeatures(int playerId) {
+    public double[] getDistanceFeatures(int playerId) {
         // Win if all disease counters >= 1
         // Lose if player deck is empty
         // Lose if too many outbreaks
@@ -95,7 +84,7 @@ public class PandemicGameState extends AbstractGameState {
     }
 
     @Override
-    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
+    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
         HashMap<HashMap<Integer, Double>, Utils.GameResult> terminals = new HashMap<>();
         terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.WIN);
         terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.LOSE);

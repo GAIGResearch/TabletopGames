@@ -1,4 +1,4 @@
-package core.observations;
+package utilities;
 
 import core.AbstractGameState;
 import core.interfaces.IPrintable;

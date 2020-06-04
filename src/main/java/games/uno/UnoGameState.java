@@ -5,12 +5,9 @@ import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-import core.observations.VectorObservation;
 import games.uno.cards.*;
-import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
@@ -94,24 +91,6 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         copy.currentCard = (UnoCard) currentCard.copy();
         copy.currentColor = currentColor;
         return copy;
-    }
-
-    @Override
-    protected VectorObservation _getVectorObservation() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    protected double[] _getDistanceFeatures(int playerId) {
-        // TODO
-        return new double[0];
-    }
-
-    @Override
-    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
-        // TODO
-        return null;
     }
 
     @Override

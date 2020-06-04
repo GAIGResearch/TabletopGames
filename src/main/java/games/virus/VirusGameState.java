@@ -5,13 +5,10 @@ import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.observations.VectorObservation;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
-import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class VirusGameState extends AbstractGameState implements IPrintable {
@@ -42,24 +39,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
             vgs.playerBodies.add((VirusBody) playerBodies.get(i).copy());
         }
         return vgs;
-    }
-
-    @Override
-    protected VectorObservation _getVectorObservation() {
-        // TODO
-        return null;
-    }
-
-    @Override
-    protected double[] _getDistanceFeatures(int playerId) {
-        // TODO
-        return new double[0];
-    }
-
-    @Override
-    protected HashMap<HashMap<Integer, Double>, Utils.GameResult> _getTerminalFeatures(int playerId) {
-        // TODO
-        return null;
     }
 
     @Override
