@@ -5,16 +5,16 @@ import core.components.GridBoard;
 import javax.swing.*;
 import java.awt.*;
 
+import static gui.PrototypeGUI.defaultItemSize;
+
 public class GridBoardView<T> extends JComponent {
     GridBoard<T> gridBoard;
     int width, height;
 
-    public static int cellSize = 20;
-
     public GridBoardView(GridBoard<T> gridBoard) {
         updateBoard(gridBoard);
-        width = gridBoard.getWidth() * cellSize;
-        height = gridBoard.getHeight() * cellSize;
+        width = gridBoard.getWidth() * defaultItemSize;
+        height = gridBoard.getHeight() * defaultItemSize;
     }
 
     public void updateBoard(GridBoard<T> gridBoard) {
@@ -34,8 +34,8 @@ public class GridBoardView<T> extends JComponent {
     }
 
     public static <T> void drawGridBoard(Graphics2D g, GridBoard<T> gridBoard, int x, int y) {
-        int width = gridBoard.getWidth() * cellSize;
-        int height = gridBoard.getHeight() * cellSize;
+        int width = gridBoard.getWidth() * defaultItemSize;
+        int height = gridBoard.getHeight() * defaultItemSize;
 
         // Draw background
         g.setColor(Color.lightGray);
@@ -45,8 +45,8 @@ public class GridBoardView<T> extends JComponent {
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                int xC = x + j * cellSize;
-                int yC = y + i * cellSize;
+                int xC = x + j * defaultItemSize;
+                int yC = y + i * defaultItemSize;
                 drawCell(g, gridBoard.getElement(j, i), xC, yC);
             }
         }
@@ -61,8 +61,8 @@ public class GridBoardView<T> extends JComponent {
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                int x = rect.x + j * cellSize;
-                int y = rect.y + i * cellSize;
+                int x = rect.x + j * defaultItemSize;
+                int y = rect.y + i * defaultItemSize;
                 drawCell(g, gridBoard.getElement(j, i), x, y);
             }
         }
@@ -71,12 +71,12 @@ public class GridBoardView<T> extends JComponent {
     private static <T> void drawCell(Graphics2D g, T element, int x, int y) {
         // Paint cell background
         g.setColor(Color.lightGray);
-        g.fillRect(x, y, cellSize, cellSize);
+        g.fillRect(x, y, defaultItemSize, defaultItemSize);
         g.setColor(Color.black);
-        g.drawRect(x, y, cellSize, cellSize);
+        g.drawRect(x, y, defaultItemSize, defaultItemSize);
 
         // Paint element in cell
-        g.drawString(element.toString(), x + cellSize/2, y + cellSize);
+        g.drawString(element.toString(), x + defaultItemSize /2, y + defaultItemSize);
     }
 
     @Override

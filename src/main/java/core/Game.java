@@ -145,6 +145,7 @@ public class Game {
             if (gui != null && !gui.isWindowOpen()) {
                 // Playing with GUI and closed window
                 terminate();
+                System.out.println("Windo wclosed");
                 break;
             }
 
@@ -153,14 +154,7 @@ public class Game {
             currentPlayer = players.get(activePlayer);
 
             // GUI update
-            if (gui != null) {
-                gui.update(currentPlayer, gameState);
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    System.out.println("EXCEPTION " + e);
-                }
-            }
+            updateGUI(gui);
 
             if (gameState.isNotTerminal()) {
                 if (CoreConstants.VERBOSE) {
@@ -186,6 +180,7 @@ public class Game {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
                             while (action == null && gui.isWindowOpen()) {
                                 action = currentPlayer.getAction(observation);
+                                updateGUI(gui);
                             }
                         } else {
                             action = currentPlayer.getAction(observation);
@@ -199,6 +194,7 @@ public class Game {
                 }
             } else {
                 if (firstEnd) {
+                    System.out.println("Ended");
                     terminate();
                     firstEnd = false;
                 }
@@ -210,6 +206,24 @@ public class Game {
         }
     }
 
+    /**
+     * Performs GUI update.
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUI gui) {
+        if (gui != null) {
+            gui.update(currentPlayer, gameState);
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION " + e);
+            }
+        }
+    }
+
+    /**
+     * Called at the end of game loop execution, when the game is over.
+     */
     private void terminate() {
         // Print last state
         if (gameState instanceof IPrintable && CoreConstants.VERBOSE) {

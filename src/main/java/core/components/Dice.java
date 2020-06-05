@@ -14,19 +14,30 @@ import utilities.Utils.ComponentType;
 
 public class Dice extends Component {
     private int nSides;  // Number of sides
+    private int value;  // Current value after last roll
 
     public Dice() {
         this(6);  // By default d6
+        value = roll();
     }
 
     public Dice(int nSides) {
         super(ComponentType.DICE);
         this.nSides = nSides;
+        value = roll();
     }
 
-    private Dice(int nSides, int ID) {
+    private Dice(int nSides, int value, int ID) {
         super(ComponentType.DICE, ID);
         this.nSides = nSides;
+        this.value = value;
+    }
+
+    /**
+     * @return current value shown by this die
+     */
+    public int getValue() {
+        return value;
     }
 
     /**
@@ -63,7 +74,7 @@ public class Dice extends Component {
 
     @Override
     public Dice copy() {
-        Dice copy = new Dice(nSides, componentID);
+        Dice copy = new Dice(nSides, value, componentID);
         copyComponentTo(copy);
         return copy;
     }

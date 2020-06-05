@@ -1,23 +1,23 @@
 package gui;
 
-import core.components.Counter;
+import core.components.Token;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static core.AbstractGUI.defaultItemSize;
 
-public class CounterView extends JComponent {
-    protected Counter counter;
+public class TokenView extends JComponent {
+    protected Token token;
     protected int size;
 
-    public CounterView(Counter c) {
-        updateCounter(c);
+    public TokenView(Token c) {
+        updateToken(c);
         size = defaultItemSize;
     }
 
-    public void updateCounter(Counter c) {
-        this.counter = c;
+    public void updateToken(Token c) {
+        this.token = c;
         if (c != null) {
             setToolTipText("Component ID: " + c.getComponentID());
         }
@@ -25,14 +25,14 @@ public class CounterView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawCounter((Graphics2D) g);
+        drawToken((Graphics2D) g);
     }
 
-    public void drawCounter(Graphics2D g) {
-        drawCounter(g, 0, 0, size, counter);
+    public void drawToken(Graphics2D g) {
+        drawToken(g, 0, 0, size, token);
     }
 
-    public static void drawCounter(Graphics2D g, int x, int y, int size, Counter counter) {
+    public static void drawToken(Graphics2D g, int x, int y, int size, Token token) {
         int fontSize = g.getFont().getSize();
         int counterSize = size - fontSize;
         int counterX = x + size/2 - counterSize/2;
@@ -43,20 +43,13 @@ public class CounterView extends JComponent {
         g.fillOval(counterX, counterY, counterSize-1, counterSize-1);
         g.setColor(Color.black);
 
-        // Draw counter value
-        int value = 0;
-        if (counter != null) {
-            value = counter.getValue();
-        }
-        g.drawString(""+value, counterX + fontSize/3, counterY + fontSize);
-
         // Draw border
         g.drawOval(counterX, counterY, counterSize-1, counterSize-1);
 
-        // Draw counter name underneath
-        String name = "Counter";
-        if (counter != null) {
-            name = counter.getComponentName();
+        // Draw token name underneath
+        String name = "Token";
+        if (token != null) {
+            name = token.getComponentName();
         }
         g.drawString(name, x, y + counterSize + fontSize);
     }
@@ -66,7 +59,7 @@ public class CounterView extends JComponent {
         return new Dimension(size, size);
     }
 
-    public Counter getCounter() {
-        return counter;
+    public Token getToken() {
+        return token;
     }
 }

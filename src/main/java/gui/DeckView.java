@@ -1,5 +1,6 @@
 package gui;
 
+import core.AbstractGUI;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
@@ -7,6 +8,7 @@ import core.components.Deck;
 import javax.swing.*;
 import java.awt.*;
 
+// TODO: drag&drop components, snap to deck, reset deck
 public class DeckView<T extends Component> extends JComponent {
     protected Deck<T> deck;
     protected int width, height;
@@ -14,8 +16,8 @@ public class DeckView<T extends Component> extends JComponent {
 
     public DeckView(Deck<T> d, boolean visible) {
         updateDeck(d, visible);
-        width = 100;
-        height = 50;
+        width = AbstractGUI.defaultCardWidth;
+        height = AbstractGUI.defaultCardHeight;
     }
 
     public void updateDeck(Deck<T> d, boolean visible) {

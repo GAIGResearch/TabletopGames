@@ -1,5 +1,6 @@
 package gui;
 
+import core.AbstractGUI;
 import core.components.Card;
 import org.davidmoten.text.utils.WordWrap;
 
@@ -12,8 +13,8 @@ public class CardView extends JComponent {
 
     public CardView(Card c) {
         updateCard(c);
-        width = 100;
-        height = 50;
+        width = AbstractGUI.defaultCardWidth;
+        height = AbstractGUI.defaultCardHeight;
     }
 
     public void updateCard(Card c) {

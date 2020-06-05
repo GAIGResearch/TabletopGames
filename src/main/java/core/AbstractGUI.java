@@ -13,6 +13,10 @@ import java.util.List;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractGUI extends JFrame {
+    public static int defaultItemSize = 50;
+    public static int defaultCardWidth = 100, defaultCardHeight = 80;
+    public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
+
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;

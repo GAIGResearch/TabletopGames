@@ -128,7 +128,7 @@ public class PandemicGUI extends AbstractGUI {
                 hand.add(cv2);
             }
             JScrollPane scrollPane = new JScrollPane(hand);
-            scrollPane.setPreferredSize(new Dimension(cardWidth + offset*2, cardHeight*3 + offset));
+            scrollPane.setPreferredSize(new Dimension(defaultCardWidth + offset*2, defaultCardHeight *3 + offset));
             scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
             playerHandPanel.add(scrollPane);
@@ -167,7 +167,7 @@ public class PandemicGUI extends AbstractGUI {
         }
 
         JScrollPane scrollPane = new JScrollPane(bufferDeckArea);
-        scrollPane.setPreferredSize(new Dimension(cardWidth*3 + offset, cardHeight + offset*2));
+        scrollPane.setPreferredSize(new Dimension(defaultCardWidth *3 + offset, defaultCardHeight + offset*2));
         scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
         cardAreas.add(bufferDeckArea);
