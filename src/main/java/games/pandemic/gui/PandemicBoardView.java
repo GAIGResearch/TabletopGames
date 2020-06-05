@@ -15,9 +15,9 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
+import static gui.DeckView.drawDeck;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
-import static games.pandemic.gui.PandemicCardView.drawDeckBack;
 import static core.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
@@ -340,9 +340,9 @@ public class PandemicBoardView extends JComponent {
         g.setFont(labelFontS);
         g.drawString("Planner Deck", (int)plannerDeckLocation.getX(), (int)plannerDeckLocation.getY() - fontSize);
 
-        drawDeckBack(g, null, null, infectionDeckLocation);
+        drawDeck(g, (Deck<Card>) gameState.getComponent(infectionHash), null, null, infectionDeckLocation, false);
         g.drawString("Infection Deck", (int)infectionDeckLocation.getX(), (int)infectionDeckLocation.getY() - fontSize);
-        drawDeckBack(g, null, null, playerDeckLocation);
+        drawDeck(g, (Deck<Card>) gameState.getComponent(playerDeckHash), null, null, playerDeckLocation, false);
         g.drawString("Player Deck", (int)playerDeckLocation.getX(), (int)playerDeckLocation.getY() - fontSize);
         g.setFont(f);
 

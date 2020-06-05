@@ -1,6 +1,7 @@
 package games.pandemic.gui;
 
 import core.components.Card;
+import gui.CardView;
 import core.properties.Property;
 import core.properties.PropertyColor;
 import core.properties.PropertyLong;
@@ -10,7 +11,6 @@ import utilities.Hash;
 import utilities.ImageIO;
 import utilities.Utils;
 
-import javax.swing.*;
 import java.awt.*;
 
 import static games.pandemic.PandemicConstants.countryHash;
@@ -18,18 +18,16 @@ import static games.pandemic.PandemicConstants.effectHash;
 import static core.CoreConstants.colorHash;
 import static core.CoreConstants.nameHash;
 
-public class PandemicCardView extends JComponent {
+public class PandemicCardView extends CardView {
     private Image background, secondaryBG;
     private boolean usingSecondary;
-    private Card card;
-    private int width;
-    private int height;
 
     public static int offset = 10;
     public static final int cardWidth = 110;
     public static final int cardHeight = 80;
 
     public PandemicCardView(Card c) {
+        super(c);
         width = cardWidth;
         height = cardHeight;
         setCard(c);
@@ -109,23 +107,6 @@ public class PandemicCardView extends JComponent {
         drawCard(g, card, background, rect.x, rect.y, rect.width, rect.height);
     }
 
-    public static void drawDeckBack(Graphics2D g, String name, Image background, Rectangle rect) {
-        if (background != null) {
-            g.drawImage(background, rect.x, rect.y, null, null);
-        } else {
-            g.setColor(Color.lightGray);
-            g.fillRect(rect.x, rect.y, rect.width-1, rect.height-1);
-            g.setColor(Color.black);
-            g.drawLine(rect.x, rect.y, rect.x+rect.width-1, rect.y+rect.height-1);
-        }
-
-        int size = g.getFont().getSize();
-        if (name != null && !name.equals("")) {
-            g.drawString(name, rect.x + 10, rect.y + size + 20);
-        }
-        g.drawRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
-    }
-
     public static void drawCard(Graphics2D g, Card card, Image background, int x, int y, int width, int height) {
         // Draw card background
         if (background == null) {
@@ -201,9 +182,5 @@ public class PandemicCardView extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width + offset/2, height + offset/2);
-    }
-
-    public Card getCard() {
-        return card;
     }
 }

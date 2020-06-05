@@ -21,6 +21,8 @@ public class Game {
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
+    // Current player acting
+    AbstractPlayer currentPlayer;
 
     // Real game state and forward model
     protected AbstractGameState gameState;
@@ -137,43 +139,78 @@ public class Game {
      */
     public final void run(AbstractGUI gui) {
 
-        while (gameState.isNotTerminal()){
-            if (CoreConstants.VERBOSE) System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+        boolean firstEnd = true;
 
-            // Get player to ask for actions next
-            int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
-            AbstractPlayer player = players.get(activePlayer);
-
-            // Get actions for the player
-            List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
-            AbstractGameState observation = gameState.copy(activePlayer);
-            if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
-                ((IPrintable) observation).printToConsole();
+        while (gameState.isNotTerminal() || gui != null && gui.isWindowOpen()){
+            if (gui != null && !gui.isWindowOpen()) {
+                // Playing with GUI and closed window
+                terminate();
+                break;
             }
 
-            // Either ask player which action to use or, in case no actions are available, report the updated observation
-            AbstractAction action = null;
-            if (actions.size() > 0) {
-                if (actions.size() == 1) {
-                    // Can only do 1 action, so do it.
-                    action = actions.get(0);
-                } else {
-                    if (player instanceof HumanGUIPlayer) {
-                        while (action == null) {
-                            action = getPlayerAction(gui, player, observation);
-                        }
-                    } else {
-                        action = getPlayerAction(gui, player, observation);
-                    }
+            // Get player to ask for actions next
+            int activePlayer = gameState.getCurrentPlayer();
+            currentPlayer = players.get(activePlayer);
+
+            // GUI update
+            if (gui != null) {
+                gui.update(currentPlayer, gameState);
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    System.out.println("EXCEPTION " + e);
+                }
+            }
+
+            if (gameState.isNotTerminal()) {
+                if (CoreConstants.VERBOSE) {
+                    System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
                 }
 
-                // Resolve action and game rules
-                forwardModel.next(gameState, action);
+                // Get actions for the player
+                List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
+                AbstractGameState observation = gameState.copy(activePlayer);
+                if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
+                    ((IPrintable) observation).printToConsole();
+                }
+
+                // Either ask player which action to use or, in case no actions are available, report the updated observation
+                AbstractAction action = null;
+                if (actions.size() > 0) {
+                    if (actions.size() == 1) {
+                        // Can only do 1 action, so do it.
+                        action = actions.get(0);
+                        currentPlayer.registerUpdatedObservation(observation);
+
+                    } else {
+                        if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                            while (action == null && gui.isWindowOpen()) {
+                                action = currentPlayer.getAction(observation);
+                            }
+                        } else {
+                            action = currentPlayer.getAction(observation);
+                        }
+                    }
+
+                    // Resolve action and game rules
+                    forwardModel.next(gameState, action);
+                } else {
+                    currentPlayer.registerUpdatedObservation(observation);
+                }
             } else {
-                player.registerUpdatedObservation(observation);
+                if (firstEnd) {
+                    terminate();
+                    firstEnd = false;
+                }
             }
         }
 
+        if (gui == null) {
+            terminate();
+        }
+    }
+
+    private void terminate() {
         // Print last state
         if (gameState instanceof IPrintable && CoreConstants.VERBOSE) {
             ((IPrintable) gameState).printToConsole();
@@ -187,26 +224,6 @@ public class Game {
         for (AbstractPlayer player: players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-    }
-
-    /**
-     * Queries the player for an action, after performing of GUI update (if running with visuals).
-     * @param gui - graphical user interface.
-     * @param player - player being asked for an action.
-     * @param observation - observation the player receives from the current game state.
-     * @return - int, index of action chosen by player (from the list of actions).
-     */
-    private AbstractAction getPlayerAction(AbstractGUI gui, AbstractPlayer player, AbstractGameState observation) {
-        if (gui != null) {
-            gui.update(player, gameState);
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-                System.out.println("EXCEPTION " + e);
-            }
-        }
-
-        return player.getAction(observation);
     }
 
     /**
@@ -245,11 +262,11 @@ public class Game {
         ActionController ac = new ActionController();
 
         /* 1. Choose game to play */
-        GameType gameToPlay = ColtExpress;
+        GameType gameToPlay = TicTacToe;
 //        List<GameType> games = GameType.Mechanic.Cooperative.getAllGames();
 
         /* 2. Running with visuals? */
-        boolean visuals = false;
+        boolean visuals = true;
 
         /* 3. Game seed */
         long seed = System.currentTimeMillis(); //0;
@@ -257,10 +274,10 @@ public class Game {
         /* 4. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-        players.add(new OSLA());
-//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new RandomPlayer(new Random()));
+//        players.add(new RandomPlayer(new Random()));
+//        players.add(new OSLA());
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         // Creating game instance (null if not implemented)
@@ -279,7 +296,7 @@ public class Game {
             // Run!
             game.run(gui);
         } else {
-            System.out.println("Game " + gameToPlay + " not yet implemented!");
+            System.out.println("Error game: " + gameToPlay);
         }
     }
 }

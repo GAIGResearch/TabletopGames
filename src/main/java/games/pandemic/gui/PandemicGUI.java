@@ -16,7 +16,6 @@ import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
 import players.ActionController;
 import players.HumanGUIPlayer;
-import utilities.CounterView;
 import utilities.Hash;
 
 import javax.swing.*;
@@ -87,12 +86,7 @@ public class PandemicGUI extends AbstractGUI {
         getContentPane().add(boardView, BorderLayout.CENTER);
         getContentPane().add(counterArea, BorderLayout.SOUTH);
 
-        // Frame properties
-        pack();
-        this.setVisible(true);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        repaint();
+        setFrameProperties();
     }
 
     private JPanel createPlayerAreas() {
@@ -217,16 +211,16 @@ public class PandemicGUI extends AbstractGUI {
         JPanel counterArea = new JPanel();
 
         Counter cnY = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
-        JComponent cY = new CounterView(cnY, Color.yellow, null);
+        JComponent cY = new PandemicCounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
         Counter cnR = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease red"));
-        JComponent cR = new CounterView(cnR, Color.red, null);
+        JComponent cR = new PandemicCounterView(cnR, Color.red, null);
         counterArea.add(cR);
         Counter cnB = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease blue"));
-        JComponent cB = new CounterView(cnB, Color.blue, null);
+        JComponent cB = new PandemicCounterView(cnB, Color.blue, null);
         counterArea.add(cB);
         Counter cnK = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease black"));
-        JComponent cK = new CounterView(cnK, Color.black, null);
+        JComponent cK = new PandemicCounterView(cnK, Color.black, null);
         counterArea.add(cK);
 
         return counterArea;

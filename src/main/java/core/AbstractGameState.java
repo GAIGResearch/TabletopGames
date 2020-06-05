@@ -27,7 +27,7 @@ public abstract class AbstractGameState {
     // Parameters, forward model and turn order for the game
     protected final AbstractGameParameters gameParameters;
     protected TurnOrder turnOrder;
-    private Area<Component> allComponents;
+    private Area allComponents;
 
     // List of actions currently available for the player
     protected List<AbstractAction> availableActions;
@@ -57,7 +57,7 @@ public abstract class AbstractGameState {
      */
     void reset() {
         turnOrder.reset();
-        allComponents = new Area<>(-1, "All Components");
+        allComponents = new Area(-1, "All Components");
         availableActions = new ArrayList<>();
         gameStatus = GAME_ONGOING;
         playerResults = new Utils.GameResult[getNPlayers()];
@@ -107,7 +107,9 @@ public abstract class AbstractGameState {
     public final Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
-
+    public final Area getAllComponents() {
+        return allComponents;
+    }
     /* Limited access final methods */
 
     /**
@@ -128,7 +130,7 @@ public abstract class AbstractGameState {
         AbstractGameState s = _copy(playerId);
         // Copy super class things
         s.turnOrder = turnOrder.copy();
-        s.allComponents = new Area<>(-1, "All components");
+        s.allComponents = new Area(-1, "All components");
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;

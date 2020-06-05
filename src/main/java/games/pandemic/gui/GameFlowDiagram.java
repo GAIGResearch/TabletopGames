@@ -1,5 +1,6 @@
-package games.pandemic.engine;
+package games.pandemic.gui;
 
+import games.pandemic.engine.Node;
 import games.pandemic.engine.conditions.ConditionNode;
 import games.pandemic.engine.rules.BranchingRuleNode;
 import games.pandemic.engine.rules.RuleNode;

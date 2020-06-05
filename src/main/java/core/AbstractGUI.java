@@ -1,10 +1,13 @@
 package core;
 
 import core.actions.AbstractAction;
+import gui.WindowInput;
 import players.ActionController;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,16 +16,30 @@ public abstract class AbstractGUI extends JFrame {
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
-    protected JLabel gameStatus, turnOwner, turn, currentPlayer, gamePhase;
+    protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase;
+    private WindowInput wi;
 
     public AbstractGUI(ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
         gameStatus = new JLabel();
+        playerStatus = new JLabel();
         gamePhase = new JLabel();
         turnOwner = new JLabel();
         turn = new JLabel();
         currentPlayer = new JLabel();
+
+        this.wi = new WindowInput();
+        addWindowListener(wi);
+    }
+
+    protected void setFrameProperties() {
+        // Frame properties
+        pack();
+        this.setVisible(true);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+//        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        repaint();
     }
 
     /* Methods that should/can be implemented by subclass */
@@ -41,10 +58,12 @@ public abstract class AbstractGUI extends JFrame {
      * @param gameState - current game state to be used in updating visuals.
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        List<AbstractAction> actions = gameState.getActions();
-        for (int i = 0; i < actions.size(); i++) {
-            actionButtons[i].setVisible(true);
-            actionButtons[i].setButtonAction(actions.get(i), gameState);
+        if (gameState.gameStatus == Utils.GameResult.GAME_ONGOING) {
+            List<AbstractAction> actions = gameState.getActions();
+            for (int i = 0; i < actions.size(); i++) {
+                actionButtons[i].setVisible(true);
+                actionButtons[i].setButtonAction(actions.get(i), gameState);
+            }
         }
     }
 
@@ -58,7 +77,7 @@ public abstract class AbstractGUI extends JFrame {
      */
     protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
         JPanel actionPanel = new JPanel();
-        actionPanel.setPreferredSize(new Dimension(width, height));
+        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
@@ -71,7 +90,10 @@ public abstract class AbstractGUI extends JFrame {
             actionButton.informAllActionButtons(actionButtons);
         }
 
-        return actionPanel;
+        JScrollPane pane = new JScrollPane(actionPanel);
+        pane.setPreferredSize(new Dimension(width, height));
+        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        return pane;
     }
 
     /**
@@ -83,11 +105,12 @@ public abstract class AbstractGUI extends JFrame {
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
         JPanel gameInfo = new JPanel();
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
-        gameInfo.add(new JLabel(gameTitle));
+        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
 
         updateGameStateInfo(gameState);
 
         gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
         gameInfo.add(gamePhase);
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
@@ -102,6 +125,7 @@ public abstract class AbstractGUI extends JFrame {
      */
     protected void updateGameStateInfo(AbstractGameState gameState) {
         gameStatus.setText("Game status: " + gameState.getGameStatus());
+        playerStatus.setText(Arrays.toString(gameState.getPlayerResults()));
         gamePhase.setText("Game phase: " + gameState.getGamePhase());
         turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
         turn.setText("Turn: " + gameState.getTurnOrder().getTurnCounter() +
@@ -122,6 +146,14 @@ public abstract class AbstractGUI extends JFrame {
         updateGameStateInfo(gameState);
 //        resetActionButtons();
         _update(player, gameState);
+    }
+
+    /**
+     * Checks if the window is open.
+     * @return true if open, false otherwise
+     */
+    public final boolean isWindowOpen() {
+        return !wi.windowClosed;
     }
 
     /* Helper class */
