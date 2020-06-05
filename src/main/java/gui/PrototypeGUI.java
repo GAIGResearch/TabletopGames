@@ -21,7 +21,7 @@ public class PrototypeGUI extends AbstractGUI {
     int width, height;
 
     protected ComponentView[] componentViews;
-    protected int maxCardsInDeck = 100;
+    protected int maxComponentsInDeck = 100;
 
     public PrototypeGUI(GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace) {
         this(game, gameState, ac, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
@@ -45,8 +45,8 @@ public class PrototypeGUI extends AbstractGUI {
         JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
 
         JPanel deckView = new JPanel();
-        componentViews = new ComponentView[maxCardsInDeck];
-        for (int i = 0; i < maxCardsInDeck; i++) {
+        componentViews = new ComponentView[maxComponentsInDeck];
+        for (int i = 0; i < maxComponentsInDeck; i++) {
             CardView cw = new CardView(null);
             cw.setVisible(false);
             deckView.add(cw);
