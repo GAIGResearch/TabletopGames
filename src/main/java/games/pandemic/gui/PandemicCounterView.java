@@ -1,7 +1,7 @@
 package games.pandemic.gui;
 
 import core.components.Counter;
-import gui.CounterView;
+import gui.views.CounterView;
 import utilities.ImageIO;
 
 import java.awt.*;

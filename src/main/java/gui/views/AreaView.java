@@ -1,7 +1,8 @@
-package gui;
+package gui.views;
 
 import core.components.*;
 import core.components.Component;
+import gui.TokenView;
 
 import javax.swing.*;
 import java.awt.*;

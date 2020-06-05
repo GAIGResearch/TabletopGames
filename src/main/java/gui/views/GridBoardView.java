@@ -1,11 +1,11 @@
-package gui;
+package gui.views;
 
 import core.components.GridBoard;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static gui.PrototypeGUI.defaultItemSize;
+import static core.AbstractGUI.defaultItemSize;
 
 public class GridBoardView<T> extends JComponent {
     GridBoard<T> gridBoard;

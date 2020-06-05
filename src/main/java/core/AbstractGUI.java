@@ -14,8 +14,11 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractGUI extends JFrame {
     public static int defaultItemSize = 50;
+    public static int defaultActionPanelHeight = 200;
+    public static int defaultInfoPanelHeight = 100;
     public static int defaultCardWidth = 100, defaultCardHeight = 80;
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
+    public static int defaultDisplayWidth = 400, defaultDisplayHeight = 300;
 
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
@@ -106,7 +109,7 @@ public abstract class AbstractGUI extends JFrame {
      * @param gameState - initial game state.
      * @return - JPanel containing several JLabels with game state information.
      */
-    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
         JPanel gameInfo = new JPanel();
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
         gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
@@ -119,6 +122,8 @@ public abstract class AbstractGUI extends JFrame {
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
+
+        gameInfo.setPreferredSize(new Dimension(width, height));
 
         return gameInfo;
     }

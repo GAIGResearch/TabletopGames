@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
-import static gui.DeckView.drawDeck;
+import static gui.views.DeckView.drawDeck;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
 import static core.CoreConstants.*;

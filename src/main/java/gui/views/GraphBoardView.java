@@ -1,4 +1,4 @@
-package gui;
+package gui.views;
 
 import core.components.BoardNode;
 import core.components.GraphBoard;

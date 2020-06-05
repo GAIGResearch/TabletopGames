@@ -1,7 +1,7 @@
 package games.pandemic.gui;
 
 import core.components.Card;
-import gui.CardView;
+import gui.views.CardView;
 import core.properties.Property;
 import core.properties.PropertyColor;
 import core.properties.PropertyLong;

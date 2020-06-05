@@ -72,7 +72,7 @@ public class PandemicGUI extends AbstractGUI {
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
         gameTurnStep = new JLabel();
-        JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
+        JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
         JComponent actionPanel = createActionPanel(highlights, 300, 200);
@@ -128,7 +128,7 @@ public class PandemicGUI extends AbstractGUI {
                 hand.add(cv2);
             }
             JScrollPane scrollPane = new JScrollPane(hand);
-            scrollPane.setPreferredSize(new Dimension(defaultCardWidth + offset*2, defaultCardHeight *3 + offset));
+            scrollPane.setPreferredSize(new Dimension(cardWidth + offset*2, cardHeight *3 + offset));
             scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
             playerHandPanel.add(scrollPane);
@@ -167,7 +167,7 @@ public class PandemicGUI extends AbstractGUI {
         }
 
         JScrollPane scrollPane = new JScrollPane(bufferDeckArea);
-        scrollPane.setPreferredSize(new Dimension(defaultCardWidth *3 + offset, defaultCardHeight + offset*2));
+        scrollPane.setPreferredSize(new Dimension(cardWidth *3 + offset, cardHeight + offset*2));
         scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
         cardAreas.add(bufferDeckArea);
@@ -195,8 +195,8 @@ public class PandemicGUI extends AbstractGUI {
         return cv2;
     }
 
-    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
-        JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
+    protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {
+        JPanel gameInfo = super.createGameStateInfoPanel("Pandemic", gameState, 300, defaultInfoPanelHeight);
         gameInfo.add(gameTurnStep);
 
         return gameInfo;
