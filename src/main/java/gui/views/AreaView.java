@@ -4,7 +4,6 @@ import core.components.*;
 import core.components.Component;
 import gui.TokenView;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -15,18 +14,15 @@ import static core.AbstractGUI.*;
 
 // TODO: snap deck/area (add component to deck/area) + remove on extract + search?
 // Long press move deck/area, short press move component in deck/area
-public class AreaView extends JComponent {
-    Area area;
-    int width, height;
-
+public class AreaView extends ComponentView {
     private HashMap<Integer, Rectangle> drawMap;
     private Map.Entry<Integer, Rectangle> dragging, draggingLong;
     private HashMap<Integer, Integer> dependencies;  // Components within other components
+    private Deck<? extends Component> deckHighlight;
 
     public AreaView(Area area, int width, int height) {
-        updateArea(area);
-        this.width = width;
-        this.height = height;
+        super(area, width, height);
+
         drawMap = new HashMap<>();
         dependencies = new HashMap<>();
 
@@ -54,7 +50,10 @@ public class AreaView extends JComponent {
                 } else {
                     for (Map.Entry<Integer, Rectangle> en : drawMap.entrySet()) {
                         Component c = area.getComponents().get(en.getKey());
-                        if (c instanceof Deck || c instanceof Area) continue;
+                        if (c instanceof Deck) {
+                            deckHighlight = (Deck<? extends Component>) c;
+                            continue;
+                        } else if (c instanceof Area) continue;
 
                         Rectangle r = new Rectangle(en.getValue());
                         // Add parent dependency
@@ -79,6 +78,9 @@ public class AreaView extends JComponent {
                                 if ((c instanceof Deck || c instanceof Area) && en.getValue().contains(e.getPoint())) {
                                     // long clicked on this rectangle of a collection
                                     draggingLong = en;
+                                    if (c instanceof Deck) {
+                                        deckHighlight = (Deck<? extends Component>) c;
+                                    }
                                     break;
                                 }
                             }
@@ -127,24 +129,13 @@ public class AreaView extends JComponent {
         });
     }
 
-    public void updateArea(Area area) {
-        this.area = area;
-        if (area != null) {
-            setToolTipText("Component ID: " + area.getComponentID());
-        }
-    }
-
-    public Area getArea() {
-        return area;
-    }
-
     @Override
     protected void paintComponent(Graphics g) {
         drawArea((Graphics2D) g);
     }
 
     protected void drawArea(Graphics2D g) {
-        drawArea(g, area, 0, 0, width, height, drawMap, dependencies);
+        drawArea(g, (Area) component, 0, 0, width, height, drawMap, dependencies);
     }
 
     public static void drawArea(Graphics2D g, Area area, int x, int y, int width, int height,
@@ -252,5 +243,9 @@ public class AreaView extends JComponent {
             return drawn;
         }
         return r;
+    }
+
+    public Deck<? extends Component> getDeckHighlight() {
+        return deckHighlight;
     }
 }

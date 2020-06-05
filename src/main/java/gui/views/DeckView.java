@@ -5,7 +5,6 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,18 +12,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 // TODO: drag&drop components, snap to deck, reset deck
-public class DeckView<T extends Component> extends JComponent {
-    protected Deck<T> deck;
-    protected int width, height;
+public class DeckView<T extends Component> extends ComponentView {
     protected boolean front;
 
     private HashMap<Integer, Rectangle> drawMap;
     private Map.Entry<Integer, Rectangle> dragging;
 
     public DeckView(Deck<T> d, boolean visible) {
-        updateDeck(d, visible);
-        width = AbstractGUI.defaultCardWidth*2;
-        height = AbstractGUI.defaultCardHeight;
+        super(d, AbstractGUI.defaultCardWidth, AbstractGUI.defaultCardHeight);
+        this.front = visible;
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -60,21 +56,14 @@ public class DeckView<T extends Component> extends JComponent {
         });
     }
 
-    public void updateDeck(Deck<T> d, boolean visible) {
-        this.deck = d;
-        this.front = visible;
-        if (d != null) {
-            setToolTipText("Component ID: " + d.getComponentID());
-        }
-    }
-
     @Override
     protected void paintComponent(Graphics g) {
         drawDeck((Graphics2D) g);
     }
 
     public void drawDeck(Graphics2D g) {
-        drawDeck(g, deck, deck.getComponentName(), null, new Rectangle(0, 0, width, height), front);
+        drawDeck(g, (Deck<? extends Component>) component, component.getComponentName(), null,
+                new Rectangle(0, 0, width, height), front);
     }
 
     public void setFront(boolean visible) {
@@ -120,9 +109,5 @@ public class DeckView<T extends Component> extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
-    }
-
-    public Deck<T> getDeck() {
-        return deck;
     }
 }

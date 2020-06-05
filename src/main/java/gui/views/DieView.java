@@ -2,25 +2,14 @@ package gui.views;
 
 import core.components.Dice;
 
-import javax.swing.*;
 import java.awt.*;
 
 import static core.AbstractGUI.defaultItemSize;
 
-public class DieView extends JComponent {
-    protected Dice die;
-    protected int size;
+public class DieView extends ComponentView {
 
     public DieView(Dice d) {
-        updateDie(d);
-        size = defaultItemSize;
-    }
-
-    public void updateDie(Dice d) {
-        this.die = d;
-        if (d != null) {
-            setToolTipText("Component ID: " + d.getComponentID());
-        }
+        super(d, defaultItemSize, defaultItemSize);
     }
 
     @Override
@@ -29,7 +18,7 @@ public class DieView extends JComponent {
     }
 
     public void drawDie(Graphics2D g) {
-        drawDie(g, 0, 0, size, die);
+        drawDie(g, 0, 0, width, (Dice) component);
     }
 
     public static void drawDie(Graphics2D g, int x, int y, int size, Dice die) {
@@ -92,12 +81,4 @@ public class DieView extends JComponent {
 
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(size, size);
-    }
-
-    public Dice getDie() {
-        return die;
-    }
 }

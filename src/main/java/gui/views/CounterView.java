@@ -2,25 +2,14 @@ package gui.views;
 
 import core.components.Counter;
 
-import javax.swing.*;
 import java.awt.*;
 
 import static core.AbstractGUI.defaultItemSize;
 
-public class CounterView extends JComponent {
-    protected Counter counter;
-    protected int size;
+public class CounterView extends ComponentView {
 
     public CounterView(Counter c) {
-        updateCounter(c);
-        size = defaultItemSize;
-    }
-
-    public void updateCounter(Counter c) {
-        this.counter = c;
-        if (c != null) {
-            setToolTipText("Component ID: " + c.getComponentID());
-        }
+        super(c, defaultItemSize, defaultItemSize);
     }
 
     @Override
@@ -29,7 +18,7 @@ public class CounterView extends JComponent {
     }
 
     public void drawCounter(Graphics2D g) {
-        drawCounter(g, 0, 0, size, counter);
+        drawCounter(g, 0, 0, width, (Counter) component);
     }
 
     public static void drawCounter(Graphics2D g, int x, int y, int size, Counter counter) {
@@ -61,12 +50,4 @@ public class CounterView extends JComponent {
         g.drawString(name, x, y + counterSize + fontSize);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(size, size);
-    }
-
-    public Counter getCounter() {
-        return counter;
-    }
 }

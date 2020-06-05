@@ -2,35 +2,19 @@ package gui.views;
 
 import core.components.GridBoard;
 
-import javax.swing.*;
 import java.awt.*;
 
 import static core.AbstractGUI.defaultItemSize;
 
-public class GridBoardView<T> extends JComponent {
-    GridBoard<T> gridBoard;
-    int width, height;
+public class GridBoardView<T> extends ComponentView {
 
     public GridBoardView(GridBoard<T> gridBoard) {
-        updateBoard(gridBoard);
-        width = gridBoard.getWidth() * defaultItemSize;
-        height = gridBoard.getHeight() * defaultItemSize;
-    }
-
-    public void updateBoard(GridBoard<T> gridBoard) {
-        this.gridBoard = gridBoard;
-        if (gridBoard != null) {
-            setToolTipText("Component ID: " + gridBoard.getComponentID());
-        }
-    }
-
-    public GridBoard<T> getGridBoard() {
-        return gridBoard;
+        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard<?>) component, 0, 0);
     }
 
     public static <T> void drawGridBoard(Graphics2D g, GridBoard<T> gridBoard, int x, int y) {
@@ -79,8 +63,4 @@ public class GridBoardView<T> extends JComponent {
         g.drawString(element.toString(), x + defaultItemSize /2, y + defaultItemSize);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height);
-    }
 }

@@ -3,33 +3,17 @@ package gui.views;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 
-import javax.swing.*;
 import java.awt.*;
 
-public class GraphBoardView extends JComponent {
-    GraphBoard graphBoard;
-    int width, height;
+public class GraphBoardView extends ComponentView {
 
-    public GraphBoardView(GraphBoard gridBoard, int width, int height) {
-        updateBoard(gridBoard);
-        this.width = width;
-        this.height = height;
-    }
-
-    public void updateBoard(GraphBoard graphBoard) {
-        this.graphBoard = graphBoard;
-        if (graphBoard != null) {
-            setToolTipText("Component ID: " + graphBoard.getComponentID());
-        }
-    }
-
-    public GraphBoard getGraphBoard() {
-        return graphBoard;
+    public GraphBoardView(GraphBoard board, int width, int height) {
+        super(board, width, height);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGraphBoard((Graphics2D)g, graphBoard, 0, 0, width, height);
+        drawGraphBoard((Graphics2D)g, (GraphBoard) component, 0, 0, width, height);
     }
 
     public static void drawGraphBoard(Graphics2D g, GraphBoard graphBoard, int x, int y, int width, int height) {
@@ -49,8 +33,4 @@ public class GraphBoardView extends JComponent {
         drawGraphBoard(g, graphBoard, rect.x, rect.y, rect.width, rect.height);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height);
-    }
 }

@@ -34,7 +34,7 @@ public class PandemicCardView extends CardView {
     }
 
     private void setCard(Card c) {
-        this.card = c;
+        this.component = c;
         String tooltip = "";
 
         String dataPath = "data/pandemic/img/";
@@ -97,9 +97,9 @@ public class PandemicCardView extends CardView {
     @Override
     protected void paintComponent(Graphics g) {
         if (usingSecondary) {
-            drawCard((Graphics2D) g, card, secondaryBG, 0, 0, width, height);
+            drawCard((Graphics2D) g, (Card) component, secondaryBG, 0, 0, width, height);
         } else {
-            drawCard((Graphics2D) g, card, background, 0, 0, width, height);
+            drawCard((Graphics2D) g, (Card) component, background, 0, 0, width, height);
         }
     }
 
@@ -171,8 +171,9 @@ public class PandemicCardView extends CardView {
         }
     }
 
-    public void updateCard(Card c) {
-        setCard(c);
+    @Override
+    public void updateComponent(core.components.Component c) {
+        setCard((Card) c);
     }
 
     public void setUsingSecondary(boolean s) {

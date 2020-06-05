@@ -4,24 +4,12 @@ import core.AbstractGUI;
 import core.components.Card;
 import org.davidmoten.text.utils.WordWrap;
 
-import javax.swing.*;
 import java.awt.*;
 
-public class CardView extends JComponent {
-    protected Card card;
-    protected int width, height;
+public class CardView extends ComponentView {
 
     public CardView(Card c) {
-        updateCard(c);
-        width = AbstractGUI.defaultCardWidth;
-        height = AbstractGUI.defaultCardHeight;
-    }
-
-    public void updateCard(Card c) {
-        this.card = c;
-        if (c != null) {
-            setToolTipText("Component ID: " + c.getComponentID());
-        }
+        super(c, AbstractGUI.defaultCardWidth, AbstractGUI.defaultCardHeight);
     }
 
     @Override
@@ -30,7 +18,7 @@ public class CardView extends JComponent {
     }
 
     public void drawCard(Graphics2D g) {
-        drawCard(g, 0, 0, width, height, card);
+        drawCard(g, 0, 0, width, height, (Card) component);
     }
 
     public static void drawCard(Graphics2D g, int x, int y, int width, int height, Card card) {
@@ -63,12 +51,4 @@ public class CardView extends JComponent {
         g.drawRect(x, y, width-1, height-1);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height);
-    }
-
-    public Card getCard() {
-        return card;
-    }
 }
