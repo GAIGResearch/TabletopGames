@@ -36,7 +36,7 @@ public class CardView extends JComponent {
     public static void drawCard(Graphics2D g, int x, int y, int width, int height, Card card) {
         // Draw background
         g.setColor(Color.lightGray);
-        g.fillOval(x, y, width-1, height-1);
+        g.fillRect(x, y, width-1, height-1);
         g.setColor(Color.black);
 
         // Draw card name and owner

@@ -177,10 +177,9 @@ public enum GameType {
             case Pandemic:
                 gui = new PandemicGUI(gameState, ac);
                 break;
-            case TicTacToe:
+            case ExplodingKittens:
                 if (gameState != null) {
-                    GridBoard<Character> board = ((TicTacToeGameState) gameState).getGridBoard();
-                    gui = new PrototypeGUI(this, gameState, ac, board.getWidth() * board.getHeight());
+                    gui = new PrototypeGUI(this, gameState, ac, 500);
                 } else {
                     gui = new PrototypeGUI(this,null, ac, 0);
                 }

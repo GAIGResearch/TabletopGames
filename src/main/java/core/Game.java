@@ -276,7 +276,7 @@ public class Game {
         ActionController ac = new ActionController();
 
         /* 1. Choose game to play */
-        GameType gameToPlay = TicTacToe;
+        GameType gameToPlay = ExplodingKittens;
 //        List<GameType> games = GameType.Mechanic.Cooperative.getAllGames();
 
         /* 2. Running with visuals? */
