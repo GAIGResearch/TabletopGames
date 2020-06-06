@@ -4,12 +4,17 @@ import core.actions.*;
 import core.components.*;
 import core.properties.*;
 import core.*;
+import core.rules.*;
+import core.rules.nodetypes.ConditionNode;
+import core.rules.GameOverCondition;
+import core.rules.nodetypes.RuleNode;
+import core.rules.rulenodes.ForceAllPlayerReaction;
 import games.pandemic.actions.*;
-import games.pandemic.engine.*;
-import games.pandemic.engine.conditions.*;
-import games.pandemic.engine.gameOver.*;
-import games.pandemic.engine.rules.*;
-import games.pandemic.engine.rules.DrawCards;
+import games.pandemic.rules.conditions.*;
+import games.pandemic.rules.gameOver.*;
+import games.pandemic.rules.rules.*;
+import games.pandemic.rules.rules.DrawCards;
+import utilities.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
@@ -23,10 +28,7 @@ import static games.pandemic.actions.MovePlayer.placePlayer;
 import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 
-public class PandemicForwardModel extends AbstractForwardModel {
-
-    // Rule executed last, rule to be executed next, and first rule to be executed in a turn (root)
-    Node lastRule, nextRule, root;
+public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
     /**
      * Constructor. Creates the rules for the game and sets up the game rule graph.
@@ -54,7 +56,6 @@ public class PandemicForwardModel extends AbstractForwardModel {
         RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes);
         RuleNode playerActionInterrupt3 = new PlayerAction(pp.n_initial_disease_cubes);
         RuleNode nextPlayerRule = new NextPlayer();
-        nextPlayerRule.setNextPlayerNode();
 
         // Conditions
         ConditionNode playerHandOverCapacity1 = new PlayerHandOverCapacity();
@@ -73,7 +74,6 @@ public class PandemicForwardModel extends AbstractForwardModel {
         infectCities.addGameOverCondition(outbreakLose);
 
         // Putting it all together to set up game turn flow
-        // possible future work: Nodes passing parameters to others
         root = playerAction;
         // Player hand may end up over capacity after give/take card actions, ideally this should receive parameter from other rule
         playerAction.setNext(playerHandOverCapacity1);
@@ -94,7 +94,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
         playerActionInterrupt2.setNext(infectCities);
 
         // Player reactions for playing events at the end of turn, one for each player
-        RuleNode forceAllPlayersEventReaction = new ForceAllEventReaction();
+        RuleNode forceAllPlayersEventReaction = new ForceAllPlayerReaction();
         infectCities.setNext(forceAllPlayersEventReaction);  // End of turn, event reactions coming next
         RuleNode[] eventActionInterrupt = new PlayerAction[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
@@ -119,33 +119,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
      * @param root - root rule node.
      */
     public PandemicForwardModel(Node root) {
-        this.root = root;
-        this.nextRule = root;
-    }
-
-    /**
-     * Applies the given action to the game state and executes any other game rules.
-     * @param currentState - current game state, to be modified by the action.
-     * @param action - action requested to be played by a player.
-     */
-    @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        PandemicGameState pgs = (PandemicGameState)currentState;
-
-        do {
-            if (nextRule.requireAction()) {
-                if (action != null) {
-                    nextRule.setAction(action);
-                    action = null;
-                } else {
-                    return;  // Wait for action to be sent to execute this rule requiring action
-                }
-            }
-            lastRule = nextRule;
-            nextRule = nextRule.execute(currentState);
-        } while (nextRule != null);
-
-        nextRule = lastRule.getNext();  // Go back to parent, skip it and go to next rule
+        super(root);
     }
 
     /**

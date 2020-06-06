@@ -1,9 +1,9 @@
-package games.pandemic.engine;
+package utilities;
 
-import games.pandemic.engine.conditions.ConditionNode;
-import games.pandemic.engine.rules.BranchingRuleNode;
-import games.pandemic.engine.rules.RuleNode;
-import utilities.Utils;
+import core.rules.Node;
+import core.rules.nodetypes.ConditionNode;
+import core.rules.nodetypes.BranchingRuleNode;
+import core.rules.nodetypes.RuleNode;
 
 import javax.swing.*;
 import java.awt.*;

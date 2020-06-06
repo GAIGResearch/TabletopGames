@@ -1,9 +1,9 @@
-package games.pandemic.engine.rules;
+package games.pandemic.rules.rules;
 
 import core.AbstractGameState;
-import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
+import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicGameState;
 
 import java.util.Random;

@@ -1,9 +1,11 @@
-package games.pandemic.engine.gameOver;
+package core.rules;
 
 import core.AbstractGameState;
-import games.pandemic.PandemicConstants;
 import utilities.Utils;
 
+/**
+ * Tests a game over condition, returning the result of the game.
+ */
 public abstract class GameOverCondition {
     public abstract Utils.GameResult test(AbstractGameState gs);
 }

@@ -1,23 +1,38 @@
-package games.pandemic.engine;
+package core.rules;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
+/**
+ * A node in a tree of game rules. Receives a unique ID on creation, and keeps track of node properties.
+ */
 public abstract class Node {
     private static int nextID = 0;
 
-    private int id;
-    protected boolean actionNode, nextPlayerNode;
-    protected AbstractAction action;
-    protected Node parent;
+    private int id;  // Unique id for this node
+    protected boolean actionNode;  // True if this node requires an action to execute
+    protected boolean nextPlayerNode;  // True if this action changes active player
+    protected AbstractAction action;  // Action to execute if this node requires one
+    protected Node parent;  // Parent node, can be used to retrieve parameters set by a previous node
 
     public Node() {
         id = nextID++;
     }
 
+    /**
+     * Executes the functionality of this node.
+     * @param gs - game state to apply functionality in.
+     * @return - Node, the next node to execute afterwards.
+     */
     public abstract Node execute(AbstractGameState gs);
+
+    /**
+     * Retrieves the next node to execute after this.
+     * @return - Node, next child to execute.
+     */
     public abstract Node getNext();
 
+    // Getters & setters
     public final void setAction(AbstractAction action) {
         this.action = action;
     }

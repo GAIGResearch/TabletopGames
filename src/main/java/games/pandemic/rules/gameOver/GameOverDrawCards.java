@@ -1,8 +1,9 @@
-package games.pandemic.engine.gameOver;
+package games.pandemic.rules.gameOver;
 
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
+import core.rules.GameOverCondition;
 import games.pandemic.PandemicGameState;
 import utilities.Utils;
 
