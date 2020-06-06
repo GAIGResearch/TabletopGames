@@ -1,10 +1,11 @@
-package games.pandemic.engine.rules;
+package games.pandemic.rules.rules;
 
 import core.AbstractGameState;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import core.properties.PropertyString;
+import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import static games.pandemic.PandemicConstants.playerDeckHash;

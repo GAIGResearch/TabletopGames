@@ -1,6 +1,7 @@
-package games.pandemic.engine.conditions;
+package games.pandemic.rules.conditions;
 
 import core.AbstractGameState;
+import core.rules.nodetypes.ConditionNode;
 import games.pandemic.PandemicGameState;
 
 public class EnoughDraws extends ConditionNode {

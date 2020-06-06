@@ -17,7 +17,7 @@ public abstract class AbstractForwardModel {
      * Combines both super class and sub class setup methods. Called from the game loop.
      * @param firstState - initial state.
      */
-    final void abstractSetup(AbstractGameState firstState) {
+    protected void abstractSetup(AbstractGameState firstState) {
         firstState.availableActions = new ArrayList<>();
         firstState.gameStatus = Utils.GameResult.GAME_ONGOING;
         firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];

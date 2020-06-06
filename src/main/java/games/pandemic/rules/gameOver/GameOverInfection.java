@@ -1,7 +1,8 @@
-package games.pandemic.engine.gameOver;
+package games.pandemic.rules.gameOver;
 
 import core.AbstractGameState;
 import core.components.Counter;
+import core.rules.GameOverCondition;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;

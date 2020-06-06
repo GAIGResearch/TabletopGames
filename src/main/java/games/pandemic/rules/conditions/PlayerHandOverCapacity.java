@@ -1,10 +1,11 @@
-package games.pandemic.engine.conditions;
+package games.pandemic.rules.conditions;
 
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
+import core.rules.nodetypes.ConditionNode;
 import games.pandemic.PandemicGameState;
-import games.pandemic.engine.rules.PlayerAction;
+import games.pandemic.rules.rules.PlayerAction;
 
 import static core.CoreConstants.playerHandHash;
 
