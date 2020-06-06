@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * An Area is a collection of components such as Decks, Token, Dices, Cards and Boards, mapping to their IDs.
  */
-public class Area<T extends Component> extends Component {
+public class Area extends Component {
 
     // Collection of components stored in this area, mapping to their IDs
     protected HashMap<Integer, Component> components;
@@ -74,7 +74,7 @@ public class Area<T extends Component> extends Component {
      * @param component - component to add to the collection.
      */
     public void putComponent(Component component) {
-        if (component instanceof Deck) putComponents((Deck)component);
+        if (component instanceof Deck) putComponents((Deck<? extends Component>)component);
         else if (component instanceof Area) putComponents((Area)component);
         else this.components.put(component.getComponentID(), component);
     }
@@ -93,7 +93,7 @@ public class Area<T extends Component> extends Component {
      * Adds all components from a deck to the collection, using their own component IDs as the keys in the map.
      * @param deck - deck to add to the collection.
      */
-    public void putComponents(Deck<T> deck) {
+    public <T extends Component> void putComponents(Deck<T> deck) {
         this.components.put(deck.getComponentID(), deck);
         for (Component c: deck.getComponents()) {
             putComponent(c);
@@ -104,7 +104,7 @@ public class Area<T extends Component> extends Component {
      * Adds all components in an area to the collection, using their own component IDs as the keys in the map.
      * @param area - area to add to the collection.
      */
-    public void putComponents(Area<T> area) {
+    public void putComponents(Area area) {
         this.components.put(area.getComponentID(), area);
         for (Component c: area.components.values()) {
             putComponent(c);
