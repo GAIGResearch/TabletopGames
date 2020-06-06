@@ -1,8 +1,8 @@
-package games.pandemic.engine.rules;
+package core.rules.nodetypes;
 
 import core.AbstractGameState;
-import games.pandemic.engine.Node;
-import games.pandemic.engine.gameOver.GameOverCondition;
+import core.rules.GameOverCondition;
+import core.rules.Node;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -17,25 +17,46 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
  * parent -> childNext
  */
 public abstract class RuleNode extends Node {
-    Node childNext;
-    private ArrayList<GameOverCondition> gameOverConditions;
+    Node childNext;  // Child to execute next after this node
+    private ArrayList<GameOverCondition> gameOverConditions;  // List of game over conditions to check after this node is executed
 
     public RuleNode() {
         super();
         gameOverConditions = new ArrayList<>();
     }
 
+    /**
+     * Specialised constructor to use for rule nodes requiring actions.
+     * @param actionNode - true if action node.
+     */
     protected RuleNode(boolean actionNode) {
         super();
         this.actionNode = actionNode;
         gameOverConditions = new ArrayList<>();
     }
 
+    /**
+     * Apply the functionality of the rule in the given game state.
+     * @param gs - game state to modify.
+     * @return - true if successfully executed, false if not and game loop should be interrupted after the execution.
+     */
     protected abstract boolean run(AbstractGameState gs);
 
-    public final void addGameOverCondition(GameOverCondition node) {
-        gameOverConditions.add(node);
+    /**
+     * Adds a new game over condition to this node.
+     * @param condition - game over condition to add.
+     */
+    public final void addGameOverCondition(GameOverCondition condition) {
+        gameOverConditions.add(condition);
     }
+
+    /**
+     * Executes the rule if all requirements met, and tests any game over conditions included with the rule. If any
+     * game over conditions trigger, the child of this rule is set to null to break the game loop.
+     * @param gs - game state to apply functionality in.
+     * @return - the next child to execute if the rule did not request an interruption, or null otherwise (and if
+     * requirements for execution are not met, or the game is over).
+     */
     public final Node execute(AbstractGameState gs) {
         if (requireAction() && action == null) return null;
 
@@ -52,6 +73,8 @@ public abstract class RuleNode extends Node {
         if (!interrupted) return childNext;
         return null;
     }
+
+    // Getters & Setters
     public final void setNext(Node childNext) {
         this.childNext = childNext;
     }

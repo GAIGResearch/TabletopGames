@@ -1,0 +1,67 @@
+package core.rules;
+
+import core.AbstractGameState;
+import core.actions.AbstractAction;
+
+/**
+ * A node in a tree of game rules. Receives a unique ID on creation, and keeps track of node properties.
+ */
+public abstract class Node {
+    private static int nextID = 0;
+
+    private int id;  // Unique id for this node
+    protected boolean actionNode;  // True if this node requires an action to execute
+    protected boolean nextPlayerNode;  // True if this action changes active player
+    protected AbstractAction action;  // Action to execute if this node requires one
+    protected Node parent;  // Parent node, can be used to retrieve parameters set by a previous node
+
+    public Node() {
+        id = nextID++;
+    }
+
+    /**
+     * Executes the functionality of this node.
+     * @param gs - game state to apply functionality in.
+     * @return - Node, the next node to execute afterwards.
+     */
+    public abstract Node execute(AbstractGameState gs);
+
+    /**
+     * Retrieves the next node to execute after this.
+     * @return - Node, next child to execute.
+     */
+    public abstract Node getNext();
+
+    // Getters & setters
+    public final void setAction(AbstractAction action) {
+        this.action = action;
+    }
+    public final boolean requireAction() { return actionNode; }
+    public final void setNextPlayerNode() {
+        nextPlayerNode = true;
+    }
+    public final boolean isNextPlayerNode() {
+        return nextPlayerNode;
+    }
+    public final int getId() { return id; }
+    public final Node getParent() { return parent; }
+    public final void setParent(Node parent) { this.parent = parent; }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Node node = (Node) o;
+        return id == node.id;
+    }
+
+    @Override
+    public final int hashCode() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().toString();
+    }
+}

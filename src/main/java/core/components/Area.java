@@ -74,7 +74,7 @@ public class Area extends Component {
      * @param component - component to add to the collection.
      */
     public void putComponent(Component component) {
-        if (component instanceof Deck) putComponents((Deck)component);
+        if (component instanceof Deck) putComponents((Deck<? extends Component>)component);
         else if (component instanceof Area) putComponents((Area)component);
         else this.components.put(component.getComponentID(), component);
     }

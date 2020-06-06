@@ -1,0 +1,43 @@
+package core.rules.nodetypes;
+
+import core.AbstractGameState;
+import core.rules.Node;
+
+/**
+ * Splits a node into n branches:
+ *
+ * parent
+ *  - child 0
+ *  - child 1
+ *  ...
+ *  - child n
+ */
+public abstract class BranchingRuleNode extends RuleNode {
+    Node[] children;  // Array of child nodes
+
+    public BranchingRuleNode() {
+        super();
+    }
+
+    /**
+     * Specialised constructor to use for rule nodes requiring actions.
+     * @param actionNode - true if action node.
+     */
+    protected BranchingRuleNode(boolean actionNode) {
+        super(actionNode);
+    }
+
+    /**
+     * Apply the functionality of the rule in the given game state, and decide which of the children is to be executed
+     * next.
+     * @param gs - game state to modify.
+     * @return - true if successfully executed, false if not and game loop should be interrupted after the execution.
+     */
+    protected abstract boolean run(AbstractGameState gs);
+
+    // Getters & Setters
+    public final void setNext(Node[] children) {
+        this.children = children;
+    }
+    public final Node[] getChildren() { return children; }
+}
