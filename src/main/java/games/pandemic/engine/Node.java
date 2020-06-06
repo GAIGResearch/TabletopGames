@@ -7,7 +7,7 @@ public abstract class Node {
     private static int nextID = 0;
 
     private int id;
-    protected boolean actionNode = false;
+    protected boolean actionNode, nextPlayerNode;
     protected AbstractAction action;
     protected Node parent;
 
@@ -22,6 +22,12 @@ public abstract class Node {
         this.action = action;
     }
     public final boolean requireAction() { return actionNode; }
+    public final void setNextPlayerNode() {
+        nextPlayerNode = true;
+    }
+    public final boolean isNextPlayerNode() {
+        return nextPlayerNode;
+    }
     public final int getId() { return id; }
     public final Node getParent() { return parent; }
     public final void setParent(Node parent) { this.parent = parent; }

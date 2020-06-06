@@ -10,6 +10,7 @@ import games.pandemic.engine.conditions.*;
 import games.pandemic.engine.gameOver.*;
 import games.pandemic.engine.rules.*;
 import games.pandemic.engine.rules.DrawCards;
+import games.pandemic.gui.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
@@ -53,6 +54,8 @@ public class PandemicForwardModel extends AbstractForwardModel {
         RuleNode playerActionInterrupt1 = new PlayerAction(pp.n_initial_disease_cubes);
         RuleNode playerActionInterrupt2 = new PlayerAction(pp.n_initial_disease_cubes);
         RuleNode playerActionInterrupt3 = new PlayerAction(pp.n_initial_disease_cubes);
+        RuleNode nextPlayerRule = new NextPlayer();
+        nextPlayerRule.setNextPlayerNode();
 
         // Conditions
         ConditionNode playerHandOverCapacity1 = new PlayerHandOverCapacity();
@@ -90,7 +93,6 @@ public class PandemicForwardModel extends AbstractForwardModel {
         playerHandOverCapacity2.setYesNo(forceDiscardReaction, infectCities);
         forceDiscardReaction.setNext(playerActionInterrupt2);
         playerActionInterrupt2.setNext(infectCities);
-//        infectCities.setNext(null);  // End of turn
 
         // Player reactions for playing events at the end of turn, one for each player
         RuleNode forceAllPlayersEventReaction = new ForceAllEventReaction();
@@ -99,16 +101,17 @@ public class PandemicForwardModel extends AbstractForwardModel {
         for (int i = 0; i < nPlayers; i++) {
             eventActionInterrupt[i] = new PlayerAction(pp.n_initial_disease_cubes);
         }
-        for (int i = 0; i < nPlayers-1; i++) {  // Last one will be null, turn over
+        for (int i = 0; i < nPlayers-1; i++) {
             eventActionInterrupt[i].setNext(eventActionInterrupt[i+1]);
         }
         forceAllPlayersEventReaction.setNext(eventActionInterrupt[0]);
-        eventActionInterrupt[nPlayers-1].setNext(null);  // End of turn
+        eventActionInterrupt[nPlayers-1].setNext(nextPlayerRule);  // Next player!
+        nextPlayerRule.setNext(root);
 
         // Next rule to execute is root
         nextRule = root;
 
-        // draw tree from root
+        // Draw game tree from root
 //        new GameFlowDiagram(root);
     }
 
@@ -143,12 +146,7 @@ public class PandemicForwardModel extends AbstractForwardModel {
             nextRule = nextRule.execute(currentState);
         } while (nextRule != null);
 
-        nextRule = lastRule.getNext();  // go back to parent, skip it and go to next rule
-        if (nextRule == null) {
-            // if still null, end of turn:
-            nextRule = root;
-            nextPlayer(pgs);
-        }
+        nextRule = lastRule.getNext();  // Go back to parent, skip it and go to next rule
     }
 
     /**
@@ -332,14 +330,5 @@ public class PandemicForwardModel extends AbstractForwardModel {
     @Override
     protected AbstractForwardModel _copy() {
         return new PandemicForwardModel(root);
-    }
-
-    /**
-     * Informs turn order of a need to move to the next player and performs any beginning of round setup.
-     */
-    private void nextPlayer(PandemicGameState pgs) {
-        pgs.getTurnOrder().endPlayerTurn(pgs);
-        pgs.nCardsDrawn = 0;
-        pgs.setMainGamePhase();
     }
 }
