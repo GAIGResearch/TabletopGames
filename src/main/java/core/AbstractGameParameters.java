@@ -1,6 +1,6 @@
 package core;
 
-import core.interfaces.TunableParameters;
+import core.interfaces.ITunableParameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,13 +49,13 @@ public abstract class AbstractGameParameters {
      * Randomizes the set of parameters, if this is a class that implements the TunableParameters interface.
      */
     public void randomize() {
-        if (this instanceof TunableParameters) {
+        if (this instanceof ITunableParameters) {
             Random rnd = new Random(gameSeed);
-            HashMap<Integer, ArrayList<?>> searchSpace = ((TunableParameters)this).getSearchSpace();
+            HashMap<Integer, ArrayList<?>> searchSpace = ((ITunableParameters)this).getSearchSpace();
             for (Map.Entry<Integer, ArrayList<?>> parameter: searchSpace.entrySet()) {
                 int nValues = parameter.getValue().size();
                 int randomChoice = rnd.nextInt(nValues);
-                ((TunableParameters)this).setParameterValue(parameter.getKey(), parameter.getValue().get(randomChoice));
+                ((ITunableParameters)this).setParameterValue(parameter.getKey(), parameter.getValue().get(randomChoice));
             }
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not randomizing");
@@ -67,9 +67,9 @@ public abstract class AbstractGameParameters {
      * interface.
      */
     public void reset() {
-        if (this instanceof TunableParameters) {
-            HashMap<Integer, Object> defaultValues = ((TunableParameters)this).getDefaultParameterValues();
-            ((TunableParameters)this).setParameterValues(defaultValues);
+        if (this instanceof ITunableParameters) {
+            HashMap<Integer, Object> defaultValues = ((ITunableParameters)this).getDefaultParameterValues();
+            ((ITunableParameters)this).setParameterValues(defaultValues);
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not resetting.");
         }

@@ -1,13 +1,13 @@
 package games.tictactoe;
 
 import core.AbstractGameParameters;
-import core.interfaces.TunableParameters;
+import core.interfaces.ITunableParameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TicTacToeGameParameters extends AbstractGameParameters implements TunableParameters {
+public class TicTacToeGameParameters extends AbstractGameParameters implements ITunableParameters {
     public int gridSize = 3;
 
     public TicTacToeGameParameters(long seed) {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public interface TunableParameters {
+public interface ITunableParameters {
 
     /**
      * Retrieve a mapping from int ID to list of possible values, one entry for each parameter.
