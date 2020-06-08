@@ -16,7 +16,7 @@ import static core.AbstractGUI.*;
 // Long press move deck/area, short press move component in deck/area
 public class AreaView extends ComponentView {
     private HashMap<Integer, Rectangle> drawMap;
-    private ArrayList<Map.Entry<Integer, Rectangle>> dragging, draggingLong;
+    private ArrayList<Map.Entry<Integer, Rectangle>> draggingDependent, dragging;
     private HashMap<Integer, Integer> dependencies;  // Components within other components
 
     private Deck<? extends Component> deckHighlight;
@@ -29,8 +29,8 @@ public class AreaView extends ComponentView {
 
         drawMap = new HashMap<>();
         dependencies = new HashMap<>();
+        draggingDependent = new ArrayList<>();
         dragging = new ArrayList<>();
-        draggingLong = new ArrayList<>();
         translation = new HashMap<>();
 
         MouseAdapter ma = new MouseAdapter() {
@@ -99,7 +99,11 @@ public class AreaView extends ComponentView {
                                 } else if (c instanceof Area) continue;
 
                                 // clicked on this rectangle
-                                dragging.add(en);
+                                if (dependencies.containsKey(en.getKey())) {
+                                    draggingDependent.add(en);
+                                } else {
+                                    dragging.add(en);
+                                }
                                 break;
                             }
                         }
@@ -110,6 +114,7 @@ public class AreaView extends ComponentView {
                             timer.schedule(new TimerTask() {
                                 @Override
                                 public void run() {
+                                    dragging.clear();
                                     for (Map.Entry<Integer, Rectangle> en : drawMap.entrySet()) {
                                         Component c = area.getComponents().get(en.getKey());
                                         Rectangle r = new Rectangle(en.getValue());
@@ -120,10 +125,11 @@ public class AreaView extends ComponentView {
                                         }
                                         if ((c instanceof Deck || c instanceof Area) && r.contains(e.getPoint())) {
                                             // long clicked on this rectangle of a collection
-                                            draggingLong.add(en);
+                                            dragging.add(en);
                                             if (c instanceof Deck) {
                                                 deckHighlight = (Deck<? extends Component>) c;
                                             }
+                                            draggingDependent.clear();
                                             break;
                                         }
                                     }
@@ -141,8 +147,8 @@ public class AreaView extends ComponentView {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                draggingLong.clear();
                 dragging.clear();
+                draggingDependent.clear();
 
                 if (selectionEnd != null && selectionStart != null && !selectionStart.equals(selectionEnd)) {
                     int topX = Math.min(selectionEnd.x, selectionStart.x);
@@ -179,8 +185,12 @@ public class AreaView extends ComponentView {
                                 deckHighlight = (Deck<? extends Component>) c;
                             }
 
-                            // clicked on this rectangle
-                            dragging.add(en);
+                            // Dragging this rectangle
+                            if (dependencies.containsKey(en.getKey())) {
+                                draggingDependent.add(en);
+                            } else {
+                                dragging.add(en);
+                            }
                         }
                     }
                 } else {
@@ -201,8 +211,9 @@ public class AreaView extends ComponentView {
                 if (selecting) {
                     selectionEnd = e.getPoint();
                 } else {
-                    if (draggingLong != null && draggingLong.size() > 0) {
-                        for (Map.Entry<Integer, Rectangle> dragged : draggingLong) {
+                    ArrayList<Integer> parents = new ArrayList<>();
+                    if (dragging != null && dragging.size() > 0) {
+                        for (Map.Entry<Integer, Rectangle> dragged : dragging) {
                             Point old = translation.get(dragged.getKey());
                             if (old != null) {  // Add to previous translation
                                 translation.put(dragged.getKey(),
@@ -211,10 +222,19 @@ public class AreaView extends ComponentView {
                                 translation.put(dragged.getKey(),
                                         new Point(e.getPoint().x - initialClick.x, e.getPoint().y - initialClick.y));
                             }
+                            parents.add(dragged.getKey());
                         }
                         repaint();
-                    } else if (dragging != null && dragging.size() > 0) {
-                        for (Map.Entry<Integer, Rectangle> dragged : dragging) {
+                    }
+
+                    // Only update translations of children if their parents not updated
+                    if (draggingDependent != null && draggingDependent.size() > 0) {
+                        for (Map.Entry<Integer, Rectangle> dragged : draggingDependent) {
+                            
+                            // Check if this one's parent was updated, skip if that's the case
+                            boolean parentUpdated = parents.contains(dependencies.get(dragged.getKey()));
+                            if (parentUpdated) continue;
+
                             Point old = translation.get(dragged.getKey());
                             if (old != null) {  // Add to previous translation
                                 translation.put(dragged.getKey(),
@@ -252,6 +272,18 @@ public class AreaView extends ComponentView {
             g.setColor(Color.black);
         }
 
+        // Draw dragging components
+        ArrayList<Map.Entry<Integer, Rectangle>> highlights = new ArrayList<>();
+        highlights.addAll(dragging);
+        highlights.addAll(draggingDependent);
+        for (Map.Entry<Integer, Rectangle> dragged: highlights) {
+            Rectangle r = dragged.getValue();
+            Rectangle toDraw = getRectangle(dragged.getKey(), r.width, r.height, drawMap, dependencies, translation);
+            g.setColor(Color.yellow);
+            g.drawRect(toDraw.x - 1, toDraw.y - 1, toDraw.width + 2, toDraw.height + 2);
+            g.setColor(Color.black);
+        }
+
         // Draw highlighted selection
         if (selectionStart != null && selectionEnd != null && !selectionStart.equals(selectionEnd)) {
             g.setColor(Color.green);
@@ -280,7 +312,7 @@ public class AreaView extends ComponentView {
             if (e.getValue() instanceof Deck) {
                 decks.add((Deck<? extends Component>) e.getValue());
 
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(), defaultCardWidth, defaultCardHeight, r, t, null, null);
+                Rectangle toDraw = getRectangle(e.getKey(), defaultCardWidth, defaultCardHeight, drawMap);
                 g.setColor(Color.lightGray);
                 g.fillRect(toDraw.x, toDraw.y, toDraw.width, toDraw.height);
                 g.setColor(Color.black);
@@ -289,7 +321,7 @@ public class AreaView extends ComponentView {
             } else if (e.getValue() instanceof Area) {
                 areas.add((Area) e.getValue());
 
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(),width/2, height/2, r, t, null, null);
+                Rectangle toDraw = getRectangle(e.getKey(),width/2, height/2, drawMap);
                 g.setColor(Color.black);
                 g.drawRect(toDraw.x, toDraw.y, toDraw.width, toDraw.height);
                 g.drawString(e.getValue().getComponentName(), toDraw.x, toDraw.y + toDraw.height + fontSize);
@@ -299,35 +331,23 @@ public class AreaView extends ComponentView {
         // Draw components
         for (Map.Entry<Integer, Component> e: area.getComponents().entrySet()) {
             Component c = e.getValue();
-            Rectangle r = drawMap.get(e.getKey());
-            Point t = translation.get(e.getKey());
-            Rectangle parent = null;
-            Point pt = null;
 
+            // Decks and areas already drawn
             if (e.getValue() instanceof Deck || e.getValue() instanceof Area) {
                 continue;
             }
 
             // Check dependencies, draw relative to parents
-            if (dependencies.containsKey(e.getKey())) {
-                parent = drawMap.get(dependencies.get(e.getKey()));
-                if (parent != null) {
-                    pt = translation.get(dependencies.get(e.getKey()));
-                }
-            } else {
+            if (!dependencies.containsKey(e.getKey())) {
                 // Check dependency
                 for (Area a : areas) {
                     if (a.getComponents().containsValue(c)) {
-                        parent = drawMap.get(a.getComponentID());
-                        pt = translation.get(a.getComponentID());
                         dependencies.put(e.getKey(), a.getComponentID());
                         break;
                     }
                 }
                 for (Deck<? extends Component> d : decks) {
                     if (d.getComponents().contains(c)) {
-                        parent = drawMap.get(d.getComponentID());
-                        pt = translation.get(d.getComponentID());
                         dependencies.put(e.getKey(), d.getComponentID());
                         break;
                     }
@@ -336,23 +356,23 @@ public class AreaView extends ComponentView {
 
             // Draw component itself (decks and areas already drawn)
             if (c instanceof GridBoard) {
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(),((GridBoard<?>) c).getWidth() * defaultItemSize,
-                        ((GridBoard<?>) c).getHeight() * defaultItemSize, r, t, parent, pt);
+                Rectangle toDraw = getRectangle(e.getKey(),((GridBoard<?>) c).getWidth() * defaultItemSize,
+                        ((GridBoard<?>) c).getHeight() * defaultItemSize, drawMap, dependencies, translation);
                 GridBoardView.drawGridBoard(g, (GridBoard<?>) c, toDraw);
             } else if (c instanceof Counter) {
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(), defaultItemSize, defaultItemSize, r, t, parent, pt);
+                Rectangle toDraw = getRectangle(e.getKey(), defaultItemSize, defaultItemSize, drawMap, dependencies, translation);
                 CounterView.drawCounter(g, (Counter) c, toDraw);
             } else if (c instanceof Card) {
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(), defaultCardWidth, defaultCardHeight, r, t, parent, pt);
+                Rectangle toDraw = getRectangle(e.getKey(), defaultCardWidth, defaultCardHeight, drawMap, dependencies, translation);
                 CardView.drawCard(g, (Card) c, toDraw);
             } else if (c instanceof Dice) {
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(), defaultItemSize, defaultItemSize, r, t, parent, pt);
+                Rectangle toDraw = getRectangle(e.getKey(), defaultItemSize, defaultItemSize, drawMap, dependencies, translation);
                 DieView.drawDie(g, (Dice) c, toDraw);
             } else if (c instanceof GraphBoard) {
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(), defaultBoardWidth, defaultBoardHeight, r, t, parent, pt);
+                Rectangle toDraw = getRectangle(e.getKey(), defaultBoardWidth, defaultBoardHeight, drawMap, dependencies, translation);
                 GraphBoardView.drawGraphBoard(g, (GraphBoard) c, toDraw);
             } else if (c instanceof Token) {
-                Rectangle toDraw = getRectangle(drawMap, e.getKey(), defaultItemSize, defaultItemSize, r, t, parent, pt);
+                Rectangle toDraw = getRectangle(e.getKey(), defaultItemSize, defaultItemSize, drawMap, dependencies, translation);
                 TokenView.drawToken(g, (Token) c, toDraw);
             } else {
                 System.out.println("Component unknown");
@@ -363,8 +383,20 @@ public class AreaView extends ComponentView {
         g.drawRect(x, y, width, height);
     }
 
-    private static Rectangle getRectangle(HashMap<Integer, Rectangle> drawMap, int key, int width, int height,
-                                          Rectangle r, Point t, Rectangle parent, Point pt) {
+    private static Rectangle getRectangle(int key, int width, int height,
+                                          HashMap<Integer, Rectangle> drawMap,
+                                          HashMap<Integer, Integer> dependencies,
+                                          HashMap<Integer, Point> translation) {
+        Rectangle r = drawMap.get(key);
+        Point t = translation.get(key);
+        Rectangle parent = null;
+        Point pt = null;
+        if (dependencies.containsKey(key)) {
+            int parentId = dependencies.get(key);
+            parent = drawMap.get(parentId);
+            pt = translation.get(parentId);
+        }
+
         if (r == null) {
             r = new Rectangle(0, 0, width, height);
             drawMap.put(key, r);
@@ -385,6 +417,16 @@ public class AreaView extends ComponentView {
             }
         }
         return drawn;
+    }
+
+    private static Rectangle getRectangle(int key, int width, int height,
+                                          HashMap<Integer, Rectangle> drawMap) {
+        Rectangle r = drawMap.get(key);
+        if (r == null) {
+            r = new Rectangle(0, 0, width, height);
+            drawMap.put(key, r);
+        }
+        return new Rectangle(r);
     }
 
     public Deck<? extends Component> getDeckHighlight() {
