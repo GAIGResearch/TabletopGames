@@ -268,8 +268,8 @@ public class Game {
             AbstractGUI gui = null;
 
             // Randomize parameters
-            AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
-            gameParameters.randomize();
+//            AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
+//            gameParameters.randomize();
 
             // Reset game instance, passing the players for this game
             game.reset(players);
