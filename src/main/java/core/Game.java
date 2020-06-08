@@ -5,7 +5,6 @@ import core.interfaces.IPrintable;
 import games.GameType;
 import players.ActionController;
 import players.HumanGUIPlayer;
-import players.OSLA;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
@@ -245,7 +244,7 @@ public class Game {
         ActionController ac = new ActionController();
 
         /* 1. Choose game to play */
-        GameType gameToPlay = Pandemic;
+        GameType gameToPlay = TicTacToe;
 //        List<GameType> games = GameType.Mechanic.Cooperative.getAllGames();
 
         /* 2. Running with visuals? */
@@ -258,8 +257,8 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-        players.add(new OSLA());
+//        players.add(new RandomPlayer(new Random()));
+//        players.add(new OSLA());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
@@ -267,6 +266,10 @@ public class Game {
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             AbstractGUI gui = null;
+
+            // Randomize parameters
+//            AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
+//            gameParameters.randomize();
 
             // Reset game instance, passing the players for this game
             game.reset(players);
