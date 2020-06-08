@@ -312,17 +312,9 @@ public class AreaView extends ComponentView {
             g.setColor(Color.black);
         }
 
-        // Draw highlights of dragging components
-        ArrayList<Map.Entry<Integer, Rectangle>> highlights = new ArrayList<>();
-        highlights.addAll(dragging);
-        highlights.addAll(draggingDependent);
-        for (Map.Entry<Integer, Rectangle> dragged: highlights) {
-            Rectangle r = dragged.getValue();
-            Rectangle toDraw = getRectangle(dragged.getKey(), r.width, r.height, drawMap, dependencies, translation);
-            g.setColor(Color.yellow);
-            g.drawRect(toDraw.x - 1, toDraw.y - 1, toDraw.width + 2, toDraw.height + 2);
-            g.setColor(Color.black);
-        }
+        // Draw highlights of dragging components, dependent orange, non-dependent yellow
+        drawHighlightDrag(g, dragging, Color.yellow);
+        drawHighlightDrag(g, draggingDependent, Color.orange);
 
         // Draw highlighted selection
         if (selectionStart != null && selectionEnd != null && !selectionStart.equals(selectionEnd)) {
@@ -334,6 +326,22 @@ public class AreaView extends ComponentView {
             g.drawRect(topX, topY, width, height);
             g.setColor(Color.black);
         }
+    }
+
+    /**
+     * Draws highlights of a list of rectangles with given color
+     * @param g - Graphics object to use for drawing
+     * @param highlights - list of highlighted rectangles
+     * @param color - color to highlight with
+     */
+    private void drawHighlightDrag(Graphics2D g, ArrayList<Map.Entry<Integer, Rectangle>> highlights, Color color) {
+        g.setColor(color);
+        for (Map.Entry<Integer,Rectangle> d: highlights) {
+            Rectangle r = d.getValue();
+            Rectangle toDraw = getRectangle(d.getKey(), r.width, r.height, drawMap, dependencies, translation);
+            g.drawRect(toDraw.x - 1, toDraw.y - 1, toDraw.width + 2, toDraw.height + 2);
+        }
+        g.setColor(Color.black);
     }
 
     /**
