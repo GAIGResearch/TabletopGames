@@ -32,6 +32,10 @@ public class TokenView extends JComponent {
         drawToken(g, 0, 0, size, token);
     }
 
+    public static void drawToken(Graphics2D g, Token token, Rectangle r) {
+        drawToken(g, r.x, r.y, r.width, token);
+    }
+
     public static void drawToken(Graphics2D g, int x, int y, int size, Token token) {
         int fontSize = g.getFont().getSize();
         int counterSize = size - fontSize;

@@ -21,6 +21,10 @@ public class DieView extends ComponentView {
         drawDie(g, 0, 0, width, (Dice) component);
     }
 
+    public static void drawDie(Graphics2D g, Dice die, Rectangle r) {
+        drawDie(g, r.x, r.y, r.width, die);
+    }
+
     public static void drawDie(Graphics2D g, int x, int y, int size, Dice die) {
         int fontSize = g.getFont().getSize();
         int nSides = 6;

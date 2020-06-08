@@ -21,6 +21,11 @@ public class CounterView extends ComponentView {
         drawCounter(g, 0, 0, width, (Counter) component);
     }
 
+
+    public static void drawCounter(Graphics2D g, Counter counter, Rectangle r) {
+        drawCounter(g, r.x, r.y, r.width, counter);
+    }
+
     public static void drawCounter(Graphics2D g, int x, int y, int size, Counter counter) {
         int fontSize = g.getFont().getSize();
         int counterSize = size - fontSize;

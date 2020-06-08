@@ -21,6 +21,10 @@ public class CardView extends ComponentView {
         drawCard(g, 0, 0, width, height, (Card) component);
     }
 
+    public static void drawCard(Graphics2D g, Card card, Rectangle r) {
+        drawCard(g, r.x, r.y, r.width, r.height, card);
+    }
+
     public static void drawCard(Graphics2D g, int x, int y, int width, int height, Card card) {
         // Draw background
         g.setColor(Color.lightGray);

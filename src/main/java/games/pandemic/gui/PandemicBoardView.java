@@ -204,7 +204,7 @@ public class PandemicBoardView extends JComponent {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
 
-            g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(Hash.GetInstance().hash("color"))).valueStr));
+            g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(colorHash)).valueStr));
             g.fillOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
             g.setColor(new Color(30, 108, 47));
             g.drawOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
