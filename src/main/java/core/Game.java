@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.GameType.*;
 
 public class Game {
@@ -145,7 +146,6 @@ public class Game {
             if (gui != null && !gui.isWindowOpen()) {
                 // Playing with GUI and closed window
                 terminate();
-                System.out.println("Windo wclosed");
                 break;
             }
 
@@ -212,7 +212,12 @@ public class Game {
      */
     private void updateGUI(AbstractGUI gui) {
         if (gui != null) {
-            gui.update(currentPlayer, gameState);
+            if (PARTIAL_OBSERVABLE) {
+                // Copying again to get the player's observation, in case player modifies the object received directly.
+                gui.update(currentPlayer, gameState.copy(currentPlayer.getPlayerID()));
+            } else {
+                gui.update(currentPlayer, gameState);
+            }
             try {
                 Thread.sleep(100);
             } catch (Exception e) {
