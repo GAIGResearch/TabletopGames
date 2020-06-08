@@ -6,54 +6,13 @@ import core.components.Component;
 import core.components.Deck;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
 
-// TODO: drag&drop components, snap to deck, reset deck
 public class DeckView<T extends Component> extends ComponentView {
     protected boolean front;
-
-    private HashMap<Integer, Rectangle> drawMap;
-    private Map.Entry<Integer, Rectangle> dragging;
 
     public DeckView(Deck<T> d, boolean visible) {
         super(d, AbstractGUI.defaultCardWidth, AbstractGUI.defaultCardHeight);
         this.front = visible;
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                for (Map.Entry<Integer, Rectangle> en: drawMap.entrySet()) {
-                    if (en.getValue().contains(e.getPoint())) {
-                        // clicked on this rectangle
-                        dragging = en;
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (dragging != null) {
-                    dragging.getValue().setLocation(e.getPoint());
-                    drawMap.put(dragging.getKey(), dragging.getValue());
-                    repaint();
-                    dragging = null;
-                }
-            }
-
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (dragging != null) {
-                    dragging.getValue().setLocation(e.getPoint());
-                    drawMap.put(dragging.getKey(), dragging.getValue());
-                    repaint();
-                    dragging = null;
-                }
-            }
-        });
     }
 
     @Override

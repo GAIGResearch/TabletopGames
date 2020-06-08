@@ -12,7 +12,7 @@ import java.util.List;
 
 import static core.AbstractGUI.*;
 
-// TODO: snap deck/area (add component to deck/area + dependency) + remove on extract
+// TODO: snap component to deck (add component to deck + dependency) + remove on extract
 // Long press move deck/area, short press move component in deck/area
 public class AreaView extends ComponentView {
     private HashMap<Integer, Rectangle> drawMap;  // Holds references to all the rectangles to be drawn, from position (0,0)
