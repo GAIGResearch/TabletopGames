@@ -5,7 +5,6 @@ import core.interfaces.IPrintable;
 import games.GameType;
 import players.ActionController;
 import players.HumanGUIPlayer;
-import players.OSLA;
 import players.RandomPlayer;
 
 import java.util.ArrayList;
@@ -303,6 +302,10 @@ public class Game {
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             AbstractGUI gui = null;
+
+            // Randomize parameters
+//            AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
+//            gameParameters.randomize();
 
             // Reset game instance, passing the players for this game
             game.reset(players);

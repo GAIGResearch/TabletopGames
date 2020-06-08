@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.TurnOrder;
 
+import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class UnoTurnOrder extends AlternatingTurnOrder {
@@ -40,10 +41,18 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
         turnCounter++;
         turnOwner = nextPlayer(gameState);
+        int n = 0;
         while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
             turnOwner = nextPlayer(gameState);
+            n++;
+            if (n >= nPlayers) {
+                gameState.setGameStatus(GAME_END);
+                break;
+            }
         }
     }
 

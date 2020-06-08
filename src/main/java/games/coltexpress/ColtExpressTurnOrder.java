@@ -5,6 +5,7 @@ import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
+import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 import static core.CoreConstants.VERBOSE;
 
@@ -138,8 +139,14 @@ public class ColtExpressTurnOrder extends TurnOrder {
         else {
             turnCounter = 0;
             turnOwner = 0;
+            int n = 0;
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
+                n++;
+                if (n >= nPlayers) {
+                    gameState.setGameStatus(GAME_END);
+                    break;
+                }
             }
         }
     }

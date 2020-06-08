@@ -7,6 +7,9 @@ import utilities.Utils;
 
 import java.util.LinkedList;
 
+import static utilities.Utils.GameResult.GAME_END;
+import static utilities.Utils.GameResult.GAME_ONGOING;
+
 public class PandemicTurnOrder extends ReactiveTurnOrder {
     protected int nStepsPerTurn;  // Number of steps in a turn before player's turn is finished
     protected int turnStep;  // 1 turn = n steps (by default n = 1)
@@ -36,17 +39,26 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
      * Method executed after a player's turn is finished.
      * By default it resets the turnStep counter to 0 and increases the turn counter.
      * Then moves to the next alive player. If this is the last player, the round ends.
+     * If the game has ended, turn owner is not changed. If there are no players still playing, game ends and method returns.
      * @param gameState - current game state.
      */
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnStep = 0;
             turnOwner = nextPlayer(gameState);
+            int n = 0;
             while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
+                n++;
+                if (n >= nPlayers) {
+                    gameState.setGameStatus(GAME_END);
+                    break;
+                }
             }
         }
     }
@@ -65,8 +77,14 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
             turnStep = 0;
             turnCounter = 0;
             turnOwner = 0;
+            int n = 0;
             while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
+                n++;
+                if (n >= nPlayers) {
+                    gameState.setGameStatus(GAME_END);
+                    break;
+                }
             }
         }
     }

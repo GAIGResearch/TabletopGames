@@ -1,10 +1,10 @@
 package core.turnorders;
 
 import core.AbstractGameState;
-import utilities.Utils;
 
 import java.util.Objects;
 
+import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public abstract class TurnOrder {
@@ -108,15 +108,24 @@ public abstract class TurnOrder {
      * Method executed after a player's turn is finished.
      * By default it resets the turnStep counter to 0 and increases the turn counter.
      * Then moves to the next alive player. If this is the last player, the round ends.
+     * If the game has ended, turn owner is not changed. If there are no players still playing, game ends and method returns.
      * @param gameState - current game state.
      */
     public void endPlayerTurn(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnOwner = nextPlayer(gameState);
+            int n = 0;
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
+                n++;
+                if (n >= nPlayers) {
+                    gameState.setGameStatus(GAME_END);
+                    break;
+                }
             }
         }
     }
@@ -125,16 +134,23 @@ public abstract class TurnOrder {
      * Method executed after all player turns.
      * By default it resets the turn counter, the turn owner to the first alive player and increases round counter.
      * If maximum number of rounds reached, game ends.
+     * If there are no players still playing, game ends and method returns.
      * @param gameState - current game state.
      */
     public void endRound(AbstractGameState gameState) {
         roundCounter++;
-        if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(Utils.GameResult.GAME_END);
+        if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(GAME_END);
         else {
             turnCounter = 0;
             turnOwner = 0;
+            int n = 0;
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
+                n++;
+                if (n >= nPlayers) {
+                    gameState.setGameStatus(GAME_END);
+                    break;
+                }
             }
         }
     }
@@ -154,7 +170,7 @@ public abstract class TurnOrder {
      * @return - int, player ID in range [0, nPlayers)
      */
     public int nextPlayer(AbstractGameState gameState) {
-        return (turnOwner+1) % nPlayers;
+        return (nPlayers+turnOwner+1) % nPlayers;
     }
 
     @Override
