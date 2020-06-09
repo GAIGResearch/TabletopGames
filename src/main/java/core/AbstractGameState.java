@@ -107,7 +107,9 @@ public abstract class AbstractGameState {
     public final Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
-
+    public final Area getAllComponents() {
+        return allComponents;
+    }
     /* Limited access final methods */
 
     /**

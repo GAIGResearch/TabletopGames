@@ -52,6 +52,7 @@
     "maxNeighbours": -1,
     "id": "cities",
     "img": "pandemicBG.jpg",
+    "size": ["Vector2D", [1200, 849]],
     "nodes" :
     [
       {

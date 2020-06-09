@@ -1,9 +1,10 @@
-package utilities;
+package gui;
 
 import core.rules.Node;
 import core.rules.nodetypes.ConditionNode;
 import core.rules.nodetypes.BranchingRuleNode;
 import core.rules.nodetypes.RuleNode;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -122,15 +123,17 @@ public class GameFlowDiagram extends JFrame {
             if (n.x > maxX) maxX = n.x;
 
             if (node instanceof RuleNode) {
-                traverseNodes(node.getNext(), level + 1);
-            } else if (node instanceof ConditionNode) {
+                if (node instanceof BranchingRuleNode) {
+                    Node[] children = ((BranchingRuleNode) node).getChildren();
+                    for (Node child : children) {
+                        traverseNodes(child, level + 1);
+                    }
+                } else {
+                    traverseNodes(node.getNext(), level + 1);
+                }
+            } if (node instanceof ConditionNode) {
                 traverseNodes(((ConditionNode) node).getYesNo()[1], level + 1);
                 traverseNodes(((ConditionNode) node).getYesNo()[0], level + 1);
-            } else if (node instanceof BranchingRuleNode) {
-                Node[] children = ((BranchingRuleNode) node).getChildren();
-                for (Node child : children) {
-                    traverseNodes(child, level + 1);
-                }
             }
         }
         private void drawTree(Graphics2D g) {
@@ -293,13 +296,26 @@ public class GameFlowDiagram extends JFrame {
             this.actionRequired = n.requireAction();
             this.nextPlayer = n.isNextPlayerNode();
             if (n instanceof RuleNode) {
-                this.type = NodeType.RULE;
-                this.gameOver = ((RuleNode) n).getGameOverConditions().size() > 0;
-                this.childrenId = new int[1];
-                if (n.getNext() != null) this.childrenId[0] = n.getNext().getId();
-                else {
-                    this.childrenId[0] = -1;
+                if (n instanceof BranchingRuleNode) {
+                    this.type = NodeType.BRANCHING;
+                    Node[] children = ((BranchingRuleNode) n).getChildren();
+                    this.childrenId = new int[children.length];
                     terminal = true;
+                    for (int i = 0; i < children.length; i++) {
+                        if (children[i] != null) {
+                            this.childrenId[i] = children[i].getId();
+                            terminal = false;
+                        } else this.childrenId[i] = -1;
+                    }
+                } else {
+                    this.type = NodeType.RULE;
+                    this.gameOver = ((RuleNode) n).getGameOverConditions().size() > 0;
+                    this.childrenId = new int[1];
+                    if (n.getNext() != null) this.childrenId[0] = n.getNext().getId();
+                    else {
+                        this.childrenId[0] = -1;
+                        terminal = true;
+                    }
                 }
             } else if (n instanceof ConditionNode) {
                 this.type = NodeType.CONDITION;
@@ -317,18 +333,6 @@ public class GameFlowDiagram extends JFrame {
                     terminal = false;
                 }
                 else this.childrenId[1] = -1;
-            } else if (n instanceof BranchingRuleNode) {
-                this.type = NodeType.BRANCHING;
-                Node[] children = ((BranchingRuleNode) n).getChildren();
-                this.childrenId = new int[children.length];
-                terminal = true;
-                for (int i = 0; i < children.length; i++) {
-                    if (children[i] != null) {
-                        this.childrenId[i] = children[i].getId();
-                        terminal = false;
-                    }
-                    else this.childrenId[i] = -1;
-                }
             }
         }
 

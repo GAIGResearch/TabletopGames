@@ -16,7 +16,6 @@ import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
 import players.ActionController;
 import players.HumanGUIPlayer;
-import utilities.CounterView;
 import utilities.Hash;
 
 import javax.swing.*;
@@ -73,7 +72,7 @@ public class PandemicGUI extends AbstractGUI {
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
         gameTurnStep = new JLabel();
-        JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState);
+        JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
         JComponent actionPanel = createActionPanel(highlights, 300, 200);
@@ -87,12 +86,7 @@ public class PandemicGUI extends AbstractGUI {
         getContentPane().add(boardView, BorderLayout.CENTER);
         getContentPane().add(counterArea, BorderLayout.SOUTH);
 
-        // Frame properties
-        pack();
-        this.setVisible(true);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        repaint();
+        setFrameProperties();
     }
 
     private JPanel createPlayerAreas() {
@@ -134,7 +128,7 @@ public class PandemicGUI extends AbstractGUI {
                 hand.add(cv2);
             }
             JScrollPane scrollPane = new JScrollPane(hand);
-            scrollPane.setPreferredSize(new Dimension(cardWidth + offset*2, cardHeight*3 + offset));
+            scrollPane.setPreferredSize(new Dimension(cardWidth + offset*2, cardHeight *3 + offset));
             scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
             playerHandPanel.add(scrollPane);
@@ -173,7 +167,7 @@ public class PandemicGUI extends AbstractGUI {
         }
 
         JScrollPane scrollPane = new JScrollPane(bufferDeckArea);
-        scrollPane.setPreferredSize(new Dimension(cardWidth*3 + offset, cardHeight + offset*2));
+        scrollPane.setPreferredSize(new Dimension(cardWidth *3 + offset, cardHeight + offset*2));
         scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
         cardAreas.add(bufferDeckArea);
@@ -201,8 +195,8 @@ public class PandemicGUI extends AbstractGUI {
         return cv2;
     }
 
-    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState) {
-        JPanel gameInfo = super.createGameStateInfoPanel(gameTitle, gameState);
+    protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {
+        JPanel gameInfo = super.createGameStateInfoPanel("Pandemic", gameState, 300, defaultInfoPanelHeight);
         gameInfo.add(gameTurnStep);
 
         return gameInfo;
@@ -217,16 +211,16 @@ public class PandemicGUI extends AbstractGUI {
         JPanel counterArea = new JPanel();
 
         Counter cnY = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
-        JComponent cY = new CounterView(cnY, Color.yellow, null);
+        JComponent cY = new PandemicCounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
         Counter cnR = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease red"));
-        JComponent cR = new CounterView(cnR, Color.red, null);
+        JComponent cR = new PandemicCounterView(cnR, Color.red, null);
         counterArea.add(cR);
         Counter cnB = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease blue"));
-        JComponent cB = new CounterView(cnB, Color.blue, null);
+        JComponent cB = new PandemicCounterView(cnB, Color.blue, null);
         counterArea.add(cB);
         Counter cnK = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease black"));
-        JComponent cK = new CounterView(cnK, Color.black, null);
+        JComponent cK = new PandemicCounterView(cnK, Color.black, null);
         counterArea.add(cK);
 
         return counterArea;
@@ -240,7 +234,7 @@ public class PandemicGUI extends AbstractGUI {
 
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) this.gameState.getComponent(PandemicConstants.playerCardHash, i);
-            playerCards[i].updateCard(playerCard);
+            playerCards[i].updateComponent(playerCard);
             playerCards[i].setUsingSecondary(i == activePlayer);
             playerCards[i].repaint();
 
@@ -249,14 +243,14 @@ public class PandemicGUI extends AbstractGUI {
             for (int j = 0; j < nCards; j++) {
                 Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
-                    playerHands[i].get(j).updateCard(c);
+                    playerHands[i].get(j).updateComponent(c);
                     playerHands[i].get(j).setVisible(true);
                 } else {
                     getCardView(i, c, j);
                 }
             }
             for (int j = nCards; j < playerHands[i].size(); j++) {
-                playerHands[i].get(j).updateCard(null);
+                playerHands[i].get(j).updateComponent(null);
                 if (j == 0) playerHands[i].get(j).setVisible(true);
                 else playerHands[i].get(j).setVisible(false);
             }
@@ -378,7 +372,7 @@ public class PandemicGUI extends AbstractGUI {
             } else if (action instanceof QuietNight) {  // Event
                 // QuietNight card in hand selected
                 for (int i = 0; i < handCardHighlights[id].size(); i++) {
-                    Card c = playerHands[id].get(i).getCard();
+                    Card c = (Card) playerHands[id].get(i).getComponent();
                     if (c != null) {
                         String name = ((PropertyString)c.getProperty(nameHash)).value;
                         if (name.equals("One quiet night")) {
@@ -401,8 +395,8 @@ public class PandemicGUI extends AbstractGUI {
                     // Show top N card of infection discard deck for player to select order
                     for (int i = 0; i < nCards; i++) {
                         Card c = deckFrom.peek();
-                        if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
-                            bufferDeck.get(i).updateCard(c);
+                        if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                            bufferDeck.get(i).updateComponent(c);
                         }
                     }
 
@@ -432,8 +426,8 @@ public class PandemicGUI extends AbstractGUI {
                     for (int i = 0; i < deck.getSize(); i++) {
                         if (i < maxBufferCards) {
                             Card c = deck.peek();
-                            if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
-                                bufferDeck.get(i).updateCard(c);
+                            if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                                bufferDeck.get(i).updateComponent(c);
                             }
                         } else {
                             System.out.println("More cards in deck that are not displayed");
@@ -454,7 +448,7 @@ public class PandemicGUI extends AbstractGUI {
                 if (this.gameState.getGamePhase() == DiscardReaction) {  // Discarding
                     int idx = ((DrawCard) action).getFromIndex();
                     if (handCardHighlights[id].contains(idx)) {
-                        Card c = playerHands[id].get(idx).getCard();
+                        Card c = (Card) playerHands[id].get(idx).getComponent();
                         if (c != null) {
                             String name = ((PropertyString)c.getProperty(nameHash)).value;
                             // Action name should be just "Discard" for card selected in hand
@@ -470,8 +464,8 @@ public class PandemicGUI extends AbstractGUI {
                             for (int i = 0; i < deck.getSize(); i++) {
                                 if (i < maxBufferCards) {
                                     Card c = deck.peek();
-                                    if (c != null && !bufferDeck.get(i).getCard().equals(c)) {
-                                        bufferDeck.get(i).updateCard(c);
+                                    if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                                        bufferDeck.get(i).updateComponent(c);
                                     }
                                 } else {
                                     System.out.println("More cards in deck that are not displayed");
@@ -482,7 +476,7 @@ public class PandemicGUI extends AbstractGUI {
                                 int selected = bufferHighlights.get(0);
 
                                 if (((DrawCard) action).getFromIndex() == selected) {
-                                    Card c = playerHands[id].get(selected).getCard();
+                                    Card c = (Card) playerHands[id].get(selected).getComponent();
                                     if (c != null) {
                                         String name = ((PropertyString) c.getProperty(nameHash)).value;
                                         actionButtons[k].setVisible(true);
@@ -517,7 +511,7 @@ public class PandemicGUI extends AbstractGUI {
         int n = playerHands[player].size();
         for (int i = 0; i < n; i++) {
             PandemicCardView pcv = playerHands[player].get(i);
-            if (pcv.getCard() != null && pcv.getCard().equals(c)) return i;
+            if (pcv.getComponent() != null && pcv.getComponent().equals(c)) return i;
         }
         return -1;
     }

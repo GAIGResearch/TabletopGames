@@ -56,11 +56,14 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
             // Add defuse card
             ExplodingKittenCard defuse =  new ExplodingKittenCard(ExplodingKittenCard.CardType.DEFUSE);
+            defuse.setOwnerId(i);
             playerCards.add(defuse);
 
             // Add N random cards from the deck
             for (int j = 0; j < ekp.nCardsPerPlayer; j++) {
-                playerCards.add(ekgs.getDrawPile().draw());
+                ExplodingKittenCard c = ekgs.getDrawPile().draw();
+                c.setOwnerId(i);
+                playerCards.add(c);
             }
         }
         ekgs.setPlayerHandCards(playerHandCards);

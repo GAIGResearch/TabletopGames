@@ -119,8 +119,9 @@ public class GridBoard<T> extends Component {
     @Override
     public String toString() {
         String s = "";
-        for (T[] ts : grid) {
-            for (T t : ts) {
+        for (int y = 0; y < getHeight(); y++) {
+            for (int x = 0; x < getWidth(); x++) {
+                T t = getElement(x, y);
                 if (t instanceof Character && t.equals(' ')) s += '.';
                 else s += t;
             }

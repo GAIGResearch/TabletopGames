@@ -29,7 +29,8 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
         super.execute(gs);
 
         // Execute exploding kitten effect
-        ExplodingKittenCard c = (ExplodingKittenCard) super.getCard(gs);
+        ExplodingKittenCard c = (ExplodingKittenCard) getCard(gs);
+        c.setOwnerId(playerID);
         ExplodingKittenCard.CardType type = c.cardType;
         if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
             // An exploding kitten was drawn, check if player has defuse card

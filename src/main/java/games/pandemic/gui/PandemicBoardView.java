@@ -15,9 +15,9 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
+import static gui.views.DeckView.drawDeck;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.gui.PandemicCardView.drawCard;
-import static games.pandemic.gui.PandemicCardView.drawDeckBack;
 import static core.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
@@ -204,7 +204,7 @@ public class PandemicBoardView extends JComponent {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
 
-            g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(Hash.GetInstance().hash("color"))).valueStr));
+            g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(colorHash)).valueStr));
             g.fillOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
             g.setColor(new Color(30, 108, 47));
             g.drawOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
@@ -340,9 +340,9 @@ public class PandemicBoardView extends JComponent {
         g.setFont(labelFontS);
         g.drawString("Planner Deck", (int)plannerDeckLocation.getX(), (int)plannerDeckLocation.getY() - fontSize);
 
-        drawDeckBack(g, null, null, infectionDeckLocation);
+        drawDeck(g, (Deck<Card>) gameState.getComponent(infectionHash), null, null, infectionDeckLocation, false);
         g.drawString("Infection Deck", (int)infectionDeckLocation.getX(), (int)infectionDeckLocation.getY() - fontSize);
-        drawDeckBack(g, null, null, playerDeckLocation);
+        drawDeck(g, (Deck<Card>) gameState.getComponent(playerDeckHash), null, null, playerDeckLocation, false);
         g.drawString("Player Deck", (int)playerDeckLocation.getX(), (int)playerDeckLocation.getY() - fontSize);
         g.setFont(f);
 

@@ -1,6 +1,7 @@
 package games;
 
 import core.*;
+import core.components.GridBoard;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -23,6 +24,7 @@ import games.uno.UnoGameState;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
+import gui.PrototypeGUI;
 import players.ActionController;
 
 import java.util.ArrayList;
@@ -167,7 +169,6 @@ public enum GameType {
      * @param ac - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     public AbstractGUI createGUI(AbstractGameState gameState, ActionController ac) {
 
         AbstractGUI gui = null;
@@ -176,6 +177,12 @@ public enum GameType {
             case Pandemic:
                 gui = new PandemicGUI(gameState, ac);
                 break;
+            case ExplodingKittens:
+                if (gameState != null) {
+                    gui = new PrototypeGUI(this, gameState, ac, 500);
+                } else {
+                    gui = new PrototypeGUI(this,null, ac, 0);
+                }
         }
 
         return gui;
@@ -322,16 +329,18 @@ public enum GameType {
 
     @Override
     public String toString() {
-        boolean implemented = (createGameInstance(minPlayers) != null);
-        boolean gui = (createGUI(null, null) != null);
-        return (gui? ANSI_BLUE : implemented? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
+        boolean implemented = createGameInstance(minPlayers) != null;
+        AbstractGUI g = createGUI(null, null);
+        boolean gui = g != null;
+        boolean prototypeGUI = g instanceof PrototypeGUI;
+        return (gui? prototypeGUI? ANSI_CYAN : ANSI_BLUE : implemented? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
                 "\n\tminPlayers = " + minPlayers +
                 "\n\tmaxPlayers = " + maxPlayers +
                 "\n\tcategories = " + categories +
                 "\n\tmechanics = " + mechanics +
                 (implemented? ANSI_GREEN: ANSI_RED) +
                 "\n\timplemented = " + implemented + ANSI_RESET +
-                (gui? ANSI_BLUE: ANSI_RED) +
+                (gui? prototypeGUI? ANSI_CYAN : ANSI_BLUE : ANSI_RED) +
                 "\n\tGUI = " + gui + ANSI_RESET +
                 "\n}\n";
     }

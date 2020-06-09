@@ -1,37 +1,27 @@
-package utilities;
+package games.pandemic.gui;
 
 import core.components.Counter;
+import gui.views.CounterView;
+import utilities.ImageIO;
 
-import javax.swing.*;
 import java.awt.*;
 
-public class CounterView extends JComponent {
+public class PandemicCounterView extends CounterView {
     private Image background;
-    private Counter counter;
     private Color color;
-    private int width;
-    private int height;
 
-    public CounterView(Counter c, Color color, String backgroundPath) {
-        this.counter = c;
+    public PandemicCounterView(Counter c, Color color, String backgroundPath) {
+        super(c);
         this.color = color;
         if (backgroundPath != null && !backgroundPath.equals("")) {
             this.background = ImageIO.GetInstance().getImage(backgroundPath);
-            width = background.getWidth(null);
-            height = background.getHeight(null);
-        } else {
-            width = 20;
-            height = 20;
+            width = Math.max(background.getWidth(null), background.getHeight(null));
+            height = width;
         }
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        drawCounter((Graphics2D) g);
-    }
-
     public void drawCounter(Graphics2D g) {
-        // Draw card background
+        // Draw background
         if (background != null) {
             g.drawImage(background, 0, 0, null, null);
         } else {
@@ -40,7 +30,7 @@ public class CounterView extends JComponent {
             g.setColor(Color.black);
         }
 
-        int value = counter.getValue();
+        int value = ((Counter)component).getValue();
         g.drawString(""+value, 5, 15);
 
         if (color != null) {
@@ -49,8 +39,4 @@ public class CounterView extends JComponent {
         g.drawOval(0, 0, width-1, height-1);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height);
-    }
 }
