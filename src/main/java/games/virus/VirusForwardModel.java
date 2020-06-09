@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static core.CoreConstants.VERBOSE;
 import static games.virus.cards.VirusCard.VirusCardOrgan.Wild;
 import static games.virus.cards.VirusCard.VirusCardOrgan.None;
 
@@ -189,11 +190,13 @@ public class VirusForwardModel extends AbstractForwardModel {
 
     @Override
     protected void endGame(AbstractGameState gameState) {
-        System.out.println("Game Results:");
-        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
-                System.out.println("The winner is the player : " + playerID);
-                break;
+        if (VERBOSE) {
+            System.out.println("Game Results:");
+            for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
+                if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
+                    System.out.println("The winner is the player : " + playerID);
+                    break;
+                }
             }
         }
     }

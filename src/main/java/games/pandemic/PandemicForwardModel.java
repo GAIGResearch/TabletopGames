@@ -303,4 +303,11 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
     protected AbstractForwardModel _copy() {
         return new PandemicForwardModel(root);
     }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
+            gameState.setPlayerResult(gameState.getGameStatus(), i);
+        }
+    }
 }

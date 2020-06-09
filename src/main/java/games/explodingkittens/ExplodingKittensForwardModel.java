@@ -162,9 +162,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         }
 
         // Print end game result
-        System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        for (int j = 0; j < gameState.getNPlayers(); j++){
-            System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);
+        if (VERBOSE) {
+            System.out.println(Arrays.toString(gameState.getPlayerResults()));
+            for (int j = 0; j < gameState.getNPlayers(); j++) {
+                System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);
+            }
         }
     }
 
