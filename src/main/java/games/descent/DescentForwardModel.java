@@ -11,6 +11,7 @@ import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import utilities.Vector2D;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,13 +63,26 @@ public class DescentForwardModel extends AbstractForwardModel {
         String[][] board = new String[height][width];
         dgs.tileReferences = new int[height][width];
         HashSet<BoardNode> drawn = new HashSet<>();
-        addTilesToBoard(config.getBoardNodes().get(0), width/2, height/2, board, dgs.tiles, dgs.tileReferences, drawn);  // TODO: not all tiles might be connected
+
+        BoardNode bn0 = config.getBoardNodes().get(0);  // Assumes all tiles in this board are connected
+        GridBoard tile = dgs.tiles.get(bn0.getComponentID());
+        int orientation = ((PropertyInt)bn0.getProperty(orientationHash)).value;
+        String[][] rotated = (String[][]) tile.rotate(orientation);
+        int startX = width / 2 - rotated[0].length/2;
+        int startY = height / 2 - rotated.length/2;
+        Rectangle bounds = addTilesToBoard(bn0, startX, startY, board, dgs.tiles, dgs.tileReferences, drawn,
+                startX, startY, startX + rotated[0].length, startY + rotated.length);
+
+        // TODO: trim the resulting board to remove excess border of nulls according to 'bounds' rectangle
+
         dgs.masterBoard = new GridBoard<>(board, String.class);
-        // TODO
+
+        // TODO initial setup
     }
 
-    private void addTilesToBoard(BoardNode bn, int x, int y, String[][] board, HashMap<Integer, GridBoard> tiles,
-                                 int[][] tileReferences, HashSet<BoardNode> drawn) {
+    private Rectangle addTilesToBoard(BoardNode bn, int x, int y, String[][] board, HashMap<Integer, GridBoard> tiles,
+                                      int[][] tileReferences, HashSet<BoardNode> drawn,
+                                      int minX, int minY, int maxX, int maxY) {
         if (!drawn.contains(bn)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(bn.getComponentID());
@@ -76,60 +90,102 @@ public class DescentForwardModel extends AbstractForwardModel {
             int height = tileGrid.length;
             int width = tileGrid[0].length;
 
-            HashMap<String, ArrayList<Vector2D>> openings = new HashMap<>();
+            HashMap<String, ArrayList<Vector2D>> openings = findOpenings(tileGrid);
+
             for (int i = y; i < y + height; i++) {
-                for (int j = x; j < x + width; x++) {
+                for (int j = x; j < x + width; j++) {
                     board[i][j] = tileGrid[i-y][j-x];
                     tileReferences[i][j] = tile.getComponentID();
-
-                    if (tileGrid[i-y][j-x].equalsIgnoreCase("open")) {
-                        // Which side are we on?
-                        // TODO: corners, non-grid tiles
-                        String side;
-                        if (i - y == 0) { // top
-                            side = "N";
-                        } else if (i - y == height) {  // bottom
-                            side = "S";
-                        } else if (j - x == 0) {
-                            side = "W";
-                        } else {
-                            side = "E";
-                        }
-                        if (!openings.containsKey(side)) {
-                            openings.put(side, new ArrayList<>());
-                        }
-                        openings.get(side).add(new Vector2D(j, i));
-                    }
                 }
             }
             drawn.add(bn);
 
             // Draw neighbours
             for (BoardNode neighbour: bn.getNeighbours()) {
-                String[] neighs = ((PropertyStringArray) bn.getProperty(neighbourHash)).getValues();
-                String[] connections = ((PropertyStringArray) bn.getProperty(connectionHash)).getValues();
-
-                Vector2D topLeftCorner = null;
 
                 // Find location to start drawing neighbour
-                for (int i = 0; i < neighs.length; i++) {
-                    if (neighs[i].equalsIgnoreCase(neighbour.getComponentName())) {
-                        String conn = connections[i];
+                Vector2D connectionToNeighbour = findConnection(bn, neighbour, openings);
 
-                        String side = conn.split("-")[0];
-                        int countFromTop = Integer.parseInt(conn.split("-")[1]);
-                        Vector2D open = openings.get(side).get(countFromTop);
+                if (connectionToNeighbour != null) {
+                    // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
+                    GridBoard tileN = tiles.get(neighbour.getComponentID());
+                    String[][] tileGridN = (String[][]) tileN.rotate(((PropertyInt)neighbour.getProperty(orientationHash)).value);
 
-                        // TODO: find orientation and opening connection from neighbour, check if they can match-up, generate top-left corner of neighbour from that
-                        topLeftCorner = open;
+                    // Find open spots on the tile
+                    HashMap<String, ArrayList<Vector2D>> openings2 = findOpenings(tileGridN);
+
+                    // Find location to start drawing neighbour
+                    Vector2D connectionFromNeighbour = findConnection(neighbour, bn, openings2);
+
+                    if (connectionFromNeighbour != null) {
+                        Vector2D topLeftCorner = new Vector2D(connectionToNeighbour.getX() - connectionFromNeighbour.getX(),
+                                connectionToNeighbour.getY() - connectionFromNeighbour.getY());
+
+                        // Update area bounds
+                        if (topLeftCorner.getX() < minX) minX = topLeftCorner.getX();
+                        if (topLeftCorner.getY() < minY) minY = topLeftCorner.getY();
+                        if (topLeftCorner.getX() + tileGridN[0].length > maxX) maxX = topLeftCorner.getX() + tileGridN[0].length;
+                        if (topLeftCorner.getY() + tileGridN.length > maxY) maxY = topLeftCorner.getY() + tileGridN.length;
+
+                        // Draw neighbour recursively
+                        addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tiles, tileReferences, drawn,
+                                minX, minY, maxX, maxY);
                     }
-                }
-
-                if (topLeftCorner != null) {
-                    addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tiles, tileReferences, drawn);
                 }
             }
         }
+        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    private Vector2D findConnection(BoardNode from, BoardNode to, HashMap<String, ArrayList<Vector2D>> openings) {
+        String[] neighbours = ((PropertyStringArray) from.getProperty(neighbourHash)).getValues();
+        String[] connections = ((PropertyStringArray) from.getProperty(connectionHash)).getValues();
+
+        for (int i = 0; i < neighbours.length; i++) {
+            if (neighbours[i].equalsIgnoreCase(to.getComponentName())) {
+                String conn = connections[i];
+
+                String side = conn.split("-")[0];
+                int countFromTop = Integer.parseInt(conn.split("-")[1]);
+                if (openings.containsKey(side)) {
+                    if (countFromTop >= 0 && countFromTop < openings.get(side).size()) {
+                        return openings.get(side).get(countFromTop);
+                    }
+                }
+                break;
+            }
+        }
+        return null;
+    }
+
+    private HashMap<String, ArrayList<Vector2D>> findOpenings(String[][] tileGrid) {
+        int height = tileGrid.length;
+        int width = tileGrid[0].length;
+
+        HashMap<String, ArrayList<Vector2D>> openings = new HashMap<>();
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (tileGrid[i][j].equalsIgnoreCase("open")) {
+                    // Which side are we on?
+                    // TODO: corners, non-grid tiles
+                    String side;
+                    if (i == 0) { // top
+                        side = "N";
+                    } else if (i == height - 1) {  // bottom
+                        side = "S";
+                    } else if (j == 0) {
+                        side = "W";
+                    } else {
+                        side = "E";
+                    }
+                    if (!openings.containsKey(side)) {
+                        openings.put(side, new ArrayList<>());
+                    }
+                    openings.get(side).add(new Vector2D(j, i));
+                }
+            }
+        }
+        return openings;
     }
 
     @Override
