@@ -5,14 +5,18 @@ import core.interfaces.IPrintable;
 import games.GameType;
 import players.ActionController;
 import players.HumanGUIPlayer;
+import players.OSLA;
 import players.RandomPlayer;
+import utilities.StatSummary;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
-import static games.GameType.*;
+import static core.CoreConstants.VERBOSE;
+import static games.GameType.ExplodingKittens;
 
 public class Game {
 
@@ -156,14 +160,14 @@ public class Game {
             updateGUI(gui);
 
             if (gameState.isNotTerminal()) {
-                if (CoreConstants.VERBOSE) {
+                if (VERBOSE) {
                     System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
                 }
 
                 // Get actions for the player
                 List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
                 AbstractGameState observation = gameState.copy(activePlayer);
-                if (observation instanceof IPrintable && CoreConstants.VERBOSE) {
+                if (observation instanceof IPrintable && VERBOSE) {
                     ((IPrintable) observation).printToConsole();
                 }
 
@@ -230,13 +234,15 @@ public class Game {
      */
     private void terminate() {
         // Print last state
-        if (gameState instanceof IPrintable && CoreConstants.VERBOSE) {
+        if (gameState instanceof IPrintable && VERBOSE) {
             ((IPrintable) gameState).printToConsole();
         }
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        System.out.println("Game Over");
+        if (VERBOSE) {
+            System.out.println("Game Over");
+        }
 
         // Allow players to terminate
         for (AbstractPlayer player: players) {
@@ -268,49 +274,59 @@ public class Game {
 
     /**
      * Main class used to run the framework. The user must specify:
-     *      1. Game type to play
-     *      2. Visuals on/off
-     *      3. Random seed for the game
-     *      4. Players for the game
+     *      1. Action controller for GUI interactions / null for no visuals
+     *      2. Random seed for the game
+     *      3. Players for the game
+     *      4. Mode of running
      * and then run this class.
      */
-    @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) {
-        // Action controller for GUI interactions
-        ActionController ac = new ActionController();
+        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        ActionController ac = new ActionController(); //null;
 
-        /* 1. Choose game to play */
-        GameType gameToPlay = ExplodingKittens;
-//        List<GameType> games = GameType.Mechanic.Cooperative.getAllGames();
-
-        /* 2. Running with visuals? */
-        boolean visuals = true;
-
-        /* 3. Game seed */
+        /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
 
-        /* 4. Set up players for the game */
+        /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer(new Random()));
-//        players.add(new RandomPlayer(new Random()));
-//        players.add(new RandomPlayer(new Random()));
-//        players.add(new OSLA());
-        players.add(new HumanGUIPlayer(ac));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new OSLA());
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
+        /* 4. Run! */
+        runOne(ExplodingKittens, players, seed, ac, false);
+//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
+    }
+
+    /**
+     * Runs one game.
+     * @param gameToPlay - game to play
+     * @param players - list of players for the game
+     * @param seed - random seed for the game
+     * @param ac - Action Controller object allowing GUI interaction. If null, runs without visuals.
+     * @param randomizeParameters - if true, parameters are randomized for each run of each game (if possible).
+     * @return - game instance created for the run
+     */
+    private static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed, ActionController ac,
+                               boolean randomizeParameters) {
         // Creating game instance (null if not implemented)
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
-            AbstractGUI gui = null;
 
             // Randomize parameters
-//            AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
-//            gameParameters.randomize();
+            if (randomizeParameters) {
+                AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
+                gameParameters.randomize();
+            }
 
             // Reset game instance, passing the players for this game
             game.reset(players);
 
-            if (visuals) {
+            AbstractGUI gui = null;
+            if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
                 gui = gameToPlay.createGUI(game.getGameState(), ac);
             }
@@ -319,6 +335,136 @@ public class Game {
             game.run(gui);
         } else {
             System.out.println("Error game: " + gameToPlay);
+        }
+
+        return game;
+    }
+
+    /**
+     * Runs several games with a given random seed.
+     * @param gamesToPlay - list of games to play.
+     * @param players - list of players for the game.
+     * @param nRepetitions - number of repetitions of each game.
+     * @param seed - random seed for all games. If null, a new random seed is used for each game.
+     * @param ac - action controller for GUI interactions, null if playing without visuals.
+     * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
+     */
+    private static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
+                                int nRepetitions, ActionController ac, boolean randomizeParameters) {
+        int nPlayers = players.size();
+
+        // Save win rate statistics over all games
+        StatSummary[] overall = new StatSummary[nPlayers];
+        for (int i = 0; i < nPlayers; i++) {
+            overall[i] = new StatSummary("Overall Player " + i);
+        }
+
+        // For each game...
+        for (GameType gt: gamesToPlay) {
+
+            // Save win rate statistics over all repetitions of this game
+            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            for (int i = 0; i < nPlayers; i++) {
+                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+            }
+
+            // Play n repetitions of this game and record player results
+            Game game = null;
+            for (int i = 0; i < nRepetitions; i++) {
+                if (seed == null) seed = System.currentTimeMillis();
+                game = runOne(gt, players, seed, ac, randomizeParameters);
+                if (game != null) {
+                    recordPlayerResults(statSummaries, game);
+                } else {
+                    break;
+                }
+            }
+
+            if (game != null) {
+                for (int i = 0; i < nPlayers; i++) {
+                    // Print statistics for this game
+                    System.out.println(statSummaries[i].toString());
+
+                    // Record in overall statistics
+                    overall[i].add(statSummaries[i]);
+                }
+            }
+        }
+
+        // Print final statistics
+        System.out.println("\n---------------------\n");
+        for (int i = 0; i < nPlayers; i++) {
+            // Print statistics for this game
+            System.out.println(overall[i].toString());
+        }
+    }
+
+    /**
+     * Runs several games with a set of random seeds, one for each repetition of a game.
+     * @param gamesToPlay - list of games to play.
+     * @param players - list of players for the game.
+     * @param nRepetitions - number of repetitions of each game.
+     * @param seeds - random seeds array, one for each repetition of a game.
+     * @param ac - action controller for GUI interactions, null if playing without visuals.
+     * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
+     */
+    private static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
+                                long[] seeds, ActionController ac, boolean randomizeParameters) {
+        int nPlayers = players.size();
+
+        // Save win rate statistics over all games
+        StatSummary[] overall = new StatSummary[nPlayers];
+        for (int i = 0; i < nPlayers; i++) {
+            overall[i] = new StatSummary("Overall Player " + i);
+        }
+
+        // For each game...
+        for (GameType gt: gamesToPlay) {
+
+            // Save win rate statistics over all repetitions of this game
+            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            for (int i = 0; i < nPlayers; i++) {
+                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+            }
+
+            // Play n repetitions of this game and record player results
+            for (int i = 0; i < nRepetitions; i++) {
+                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters);
+                if (game != null) {
+                    recordPlayerResults(statSummaries, game);
+                }
+            }
+
+            for (int i = 0; i < nPlayers; i++) {
+                // Print statistics for this game
+                System.out.println(statSummaries[i].toString());
+
+                // Record in overall statistics
+                overall[i].add(statSummaries[i]);
+            }
+        }
+
+        // Print final statistics
+        System.out.println("\n---------------------\n");
+        for (int i = 0; i < nPlayers; i++) {
+            // Print statistics for this game
+            System.out.println(overall[i].toString());
+        }
+    }
+
+    /**
+     * Records statistics of given game into the given StatSummary objects. Only WIN, LOSE or DRAW are valid results
+     * recorded.
+     * @param statSummaries - object recording statistics
+     * @param game - finished game
+     */
+    private static void recordPlayerResults(StatSummary[] statSummaries, Game game) {
+        int nPlayers = statSummaries.length;
+        Utils.GameResult[] results = game.getGameState().getPlayerResults();
+        for (int p = 0; p < nPlayers; p++) {
+            if (results[p] == Utils.GameResult.WIN || results[p] == Utils.GameResult.LOSE || results[p] == Utils.GameResult.DRAW) {
+                statSummaries[p].add(results[p].value);
+            }
         }
     }
 }

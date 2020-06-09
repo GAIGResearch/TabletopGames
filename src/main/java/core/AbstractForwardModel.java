@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static core.CoreConstants.DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED;
+import static core.CoreConstants.VERBOSE;
 
 public abstract class AbstractForwardModel {
 
@@ -100,7 +101,9 @@ public abstract class AbstractForwardModel {
         if (action != null && currentState.getActions().contains(action)) {
             _next(currentState, action);
         } else {
-            System.out.println("Invalid action.");
+            if (VERBOSE) {
+                System.out.println("Invalid action.");
+            }
             illegalActionPlayed(currentState);
         }
     }

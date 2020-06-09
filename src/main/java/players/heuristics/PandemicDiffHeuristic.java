@@ -80,7 +80,7 @@ public class PandemicDiffHeuristic extends StateHeuristic {
             double score = diffCures * FACTOR_CURES + diffCardsInHand * FACTOR_CARDS_IN_HAND + diffCubes * FACTOR_CUBES +
                     diffCardsInPile * FACTOR_CARDS_IN_PILE + diffOutbreaks * FACTOR_OUTBREAKS + diffResearchStations * FACTOR_RS;
 
-            System.out.println("OSLA evaluated = " + score);
+//            System.out.println("OSLA evaluated = " + score);
 
             return score;
         }

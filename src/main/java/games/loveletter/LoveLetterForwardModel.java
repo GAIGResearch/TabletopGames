@@ -178,11 +178,13 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         // Print game result
-        System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        Utils.GameResult[] playerResults = gameState.getPlayerResults();
-        for (int j = 0; j < gameState.getNPlayers(); j++){
-            if (playerResults[j] == Utils.GameResult.WIN)
-                System.out.println("Player " + j + " won");
+        if (VERBOSE) {
+            System.out.println(Arrays.toString(gameState.getPlayerResults()));
+            Utils.GameResult[] playerResults = gameState.getPlayerResults();
+            for (int j = 0; j < gameState.getNPlayers(); j++) {
+                if (playerResults[j] == Utils.GameResult.WIN)
+                    System.out.println("Player " + j + " won");
+            }
         }
     }
 

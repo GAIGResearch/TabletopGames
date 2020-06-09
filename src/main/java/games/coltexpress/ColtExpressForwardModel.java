@@ -248,7 +248,9 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
         }
 
-        System.out.println(Arrays.toString(cegs.getPlayerResults()));
+        if (VERBOSE) {
+            System.out.println(Arrays.toString(cegs.getPlayerResults()));
+        }
     }
 
     @Override
