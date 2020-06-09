@@ -5,6 +5,9 @@ import core.components.GridBoard;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
+import games.descent.DescentForwardModel;
+import games.descent.DescentGameState;
+import games.descent.DescentParameters;
 import games.explodingkittens.ExplodingKittenParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -71,7 +74,13 @@ public enum GameType {
             add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
     Carcassonne (2, 5,
             new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
-            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }});
+            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
+    Descent (2, 5,
+            new ArrayList<Category>() {{ add(Adventure); add(Strategy); add(Exploration); add(Fantasy); add(Fighting);
+            add(Miniatures); }},
+            new ArrayList<Mechanic>() {{ add(ActionPoints); add(DiceRolling); add(GridMovement); add(HandManagement);
+            add(LineOfSight); add(ModularBoard); add(MovementPoints); add(MultipleMaps); add(Campaign); add(Cooperative);
+            add(VariablePlayerPowers); add(GameMaster); }});
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -97,6 +106,8 @@ public enum GameType {
                 return ColtExpress;
             case "carcassonne":
                 return Carcassonne;
+            case "descent":
+                return Descent;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -155,6 +166,12 @@ public enum GameType {
                 params = new ColtExpressParameters(seed);
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
+                break;
+            case Descent:
+                params = new DescentParameters(seed);
+                forwardModel = new DescentForwardModel();
+                gameState = new DescentGameState(params, nPlayers);
+                break;
         }
 
         if (forwardModel != null) {
@@ -214,7 +231,11 @@ public enum GameType {
         Trains,
         CityBuilding,
         Medieval,
-        TerritoryBuilding;
+        TerritoryBuilding,
+        Adventure,
+        Exploration,
+        Fantasy,
+        Miniatures;
 
         /**
          * Retrieves a list of all games within this category.
@@ -266,7 +287,15 @@ public enum GameType {
         Influence,
         MapAddition,
         TilePlacement,
-        PatternBuilding;
+        PatternBuilding,
+        GameMaster,
+        DiceRolling,
+        GridMovement,
+        LineOfSight,
+        ModularBoard,
+        MovementPoints,
+        MultipleMaps,
+        Campaign;
 
         /**
          * Retrieves a list of all games using this mechanic.

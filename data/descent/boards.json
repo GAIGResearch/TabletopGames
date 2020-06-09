@@ -1,0 +1,24 @@
+[
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "board1",
+    "nodes" :
+    [
+      {
+        "name": ["String", "11A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["20A"]],
+        "connections": ["String[]", ["E-0"]]
+      },
+      {
+        "name": ["String", "20A"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["11A"]],
+        "connections": ["String[]", ["W-0"]]
+      }
+    ]
+    }
+]

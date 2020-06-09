@@ -16,6 +16,7 @@ import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VERBOSE;
+import static games.GameType.Descent;
 import static games.GameType.ExplodingKittens;
 
 public class Game {
@@ -282,7 +283,7 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
+        ActionController ac = null; //new ActionController(); //null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
@@ -297,7 +298,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(ExplodingKittens, players, seed, ac, false);
+        runOne(Descent, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
     }
 

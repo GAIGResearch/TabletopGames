@@ -1,0 +1,17 @@
+[
+  {
+    "id": "Widow Tarha",
+    "type": ["String", "Figure"],
+    "color": ["Color", "yellow"],
+    "movement": ["Integer", 4],
+    "hp": ["Integer", 10],
+    "fatigue": ["Integer", 4],
+    "defence": ["Color", "gray"],
+    "willpower": ["Integer", 3],
+    "might": ["Integer", 2],
+    "knowledge": ["Integer", 4],
+    "awareness": ["Integer", 2],
+    "ability": ["String", ""],
+    "heroicFeat": ["String", ""]
+  }
+]

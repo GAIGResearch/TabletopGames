@@ -157,7 +157,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         state.areas.put(-1, gameArea);
 
         // Load the board
-        state.world = _data.findBoard("cities");
+        state.world = _data.findGraphBoard("cities");
         gameArea.putComponent(pandemicBoardHash, state.world);
 
         // Initialize game state variables

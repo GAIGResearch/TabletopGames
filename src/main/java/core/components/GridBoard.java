@@ -1,9 +1,20 @@
 package core.components;
 
+import core.properties.PropertyString;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import utilities.Utils;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import static core.CoreConstants.imgHash;
 
 public class GridBoard<T> extends Component {
 
@@ -11,7 +22,12 @@ public class GridBoard<T> extends Component {
     private int height;  // Height of the board
 
     private T[][] grid;  // 2D grid representation of this board
-    private final Class<T> typeParameterClass;  // Type of this class
+    private Class<T> typeParameterClass;  // Type of this class
+
+    private GridBoard() {
+        super(Utils.ComponentType.BOARD);
+        typeParameterClass = (Class<T>) String.class;
+    }
 
     @SuppressWarnings({"unchecked"})
     private GridBoard(int width, int height, Class<T> typeParameterClass){
@@ -96,6 +112,41 @@ public class GridBoard<T> extends Component {
         return grid;
     }
 
+    /**
+     * Returns a new grid, copy of this one, with given orientation.
+     * @param orientation - int orientation, how many times it should be rotated clockwise
+     * @return - new grid with the same elements and correct orientation.
+     */
+    public T[][] rotate(int orientation) {
+        GridBoard<T> copy = copy();
+        orientation %= 4;  // Maximum 4 sides to a grid
+        for (int i = 0; i < orientation; i++) {
+            copy.grid = rotateClockWise(copy.grid);
+        }
+        return copy.grid;
+    }
+
+    /**
+     * Rotates a given grid clockwise, returning new one
+     * @param original - original grid to rotate
+     * @return rotated grid
+     */
+    private T[][] rotateClockWise(T[][] original) {
+        final int M = original.length;
+        final int N = original[0].length;
+        T[][] grid = (T[][])Array.newInstance(typeParameterClass, N, M);
+        for (int r = 0; r < M; r++) {
+            for (int c = 0; c < N; c++) {
+                grid[c][M-1-r] = original[r][c];
+            }
+        }
+        return grid;
+    }
+
+    /**
+     * Returns a 1D representation of this grid, one row after another
+     * @return 1D flattened grid
+     */
     public T[] flattenGrid() {
         int length = getHeight() * getWidth();
         T[] array = (T[])Array.newInstance(typeParameterClass, length);
@@ -123,10 +174,73 @@ public class GridBoard<T> extends Component {
             for (int x = 0; x < getWidth(); x++) {
                 T t = getElement(x, y);
                 if (t instanceof Character && t.equals(' ')) s += '.';
-                else s += t;
+                else s += t + " ";
             }
             s += "\n";
         }
         return s;
+    }
+
+    /**
+     * Loads all boards from a JSON file.
+     * @param filename - path to file.
+     * @return - List of Board objects.
+     */
+    public static List<GridBoard> loadBoards(String filename)
+    {
+        JSONParser jsonParser = new JSONParser();
+        ArrayList<GridBoard> gridBoards = new ArrayList<>();
+
+        try (FileReader reader = new FileReader(filename)) {
+
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+            for(Object o : data) {
+                GridBoard newGridBoard = new GridBoard();
+                newGridBoard.loadBoard((JSONObject) o);
+                gridBoards.add(newGridBoard);
+            }
+
+        }catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        return gridBoards;
+    }
+
+    /**
+     * Loads board info from a JSON file.
+     * @param board - board to load in JSON format
+     */
+    public void loadBoard(JSONObject board) {
+        componentName = (String) board.get("id");
+
+        JSONArray size = (JSONArray) board.get("size");
+        this.width = (int)(long)size.get(0);
+        this.height = (int)(long)size.get(1);
+
+        if (board.get("img") != null) {
+            properties.put(imgHash, new PropertyString((String) board.get("img")));
+        }
+
+        String classType = ((String) board.get("class")).toLowerCase();
+        if (classType.equals("string")) {
+            typeParameterClass = (Class<T>) String.class;
+        } else if (classType.equals("character")) {
+            typeParameterClass = (Class<T>) Character.class;
+        }  // TODO: others
+
+        this.grid = (T[][])Array.newInstance(typeParameterClass, width, height);
+
+        JSONArray grid = (JSONArray) board.get("grid");
+        int y = 0;
+        for (Object o : grid) {
+            JSONArray row = (JSONArray) o;
+            int x = 0;
+            for (Object o1 : row) {
+                setElement(x, y, (T) o1);
+                x++;
+            }
+            y++;
+        }
     }
 }

@@ -21,7 +21,7 @@ public class PandemicData extends AbstractGameData {
     }
 
     @Override
-    public GraphBoard findBoard(String name) {
+    public GraphBoard findGraphBoard(String name) {
         for (GraphBoard c: graphBoards) {
             if (name.equalsIgnoreCase(c.getComponentName())) {
                 return c.copy();
