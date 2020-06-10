@@ -3,6 +3,7 @@ package games.descent;
 import core.AbstractGameParameters;
 import core.AbstractGameState;
 import core.components.Component;
+import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.interfaces.IPrintable;
 
@@ -17,6 +18,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
 
     GridBoard<String> masterBoard;
+    GraphBoard masterGraph;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -65,6 +67,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public GridBoard<String> getMasterBoard() {
         return masterBoard;
+    }
+
+    public GraphBoard getMasterGraph() {
+        return masterGraph;
     }
 
     @Override

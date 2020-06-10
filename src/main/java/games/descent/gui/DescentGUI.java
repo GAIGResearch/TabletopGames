@@ -35,7 +35,7 @@ public class DescentGUI extends AbstractGUI {
         DescentGameState dgs = (DescentGameState) gameState;
 
         if (gameState != null) {
-            view = new DescentGridBoardView(dgs.getMasterBoard());
+            view = new DescentGridBoardView(dgs.getMasterBoard(), dgs.getMasterGraph());
         } else {
             view = new JPanel();
         }

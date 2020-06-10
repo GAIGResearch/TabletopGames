@@ -6,6 +6,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -273,6 +274,26 @@ public class GridBoard<T> extends Component {
                     gb.addConnection(bn, bn2);
                 }
             }
+        }
+        return gb;
+    }
+
+    public GraphBoard toGraphBoard(List<Pair<Vector2D,Vector2D>> neighbours, boolean way8) {
+        GraphBoard gb = new GraphBoard(componentName, componentID);
+        HashMap<Vector2D, BoardNode> bnMapping = new HashMap<>();
+        // Add all cells as board nodes connected to each other
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (getElement(j, i) != null) {
+                    BoardNode bn = new BoardNode(-1, getElement(j, i).toString());
+                    bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
+                    gb.addBoardNode(bn);
+                    bnMapping.put(new Vector2D(j, i), bn);
+                }
+            }
+        }
+        for (Pair<Vector2D, Vector2D> p: neighbours) {
+            gb.addConnection(bnMapping.get(p.a), bnMapping.get(p.b));
         }
         return gb;
     }
