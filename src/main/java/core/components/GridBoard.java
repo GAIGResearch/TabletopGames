@@ -258,6 +258,7 @@ public class GridBoard<T> extends Component {
             for (int j = 0; j < width; j++) {
                 BoardNode bn = new BoardNode(-1, getElement(j, i).toString());
                 bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
+                bn.setProperty(new PropertyString("terrain", getElement(j, i).toString()));
                 gb.addBoardNode(bn);
                 bnMapping.put(new Vector2D(j, i), bn);
             }
@@ -287,6 +288,7 @@ public class GridBoard<T> extends Component {
                 if (getElement(j, i) != null) {
                     BoardNode bn = new BoardNode(-1, getElement(j, i).toString());
                     bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
+                    bn.setProperty(new PropertyString("terrain", getElement(j, i).toString()));
                     gb.addBoardNode(bn);
                     bnMapping.put(new Vector2D(j, i), bn);
                 }

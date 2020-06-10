@@ -115,47 +115,81 @@ public class DescentForwardModel extends AbstractForwardModel {
             int height = tileGrid.length;
             int width = tileGrid[0].length;
 
+            // Connect the new tile with current board. Tile overlapping here has 8-way connectivity,
+            // as do its neighbours on new tile
+            // TODO: ignore edges...
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     if (board[i][j] != null && board[i][j].equalsIgnoreCase("open")) {
-                        // Connect the new tile with current board. Tile overlapping here has 8-way connectivity,
-                        // as do its neighbours on new tile
+                        Vector2D point = new Vector2D(j, i);
+
+                        // Add connections from this point to points on the master board
                         List<Vector2D> boardNs = getNeighbourhood(j, i, board[0].length, board.length, true);
-                        List<Vector2D> newTilesNs = getNeighbourhood(j - x, i - y, width, height, true);
-                        newTilesNs.add(new Vector2D(j-x, i-y));
-                        for (Vector2D n1: newTilesNs) {
-                            if (DescentConstants.TerrainType.isWalkable(tileGrid[n1.getY()][n1.getX()])) {
-                                Vector2D n1InBoard = new Vector2D(n1.getX() + x, n1.getY() + y);
-                                // Connect each tile that can connect to the new board with all possible connections
-                                for (Vector2D n2 : boardNs) {
-                                    if (DescentConstants.TerrainType.isWalkable(board[n2.getY()][n2.getX()]) &&
-                                    Math.abs(n1InBoard.getY() - n2.getY()) <= 1 && Math.abs(n1InBoard.getX() - n2.getX()) <= 1) {
-                                        neighbours.add(new Pair<>(n1InBoard.copy(), n2.copy()));
+                        if (DescentConstants.TerrainType.isWalkable(tileGrid[point.getY() - y][point.getX() - x])) {
+                            // Connect each cell that can connect to the master board with all possible connections
+                            for (Vector2D n2 : boardNs) {
+                                if (DescentConstants.TerrainType.isWalkable(board[n2.getY()][n2.getX()]) &&
+                                        !n2.equals(point)) {
+                                    if (Math.abs(point.getY() - n2.getY()) <= 1 && Math.abs(point.getX() - n2.getX()) <= 1) {
+                                        neighbours.add(new Pair<>(point.copy(), n2.copy()));
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add connections from connecting point on the master board to this tile, the orthogonal neighbour that's an inside piece
+                        List<Vector2D> possible = getNeighbourhood(j, i, board[0].length, board.length, false);
+                        Vector2D other = null;
+                        for (Vector2D p: possible) {
+                            if (DescentConstants.TerrainType.isInsideTile(board[p.getY()][p.getX()])) {
+                                other = p;
+                                break;
+                            }
+                        }
+
+                        if (other != null) {
+                            List<Vector2D> tileNs = getNeighbourhood(j - x, i - y, width, height, true);
+                            // Connect each cell that can connect to the master board with all possible connections
+                            for (Vector2D n2 : tileNs) {
+                                Vector2D pointInBoard = new Vector2D(n2.getX() + x, n2.getY() + y);
+                                if (DescentConstants.TerrainType.isWalkable(tileGrid[n2.getY()][n2.getX()]) &&
+                                        !pointInBoard.equals(other)) {
+                                    if (Math.abs(other.getY() - pointInBoard.getY()) <= 1 && Math.abs(other.getX() - pointInBoard.getX()) <= 1) {
+                                        neighbours.add(new Pair<>(other.copy(), pointInBoard.copy()));
                                     }
                                 }
                             }
                         }
                     }
+                }
+            }
 
-                    // Add cells from new tile to the master board
+            // Add cells from new tile to the master board
+            for (int i = y; i < y + height; i++) {
+                for (int j = x; j < x + width; j++) {
                     board[i][j] = tileGrid[i-y][j-x];
                     tileReferences[i][j] = tile.getComponentID();
                 }
             }
+
+            // Add connections between all tiles just placed, unless blocked (no blocked tiles are connected)
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
-                    // Add connections between all tiles just placed, unless blocked (no blocked tiles are connected)
-                    if (DescentConstants.TerrainType.isWalkable(board[j][i])) {
+                    if (DescentConstants.TerrainType.isWalkable(board[i][j])) {
                         Vector2D thisNode = new Vector2D(j, i);
-                        List<Vector2D> ns = getNeighbourhood(j, i, board[0].length, board.length, true);
-                        for (Vector2D n : ns) {
-                            if (DescentConstants.TerrainType.isWalkable(board[n.getY()][n.getX()])) {
+                        List<Vector2D> ns = getNeighbourhood(j-x, i-y, width, height, true);
+                        for (Vector2D nn : ns) {
+                            Vector2D n = new Vector2D(nn.getX() + x, nn.getY() + y);
+                            if (DescentConstants.TerrainType.isWalkable(board[n.getY()][n.getX()]) &&
+                                !n.equals(thisNode)) {
                                 neighbours.add(new Pair<>(thisNode.copy(), n.copy()));
                             }
                         }
                     }
                 }
             }
+
+            // This tile was drawn
             drawn.add(bn);
 
             // Draw neighbours
