@@ -3,12 +3,8 @@ package games.descent.gui;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.components.Component;
-import core.components.Deck;
 import games.descent.DescentGameState;
 import gui.views.AreaView;
-import gui.views.CardView;
-import gui.views.ComponentView;
 import players.ActionController;
 import players.HumanGUIPlayer;
 
@@ -16,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
 
+// TODO: make tool to create tiles automatically (as actions? mini game to generate tiles?)
 public class DescentGUI extends AbstractGUI {
     JComponent view;
     int width, height;
