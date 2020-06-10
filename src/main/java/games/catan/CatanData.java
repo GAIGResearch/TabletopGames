@@ -1,14 +1,14 @@
 package games.catan;
 
-import core.GameData;
+import core.AbstractGameData;
 import core.components.*;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class CatanData implements GameData {
+public class CatanData extends AbstractGameData {
 
-    private List<Board> boards;
+    private List<GraphBoard> boards;
     private List<Deck<Card>> decks;
     private List<Token> tokens;
     private List<Counter> counters;
@@ -63,7 +63,7 @@ public class CatanData implements GameData {
     }
 
     @Override
-    public Board findBoard(String name) {
+    public GraphBoard findBoard(String name) {
         return null;
     }
 
