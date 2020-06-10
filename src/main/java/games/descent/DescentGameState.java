@@ -62,6 +62,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return (DescentGameData) data;
     }
 
+    public GridBoard<String> getMasterBoard() {
+        return masterBoard;
+    }
+
     @Override
     public String toString() {
         return masterBoard.toString();

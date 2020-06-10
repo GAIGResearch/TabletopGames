@@ -8,6 +8,7 @@ import games.coltexpress.ColtExpressParameters;
 import games.descent.DescentForwardModel;
 import games.descent.DescentGameState;
 import games.descent.DescentParameters;
+import games.descent.gui.DescentGUI;
 import games.explodingkittens.ExplodingKittenParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -200,6 +201,8 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(this,null, ac, 0);
                 }
+            case Descent:
+                gui = new DescentGUI(gameState, ac);
         }
 
         return gui;

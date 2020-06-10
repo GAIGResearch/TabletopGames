@@ -35,7 +35,7 @@ public class GridBoard<T> extends Component {
         this.width = width;
         this.height = height;
         this.typeParameterClass = typeParameterClass;
-        this.grid = (T[][])Array.newInstance(typeParameterClass, width, height);
+        this.grid = (T[][])Array.newInstance(typeParameterClass, height, width);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -47,16 +47,16 @@ public class GridBoard<T> extends Component {
 
     public GridBoard(T[][] grid, Class<T> typeParameterClass){
         super(Utils.ComponentType.BOARD);
-        this.width = grid.length;
-        this.height = grid[0].length;
+        this.width = grid[0].length;
+        this.height = grid.length;
         this.grid = grid;
         this.typeParameterClass = typeParameterClass;
     }
 
     public GridBoard(T[][] grid, Class<T> typeParameterClass, int ID){
         super(Utils.ComponentType.BOARD, ID);
-        this.width = grid.length;
-        this.height = grid[0].length;
+        this.width = grid[0].length;
+        this.height = grid.length;
         this.grid = grid;
         this.typeParameterClass = typeParameterClass;
     }
@@ -84,7 +84,7 @@ public class GridBoard<T> extends Component {
      */
     public boolean setElement(int x, int y, T value){
         if (x >= 0 && x < width && y >= 0 && y < height) {
-            grid[x][y] = value;
+            grid[y][x] = value;
             return true;
         }
         else
@@ -100,7 +100,7 @@ public class GridBoard<T> extends Component {
     public T getElement(int x, int y)
     {
         if (x >= 0 && x < width && y >= 0 && y < height)
-            return grid[x][y];
+            return grid[y][x];
         return null;
     }
 
@@ -158,9 +158,9 @@ public class GridBoard<T> extends Component {
 
     @Override
     public GridBoard<T> copy() {
-        T[][] gridCopy = (T[][])Array.newInstance(typeParameterClass, getWidth(), getHeight());
-        for (int i = 0; i < width; i++) {
-            if (height >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, height);
+        T[][] gridCopy = (T[][])Array.newInstance(typeParameterClass, getHeight(), getWidth());
+        for (int i = 0; i < height; i++) {
+            if (width >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
         }
         GridBoard<T> g = new GridBoard<>(gridCopy, typeParameterClass, componentID);
         copyComponentTo(g);
@@ -229,7 +229,7 @@ public class GridBoard<T> extends Component {
             typeParameterClass = (Class<T>) Character.class;
         }  // TODO: others
 
-        this.grid = (T[][])Array.newInstance(typeParameterClass, width, height);
+        this.grid = (T[][])Array.newInstance(typeParameterClass, height, width);
 
         JSONArray grid = (JSONArray) board.get("grid");
         int y = 0;

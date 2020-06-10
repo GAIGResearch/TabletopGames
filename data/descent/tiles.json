@@ -66,5 +66,17 @@
         ["edge", "plain", "plain", "plain", "open"],
         ["edge", "edge", "edge", "edge", "edge"]
       ]
+  },
+  {
+    "id" : "endcap",
+    "size": [4, 3],
+    "img": "",
+    "class": "String",
+    "grid":
+    [
+      ["edge", "open", "open", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "edge", "edge", "edge", "edge"]
+    ]
   }
 ]

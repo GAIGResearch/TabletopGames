@@ -10,14 +10,26 @@
       {
         "name": ["String", "11A"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["20A"]],
-        "connections": ["String[]", ["E-0"]]
+        "neighbours": ["String[]", ["20A", "endcap-1"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
       },
       {
         "name": ["String", "20A"],
         "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["11A", "endcap-2"]],
+        "connections": ["String[]", ["W-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap-1"],
+        "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["11A"]],
-        "connections": ["String[]", ["W-0"]]
+        "connections": ["String[]", ["E-0"]]
+      },
+      {
+        "name": ["String", "endcap-2"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["20A"]],
+        "connections": ["String[]", ["N-0"]]
       }
     ]
     }

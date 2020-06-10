@@ -283,7 +283,7 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = null; //new ActionController(); //null;
+        ActionController ac = new ActionController(); //null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
