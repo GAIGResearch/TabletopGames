@@ -3,7 +3,6 @@ package core.components;
 import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 import java.util.HashMap;
@@ -122,12 +121,11 @@ public abstract class Component {
 
     /**
      * Adds a property with an id and a Property object
-     * @param propId ID of the property
      * @param prop property to add
      */
-    public void setProperty(int propId, Property prop)
+    public void setProperty(Property prop)
     {
-        properties.put(propId, prop);
+        properties.put(prop.getHashKey(), prop);
     }
 
     /**
@@ -182,7 +180,7 @@ public abstract class Component {
                     }
                 }
                 if (prop != null) {
-                    c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                    c.setProperty(prop);
                 }
             }
         }
@@ -199,7 +197,7 @@ public abstract class Component {
         copyTo.properties.clear();
         for (int prop_key : this.properties.keySet()) {
             Property newProp = this.properties.get(prop_key).copy();
-            copyTo.setProperty(prop_key, newProp);
+            copyTo.setProperty(newProp);
         }
         copyTo.ownerId = ownerId;
         copyTo.componentName = componentName;

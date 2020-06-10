@@ -12,10 +12,11 @@ import java.util.List;
 
 public class DescentGameState extends AbstractGameState implements IPrintable {
 
-    GridBoard<String> masterBoard;
+    // For reference only
     HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
-
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
+
+    GridBoard<String> masterBoard;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -33,7 +34,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     @Override
     protected List<Component> _getAllComponents() {
         ArrayList<Component> components = new ArrayList<>();
-        components.addAll(tiles.values());
+        components.add(masterBoard);
         // TODO
         return components;
     }

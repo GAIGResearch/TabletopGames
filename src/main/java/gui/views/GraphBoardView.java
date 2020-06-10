@@ -13,8 +13,8 @@ import java.awt.*;
 import java.util.HashSet;
 
 import static core.AbstractGUI.defaultItemSize;
-import static core.CoreConstants.colorHash;
-import static core.CoreConstants.nameHash;
+import static core.CoreConstants.*;
+import static core.CoreConstants.sizeHash;
 import static games.pandemic.PandemicConstants.*;
 
 public class GraphBoardView extends ComponentView {

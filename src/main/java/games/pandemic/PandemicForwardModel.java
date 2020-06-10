@@ -266,7 +266,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             int index = i * range + i + rnd.nextInt(range);
 
             Card card = new Card("Epidemic");
-            card.setProperty(nameHash, new PropertyString("epidemic"));
+            card.setProperty(new PropertyString("name", "epidemic"));
             playerDeck.add(card, index);
 
         }
