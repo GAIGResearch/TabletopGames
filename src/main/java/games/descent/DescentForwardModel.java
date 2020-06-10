@@ -99,6 +99,49 @@ public class DescentForwardModel extends AbstractForwardModel {
         // TODO initial setup
     }
 
+    @Override
+    protected void _next(AbstractGameState currentState, AbstractAction action) {
+        action.execute(currentState);
+        if (checkEndOfGame()) return;
+        currentState.getTurnOrder().endPlayerTurn(currentState);
+        // TODO
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        actions.add(new DoNothing());
+        // TODO
+        return actions;
+    }
+
+    @Override
+    protected AbstractForwardModel _copy() {
+        return new DescentForwardModel();
+    }
+
+    private boolean checkEndOfGame() {
+        // TODO
+        return false;
+    }
+
+    /**
+     * Recursively adds tiles to the board, iterating through all neighbours and updating references from grid
+     * to tiles, list of valid neighbours for movement graph according to Descent movement rules, and bounds for
+     * the resulting grid of the master board (with all tiles put together).
+     * @param bn - board node representing tile to add to board
+     * @param x - top-left x-coordinate for this tile's location in the master board
+     * @param y - top-left y-coordinate for this tile's location in the master board
+     * @param board - the master grid board representation
+     * @param tileGrid - grid representation of tile to add to board (possibly a trimmed version from its corresponding
+     *                 object in the "tiles" map to fit together with existing board)
+     * @param tiles - mapping from board node component ID, to GridBoard object representing the tile
+     * @param tileReferences - references from each cell in the grid to the component ID of the GridBoard representing
+     *                       the tile at that location
+     * @param drawn - a list of board nodes already drawn, to avoid drawing twice during recursive calls.
+     * @param neighbours - a list of pairs of neighbouring cells
+     * @param bounds - bounds of contents of the master grid board
+     */
     private void addTilesToBoard(BoardNode bn, int x, int y, String[][] board,
                                  String[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
@@ -169,7 +212,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                         List<Vector2D> ns = getNeighbourhood(j, i, width, height, true);
                         for (Vector2D nn : ns) {
                             if (DescentConstants.TerrainType.isWalkable(tileGrid[nn.getY()][nn.getX()]) &&
-                                !(nn.getX() == j && nn.getY() == i)) {
+                                    !(nn.getX() == j && nn.getY() == i)) {
                                 neighbours.add(new Pair<>(new Vector2D(j + x, i + y), new Vector2D(nn.getX() + x, nn.getY() + y)));
                             }
                         }
@@ -260,6 +303,14 @@ public class DescentForwardModel extends AbstractForwardModel {
         }
     }
 
+    /**
+     * Finds a connection between two boardnodes representing tiles in the game (i.e. where the 2 tiles should be
+     * connecting according to board configuration)
+     * @param from - origin board node to find connection from
+     * @param to - board node to find connection to
+     * @param openings - list of openings for the origin board node
+     * @return - a pair of side, and location (in tile space) of openings that would connect to the given tile as required
+     */
     private Pair<String, Vector2D> findConnection(BoardNode from, BoardNode to, HashMap<String, ArrayList<Vector2D>> openings) {
         String[] neighbours = ((PropertyStringArray) from.getProperty(neighbourHash)).getValues();
         String[] connections = ((PropertyStringArray) from.getProperty(connectionHash)).getValues();
@@ -281,8 +332,13 @@ public class DescentForwardModel extends AbstractForwardModel {
         return null;
     }
 
+    /**
+     * Finds coordinates (in tile space) for where openings on all sides (top-left locations).
+     * // TODO: assumes all openings 2-tile wide + no openings are next to each other.
+     * @param tileGrid - grid to look for openings in
+     * @return - Mapping from side (N, S, W, E) to a list of openings on that particular side.
+     */
     private HashMap<String, ArrayList<Vector2D>> findOpenings(String[][] tileGrid) {
-        // TODO: assumes all openings 2-tile wide + no openings are next to each other.
         int height = tileGrid.length;
         int width = tileGrid[0].length;
 
@@ -372,31 +428,5 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         }
         return openings;
-    }
-
-    @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
-        if (checkEndOfGame()) return;
-        currentState.getTurnOrder().endPlayerTurn(currentState);
-        // TODO
-    }
-
-    @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
-        // TODO
-        return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new DescentForwardModel();
-    }
-
-    private boolean checkEndOfGame() {
-        // TODO
-        return false;
     }
 }
