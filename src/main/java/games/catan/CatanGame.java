@@ -2,7 +2,7 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.ForwardModel;
+import core.AbstractForwardModel;
 import core.Game;
 import players.RandomPlayer;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 public class CatanGame extends Game {
-    public CatanGame(List<AbstractPlayer> players, ForwardModel model, AbstractGameState gameState) {
+    public CatanGame(List<AbstractPlayer> players, AbstractForwardModel model, AbstractGameState gameState) {
         super(players, model, gameState);
     }
 
@@ -25,7 +25,7 @@ public class CatanGame extends Game {
         players.add(new RandomPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/");
-        ForwardModel forwardModel = new CatanForwardModel(params, players.size());
+        AbstractForwardModel forwardModel = new CatanForwardModel(params, players.size());
         CatanGameState gameState = new CatanGameState(params, forwardModel, players.size());
 
         CatanGame game = new CatanGame(players, forwardModel, gameState);

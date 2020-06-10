@@ -26,6 +26,9 @@ import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import gui.PrototypeGUI;
 import players.ActionController;
+import games.catan.CatanGameState;
+import games.catan.CatanForwardModel;
+import games.catan.CatanParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +74,12 @@ public enum GameType {
             add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
     Carcassonne (2, 5,
             new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
-            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }});
+            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
+    // todo catan is just a copy of pandemic
+    Catan(2, 4,
+                     new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
+            new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
+        add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }});
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -97,6 +105,8 @@ public enum GameType {
                 return ColtExpress;
             case "carcassonne":
                 return Carcassonne;
+            case "cata":
+                return Catan;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -155,6 +165,10 @@ public enum GameType {
                 params = new ColtExpressParameters(seed);
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
+            case Catan:
+                params = new CatanParameters(seed);
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
         }
 
         if (forwardModel != null) {

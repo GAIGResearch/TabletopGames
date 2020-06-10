@@ -1,8 +1,8 @@
 package games.catan;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 
-public class CatanParameters extends GameParameters {
+public class CatanParameters extends AbstractGameParameters {
     private String dataPath;
     int n_actions_per_turn = 1;
 
@@ -10,12 +10,22 @@ public class CatanParameters extends GameParameters {
     int cities_per_player = 4;
     int roads_per_player = 15;
 
-    protected CatanParameters(String dataPath){
+    public CatanParameters(long seed){
+        super(seed);
+    }
+
+    public CatanParameters(String dataPath, long seed){
+        super(seed);
         this.dataPath = dataPath;
     }
 
     public String getDataPath(){
         return dataPath;
+    }
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return null;
     }
 
     public enum TileType {

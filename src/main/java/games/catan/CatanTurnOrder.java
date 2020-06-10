@@ -1,6 +1,6 @@
 package games.catan;
 
-import core.turnorder.TurnOrder;
+import core.turnorders.TurnOrder;
 
 public class CatanTurnOrder extends TurnOrder {
 
@@ -9,7 +9,12 @@ public class CatanTurnOrder extends TurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
+    protected void _reset() {
+
+    }
+
+    @Override
+    protected TurnOrder _copy() {
         return null;
     }
 }

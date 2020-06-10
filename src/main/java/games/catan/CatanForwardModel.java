@@ -1,12 +1,16 @@
 package games.catan;
 
 import core.AbstractGameState;
-import core.ForwardModel;
-import core.actions.IAction;
+import core.AbstractForwardModel;
+import core.actions.AbstractAction;
 
-public class CatanForwardModel extends ForwardModel {
+import java.util.List;
+
+public class CatanForwardModel extends AbstractForwardModel {
     CatanParameters params;
     int nPlayers;
+
+    public CatanForwardModel(){}
 
     public CatanForwardModel(CatanParameters pp, int nPlayers) {
         this.params = pp;
@@ -14,12 +18,22 @@ public class CatanForwardModel extends ForwardModel {
     }
 
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
 
     }
 
     @Override
-    public void next(AbstractGameState currentState, IAction action) {
+    protected void _next(AbstractGameState currentState, AbstractAction action) {
 
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return null;
+    }
+
+    @Override
+    protected AbstractForwardModel _copy() {
+        return null;
     }
 }
