@@ -29,7 +29,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         DescentGameData _data = dgs.getData();
         // 1. Read the graph board configuration for the master grid board
-        GraphBoard config = _data.findGraphBoard("board1");
+        GraphBoard config = _data.findGraphBoard("board2");
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();
@@ -75,9 +75,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         String[][] rotated = (String[][]) tile.rotate(orientation);
         int startX = width / 2 - rotated[0].length/2;
         int startY = height / 2 - rotated.length/2;
-        Rectangle bounds = addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences,
-                drawn, neighbours,
-                startX, startY, startX + rotated[0].length, startY + rotated.length);
+        Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
+        addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, drawn, neighbours, bounds);
 
         // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
         String[][] trimBoard = new String[bounds.height][bounds.width];
@@ -100,12 +99,12 @@ public class DescentForwardModel extends AbstractForwardModel {
         // TODO initial setup
     }
 
-    private Rectangle addTilesToBoard(BoardNode bn, int x, int y, String[][] board,
-                                      String[][] tileGrid,
-                                      HashMap<Integer, GridBoard> tiles,
-                                      int[][] tileReferences, HashSet<BoardNode> drawn,
-                                      ArrayList<Pair<Vector2D, Vector2D>> neighbours,
-                                      int minX, int minY, int maxX, int maxY) {
+    private void addTilesToBoard(BoardNode bn, int x, int y, String[][] board,
+                                 String[][] tileGrid,
+                                 HashMap<Integer, GridBoard> tiles,
+                                 int[][] tileReferences, HashSet<BoardNode> drawn,
+                                 ArrayList<Pair<Vector2D, Vector2D>> neighbours,
+                                 Rectangle bounds) {
         if (!drawn.contains(bn)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(bn.getComponentID());
@@ -117,7 +116,6 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Connect the new tile with current board. Tile overlapping here has 8-way connectivity,
             // as do its neighbours on new tile
-            // TODO: ignore edges...
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     if (board[i][j] != null && board[i][j].equalsIgnoreCase("open")) {
@@ -164,28 +162,26 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
+            // Add connections between all tiles just placed, unless blocked (no blocked tiles are connected)
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    if (DescentConstants.TerrainType.isWalkable(tileGrid[i][j])) {
+                        List<Vector2D> ns = getNeighbourhood(j, i, width, height, true);
+                        for (Vector2D nn : ns) {
+                            if (DescentConstants.TerrainType.isWalkable(tileGrid[nn.getY()][nn.getX()]) &&
+                                !(nn.getX() == j && nn.getY() == i)) {
+                                neighbours.add(new Pair<>(new Vector2D(j + x, i + y), new Vector2D(nn.getX() + x, nn.getY() + y)));
+                            }
+                        }
+                    }
+                }
+            }
+
             // Add cells from new tile to the master board
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     board[i][j] = tileGrid[i-y][j-x];
                     tileReferences[i][j] = tile.getComponentID();
-                }
-            }
-
-            // Add connections between all tiles just placed, unless blocked (no blocked tiles are connected)
-            for (int i = y; i < y + height; i++) {
-                for (int j = x; j < x + width; j++) {
-                    if (DescentConstants.TerrainType.isWalkable(board[i][j])) {
-                        Vector2D thisNode = new Vector2D(j, i);
-                        List<Vector2D> ns = getNeighbourhood(j-x, i-y, width, height, true);
-                        for (Vector2D nn : ns) {
-                            Vector2D n = new Vector2D(nn.getX() + x, nn.getY() + y);
-                            if (DescentConstants.TerrainType.isWalkable(board[n.getY()][n.getX()]) &&
-                                !n.equals(thisNode)) {
-                                neighbours.add(new Pair<>(thisNode.copy(), n.copy()));
-                            }
-                        }
-                    }
                 }
             }
 
@@ -248,20 +244,20 @@ public class DescentForwardModel extends AbstractForwardModel {
                                 connectionToNeighbour.b.getY() - connectionFromNeighbour.getY());
 
                         // Update area bounds
-                        if (topLeftCorner.getX() < minX) minX = topLeftCorner.getX();
-                        if (topLeftCorner.getY() < minY) minY = topLeftCorner.getY();
-                        if (topLeftCorner.getX() + tileGridN[0].length > maxX) maxX = topLeftCorner.getX() + tileGridN[0].length;
-                        if (topLeftCorner.getY() + tileGridN.length > maxY) maxY = topLeftCorner.getY() + tileGridN.length;
+                        if (topLeftCorner.getX() < bounds.x) bounds.x = topLeftCorner.getX();
+                        if (topLeftCorner.getY() < bounds.y) bounds.y = topLeftCorner.getY();
+                        int deltaMaxX = (int) (topLeftCorner.getX() + tileGridN[0].length - bounds.getMaxX());
+                        if (deltaMaxX > 0) bounds.width += deltaMaxX;
+                        int deltaMaxY = (int) (topLeftCorner.getY() + tileGridN.length - bounds.getMaxY());
+                        if (deltaMaxY > 0) bounds.height += deltaMaxY;
 
                         // Draw neighbour recursively
                         addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                tiles, tileReferences, drawn, neighbours,
-                                minX, minY, maxX, maxY);
+                                tiles, tileReferences, drawn, neighbours, bounds);
                     }
                 }
             }
         }
-        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
 
     private Pair<String, Vector2D> findConnection(BoardNode from, BoardNode to, HashMap<String, ArrayList<Vector2D>> openings) {

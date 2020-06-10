@@ -9,6 +9,13 @@ public class DescentConstants {
     public final static int connectionHash = Hash.GetInstance().hash("connections");
     public final static int terrainHash = Hash.GetInstance().hash("terrain");
 
+    public final static HashSet<Character> direction = new HashSet<Character>() {{
+       add('N');
+       add('S');
+       add('W');
+       add('E');
+    }};
+
     public enum TerrainType {
         // Tile margins
         Edge,
@@ -58,11 +65,11 @@ public class DescentConstants {
         }
 
         public static boolean isWalkable(String terrain) {
-            return terrain != null && getWalkableStringTiles().contains(terrain);
+            return terrain != null && (getWalkableStringTiles().contains(terrain));
         }
 
         public static boolean isInsideTile(String terrain) {
-            return terrain != null && !getMarginStringTiles().contains(terrain);
+            return terrain != null && (!getMarginStringTiles().contains(terrain));
         }
     }
 }

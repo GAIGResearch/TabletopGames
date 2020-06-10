@@ -35,7 +35,7 @@ public class DescentGridBoardView extends ComponentView {
     private GraphBoard masterGraph;
 
     public DescentGridBoardView(GridBoard<String> gridBoard, GraphBoard masterGraph) {
-        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
+        super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
         this.masterGraph = masterGraph;
     }
 

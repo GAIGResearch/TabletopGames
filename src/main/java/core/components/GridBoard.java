@@ -26,12 +26,12 @@ public class GridBoard<T> extends Component {
     private T[][] grid;  // 2D grid representation of this board
     private Class<T> typeParameterClass;  // Type of this class
 
-    private GridBoard() {
+    protected GridBoard() {
         super(Utils.ComponentType.BOARD);
         typeParameterClass = (Class<T>) String.class;
     }
 
-    private GridBoard(int width, int height, Class<T> typeParameterClass){
+    protected GridBoard(int width, int height, Class<T> typeParameterClass){
         super(Utils.ComponentType.BOARD);
         this.width = width;
         this.height = height;
@@ -53,7 +53,7 @@ public class GridBoard<T> extends Component {
         this.typeParameterClass = typeParameterClass;
     }
 
-    public GridBoard(T[][] grid, Class<T> typeParameterClass, int ID){
+    protected GridBoard(T[][] grid, Class<T> typeParameterClass, int ID){
         super(Utils.ComponentType.BOARD, ID);
         this.width = grid[0].length;
         this.height = grid.length;
@@ -231,16 +231,29 @@ public class GridBoard<T> extends Component {
 
         this.grid = (T[][])Array.newInstance(typeParameterClass, height, width);
 
-        JSONArray grid = (JSONArray) board.get("grid");
+        JSONArray grids = (JSONArray) board.get("grid");
         int y = 0;
-        for (Object o : grid) {
-            JSONArray row = (JSONArray) o;
-            int x = 0;
-            for (Object o1 : row) {
-                setElement(x, y, (T) o1);
-                x++;
+        for (Object g : grids) {
+            if (((JSONArray)g).get(0) instanceof JSONArray) {
+                y = 0;
+                for (Object o : (JSONArray) g) {
+                    JSONArray row = (JSONArray) o;
+                    int x = 0;
+                    for (Object o1 : row) {
+                        setElement(x, y, (T) o1);
+                        x++;
+                    }
+                    y++;
+                }
+            } else {
+                JSONArray row = (JSONArray) g;
+                int x = 0;
+                for (Object o1 : row) {
+                    setElement(x, y, (T) o1);
+                    x++;
+                }
+                y++;
             }
-            y++;
         }
     }
 
@@ -295,7 +308,9 @@ public class GridBoard<T> extends Component {
             }
         }
         for (Pair<Vector2D, Vector2D> p: neighbours) {
-            gb.addConnection(bnMapping.get(p.a), bnMapping.get(p.b));
+            if (bnMapping.get(p.a) != null && bnMapping.get(p.b) != null) {
+                gb.addConnection(bnMapping.get(p.a), bnMapping.get(p.b));
+            }
         }
         return gb;
     }

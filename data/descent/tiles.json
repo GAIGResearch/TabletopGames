@@ -68,6 +68,34 @@
       ]
   },
   {
+    "id": "13A1",
+    "size": [6, 3],
+    "img": "",
+    "class": "String",
+    "grid":
+      [
+        ["edge", "edge", "open", "open", "edge", "edge"],
+        ["edge","plain", "plain", "plain", "plain", "edge"],
+        ["edge", "edge", "open", "open", "edge", "edge"]
+      ]
+  },
+  {
+    "id": "13A2",
+    "size": [8, 7],
+    "img": "",
+    "class": "String",
+    "grid":
+    [
+      ["edge", "edge","edge", "open", "open", "edge", "edge", "edge"],
+      ["edge", "plain", "plain", "plain", "plain", "plain", "plain", "edge"],
+      ["edge", "plain", "plain", "plain", "plain", "plain", "plain", "edge"],
+      ["edge", "plain", "plain", "plain", "plain", "plain", "plain", "edge"],
+      ["edge", "plain", "plain", "edge", "edge", "edge", "edge", "edge"],
+      ["edge", "plain", "plain", "edge", "null", "null", "null", "null"],
+      ["edge", "open", "open", "edge", "null", "null", "null", "null"]
+    ]
+  },
+  {
     "id" : "endcap",
     "size": [4, 3],
     "img": "",
@@ -76,7 +104,58 @@
     [
       ["edge", "open", "open", "edge"],
       ["edge", "plain", "plain", "edge"],
-      ["edge", "edge", "edge", "edge", "edge"]
+      ["edge", "edge", "edge", "edge"]
+    ]
+  },
+  {
+    "id" : "extender",
+    "size": [4, 3],
+    "img": "",
+    "class": "String",
+    "grid":
+    [
+      ["edge", "open", "open", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "open", "open", "edge"]
+    ]
+  },
+  {
+    "id" : "transition",
+    "size": [4, 4],
+    "img": "",
+    "class": "String",
+    "grid":
+    [
+      ["edge", "open", "open", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "open", "open", "edge"]
+    ]
+  },
+  {
+    "id" : "entrance",
+    "size": [4, 4],
+    "img": "",
+    "class": "String",
+    "grid":
+    [
+      ["edge", "open", "open", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "edge", "edge", "edge"]
+    ]
+  },
+  {
+    "id" : "exit",
+    "size": [4, 4],
+    "img": "",
+    "class": "String",
+    "grid":
+    [
+      ["edge", "open", "open", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "plain", "plain", "edge"],
+      ["edge", "edge", "edge", "edge"]
     ]
   }
 ]

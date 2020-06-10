@@ -4,8 +4,8 @@ import core.AbstractGameData;
 import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.components.Token;
-
 import java.util.List;
+
 
 public class DescentGameData extends AbstractGameData {
     List<GridBoard> tiles;
