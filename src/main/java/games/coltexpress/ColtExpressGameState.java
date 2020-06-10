@@ -1,146 +1,156 @@
 package games.coltexpress;
 
+import core.AbstractGameParameters;
 import core.AbstractGameState;
-import core.ForwardModel;
-import core.actions.IAction;
-import core.observations.IObservation;
-import core.observations.IPrintable;
-import games.coltexpress.cards.CharacterType;
+import core.actions.AbstractAction;
+import core.components.Component;
+import core.interfaces.IGamePhase;
+import core.interfaces.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
-import games.coltexpress.components.Train;
-import core.components.IPartialObservableDeck;
+import games.coltexpress.cards.RoundCard;
+import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
 import core.components.PartialObservableDeck;
-import utilities.Utils;
+import games.coltexpress.ColtExpressTypes.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-public class ColtExpressGameState extends AbstractGameState implements IObservation, IPrintable {
+public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 
-    public enum GamePhase {
-        DrawCards,
+    // Colt express adds 4 game phases
+    public enum ColtExpressGamePhase implements IGamePhase {
         PlanActions,
         ExecuteActions,
         DraftCharacter
     }
 
-    private List<PartialObservableDeck<ColtExpressCard>> playerHandCards;
-    private List<PartialObservableDeck<ColtExpressCard>> playerDecks;
-    private PartialObservableDeck<ColtExpressCard> cardStack;
-    private HashMap<Integer, CharacterType> playerCharacters;
+    // Cards in player hands
+    List<PartialObservableDeck<ColtExpressCard>> playerHandCards;
+    // A deck for each player
+    List<PartialObservableDeck<ColtExpressCard>> playerDecks;
+    List<PartialObservableDeck<Loot>> playerLoot;
+    int[] bulletsLeft;
+    // The player characters available
+    HashMap<Integer, CharacterType> playerCharacters;
+    int playerPlayingBelle;
 
-    private Train train;
+    // The card stack built by players each round
+    PartialObservableDeck<ColtExpressCard> plannedActions;
+    // The train to loot
+    LinkedList<Compartment> trainCompartments;
+    // The round cards
+    List<RoundCard> rounds;
 
-    private GamePhase gamePhase = GamePhase.DrawCards;
+    @Override
+    public List<Component> _getAllComponents() {
+        List<Component> components = new ArrayList<>();
+        components.add(plannedActions);
+        components.addAll(trainCompartments);
 
-    public static boolean PARTIAL_OBSERVABLE = false;
+        for (Compartment compartment: trainCompartments) {
+            components.add(compartment.getLootInside());
+            components.add(compartment.getLootOnTop());
+        }
 
-    public GamePhase getGamePhase() {
-        return gamePhase;
+        components.addAll(playerHandCards);
+        components.addAll(playerDecks);
+        components.addAll(playerLoot);
+        components.addAll(rounds);
+        return components;
     }
 
-    public void setGamePhase(GamePhase gamePhase) {
-        this.gamePhase = gamePhase;
+    @Override
+    protected AbstractGameState _copy(int playerId) {
+        ColtExpressGameState copy = new ColtExpressGameState(gameParameters, getNPlayers());
+        copy.playerHandCards = new ArrayList<>();
+        for (PartialObservableDeck<ColtExpressCard> d: playerHandCards) {
+            copy.playerHandCards.add(d.copy());
+        }
+        copy.playerDecks = new ArrayList<>();
+        for (PartialObservableDeck<ColtExpressCard> d: playerDecks) {
+            copy.playerDecks.add(d.copy());
+        }
+        copy.playerLoot = new ArrayList<>();
+        for (PartialObservableDeck<Loot> d: playerLoot) {
+            copy.playerLoot.add(d.copy());
+        }
+        copy.trainCompartments = new LinkedList<>();
+        for (Compartment d: trainCompartments) {
+            copy.trainCompartments.add((Compartment) d.copy());
+        }
+        copy.bulletsLeft = bulletsLeft.clone();
+        copy.playerCharacters = new HashMap<>(playerCharacters);
+        copy.playerPlayingBelle = playerPlayingBelle;
+        copy.plannedActions = plannedActions.copy();
+        copy.rounds = new ArrayList<>();
+        for (RoundCard c: rounds) {
+            copy.rounds.add((RoundCard) c.copy());
+        }
+        return copy;
     }
 
-    public ColtExpressGameState(ColtExpressParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new ColtExpressTurnOrder(nPlayers));
-        setComponents(gameParameters);
+    @Override
+    protected double _getScore(int playerId) {
+        return 0;// TODO
     }
 
-    public void setComponents(ColtExpressParameters gameParameters) {
-        train = new Train(getNPlayers());
+    @Override
+    protected void _reset() {
+        playerHandCards = new ArrayList<>();
+        playerDecks = new ArrayList<>();
+        playerLoot = new ArrayList<>();
+        bulletsLeft = new int[getNPlayers()];
         playerCharacters = new HashMap<>();
-
-        // give each player a single card
-        playerDecks = new ArrayList<>(getNPlayers());
-        for (int playerIndex = 0; playerIndex < getNPlayers(); playerIndex++) {
-            playerCharacters.put(playerIndex, gameParameters.pickRandomCharacterType());
-
-            boolean[] visibility = new boolean[getNPlayers()];
-            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
-            visibility[playerIndex] = true;
-
-            PartialObservableDeck<ColtExpressCard> playerCards =
-                    new PartialObservableDeck<>("playerCards"+playerIndex, visibility);
-            for (ColtExpressCard.CardType type : gameParameters.cardCounts.keySet()){
-                for (int j = 0; j < gameParameters.cardCounts.get(type); j++)
-                    playerCards.add(new ColtExpressCard(type));
-            }
-            playerDecks.add(playerCards);
-        }
+        playerPlayingBelle = -1;
+        plannedActions = null;
+        trainCompartments = new LinkedList<>();
+        rounds = new ArrayList<>();
+        gamePhase = ColtExpressGamePhase.PlanActions;
     }
 
-    private ArrayList<IAction> playerActions(int playerID) {
-        ArrayList<IAction> actions = new ArrayList<>();
-
-        // add end turn by drawing a card
-        return actions;
+    public ColtExpressGameState(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers, (ColtExpressParameters) gameParameters));
+        gamePhase = ColtExpressGamePhase.PlanActions;
+        trainCompartments = new LinkedList<>();
+        playerPlayingBelle = -1;
     }
 
-    @Override
-    public IObservation getObservation(int player) {
-        return this;
+    public void addLoot(Integer playerID, Loot loot) {
+        playerLoot.get(playerID).add(loot);
     }
 
-    @Override
-    public void endGame() {
-        this.gameStatus = Utils.GameResult.GAME_END;
-        Arrays.fill(playerResults, Utils.GameResult.GAME_LOSE);
+    public void addNeutralBullet(Integer playerID) {
+        addBullet(playerID, -1);
     }
 
-    private ArrayList<IAction> drawAction(int player){
-        ArrayList<IAction> actions = new ArrayList<>();
-        return actions;
+    public void addBullet(Integer playerID, Integer shooterID) {
+        this.playerDecks.get(playerID).add(new ColtExpressCard(shooterID, ColtExpressCard.CardType.Bullet));
+        if (playerCharacters.containsKey(shooterID))
+            bulletsLeft[shooterID]--;
     }
 
-    public ArrayList<IAction> schemingActions(int player){
-        ArrayList<IAction> actions = new ArrayList<>();
-        return actions;
+    public LinkedList<Compartment> getTrainCompartments() {
+        return trainCompartments;
     }
 
-    public ArrayList<IAction> stealingActions(int player)
-    {
-        ArrayList<IAction> actions = new ArrayList<>();
-        return actions;
+    public PartialObservableDeck<Loot> getLoot(int playerID){return playerLoot.get(playerID);}
+
+    public PartialObservableDeck<ColtExpressCard> getPlannedActions() {
+        return plannedActions;
     }
 
-    @Override
-    public List<IAction> computeAvailableActions() {
-
-        ArrayList<IAction> actions;
-        int player = getTurnOrder().getCurrentPlayer(this);
-        switch (gamePhase){
-            case DraftCharacter:
-                System.out.println("character drafting is not implemented yet");
-            case DrawCards:
-                actions = drawAction(player);
-                break;
-            case PlanActions:
-                actions = schemingActions(player);
-                break;
-            case ExecuteActions:
-                actions = stealingActions(player);
-                break;
-            default:
-                actions = new ArrayList<>();
-                break;
-        }
-
-        return actions;
+    public List<PartialObservableDeck<ColtExpressCard>> getPlayerDecks() {
+        return playerDecks;
     }
 
-    @Override
-    public void setComponents() {
-
+    public List<RoundCard> getRounds() {
+        return rounds;
     }
 
     @Override
     public void printToConsole() {
         System.out.println("Colt Express Game-State");
-        System.out.println("======================");
+        System.out.println("=======================");
 
         int currentPlayer = turnOrder.getCurrentPlayer(this);
 
@@ -148,24 +158,75 @@ public class ColtExpressGameState extends AbstractGameState implements IObservat
             if (currentPlayer == i)
                 System.out.print(">>> ");
             System.out.print("Player " + i + " = "+ playerCharacters.get(i).name() + ":  ");
-            printDeck(playerDecks.get(i));
+            System.out.print("Hand=");
+            System.out.print(playerHandCards.get(i).toString(i));
+            System.out.print("; Deck=");
+            System.out.print(playerDecks.get(i).toString(i));
+            System.out.print("; Loot=");
+            System.out.print(playerLoot.get(i).toString(i));
             System.out.println();
         }
+        System.out.println();
+        System.out.println(printTrain());
 
+        System.out.println();
+        System.out.print("Planned Actions: ");
+        System.out.println(plannedActions.toString());
+
+        System.out.println();
+        int i = 0;
+        for (RoundCard round : rounds){
+            if (i == ((ColtExpressTurnOrder)turnOrder).getCurrentRoundCardIndex()) {
+                System.out.print("->");
+            }
+            System.out.print(round.toString());
+            System.out.print(", ");
+            i++;
+        }
+
+        System.out.println();
         System.out.println("Current GamePhase: " + gamePhase);
     }
 
-    public void printDeck(IPartialObservableDeck<ColtExpressCard> deck){
+    public String printTrain(){
         StringBuilder sb = new StringBuilder();
-        for (ColtExpressCard card : deck.getVisibleCards(turnOrder.getCurrentPlayer(this))){
-            if (card == null)
-                sb.append("UNKNOWN");
-            else
-                sb.append(card.cardType.toString());
-            sb.append(",");
+        sb.append("Train:\n");
+        for (Compartment compartment : trainCompartments)
+        {
+            sb.append(compartment.toString());
+            sb.append("\n");
         }
-        if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-        System.out.print(sb.toString());
+        sb.deleteCharAt(sb.length()-1);
+
+        return sb.toString();
+    }
+
+    /**
+     * Helper getter methods for round card composition.
+     */
+
+    RoundCard getRandomEndRoundCard(ColtExpressParameters cep) {
+        int nEndCards = cep.endRoundCards.length;
+        int choice = new Random(cep.getGameSeed()).nextInt(nEndCards);
+        return getEndRoundCard(cep, choice);
+    }
+
+    RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
+        if (idx >= 0 && idx < cep.endRoundCards.length) {
+            RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
+            AbstractAction event = cep.endRoundCards[idx].getEndCardEvent();
+            return new RoundCard(cep.endRoundCards[idx].name(), turnTypes, event);
+        }
+        return null;
+    }
+
+    RoundCard getRoundCard(ColtExpressParameters cep, int idx, int nPlayers) {
+        if (idx >= 0 && idx < cep.roundCards.length) {
+            RoundCard.TurnType[] turnTypes = cep.roundCards[idx].getTurnTypeSequence(nPlayers);
+            AbstractAction event = cep.roundCards[idx].getEndCardEvent();
+            return new RoundCard(cep.roundCards[idx].name(), turnTypes, event);
+        }
+        return null;
     }
 
 }

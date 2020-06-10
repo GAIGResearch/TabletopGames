@@ -1,19 +1,39 @@
 package core.actions;
 
 import core.AbstractGameState;
+import core.components.Card;
 
-public class DoNothing implements IAction {
+import java.util.Objects;
 
-   @Override
+/**
+ * This action executes successfully automatically, it makes not changes to the game state.
+ */
+public class DoNothing extends AbstractAction {
+
+    @Override
     public boolean execute(AbstractGameState gs) {
        return true;
    }
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        return other instanceof DoNothing;
+    public AbstractAction copy() {
+        return new DoNothing();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 
     @Override

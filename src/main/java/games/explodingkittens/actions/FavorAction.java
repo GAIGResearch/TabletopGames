@@ -1,23 +1,23 @@
 package games.explodingkittens.actions;
 
-import core.components.IDeck;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
-import core.turnorder.TurnOrder;
+import core.turnorders.TurnOrder;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.FavorPhase;
+import java.util.Objects;
 
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Favor;
 
-public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
+public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     final int target;
-    final int playerAskingForFavor;
 
-    public FavorAction(T card, IDeck<T> playerDeck, IDeck<T> discardPile, int target, int playerID) {
-        super(card, playerDeck, discardPile);
+    public FavorAction(int deckFrom, int deckTo, int index, int target) {
+        super(deckFrom, deckTo, index);
         this.target = target;
-        this.playerAskingForFavor = playerID;
     }
 
     @Override
@@ -25,8 +25,8 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
         super.execute(gs);
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
-        ekgs.setGamePhase(FavorPhase);
-        ekgs.setPlayerGettingAFavor(playerAskingForFavor);
+        ekgs.setGamePhase(Favor);
+        ekgs.setPlayerGettingAFavor(gs.getTurnOrder().getCurrentPlayer(gs));
 
         ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
         ekto.registerFavorAction(target);
@@ -43,8 +43,26 @@ public class FavorAction<T> extends PlayCard<T> implements IsNopeable, IPrintabl
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FavorAction that = (FavorAction) o;
+        return target == that.target;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), target);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new FavorAction(deckFrom, deckTo, fromIndex, target);
+    }
 }

@@ -1,54 +1,42 @@
 package games.loveletter.actions;
 
-import core.actions.IAction;
-import core.components.IDeck;
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.actions.AbstractAction;
+import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.cards.LoveLetterCard;
 
-public class DrawCard implements IAction, IPrintable {
+/**
+ * At the beginning of each round the player draws a card and loses its protection status.
+ */
+public class DrawCard extends core.actions.DrawCard implements IPrintable {
 
-    private final IDeck<LoveLetterCard> deckFrom;
-    private final IDeck<LoveLetterCard> deckTo;
-
-    private int index;
-    private final int playerID;
-
-    public DrawCard (IDeck<LoveLetterCard> deckFrom, IDeck<LoveLetterCard> deckTo, int index, int playerID) {
-        this.deckFrom = deckFrom;
-        this.deckTo = deckTo;
-        this.index = index;
-        this.playerID = playerID;
-    }
-
-    public DrawCard (IDeck<LoveLetterCard> deckFrom, IDeck<LoveLetterCard> deckTo, int playerID) {
-        this(deckFrom, deckTo, -1, playerID);
+    public DrawCard(int deckFrom, int deckTo, int fromIndex) {
+        super(deckFrom, deckTo, fromIndex);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((LoveLetterGameState)gs).setProtection(playerID, false);
+        ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), false);
+        return super.execute(gs);
+    }
 
-        LoveLetterCard card;
-        if (index != -1){
-            card = deckFrom.pick(index);
-        } else {
-            card = deckFrom.draw();
-        }
-        if (card == null) {
-            return false;
-        }
-        return deckTo.add(card);
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 
     @Override
     public String toString() {
-        return "draw a card and remove protection status";
+        return "Draw a card and remove protection status.";
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DrawCard(deckFrom, deckTo, fromIndex);
     }
 }

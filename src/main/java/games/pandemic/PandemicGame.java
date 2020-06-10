@@ -1,15 +1,10 @@
 package games.pandemic;
 
-import core.AbstractGameState;
-import core.ForwardModel;
-import core.Game;
-import core.GUI;
-
-import java.util.List;
+import core.*;
+import games.GameType;
 import games.pandemic.gui.PandemicGUI;
 import players.ActionController;
-import players.HumanGUIPlayer;
-import core.AbstractPlayer;
+import players.OSLA;
 import players.RandomPlayer;
 import utilities.Utils;
 
@@ -17,8 +12,12 @@ import java.util.*;
 
 public class PandemicGame extends Game {
 
-    public PandemicGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState) {
-        super(agents, model, gameState);
+    public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
+        super(GameType.Pandemic, agents, new PandemicForwardModel(params, agents.size()),
+                new PandemicGameState(params, agents.size()));
+    }
+    public PandemicGame(AbstractForwardModel model, AbstractGameState gameState) {
+        super(GameType.Pandemic, model, gameState);
     }
 
     public static void main(String[] args){
@@ -29,29 +28,31 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLA());
 
-        PandemicParameters params = new PandemicParameters("data/");
-        ForwardModel forwardModel = new PandemicForwardModel(params, players.size());
-        PandemicGameState gameState = new PandemicGameState(params, forwardModel, players.size());
 
-        PandemicGame game = new PandemicGame(players, forwardModel, gameState);
-        GUI gui = new PandemicGUI(gameState, ac);
+        PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
+        PandemicGame game = new PandemicGame(players, params);
+
+        AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
         game.run(gui);
+
+//        game.run(null);
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);
     }
 
-    public static void runMany(List<AbstractPlayer> players, ForwardModel model) {
+    public static void runMany(List<AbstractPlayer> players, AbstractForwardModel model) {
         HashMap<Utils.GameResult, Integer> results = new HashMap<>();
         for (Utils.GameResult r: Utils.GameResult.values()) {
             results.put(r, 0);
         }
 
-        PandemicParameters params = new PandemicParameters("data/");
+        PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         for (int i = 0; i < 10000; i++) {
-            PandemicGame game = new PandemicGame(players, model, new PandemicGameState(params, model, players.size()));
+            PandemicGame game = new PandemicGame(players, params);
             game.run(null);
             Utils.GameResult result = game.gameState.getGameStatus();
             int prevCount = results.get(result);

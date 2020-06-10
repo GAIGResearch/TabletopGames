@@ -1,36 +1,33 @@
 package games.explodingkittens.actions;
 
-import core.components.IDeck;
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
+import core.interfaces.IPrintable;
 
-public class NopeAction<T> extends PlayCard<T> implements IsNope, IPrintable {
+public class NopeAction extends DrawCard implements IPrintable {
 
-    private final int playerID;
-
-    public NopeAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck, int playerID) {
-        super(card, playerDeck, discardDeck);
-        this.playerID = playerID;
-    }
-
-    @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-        return true;
+    public NopeAction(int deckFrom, int deckTo, int index) {
+        super(deckFrom, deckTo, index);
     }
 
     @Override
     public String toString(){//overriding the toString() method
-        return String.format("Player %d nopes the previous action", playerID);
+        return "Player nopes the previous action";
     }
 
     @Override
-    public boolean isNope() {
-        return true;
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " nopes the previous action";
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new NopeAction(deckFrom, deckTo, fromIndex);
     }
 }

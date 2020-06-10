@@ -1,24 +1,113 @@
 package core.components;
 
-import core.content.*;
+import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public abstract class Component {
-    protected ComponentType type;
-    protected HashMap<Integer, Property> properties;
+    private static int ID = 0;  // All components receive a unique and final ID from this always increasing counter
 
-    public ComponentType getType()                   { return this.type; }
-    public void          setType(ComponentType type) { this.type = type; }
+    protected final int componentID;  // Unique ID of this component
+    protected final ComponentType type;  // Type of this component
+    protected final HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
+    protected int ownerId = -1;  // By default belongs to the game
+    protected String componentName;  // Name of this component
 
+    public Component(ComponentType type, String name) {
+        this.componentID = ID++;
+        this.type = type;
+        this.componentName = name;
+        this.properties = new HashMap<>();
+    }
 
+    public Component(ComponentType type) {
+        this.componentID = ID++;
+        this.type = type;
+        this.componentName = type.toString();
+        this.properties = new HashMap<>();
+    }
+
+    protected Component(ComponentType type, String name, int componentID) {
+        this.componentID = componentID;
+        this.type = type;
+        this.componentName = name;
+        this.properties = new HashMap<>();
+    }
+
+    protected Component(ComponentType type, int componentID) {
+        this.componentID = componentID;
+        this.type = type;
+        this.componentName = type.toString();
+        this.properties = new HashMap<>();
+    }
+
+    /**
+     * To be implemented by subclass, all components should be able to create copies of themselves.
+     * @return - a new Component with the same properties.
+     */
+    public abstract Component copy();
+
+    /**
+     * Get and set the type of this component.
+     */
+    public ComponentType getType()                   {
+        return this.type;
+    }
+
+    /**
+     * Get number of properties for this component.
+     * @return - int, size of properties map.
+     */
     public int getNumProperties()
     {
         return properties.size();
+    }
+
+    /**
+     * Get and set the ID of the player who owns the deck (-1, the game's, by default).
+     * @return - int, owner ID
+     */
+    public int getOwnerId() {
+        return ownerId;
+    }
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    /**
+     * Get the ID of this component.
+     * @return - component ID.
+     */
+    public int getComponentID() {
+        return componentID;
+    }
+
+    /**
+     * @return name of this component.
+     */
+    public String getComponentName() {
+        return componentName;
+    }
+
+    /**
+     * Sets the name of this component.
+     * @param componentName - new name for this component.
+     */
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
+    }
+
+    /**
+     * Get the full map of properties.
+     * @return - mapping from property integer key to property objects.
+     */
+    public HashMap<Integer, Property> getProperties() {
+        return properties;
     }
 
     /**
@@ -92,22 +181,54 @@ public abstract class Component {
                         prop = new PropertyLong(key, (long) value.get(1));
                     }
                 }
-                c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                if (prop != null) {
+                    c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                }
             }
         }
 
         return c;
     }
 
+    /**
+     * Copies super class variables in given subclass instance.
+     * @param copyTo - subclass component instance
+     */
     public void copyComponentTo(Component copyTo)
     {
-        for(int prop_key : this.properties.keySet())
-        {
+        copyTo.properties.clear();
+        for (int prop_key : this.properties.keySet()) {
             Property newProp = this.properties.get(prop_key).copy();
             copyTo.setProperty(prop_key, newProp);
         }
-
-        copyTo.type = this.type;
+        copyTo.ownerId = ownerId;
+        copyTo.componentName = componentName;
     }
 
+    @Override
+    public String toString() {
+        return "Component{" +
+                "componentID=" + componentID +
+                ", type=" + type +
+                ", ownerId=" + ownerId +
+                ", componentName='" + componentName + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Component component = (Component) o;
+        return componentID == ((Component) o).componentID && ownerId == ((Component) o).ownerId &&
+                type == component.type &&
+                componentName.equals(((Component) o).componentName) &&
+                Objects.equals(properties, component.properties);
+    }
+
+    @Override
+    public final int hashCode() {
+        return componentID;
+    }
 }

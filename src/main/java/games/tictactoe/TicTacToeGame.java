@@ -1,29 +1,27 @@
 package games.tictactoe;
 
-import core.AbstractGameState;
-import core.ForwardModel;
 import core.Game;
 import core.AbstractPlayer;
-import players.HumanConsolePlayer;
+import games.GameType;
+import players.OSLA;
 import players.RandomPlayer;
 
 import java.util.*;
 
 public class TicTacToeGame extends Game {
 
-    public TicTacToeGame(List<AbstractPlayer> agents, ForwardModel model, AbstractGameState gameState)
+    public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
     {
-        super(agents, model, gameState);
+        super(GameType.TicTacToe, agents, new TicTacToeForwardModel(), new TicTacToeGameState(params, agents.size()));
     }
 
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
+        agents.add(new OSLA());
         agents.add(new RandomPlayer());
-        agents.add(new HumanConsolePlayer());
 
-        ForwardModel forwardModel = new TicTacToeForwardModel();
-        AbstractGameState gameState = new TicTacToeGameState(new TicTacToeGameParameters(), forwardModel, agents.size());
-        Game game = new TicTacToeGame(agents, forwardModel, gameState);
+        TicTacToeGameParameters params = new TicTacToeGameParameters(System.currentTimeMillis());
+        Game game = new TicTacToeGame(agents, params);
         game.run(null);
     }
 }

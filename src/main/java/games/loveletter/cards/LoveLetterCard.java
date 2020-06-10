@@ -3,6 +3,8 @@ package games.loveletter.cards;
 import core.components.Card;
 
 public class LoveLetterCard extends Card {
+
+    // each card consists of a type and a value. the card type defines the actions available to the player
     public enum CardType {
         Princess(8),
         Countess(7),
@@ -13,7 +15,7 @@ public class LoveLetterCard extends Card {
         Priest(2),
         Guard(1);
 
-        private int value;
+        private final int value;
         CardType(int value){
             this.value = value;
         }
@@ -21,9 +23,10 @@ public class LoveLetterCard extends Card {
         public int getValue(){ return value;}
     }
 
-    public CardType cardType;
+    public final CardType cardType;
 
     public LoveLetterCard(CardType cardType) {
+        super(cardType.toString());
         this.cardType = cardType;
     }
 
@@ -31,4 +34,8 @@ public class LoveLetterCard extends Card {
         return cardType.toString();
     }
 
+    @Override
+    public Card copy() {
+        return new LoveLetterCard(cardType);
+    }
 }

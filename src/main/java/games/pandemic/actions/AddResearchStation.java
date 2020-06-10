@@ -1,18 +1,20 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Counter;
-import core.content.PropertyBoolean;
+import core.properties.PropertyBoolean;
 import core.AbstractGameState;
-import core.content.PropertyString;
+import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 
-import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.nameHash;
+import java.util.Objects;
 
-public class AddResearchStation implements IAction {
+import static games.pandemic.PandemicConstants.*;
+import static core.CoreConstants.nameHash;
+
+public class AddResearchStation extends AbstractAction {
     protected String city;
 
     public AddResearchStation(String city) {
@@ -21,7 +23,7 @@ public class AddResearchStation implements IAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BoardNode bn = ((PandemicGameState)gs).world.getNode(nameHash, city);
+        BoardNode bn = ((PandemicGameState)gs).getWorld().getNodeByStringProperty(nameHash, city);
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
             bn.setProperty(researchStationHash, new PropertyBoolean(true));
@@ -31,6 +33,11 @@ public class AddResearchStation implements IAction {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new AddResearchStation(this.city);
     }
 
     @Override
@@ -54,5 +61,15 @@ public class AddResearchStation implements IAction {
 
     public String getCity() {
         return city;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(city);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

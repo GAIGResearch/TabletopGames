@@ -2,72 +2,129 @@ package core.actions;
 
 import core.components.Card;
 import core.components.Deck;
-import core.components.IDeck;
 import core.AbstractGameState;
 
-public class DrawCard implements IAction {
+import java.util.Objects;
 
-    private Deck<Card> deckFrom;
-    private Deck<Card> deckTo;
+public class DrawCard extends AbstractAction {
 
-    private int index;
+    protected int deckFrom;
+    protected int deckTo;
+    protected int fromIndex;
+    protected int toIndex;
 
-    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo, int index) {
+    protected int cardId;  // Component ID of the card moved, updated after the action is executed
+    protected boolean executed;  // Indicates whether the action executed or not
+
+    /**
+     * This action moves one card (given by index in its origin deck) from a deck to another.
+     * @param deckFrom - origin deck from which card will be moved.
+     * @param deckTo - destination deck to which card will be moved.
+     * @param fromIndex - index in the origin deck where the card can be found.
+     * @param toIndex - index in the destination deck where the card should be placed.
+     */
+    public DrawCard (int deckFrom, int deckTo, int fromIndex, int toIndex) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
-        this.index = index;
+        this.fromIndex = fromIndex;
+        this.toIndex = toIndex;
     }
 
-    public DrawCard (Deck<Card> deckFrom, Deck<Card> deckTo) {
+    public DrawCard (int deckFrom, int deckTo, int fromIndex) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
+        this.fromIndex = fromIndex;
+        this.toIndex = 0;
+    }
+
+    public DrawCard (int deckFrom, int deckTo) {
+        this.deckFrom = deckFrom;
+        this.deckTo = deckTo;
+        this.fromIndex = 0;
+        this.toIndex = 0;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        Card card;
-        if (index != -1){
-            card = deckFrom.pick(index);
-        } else {
-            card = deckFrom.draw();
+        executed = true;
+        Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
+        Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
+        Card card = from.pick(fromIndex);
+        if (card != null) {
+            cardId = card.getComponentID();
         }
-        if (card == null) {
-            return false;
-        }
-        return deckTo.add(card);
+        return card != null && to.add(card, toIndex);
     }
 
     @Override
-    public boolean equals(Object other)
-    {
-        if (this == other) return true;
-        if(other instanceof DrawCard)
-        {
-            DrawCard otherAction = (DrawCard) other;
-            return deckFrom.equals(otherAction.deckFrom) && deckTo.equals(otherAction.deckTo);
+    public Card getCard(AbstractGameState gs) {
+        if (!executed) {
+            Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
+            return deck.getComponents().get(fromIndex);
+        }
+        return (Card) gs.getComponentById(cardId);
+    }
 
-        }else return false;
+    // Getters
+    public int getCardId() {
+        return cardId;
+    }
+    public int getFromIndex() {
+        return fromIndex;
+    }
+    public int getToIndex() {
+        return toIndex;
+    }
+    public int getDeckFrom() {
+        return deckFrom;
+    }
+    public int getDeckTo() {
+        return deckTo;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new DrawCard(deckFrom, deckTo, fromIndex, toIndex);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DrawCard drawCard = (DrawCard) o;
+        return deckFrom == drawCard.deckFrom &&
+                deckTo == drawCard.deckTo &&
+                fromIndex == drawCard.fromIndex &&
+                toIndex == drawCard.toIndex &&
+                cardId == drawCard.cardId &&
+                executed == drawCard.executed;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deckFrom, deckTo, fromIndex, toIndex, cardId, executed);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "DrawCard{" +
+                "deckFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
+                ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
+                ", card=" + getCard(gameState).getComponentName() +
+                ", toIndex=" + toIndex +
+                '}';
     }
 
     @Override
     public String toString() {
         return "DrawCard{" +
-                "deckFrom=" + deckFrom.getID() +
-                ", deckTo=" + deckTo.getID() +
-                ", index=" + index +
+                "deckFrom=" + deckFrom +
+                ", deckTo=" + deckTo +
+                ", fromIndex=" + fromIndex +
+                ", toIndex=" + toIndex +
+                ", cardId=" + cardId +
+                ", executed=" + executed +
                 '}';
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public Deck<Card> getDeckFrom() {
-        return deckFrom;
-    }
-
-    public IDeck<Card> getDeckTo() {
-        return deckTo;
     }
 }
 

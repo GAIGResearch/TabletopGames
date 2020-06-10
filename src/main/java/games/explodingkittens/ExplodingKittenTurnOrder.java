@@ -1,17 +1,26 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
-import core.turnorder.ReactiveTurnOrder;
-import core.turnorder.TurnOrder;
+import core.turnorders.ReactiveTurnOrder;
+import core.turnorders.TurnOrder;
 import utilities.Utils;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.NopePhase;
+import java.util.LinkedList;
+
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 
 public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
-    int requiredDraws = 1;
+    int requiredDraws;
 
     public ExplodingKittenTurnOrder(int nPlayers){
         super(nPlayers);
+        requiredDraws = 1;
+    }
+
+    @Override
+    protected void _reset() {
+        super._reset();
+        requiredDraws = 1;
     }
 
     public void endPlayerTurnStep(AbstractGameState gameState) {
@@ -29,7 +38,7 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
 
     public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState){
         addAllReactivePlayersButCurrent(gameState);
-        gameState.setGamePhase(NopePhase);
+        gameState.setGamePhase(Nope);
     }
 
     public void registerFavorAction(int player){
@@ -43,9 +52,10 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
-        ExplodingKittenTurnOrder to = (ExplodingKittenTurnOrder) super.copy();
+    protected TurnOrder _copy() {
+        ExplodingKittenTurnOrder to = new ExplodingKittenTurnOrder(nPlayers);
+        to.reactivePlayers = new LinkedList<>(reactivePlayers);
         to.requiredDraws = requiredDraws;
-        return copyTo(to);
+        return to;
     }
 }

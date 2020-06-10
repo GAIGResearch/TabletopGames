@@ -1,7 +1,7 @@
 package games.loveletter;
 
-import core.turnorder.AlternatingTurnOrder;
-import core.turnorder.TurnOrder;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 
 
 public class LoveLetterTurnOrder extends AlternatingTurnOrder {
@@ -12,8 +12,9 @@ public class LoveLetterTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
-    public TurnOrder copy() {
-        LoveLetterTurnOrder to = (LoveLetterTurnOrder) super.copy();
-        return copyTo(to);
+    protected TurnOrder _copy() {
+        LoveLetterTurnOrder to = new LoveLetterTurnOrder(nPlayers);
+        to.direction = direction;
+        return to;
     }
 }

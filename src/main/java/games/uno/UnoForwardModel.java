@@ -1,35 +1,188 @@
 package games.uno;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.AbstractGameState;
-import core.ForwardModel;
+import core.AbstractForwardModel;
+import core.components.Deck;
+import games.uno.actions.NoCards;
+import games.uno.actions.PlayCard;
+import games.uno.cards.*;
+import utilities.Utils;
 
-public class UnoForwardModel extends ForwardModel {
+import java.util.ArrayList;
+import java.util.List;
+
+import static core.CoreConstants.VERBOSE;
+
+public class UnoForwardModel extends AbstractForwardModel {
 
     @Override
-    public void setup(AbstractGameState firstState) {
+    protected void _setup(AbstractGameState firstState) {
+        UnoGameState ugs = (UnoGameState) firstState;
 
-    }
+        // Create the draw deck with all the cards
+        ugs.drawDeck = new Deck<>("DrawDeck");
+        createCards(ugs);
 
-    @Override
-    public void next(AbstractGameState gameState, IAction action) {
-        action.execute(gameState);
-        gameState.getTurnOrder().endPlayerTurn(gameState);
+        // Shuffle the deck
+        ugs.drawDeck.shuffle();
 
-        if (gameState.getTurnOrder().getRoundCounter() == 9) {
-            gameState.endGame();
-        }
+        // Create the discard deck, at the beginning it is empty
+        ugs.discardDeck = new Deck<>("DiscardDeck");
 
-        checkWinCondition((UnoGameState) gameState);
-    }
+        ugs.playerDecks = new ArrayList<>(ugs.getNPlayers());
+        drawCardsToPlayers(ugs);
 
-    public void checkWinCondition(UnoGameState gameState) {
-        for (int i = 0; i < gameState.getNPlayers(); i++)
+        // get current card and set the current card and color
+        ugs.currentCard  = ugs.drawDeck.draw();
+        ugs.currentColor = ugs.currentCard.color;
+
+        // The first card cannot be a wild.
+        // In case, add to draw deck and shuffle again
+        while (ugs.isWildCard(ugs.currentCard))
         {
-            if (gameState.playerDecks.get(i).getSize() == 0)
-                gameState.registerWinner(i);
+            if (VERBOSE) {
+                System.out.println("First card wild");
+            }
+            ugs.drawDeck.add(ugs.currentCard);
+            ugs.drawDeck.shuffle();
+            ugs.currentCard = ugs.drawDeck.draw();
+            ugs.currentColor = ugs.currentCard.color;
+        }
+
+        // If the first card is Skip, Reverse or DrawTwo, play the card
+        if (!ugs.isNumberCard(ugs.currentCard)) {
+            if (VERBOSE) {
+                System.out.println("First card no number " + ugs.currentColor);
+            }
+            if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
+                ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
+            }
+            else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
+                int player = ugs.getCurrentPlayer();
+                ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
+                ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
+            }
+            ugs.getTurnOrder().endPlayerTurn(ugs);
+        }
+
+        // add current card to discard deck
+        ugs.discardDeck.add(ugs.currentCard);
+    }
+
+    @Override
+    protected void _next(AbstractGameState gameState, AbstractAction action) {
+        action.execute(gameState);
+        checkGameEnd((UnoGameState)gameState);
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
+            gameState.getTurnOrder().endPlayerTurn(gameState);
+    }
+
+    // Create all the cards and include them into the drawPile
+    private void createCards(UnoGameState ugs) {
+        UnoGameParameters ugp = (UnoGameParameters)ugs.getGameParameters();
+        for (String color : ugp.colors) {
+            if (!color.equals("Wild")) {
+
+                // Create the number cards
+                for (int number = 0; number < ugp.nNumberCards; number++) {
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Number, color, number));
+                    if (number > 0)
+                        ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Number, color, number));
+                }
+
+                // Create the DrawTwo, Reverse and Skip cards for each color
+                for (int i = 0; i < ugp.nSkipCards; i++) {
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Skip, color));
+                }
+                for (int i = 0; i < ugp.nReverseCards; i++) {
+                    ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Reverse, color));
+                }
+                for (int i = 0; i < ugp.nDrawCards; i++) {
+                    for (int n : ugp.specialDrawCards) {
+                        ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Draw, color, n));
+                    }
+                }
+            }
+        }
+
+        // Create the wild cards, N of each type
+        for (int i = 0; i < ugp.nWildCards; i++) {
+            for (int n : ugp.specialWildDrawCards) {
+                ugs.drawDeck.add(new UnoCard(UnoCard.UnoCardType.Wild, "Wild", n));
+            }
         }
     }
 
+    private void drawCardsToPlayers(UnoGameState ugs) {
+        for (int player = 0; player < ugs.getNPlayers(); player++) {
+            String playerDeckName = "Player" + player + "Deck";
+            ugs.playerDecks.add(new Deck<>(playerDeckName));
+            for (int card = 0; card < ((UnoGameParameters)ugs.getGameParameters()).nCardsPerPlayer; card++) {
+                ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
+            }
+        }
+    }
 
+    // The game is ended if there is a player without cards
+    private void checkGameEnd(UnoGameState ugs) {
+        for (int playerID = 0; playerID < ugs.getNPlayers(); playerID++) {
+            int nCards = ugs.playerDecks.get(playerID).getComponents().size();
+            if (nCards == 0) {
+                for (int i = 0; i < ugs.getNPlayers(); i++) {
+                    if (i == playerID)
+                        ugs.setPlayerResult(Utils.GameResult.WIN, i);
+                    else
+                        ugs.setPlayerResult(Utils.GameResult.LOSE, i);
+                }
+                ugs.setGameStatus(Utils.GameResult.GAME_END);
+            }
+        }
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        UnoGameState ugs = (UnoGameState)gameState;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int player = ugs.getCurrentPlayer();
+
+        Deck<UnoCard> playerHand = ugs.playerDecks.get(player);
+        for (UnoCard card : playerHand.getComponents()) {
+            int cardIdx = playerHand.getComponents().indexOf(card);
+            if (card.isPlayable(ugs)) {
+                if (ugs.isWildCard(card)) {
+                    for (String color : ((UnoGameParameters)ugs.getGameParameters()).colors) {
+                        actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx, color));
+                    }
+                }
+                else {
+                    actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx));
+                }
+            }
+        }
+
+        if (actions.isEmpty())
+            actions.add(new NoCards());
+
+        return actions;
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
+        if (VERBOSE) {
+            System.out.println("Game Results:");
+            for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
+                if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
+                    System.out.println("The winner is the player : " + playerID);
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected AbstractForwardModel _copy() {
+        return new UnoForwardModel();
+    }
 }
+

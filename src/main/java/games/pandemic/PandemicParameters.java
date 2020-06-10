@@ -1,15 +1,13 @@
 package games.pandemic;
 
-import core.GameParameters;
+import core.AbstractGameParameters;
 
 import java.util.HashMap;
 
-public class PandemicParameters extends GameParameters {
+public class PandemicParameters extends AbstractGameParameters {
 
-    private String dataPath;
-    public String getDataPath(){return dataPath;}
+    String dataPath;
 
-    long game_seed = System.currentTimeMillis(); //0;
     int lose_max_outbreak = 8;
 
     int max_cubes_per_city = 3;  // More cause outbreak
@@ -26,7 +24,6 @@ public class PandemicParameters extends GameParameters {
     int n_cards_for_cure_reduced = 4;
     int n_forecast_cards = 6;  // How many cards should be viewed and rearranged for the Forecast event card
 
-    int n_players = 4;
     int max_cards_per_player = 7;  // Max cards in hand per player
     int n_cards_draw = 2;  // Number of cards players draw each turn
 
@@ -41,14 +38,14 @@ public class PandemicParameters extends GameParameters {
     int n_actions_per_turn = 4;
     int n_research_stations = 6;
 
-    protected PandemicParameters(String dataPath) {
+    public PandemicParameters(String dataPath, long seed) {
+        super(seed);
         this.dataPath = dataPath;
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {
-        this(pandemicParameters.dataPath);
+        this(pandemicParameters.dataPath, System.currentTimeMillis());
 
-        this.game_seed = pandemicParameters.game_seed;
         this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
         this.max_cubes_per_city = pandemicParameters.max_cubes_per_city;  // More cause outbreak
         this.n_epidemic_cards = pandemicParameters.n_epidemic_cards;
@@ -59,7 +56,6 @@ public class PandemicParameters extends GameParameters {
         this.n_initial_disease_cubes = pandemicParameters.n_initial_disease_cubes;
         this.n_cards_for_cure = pandemicParameters.n_cards_for_cure;
         this.n_cards_for_cure_reduced = pandemicParameters.n_cards_for_cure_reduced;
-        this.n_players = pandemicParameters.n_players;
         this.max_cards_per_player = pandemicParameters.max_cards_per_player;  // Max cards in hand per player
         this.n_cards_draw = pandemicParameters.n_cards_draw;  // Number of cards players draw each turn
         this.n_actions_per_turn = pandemicParameters.n_actions_per_turn;
@@ -74,10 +70,6 @@ public class PandemicParameters extends GameParameters {
         this.n_cards_per_player = new HashMap<>();
         for(int key : pandemicParameters.n_cards_per_player.keySet())
             this.n_cards_per_player.put(key, pandemicParameters.n_cards_per_player.get(key));
-    }
-
-    public long getGame_seed() {
-        return game_seed;
     }
 
     public int getLose_max_outbreak() {
@@ -128,10 +120,6 @@ public class PandemicParameters extends GameParameters {
         return n_forecast_cards;
     }
 
-    public int getN_players() {
-        return n_players;
-    }
-
     public int getMax_cards_per_player() {
         return max_cards_per_player;
     }
@@ -150,5 +138,12 @@ public class PandemicParameters extends GameParameters {
 
     public int getN_research_stations() {
         return n_research_stations;
+    }
+
+    public String getDataPath(){return dataPath;}
+
+    @Override
+    protected AbstractGameParameters _copy() {
+        return new PandemicParameters(this);
     }
 }

@@ -1,33 +1,25 @@
 package games.explodingkittens.actions;
 
-import core.components.IDeck;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.observations.IPrintable;
+import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittenTurnOrder;
-import games.explodingkittens.ExplodingKittensGameState;
-import core.turnorder.TurnOrder;
+import core.turnorders.TurnOrder;
 
-import static games.explodingkittens.ExplodingKittensGameState.GamePhase.PlayerMove;
+public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
 
-public class SkipAction<T> extends PlayCard<T> implements IsNopeable, IPrintable {
-
-    public SkipAction(T card, IDeck<T> playerDeck, IDeck<T> discardDeck)
-    {
-        super(card, playerDeck, discardDeck);
+    public SkipAction(int deckFrom, int deckTo, int index) {
+        super(deckFrom, deckTo, index);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        // Discard the card played
         super.execute(gs);
-        ((ExplodingKittensGameState) gs).setGamePhase(PlayerMove);
+        // Execute action
+        gs.setMainGamePhase();
         ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
-        //int nextPlayer = ((ExplodingKittensGameState) gs).nextPlayerToDraw(playerID);
-        //if (nextPlayer != playerID)
-        //    ((ExplodingKittensGameState) gs).remainingDraws = 1;
-        //else
-        //    ((ExplodingKittensGameState) gs).remainingDraws -= 1;
-
-        //((ExplodingKittensGameState) gs).setActivePlayer(nextPlayer);
         return true;
     }
 
@@ -37,12 +29,22 @@ public class SkipAction<T> extends PlayCard<T> implements IsNopeable, IPrintable
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Player " + gameState.getCurrentPlayer() + " skips its draw";
+    }
+
+    @Override
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
         return super.execute(gs);
     }
 
     @Override
-    public void printToConsole() {
+    public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new SkipAction(deckFrom, deckTo, fromIndex);
     }
 }

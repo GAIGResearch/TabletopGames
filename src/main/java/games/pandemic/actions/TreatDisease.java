@@ -1,18 +1,20 @@
 package games.pandemic.actions;
 
-import core.actions.IAction;
+import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Counter;
-import core.content.PropertyIntArray;
+import core.properties.PropertyIntArray;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
-import static games.pandemic.PandemicConstants.*;
-import static utilities.CoreConstants.nameHash;
+import java.util.Objects;
 
-public class TreatDisease implements IAction {
+import static games.pandemic.PandemicConstants.*;
+import static core.CoreConstants.nameHash;
+
+public class TreatDisease extends AbstractAction {
 
     //PandemicParameters gp;
     private int initialDiseaseCubes;
@@ -42,7 +44,7 @@ public class TreatDisease implements IAction {
         Counter diseaseCubeCounter = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color));
         int colorIdx = Utils.indexOf(colors, color);
 
-        BoardNode bn = pgs.world.getNode(nameHash, city);
+        BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, city);
         if (bn != null) {
             PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(infectionHash);
             int[] array = infectionArray.getValues();
@@ -67,6 +69,10 @@ public class TreatDisease implements IAction {
         return false;
     }
 
+    @Override
+    public AbstractAction copy() {
+        return new TreatDisease(initialDiseaseCubes, color, city, treatAll);
+    }
 
     @Override
     public boolean equals(Object other)
@@ -82,12 +88,21 @@ public class TreatDisease implements IAction {
     }
 
     @Override
-    public String
-    toString() {
+    public String  toString() {
         return "TreatDisease{" +
                 "color='" + color + '\'' +
                 ", city='" + city + '\'' +
                 ", treatAll=" + treatAll +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(initialDiseaseCubes, color, city, treatAll);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

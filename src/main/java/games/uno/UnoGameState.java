@@ -1,113 +1,136 @@
 package games.uno;
 
-import core.ForwardModel;
-import core.actions.IAction;
+import core.AbstractGameParameters;
+import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
-import core.GameParameters;
-import core.turnorder.AlternatingTurnOrder;
+import core.interfaces.IPrintable;
 import games.uno.cards.*;
-import core.observations.IObservation;
-import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class UnoGameState extends AbstractGameState {
-    List<Deck<UnoCard>> playerDecks;
-    Deck<UnoCard> drawPile;
-    Deck<UnoCard> discardPile;
-    public UnoCard currentCard;
+import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
-    public UnoGameState(GameParameters gameParameters, ForwardModel model, int nPlayers) {
-        super(gameParameters, model, nPlayers, new AlternatingTurnOrder(nPlayers));
+public class UnoGameState extends AbstractGameState implements IPrintable {
+    List<Deck<UnoCard>>  playerDecks;
+    Deck<UnoCard>        drawDeck;
+    Deck<UnoCard>        discardDeck;
+    UnoCard              currentCard;
+    String currentColor;
+
+    /**
+     * Constructor. Initialises some generic game state variables.
+     *
+     * @param gameParameters - game parameters.
+     * @param nPlayers      - number of players for this game.
+     */
+    public UnoGameState(AbstractGameParameters gameParameters, int nPlayers) {
+        super(gameParameters, new UnoTurnOrder(nPlayers));
     }
 
     @Override
-    public IObservation getObservation(int player) {
+    protected List<Component> _getAllComponents()
+    {
+        return new ArrayList<Component>() {{
+            addAll(playerDecks);
+            add(drawDeck);
+            add(discardDeck);
+            add(currentCard);
+        }};
+    }
 
-        int[] cardsPerPlayer = new int[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++)
-            cardsPerPlayer[i] = playerDecks.get(i).getSize();
+    boolean isWildCard(UnoCard card) {
+        return card.type == Wild;
+    }
 
-        return new UnoObservation(currentCard, playerDecks.get(player), discardPile,
-                cardsPerPlayer, drawPile.getSize());
+    boolean isNumberCard(UnoCard card) {
+        return card.type == UnoCard.UnoCardType.Number;
+    }
+
+    public void updateCurrentCard(UnoCard card) {
+        currentCard  = card;
+        currentColor = card.color;
+    }
+
+    public void updateCurrentCard(UnoCard card, String color) {
+        currentCard  = card;
+        currentColor = color;
+    }
+
+    public Deck<UnoCard> getDrawDeck() {
+        return drawDeck;
+    }
+
+    public Deck<UnoCard> getDiscardDeck() {
+        return discardDeck;
+    }
+
+    public List<Deck<UnoCard>> getPlayerDecks() {
+        return playerDecks;
+    }
+
+    public UnoCard getCurrentCard() {
+        return currentCard;
+    }
+
+    public String getCurrentColor() {
+        return currentColor;
     }
 
     @Override
-    public void endGame() {
-        gameStatus = Utils.GameResult.GAME_DRAW;
-        Arrays.fill(playerResults, Utils.GameResult.GAME_DRAW);
-    }
-
-    @Override
-    public List<IAction> computeAvailableActions() {
-        ArrayList<IAction> actions = new ArrayList<>();
-        int player = turnOrder.getCurrentPlayer(this);
-        Deck<UnoCard> playerDeck = playerDecks.get(player);
-        for (UnoCard card : playerDeck.getCards()){
-            if (card.isPlayable(this))
-            {
-                if (card instanceof UnoNumberCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile));
-                if (card instanceof UnoSkipCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoSkipCard.SkipCardEffect()));
-                if (card instanceof UnoReverseCard)
-                    actions.add(new PlayCard<>(card, playerDeck, discardPile, new UnoReverseCard.ReverseCardEffect()));
-            }
+    protected AbstractGameState _copy(int playerId) {
+        // TODO: partial observability
+        UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
+        copy.playerDecks = new ArrayList<>();
+        for (Deck<UnoCard> d: playerDecks) {
+            copy.playerDecks.add(d.copy());
         }
-        actions.add(new DrawCards<>(drawPile, playerDecks.get(player), discardPile, 1));
-        return actions;
+        copy.drawDeck = drawDeck.copy();
+        copy.discardDeck = discardDeck.copy();
+        copy.currentCard = (UnoCard) currentCard.copy();
+        copy.currentColor = currentColor;
+        return copy;
     }
 
     @Override
-    public void setComponents() {
-
-        drawPile = new Deck<>("Draw Pile");
-
-        for (UnoCard.UnoCardColor color : UnoCard.UnoCardColor.values())
-        {
-            if (color == UnoCard.UnoCardColor.Wild)
-                continue;
-
-            for (int i = 0; i < 10; i++)
-            {
-                drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
-                if (i > 0)
-                    drawPile.add(new UnoNumberCard(color, UnoCard.UnoCardType.Number, i));
-            }
-            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
-            drawPile.add(new UnoSkipCard(color, UnoCard.UnoCardType.Skip));
-            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
-            drawPile.add(new UnoReverseCard(color, UnoCard.UnoCardType.Reverse));
-        }
-
-        drawPile.shuffle();
-        // todo add action cards step-by-step
-
-        discardPile = new Deck<>("Discard Pile");
-
-        playerDecks = new ArrayList<>(getNPlayers());
-        for (int i = 0; i < getNPlayers(); i++){
-            playerDecks.add(new Deck<>("Player Deck"));
-            for (int j = 0; j < 7; j++){
-                playerDecks.get(i).add(drawPile.draw());
-            }
-        }
-
-        currentCard = drawPile.draw();
-        discardPile.add(currentCard);
+    protected double _getScore(int playerId) {
+        // TODO: heuristic
+        return 0;
     }
 
-    public void registerWinner(int playerID){
-        gameStatus = Utils.GameResult.GAME_END;
-        for (int i = 0; i < getNPlayers(); i++)
-        {
-            if (i == playerID)
-                playerResults[i] = Utils.GameResult.GAME_WIN;
-            else
-                playerResults[i] = Utils.GameResult.GAME_LOSE;
+    @Override
+    protected void _reset() {
+        playerDecks = new ArrayList<>();
+        drawDeck = null;
+        discardDeck = null;
+        currentCard = null;
+        currentColor = null;
+    }
+
+    @Override
+    public void printToConsole() {
+
+        String[] strings = new String[6];
+
+        strings[0] = "----------------------------------------------------";
+        strings[1] = "Current Card: " + currentCard.toString() + " [" + currentColor + "]";
+        strings[2] = "----------------------------------------------------";
+
+        strings[3] = "Player      : " + getCurrentPlayer();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Player Hand : ");
+
+        for (UnoCard card : playerDecks.get(getCurrentPlayer()).getComponents()) {
+            sb.append(card.toString());
+            sb.append(" ");
+        }
+        strings[4] = sb.toString();
+        strings[5] = "----------------------------------------------------";
+
+        for (String s : strings){
+            System.out.println(s);
         }
     }
 }
+
