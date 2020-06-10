@@ -1,0 +1,26 @@
+[
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "map1",
+    "sideQuests": ["Integer[]", [1, 2, 3]],
+    "nodes" :
+    [
+      {
+        "name": ["String", "MainQuest"],
+        "delay": ["String", 4]
+      },
+      {
+        "name": ["String", "City"]
+      },
+      {
+        "name": ["String", "SideQuest"]
+      },
+      {
+        "name": ["String", "SideQuest"]
+      }
+    ]
+  }
+]

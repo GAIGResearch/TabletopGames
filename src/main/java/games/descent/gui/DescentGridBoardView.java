@@ -5,7 +5,7 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
-import games.descent.DescentConstants;
+import games.descent.DescentTypes;
 import gui.views.ComponentView;
 import utilities.Vector2D;
 
@@ -76,7 +76,7 @@ public class DescentGridBoardView extends ComponentView {
         BoardNode bn = graph.getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", new Vector2D(x, y)));
         if (bn != null) {
             String terrain = ((PropertyString)bn.getProperty(terrainHash)).value;
-            if (DescentConstants.TerrainType.isWalkable(terrain)) {
+            if (DescentTypes.TerrainType.isWalkable(terrain)) {
 
                 g.setColor(Color.black);
                 g.drawRect(xC, yC, defaultItemSize, defaultItemSize);

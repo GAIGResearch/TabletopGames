@@ -1,0 +1,30 @@
+[
+  {
+    "id": "Acolyte of Saradyn",
+    "monsters": [
+      ["Goblin archer group", "5A"],
+      ["Barghest group", "4A", "all:HP+2"]
+    ],
+    "tokens": [
+      ["Villager", "nHeroes", "8A", "Wounded clergy"]
+    ],
+    "rules": [
+      ["acolyte", "1 hero escorts: speed-1", "If end turn adjacent to 1 or more wounded clergy, choose 1 adjacent wounded clergy to escort",
+        "action: pass acolyte adjacent"],
+      ["reinforcements", "add <=2 goblin archer", "4A"]
+    ],
+    "hero-win": ["monster:barghest", "count", 0],
+    "overlord-win": ["property:fatigue", "count", 7],
+    "overlord-reward": ["2XP", "heroes discard all but 1 Villager"],
+    "hero-reward": ["1XP", "25G x Villager"],
+    "boards": [
+      "board1"
+    ]
+  },
+  {
+    "id": "campaignPhase1",
+    "boards": [
+      "map1"
+    ]
+  }
+]

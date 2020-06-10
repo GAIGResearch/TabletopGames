@@ -16,6 +16,8 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import games.descent.DescentTypes.*;
+
 import static core.CoreConstants.neighbourHash;
 import static core.CoreConstants.orientationHash;
 import static games.descent.DescentConstants.connectionHash;
@@ -26,10 +28,32 @@ public class DescentForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
-
         DescentGameData _data = dgs.getData();
+
+        // TODO: epic play options (pg 19)
+
+        // 1. Get campaign from game parameters, load all the necessary information
+        Campaign campaign = ((DescentParameters)dgs.getGameParameters()).campaign;
+//        _data.getCampaign();
+
+        // First player is always the overlord
+
+        // 5. Player setup phase interrupts, after which setup continues:
+        // Player chooses hero, class, skills
+        // Set up player tokens
+
+        // 2. Set up the first step of the campaign: either a quest, or a world map
+        // Overlord chooses monster groups
+        // Shuffle overlord deck and give overlord nPlayers cards.
+        // Separate shop items by acts, shuffle.
+        // Separate monster and lieutenent cards into 2 acts.
+        // Set up dice
+
+        // 4. Shuffle search cards deck
+
+
         // 1. Read the graph board configuration for the master grid board
-        GraphBoard config = _data.findGraphBoard("board2");
+        GraphBoard config = _data.findGraphBoard("board1");
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();
@@ -39,7 +63,9 @@ public class DescentForwardModel extends AbstractForwardModel {
                 name = name.split("-")[0];
             }
             GridBoard tile = _data.findGridBoard(name);
-            dgs.tiles.put(bn.getComponentID(), tile);
+            if (tile != null) {
+                dgs.tiles.put(bn.getComponentID(), tile);
+            }
         }
 
         // 3. Put together the master grid board
@@ -49,13 +75,15 @@ public class DescentForwardModel extends AbstractForwardModel {
         for (BoardNode bn: config.getBoardNodes()) {
             // Find width of this tile, according to orientation
             GridBoard tile = dgs.tiles.get(bn.getComponentID());
-            int orientation = ((PropertyInt)bn.getProperty(orientationHash)).value;
-            if (orientation % 2 == 0) {
-                width += tile.getWidth();
-                height += tile.getHeight();
-            } else {
-                width += tile.getHeight();
-                height += tile.getWidth();
+            if (tile != null) {
+                int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
+                if (orientation % 2 == 0) {
+                    width += tile.getWidth();
+                    height += tile.getHeight();
+                } else {
+                    width += tile.getHeight();
+                    height += tile.getWidth();
+                }
             }
         }
 
@@ -69,34 +97,48 @@ public class DescentForwardModel extends AbstractForwardModel {
         HashSet<BoardNode> drawn = new HashSet<>();
         ArrayList<Pair<Vector2D, Vector2D>> neighbours = new ArrayList<>();  // Holds neighbouring cells information
 
-        BoardNode bn0 = config.getBoardNodes().get(0);  // Assumes all tiles in this board are connected
-        GridBoard tile = dgs.tiles.get(bn0.getComponentID());
-        int orientation = ((PropertyInt)bn0.getProperty(orientationHash)).value;
-        String[][] rotated = (String[][]) tile.rotate(orientation);
-        int startX = width / 2 - rotated[0].length/2;
-        int startY = height / 2 - rotated.length/2;
-        Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
-        addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, drawn, neighbours, bounds);
-
-        // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
-        String[][] trimBoard = new String[bounds.height][bounds.width];
-        int[][] trimTileRef = new int[bounds.height][bounds.width];
-        for (int i = 0; i < bounds.height; i++) {
-            if (bounds.width >= 0) System.arraycopy(board[i + bounds.y], bounds.x, trimBoard[i], 0, bounds.width);
-            if (bounds.width >= 0) System.arraycopy(dgs.tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
+        BoardNode bn0 = null;
+        for (BoardNode b: config.getBoardNodes()) {
+            if (b != null) {
+                GridBoard tile = dgs.tiles.get(b.getComponentID());
+                if (tile != null) {
+                    bn0 = b;
+                    break;
+                }
+            }
         }
-        dgs.tileReferences = trimTileRef;
-        // Also trim neighbour records
-        for (Pair<Vector2D, Vector2D> p: neighbours) {
-            p.a.subtract(bounds.x, bounds.y);
-            p.b.subtract(bounds.x, bounds.y);
+        if (bn0 != null) {
+            GridBoard tile = dgs.tiles.get(bn0.getComponentID());
+            int orientation = ((PropertyInt) bn0.getProperty(orientationHash)).value;
+            String[][] rotated = (String[][]) tile.rotate(orientation);
+            int startX = width / 2 - rotated[0].length / 2;
+            int startY = height / 2 - rotated.length / 2;
+            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
+            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, drawn, neighbours, bounds);
+
+            // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
+            String[][] trimBoard = new String[bounds.height][bounds.width];
+            int[][] trimTileRef = new int[bounds.height][bounds.width];
+            for (int i = 0; i < bounds.height; i++) {
+                if (bounds.width >= 0) System.arraycopy(board[i + bounds.y], bounds.x, trimBoard[i], 0, bounds.width);
+                if (bounds.width >= 0)
+                    System.arraycopy(dgs.tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
+            }
+            dgs.tileReferences = trimTileRef;
+            // Also trim neighbour records
+            for (Pair<Vector2D, Vector2D> p : neighbours) {
+                p.a.subtract(bounds.x, bounds.y);
+                p.b.subtract(bounds.x, bounds.y);
+            }
+
+            // This is the master board!
+            dgs.masterBoard = new GridBoard<>(trimBoard, String.class);
+            dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours, true);
+
+            // TODO initial setup
+        } else {
+            System.out.println("Tiles for the map not found");
         }
-
-        // This is the master board!
-        dgs.masterBoard = new GridBoard<>(trimBoard, String.class);
-        dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours, true);
-
-        // TODO initial setup
     }
 
     @Override
@@ -105,6 +147,21 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (checkEndOfGame()) return;
         currentState.getTurnOrder().endPlayerTurn(currentState);
         // TODO
+
+        // Transitioning between encounters:
+        // Set up campaign phase
+        // receive gold from search cards and return cards to the deck.
+        // recover all damage and fatigue, discard conditions and effects
+        // receive quest reward (1XP per hero + bonus from quest)
+        // shopping (if right after interlude, can buy any act 1 cards, then remove these from game)
+        // spend XP points for skills
+        // choose next quest (winner chooses)
+        // set up next quest
+
+        // choosing interlude: the heroes pick if they won >= 2 act 1 quests, overlord picks if they won >=2 quests
+
+        // TODO: in 2-hero games, free regular attack action each turn or recover 2 damage.
+        // TODO: 2 player games, with 2 heroes for one, and the other the overlord.
     }
 
     @Override
@@ -166,10 +223,10 @@ public class DescentForwardModel extends AbstractForwardModel {
 
                         // Add connections from this point to points on the master board
                         List<Vector2D> boardNs = getNeighbourhood(j, i, board[0].length, board.length, true);
-                        if (DescentConstants.TerrainType.isWalkable(tileGrid[point.getY() - y][point.getX() - x])) {
+                        if (TerrainType.isWalkable(tileGrid[point.getY() - y][point.getX() - x])) {
                             // Connect each cell that can connect to the master board with all possible connections
                             for (Vector2D n2 : boardNs) {
-                                if (DescentConstants.TerrainType.isWalkable(board[n2.getY()][n2.getX()]) &&
+                                if (TerrainType.isWalkable(board[n2.getY()][n2.getX()]) &&
                                         !n2.equals(point)) {
                                     if (Math.abs(point.getY() - n2.getY()) <= 1 && Math.abs(point.getX() - n2.getX()) <= 1) {
                                         neighbours.add(new Pair<>(point.copy(), n2.copy()));
@@ -182,7 +239,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                         List<Vector2D> possible = getNeighbourhood(j, i, board[0].length, board.length, false);
                         Vector2D other = null;
                         for (Vector2D p: possible) {
-                            if (DescentConstants.TerrainType.isInsideTile(board[p.getY()][p.getX()])) {
+                            if (TerrainType.isInsideTile(board[p.getY()][p.getX()])) {
                                 other = p;
                                 break;
                             }
@@ -193,7 +250,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                             // Connect each cell that can connect to the master board with all possible connections
                             for (Vector2D n2 : tileNs) {
                                 Vector2D pointInBoard = new Vector2D(n2.getX() + x, n2.getY() + y);
-                                if (DescentConstants.TerrainType.isWalkable(tileGrid[n2.getY()][n2.getX()]) &&
+                                if (TerrainType.isWalkable(tileGrid[n2.getY()][n2.getX()]) &&
                                         !pointInBoard.equals(other)) {
                                     if (Math.abs(other.getY() - pointInBoard.getY()) <= 1 && Math.abs(other.getX() - pointInBoard.getX()) <= 1) {
                                         neighbours.add(new Pair<>(other.copy(), pointInBoard.copy()));
@@ -208,10 +265,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Add connections between all tiles just placed, unless blocked (no blocked tiles are connected)
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    if (DescentConstants.TerrainType.isWalkable(tileGrid[i][j])) {
+                    if (TerrainType.isWalkable(tileGrid[i][j])) {
                         List<Vector2D> ns = getNeighbourhood(j, i, width, height, true);
                         for (Vector2D nn : ns) {
-                            if (DescentConstants.TerrainType.isWalkable(tileGrid[nn.getY()][nn.getX()]) &&
+                            if (TerrainType.isWalkable(tileGrid[nn.getY()][nn.getX()]) &&
                                     !(nn.getX() == j && nn.getY() == i)) {
                                 neighbours.add(new Pair<>(new Vector2D(j + x, i + y), new Vector2D(nn.getX() + x, nn.getY() + y)));
                             }
@@ -241,62 +298,64 @@ public class DescentForwardModel extends AbstractForwardModel {
                     connectionToNeighbour.b.add(x, y);
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
                     GridBoard tileN = tiles.get(neighbour.getComponentID());
-                    String[][] tileGridN = (String[][]) tileN.rotate(((PropertyInt)neighbour.getProperty(orientationHash)).value);
+                    if (tileN != null) {
+                        String[][] tileGridN = (String[][]) tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
-                    // Find location to start drawing neighbour
-                    Pair<String, Vector2D> conn2 = findConnection(neighbour, bn, findOpenings(tileGridN));
+                        // Find location to start drawing neighbour
+                        Pair<String, Vector2D> conn2 = findConnection(neighbour, bn, findOpenings(tileGridN));
 
-                    int w = tileGridN[0].length;
-                    int h = tileGridN.length;
+                        int w = tileGridN[0].length;
+                        int h = tileGridN.length;
 
-                    if (conn2 != null) {
-                        String side = conn2.a;
-                        Vector2D connectionFromNeighbour = conn2.b;
-                        if (side.equalsIgnoreCase("W")) {
-                            // Remove first column
-                            String[][] tileGridNTrim = new String[h][w-1];
-                            for (int i = 0; i < h; i++) {
-                                System.arraycopy(tileGridN[i], 1, tileGridNTrim[i], 0, w - 1);
+                        if (conn2 != null) {
+                            String side = conn2.a;
+                            Vector2D connectionFromNeighbour = conn2.b;
+                            if (side.equalsIgnoreCase("W")) {
+                                // Remove first column
+                                String[][] tileGridNTrim = new String[h][w - 1];
+                                for (int i = 0; i < h; i++) {
+                                    System.arraycopy(tileGridN[i], 1, tileGridNTrim[i], 0, w - 1);
+                                }
+                                tileGridN = tileGridNTrim;
+                            } else if (side.equalsIgnoreCase("E")) {
+                                connectionFromNeighbour.subtract(1, 0);
+                                // Remove last column
+                                String[][] tileGridNTrim = new String[h][w - 1];
+                                for (int i = 0; i < h; i++) {
+                                    System.arraycopy(tileGridN[i], 0, tileGridNTrim[i], 0, w - 1);
+                                }
+                                tileGridN = tileGridNTrim;
+                            } else if (side.equalsIgnoreCase("N")) {
+                                // Remove first row
+                                String[][] tileGridNTrim = new String[h - 1][w];
+                                for (int i = 1; i < h; i++) {
+                                    System.arraycopy(tileGridN[i], 0, tileGridNTrim[i - 1], 0, w);
+                                }
+                                tileGridN = tileGridNTrim;
+                            } else {
+                                connectionFromNeighbour.subtract(0, 1);
+                                // Remove last row
+                                String[][] tileGridNTrim = new String[h - 1][w];
+                                for (int i = 0; i < h - 1; i++) {
+                                    System.arraycopy(tileGridN[i], 0, tileGridNTrim[i], 0, w);
+                                }
+                                tileGridN = tileGridNTrim;
                             }
-                            tileGridN = tileGridNTrim;
-                        } else if (side.equalsIgnoreCase("E")) {
-                            connectionFromNeighbour.subtract(1, 0);
-                            // Remove last column
-                            String[][] tileGridNTrim = new String[h][w-1];
-                            for (int i = 0; i < h; i++) {
-                                System.arraycopy(tileGridN[i], 0, tileGridNTrim[i], 0, w - 1);
-                            }
-                            tileGridN = tileGridNTrim;
-                        } else if (side.equalsIgnoreCase("N")) {
-                            // Remove first row
-                            String[][] tileGridNTrim = new String[h-1][w];
-                            for (int i = 1; i < h; i++) {
-                                System.arraycopy(tileGridN[i], 0, tileGridNTrim[i - 1], 0, w);
-                            }
-                            tileGridN = tileGridNTrim;
-                        } else {
-                            connectionFromNeighbour.subtract(0, 1);
-                            // Remove last row
-                            String[][] tileGridNTrim = new String[h-1][w];
-                            for (int i = 0; i < h-1; i++) {
-                                System.arraycopy(tileGridN[i], 0, tileGridNTrim[i], 0, w);
-                            }
-                            tileGridN = tileGridNTrim;
+                            Vector2D topLeftCorner = new Vector2D(connectionToNeighbour.b.getX() - connectionFromNeighbour.getX(),
+                                    connectionToNeighbour.b.getY() - connectionFromNeighbour.getY());
+
+                            // Update area bounds
+                            if (topLeftCorner.getX() < bounds.x) bounds.x = topLeftCorner.getX();
+                            if (topLeftCorner.getY() < bounds.y) bounds.y = topLeftCorner.getY();
+                            int deltaMaxX = (int) (topLeftCorner.getX() + tileGridN[0].length - bounds.getMaxX());
+                            if (deltaMaxX > 0) bounds.width += deltaMaxX;
+                            int deltaMaxY = (int) (topLeftCorner.getY() + tileGridN.length - bounds.getMaxY());
+                            if (deltaMaxY > 0) bounds.height += deltaMaxY;
+
+                            // Draw neighbour recursively
+                            addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
+                                    tiles, tileReferences, drawn, neighbours, bounds);
                         }
-                        Vector2D topLeftCorner = new Vector2D(connectionToNeighbour.b.getX() - connectionFromNeighbour.getX(),
-                                connectionToNeighbour.b.getY() - connectionFromNeighbour.getY());
-
-                        // Update area bounds
-                        if (topLeftCorner.getX() < bounds.x) bounds.x = topLeftCorner.getX();
-                        if (topLeftCorner.getY() < bounds.y) bounds.y = topLeftCorner.getY();
-                        int deltaMaxX = (int) (topLeftCorner.getX() + tileGridN[0].length - bounds.getMaxX());
-                        if (deltaMaxX > 0) bounds.width += deltaMaxX;
-                        int deltaMaxY = (int) (topLeftCorner.getY() + tileGridN.length - bounds.getMaxY());
-                        if (deltaMaxY > 0) bounds.height += deltaMaxY;
-
-                        // Draw neighbour recursively
-                        addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                tiles, tileReferences, drawn, neighbours, bounds);
                     }
                 }
             }
