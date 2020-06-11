@@ -7,6 +7,7 @@ import core.actions.DoNothing;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
+import core.components.Token;
 import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import utilities.Pair;
@@ -32,29 +33,57 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // TODO: epic play options (pg 19)
 
-        // 1. Get campaign from game parameters, load all the necessary information
+        // Get campaign from game parameters, load all the necessary information
         Campaign campaign = ((DescentParameters)dgs.getGameParameters()).campaign;
         campaign.load(_data);
 
         // Set up first board of first quest
         setupBoard(dgs, _data, campaign.getQuests()[0].getBoards().get(0));
+        dgs.overlordPlayer = 0;  // First player is always the overlord
+        // TODO: is this quest phase or campaign phase?
 
-        // First player is always the overlord
-
+        // TODO: Let players choose these, for now randomly assigned
+        // TODO: 2 player games, with 2 heroes for one, and the other the overlord.
         // 5. Player setup phase interrupts, after which setup continues:
-        // Player chooses hero, class, skills
-        // Set up player tokens
+        // Player chooses hero & class
 
-        // 2. Set up the first step of the campaign: either a quest, or a world map
-        // Overlord chooses monster groups
+        ArrayList<Integer> archetypes = new ArrayList<>();
+        for (int i = 0; i < DescentConstants.archetypes.length; i++) {
+            archetypes.add(i);
+        }
+        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        for (int i = 1; i < dgs.getNPlayers(); i++) {
+            // Choose random archetype from those remaining
+            int choice = archetypes.get(rnd.nextInt(archetypes.size()));
+            archetypes.remove(Integer.valueOf(choice));
+            String archetype = DescentConstants.archetypes[choice];
+
+            // Choose random hero from that archetype
+            List<Token> heroes = _data.findHeroes(archetype);
+            Token figure = heroes.get(rnd.nextInt(heroes.size()));
+
+            // Choose random class from that archetype
+
+            // Assign skills from chosen class
+
+            // Inform game of this player's token
+        }
+
+        // Place player tokens according to quest starting location
+
+        // Overlord will also have a figure, but not on the board (to store xp and skill info)
+        // Overlord chooses monster groups // TODO, for now randomly selected
+        // Place monsters
+
         // Shuffle overlord deck and give overlord nPlayers cards.
+
         // Separate shop items by acts, shuffle.
+
         // Separate monster and lieutenent cards into 2 acts.
+
         // Set up dice
 
-        // 4. Shuffle search cards deck
-
-        // TODO initial setup
+        // Shuffle search cards deck
     }
 
     @Override
@@ -64,7 +93,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         currentState.getTurnOrder().endPlayerTurn(currentState);
         // TODO
 
-        // Transitioning between encounters:
+        // Quest finished -> Campaign phase
         // Set up campaign phase
         // receive gold from search cards and return cards to the deck.
         // recover all damage and fatigue, discard conditions and effects
@@ -72,12 +101,12 @@ public class DescentForwardModel extends AbstractForwardModel {
         // shopping (if right after interlude, can buy any act 1 cards, then remove these from game)
         // spend XP points for skills
         // choose next quest (winner chooses)
-        // set up next quest
+        // setup next quest
+        // Campaign phase -> quest phase
 
         // choosing interlude: the heroes pick if they won >= 2 act 1 quests, overlord picks if they won >=2 quests
 
         // TODO: in 2-hero games, free regular attack action each turn or recover 2 damage.
-        // TODO: 2 player games, with 2 heroes for one, and the other the overlord.
     }
 
     @Override

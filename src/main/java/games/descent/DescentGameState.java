@@ -20,6 +20,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     GridBoard<String> masterBoard;
     GraphBoard masterGraph;
 
+    int overlordPlayer;
+
     /**
      * Constructor. Initialises some generic game state variables.
      *

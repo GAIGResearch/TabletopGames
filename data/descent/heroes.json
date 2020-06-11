@@ -1,8 +1,9 @@
 [
   {
     "id": "Widow Tarha",
-    "type": ["String", "Figure"],
+    "type": ["String", "Hero"],
     "color": ["Color", "yellow"],
+    "archetype": ["String", "Mage"],
     "movement": ["Integer", 4],
     "hp": ["Integer", 10],
     "fatigue": ["Integer", 4],

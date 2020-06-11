@@ -6,6 +6,7 @@ import utilities.Pair;
 
 import java.util.ArrayList;
 
+// TODO: figure out how this works
 public class Quest {
 
     private String name;
@@ -52,5 +53,9 @@ public class Quest {
 
     public void setNextSideQuests(ArrayList<Quest> nextSideQuests) {
         this.nextSideQuests = nextSideQuests;
+    }
+
+    public Quest copy() {
+        return new Quest(); // TODO
     }
 }
