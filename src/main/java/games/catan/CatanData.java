@@ -2,9 +2,11 @@ package games.catan;
 
 import core.AbstractGameData;
 import core.components.*;
+import core.properties.Property;
+import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import core.properties.PropertyString;
-import games.catan.CatanConstants.*;
+import utilities.Hash;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,17 +16,24 @@ import java.util.Map;
 
 public class CatanData extends AbstractGameData {
 
-    private List<GraphBoard> boards;
+    private GraphBoard board;
+    private List<Area> areas;
     private List<Deck<Card>> decks;
     private List<Token> tokens;
     private List<Counter> counters;
 
-    private int victoryPoints;
+    private CatanParameters params;
+
+    public CatanData(CatanParameters params){
+        this.params = params;
+        this.areas = new ArrayList<>();
+        this.decks = new ArrayList<>();
+    }
 
     @Override
     public void load(String dataPath) {
         // load all components, tiles, decks, counters....
-        // todo
+
         // 126 cards - resources, bonus
         // 37 tiles
         // 90 tokens
@@ -41,35 +50,61 @@ public class CatanData extends AbstractGameData {
             put(CatanParameters.TileType.SEA, 18);
         }};
 
-        GraphBoard board = generateBoard();
+        // generate graph board
+        board = generateBoard();
 
+        // add player tokens (counters)
+        for (int i = 0; i < params.n_players; i++){
+            Area area = new Area(i, "PlayerArea_" + i);
 
+            Counter cityCounter = new Counter(params.n_cities, 0, params.n_cities, "cityCounter");
+            Counter settlementCounter = new Counter(params.n_settlements, 0, params.n_settlements, "settlementCounter");
+            Counter roadCounter = new Counter(params.n_roads, 0, params.n_roads, "roadCounter");
 
+            area.putComponent(CatanConstants.cityCounterHash, cityCounter);
+            area.putComponent(CatanConstants.settlementCounterHash, settlementCounter);
+            area.putComponent(CatanConstants.roadCounterHash, roadCounter);
 
-        // todo that could be simplified
-        HashMap<Integer, Integer> numberTokens = new HashMap<Integer, Integer>(){{
-            put(2, 1);
-            put(3, 2);
-            put(4, 2);
-            put(5, 2);
-            put(6, 2);
-            put(8, 2);
-            put(9, 2);
-            put(10, 2);
-            put(11, 2);
-            put(12, 1);
-        }};
+            areas.add(area);
+        }
 
-
-        // city tokens
-
-        // resources
-
+        // create resource cards
+        Deck<Card> resourceDeck = new Deck("resourceDeck");
+        for (CatanParameters.Resources res: CatanParameters.Resources.values()) {
+            for (int i = 0; i < params.n_resource_cards; i++) {
+                Card c = new Card();
+                c.setProperty(CatanConstants.cardType, new PropertyString("cardType", res.name()));
+                resourceDeck.add(c);
+            }
+        }
 
         // Build development deck
         HashMap<CatanParameters.CardTypes, Integer> developmentCounts = new HashMap<CatanParameters.CardTypes, Integer>(){{
             put(CatanParameters.CardTypes.KNIGHT_CARD, 10);
         }};
+
+        List<Deck<Card>> developmentDeck = Deck.loadDecksOfCards(dataPath + "catan/decks.json");
+        Deck tmpDeck = new Deck("tmpDeck");
+        for (Deck<Card> devDeck: developmentDeck){
+            // first pass is the devDeck and second is the resource deck
+            for (Card c: devDeck.getComponents()){
+                PropertyInt count = (PropertyInt)c.getProperty(CatanConstants.countHash);
+                if (count != null){
+                    for (int i = 0; i < count.value-1; i++){
+                        Card cardCopy = c.copy();
+                        tmpDeck.add(cardCopy);
+                    }
+                }
+            }
+        }
+        // todo also contains the resource deck
+        developmentDeck.add(tmpDeck);
+
+
+        // add decks to decks
+        decks.add(resourceDeck);
+        decks.addAll(developmentDeck);
+
 
 
     }
@@ -106,6 +141,21 @@ public class CatanData extends AbstractGameData {
             put(CatanParameters.TileType.SEA, 18);
         }};
 
+
+        // todo that could be simplified
+        HashMap<Integer, Integer> numberTokens = new HashMap<Integer, Integer>(){{
+            put(2, 1);
+            put(3, 2);
+            put(4, 2);
+            put(5, 2);
+            put(6, 2);
+            put(8, 2);
+            put(9, 2);
+            put(10, 2);
+            put(11, 2);
+            put(12, 1);
+        }};
+
         GraphBoard board = new GraphBoard();
         ArrayList<BoardNode> boardNodes = new ArrayList<>();
         for (Map.Entry tileCount : tileCounts.entrySet()){
@@ -114,7 +164,7 @@ public class CatanData extends AbstractGameData {
                 BoardNode bn = new BoardNode(6, tileCount.getKey().toString() + "_" + i);
 //                bn.setProperty(Hash.GetInstance().hash("number"), new PropertyInt("a",1));
                 bn.setProperty(CatanConstants.typeHash, new PropertyString("type", tileCount.getKey().toString()));
-                System.out.println();
+                bn.setProperty(CatanConstants.robberHash, new PropertyBoolean("robber", false));
                 boardNodes.add(bn);
             }
         }

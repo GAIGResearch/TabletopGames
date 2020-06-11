@@ -21,7 +21,7 @@ public class CatanGameState extends AbstractGameState {
     public CatanGameState(AbstractGameParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
 
-        data = new CatanData();
+        data = new CatanData((CatanParameters)pp);
         data.load(((CatanParameters)gameParameters).getDataPath());
     }
 

@@ -6,9 +6,12 @@ public class CatanParameters extends AbstractGameParameters {
     private String dataPath;
     int n_actions_per_turn = 1;
 
-    int settlements_per_player = 5;
-    int cities_per_player = 4;
-    int roads_per_player = 15;
+    int n_players= 4;
+
+    int n_settlements = 5;
+    int n_cities = 4;
+    int n_roads = 15;
+    int n_resource_cards = 19;
 
     public CatanParameters(long seed){
         super(seed);
