@@ -53,7 +53,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
 
         // 1. Read the graph board configuration for the master grid board
-        GraphBoard config = _data.findGraphBoard("board2");
+        GraphBoard config = _data.findGraphBoard("board1");
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();

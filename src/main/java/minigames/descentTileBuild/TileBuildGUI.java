@@ -86,18 +86,23 @@ public class TileBuildGUI extends AbstractGUI {
             }
             int w = tile.getWidth();
             int h = tile.getHeight();
+            int offX = 0;
+            int offY = 0;
             if (minX == 0) {
-                tile.setWidth(w + 1, 1);
+                w++;
+                offX = 1;
             }
             if (minY == 0) {
-                tile.setHeight(h + 1, 1);
+                h++;
+                offY = 1;
             }
-            if (maxX == w - 1) {
-                tile.setWidth(w + 1);
+            if (maxX == tile.getWidth() - 1) {
+                w++;
             }
-            if (maxY == h - 1) {
-                tile.setHeight(h + 1);
+            if (maxY == tile.getHeight() - 1) {
+                h++;
             }
+            tile.setWidthHeight(w, h, offX, offY);
 
             // TODO check if all "open" spaces are exactly 2-wide and not next to each other
 
