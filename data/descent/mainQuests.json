@@ -19,12 +19,14 @@
     "hero-reward": ["1XP", "25G x Villager"],
     "boards": [
       "board1"
-    ]
+    ],
+    "next-quest": ["Rellegar's Rest", "Siege of Skytower"],
+    "next-side-quests": [0, 1]
   },
   {
-    "id": "campaignPhase1",
-    "boards": [
-      "map1"
-    ]
+    "id": "Rellegar's Rest"
+  },
+  {
+    "id": "Siege of Skytower"
   }
 ]

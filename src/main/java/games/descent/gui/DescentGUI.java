@@ -4,7 +4,6 @@ import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import games.descent.DescentGameState;
-import gui.views.AreaView;
 import players.ActionController;
 import players.HumanGUIPlayer;
 
@@ -12,23 +11,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
 
-// TODO: make tool to create tiles automatically (as actions? mini game to generate tiles?)
 public class DescentGUI extends AbstractGUI {
-    JComponent view;
+    DescentGridBoardView view;
     int width, height;
+    int maxWidth = 800;
+    int maxHeight = 600;
 
     public DescentGUI(AbstractGameState gameState, ActionController ac) {
         super(ac, 1);  // TODO: calculate/approximate max action space
 
         DescentGameState dgs = (DescentGameState) gameState;
 
-        if (gameState != null) {
-            view = new DescentGridBoardView(dgs.getMasterBoard(), dgs.getMasterGraph());
-            width = view.getPreferredSize().width;
-            height = view.getPreferredSize().height;
-        } else {
-            view = new JPanel();
-        }
+        view = new DescentGridBoardView(dgs.getMasterBoard(), dgs.getMasterGraph());
+        width = view.getPreferredSize().width;
+        height = view.getPreferredSize().height;
+
         JPanel infoPanel = createGameStateInfoPanel("Descent", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
 
@@ -36,7 +33,9 @@ public class DescentGUI extends AbstractGUI {
         north.setLayout(new BoxLayout(north, BoxLayout.Y_AXIS));
         north.add(infoPanel);
 
-        getContentPane().add(view, BorderLayout.CENTER);
+        JScrollPane pane = new JScrollPane(view);
+        pane.setPreferredSize(new Dimension(maxWidth, maxHeight));
+        getContentPane().add(pane, BorderLayout.CENTER);
         getContentPane().add(north, BorderLayout.NORTH);
         getContentPane().add(actionPanel, BorderLayout.SOUTH);
 
@@ -46,11 +45,6 @@ public class DescentGUI extends AbstractGUI {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            if (view instanceof AreaView) {
-                ((AreaView) view).updateComponent(gameState.getAllComponents());
-            } else {
-                view = new AreaView(gameState.getAllComponents(), width, height);
-            }
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
             }
@@ -60,6 +54,6 @@ public class DescentGUI extends AbstractGUI {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight);
+        return new Dimension(maxWidth, maxHeight + defaultActionPanelHeight + defaultInfoPanelHeight);
     }
 }

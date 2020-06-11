@@ -77,12 +77,13 @@ public class DescentGridBoardView extends ComponentView {
         BoardNode bn = graph.getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", new Vector2D(x, y)));
         if (bn != null) {
             String terrain = ((PropertyString)bn.getProperty(terrainHash)).value;
+
+            Stroke s = g.getStroke();
+
             if (DescentTypes.TerrainType.isWalkable(terrain)) {
 
                 g.setColor(Color.black);
                 g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
-
-                Stroke s = g.getStroke();
                 g.setStroke(new BasicStroke(5));
 
                 List<Vector2D> neighbours = getNeighbourhood(x, y, gridWidth, gridHeight, false);
@@ -117,9 +118,14 @@ public class DescentGridBoardView extends ComponentView {
                         }
                     }
                 }
-
-                g.setStroke(s);
+            } else {
+                if (terrain.equals("block")) {
+                    g.setStroke(new BasicStroke(5));
+                    g.setColor(Color.black);
+                    g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
+                }
             }
+            g.setStroke(s);
 
             // Draw underlying graph
             g.setColor(Color.green);

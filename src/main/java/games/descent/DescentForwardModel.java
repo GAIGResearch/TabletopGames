@@ -34,7 +34,10 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // 1. Get campaign from game parameters, load all the necessary information
         Campaign campaign = ((DescentParameters)dgs.getGameParameters()).campaign;
-//        _data.getCampaign();
+        campaign.load(_data);
+
+        // Set up first board of first quest
+        setupBoard(dgs, _data, campaign.getQuests()[0].getBoards().get(0));
 
         // First player is always the overlord
 
@@ -51,94 +54,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // 4. Shuffle search cards deck
 
-
-        // 1. Read the graph board configuration for the master grid board
-        GraphBoard config = _data.findGraphBoard("board1");
-
-        // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
-        dgs.tiles = new HashMap<>();
-        for (BoardNode bn: config.getBoardNodes()) {
-            String name = bn.getComponentName();
-            if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
-                name = name.split("-")[0];
-            }
-            GridBoard tile = _data.findGridBoard(name);
-            if (tile != null) {
-                dgs.tiles.put(bn.getComponentID(), tile);
-            }
-        }
-
-        // 3. Put together the master grid board
-        // Find maximum board width and height, if all were put together side by side
-        int width = 0;
-        int height = 0;
-        for (BoardNode bn: config.getBoardNodes()) {
-            // Find width of this tile, according to orientation
-            GridBoard tile = dgs.tiles.get(bn.getComponentID());
-            if (tile != null) {
-                int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
-                if (orientation % 2 == 0) {
-                    width += tile.getWidth();
-                    height += tile.getHeight();
-                } else {
-                    width += tile.getHeight();
-                    height += tile.getWidth();
-                }
-            }
-        }
-
-        // First tile will be in the center, board could expand in more directions
-        width *= 2;
-        height *= 2;
-
-        // Create big board
-        String[][] board = new String[height][width];
-        dgs.tileReferences = new int[height][width];
-        HashSet<BoardNode> drawn = new HashSet<>();
-        ArrayList<Pair<Vector2D, Vector2D>> neighbours = new ArrayList<>();  // Holds neighbouring cells information
-
-        BoardNode bn0 = null;
-        for (BoardNode b: config.getBoardNodes()) {
-            if (b != null) {
-                GridBoard tile = dgs.tiles.get(b.getComponentID());
-                if (tile != null) {
-                    bn0 = b;
-                    break;
-                }
-            }
-        }
-        if (bn0 != null) {
-            GridBoard tile = dgs.tiles.get(bn0.getComponentID());
-            int orientation = ((PropertyInt) bn0.getProperty(orientationHash)).value;
-            String[][] rotated = (String[][]) tile.rotate(orientation);
-            int startX = width / 2 - rotated[0].length / 2;
-            int startY = height / 2 - rotated.length / 2;
-            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
-            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, drawn, neighbours, bounds);
-
-            // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
-            String[][] trimBoard = new String[bounds.height][bounds.width];
-            int[][] trimTileRef = new int[bounds.height][bounds.width];
-            for (int i = 0; i < bounds.height; i++) {
-                if (bounds.width >= 0) System.arraycopy(board[i + bounds.y], bounds.x, trimBoard[i], 0, bounds.width);
-                if (bounds.width >= 0)
-                    System.arraycopy(dgs.tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
-            }
-            dgs.tileReferences = trimTileRef;
-            // Also trim neighbour records
-            for (Pair<Vector2D, Vector2D> p : neighbours) {
-                p.a.subtract(bounds.x, bounds.y);
-                p.b.subtract(bounds.x, bounds.y);
-            }
-
-            // This is the master board!
-            dgs.masterBoard = new GridBoard<>(trimBoard, String.class);
-            dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours);
-
-            // TODO initial setup
-        } else {
-            System.out.println("Tiles for the map not found");
-        }
+        // TODO initial setup
     }
 
     @Override
@@ -180,6 +96,99 @@ public class DescentForwardModel extends AbstractForwardModel {
     private boolean checkEndOfGame() {
         // TODO
         return false;
+    }
+
+    private void setupBoard(DescentGameState dgs, DescentGameData _data, String bConfig) {
+
+        // 1. Read the graph board configuration for the master grid board
+        GraphBoard config = _data.findGraphBoard(bConfig);
+
+        // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
+        dgs.tiles = new HashMap<>();
+        for (BoardNode bn : config.getBoardNodes()) {
+            String name = bn.getComponentName();
+            if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
+                name = name.split("-")[0];
+            }
+            GridBoard tile = _data.findGridBoard(name);
+            if (tile != null) {
+                dgs.tiles.put(bn.getComponentID(), tile);
+            }
+        }
+
+        // 3. Put together the master grid board
+        // Find maximum board width and height, if all were put together side by side
+        int width = 0;
+        int height = 0;
+        for (BoardNode bn : config.getBoardNodes()) {
+            // Find width of this tile, according to orientation
+            GridBoard tile = dgs.tiles.get(bn.getComponentID());
+            if (tile != null) {
+                int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
+                if (orientation % 2 == 0) {
+                    width += tile.getWidth();
+                    height += tile.getHeight();
+                } else {
+                    width += tile.getHeight();
+                    height += tile.getWidth();
+                }
+            }
+        }
+
+        // First tile will be in the center, board could expand in more directions
+        width *= 2;
+        height *= 2;
+
+        // Create big board
+        String[][] board = new String[height][width];
+        dgs.tileReferences = new int[height][width];
+        HashSet<BoardNode> drawn = new HashSet<>();
+        ArrayList<Pair<Vector2D, Vector2D>> neighbours = new ArrayList<>();  // Holds neighbouring cells information
+
+        BoardNode bn0 = null;
+        for (BoardNode b : config.getBoardNodes()) {
+            if (b != null) {
+                GridBoard tile = dgs.tiles.get(b.getComponentID());
+                if (tile != null) {
+                    bn0 = b;
+                    break;
+                }
+            }
+        }
+        if (bn0 != null) {
+            GridBoard tile = dgs.tiles.get(bn0.getComponentID());
+            int orientation = ((PropertyInt) bn0.getProperty(orientationHash)).value;
+            String[][] rotated = (String[][]) tile.rotate(orientation);
+            int startX = width / 2 - rotated[0].length / 2;
+            int startY = height / 2 - rotated.length / 2;
+            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
+            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, drawn, neighbours, bounds);
+
+            // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
+            bounds.x -= 1;
+            bounds.y -= 1;
+            bounds.width += 2;
+            bounds.height += 2;
+            String[][] trimBoard = new String[bounds.height][bounds.width];
+            int[][] trimTileRef = new int[bounds.height][bounds.width];
+            for (int i = 0; i < bounds.height; i++) {
+                if (bounds.width >= 0) System.arraycopy(board[i + bounds.y], bounds.x, trimBoard[i], 0, bounds.width);
+                if (bounds.width >= 0)
+                    System.arraycopy(dgs.tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
+            }
+            dgs.tileReferences = trimTileRef;
+            // Also trim neighbour records
+            for (Pair<Vector2D, Vector2D> p : neighbours) {
+                p.a.subtract(bounds.x, bounds.y);
+                p.b.subtract(bounds.x, bounds.y);
+            }
+
+            // This is the master board!
+            dgs.masterBoard = new GridBoard<>(trimBoard, String.class);
+            dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours);
+        } else {
+            System.out.println("Tiles for the map not found");
+        }
     }
 
     /**
