@@ -62,7 +62,9 @@ public class DescentForwardModel extends AbstractForwardModel {
             List<Token> heroes = _data.findHeroes(archetype);
             Token figure = heroes.get(rnd.nextInt(heroes.size()));
 
-            // Choose random class from that archetype
+            // Choose random class from that archetype TODO: check if available in the framework
+            choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
+            String heroClass = DescentConstants.archetypeClassMap.get(archetype)[choice];
 
             // Assign skills from chosen class
 
