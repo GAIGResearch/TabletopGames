@@ -1,4 +1,4 @@
-package minigames.descentTileBuild;
+package tools.descentTileBuild;
 
 import core.components.GridBoard;
 import games.descent.gui.DescentGridBoardView;

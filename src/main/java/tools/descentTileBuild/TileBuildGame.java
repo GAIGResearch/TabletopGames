@@ -1,10 +1,9 @@
-package minigames.descentTileBuild;
+package tools.descentTileBuild;
 
 import core.AbstractPlayer;
 import core.Game;
 import players.ActionController;
 import players.HumanGUIPlayer;
-import players.RandomPlayer;
 
 import java.util.ArrayList;
 
