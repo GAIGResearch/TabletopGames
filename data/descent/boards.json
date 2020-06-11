@@ -80,32 +80,26 @@
       {
         "name": ["String", "11A"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["13A1", "endcap-1"]],
+        "neighbours": ["String[]", ["28A", "endcap-1"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
+      },
+      {
+        "name": ["String", "28A"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["11A", "endcap-2"]],
         "connections": ["String[]", ["W-0", "E-0"]]
       },
       {
-        "name": ["String", "13A1"],
-        "orientation": ["Integer", 1],
-        "neighbours": ["String[]", ["11A", "13A2"]],
-        "connections": ["String[]", ["E-0", "W-0"]]
-      },
-      {
-        "name": ["String", "13A2"],
-        "orientation": ["Integer", 1],
-        "neighbours": ["String[]", ["13A1", "endcap-2"]],
-        "connections": ["String[]", ["E-0", "W-0"]]
-      },
-      {
         "name": ["String", "endcap-1"],
-        "orientation": ["Integer", 3],
+        "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["11A"]],
-        "connections": ["String[]", ["W-0"]]
+        "connections": ["String[]", ["E-0"]]
       },
       {
         "name": ["String", "endcap-2"],
-        "orientation": ["Integer", 1],
-        "neighbours": ["String[]", ["13A2"]],
-        "connections": ["String[]", ["E-0"]]
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["28A"]],
+        "connections": ["String[]", ["W-0"]]
       }
     ]
   }

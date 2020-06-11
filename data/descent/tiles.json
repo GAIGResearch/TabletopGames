@@ -94,7 +94,18 @@
       ["edge", "plain", "plain", "edge", "null", "null", "null", "null"],
       ["edge", "open", "open", "edge", "null", "null", "null", "null"]
     ]
-  },
+  },{
+  "id": "28A",
+  "size": [5, 4],
+  "img": "",
+  "class": "String",
+  "grid": [
+    ["null", "null", "null", "open", "open"],
+    ["null", "plain", "plain", "plain", "plain"],
+    ["null", "plain", "plain", "plain", "plain"],
+    ["null", "open", "open", "null", "null"]
+  ]
+},
   {
     "id" : "endcap",
     "size": [4, 3],

@@ -62,7 +62,8 @@ public class TileBuildFM extends AbstractForwardModel {
                             List<Vector2D> neighbours = getNeighbourhood(j, i, tbs.tile.getWidth(), tbs.tile.getHeight(), false);
                             boolean anyOpen = false;
                             for (Vector2D n : neighbours) {
-                                if (tbs.tile.getElement(n.getX(), n.getY()).equals("open")) {
+                                String el = tbs.tile.getElement(n.getX(), n.getY());
+                                if (el != null && el.equals("open")) {
                                     anyOpen = true;
                                     // Check if this would be valid placement
                                     List<Vector2D> insideNeighbours = countInsideNeighboursOpenTile(n.getX(), n.getY(), tbs.tile.getWidth(), tbs.tile.getHeight(), tbs.tile);

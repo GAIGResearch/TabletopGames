@@ -23,7 +23,7 @@ public class DescentGridBoardView extends ComponentView {
     public static HashMap<String, Color> colorMap = new HashMap<String, Color>() {{
         put("null", Color.gray);
         put(null, Color.gray);
-        put("edge", Color.black);
+        put("edge", Color.gray);
         put("plain", Color.white);
         put("block", Color.red);
         put("lava", Color.orange);
