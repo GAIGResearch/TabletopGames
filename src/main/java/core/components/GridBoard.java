@@ -31,7 +31,7 @@ public class GridBoard<T> extends Component {
         typeParameterClass = (Class<T>) String.class;
     }
 
-    protected GridBoard(int width, int height, Class<T> typeParameterClass){
+    public GridBoard(int width, int height, Class<T> typeParameterClass){
         super(Utils.ComponentType.BOARD);
         this.width = width;
         this.height = height;
@@ -76,6 +76,30 @@ public class GridBoard<T> extends Component {
     public int getHeight(){return height; }
 
     /**
+     * Set the width or height of the grid. Creates a new grid with the new dimensions, and copies elements from the
+     * previous grid that fit in the new one (same x, y coordinates).
+     */
+    public void setWidth(int width) {
+        setWidthHeight(width, height);
+    }
+    public void setHeight(int height) {
+        setWidthHeight(width, height);
+    }
+    public void setWidthHeight(int width, int height) {
+        int w = Math.min(width, this.width);
+        int h = Math.min(height, this.height);
+
+        this.width = width;
+        this.height = height;
+
+        T[][] grid = (T[][])Array.newInstance(typeParameterClass, height, width);
+        for (int i = 0; i < h; i++) {
+            if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i], 0, w);
+        }
+        this.grid = grid;
+    }
+
+    /**
      * Sets the element at position (x, y).
      * @param x - x coordinate in the grid.
      * @param y - y coordinate in the grid.
@@ -110,6 +134,18 @@ public class GridBoard<T> extends Component {
      */
     public T[][] getGridValues(){
         return grid;
+    }
+
+    public List<Vector2D> getEmptyCells(T defaultElement) {
+        List<Vector2D> emptyCells = new ArrayList<>();
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (getElement(j, i) == null || getElement(j, i).equals(defaultElement)) {
+                    emptyCells.add(new Vector2D(j, i));
+                }
+            }
+        }
+        return emptyCells;
     }
 
     /**
@@ -292,7 +328,14 @@ public class GridBoard<T> extends Component {
         return gb;
     }
 
-    public GraphBoard toGraphBoard(List<Pair<Vector2D,Vector2D>> neighbours, boolean way8) {
+    /**
+     * Generates a graph from this grid, with 4-way or 8-way connectivity and pre-set neighbouring cells.
+     * Used to restrict grid connectivity further.
+     * @param neighbours - list of neighbouring cells, where each Vector2D is coordinates to a cell in the grid.
+     * @return - GraphBoard, board with board nodes connected. All board nodes have information about their location
+     * in the original grid, via the "coordinates" property.
+     */
+    public GraphBoard toGraphBoard(List<Pair<Vector2D,Vector2D>> neighbours) {
         GraphBoard gb = new GraphBoard(componentName, componentID);
         HashMap<Vector2D, BoardNode> bnMapping = new HashMap<>();
         // Add all cells as board nodes connected to each other

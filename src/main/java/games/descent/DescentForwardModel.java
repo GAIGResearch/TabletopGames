@@ -133,7 +133,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // This is the master board!
             dgs.masterBoard = new GridBoard<>(trimBoard, String.class);
-            dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours, true);
+            dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours);
 
             // TODO initial setup
         } else {

@@ -21,15 +21,16 @@ import static utilities.Utils.getNeighbourhood;
 public class DescentGridBoardView extends ComponentView {
 
     public static HashMap<String, Color> colorMap = new HashMap<String, Color>() {{
-        put("null", Color.darkGray);
-        put(null, Color.darkGray);
+        put("null", Color.gray);
+        put(null, Color.gray);
         put("edge", Color.black);
         put("plain", Color.white);
         put("block", Color.red);
         put("lava", Color.orange);
         put("water", Color.blue);
         put("hazard", Color.green);
-        put("open", Color.gray);
+        put("open", Color.lightGray);
+        put("pit", Color.darkGray);
     }};
 
     private GraphBoard masterGraph;
