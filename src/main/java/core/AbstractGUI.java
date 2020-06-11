@@ -157,6 +157,13 @@ public abstract class AbstractGUI extends JFrame {
         _update(player, gameState);
     }
 
+    protected void resetActionButtons() {
+        for (ActionButton actionButton : actionButtons) {
+            actionButton.setVisible(false);
+            actionButton.setButtonAction(null, "");
+        }
+    }
+
     /**
      * Checks if the window is open.
      * @return true if open, false otherwise

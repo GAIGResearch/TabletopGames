@@ -15,13 +15,15 @@ import utilities.Vector2D;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Collection;
 
 public class TileBuildGUI extends AbstractGUI {
     TileBuildGridBoardView view;
     TerrainOptionsView terrainOptionsView;
+
+    Pair<String, Rectangle> terrainType;
+    Vector2D cell;
 
     int width, height;
     private TileBuildState gameState;
@@ -65,10 +67,41 @@ public class TileBuildGUI extends AbstractGUI {
 
         JButton getjson = new JButton("Generate JSON");
         getjson.addActionListener(e -> {
-            GridBoard<String> tile = ((TileBuildState) gameState).tile;
+            GridBoard<String> tile = ((TileBuildState) gameState).tile.copy();
+
+            // Add edge tiles around the grid
+            int minX = tile.getWidth()-1;
+            int minY = tile.getHeight()-1;
+            int maxX = 0;
+            int maxY = 0;
+            for (int i = 0; i < tile.getHeight(); i++) {
+                for (int j = 0; j < tile.getWidth(); j++) {
+                    if (DescentTypes.TerrainType.isInsideTile(tile.getElement(j, i))) {
+                        if (j < minX) minX = j;
+                        if (i < minY) minY = i;
+                        if (i > maxY) maxY = i;
+                        if (j > maxX) maxX = j;
+                    }
+                }
+            }
+            int w = tile.getWidth();
+            int h = tile.getHeight();
+            if (minX == 0) {
+                tile.setWidth(w + 1, 1);
+            }
+            if (minY == 0) {
+                tile.setHeight(h + 1, 1);
+            }
+            if (maxX == w - 1) {
+                tile.setWidth(w + 1);
+            }
+            if (maxY == h - 1) {
+                tile.setHeight(h + 1);
+            }
+
+            // TODO check if all "open" spaces are exactly 2-wide and not next to each other
 
             // Grid print out in correct format
-            // TODO: add edge tiles around the grid
             String gridValues = "[";
             for (int i = 0; i < tile.getHeight(); i++) {
                 gridValues += "\n[";
@@ -147,6 +180,10 @@ public class TileBuildGUI extends AbstractGUI {
         Vector2D cell = view.highlight;
 
         if (terrainType != null && cell != null) {
+//            if (this.cell != null && !this.cell.equals(cell) || this.terrainType != null && !this.terrainType.equals(terrainType)) {
+//                resetActionButtons();
+//            }
+
             // Find the right action
             List<AbstractAction> actions = gameState.getActions();
             for (AbstractAction a: actions) {
@@ -154,13 +191,17 @@ public class TileBuildGUI extends AbstractGUI {
                     if (((SetGridValueAction) a).getX() == cell.getX() && ((SetGridValueAction) a).getY() == cell.getY()) {
                         String actionStr = (String)((SetGridValueAction) a).getValue();
                         if (actionStr.equalsIgnoreCase(terrainType.a)){
-                            actionButtons[0].setButtonAction(a, "Apply terrain type");
-                            actionButtons[0].setVisible(true);
+                            ac.addAction(a);
+//                            terrainOptionsView.highlight = null;
+                            view.highlight = null;
                         }
                     }
                 }
             }
         }
+
+        this.cell = cell;
+        this.terrainType = terrainType;
     }
 
     @Override

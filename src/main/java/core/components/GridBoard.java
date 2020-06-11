@@ -77,15 +77,28 @@ public class GridBoard<T> extends Component {
 
     /**
      * Set the width or height of the grid. Creates a new grid with the new dimensions, and copies elements from the
-     * previous grid that fit in the new one (same x, y coordinates).
+     * previous grid that fit in the new one (same x, y coordinates). Possibly adding an offset from which to add
+     * elements in the new grid.
      */
     public void setWidth(int width) {
-        setWidthHeight(width, height);
+        setWidthHeight(width, height, 0, 0);
     }
     public void setHeight(int height) {
-        setWidthHeight(width, height);
+        setWidthHeight(width, height, 0, 0);
+    }
+    public void setWidth(int width, int offset) {
+        setWidthHeight(width, height, offset, 0);
+    }
+    public void setHeight(int height, int offset) {
+        setWidthHeight(width, height, 0, offset);
     }
     public void setWidthHeight(int width, int height) {
+        setWidthHeight(width, height, 0, 0);
+    }
+    public void setWidthHeight(int width, int height, int offsetX, int offsetY) {
+        if (offsetX + this.width > width) offsetX = 0;
+        if (offsetY + this.height > height) offsetY = 0;
+
         int w = Math.min(width, this.width);
         int h = Math.min(height, this.height);
 
@@ -94,7 +107,7 @@ public class GridBoard<T> extends Component {
 
         T[][] grid = (T[][])Array.newInstance(typeParameterClass, height, width);
         for (int i = 0; i < h; i++) {
-            if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i], 0, w);
+            if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i + offsetY], offsetX, w);
         }
         this.grid = grid;
     }
