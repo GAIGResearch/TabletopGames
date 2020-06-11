@@ -131,7 +131,7 @@ public class GraphBoard extends Component {
      * Sets the list of board nodes to the given list.
      * @param boardNodes - new list of board nodes.
      */
-    private void setBoardNodes(List<BoardNode> boardNodes) {
+    public void setBoardNodes(List<BoardNode> boardNodes) {
         this.boardNodes = boardNodes;
     }
 

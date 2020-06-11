@@ -3,8 +3,12 @@ package games.catan;
 import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CatanForwardModel extends AbstractForwardModel {
     CatanParameters params;
@@ -29,7 +33,10 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        return null;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        actions.add(new DoNothing());
+
+        return actions;
     }
 
     @Override

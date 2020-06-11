@@ -1,6 +1,5 @@
 package games.catan;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.AbstractForwardModel;
 import core.Game;
@@ -13,23 +12,28 @@ import java.util.Random;
 
 public class CatanGame extends Game {
     public CatanGame(List<AbstractPlayer> agents, CatanParameters params) {
-        super(GameType.Catan, agents, new CatanForwardModel(), new CatanGameState(params, agents.size()));
+        super(GameType.Catan, agents, new CatanForwardModel(params, agents.size()), new CatanGameState(params, agents.size()));
+    }
+
+    public CatanGame(List<AbstractPlayer> agents, CatanParameters params, CatanForwardModel model, CatanGameState gameState) {
+        super(GameType.Catan, agents, model, gameState);
     }
 
     public static void main(String[] args){
 
-
-        List<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
+        List<AbstractPlayer> agents = new ArrayList<>();
+        agents.add(new RandomPlayer(new Random()));
+        agents.add(new RandomPlayer(new Random()));
+        agents.add(new RandomPlayer(new Random()));
+        agents.add(new RandomPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/", System.currentTimeMillis());
-        AbstractForwardModel forwardModel = new CatanForwardModel(params, players.size());
+        CatanForwardModel forwardModel = new CatanForwardModel(params, agents.size());
+        CatanGameState gs = new CatanGameState(params, agents.size());
 
-        CatanGame game = new CatanGame(players, params);
-        // todo add GUI?
+        CatanGame game = new CatanGame(agents, params, forwardModel, gs);
+
+        // todo add GUI
         game.run(null);
         System.out.println(game.gameState.getGameStatus());
 
