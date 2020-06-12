@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CatanGameState extends AbstractGameState {
-    CatanData data;
+    private CatanData data;
     public GraphBoard board;
 
     // Collection of areas, mapped to player ID. -1 is the general game area containing the board, counters and several decks.
@@ -51,6 +51,10 @@ public class CatanGameState extends AbstractGameState {
     }
     Area getArea(int playerId) {
         return areas.get(playerId);
+    }
+
+    public CatanData getData(){
+        return data;
     }
 
     @Override
