@@ -8,46 +8,58 @@ public class DescentConstants {
 
     public final static String[] archetypes = new String[] {"Warrior", "Mage", "Scout", "Healer"};
     public final static HashMap<String, String[]> archetypeClassMap = new HashMap<String, String[]>() {{
-       put("Mage", new String[] {"Battlemage",
-                                "Conjurer",
-                                "Elementalist",
-                                "Geomancer",
-                                "Hexer",
-                                "Lorekeeper",
-                                "Necromancer",
+       put("Mage", new String[] {
+//                                "Necromancer",
                                 "Runemaster",
-                                "Truthseer"});
-       put("Healer", new String[] {"Apothecary",
-                                   "Bard",
-                                   "Crusader",
+//                                "Battlemage",
+//                                "Conjurer",
+//                                "Elementalist",
+//                                "Geomancer",
+//                                "Hexer",
+//                                "Lorekeeper",
+//                                "Truthseer"
+                                });
+       put("Healer", new String[] {
                                    "Disciple",
-                                   "Heretic",
-                                   "Prophet",
-                                   "Soul Reaper",
-                                   "Spiritspeaker",
-                                   "Watchman"});
-       put("Warrior", new String[] {"Avenger",
-                                   "Beastmaster",
-                                   "Berserker",
-                                   "Champion",
-                                   "Knight",
-                                   "Marshal",
-                                   "Raider",
-                                   "Skirmisher",
-                                   "Steelcaster"});
-       put("Scout", new String[] { "Bounty Hunter",
-                                   "Monk",
-                                   "Ravager",
-                                   "Shadow Walker",
-                                   "Stalker",
-                                   "Thief",
-                                   "Treasure Hunter",
-                                   "Trickster",
-                                   "Wildlander"});
+//                                   "Spiritspeaker",
+//                                   "Apothecary",
+//                                   "Bard",
+//                                   "Crusader",
+//                                   "Heretic",
+//                                   "Prophet",
+//                                   "Soul Reaper",
+//                                   "Watchman"
+                                    });
+       put("Warrior", new String[] {
+//                                   "Berserker",
+//                                   "Knight",
+//                                   "Avenger",
+//                                   "Beastmaster",
+//                                   "Champion",
+//                                   "Marshal",
+//                                   "Raider",
+//                                   "Skirmisher",
+//                                   "Steelcaster"
+                                    });
+       put("Scout", new String[] {
+//                                   "Thief",
+//                                   "Wildlander",
+//                                   "Bounty Hunter",
+//                                   "Monk",
+//                                   "Ravager",
+//                                   "Shadow Walker",
+//                                   "Stalker",
+//                                   "Treasure Hunter",
+//                                   "Trickster"
+       });
     }};
     
     public final static int connectionHash = Hash.GetInstance().hash("connections");
     public final static int terrainHash = Hash.GetInstance().hash("terrain");
     public final static int archetypeHash = Hash.GetInstance().hash("archetype");
+    public final static int classHash = Hash.GetInstance().hash("class");
+    public final static int xpHash = Hash.GetInstance().hash("XP");
+    public final static int costHash = Hash.GetInstance().hash("cost");
+    public final static int equipSlotHash = Hash.GetInstance().hash("equipSlots");
 
 }

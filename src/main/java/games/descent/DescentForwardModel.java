@@ -4,12 +4,11 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.BoardNode;
-import core.components.GraphBoard;
-import core.components.GridBoard;
-import core.components.Token;
+import core.components.*;
 import core.properties.PropertyInt;
+import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent.components.Figure;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -21,7 +20,7 @@ import games.descent.DescentTypes.*;
 
 import static core.CoreConstants.neighbourHash;
 import static core.CoreConstants.orientationHash;
-import static games.descent.DescentConstants.connectionHash;
+import static games.descent.DescentConstants.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends AbstractForwardModel {
@@ -36,10 +35,15 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Get campaign from game parameters, load all the necessary information
         Campaign campaign = ((DescentParameters)dgs.getGameParameters()).campaign;
         campaign.load(_data);
+        // TODO: Separate shop items (+shuffle), monster and lieutenent cards into 2 acts.
 
         // Set up first board of first quest
         setupBoard(dgs, _data, campaign.getQuests()[0].getBoards().get(0));
         dgs.overlordPlayer = 0;  // First player is always the overlord
+        // Overlord will also have a figure, but not on the board (to store xp and skill info)
+        dgs.overlord = new Figure("Overlord");
+        // TODO: Shuffle overlord deck and give overlord nPlayers cards.
+
         // TODO: is this quest phase or campaign phase?
 
         // TODO: Let players choose these, for now randomly assigned
@@ -59,33 +63,38 @@ public class DescentForwardModel extends AbstractForwardModel {
             String archetype = DescentConstants.archetypes[choice];
 
             // Choose random hero from that archetype
-            List<Token> heroes = _data.findHeroes(archetype);
-            Token figure = heroes.get(rnd.nextInt(heroes.size()));
+            List<Figure> heroes = _data.findHeroes(archetype);
+            Figure figure = heroes.get(rnd.nextInt(heroes.size()));
 
-            // Choose random class from that archetype TODO: check if available in the framework
+            // Choose random class from that archetype
             choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
             String heroClass = DescentConstants.archetypeClassMap.get(archetype)[choice];
 
-            // Assign skills from chosen class
+            // Inform figure of chosen class
+            figure.setProperty(new PropertyString("class", heroClass));
+
+            // Assign starting skills and equipment from chosen class
+            Deck<Card> classDeck = _data.findDeck(heroClass);
+            for (Card c: classDeck.getComponents()) {
+                if (((PropertyInt)c.getProperty(xpHash)).value <= figure.getXP()) {
+                    figure.equip(c);
+                }
+            }
 
             // Inform game of this player's token
+            dgs.heroes.add(figure);
         }
 
         // Place player tokens according to quest starting location
 
-        // Overlord will also have a figure, but not on the board (to store xp and skill info)
         // Overlord chooses monster groups // TODO, for now randomly selected
         // Place monsters
 
-        // Shuffle overlord deck and give overlord nPlayers cards.
-
-        // Separate shop items by acts, shuffle.
-
-        // Separate monster and lieutenent cards into 2 acts.
-
-        // Set up dice
+        // Set up dice?
 
         // Shuffle search cards deck
+
+        // Ready to start playing!
     }
 
     @Override

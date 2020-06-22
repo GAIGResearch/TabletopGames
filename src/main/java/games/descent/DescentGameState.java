@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.interfaces.IPrintable;
+import games.descent.components.Figure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     GridBoard<String> masterBoard;
     GraphBoard masterGraph;
 
+    ArrayList<Figure> heroes;
+    Figure overlord;
+    ArrayList<Figure> monsters;
+
     int overlordPlayer;
 
     /**
@@ -33,6 +38,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         tiles = new HashMap<>();
         data = new DescentGameData();
         data.load(((DescentParameters)gameParameters).getDataPath());
+
+        heroes = new ArrayList<>();
+        monsters = new ArrayList<>();
     }
 
     @Override

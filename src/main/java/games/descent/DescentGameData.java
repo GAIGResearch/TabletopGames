@@ -1,9 +1,7 @@
 package games.descent;
 
 import core.AbstractGameData;
-import core.components.GraphBoard;
-import core.components.GridBoard;
-import core.components.Token;
+import core.components.*;
 import core.properties.PropertyString;
 import games.descent.components.Figure;
 import games.descent.concepts.Quest;
@@ -12,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,17 +22,29 @@ import static games.descent.DescentConstants.archetypeHash;
 public class DescentGameData extends AbstractGameData {
     List<GridBoard> tiles;
     List<GraphBoard> boardConfigurations;
-    List<Token> figures;
+    List<Figure> figures;
+    List<Deck<Card>> decks;
     List<Quest> quests;
     List<Quest> sideQuests;
 
     @Override
     public void load(String dataPath) {
         tiles = GridBoard.loadBoards(dataPath + "tiles.json");
-        figures = Figure.loadTokens(dataPath + "heroes.json");
+        figures = Figure.loadFigures(dataPath + "heroes.json");
         boardConfigurations = GraphBoard.loadBoards(dataPath + "boards.json");
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
+
+        decks = new ArrayList<>();
+
+        // Read all class decks
+        File classesPath = new File(dataPath + "classes/");
+        File[] filesList = classesPath.listFiles();
+        if (filesList != null) {
+            for (File f: filesList) {
+                decks.addAll(Deck.loadDecksOfCards(f.getAbsolutePath()));
+            }
+        }
     }
 
     @Override
@@ -66,6 +77,16 @@ public class DescentGameData extends AbstractGameData {
         return null;
     }
 
+    @Override
+    public Deck<Card> findDeck(String name) {
+        for (Deck<Card> d: decks) {
+            if (name.equalsIgnoreCase(d.getComponentName())) {
+                return d.copy();
+            }
+        }
+        return null;
+    }
+
     public Quest findQuest(String name) {
         for (Quest q: quests) {
             if (q.getName().equalsIgnoreCase(name)) {
@@ -75,9 +96,9 @@ public class DescentGameData extends AbstractGameData {
         return null;
     }
 
-    public List<Token> findHeroes(String archetype) {
-        List<Token> heroes = new ArrayList<>();
-        for (Token f: figures) {
+    public List<Figure> findHeroes(String archetype) {
+        List<Figure> heroes = new ArrayList<>();
+        for (Figure f: figures) {
             if (f.getTokenType().equalsIgnoreCase("hero")) {
                 String arch = ((PropertyString)f.getProperty(archetypeHash)).value;
                 if (arch != null && arch.equalsIgnoreCase(archetype)) {

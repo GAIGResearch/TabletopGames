@@ -7,7 +7,7 @@
     "movement": ["Integer", 4],
     "hp": ["Integer", 10],
     "fatigue": ["Integer", 4],
-    "defence": ["Color", "gray"],
+    "defence": ["Color[]", ["gray"]],
     "willpower": ["Integer", 3],
     "might": ["Integer", 2],
     "knowledge": ["Integer", 4],
