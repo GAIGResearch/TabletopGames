@@ -6,7 +6,12 @@ import java.util.HashMap;
 
 public class DescentConstants {
 
-    public final static String[] archetypes = new String[] {"Warrior", "Mage", "Scout", "Healer"};
+    public final static String[] archetypes = new String[] {
+//            "Warrior",
+            "Mage",
+//            "Scout",
+            "Healer"
+    };
     public final static HashMap<String, String[]> archetypeClassMap = new HashMap<String, String[]>() {{
        put("Mage", new String[] {
 //                                "Necromancer",

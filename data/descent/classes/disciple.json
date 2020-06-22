@@ -21,7 +21,7 @@
          "weaponSurges": ["String[]", ["Surge: Stun"]],
          "equipSlots": ["String[]", ["hand"]],
          "cost": ["Integer", 25],
-         "action": ["String", "Perform an attack with this weapon."]
+         "action": ["String", "Attack"]
        },
        {
          "name": ["String","Wooden Shield"],

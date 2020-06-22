@@ -30,13 +30,15 @@ public class DescentGameData extends AbstractGameData {
     @Override
     public void load(String dataPath) {
         tiles = GridBoard.loadBoards(dataPath + "tiles.json");
-        figures = Figure.loadFigures(dataPath + "heroes.json");
         boardConfigurations = GraphBoard.loadBoards(dataPath + "boards.json");
+
+        figures = Figure.loadFigures(dataPath + "heroes.json");
+        figures.addAll(Figure.loadFigures(dataPath + "monsters.json"));
+
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
 
         decks = new ArrayList<>();
-
         // Read all class decks
         File classesPath = new File(dataPath + "classes/");
         File[] filesList = classesPath.listFiles();

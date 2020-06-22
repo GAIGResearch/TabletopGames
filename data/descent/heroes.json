@@ -12,7 +12,23 @@
     "might": ["Integer", 2],
     "knowledge": ["Integer", 4],
     "awareness": ["Integer", 2],
-    "ability": ["String", ""],
-    "heroicFeat": ["String", ""]
+    "ability": ["String", "Once per round, after you roll a dice for an attack, you may reroll 1 attack or power die. You must keep the new result."],
+    "heroicFeat": ["String", "Action: Attack(targets=2)"]
+  },
+  {
+    "id": "Avric Albright",
+    "type": ["String", "Hero"],
+    "color": ["Color", "blue"],
+    "archetype": ["String", "Healer"],
+    "movement": ["Integer", 4],
+    "hp": ["Integer", 12],
+    "fatigue": ["Integer", 4],
+    "defence": ["Color[]", ["gray"]],
+    "willpower": ["Integer", 4],
+    "might": ["Integer", 2],
+    "knowledge": ["Integer", 3],
+    "awareness": ["Integer", 2],
+    "ability": ["String", "Each hero within 3 spaces of you (including yourself) gains \"Surge: Recover 1 Heart\" on all attack rolls."],
+    "heroicFeat": ["String", "Action: HealAllInRange(figureType=heroes,amount=RollDie(dice={red:2}),range=3)"]
   }
 ]

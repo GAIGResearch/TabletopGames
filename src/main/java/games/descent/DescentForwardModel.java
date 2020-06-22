@@ -42,6 +42,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord");
+        dgs.overlord.setTokenType("Overlord");
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
 
         // TODO: is this quest phase or campaign phase?

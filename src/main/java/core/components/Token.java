@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class Token extends Component {
-    private String tokenType;
+    protected String tokenType;
 
     public Token(String name){
         super(ComponentType.TOKEN, name);

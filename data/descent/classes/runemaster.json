@@ -21,7 +21,7 @@
          "equipmentType": ["String[]", ["Magic", "Rune"]],
          "equipSlots": ["String[]", ["hand", "hand"]],
          "cost": ["Integer", 25],
-         "action": ["String", "Perform an attack with this weapon."]
+         "action": ["String", "Attack"]
        },
        {
          "name": ["String","Exploding Rune"],

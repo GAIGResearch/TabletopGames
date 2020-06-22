@@ -98,6 +98,7 @@ public class Figure extends Token {
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
         copy.xp = xp;
+        copy.tokenType = tokenType;
         // TODO: copy all
         copyComponentTo(copy);
         return copy;
@@ -109,6 +110,7 @@ public class Figure extends Token {
      */
     protected void loadFigure(JSONObject figure) {
         this.componentName = (String) figure.get("id");
+        this.tokenType = (String) ( (JSONArray) figure.get("type")).get(1);
         // TODO: custom load of figure properties
         parseComponent(this, figure);
     }
