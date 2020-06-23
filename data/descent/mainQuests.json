@@ -2,7 +2,7 @@
   {
     "id": "Acolyte of Saradyn",
     "monsters": [
-      ["Goblin archer group", "5A"],
+      ["Goblin Archer group", "5A"],
       ["Barghest group", "4A", "all:HP+2"]
     ],
     "tokens": [
@@ -19,6 +19,12 @@
     "hero-reward": ["1XP", "25G x Villager"],
     "boards": [
       "board1"
+    ],
+    "starting-locations": [
+      [[2, 16],
+      [2, 17],
+      [3, 16],
+      [3, 17]]
     ],
     "next-quest": ["Rellegar's Rest", "Siege of Skytower"],
     "next-side-quests": [0, 1]

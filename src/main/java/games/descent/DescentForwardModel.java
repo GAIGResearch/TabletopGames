@@ -8,7 +8,10 @@ import core.components.*;
 import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import core.properties.PropertyVector2D;
+import games.descent.actions.Move;
 import games.descent.components.Figure;
+import games.descent.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -18,8 +21,7 @@ import java.util.List;
 
 import games.descent.DescentTypes.*;
 
-import static core.CoreConstants.neighbourHash;
-import static core.CoreConstants.orientationHash;
+import static core.CoreConstants.*;
 import static games.descent.DescentConstants.*;
 import static utilities.Utils.getNeighbourhood;
 
@@ -37,8 +39,11 @@ public class DescentForwardModel extends AbstractForwardModel {
         campaign.load(_data);
         // TODO: Separate shop items (+shuffle), monster and lieutenent cards into 2 acts.
 
+        Quest firstQuest = campaign.getQuests()[0];
+        String firstBoard = firstQuest.getBoards().get(0);
+
         // Set up first board of first quest
-        setupBoard(dgs, _data, campaign.getQuests()[0].getBoards().get(0));
+        setupBoard(dgs, _data, firstBoard);
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord");
@@ -51,6 +56,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         // TODO: 2 player games, with 2 heroes for one, and the other the overlord.
         // 5. Player setup phase interrupts, after which setup continues:
         // Player chooses hero & class
+
+        ArrayList<Vector2D> playerStartingLocations = firstQuest.getStartingLocations().get(firstBoard);
 
         ArrayList<Integer> archetypes = new ArrayList<>();
         for (int i = 0; i < DescentConstants.archetypes.length; i++) {
@@ -82,11 +89,14 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
+            // Place player in random starting location
+            choice = rnd.nextInt(playerStartingLocations.size());
+            figure.setLocation(playerStartingLocations.get(choice));
+            playerStartingLocations.remove(choice);
+
             // Inform game of this player's token
             dgs.heroes.add(figure);
         }
-
-        // Place player tokens according to quest starting location
 
         // Overlord chooses monster groups // TODO, for now randomly selected
         // Place monsters
@@ -103,6 +113,11 @@ public class DescentForwardModel extends AbstractForwardModel {
         action.execute(currentState);
         if (checkEndOfGame()) return;
         currentState.getTurnOrder().endPlayerTurn(currentState);
+        // Any figure that ends its turn in a lava space is immediately defeated.
+        // Heroes that are defeated in this way place their hero token in the nearest empty space
+        // (from where they were defeated) that does not contain lava. A large monster is immediately defeated only
+        // if all spaces it occupies are lava spaces.
+
         // TODO
 
         // Quest finished -> Campaign phase
@@ -123,8 +138,37 @@ public class DescentForwardModel extends AbstractForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        DescentGameState dgs = (DescentGameState)gameState;
+
         ArrayList<AbstractAction> actions = new ArrayList<>();
         actions.add(new DoNothing());
+
+        int currentPlayer = gameState.getCurrentPlayer();
+
+        // Move actions
+        if (currentPlayer != 0) {
+            Figure f = dgs.getHeroes().get(currentPlayer-1);
+
+            // Check if figure can still move
+            PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
+            if (f.getMovePoints() > 0) {
+
+                // Find valid neighbours in master graph, can move there
+                Vector2D currentLocation = f.getLocation();
+                BoardNode bn = dgs.getMasterGraph().getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", currentLocation));
+                for (BoardNode neighbour : bn.getNeighbours()) {
+                    Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+
+                    // Find terrain type
+                    String tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
+                    if (!tile.equals("water") || f.getMovePoints() > 1) { // Difficult terrain
+                        actions.add(new Move(loc.copy()));
+                    }
+                }
+            }
+        } else {
+            // TODO: monsters movement
+        }
         // TODO
         return actions;
     }

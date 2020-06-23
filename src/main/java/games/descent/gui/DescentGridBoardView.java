@@ -3,9 +3,12 @@ package games.descent.gui;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
+import core.properties.PropertyColor;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
+import games.descent.DescentGameState;
 import games.descent.DescentTypes;
+import games.descent.components.Figure;
 import gui.views.ComponentView;
 import utilities.Vector2D;
 
@@ -14,9 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import static core.AbstractGUI.defaultItemSize;
+import static core.CoreConstants.colorHash;
 import static core.CoreConstants.coordinateHash;
 import static games.descent.DescentConstants.terrainHash;
 import static utilities.Utils.getNeighbourhood;
+import static utilities.Utils.stringToColor;
 
 public class DescentGridBoardView extends ComponentView {
 
@@ -33,16 +38,30 @@ public class DescentGridBoardView extends ComponentView {
         put("pit", Color.darkGray);
     }};
 
-    private GraphBoard masterGraph;
+    private DescentGameState gameState;
 
-    public DescentGridBoardView(GridBoard<String> gridBoard, GraphBoard masterGraph) {
+    public DescentGridBoardView(GridBoard<String> gridBoard, DescentGameState gameState) {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
-        this.masterGraph = masterGraph;
+        this.gameState = gameState;
+    }
+
+    public void updateGameState(DescentGameState gameState) {
+        this.gameState = gameState;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard<String>) component, 0, 0, masterGraph);
+        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard<String>) component, 0, 0, gameState.getMasterGraph());
+
+        // Draw figures
+        for (int i = 1; i < gameState.getNPlayers(); i++) {
+            Figure f = gameState.getHeroes().get(i-1);
+            Vector2D loc = f.getLocation();
+            g.setColor(stringToColor(((PropertyColor)f.getProperty(colorHash)).valueStr));
+            g.fillOval(loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, defaultItemSize, defaultItemSize);
+            g.setColor(Color.black);
+            g.drawOval(loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, defaultItemSize, defaultItemSize);
+        }
     }
 
     public static void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard<String> gridBoard, int x, int y,

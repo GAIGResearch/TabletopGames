@@ -22,7 +22,7 @@ public class DescentGUI extends AbstractGUI {
 
         DescentGameState dgs = (DescentGameState) gameState;
 
-        view = new DescentGridBoardView(dgs.getMasterBoard(), dgs.getMasterGraph());
+        view = new DescentGridBoardView(dgs.getMasterBoard(), dgs);
         width = view.getPreferredSize().width;
         height = view.getPreferredSize().height;
 
@@ -48,6 +48,7 @@ public class DescentGUI extends AbstractGUI {
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
             }
+            view.updateGameState((DescentGameState) gameState);
         }
         repaint();
     }

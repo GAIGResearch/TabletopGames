@@ -9,11 +9,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Vector2D;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static games.descent.DescentConstants.archetypeHash;
@@ -124,6 +126,7 @@ public class DescentGameData extends AbstractGameData {
                 Quest q = new Quest();
                 q.setName((String) obj.get("id"));
 
+                // Find all boards for the quest
                 ArrayList<String> boards = new ArrayList<>();
                 JSONArray bs = (JSONArray) obj.get("boards");
                 if (bs != null) {
@@ -133,6 +136,25 @@ public class DescentGameData extends AbstractGameData {
                     q.setBoards(boards);
                 }
 
+                // Find starting locations for players, maps to a board
+                HashMap<String, ArrayList<Vector2D>> startingLocations = new HashMap<>();
+                JSONArray ls = (JSONArray) obj.get("starting-locations");
+                if (ls != null) {
+                    int i = 0;
+                    for (Object b: ls) {
+                        JSONArray board = (JSONArray) b;
+                        ArrayList<Vector2D> locations = new ArrayList<>();
+                        for (Object o2: board) {
+                            JSONArray arr = (JSONArray) o2;
+                            locations.add(new Vector2D((int)(long)arr.get(0), (int)(long)arr.get(1)));
+                        }
+                        startingLocations.put(boards.get(i), locations);
+                        i++;
+                    }
+                    q.setStartingLocations(startingLocations);
+                }
+
+                // Quest read complete
                 quests.add(q);
             }
 

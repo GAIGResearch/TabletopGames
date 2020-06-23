@@ -4,11 +4,13 @@ import core.components.Card;
 import core.components.Deck;
 import core.components.Token;
 import core.properties.Property;
+import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Vector2D;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static games.descent.DescentConstants.costHash;
-import static games.descent.DescentConstants.equipSlotHash;
+import static games.descent.DescentConstants.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
@@ -29,6 +30,11 @@ public class Figure extends Token {
     Deck<Card> otherEquipment;
 
     HashMap<String, Integer> equipSlotsAvailable;
+
+    int movePoints;
+    int hp;  // TODO: reset this every quest to max HP
+    int fatigue;  // TODO: reset this every quest to max fatigue
+    Vector2D location;
 
     public Figure(String name) {
         super(name);
@@ -46,6 +52,10 @@ public class Figure extends Token {
 
     protected Figure(String name, int ID) {
         super(name, ID);
+    }
+
+    public void resetRound() {
+        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
     }
 
     public boolean equip(Card c) {
@@ -95,6 +105,38 @@ public class Figure extends Token {
         this.xp = xp;
     }
 
+    public int getMovePoints() {
+        return movePoints;
+    }
+
+    public void setMovePoints(int movePoints) {
+        this.movePoints = movePoints;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public int getFatigue() {
+        return fatigue;
+    }
+
+    public void setFatigue(int fatigue) {
+        this.fatigue = fatigue;
+    }
+
+    public Vector2D getLocation() {
+        return location;
+    }
+
+    public void setLocation(Vector2D location) {
+        this.location = location;
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -110,6 +152,12 @@ public class Figure extends Token {
         if (armor != null) {
             copy.armor = armor.copy();
         }
+        copy.movePoints = movePoints;
+        copy.hp = hp;
+        copy.fatigue = fatigue;
+        if (location != null) {
+            copy.location = location.copy();
+        }
         copyComponentTo(copy);
         return copy;
     }
@@ -123,6 +171,9 @@ public class Figure extends Token {
         this.tokenType = (String) ( (JSONArray) figure.get("type")).get(1);
         // TODO: custom load of figure properties
         parseComponent(this, figure);
+        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
+        this.hp = ((PropertyInt)getProperty(healthHash)).value;
+        this.fatigue = ((PropertyInt)getProperty(fatigueHash)).value;
     }
 
     /**

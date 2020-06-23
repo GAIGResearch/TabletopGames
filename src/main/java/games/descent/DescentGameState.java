@@ -83,6 +83,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return masterGraph;
     }
 
+    public ArrayList<Figure> getHeroes() {
+        return heroes;
+    }
+
     @Override
     public String toString() {
         return masterBoard.toString();

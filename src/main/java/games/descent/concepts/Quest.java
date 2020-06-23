@@ -3,8 +3,11 @@ package games.descent.concepts;
 import core.components.Token;
 import utilities.Group;
 import utilities.Pair;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 // TODO: figure out how this works
 public class Quest {
@@ -20,6 +23,7 @@ public class Quest {
 //    private ArrayList<DescentReward> overlordRewards;
 //    private ArrayList<DescentReward> heroReward;
     private ArrayList<String> boards;
+    HashMap<String, ArrayList<Vector2D>> startingLocations;
     private ArrayList<Quest> nextMainQuests;
     private ArrayList<Quest> nextSideQuests;
 
@@ -55,9 +59,21 @@ public class Quest {
         this.nextSideQuests = nextSideQuests;
     }
 
+    public void setStartingLocations(HashMap<String, ArrayList<Vector2D>> startingLocations) {
+        this.startingLocations = startingLocations;
+    }
+
+    public HashMap<String, ArrayList<Vector2D>> getStartingLocations() {
+        return startingLocations;
+    }
+
     public Quest copy() {
         Quest q = new Quest();
         q.boards = new ArrayList<>(boards);
+        q.startingLocations = new HashMap<>();
+        for (Map.Entry<String, ArrayList<Vector2D>> e: startingLocations.entrySet()) {
+            q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
+        }
         q.name = name;
         return q; // TODO
     }
