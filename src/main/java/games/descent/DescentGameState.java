@@ -63,6 +63,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.masterBoard = masterBoard.copy();
         copy.masterBoardOccupancy = masterBoardOccupancy.copy();
         copy.masterGraph = masterGraph.copy();
+        copy.overlord = overlord.copy();
         copy.heroes = new ArrayList<>();
         for (Figure f: heroes) {
             copy.heroes.add(f.copy());

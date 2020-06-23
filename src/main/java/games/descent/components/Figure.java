@@ -56,7 +56,11 @@ public class Figure extends Token {
     }
 
     public void resetRound() {
-        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
+        if (getProperty(movementHash) != null) {
+            this.movePoints = ((PropertyInt) getProperty(movementHash)).value;
+        } else {
+            this.movePoints = 0;
+        }
         this.nActionsExecuted = 0;
     }
 
@@ -155,7 +159,7 @@ public class Figure extends Token {
         copy.equipSlotsAvailable = new HashMap<>();
         for (Map.Entry<String, Integer> e: equipSlotsAvailable.entrySet()) {
             copy.equipSlotsAvailable.put(e.getKey(), e.getValue());
-        };
+        }
         copy.skills = skills.copy();
         copy.handEquipment = handEquipment.copy();
         copy.otherEquipment = otherEquipment.copy();

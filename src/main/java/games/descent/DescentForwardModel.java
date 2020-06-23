@@ -120,7 +120,9 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         int currentPlayer = currentState.getCurrentPlayer();
         int nActionsPerPlayer = ((DescentParameters)currentState.getGameParameters()).nActionsPerPlayer;
-        if (currentPlayer == 0 || ((DescentGameState)currentState).getHeroes().get(currentPlayer-1).getNActionsExecuted() == nActionsPerPlayer) {
+        if (currentPlayer == 0 && ((DescentGameState)currentState).overlord.getNActionsExecuted() == nActionsPerPlayer
+            || currentPlayer != 0 &&
+                ((DescentGameState)currentState).getHeroes().get(currentPlayer-1).getNActionsExecuted() == nActionsPerPlayer) {
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
 
@@ -159,33 +161,56 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Move actions
         if (currentPlayer != 0) {
             Figure f = dgs.getHeroes().get(currentPlayer-1);
-            Vector2D currentLocation = f.getLocation();
-            String currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+            actions.addAll(moveActions(dgs, f));
+        } else {
+            // Find current monster group / monster playing, retrieve actions they can execute
+            int monsterGroupIdx = ((DescentTurnOrder)dgs.getTurnOrder()).monsterGroupActingNext;
+            ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+            int nextMonster = ((DescentTurnOrder)dgs.getTurnOrder()).monsterActingNext;
+            Monster m = monsterGroup.get(nextMonster);
+            actions.addAll(moveActions(dgs, m));
 
-            // Check if figure can still move TODO: stamina move, not an action
-            PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
-            if (currentTile.equals("pit") || f.getMovePoints() > 0) {
-
-                // Find valid neighbours in master graph, can move there
-                BoardNode bn = dgs.getMasterGraph().getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", currentLocation));
-                for (BoardNode neighbour : bn.getNeighbours()) {
-                    Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-
-                    // Find terrain type
-                    String tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
-                    if ((currentTile.equals("pit") && !tile.equals("pit") // Moving from pit
-                            || !tile.equals("water")  // Normal move
-                            || f.getMovePoints() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
-                            && dgs.masterBoardOccupancy.getElement(loc.getX(), loc.getY())== -1) {  // Empty space?
-                        actions.add(new Move(loc.copy()));
-                    }
+            // Check if finished
+            int nActions = ((DescentParameters)dgs.getGameParameters()).nActionsPerPlayer;
+            if (m.getNActionsExecuted() == nActions) {
+                // This monster is finished, move to next monster
+                ((DescentTurnOrder)dgs.getTurnOrder()).nextMonster(monsterGroup.size());
+                if (nextMonster == monsterGroup.size()-1) {
+                    // Overlord is finished with this monster group
+                    dgs.overlord.setNActionsExecuted(nActions);
                 }
             }
-        } else {
-            int a = 0;
-            // TODO: monsters movement
         }
-        // TODO
+
+        // TODO other actions
+        return actions;
+    }
+
+    private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
+        List<AbstractAction> actions = new ArrayList<>();
+
+        Vector2D currentLocation = f.getLocation();
+        String currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+
+        // Check if figure can still move TODO: stamina move, not an action
+        PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
+        if (currentTile.equals("pit") || f.getMovePoints() > 0) {
+
+            // Find valid neighbours in master graph, can move there
+            BoardNode bn = dgs.getMasterGraph().getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", currentLocation));
+            for (BoardNode neighbour : bn.getNeighbours()) {
+                Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+
+                // Find terrain type
+                String tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
+                if ((currentTile.equals("pit") && !tile.equals("pit") // Moving from pit
+                        || !tile.equals("water")  // Normal move
+                        || f.getMovePoints() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
+                        && dgs.masterBoardOccupancy.getElement(loc.getX(), loc.getY())== -1) {  // Empty space?
+                    actions.add(new Move(loc.copy()));
+                }
+            }
+        }
         return actions;
     }
 
