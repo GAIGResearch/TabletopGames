@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.properties.PropertyInt;
 import games.descent.DescentGameState;
+import games.descent.DescentParameters;
 import games.descent.components.Figure;
 import utilities.Vector2D;
 
@@ -25,21 +26,29 @@ public class Move extends AbstractAction {
         }
         else {
             DescentGameState dgs = (DescentGameState)gs;
+            DescentParameters dp = (DescentParameters)gs.getGameParameters();
+
             Figure f = dgs.getHeroes().get(currentPlayer-1);
-            PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
-            f.setLocation(location);
+            String currentTile = dgs.getMasterBoard().getElement(f.getLocation().getX(), f.getLocation().getY());
             String destinationTile = dgs.getMasterBoard().getElement(location.getX(), location.getY());
-            if (destinationTile.equals("water")) {
-                f.setMovePoints(f.getMovePoints() - 2);  // Difficult terrain
-            } else if (destinationTile.equals("pit")) {
-                f.setMovePoints(moveSpeed.value);  // Finish movement
-                f.setHp(f.getHp() - 1);
+
+            f.setLocation(location);
+            if (destinationTile.equals("water") && !currentTile.equals("pit")) {
+                f.setMovePoints(f.getMovePoints() - dp.waterMoveCost);  // Difficult terrain
             } else {
-                f.setMovePoints(f.getMovePoints() - 1);
+                if (!currentTile.equals("pit")) {
+                    f.setMovePoints(f.getMovePoints() - 1);  // Normal move
+                }
+                if (destinationTile.equals("pit")) {
+                    f.setHp(f.getHp() - dp.pitFallHpCost);  // Hurts
+                }
                 if (destinationTile.equals("lava") || destinationTile.equals("hazard")) {
-                    f.setHp(f.getHp() - 1);  // Hurts
+                    f.setHp(f.getHp() - dp.lavaHpCost);  // Hurts
                 }
             }
+
+            // Check if move action finished
+            if (f.getMovePoints() == 0 || currentTile.equals("pit")) f.setNActionsExecuted(f.getNActionsExecuted() + 1);
             return true;
         }
     }

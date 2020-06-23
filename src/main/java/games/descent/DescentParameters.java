@@ -6,8 +6,13 @@ import static games.descent.DescentTypes.Campaign.HeirsOfBlood;
 
 public class DescentParameters extends AbstractGameParameters {
 
-    String dataPath = "data/descent/";
-    DescentTypes.Campaign campaign = HeirsOfBlood;
+    public String dataPath = "data/descent/";
+    public DescentTypes.Campaign campaign = HeirsOfBlood;
+
+    public int nActionsPerPlayer = 1;  // TODO: 2 move actions?
+    public int pitFallHpCost = 2;
+    public int lavaHpCost = 1;
+    public int waterMoveCost = 2;
 
     public DescentParameters(long seed) {
         super(seed);

@@ -34,6 +34,7 @@ public class Figure extends Token {
     int movePoints;
     int hp;  // TODO: reset this every quest to max HP
     int fatigue;  // TODO: reset this every quest to max fatigue
+    int nActionsExecuted;
     Vector2D location;
 
     public Figure(String name) {
@@ -56,6 +57,7 @@ public class Figure extends Token {
 
     public void resetRound() {
         this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
+        this.nActionsExecuted = 0;
     }
 
     public boolean equip(Card c) {
@@ -137,6 +139,14 @@ public class Figure extends Token {
         this.location = location;
     }
 
+    public int getNActionsExecuted() {
+        return nActionsExecuted;
+    }
+
+    public void setNActionsExecuted(int nActionsExecuted) {
+        this.nActionsExecuted = nActionsExecuted;
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -158,6 +168,7 @@ public class Figure extends Token {
         if (location != null) {
             copy.location = location.copy();
         }
+        copy.nActionsExecuted = nActionsExecuted;
         copyComponentTo(copy);
         return copy;
     }
