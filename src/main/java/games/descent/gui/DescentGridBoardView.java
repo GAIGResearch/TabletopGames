@@ -17,6 +17,7 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,24 +68,28 @@ public class DescentGridBoardView extends ComponentView {
             g.drawOval(loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, defaultItemSize, defaultItemSize);
         }
         // Draw monsters
-        for (Monster m: gameState.getMonsters()) {
-            Vector2D loc = m.getLocation();
-            int orientation = m.getOrientation();
+        for (ArrayList<Monster> monsterGroup: gameState.getMonsters()) {
+            String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+            String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
-            Pair<Integer, Integer> size = m.getSize();
-            if (orientation%2 == 1) {
-                size.swap();
-            }
+            for (Monster m: monsterGroup) {
+                Vector2D loc = m.getLocation();
+                int orientation = m.getOrientation();
 
-            String imagePath = ((DescentParameters)gameState.getGameParameters()).dataPath + "img/";
-            String path = ((PropertyString) m.getProperty(imgHash)).value;
-            if (((PropertyColor)m.getProperty(colorHash)).valueStr.equals("red")) {
-                imagePath += path.replace(".png", "-master.png");
-            } else {
-                imagePath += path;
+                Pair<Integer, Integer> size = m.getSize();
+                if (orientation % 2 == 1) {
+                    size.swap();
+                }
+
+                String imagePath = dataPath;
+                if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
+                    imagePath += path.replace(".png", "-master.png");
+                } else {
+                    imagePath += path;
+                }
+                Image img = ImageIO.GetInstance().getImage(imagePath);
+                g.drawImage(img, loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, size.a * defaultItemSize, size.b * defaultItemSize, null);
             }
-            Image img = ImageIO.GetInstance().getImage(imagePath);
-            g.drawImage(img, loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, size.a*defaultItemSize, size.b*defaultItemSize, null);
         }
 
     }

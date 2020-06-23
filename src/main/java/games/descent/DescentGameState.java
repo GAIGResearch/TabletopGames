@@ -28,7 +28,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     ArrayList<Figure> heroes;
     Figure overlord;
-    ArrayList<Monster> monsters;
+    ArrayList<ArrayList<Monster>> monsters;
 
     int overlordPlayer;
 
@@ -68,8 +68,12 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             copy.heroes.add(f.copy());
         }
         copy.monsters = new ArrayList<>();
-        for (Monster m: monsters) {
-            copy.monsters.add(m.copy());
+        for (ArrayList<Monster> ma: monsters) {
+            ArrayList<Monster> maC = new ArrayList<>();
+            for (Monster m: ma) {
+                maC.add(m.copy());
+            }
+            copy.monsters.add(maC);
         }
         copy.tileReferences = tileReferences.clone();  // TODO deep
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
@@ -104,7 +108,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return heroes;
     }
 
-    public ArrayList<Monster> getMonsters() {
+    public ArrayList<ArrayList<Monster>> getMonsters() {
         return monsters;
     }
 

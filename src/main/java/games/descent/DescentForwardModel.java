@@ -630,6 +630,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         dgs.monsters = new ArrayList<>();
         ArrayList<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
+            ArrayList<Monster> monsterGroup = new ArrayList<>();
+
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
@@ -674,7 +676,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Always 1 master
             Monster master = new Monster(name + " master", monsterDef.get(act + "-master").getProperties());
             placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, hpModifierMaster, superDef);
-            dgs.monsters.add(master);
+            monsterGroup.add(master);
 
             // How many minions?
             int nMinions;
@@ -695,9 +697,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (int i = 0; i < nMinions; i++) {
                 Monster minion = new Monster(name + " minion " + i, monsterDef.get(act + "-minion").getProperties());
                 placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, hpModifierMinion, superDef);
-                dgs.monsters.add(minion);
+                monsterGroup.add(minion);
             }
 
+            dgs.monsters.add(monsterGroup);
         }
     }
 
