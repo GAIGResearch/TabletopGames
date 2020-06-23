@@ -17,8 +17,8 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import static core.AbstractGUI.defaultItemSize;
@@ -92,7 +92,7 @@ public class DescentGridBoardView extends ComponentView {
 
     public static void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard<String> gridBoard, int x, int y,
                                                           GraphBoard graphBoard,
-                                                          HashMap<String, ArrayList<Vector2D>> gridReferences,
+                                                          HashMap<String, HashSet<Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;

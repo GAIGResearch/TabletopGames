@@ -12,6 +12,7 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class DescentGameState extends AbstractGameState implements IPrintable {
@@ -19,7 +20,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // For reference only
     HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
-    HashMap<String, ArrayList<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
+    HashMap<String, HashSet<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
 
     GridBoard<String> masterBoard;
     GridBoard<Integer> masterBoardOccupancy;
@@ -111,7 +112,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return tileReferences;
     }
 
-    public HashMap<String, ArrayList<Vector2D>> getGridReferences() {
+    public HashMap<String, HashSet<Vector2D>> getGridReferences() {
         return gridReferences;
     }
 

@@ -215,7 +215,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             GridBoard tile = _data.findGridBoard(name);
             if (tile != null) {
                 dgs.tiles.put(bn.getComponentID(), tile);
-                dgs.gridReferences.put(name, new ArrayList<>());
+                dgs.gridReferences.put(name, new HashSet<>());
             }
         }
 
@@ -286,7 +286,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 p.b.subtract(bounds.x, bounds.y);
             }
             // And grid references
-            for (Map.Entry<String, ArrayList<Vector2D>> e: dgs.gridReferences.entrySet()) {
+            for (Map.Entry<String, HashSet<Vector2D>> e: dgs.gridReferences.entrySet()) {
                 for (Vector2D v: e.getValue()) {
                     v.subtract(bounds.x, bounds.y);
                 }
@@ -321,7 +321,7 @@ public class DescentForwardModel extends AbstractForwardModel {
     private void addTilesToBoard(BoardNode bn, int x, int y, String[][] board,
                                  String[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
-                                 int[][] tileReferences,  HashMap<String, ArrayList<Vector2D>> gridReferences,
+                                 int[][] tileReferences,  HashMap<String, HashSet<Vector2D>> gridReferences,
                                  HashSet<BoardNode> drawn,
                                  ArrayList<Pair<Vector2D, Vector2D>> neighbours,
                                  Rectangle bounds) {
@@ -401,7 +401,11 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     board[i][j] = tileGrid[i-y][j-x];
+                    if (board[i][j].equals("edge") || board[i][j].equals("null") || board[i][j] == null) continue;
                     tileReferences[i][j] = tile.getComponentID();
+                    for (String s: gridReferences.keySet()) {
+                        gridReferences.get(s).remove(new Vector2D(j, i));
+                    }
                     gridReferences.get(tile.getComponentName()).add(new Vector2D(j, i));
                 }
             }
@@ -624,7 +628,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
-            ArrayList<Vector2D> tileCoords = dgs.gridReferences.get(tile);
+            HashSet<Vector2D> tileCoords = dgs.gridReferences.get(tile);
 
             // Check property modifiers
             int hpModifierMaster = 0;
