@@ -400,8 +400,13 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Add cells from new tile to the master board
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
+                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].equals("edge")
+                            || tileGrid[i-y][j-x].equals("null") || tileGrid[i-y][j-x].equals("open"))) continue;
+                    // Avoid removing already set tiles
                     board[i][j] = tileGrid[i-y][j-x];
-                    if (board[i][j].equals("edge") || board[i][j].equals("null") || board[i][j] == null) continue;
+
+                    if (board[i][j].equals("edge") || board[i][j].equals("null") || board[i][j].equals("open")) continue;
+                    // Don't keep references for edge tiles
                     tileReferences[i][j] = tile.getComponentID();
                     for (String s: gridReferences.keySet()) {
                         gridReferences.get(s).remove(new Vector2D(j, i));

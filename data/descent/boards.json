@@ -22,7 +22,7 @@
       {
         "name": ["String", "9A"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["5A", "entrance", "8A"]],
+        "neighbours": ["String[]", ["21A", "entrance", "8A"]],
         "connections": ["String[]", ["N-0", "W-0", "E-0"]]
       },
       {
