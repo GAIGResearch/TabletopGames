@@ -1,8 +1,5 @@
 package games.descent.concepts;
 
-import core.components.Token;
-import utilities.Group;
-import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
@@ -13,7 +10,7 @@ import java.util.Map;
 public class Quest {
 
     private String name;
-//    private ArrayList<Group<Monster, String, ArrayList<String>>> monsters;  // monster, location, effects
+    private ArrayList<String[]> monsters;  // name, tile, bonus effects for each monster type
 //    private ArrayList<Group<Pair<Token, String>, Integer, String>> tokens;  // token, meaning, how many, where
 //    private ArrayList<DescentRule> rules;  // define these in code
 //    private ArrayList<DescentWinCondition> heroWins;
@@ -23,9 +20,10 @@ public class Quest {
 //    private ArrayList<DescentReward> overlordRewards;
 //    private ArrayList<DescentReward> heroReward;
     private ArrayList<String> boards;
-    HashMap<String, ArrayList<Vector2D>> startingLocations;
+    private HashMap<String, ArrayList<Vector2D>> startingLocations;
     private ArrayList<Quest> nextMainQuests;
     private ArrayList<Quest> nextSideQuests;
+    private int act;
 
     public String getName() {
         return name;
@@ -67,6 +65,22 @@ public class Quest {
         return startingLocations;
     }
 
+    public void setMonsters(ArrayList<String[]> monsters) {
+        this.monsters = monsters;
+    }
+
+    public ArrayList<String[]> getMonsters() {
+        return monsters;
+    }
+
+    public void setAct(int act) {
+        this.act = act;
+    }
+
+    public int getAct() {
+        return act;
+    }
+
     public Quest copy() {
         Quest q = new Quest();
         q.boards = new ArrayList<>(boards);
@@ -75,6 +89,11 @@ public class Quest {
             q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
         }
         q.name = name;
+        q.monsters = new ArrayList<>();
+        for (String[] s: monsters) {
+            q.monsters.add(s.clone());
+        }
+        q.act = act;
         return q; // TODO
     }
 }

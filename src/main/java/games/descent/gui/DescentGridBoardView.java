@@ -7,18 +7,22 @@ import core.properties.PropertyColor;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import games.descent.DescentGameState;
+import games.descent.DescentParameters;
 import games.descent.DescentTypes;
 import games.descent.components.Figure;
+import games.descent.components.Monster;
 import gui.views.ComponentView;
+import utilities.ImageIO;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static core.AbstractGUI.defaultItemSize;
-import static core.CoreConstants.colorHash;
-import static core.CoreConstants.coordinateHash;
+import static core.CoreConstants.*;
 import static games.descent.DescentConstants.terrainHash;
 import static utilities.Utils.getNeighbourhood;
 import static utilities.Utils.stringToColor;
@@ -51,21 +55,44 @@ public class DescentGridBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard<String>) component, 0, 0, gameState.getMasterGraph());
+        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard<String>) component, 0, 0,
+                gameState.getMasterGraph(), gameState.getGridReferences(), gameState.getTileReferences());
 
-        // Draw figures
-        for (int i = 1; i < gameState.getNPlayers(); i++) {
-            Figure f = gameState.getHeroes().get(i-1);
+        // Draw heroes
+        for (Figure f: gameState.getHeroes()) {
             Vector2D loc = f.getLocation();
             g.setColor(stringToColor(((PropertyColor)f.getProperty(colorHash)).valueStr));
             g.fillOval(loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, defaultItemSize, defaultItemSize);
             g.setColor(Color.black);
             g.drawOval(loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, defaultItemSize, defaultItemSize);
         }
+        // Draw monsters
+        for (Monster m: gameState.getMonsters()) {
+            Vector2D loc = m.getLocation();
+            int orientation = m.getOrientation();
+
+            Pair<Integer, Integer> size = m.getSize();
+            if (orientation%2 == 1) {
+                size.swap();
+            }
+
+            String imagePath = ((DescentParameters)gameState.getGameParameters()).dataPath + "img/";
+            String path = ((PropertyString) m.getProperty(imgHash)).value;
+            if (((PropertyColor)m.getProperty(colorHash)).valueStr.equals("red")) {
+                imagePath += path.replace(".png", "-master.png");
+            } else {
+                imagePath += path;
+            }
+            Image img = ImageIO.GetInstance().getImage(imagePath);
+            g.drawImage(img, loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, size.a*defaultItemSize, size.b*defaultItemSize, null);
+        }
     }
 
+
     public static void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard<String> gridBoard, int x, int y,
-                                                          GraphBoard graphBoard) {
+                                                          GraphBoard graphBoard,
+                                                          HashMap<String, ArrayList<Vector2D>> gridReferences,
+                                                          int[][] tileReferences) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -81,6 +108,21 @@ public class DescentGridBoardView extends ComponentView {
                         x, y);
             }
         }
+
+        // Draw grid references
+        g.setColor(Color.black);
+//        for (String tile: gridReferences.keySet()) {
+//            for (Vector2D t: gridReferences.get(tile)) {
+//                g.drawString(tile, t.getX()*defaultItemSize + 10, t.getY()*defaultItemSize + 10);
+//            }
+//        }
+
+        // Draw tile references
+//        for (int i = 0; i < gridBoard.getHeight(); i++) {
+//            for (int j = 0; j < gridBoard.getWidth(); j++) {
+//                g.drawString(""+tileReferences[i][j], j*defaultItemSize + 10, i*defaultItemSize + 10);
+//            }
+//        }
     }
 
     private static void drawCell(Graphics2D g, String element, int x, int y, int gridWidth, int gridHeight, GraphBoard graph,

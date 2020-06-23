@@ -14,10 +14,9 @@ import utilities.Vector2D;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+import static core.components.Component.parseComponent;
 import static games.descent.DescentConstants.archetypeHash;
 
 
@@ -28,6 +27,7 @@ public class DescentGameData extends AbstractGameData {
     List<Deck<Card>> decks;
     List<Quest> quests;
     List<Quest> sideQuests;
+    HashMap<String, HashMap<String, Token>> monsters;
 
     @Override
     public void load(String dataPath) {
@@ -35,7 +35,7 @@ public class DescentGameData extends AbstractGameData {
         boardConfigurations = GraphBoard.loadBoards(dataPath + "boards.json");
 
         figures = Figure.loadFigures(dataPath + "heroes.json");
-//        figures.addAll(Figure.loadFigures(dataPath + "monsters.json"));
+        monsters = loadMonsters(dataPath + "monsters.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
@@ -113,6 +113,10 @@ public class DescentGameData extends AbstractGameData {
         return heroes;
     }
 
+    public HashMap<String, Token> findMonster(String name) {
+        return monsters.get(name);
+    }
+
     private static ArrayList<Quest> loadQuests(String dataPath) {
 
         JSONParser jsonParser = new JSONParser();
@@ -125,6 +129,14 @@ public class DescentGameData extends AbstractGameData {
                 JSONObject obj = (JSONObject) o;
                 Quest q = new Quest();
                 q.setName((String) obj.get("id"));
+
+                // Find act
+                int act = 1;
+                Object actObj = obj.get("act");
+                if (actObj != null) {
+                    act = (int) (long) actObj;
+                }
+                q.setAct(act);
 
                 // Find all boards for the quest
                 ArrayList<String> boards = new ArrayList<>();
@@ -154,6 +166,17 @@ public class DescentGameData extends AbstractGameData {
                     q.setStartingLocations(startingLocations);
                 }
 
+                // Find monsters
+                ArrayList<String[]> qMonsters = new ArrayList<>();
+                JSONArray ms = (JSONArray) obj.get("monsters");
+                if (ms != null) {
+                    for (Object o1 : ms) {
+                        JSONArray mDef = (JSONArray) o1;
+                        qMonsters.add((String[]) mDef.toArray(new String[0]));
+                    }
+                    q.setMonsters(qMonsters);
+                }
+
                 // Quest read complete
                 quests.add(q);
             }
@@ -163,5 +186,50 @@ public class DescentGameData extends AbstractGameData {
         }
 
         return quests;
+    }
+
+    private static HashMap<String, HashMap<String, Token>> loadMonsters(String dataPath) {
+        HashMap<String, HashMap<String, Token>> monsters = new HashMap<>();
+
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader(dataPath)) {
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+
+            for (Object o : data) {
+                JSONObject obj = (JSONObject) o;
+
+                String key = (String) obj.get("id");
+                Token superT = new Token("");
+                HashSet ignoreKeys = new HashSet(){{
+                    add("act1");
+                    add("act2");
+                    add("id");
+                }};
+                parseComponent(superT, obj, ignoreKeys);
+
+                HashMap<String, Token> monsterDef = new HashMap<>();
+                Token act1m = new Token("");
+                parseComponent(act1m, (JSONObject) ((JSONArray)obj.get("act1")).get(0));
+                Token act1M = new Token("");
+                parseComponent(act1M, (JSONObject) ((JSONArray)obj.get("act1")).get(1));
+
+                Token act2m = new Token("");
+                parseComponent(act2m, (JSONObject) ((JSONArray)obj.get("act2")).get(0));
+                Token act2M = new Token("");
+                parseComponent(act2M, (JSONObject) ((JSONArray)obj.get("act2")).get(1));
+
+                monsterDef.put("1-minion", act1m);
+                monsterDef.put("1-master", act1M);
+                monsterDef.put("2-minion", act2m);
+                monsterDef.put("2-master", act2M);
+                monsterDef.put("super", superT);
+
+                monsters.put(key, monsterDef);
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        return monsters;
     }
 }

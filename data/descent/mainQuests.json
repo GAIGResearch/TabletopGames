@@ -1,9 +1,10 @@
 [
   {
     "id": "Acolyte of Saradyn",
+    "act": 1,
     "monsters": [
-      ["Goblin Archer group", "5A"],
-      ["Barghest group", "4A", "all:HP+2"]
+      ["Goblin Archer:group", "5A"],
+      ["Barghest:group", "4A", "all:HP:+:2"]
     ],
     "tokens": [
       ["Villager", "nHeroes", "8A", "Wounded clergy"]

@@ -8,4 +8,10 @@ public class Pair<T,V> {
         this.a = a;
         this.b = b;
     }
+
+    public void swap() {
+        T c = a;
+        a = (T) b;
+        b = (V) c;
+    }
 }

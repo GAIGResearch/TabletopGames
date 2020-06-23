@@ -5,12 +5,11 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
-import core.properties.PropertyInt;
-import core.properties.PropertyString;
-import core.properties.PropertyStringArray;
-import core.properties.PropertyVector2D;
+import core.properties.*;
+import games.GameType;
 import games.descent.actions.Move;
 import games.descent.components.Figure;
+import games.descent.components.Monster;
 import games.descent.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -44,6 +43,8 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // Set up first board of first quest
         setupBoard(dgs, _data, firstBoard);
+
+        // Overlord setup
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord");
@@ -64,6 +65,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             archetypes.add(i);
         }
         Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        dgs.heroes = new ArrayList<>();
         for (int i = 1; i < dgs.getNPlayers(); i++) {
             // Choose random archetype from those remaining
             int choice = archetypes.get(rnd.nextInt(archetypes.size()));
@@ -99,7 +101,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         }
 
         // Overlord chooses monster groups // TODO, for now randomly selected
-        // Place monsters
+        // Create and place monsters
+        createMonsters(dgs, firstQuest, _data, rnd);
 
         // Set up dice?
 
@@ -177,6 +180,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
         } else {
+            int a = 0;
             // TODO: monsters movement
         }
         // TODO
@@ -200,6 +204,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();
+        dgs.gridReferences = new HashMap<>();
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
@@ -208,6 +213,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             GridBoard tile = _data.findGridBoard(name);
             if (tile != null) {
                 dgs.tiles.put(bn.getComponentID(), tile);
+                dgs.gridReferences.put(name, new ArrayList<>());
             }
         }
 
@@ -257,7 +263,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
-            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, drawn, neighbours, bounds);
+            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, neighbours, bounds);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
             bounds.x -= 1;
@@ -276,6 +282,12 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (Pair<Vector2D, Vector2D> p : neighbours) {
                 p.a.subtract(bounds.x, bounds.y);
                 p.b.subtract(bounds.x, bounds.y);
+            }
+            // And grid references
+            for (Map.Entry<String, ArrayList<Vector2D>> e: dgs.gridReferences.entrySet()) {
+                for (Vector2D v: e.getValue()) {
+                    v.subtract(bounds.x, bounds.y);
+                }
             }
 
             // This is the master board!
@@ -306,7 +318,8 @@ public class DescentForwardModel extends AbstractForwardModel {
     private void addTilesToBoard(BoardNode bn, int x, int y, String[][] board,
                                  String[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
-                                 int[][] tileReferences, HashSet<BoardNode> drawn,
+                                 int[][] tileReferences,  HashMap<String, ArrayList<Vector2D>> gridReferences,
+                                 HashSet<BoardNode> drawn,
                                  ArrayList<Pair<Vector2D, Vector2D>> neighbours,
                                  Rectangle bounds) {
         if (!drawn.contains(bn)) {
@@ -386,6 +399,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 for (int j = x; j < x + width; j++) {
                     board[i][j] = tileGrid[i-y][j-x];
                     tileReferences[i][j] = tile.getComponentID();
+                    gridReferences.get(tile.getComponentName()).add(new Vector2D(j, i));
                 }
             }
 
@@ -458,7 +472,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
                             // Draw neighbour recursively
                             addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                    tiles, tileReferences, drawn, neighbours, bounds);
+                                    tiles, tileReferences, gridReferences, drawn, neighbours, bounds);
                         }
                     }
                 }
@@ -591,5 +605,139 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         }
         return openings;
+    }
+
+    /**
+     * Creates all the monsters according to given quest information and places them randomly in the map on requested tile.
+     * @param dgs - game state
+     * @param quest - quest defining monsters
+     * @param _data - all game data
+     * @param rnd - random generator
+     */
+    private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd) {
+        dgs.monsters = new ArrayList<>();
+        ArrayList<String[]> monsters = quest.getMonsters();
+        for (String[] mDef: monsters) {
+            String nameDef = mDef[0];
+            String name = nameDef.split(":")[0];
+            String tile = mDef[1];
+            ArrayList<Vector2D> tileCoords = dgs.gridReferences.get(tile);
+
+            // Check property modifiers
+            int hpModifierMaster = 0;
+            int hpModifierMinion = 0;
+            if (mDef.length > 2) {
+                String mod = mDef[2];
+                String[] modifiers = mod.split(";");
+                for (String modifier: modifiers) {
+                    String who = modifier.split(":")[0];
+                    String property = modifier.split(":")[1];
+                    String sign = modifier.split(":")[2];
+                    int amount = Integer.parseInt(modifier.split(":")[3]);
+                    if (sign.equals("-")) amount = -amount;
+
+                    if (property.equals("HP")) {
+                        // HP modifier
+                        if (who.equals("all")) {
+                            hpModifierMaster += amount;
+                            hpModifierMinion += amount;
+                        } else if (who.equals("master")) {
+                            hpModifierMaster += amount;
+                        } else {
+                            hpModifierMinion += amount;
+                        }
+                    } else {
+                        int a = 0;
+                        // TODO: other properties modified
+                        // TODO: this could be adding/removing abilities too
+                    }
+                }
+            }
+
+            int act = quest.getAct();
+            HashMap<String, Token> monsterDef = _data.findMonster(name);
+            Token superDef = monsterDef.get("super");
+            int[] monsterSetup = ((PropertyIntArray)superDef.getProperty(setupHash)).getValues();
+
+            // Always 1 master
+            Monster master = new Monster(name + " master", monsterDef.get(act + "-master").getProperties());
+            placeMonster(dgs, master, tileCoords, rnd, hpModifierMaster, superDef);
+            dgs.monsters.add(master);
+
+            // How many minions?
+            int nMinions;
+            if (nameDef.contains("group")) {
+                if (nameDef.contains("ignore")) {
+                    // Ignore group limits, max number
+                    nMinions = monsterSetup[monsterSetup.length-1];
+                } else {
+                    // Respect group limits
+                    nMinions = monsterSetup[dgs.getNPlayers()- GameType.Descent.getMinPlayers()];
+                }
+            } else {
+                // Format name:#minion
+                nMinions = Integer.parseInt(nameDef.split(":")[1]);
+            }
+
+            // Place minions
+            for (int i = 0; i < nMinions; i++) {
+                Monster minion = new Monster(name + " minion " + i, monsterDef.get(act + "-minion").getProperties());
+                placeMonster(dgs, minion, tileCoords, rnd, hpModifierMinion, superDef);
+                dgs.monsters.add(minion);
+            }
+
+        }
+    }
+
+    /**
+     * Places a monster in the board, randomly choosing one valid tile from given list.
+     * @param dgs - current game state
+     * @param monster - monster to place
+     * @param tileCoords - coordinate options for the monster
+     * @param rnd - random generator
+     */
+    private void placeMonster(DescentGameState dgs, Monster monster, ArrayList<Vector2D> tileCoords, Random rnd,
+                              int hpModifier, Token superDef) {
+        // Finish setup of monster
+        monster.setProperties(superDef.getProperties());
+        if (hpModifier > 0) {
+            int oldMasterHP = ((PropertyInt)monster.getProperty(healthHash)).value;
+            monster.setProperty(new PropertyInt("hp", oldMasterHP + hpModifier));
+        }
+        // Place monster
+        boolean placed = false;
+
+        // TODO: maybe change orientation if monster doesn't fit vertically
+        String size = ((PropertyString)monster.getProperty(sizeHash)).value;
+        int w = Integer.parseInt(size.split("x")[0]);
+        int h = Integer.parseInt(size.split("x")[1]);
+        monster.setSize(w, h);
+
+        while (!placed) {
+            Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
+            if (dgs.masterBoard.getElement(option.getX(), option.getY()).equals("plain")) {
+                // TODO: some monsters want to spawn in lava/water.
+                // This can be top-left corner, check if the other tiles are valid too
+                boolean canPlace = true;
+                for (int i = 0; i < h; i++) {
+                    for (int j = 0; j < w; j++) {
+                        if (i == 0 && j == 0) continue;
+                        Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
+                        if (!dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY()).equals("plain") ||
+                            !tileCoords.contains(thisTile)) {
+                            canPlace = false;
+                        }
+                    }
+                }
+                if (canPlace) {
+                    monster.setLocation(option);
+                    placed = true;
+                } else {
+//                    tileCoords.remove(option); // TODO: this monster couldn't place, but others might
+                }
+            } else {
+//                tileCoords.remove(option); // TODO: this monster couldn't place, but others might
+            }
+        }
     }
 }

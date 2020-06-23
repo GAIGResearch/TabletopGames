@@ -7,6 +7,8 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.interfaces.IPrintable;
 import games.descent.components.Figure;
+import games.descent.components.Monster;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,13 +19,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // For reference only
     HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
+    HashMap<String, ArrayList<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
 
     GridBoard<String> masterBoard;
     GraphBoard masterGraph;
 
     ArrayList<Figure> heroes;
     Figure overlord;
-    ArrayList<Figure> monsters;
+    ArrayList<Monster> monsters;
 
     int overlordPlayer;
 
@@ -85,6 +88,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public ArrayList<Figure> getHeroes() {
         return heroes;
+    }
+
+    public ArrayList<Monster> getMonsters() {
+        return monsters;
+    }
+
+    public int[][] getTileReferences() {
+        return tileReferences;
+    }
+
+    public HashMap<String, ArrayList<Vector2D>> getGridReferences() {
+        return gridReferences;
     }
 
     @Override

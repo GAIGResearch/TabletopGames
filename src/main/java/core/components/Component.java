@@ -5,8 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Utils.ComponentType;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class Component {
     private static int ID = 0;  // All components receive a unique and final ID from this always increasing counter
@@ -128,16 +127,27 @@ public abstract class Component {
         properties.put(prop.getHashKey(), prop);
     }
 
+    public void setProperties(HashMap<Integer, Property> props) {
+        for (Property p: props.values()) {
+            setProperty(p);
+        }
+    }
+
+    public static Component parseComponent(Component c, JSONObject obj) {
+        return parseComponent(c, obj, new HashSet<>());
+    }
+
     /**
      * Parses a Component object from a JSON object.
      * @param obj - JSON object to parse.
      * @return new Component object with properties as defined in JSON.
      */
-    protected static Component parseComponent(Component c, JSONObject obj)
+    public static Component parseComponent(Component c, JSONObject obj, Set<String> ignoreKeys)
     {
         for(Object o : obj.keySet())
         {
             String key = (String)o;
+            if (ignoreKeys.contains(key)) continue;
 
             if(obj.get(key) instanceof JSONArray) {
                 JSONArray value = (JSONArray) obj.get(key);
