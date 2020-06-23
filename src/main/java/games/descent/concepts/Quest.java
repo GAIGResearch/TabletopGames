@@ -56,6 +56,9 @@ public class Quest {
     }
 
     public Quest copy() {
-        return new Quest(); // TODO
+        Quest q = new Quest();
+        q.boards = new ArrayList<>(boards);
+        q.name = name;
+        return q; // TODO
     }
 }

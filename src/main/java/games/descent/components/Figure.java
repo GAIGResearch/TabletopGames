@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static games.descent.DescentConstants.costHash;
 import static games.descent.DescentConstants.equipSlotHash;
@@ -99,7 +100,16 @@ public class Figure extends Token {
         Figure copy = new Figure(componentName, componentID);
         copy.xp = xp;
         copy.tokenType = tokenType;
-        // TODO: copy all
+        copy.equipSlotsAvailable = new HashMap<>();
+        for (Map.Entry<String, Integer> e: equipSlotsAvailable.entrySet()) {
+            copy.equipSlotsAvailable.put(e.getKey(), e.getValue());
+        };
+        copy.skills = skills.copy();
+        copy.handEquipment = handEquipment.copy();
+        copy.otherEquipment = otherEquipment.copy();
+        if (armor != null) {
+            copy.armor = armor.copy();
+        }
         copyComponentTo(copy);
         return copy;
     }
