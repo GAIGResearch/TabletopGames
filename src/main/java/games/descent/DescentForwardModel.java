@@ -158,7 +158,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         int currentPlayer = gameState.getCurrentPlayer();
 
-        // Move actions
+        // Move actions TODO: this system wouldn't allow move through friends, multi-step move?
         if (currentPlayer != 0) {
             Figure f = dgs.getHeroes().get(currentPlayer-1);
             actions.addAll(moveActions(dgs, f));
@@ -172,7 +172,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Check if finished
             int nActions = ((DescentParameters)dgs.getGameParameters()).nActionsPerPlayer;
-            if (m.getNActionsExecuted() == nActions) {
+            if (m.getNActionsExecuted() == nActions || actions.size() == 1) {
                 // This monster is finished, move to next monster
                 ((DescentTurnOrder)dgs.getTurnOrder()).nextMonster(monsterGroup.size());
                 if (nextMonster == monsterGroup.size()-1) {
