@@ -36,30 +36,66 @@ public class Move extends AbstractAction {
             // Move corresponding hero player
             f = dgs.getHeroes().get(currentPlayer-1);
         }
+        // Update location
+        Vector2D oldLocation = f.getLocation().copy();
+        f.setLocation(location.copy());
 
-        String currentTile = dgs.getMasterBoard().getElement(f.getLocation().getX(), f.getLocation().getY());
-        String destinationTile = dgs.getMasterBoard().getElement(location.getX(), location.getY());
+        // TODO: maybe change orientation if monster doesn't fit vertically
+        int w = 1;
+        int h = 1;
+        if (f.getSize()!= null) {
+            w = f.getSize().a;
+            h = f.getSize().b;
+        }
 
-        dgs.getMasterBoardOccupancy().setElement(f.getLocation().getX(), f.getLocation().getY(), -1);
-        dgs.getMasterBoardOccupancy().setElement(location.getX(), location.getY(), f.getComponentID());
-        f.setLocation(location);
+        boolean toWater = false;
+        boolean inPit = false;
+        boolean toPit = false;
+        boolean toLava = false;
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                String currentTile = dgs.getMasterBoard().getElement(oldLocation.getX() + j, oldLocation.getY() + i);
+                String destinationTile = dgs.getMasterBoard().getElement(location.getX() + j, location.getY() + i);
 
-        if (destinationTile.equals("water") && !currentTile.equals("pit")) {
-            f.setMovePoints(f.getMovePoints() - dp.waterMoveCost);  // Difficult terrain
-        } else {
-            if (!currentTile.equals("pit")) {
-                f.setMovePoints(f.getMovePoints() - 1);  // Normal move
-            }
-            if (destinationTile.equals("pit")) {
-                f.setHp(f.getHp() - dp.pitFallHpCost);  // Hurts
-            }
-            if (destinationTile.equals("lava") || destinationTile.equals("hazard")) {
-                f.setHp(f.getHp() - dp.lavaHpCost);  // Hurts
+                dgs.getMasterBoardOccupancy().setElement(f.getLocation().getX() + j, f.getLocation().getY() + i, -1);
+                dgs.getMasterBoardOccupancy().setElement(location.getX() + j, location.getY() + i, f.getComponentID());
+
+                if (currentTile.equals("pit")) {
+                    inPit = true;
+                }
+                switch (destinationTile) {
+                    case "water":
+                        toWater = true;
+                        break;
+                    case "pit":
+                        toPit = true;
+                        break;
+                    case "lava":
+                    case "hazard":
+                        toLava = true;
+                        break;
+                }
             }
         }
 
+        if (!inPit) {
+            // Can't spend move points in pit, it's just one action
+            if (toWater) {
+                f.setMovePoints(f.getMovePoints() - dp.waterMoveCost);  // Difficult terrain
+            } else {
+                f.setMovePoints(f.getMovePoints() - 1);  // Normal move
+            }
+        }
+
+        if (toPit) {
+            f.setHp(f.getHp() - dp.pitFallHpCost);  // Hurts
+        }
+        if (toLava) {
+            f.setHp(f.getHp() - dp.pitFallHpCost);  // Hurts
+        }
+
         // Check if move action finished
-        if (f.getMovePoints() == 0 || currentTile.equals("pit")) f.setNActionsExecuted(f.getNActionsExecuted() + 1);
+        if (f.getMovePoints() == 0 || inPit) f.setNActionsExecuted(f.getNActionsExecuted() + 1);
         return true;
     }
 

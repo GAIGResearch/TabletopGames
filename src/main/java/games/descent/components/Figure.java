@@ -10,6 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.io.FileReader;
@@ -35,11 +36,14 @@ public class Figure extends Token {
     int hp;  // TODO: reset this every quest to max HP
     int fatigue;  // TODO: reset this every quest to max fatigue
     int nActionsExecuted;
+
     Vector2D location;
+    Pair<Integer,Integer> size;
 
     public Figure(String name) {
         super(name);
         xp = 0;
+        size = new Pair<>(1,1);
 
         skills = new Deck<>("Skills");
         handEquipment = new Deck<>("Hands");
@@ -151,6 +155,14 @@ public class Figure extends Token {
         this.nActionsExecuted = nActionsExecuted;
     }
 
+    public void setSize(int width, int height) {
+        this.size = new Pair<>(width, height);
+    }
+
+    public Pair<Integer, Integer> getSize() {
+        return size;
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -173,6 +185,7 @@ public class Figure extends Token {
             copy.location = location.copy();
         }
         copy.nActionsExecuted = nActionsExecuted;
+        copy.size = size.copy();
         copyComponentTo(copy);
         return copy;
     }

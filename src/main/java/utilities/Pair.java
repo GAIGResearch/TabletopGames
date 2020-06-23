@@ -14,4 +14,8 @@ public class Pair<T,V> {
         a = (T) b;
         b = (V) c;
     }
+
+    public Pair<V, V> copy() {
+        return new Pair(a, b);
+    }
 }

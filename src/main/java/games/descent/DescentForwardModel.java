@@ -200,6 +200,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             BoardNode bn = dgs.getMasterGraph().getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", currentLocation));
             for (BoardNode neighbour : bn.getNeighbours()) {
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+                // TODO: size of figure moving, take into account large monster "expansion" rule, location saved on figure is always top-left corner
 
                 // Find terrain type
                 String tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
