@@ -32,7 +32,10 @@ public class Move extends AbstractAction {
             String currentTile = dgs.getMasterBoard().getElement(f.getLocation().getX(), f.getLocation().getY());
             String destinationTile = dgs.getMasterBoard().getElement(location.getX(), location.getY());
 
+            dgs.getMasterBoardOccupancy().setElement(f.getLocation().getX(), f.getLocation().getY(), -1);
+            dgs.getMasterBoardOccupancy().setElement(location.getX(), location.getY(), f.getComponentID());
             f.setLocation(location);
+
             if (destinationTile.equals("water") && !currentTile.equals("pit")) {
                 f.setMovePoints(f.getMovePoints() - dp.waterMoveCost);  // Difficult terrain
             } else {

@@ -22,6 +22,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     HashMap<String, ArrayList<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
 
     GridBoard<String> masterBoard;
+    GridBoard<Integer> masterBoardOccupancy;
     GraphBoard masterGraph;
 
     ArrayList<Figure> heroes;
@@ -59,6 +60,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.tiles = new HashMap<>(tiles);  // TODO: deep copy
         copy.masterBoard = masterBoard.copy();
+        copy.masterBoardOccupancy = masterBoardOccupancy.copy();
+        copy.masterGraph = masterGraph.copy();
+        copy.heroes = new ArrayList<>();
+        for (Figure f: heroes) {
+            copy.heroes.add(f.copy());
+        }
+        copy.monsters = new ArrayList<>();
+        for (Monster m: monsters) {
+            copy.monsters.add(m.copy());
+        }
+        copy.tileReferences = tileReferences.clone();  // TODO deep
+        copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
         // TODO
         return copy;
     }
@@ -100,6 +113,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public HashMap<String, ArrayList<Vector2D>> getGridReferences() {
         return gridReferences;
+    }
+
+    public GridBoard<Integer> getMasterBoardOccupancy() {
+        return masterBoardOccupancy;
     }
 
     @Override

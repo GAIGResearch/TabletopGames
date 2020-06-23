@@ -41,8 +41,8 @@ public class GridBoard<T> extends Component {
 
     public GridBoard(int width, int height, Class<T> typeParameterClass, T defaultValue){
         this(width, height, typeParameterClass);
-        for (int x = 0; x < width; x++)
-            Arrays.fill(grid[x], defaultValue);
+        for (int y = 0; y < height; y++)
+            Arrays.fill(grid[y], defaultValue);
     }
 
     public GridBoard(T[][] grid, Class<T> typeParameterClass){

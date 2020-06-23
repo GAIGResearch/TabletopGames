@@ -93,7 +93,9 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Place player in random starting location
             choice = rnd.nextInt(playerStartingLocations.size());
-            figure.setLocation(playerStartingLocations.get(choice));
+            Vector2D location = playerStartingLocations.get(choice);
+            figure.setLocation(location);
+            dgs.masterBoardOccupancy.setElement(location.getX(), location.getY(), figure.getComponentID());
             playerStartingLocations.remove(choice);
 
             // Inform game of this player's token
@@ -167,14 +169,14 @@ public class DescentForwardModel extends AbstractForwardModel {
                 // Find valid neighbours in master graph, can move there
                 BoardNode bn = dgs.getMasterGraph().getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", currentLocation));
                 for (BoardNode neighbour : bn.getNeighbours()) {
-                    // TODO: check if this is occupied by someone else
                     Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
 
                     // Find terrain type
                     String tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
-                    if (currentTile.equals("pit") && !tile.equals("pit") // Moving from pit
+                    if ((currentTile.equals("pit") && !tile.equals("pit") // Moving from pit
                             || !tile.equals("water")  // Normal move
-                            || f.getMovePoints() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) { // Difficult terrain
+                            || f.getMovePoints() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
+                            && dgs.masterBoardOccupancy.getElement(loc.getX(), loc.getY())== -1) {  // Empty space?
                         actions.add(new Move(loc.copy()));
                     }
                 }
@@ -292,6 +294,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // This is the master board!
             dgs.masterBoard = new GridBoard<>(trimBoard, String.class);
+            dgs.masterBoardOccupancy = new GridBoard<>(trimBoard[0].length, trimBoard.length, Integer.class, -1);
             dgs.masterGraph = dgs.masterBoard.toGraphBoard(neighbours);
         } else {
             System.out.println("Tiles for the map not found");
@@ -661,7 +664,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Always 1 master
             Monster master = new Monster(name + " master", monsterDef.get(act + "-master").getProperties());
-            placeMonster(dgs, master, tileCoords, rnd, hpModifierMaster, superDef);
+            placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, hpModifierMaster, superDef);
             dgs.monsters.add(master);
 
             // How many minions?
@@ -675,14 +678,14 @@ public class DescentForwardModel extends AbstractForwardModel {
                     nMinions = monsterSetup[dgs.getNPlayers()- GameType.Descent.getMinPlayers()];
                 }
             } else {
-                // Format name:#minion
+                // Format name:#minions
                 nMinions = Integer.parseInt(nameDef.split(":")[1]);
             }
 
             // Place minions
             for (int i = 0; i < nMinions; i++) {
                 Monster minion = new Monster(name + " minion " + i, monsterDef.get(act + "-minion").getProperties());
-                placeMonster(dgs, minion, tileCoords, rnd, hpModifierMinion, superDef);
+                placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, hpModifierMinion, superDef);
                 dgs.monsters.add(minion);
             }
 
@@ -713,9 +716,11 @@ public class DescentForwardModel extends AbstractForwardModel {
         int h = Integer.parseInt(size.split("x")[1]);
         monster.setSize(w, h);
 
-        while (!placed) {
+        while (tileCoords.size() > 0) {
             Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
-            if (dgs.masterBoard.getElement(option.getX(), option.getY()).equals("plain")) {
+            tileCoords.remove(option);
+            if (dgs.masterBoard.getElement(option.getX(), option.getY()).equals("plain") &&
+                dgs.masterBoardOccupancy.getElement(option.getX(), option.getY()) == -1) {
                 // TODO: some monsters want to spawn in lava/water.
                 // This can be top-left corner, check if the other tiles are valid too
                 boolean canPlace = true;
@@ -724,19 +729,22 @@ public class DescentForwardModel extends AbstractForwardModel {
                         if (i == 0 && j == 0) continue;
                         Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
                         if (!dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY()).equals("plain") ||
-                            !tileCoords.contains(thisTile)) {
+                                !tileCoords.contains(thisTile) ||
+                                dgs.masterBoardOccupancy.getElement(thisTile.getX(), thisTile.getY()) != -1) {
                             canPlace = false;
                         }
                     }
                 }
                 if (canPlace) {
-                    monster.setLocation(option);
-                    placed = true;
-                } else {
-//                    tileCoords.remove(option); // TODO: this monster couldn't place, but others might
+                    monster.setLocation(option.copy());
+
+                    for (int i = 0; i < h; i++) {
+                        for (int j = 0; j < w; j++) {
+                            dgs.masterBoardOccupancy.setElement(option.getX() + j, option.getY() + i, monster.getComponentID());
+                        }
+                    }
+                    break;
                 }
-            } else {
-//                tileCoords.remove(option); // TODO: this monster couldn't place, but others might
             }
         }
     }

@@ -86,6 +86,7 @@ public class DescentGridBoardView extends ComponentView {
             Image img = ImageIO.GetInstance().getImage(imagePath);
             g.drawImage(img, loc.getX() * defaultItemSize, loc.getY() * defaultItemSize, size.a*defaultItemSize, size.b*defaultItemSize, null);
         }
+
     }
 
 
