@@ -34,7 +34,9 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanData data = state.getData();
 
         state.areas = new HashMap<>();
-        state.board = generateBoard();
+        CatanBoard catanBoard = new CatanBoard(params);
+        System.out.println("check catanboard");
+//        state.board = catanBoard.board;
 
         // todo distribute everything to player
         for (int i = 0; i < state.getNPlayers(); i++) {
@@ -72,23 +74,49 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     private GraphBoard generateBoard(){
         // todo steps:
-        // 1, put desert in middle
         // 2, distribute all the resource tiles with number tokens
         // 3, distribute sea tiles
 
+        // set up land tiles
         GraphBoard board = new GraphBoard();
         ArrayList<BoardNode> boardNodes = new ArrayList<>();
+
+        // 1, put desert in middle
+        BoardNode desert = new BoardNode(6, CatanParameters.TileType.DESERT.name());
+
+        ArrayList<CatanParameters.TileType> tileList = new ArrayList<>();
         for (Map.Entry tileCount : params.tileCounts.entrySet()){
             // todo create component ids
-            for (int i = 0; i < (int)tileCount.getValue(); i++){
-                BoardNode bn = new BoardNode(6, tileCount.getKey().toString() + "_" + i);
-//                bn.setProperty(Hash.GetInstance().hash("number"), new PropertyInt("a",1));
-                bn.setProperty(CatanConstants.typeHash, new PropertyString("type", tileCount.getKey().toString()));
-                bn.setProperty(CatanConstants.robberHash, new PropertyBoolean("robber", false));
-                boardNodes.add(bn);
+            for (int i = 0; i < (int)tileCount.getValue(); i++) {
+                tileList.add((CatanParameters.TileType)tileCount.getKey());
             }
         }
+        Collections.shuffle(tileList);
+
+        for (BoardNode bn: boardNodes){
+            if (desert.getNeighbours().size() < 6){
+                desert.addNeighbour(bn);
+            }
+        }
+
+
+//        // first get all the tilecounts and then randomly allocate them
+//        for (Map.Entry tileCount : params.tileCounts.entrySet()){
+//            // todo create component ids
+//            for (int i = 0; i < (int)tileCount.getValue(); i++){
+//                BoardNode bn = new BoardNode(6, tileCount.getKey().toString() + "_" + i);
+////                bn.setProperty(Hash.GetInstance().hash("number"), new PropertyInt("a",1));
+//                bn.setProperty(CatanConstants.typeHash, new PropertyString("type", tileCount.getKey().toString()));
+//                bn.setProperty(CatanConstants.robberHash, new PropertyBoolean("robber", false));
+//                boardNodes.add(bn);
+//            }
+//        }
+
+
+
         board.setBoardNodes(boardNodes);
+
+
 
 
         return board;

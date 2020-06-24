@@ -7,6 +7,7 @@ import utilities.Utils;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 
 public class BoardNode extends Component {
@@ -89,6 +90,20 @@ public class BoardNode extends Component {
      */
     public HashSet<BoardNode> getNeighbours() {
         return neighbours;
+    }
+
+    /**
+     * @return the neighbour of given side of this node.
+     */
+    public BoardNode getNeighbour(int side) {
+        BoardNode bn = null;
+        if (neighbours.contains(side)){
+            Iterator it = neighbours.iterator();
+            while (it.hasNext()){
+                bn = (BoardNode) it.next();
+            }
+        }
+        return bn;
     }
 
     /**

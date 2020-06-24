@@ -40,8 +40,10 @@ public class CatanParameters extends AbstractGameParameters {
         put(CatanParameters.TileType.FIELDS, 4);
         put(CatanParameters.TileType.PASTURE, 4);
         put(CatanParameters.TileType.DESERT, 1);
-        put(CatanParameters.TileType.SEA, 18);
     }};
+
+    // put(CatanParameters.TileType.SEA, 18);
+    //
 
 
     // todo that could be simplified
