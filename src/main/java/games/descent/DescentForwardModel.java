@@ -219,11 +219,12 @@ public class DescentForwardModel extends AbstractForwardModel {
             // TODO other actions
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes]
             // - Rest
-            // - Perform "action" ability/skill
+            // - Perform "action" ability/skill  // TODO: add these to list of figure's actions, have some mapping to functions
             // - Open/close a door
             // - Revive hero
             // - Search
             // - Stand up
+            // - Special (specified by quest) TODO: add these to list of figure's actions
 
         } else {
             actions.addAll(moveActions(dgs, actingFigure));
