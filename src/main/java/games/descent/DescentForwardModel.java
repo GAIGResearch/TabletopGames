@@ -127,6 +127,31 @@ public class DescentForwardModel extends AbstractForwardModel {
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
 
+        /*
+        Hero turn:
+        1. Start of turn:
+            - start of turn abilities
+            - refresh cards
+            - test attributes for conditions
+        2. Take 2 actions
+
+        Overlord turn: TODO: current turn order alternates 1 monster group, 1 hero player etc.
+        1. Start of turn:
+            - Start of turn abilities
+            - Draw 1 Overlord card
+            - Refresh cards
+        2. Activate monsters:
+            - Choose monster group
+            - On-activation group effects
+            - Choose unactivated monster in group
+            - On-activation effects
+            - Perform 2 actions with the monster
+            - End of monster activation effects
+            - End of monster group activation effects
+            - Repeat steps for each remaining monster group
+        3. End of turn abilities
+         */
+
         // Any figure that ends its turn in a lava space is immediately defeated.
         // Heroes that are defeated in this way place their hero token in the nearest empty space
         // (from where they were defeated) that does not contain lava. A large monster is immediately defeated only
@@ -192,6 +217,13 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // TODO other actions
+            // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes]
+            // - Rest
+            // - Perform "action" ability/skill
+            // - Open/close a door
+            // - Revive hero
+            // - Search
+            // - Stand up
 
         } else {
             actions.addAll(moveActions(dgs, actingFigure));
