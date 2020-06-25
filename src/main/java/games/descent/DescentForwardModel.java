@@ -9,6 +9,7 @@ import core.properties.*;
 import games.GameType;
 import games.descent.actions.Move;
 import games.descent.components.Figure;
+import games.descent.components.Hero;
 import games.descent.components.Monster;
 import games.descent.concepts.Quest;
 import utilities.Pair;
@@ -73,8 +74,8 @@ public class DescentForwardModel extends AbstractForwardModel {
             String archetype = DescentConstants.archetypes[choice];
 
             // Choose random hero from that archetype
-            List<Figure> heroes = _data.findHeroes(archetype);
-            Figure figure = heroes.get(rnd.nextInt(heroes.size()));
+            List<Hero> heroes = _data.findHeroes(archetype);
+            Hero figure = heroes.get(rnd.nextInt(heroes.size()));
 
             // Choose random class from that archetype
             choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
@@ -152,37 +153,66 @@ public class DescentForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         DescentGameState dgs = (DescentGameState)gameState;
-
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
-
         int currentPlayer = gameState.getCurrentPlayer();
+        int nActions = ((DescentParameters) dgs.getGameParameters()).nActionsPerPlayer;
 
-        // Move actions TODO: this system wouldn't allow move through friends, multi-step move?
+        // Find current monster group + monster playing
+        int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
+        ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+        int nextMonster = ((DescentTurnOrder) dgs.getTurnOrder()).monsterActingNext;
+
+        // Find currently acting figure (hero or monster)
+        Figure actingFigure;
         if (currentPlayer != 0) {
-            Figure f = dgs.getHeroes().get(currentPlayer-1);
-            actions.addAll(moveActions(dgs, f));
+            // If hero player, get corresponding hero
+            actingFigure = dgs.getHeroes().get(currentPlayer - 1);
         } else {
-            // Find current monster group / monster playing, retrieve actions they can execute
-            int monsterGroupIdx = ((DescentTurnOrder)dgs.getTurnOrder()).monsterGroupActingNext;
-            ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
-            int nextMonster = ((DescentTurnOrder)dgs.getTurnOrder()).monsterActingNext;
-            Monster m = monsterGroup.get(nextMonster);
-            actions.addAll(moveActions(dgs, m));
+            // Otherwise, monster is playing
+            actingFigure = monsterGroup.get(nextMonster);
+        }
 
-            // Check if finished
-            int nActions = ((DescentParameters)dgs.getGameParameters()).nActionsPerPlayer;
-            if (m.getNActionsExecuted() == nActions || actions.size() == 1) {
+        // Init action list
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+
+        if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
+            // Can do actions other than move
+
+            // Do nothing // TODO: remove this option, replace with EndAction action.
+            actions.add(new DoNothing());
+
+            // Can we do a move action? Can't if already done max actions & not currently executing a move, or immobilized
+            boolean canMove = !actingFigure.hasCondition(DescentCondition.Immobilize) &&
+                    (actingFigure.getNActionsExecuted() != nActions || actingFigure.getMovePoints() > 0);
+            if (canMove) {
+                // Is this a new move action? It is if player can move, but all move points spent in first move action
+                if (actingFigure.getMovePoints() == 0) {
+                    // TODO: This is a second move action, reset move points for calculation + if agent actually chooses it
+                }
+                actions.addAll(moveActions(dgs, actingFigure));
+            }
+
+            // TODO other actions
+
+        } else {
+            actions.addAll(moveActions(dgs, actingFigure));
+        }
+
+        // TODO: stamina move, not an "action", but same rules for move apply
+
+        if (actingFigure.getNActionsExecuted() == nActions || actions.size() == 1) {
+            if (currentPlayer == 0) {
                 // This monster is finished, move to next monster
-                ((DescentTurnOrder)dgs.getTurnOrder()).nextMonster(monsterGroup.size());
-                if (nextMonster == monsterGroup.size()-1) {
+                // TODO: barghest minions never move, find out why
+                ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
+                if (nextMonster == monsterGroup.size() - 1) {
                     // Overlord is finished with this monster group
                     dgs.overlord.setNActionsExecuted(nActions);
                 }
+            } else {
+                actingFigure.setNActionsExecuted(actingFigure.getNActionsExecuted()+1);
             }
         }
 
-        // TODO other actions
         return actions;
     }
 
@@ -192,7 +222,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         Vector2D currentLocation = f.getLocation();
         String currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
-        // Check if figure can still move TODO: stamina move, not an action
+        // Check if figure can still move
         PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
         if (currentTile.equals("pit") || f.getMovePoints() > 0) {
 
@@ -208,6 +238,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         || !tile.equals("water")  // Normal move
                         || f.getMovePoints() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
                         && dgs.masterBoardOccupancy.getElement(loc.getX(), loc.getY())== -1) {  // Empty space?
+                    // TODO: allow move in non-empty space if figure has move points left that allow it to finish the move action afterwards in an empty space
+                    // TODO: if moving to non-empty space, change game phase to ForceMove; otherwise, change game phase to main phase (if in force move).
                     actions.add(new Move(loc.copy()));
                 }
             }

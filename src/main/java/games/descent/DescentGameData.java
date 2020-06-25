@@ -3,7 +3,7 @@ package games.descent;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
-import games.descent.components.Figure;
+import games.descent.components.Hero;
 import games.descent.concepts.Quest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,7 +23,7 @@ import static games.descent.DescentConstants.archetypeHash;
 public class DescentGameData extends AbstractGameData {
     List<GridBoard> tiles;
     List<GraphBoard> boardConfigurations;
-    List<Figure> figures;
+    List<Hero> heroes;
     List<Deck<Card>> decks;
     List<Quest> quests;
     List<Quest> sideQuests;
@@ -34,7 +34,7 @@ public class DescentGameData extends AbstractGameData {
         tiles = GridBoard.loadBoards(dataPath + "tiles.json");
         boardConfigurations = GraphBoard.loadBoards(dataPath + "boards.json");
 
-        figures = Figure.loadFigures(dataPath + "heroes.json");
+        heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
@@ -73,7 +73,7 @@ public class DescentGameData extends AbstractGameData {
 
     @Override
     public Token findToken(String name) {
-        for (Token t: figures) {
+        for (Token t: heroes) {
             if (t.getComponentName().equalsIgnoreCase(name)) {
                 return t;
             }
@@ -100,9 +100,9 @@ public class DescentGameData extends AbstractGameData {
         return null;
     }
 
-    public List<Figure> findHeroes(String archetype) {
-        List<Figure> heroes = new ArrayList<>();
-        for (Figure f: figures) {
+    public List<Hero> findHeroes(String archetype) {
+        List<Hero> heroes = new ArrayList<>();
+        for (Hero f: this.heroes) {
             if (f.getTokenType().equalsIgnoreCase("hero")) {
                 String arch = ((PropertyString)f.getProperty(archetypeHash)).value;
                 if (arch != null && arch.equalsIgnoreCase(archetype)) {

@@ -2,7 +2,6 @@ package games.descent.components;
 
 import core.properties.Property;
 import core.properties.PropertyInt;
-import utilities.Pair;
 
 import java.util.HashMap;
 
@@ -19,7 +18,8 @@ public class Monster extends Figure {
 
         this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
         this.hp = ((PropertyInt)getProperty(healthHash)).value;
-        // TODO: token type might not be set as monster
+
+        tokenType = "Monster";
     }
 
     protected Monster(String name, int ID) {
@@ -37,15 +37,8 @@ public class Monster extends Figure {
     @Override
     public Monster copy() {
         Monster copy = new Monster(componentName, componentID);
-        copy.xp = xp;
-        copy.tokenType = tokenType;
-        copy.movePoints = movePoints;
-        copy.hp = hp;
-        if (location != null) {
-            copy.location = location.copy();
-        }
-        copy.nActionsExecuted = nActionsExecuted;
-        copyComponentTo(copy);
+        copy.orientation = orientation;
+        super.copyComponentTo(copy);
         return copy;
     }
 }

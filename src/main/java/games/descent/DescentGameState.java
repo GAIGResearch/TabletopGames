@@ -5,8 +5,10 @@ import core.AbstractGameState;
 import core.components.Component;
 import core.components.GraphBoard;
 import core.components.GridBoard;
+import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.descent.components.Figure;
+import games.descent.components.Hero;
 import games.descent.components.Monster;
 import utilities.Vector2D;
 
@@ -17,6 +19,10 @@ import java.util.List;
 
 public class DescentGameState extends AbstractGameState implements IPrintable {
 
+    public enum DescentPhase implements IGamePhase {
+        ForceMove  // Used when a figure started a (possibly valid move action) and is currently overlapping a friendly figure
+    }
+
     // For reference only
     HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
@@ -26,7 +32,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     GridBoard<Integer> masterBoardOccupancy;
     GraphBoard masterGraph;
 
-    ArrayList<Figure> heroes;
+    ArrayList<Hero> heroes;
     Figure overlord;
     ArrayList<ArrayList<Monster>> monsters;
 
@@ -65,7 +71,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.masterGraph = masterGraph.copy();
         copy.overlord = overlord.copy();
         copy.heroes = new ArrayList<>();
-        for (Figure f: heroes) {
+        for (Hero f: heroes) {
             copy.heroes.add(f.copy());
         }
         copy.monsters = new ArrayList<>();
@@ -105,7 +111,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return masterGraph;
     }
 
-    public ArrayList<Figure> getHeroes() {
+    public ArrayList<Hero> getHeroes() {
         return heroes;
     }
 

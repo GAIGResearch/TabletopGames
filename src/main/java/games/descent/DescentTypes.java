@@ -120,4 +120,17 @@ public class DescentTypes {
             return terrain != null && (!getMarginStringTiles().contains(terrain));
         }
     }
+
+    public enum DescentCondition {
+        Immobilize,
+        Poison,
+        Stun,
+        Disease,
+//        Bleed,
+//        Burn,
+//        Curse,
+//        Weaken,
+//        Doom,
+//        Terrify
+    }
 }
