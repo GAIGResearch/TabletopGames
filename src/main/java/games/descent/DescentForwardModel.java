@@ -231,6 +231,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         }
 
         // TODO: stamina move, not an "action", but same rules for move apply
+        // TODO: exhaust a card for an action/modifier/effect "free" action
 
         if (actingFigure.getNActionsExecuted() == nActions || actions.size() == 1) {
             if (currentPlayer == 0) {
