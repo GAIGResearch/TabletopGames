@@ -3,11 +3,9 @@ package core.components;
 import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import utilities.Hash;
 import utilities.Utils.ComponentType;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class Component {
     private static int ID = 0;  // All components receive a unique and final ID from this always increasing counter
@@ -122,12 +120,21 @@ public abstract class Component {
 
     /**
      * Adds a property with an id and a Property object
-     * @param propId ID of the property
      * @param prop property to add
      */
-    public void setProperty(int propId, Property prop)
+    public void setProperty(Property prop)
     {
-        properties.put(propId, prop);
+        properties.put(prop.getHashKey(), prop);
+    }
+
+    public void setProperties(HashMap<Integer, Property> props) {
+        for (Property p: props.values()) {
+            setProperty(p);
+        }
+    }
+
+    public static Component parseComponent(Component c, JSONObject obj) {
+        return parseComponent(c, obj, new HashSet<>());
     }
 
     /**
@@ -135,11 +142,12 @@ public abstract class Component {
      * @param obj - JSON object to parse.
      * @return new Component object with properties as defined in JSON.
      */
-    protected static Component parseComponent(Component c, JSONObject obj)
+    public static Component parseComponent(Component c, JSONObject obj, Set<String> ignoreKeys)
     {
         for(Object o : obj.keySet())
         {
             String key = (String)o;
+            if (ignoreKeys.contains(key)) continue;
 
             if(obj.get(key) instanceof JSONArray) {
                 JSONArray value = (JSONArray) obj.get(key);
@@ -182,7 +190,7 @@ public abstract class Component {
                     }
                 }
                 if (prop != null) {
-                    c.setProperty(Hash.GetInstance().hash(prop.getHashString()), prop);
+                    c.setProperty(prop);
                 }
             }
         }
@@ -199,7 +207,7 @@ public abstract class Component {
         copyTo.properties.clear();
         for (int prop_key : this.properties.keySet()) {
             Property newProp = this.properties.get(prop_key).copy();
-            copyTo.setProperty(prop_key, newProp);
+            copyTo.setProperty(newProp);
         }
         copyTo.ownerId = ownerId;
         copyTo.componentName = componentName;

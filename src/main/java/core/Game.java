@@ -289,10 +289,10 @@ public class Game {
 
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
         players.add(new OSLA());
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+//        players.add(new RandomPlayer(new Random()));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 

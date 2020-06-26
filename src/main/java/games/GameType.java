@@ -1,7 +1,6 @@
 package games;
 
 import core.*;
-import core.components.GridBoard;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -68,10 +67,10 @@ public enum GameType {
     ColtExpress (2, 6,
             new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
-    Carcassonne (2, 5,
-            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
-            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }});
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }});
+//    Carcassonne (2, 5,
+//            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
+//            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -95,8 +94,6 @@ public enum GameType {
                 return Virus;
             case "coltexpress":
                 return ColtExpress;
-            case "carcassonne":
-                return Carcassonne;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -155,12 +152,10 @@ public enum GameType {
                 params = new ColtExpressParameters(seed);
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
+                break;
         }
 
-        if (forwardModel != null) {
-            return new Game(this, forwardModel, gameState);
-        }
-        return null;
+        return new Game(this, forwardModel, gameState);
     }
 
     /**
@@ -214,7 +209,11 @@ public enum GameType {
         Trains,
         CityBuilding,
         Medieval,
-        TerritoryBuilding;
+        TerritoryBuilding,
+        Adventure,
+        Exploration,
+        Fantasy,
+        Miniatures;
 
         /**
          * Retrieves a list of all games within this category.
@@ -266,7 +265,15 @@ public enum GameType {
         Influence,
         MapAddition,
         TilePlacement,
-        PatternBuilding;
+        PatternBuilding,
+        GameMaster,
+        DiceRolling,
+        GridMovement,
+        LineOfSight,
+        ModularBoard,
+        MovementPoints,
+        MultipleMaps,
+        Campaign;
 
         /**
          * Retrieves a list of all games using this mechanic.

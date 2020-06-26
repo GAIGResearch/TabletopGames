@@ -11,7 +11,6 @@ import games.pandemic.PandemicGameState;
 
 import java.util.Objects;
 
-import static games.pandemic.PandemicConstants.*;
 import static core.CoreConstants.nameHash;
 
 public class AddResearchStation extends AbstractAction {
@@ -26,7 +25,7 @@ public class AddResearchStation extends AbstractAction {
         BoardNode bn = ((PandemicGameState)gs).getWorld().getNodeByStringProperty(nameHash, city);
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
-            bn.setProperty(researchStationHash, new PropertyBoolean(true));
+            bn.setProperty(new PropertyBoolean("researchStation", true));
             Counter rStationCounter = (Counter) pgs.getComponent(PandemicConstants.researchStationHash);
             rStationCounter.decrement(1); // We have one less research station
             pgs.addResearchStation(((PropertyString) bn.getProperty(nameHash)).value);

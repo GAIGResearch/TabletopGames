@@ -2,6 +2,7 @@ package utilities;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Utils {
 
@@ -84,5 +85,34 @@ public abstract class Utils {
         int tmp = input[a];
         input[a] = input[b];
         input[b] = tmp;
+    }
+
+    /**
+     * Find a list of coordinates for neighbours of point at (x, y) in 2D grid of given width and height, with either
+     * 8-way or 4-way connectivity.
+     * @param x - x coordinate of point
+     * @param y - y coordinate of point
+     * @param width - width of grid
+     * @param height - height of grid
+     * @param way8 - if true, grid has 8-way connectivity, otherwise just 4.
+     * @return List of Vector2D, coordinates for valid neighbours
+     */
+    public static java.util.List<Vector2D> getNeighbourhood(int x, int y, int width, int height, boolean way8) {
+        List<Vector2D> neighbours = new ArrayList<>();
+
+        // Add orthogonal neighbours
+        if (x > 0) neighbours.add(new Vector2D(x-1, y));
+        if (x < width-1) neighbours.add(new Vector2D(x+1, y));
+        if (y > 0) neighbours.add(new Vector2D(x, y-1));
+        if (y < height-1) neighbours.add(new Vector2D(x, y+1));
+
+        // Add diagonal neighbours
+        if (way8) {
+            if (x > 0 && y > 0) neighbours.add(new Vector2D(x-1, y-1));
+            if (x < width-1 && y < height-1) neighbours.add(new Vector2D(x+1, y+1));
+            if (x > 0 && y < height-1) neighbours.add(new Vector2D(x-1, y+1));
+            if (x < width-1 && y > 0) neighbours.add(new Vector2D(x+1, y-1));
+        }
+        return neighbours;
     }
 }
