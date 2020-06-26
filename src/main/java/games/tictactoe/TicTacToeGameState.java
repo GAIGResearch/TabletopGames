@@ -9,7 +9,6 @@ import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
 import utilities.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     protected double _getScore(int playerId) {
-        return new TicTacToeHeuristic(playerId).evaluateState(this);
+        return new TicTacToeHeuristic().evaluateState(this, playerId);
     }
 
     @Override

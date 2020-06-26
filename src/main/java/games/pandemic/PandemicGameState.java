@@ -101,7 +101,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
 
     @Override
     protected double _getScore(int playerId) {
-        return new PandemicHeuristic().evaluateState(this);
+        return new PandemicHeuristic().evaluateState(this, playerId);
     }
 
     @Override

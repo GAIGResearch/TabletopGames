@@ -9,16 +9,15 @@ public class TicTacToeHeuristic implements IStateHeuristic {
     double FACTOR_PLAYER = 0.8;
     double FACTOR_OPPONENT = 0.5;
 
-    private int playerId;
-
-    public TicTacToeHeuristic(int playerId) {
-        this.playerId = playerId;
-    }
-
     @Override
-    public double evaluateState(AbstractGameState gs) {
+    public double evaluateState(AbstractGameState gs, int playerId) {
         TicTacToeGameState ttgs = (TicTacToeGameState) gs;
         Utils.GameResult gameStatus = gs.getGameStatus();
+
+        if(gameStatus == Utils.GameResult.LOSE)
+            return -1;
+        if(gameStatus == Utils.GameResult.WIN)
+            return 1;
 
         // Count how many lines of player characters + rest empty, the more player characters the better
         int[] nPlayer = new int[ttgs.gridBoard.getWidth()];
@@ -46,15 +45,8 @@ public class TicTacToeHeuristic implements IStateHeuristic {
             pScore += nPlayer[i] * Math.pow(0.5, nPlayer.length-i);
             oppScore += nOpponent[i] * Math.pow(0.3, nOpponent.length-i);
         }
-        double rawScore = pScore * FACTOR_PLAYER + oppScore * FACTOR_OPPONENT;
 
-        if(gameStatus == Utils.GameResult.LOSE)
-            rawScore = -1;
-
-        if(gameStatus == Utils.GameResult.WIN)
-            rawScore = 1;
-
-        return rawScore;
+        return pScore * FACTOR_PLAYER + oppScore * FACTOR_OPPONENT;
     }
 
     private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, Character playerChar) {

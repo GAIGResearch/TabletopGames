@@ -17,7 +17,7 @@ public class PandemicDiffHeuristic implements IStateHeuristic {
     }
 
     @Override
-    public double evaluateState(AbstractGameState gs) {
+    public double evaluateState(AbstractGameState gs, int playerId) {
         Utils.GameResult gamestatus = gs.getGameStatus();
 
         // Compute a score relative to the root's state.

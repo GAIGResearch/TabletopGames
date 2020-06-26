@@ -77,7 +77,7 @@ public class OTLA extends AbstractPlayer {
                 avgTimeTaken  = acumTimeTaken/numIters;
                 remaining = ect.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
-                double valState = stateHeuristic.evaluateState((PandemicGameState)gsCopy);
+                double valState = stateHeuristic.evaluateState(gsCopy, getPlayerID());
                 double Q = noise(valState, this.epsilon, this.random.nextDouble());
 
                 if (Q > maxQ) {

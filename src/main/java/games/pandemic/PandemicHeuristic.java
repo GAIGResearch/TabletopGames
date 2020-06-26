@@ -17,9 +17,14 @@ public class PandemicHeuristic implements IStateHeuristic {
     double FACTOR_RS = 0.2;
 
     @Override
-    public double evaluateState(AbstractGameState gs) {
+    public double evaluateState(AbstractGameState gs, int playerId) {
         PandemicGameState pgs = (PandemicGameState) gs;
         Utils.GameResult gameStatus = gs.getGameStatus();
+
+        if(gameStatus == Utils.GameResult.LOSE)
+            return -1;
+        if(gameStatus == Utils.GameResult.WIN)
+            return 1;
 
         // Compute a score
         int nOutbreaks = ((Counter)pgs.getComponent(PandemicConstants.outbreaksHash)).getValue();
@@ -35,16 +40,8 @@ public class PandemicHeuristic implements IStateHeuristic {
                 nCuresDiscovered += 1;
         }
 
-        double rawScore = nCuresDiscovered * FACTOR_CURES + nCardsInHand * FACTOR_CARDS_IN_HAND + nDiseaseCubes * FACTOR_CUBES +
+        return nCuresDiscovered * FACTOR_CURES + nCardsInHand * FACTOR_CARDS_IN_HAND + nDiseaseCubes * FACTOR_CUBES +
                 nCardsInPile * FACTOR_CARDS_IN_PILE + nOutbreaks * FACTOR_OUTBREAKS + nResearchStations * FACTOR_RS;
-
-        if(gameStatus == Utils.GameResult.LOSE)
-            rawScore = -1;
-
-        if(gameStatus == Utils.GameResult.WIN)
-            rawScore = 1;
-
-        return rawScore;
     }
 
 }

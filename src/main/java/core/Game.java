@@ -13,8 +13,7 @@ import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VERBOSE;
-import static games.GameType.ExplodingKittens;
-import static games.GameType.TicTacToe;
+import static games.GameType.*;
 
 public class Game {
 
@@ -456,15 +455,15 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new OSLA());
 //        players.add(new RandomPlayer(new Random()));
-        players.add(new OSLA());
         players.add(new RandomPlayer(new Random()));
-//        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new OSLA());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
 //        runOne(TicTacToe, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-        runMany(new ArrayList<GameType>() {{add(TicTacToe);}}, players, null, 50, null, false);
+        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 50, null, false);
     }
 }
