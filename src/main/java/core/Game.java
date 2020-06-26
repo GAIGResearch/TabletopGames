@@ -16,7 +16,6 @@ import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VERBOSE;
-import static games.GameType.Descent;
 import static games.GameType.ExplodingKittens;
 
 public class Game {
@@ -298,7 +297,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Descent, players, seed, ac, false);
+        runOne(ExplodingKittens, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
     }
 
