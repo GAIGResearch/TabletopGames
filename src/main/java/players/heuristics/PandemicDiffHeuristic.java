@@ -3,12 +3,13 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Counter;
 import core.components.Deck;
+import core.interfaces.IStateHeuristic;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
-public class PandemicDiffHeuristic extends StateHeuristic {
+public class PandemicDiffHeuristic implements IStateHeuristic {
     private BoardStats rootBoardStats;
 
     public PandemicDiffHeuristic(AbstractGameState root) {

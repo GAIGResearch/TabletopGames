@@ -3,10 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.GameType;
-import players.ActionController;
-import players.HumanGUIPlayer;
-import players.OSLA;
-import players.RandomPlayer;
+import players.*;
 import utilities.StatSummary;
 import utilities.Utils;
 
@@ -17,6 +14,7 @@ import java.util.Random;
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VERBOSE;
 import static games.GameType.ExplodingKittens;
+import static games.GameType.TicTacToe;
 
 public class Game {
 
@@ -273,35 +271,6 @@ public class Game {
 
 
     /**
-     * Main class used to run the framework. The user must specify:
-     *      1. Action controller for GUI interactions / null for no visuals
-     *      2. Random seed for the game
-     *      3. Players for the game
-     *      4. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
-
-        /* 2. Game seed */
-        long seed = System.currentTimeMillis(); //0;
-
-        /* 3. Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new OSLA());
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-//        players.add(new RandomPlayer(new Random()));
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Run! */
-        runOne(ExplodingKittens, players, seed, ac, false);
-//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-    }
-
-    /**
      * Runs one game.
      * @param gameToPlay - game to play
      * @param players - list of players for the game
@@ -466,5 +435,36 @@ public class Game {
                 statSummaries[p].add(results[p].value);
             }
         }
+    }
+
+    /**
+     * Main class used to run the framework. The user must specify:
+     *      1. Action controller for GUI interactions / null for no visuals
+     *      2. Random seed for the game
+     *      3. Players for the game
+     *      4. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        ActionController ac = new ActionController(); //null;
+
+        /* 2. Game seed */
+        long seed = System.currentTimeMillis(); //0;
+
+        /* 3. Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+//        players.add(new OSLA());
+//        players.add(new RandomPlayer(new Random()));
+        players.add(new OSLA());
+        players.add(new RandomPlayer(new Random()));
+//        players.add(new RandomPlayer(new Random()));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+
+        /* 4. Run! */
+//        runOne(TicTacToe, players, seed, ac, false);
+//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
+        runMany(new ArrayList<GameType>() {{add(TicTacToe);}}, players, null, 50, null, false);
     }
 }

@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
 import players.heuristics.PandemicDiffHeuristic;
-import players.heuristics.StateHeuristic;
+import core.interfaces.IStateHeuristic;
 import utilities.ElapsedCpuTimer;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.Random;
 public class OTLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
-    private StateHeuristic stateHeuristic;
+    private IStateHeuristic stateHeuristic;
     public double epsilon = 1e-6;
     public boolean rollN = true;
     public final static int time_to_act = 100; // in milliseconds
