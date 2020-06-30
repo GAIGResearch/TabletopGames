@@ -94,7 +94,7 @@ public class UnoForwardModel extends AbstractForwardModel {
         // Refresh draw deck and shuffle
         ugs.drawDeck.add(ugs.discardDeck);
         ugs.discardDeck.clear();
-        ugs.drawDeck.shuffle();  //new Random(ugs.getGameParameters().getGameSeed() + ugs.getTurnOrder().getRoundCounter())
+        ugs.drawDeck.shuffle(new Random(ugs.getGameParameters().getGameSeed() + ugs.getTurnOrder().getRoundCounter()));
 
         // Draw new cards for players
         drawCardsToPlayers(ugs);

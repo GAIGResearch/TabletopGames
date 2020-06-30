@@ -338,11 +338,15 @@ public class Game {
 
             // Play n repetitions of this game and record player results
             Game game = null;
+            int offset = 0;
             for (int i = 0; i < nRepetitions; i++) {
-                if (seed == null) seed = System.currentTimeMillis();
-                game = runOne(gt, players, seed, ac, randomizeParameters);
+                Long s = seed;
+                if (s == null) s = System.currentTimeMillis();
+                s += offset;
+                game = runOne(gt, players, s, ac, randomizeParameters);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
+                    offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
                 } else {
                     break;
                 }
