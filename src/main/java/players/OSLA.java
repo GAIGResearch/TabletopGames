@@ -3,7 +3,7 @@ package players;
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
-import players.heuristics.StateHeuristic;
+import core.interfaces.IStateHeuristic;
 
 import java.util.List;
 import java.util.Random;
@@ -11,7 +11,7 @@ import java.util.Random;
 public class OSLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
-    private StateHeuristic stateHeuristic;
+    private IStateHeuristic stateHeuristic;
     public double epsilon = 1e-6;
 
     public OSLA(){
@@ -34,16 +34,17 @@ public class OSLA extends AbstractPlayer {
         for (AbstractAction action : actions) {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);
-            double valState = gs.getScore(this.getPlayerID()); //stateHeuristic.evaluateState((AbstractGameState)gsCopy);
+            double valState = gsCopy.getScore(this.getPlayerID()); //stateHeuristic.evaluateState((AbstractGameState)gsCopy);
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
+//            System.out.println(valState);
 
             if (Q > maxQ) {
                 maxQ = Q;
                 bestAction = action;
             }
-
         }
+//        System.out.println();
 
         return bestAction;
     }

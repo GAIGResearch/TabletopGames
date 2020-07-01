@@ -36,14 +36,14 @@ public abstract class Utils {
     public enum GameResult {
         WIN(1),
         DRAW(0),
-        LOSE(-1),
+        LOSE(0),
         DISQUALIFY(-2),
         GAME_ONGOING(2),
         GAME_END(3);
 
-        public final int value;
+        public final double value;
 
-        GameResult(int value) {
+        GameResult(double value) {
             this.value = value;
         }
     }

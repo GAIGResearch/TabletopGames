@@ -18,6 +18,13 @@ public class UnoGameParameters extends AbstractGameParameters {
             "Yellow"
     };
 
+    public int nReversePoints = 20;
+    public int nDraw2Points = 20;
+    public int nSkipPoints = 20;
+    public int nWildPoints = 50;
+    public int nWildDrawPoints = 50;
+    public int nWinPoints = 500;
+
     public UnoGameParameters(long seed) {
         super(seed);
     }

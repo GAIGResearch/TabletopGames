@@ -7,7 +7,6 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractGameParameters;
-import players.heuristics.PandemicHeuristic;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -102,9 +101,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
 
     @Override
     protected double _getScore(int playerId) {
-        // Martin's heuristic. // TODO maybe improvements?
-        PandemicHeuristic ph = new PandemicHeuristic(this);
-        return ph.evaluateState(this);
+        return new PandemicHeuristic().evaluateState(this, playerId);
     }
 
     @Override

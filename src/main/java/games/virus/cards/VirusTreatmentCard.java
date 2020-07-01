@@ -13,7 +13,7 @@ public class VirusTreatmentCard extends VirusCard {
     private TreatmentType treatmentType;
 
     public VirusTreatmentCard(TreatmentType treatmentType) {
-        super(VirusCardOrgan.None, VirusCardType.Treatment);
+        super(OrganType.None, VirusCardType.Treatment);
         this.treatmentType = treatmentType;
     }
 

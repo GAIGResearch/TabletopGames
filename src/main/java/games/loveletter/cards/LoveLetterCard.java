@@ -21,6 +21,8 @@ public class LoveLetterCard extends Card {
         }
 
         public int getValue(){ return value;}
+
+        public static int getMaxCardValue() { return 8; }
     }
 
     public final CardType cardType;

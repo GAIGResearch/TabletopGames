@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Random;
 
 import static core.CoreConstants.VERBOSE;
-import static games.virus.cards.VirusCard.VirusCardOrgan.Wild;
-import static games.virus.cards.VirusCard.VirusCardOrgan.None;
+import static games.virus.cards.VirusCard.OrganType.Wild;
+import static games.virus.cards.VirusCard.OrganType.None;
 
 public class VirusForwardModel extends AbstractForwardModel {
 
@@ -66,7 +66,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     private void createCards(VirusGameState vgs) {
         VirusGameParameters vgp = (VirusGameParameters) vgs.getGameParameters();
 
-        for (VirusCard.VirusCardOrgan organ: VirusCard.VirusCardOrgan.values()) {
+        for (VirusCard.OrganType organ: VirusCard.OrganType.values()) {
             if (organ != None && organ != Wild) {
 
                 // 5 cards for each organ plus 1 for wild organ

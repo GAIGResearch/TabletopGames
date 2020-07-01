@@ -109,28 +109,34 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     @Override
     public int nextPlayer(AbstractGameState gameState) {
-        if (gameState.getGamePhase() != ColtExpressGameState.ColtExpressGamePhase.PlanActions)
+        if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.DraftCharacter) {
             return (nPlayers + turnOwner + direction) % nPlayers;
-
-        if (currentTurnType == RoundCard.TurnType.DoubleTurn)
-        {
-            if (firstAction) {
-                firstAction = false;
-                return turnOwner;
+        } else if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.ExecuteActions) {
+            ColtExpressGameState cegs = (ColtExpressGameState) gameState;
+            if (cegs.plannedActions.getSize() > 0) {
+                return cegs.plannedActions.getComponents().get(0).playerID;
             }
-        }
+            return (nPlayers + turnOwner + direction) % nPlayers;
+        } else {
+            if (currentTurnType == RoundCard.TurnType.DoubleTurn) {
+                if (firstAction) {
+                    firstAction = false;
+                    return turnOwner;
+                }
+            }
 
-        firstAction = true;
-        int tmp = (nPlayers+turnOwner+direction) % nPlayers;
-        if (tmp == firstPlayerOfRound){
-            currentRoundIndex++;
-            if (currentRoundIndex < ((ColtExpressGameState)gameState).getRounds().get(currentRoundCardIndex).getTurnTypes().length)
-                initRound(((ColtExpressGameState)gameState).getRounds().get(currentRoundCardIndex), currentRoundIndex);
-            else
-                gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
+            firstAction = true;
+            int tmp = (nPlayers + turnOwner + direction) % nPlayers;
+            if (tmp == firstPlayerOfRound) {
+                currentRoundIndex++;
+                if (currentRoundIndex < ((ColtExpressGameState) gameState).getRounds().get(currentRoundCardIndex).getTurnTypes().length)
+                    initRound(((ColtExpressGameState) gameState).getRounds().get(currentRoundCardIndex), currentRoundIndex);
+                else
+                    gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
 
+            }
+            return tmp;
         }
-        return tmp;
     }
 
     @Override

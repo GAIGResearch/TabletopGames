@@ -61,6 +61,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     @Override
     protected AbstractGameState _copy(int playerId) {
+        // TODO: partial observability
         ColtExpressGameState copy = new ColtExpressGameState(gameParameters, getNPlayers());
         copy.playerHandCards = new ArrayList<>();
         for (PartialObservableDeck<ColtExpressCard> d: playerHandCards) {
@@ -91,7 +92,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     @Override
     protected double _getScore(int playerId) {
-        return 0;// TODO
+        return new ColtExpressHeuristic().evaluateState(this, playerId);
     }
 
     @Override

@@ -3,20 +3,18 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.GameType;
-import players.ActionController;
-import players.HumanGUIPlayer;
-import players.OSLA;
-import players.RandomPlayer;
+import players.*;
 import utilities.StatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VERBOSE;
-import static games.GameType.ExplodingKittens;
+import static games.GameType.*;
 
 public class Game {
 
@@ -189,12 +187,12 @@ public class Game {
                             action = currentPlayer.getAction(observation);
                         }
                     }
-
-                    // Resolve action and game rules
-                    forwardModel.next(gameState, action);
                 } else {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
+
+                // Resolve action and game rules
+                forwardModel.next(gameState, action);
             } else {
                 if (firstEnd) {
                     System.out.println("Ended");
@@ -273,35 +271,6 @@ public class Game {
 
 
     /**
-     * Main class used to run the framework. The user must specify:
-     *      1. Action controller for GUI interactions / null for no visuals
-     *      2. Random seed for the game
-     *      3. Players for the game
-     *      4. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
-
-        /* 2. Game seed */
-        long seed = System.currentTimeMillis(); //0;
-
-        /* 3. Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new OSLA());
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-//        players.add(new RandomPlayer(new Random()));
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Run! */
-        runOne(ExplodingKittens, players, seed, ac, false);
-//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-    }
-
-    /**
      * Runs one game.
      * @param gameToPlay - game to play
      * @param players - list of players for the game
@@ -348,9 +317,11 @@ public class Game {
      * @param seed - random seed for all games. If null, a new random seed is used for each game.
      * @param ac - action controller for GUI interactions, null if playing without visuals.
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
+     * @param detailedStatistics - if true, detailed statistics are printed, otherwise just average of wins
      */
     private static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
-                                int nRepetitions, ActionController ac, boolean randomizeParameters) {
+                                int nRepetitions, ActionController ac, boolean randomizeParameters,
+                                boolean detailedStatistics) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -365,16 +336,20 @@ public class Game {
             // Save win rate statistics over all repetitions of this game
             StatSummary[] statSummaries = new StatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + i + "}");
             }
 
             // Play n repetitions of this game and record player results
             Game game = null;
+            int offset = 0;
             for (int i = 0; i < nRepetitions; i++) {
-                if (seed == null) seed = System.currentTimeMillis();
-                game = runOne(gt, players, seed, ac, randomizeParameters);
+                Long s = seed;
+                if (s == null) s = System.currentTimeMillis();
+                s += offset;
+                game = runOne(gt, players, s, ac, randomizeParameters);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
+                    offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
                 } else {
                     break;
                 }
@@ -383,7 +358,11 @@ public class Game {
             if (game != null) {
                 for (int i = 0; i < nPlayers; i++) {
                     // Print statistics for this game
-                    System.out.println(statSummaries[i].toString());
+                    if (detailedStatistics) {
+                        System.out.println(statSummaries[i].toString());
+                    } else {
+                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean());
+                    }
 
                     // Record in overall statistics
                     overall[i].add(statSummaries[i]);
@@ -395,7 +374,11 @@ public class Game {
         System.out.println("\n---------------------\n");
         for (int i = 0; i < nPlayers; i++) {
             // Print statistics for this game
-            System.out.println(overall[i].toString());
+            if (detailedStatistics) {
+                System.out.println(overall[i].toString());
+            } else {
+                System.out.println(overall[i].name + ": " + overall[i].mean());
+            }
         }
     }
 
@@ -466,5 +449,41 @@ public class Game {
                 statSummaries[p].add(results[p].value);
             }
         }
+    }
+
+    /**
+     * Main class used to run the framework. The user must specify:
+     *      1. Action controller for GUI interactions / null for no visuals
+     *      2. Random seed for the game
+     *      3. Players for the game
+     *      4. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        ActionController ac = new ActionController(); //null;
+
+        /* 2. Game seed */
+        long seed = System.currentTimeMillis(); //0;
+
+        /* 3. Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+//        players.add(new OSLA());
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
+        players.add(new OSLA());
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+
+        /* 4. Run! */
+//        runOne(TicTacToe, players, seed, ac, false);
+//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
+
+        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+        games.remove(Pandemic);
+        games.remove(TicTacToe);
+        runMany(games, players, null, 50, null, false, false);
+//        runMany(new ArrayList<GameType>() {{add(Virus);}}, players, null, 50, null, false, false);
     }
 }

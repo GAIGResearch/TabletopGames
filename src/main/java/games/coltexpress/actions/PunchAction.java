@@ -88,6 +88,7 @@ public class PunchAction  extends DrawCard {
                 availableLootDeck.remove(chosenLoot);
             }
         }
+
         return true;
     }
 

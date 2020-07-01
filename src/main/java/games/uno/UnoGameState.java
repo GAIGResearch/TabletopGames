@@ -17,7 +17,8 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     Deck<UnoCard>        drawDeck;
     Deck<UnoCard>        discardDeck;
     UnoCard              currentCard;
-    String currentColor;
+    String               currentColor;
+    int[]                playerScore;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -78,6 +79,36 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         return currentColor;
     }
 
+    public int calculatePlayerPoints(int playerID) {
+        UnoGameParameters ugp = (UnoGameParameters) getGameParameters();
+        int nPoints = 0;
+        for (int otherPlayer = 0; otherPlayer < getNPlayers(); otherPlayer++) {
+            if (otherPlayer != playerID) {
+                for (UnoCard card : playerDecks.get(otherPlayer).getComponents()) {
+                    switch (card.type) {
+                        case Number:
+                            nPoints += card.number;
+                            break;
+                        case Skip:
+                            nPoints += ugp.nSkipPoints;
+                            break;
+                        case Reverse:
+                            nPoints += ugp.nReversePoints;
+                            break;
+                        case Draw:
+                            nPoints += ugp.nDraw2Points;
+                            break;
+                        case Wild:
+                            if (card.drawN == 0) nPoints += ugp.nWildPoints;
+                            else nPoints += ugp.nWildDrawPoints;
+                            break;
+                    }
+                }
+            }
+        }
+        return nPoints;
+    }
+
     @Override
     protected AbstractGameState _copy(int playerId) {
         // TODO: partial observability
@@ -90,13 +121,13 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         copy.discardDeck = discardDeck.copy();
         copy.currentCard = (UnoCard) currentCard.copy();
         copy.currentColor = currentColor;
+        copy.playerScore = playerScore.clone();
         return copy;
     }
 
     @Override
     protected double _getScore(int playerId) {
-        // TODO: heuristic
-        return 0;
+        return new UnoHeuristic().evaluateState(this, playerId);
     }
 
     @Override

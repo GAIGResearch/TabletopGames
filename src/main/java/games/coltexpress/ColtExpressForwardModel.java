@@ -122,7 +122,9 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         if (action != null) {
             if (VERBOSE)
                 System.out.println(action.toString());
+
             action.execute(gameState);
+
         } else {
             if (VERBOSE)
                 System.out.println("Player cannot do anything since he has drawn cards or " +
@@ -139,9 +141,24 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             ceto.endPlayerTurn(gameState);
             if (cegs.plannedActions.getSize() == 0) {
                 ceto.endRoundCard((ColtExpressGameState) gameState);
+
+                int nPlayersInTrain = 0;
+                for (Compartment c: cegs.getTrainCompartments()) {
+                    nPlayersInTrain += c.playersOnTopOfCompartment.size();
+                    nPlayersInTrain += c.playersInsideCompartment.size();
+                }
+                if (nPlayersInTrain != cegs.getNPlayers()) {
+                    int a = 0;
+                }
+
                 distributeCards((ColtExpressGameState) gameState);
             }
         }
+    }
+
+    @Override
+    protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
+        _next(gameState, action);
     }
 
     private CharacterType pickRandomCharacterType(Random rnd, HashSet<CharacterType> characters){
@@ -183,7 +200,6 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
         ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
 
-        cegs.setGameStatus(Utils.GameResult.GAME_END);
         Arrays.fill(cegs.getPlayerResults(), Utils.GameResult.LOSE);
 
         int[] pointsPerPlayer = new int[cegs.getNPlayers()];
@@ -226,8 +242,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         }
         if (potentialWinnersByPoints.size() == 1)
         {
-            for (Integer playerID : potentialWinnersByPoints)
-                cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
+            cegs.setPlayerResult(Utils.GameResult.WIN, potentialWinnersByPoints.get(0));
         } else {
 
             //In case of a tie, the winner is the tied player who has received the fewest
@@ -439,7 +454,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
         if (availableTargets.size() > 1)
             availableTargets.remove(cegs.playerPlayingBelle);
-        boolean playerIsCheyenne = cegs.playerCharacters.get(player) == CharacterType.Django;
+        boolean playerIsCheyenne = cegs.playerCharacters.get(player) == CharacterType.Cheyenne;
 
         // punch forward or backward
         for (int offset = -1; offset <= 1; offset++){
