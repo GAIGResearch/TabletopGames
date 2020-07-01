@@ -29,6 +29,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
+        // TODO: partial observability
         VirusGameState vgs = new VirusGameState(gameParameters.copy(), getNPlayers());
         vgs.drawDeck = drawDeck.copy();
         vgs.discardDeck = discardDeck.copy();
@@ -43,8 +44,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected double _getScore(int playerId) {
-        // TODO
-        return 0;
+        return new VirusHeuristic().evaluateState(this, playerId);
     }
 
     @Override

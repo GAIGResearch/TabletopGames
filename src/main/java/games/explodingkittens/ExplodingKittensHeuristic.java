@@ -43,7 +43,7 @@ public class ExplodingKittensHeuristic implements IStateHeuristic {
             case DEFUSE:
                 return defuseValue;
             case NOPE:
-                if (ekgs.actionStack.get(0) instanceof IsNopeable) {
+                if (ekgs.actionStack.size() > 0 && ekgs.actionStack.get(0) instanceof IsNopeable) {
                     return nopeValue;
                 } else return 0;  // Neutral
             case ATTACK:

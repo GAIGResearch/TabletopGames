@@ -8,14 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VirusBody extends Component {
-    public HashMap<VirusCard.VirusCardOrgan, VirusOrgan> organs;
+    public HashMap<VirusCard.OrganType, VirusOrgan> organs;
 
     public VirusBody()
     {
         super(Utils.ComponentType.TOKEN);
         organs = new HashMap<>();
-        for (VirusCard.VirusCardOrgan oType : VirusCard.VirusCardOrgan.values()) {
-            if (oType != VirusCard.VirusCardOrgan.None && oType != VirusCard.VirusCardOrgan.Wild) {
+        for (VirusCard.OrganType oType : VirusCard.OrganType.values()) {
+            if (oType != VirusCard.OrganType.None && oType != VirusCard.OrganType.Wild) {
                 organs.put(oType, new VirusOrgan());
             }
         }
@@ -25,8 +25,8 @@ public class VirusBody extends Component {
     {
         super(Utils.ComponentType.TOKEN, ID);
         organs = new HashMap<>();
-        for (VirusCard.VirusCardOrgan oType : VirusCard.VirusCardOrgan.values()) {
-            if (oType != VirusCard.VirusCardOrgan.None && oType != VirusCard.VirusCardOrgan.Wild) {
+        for (VirusCard.OrganType oType : VirusCard.OrganType.values()) {
+            if (oType != VirusCard.OrganType.None && oType != VirusCard.OrganType.Wild) {
                 organs.put(oType, new VirusOrgan());
             }
         }
@@ -36,7 +36,7 @@ public class VirusBody extends Component {
     public Component copy() {
         VirusBody vb = new VirusBody(componentID);
         vb.organs = new HashMap<>();
-        for (Map.Entry<VirusCard.VirusCardOrgan, VirusOrgan> e: organs.entrySet()) {
+        for (Map.Entry<VirusCard.OrganType, VirusOrgan> e: organs.entrySet()) {
             vb.organs.put(e.getKey(), (VirusOrgan) e.getValue().copy());
         }
         return vb;
@@ -45,21 +45,21 @@ public class VirusBody extends Component {
     @Override
     public String toString() {
         String s = "";
-        for (Map.Entry<VirusCard.VirusCardOrgan, VirusOrgan> e: organs.entrySet()) {
+        for (Map.Entry<VirusCard.OrganType, VirusOrgan> e: organs.entrySet()) {
             s += e.getKey() + ": " + e.getValue().toString() + " ";
         }
         return s;
     }
 
-    public HashMap<VirusCard.VirusCardOrgan, VirusOrgan> getOrgans() {
+    public HashMap<VirusCard.OrganType, VirusOrgan> getOrgans() {
         return organs;
     }
 
-    public boolean hasOrgan(VirusCard.VirusCardOrgan organ) {
+    public boolean hasOrgan(VirusCard.OrganType organ) {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.None;
     }
 
-    public boolean hasOrganImmunised(VirusCard.VirusCardOrgan organ) {
+    public boolean hasOrganImmunised(VirusCard.OrganType organ) {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.Immunised;
     }
 

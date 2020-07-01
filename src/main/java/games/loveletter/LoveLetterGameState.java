@@ -70,8 +70,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
     @Override
     protected double _getScore(int playerId) {
-        // TODO heuristic
-        return 0;
+        return new LoveLetterHeuristic().evaluateState(this, playerId);
     }
 
     @Override

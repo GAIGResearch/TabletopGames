@@ -8,6 +8,7 @@ import utilities.StatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -316,9 +317,11 @@ public class Game {
      * @param seed - random seed for all games. If null, a new random seed is used for each game.
      * @param ac - action controller for GUI interactions, null if playing without visuals.
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
+     * @param detailedStatistics - if true, detailed statistics are printed, otherwise just average of wins
      */
     private static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
-                                int nRepetitions, ActionController ac, boolean randomizeParameters) {
+                                int nRepetitions, ActionController ac, boolean randomizeParameters,
+                                boolean detailedStatistics) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -333,7 +336,7 @@ public class Game {
             // Save win rate statistics over all repetitions of this game
             StatSummary[] statSummaries = new StatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + i + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -355,7 +358,11 @@ public class Game {
             if (game != null) {
                 for (int i = 0; i < nPlayers; i++) {
                     // Print statistics for this game
-                    System.out.println(statSummaries[i].toString());
+                    if (detailedStatistics) {
+                        System.out.println(statSummaries[i].toString());
+                    } else {
+                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean());
+                    }
 
                     // Record in overall statistics
                     overall[i].add(statSummaries[i]);
@@ -367,7 +374,11 @@ public class Game {
         System.out.println("\n---------------------\n");
         for (int i = 0; i < nPlayers; i++) {
             // Print statistics for this game
-            System.out.println(overall[i].toString());
+            if (detailedStatistics) {
+                System.out.println(overall[i].toString());
+            } else {
+                System.out.println(overall[i].name + ": " + overall[i].mean());
+            }
         }
     }
 
@@ -458,7 +469,7 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new OSLA());
-//        players.add(new RandomPlayer(new Random()));
+        players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new OSLA());
@@ -468,6 +479,11 @@ public class Game {
         /* 4. Run! */
 //        runOne(TicTacToe, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-        runMany(new ArrayList<GameType>() {{add(LoveLetter);}}, players, null, 50, null, false);
+
+        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+        games.remove(Pandemic);
+        games.remove(TicTacToe);
+        runMany(games, players, null, 50, null, false, false);
+//        runMany(new ArrayList<GameType>() {{add(Virus);}}, players, null, 50, null, false, false);
     }
 }

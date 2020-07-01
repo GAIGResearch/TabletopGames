@@ -4,7 +4,7 @@ import core.components.Card;
 
 
 public class VirusCard extends Card {
-    public enum VirusCardOrgan {
+    public enum OrganType {
         Heart,
         Brain,
         Stomach,
@@ -20,16 +20,16 @@ public class VirusCard extends Card {
         Treatment
     }
 
-    public final VirusCardOrgan organ;
+    public final OrganType organ;
     public final VirusCardType type;
 
-    public VirusCard(VirusCardOrgan organ, VirusCardType type) {
+    public VirusCard(OrganType organ, VirusCardType type) {
         super(type.toString());
         this.organ = organ;
         this.type = type;
     }
     
-    public VirusCard(VirusCardOrgan organ, VirusCardType type, int ID) {
+    public VirusCard(OrganType organ, VirusCardType type, int ID) {
         super(type.toString(), ID);
         this.organ = organ;
         this.type = type;

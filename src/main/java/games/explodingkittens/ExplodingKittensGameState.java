@@ -52,6 +52,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     @Override
     protected AbstractGameState _copy(int playerId) {
+        // TODO: partial observability
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.drawPile = drawPile.copy();
         ekgs.discardPile = discardPile.copy();
@@ -69,8 +70,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     @Override
     protected double _getScore(int playerId) {
-        // TODO heuristic
-        return 0;
+        return new ExplodingKittensHeuristic().evaluateState(this, playerId);
     }
 
     @Override
