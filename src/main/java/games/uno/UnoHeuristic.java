@@ -27,7 +27,7 @@ public class UnoHeuristic implements IStateHeuristic {
             if (i == playerId) {
                 rawScore += s * FACTOR_PLAYER;
             } else {
-                rawScore += s * FACTOR_OPPONENT;
+                rawScore += s * F_OPPONENT;
             }
         }
         rawScore += FACTOR_N_CARDS * ugs.getPlayerDecks().get(playerId).getSize()/ugp.nCardsPerPlayer;

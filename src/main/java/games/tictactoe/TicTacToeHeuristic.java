@@ -23,6 +23,8 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         int[] nPlayer = new int[ttgs.gridBoard.getWidth()];
         int[] nOpponent = new int[ttgs.gridBoard.getWidth()];
 
+        double nTotalCount = nPlayer.length * 2 + 2;  // N rows + N columns + 2 diagonals
+
         Character playerChar = ttgs.playerMapping.get(playerId);
 
         // Check columns
@@ -42,8 +44,8 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         // Calculate scores, the more characters for player, the higher the weight
         double pScore = 0, oppScore = 0;
         for (int i = 0; i < nPlayer.length; i++) {
-            pScore += nPlayer[i] * Math.pow(0.5, nPlayer.length-i);
-            oppScore += nOpponent[i] * Math.pow(0.3, nOpponent.length-i);
+            pScore += nPlayer[i]/nTotalCount * Math.pow(0.5, nPlayer.length-i);
+            oppScore += nOpponent[i]/nTotalCount * Math.pow(0.3, nOpponent.length-i);
         }
 
         return pScore * FACTOR_PLAYER + oppScore * FACTOR_OPPONENT;

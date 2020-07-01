@@ -11,7 +11,7 @@ public class LoveLetterHeuristic implements IStateHeuristic {
     double COUNTESS_PLAY_THRESHOLD = 0.1;
 
     // Simple sum of card values
-    
+
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         LoveLetterGameState llgs = (LoveLetterGameState) gs;
