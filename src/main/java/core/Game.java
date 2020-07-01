@@ -468,6 +468,6 @@ public class Game {
         /* 4. Run! */
 //        runOne(TicTacToe, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-        runMany(new ArrayList<GameType>() {{add(ColtExpress);}}, players, null, 50, null, false);
+        runMany(new ArrayList<GameType>() {{add(LoveLetter);}}, players, null, 50, null, false);
     }
 }

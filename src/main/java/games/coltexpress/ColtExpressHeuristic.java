@@ -20,7 +20,6 @@ public class ColtExpressHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         ColtExpressGameState cegs = (ColtExpressGameState) gs;
-        ColtExpressParameters cep = ((ColtExpressParameters)cegs.getGameParameters());
         Utils.GameResult gameStatus = gs.getGameStatus();
 
         if (gameStatus == Utils.GameResult.LOSE)
