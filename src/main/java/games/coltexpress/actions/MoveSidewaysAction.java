@@ -42,7 +42,6 @@ public class MoveSidewaysAction extends DrawCard {
         else{
             source.playersOnTopOfCompartment.remove(card.playerID);
             target.playersOnTopOfCompartment.add(card.playerID);
-
         }
 
         return true;

@@ -3,6 +3,7 @@ package games.coltexpress.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
+import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 
@@ -35,8 +36,8 @@ public class MoveVerticalAction extends DrawCard {
             comp.playersOnTopOfCompartment.remove(card.playerID);
             comp.playersInsideCompartment.add(card.playerID);
         }
-        return true;
 
+        return true;
     }
 
     @Override

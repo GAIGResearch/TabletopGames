@@ -186,12 +186,12 @@ public class Game {
                             action = currentPlayer.getAction(observation);
                         }
                     }
-
-                    // Resolve action and game rules
-                    forwardModel.next(gameState, action);
                 } else {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
+
+                // Resolve action and game rules
+                forwardModel.next(gameState, action);
             } else {
                 if (firstEnd) {
                     System.out.println("Ended");
@@ -468,6 +468,6 @@ public class Game {
         /* 4. Run! */
 //        runOne(TicTacToe, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 50, null, false);
+        runMany(new ArrayList<GameType>() {{add(ColtExpress);}}, players, null, 50, null, false);
     }
 }

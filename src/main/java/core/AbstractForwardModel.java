@@ -71,8 +71,9 @@ public abstract class AbstractForwardModel {
      * or play a random action for them instead.
      * Subclasses can overwrite for their own behaviour.
      * @param gameState - game state in which illegal action was attempted.
+     * @param action - action played
      */
-    protected void illegalActionPlayed(AbstractGameState gameState) {
+    protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
         if (DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED) {
             gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             gameState.turnOrder.endPlayerTurn(gameState);
@@ -104,7 +105,7 @@ public abstract class AbstractForwardModel {
             if (VERBOSE) {
                 System.out.println("Invalid action.");
             }
-            illegalActionPlayed(currentState);
+            illegalActionPlayed(currentState, action);
         }
     }
 

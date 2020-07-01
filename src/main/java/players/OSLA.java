@@ -37,13 +37,14 @@ public class OSLA extends AbstractPlayer {
             double valState = gsCopy.getScore(this.getPlayerID()); //stateHeuristic.evaluateState((AbstractGameState)gsCopy);
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
+//            System.out.println(valState);
 
             if (Q > maxQ) {
                 maxQ = Q;
                 bestAction = action;
             }
-
         }
+//        System.out.println();
 
         return bestAction;
     }
