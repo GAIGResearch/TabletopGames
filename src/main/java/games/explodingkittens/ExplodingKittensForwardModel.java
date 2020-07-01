@@ -313,17 +313,19 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         List<ExplodingKittenCard> cards = ekgs.drawPile.getComponents();
         int numberOfCards = ekgs.drawPile.getSize();
         int n = Math.min(((ExplodingKittenParameters)ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
-        ArrayList<int[]> permutations = new ArrayList<>();
-        int[] order = new int[n];
-        for (int i = 0; i < n; i++) {
-            order[i] = i;
-        }
-        generatePermutations(n, order, permutations);
-        for (int c = 0; c < playerDeck.getSize(); c++) {
-            if (playerDeck.getComponents().get(c).cardType == ExplodingKittenCard.CardType.SEETHEFUTURE) {
-                for (int[] perm : permutations) {
-                    actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(),
-                            ekgs.discardPile.getComponentID(), c, ekgs.drawPile.getComponentID(), perm));
+        if (n > 0) {
+            ArrayList<int[]> permutations = new ArrayList<>();
+            int[] order = new int[n];
+            for (int i = 0; i < n; i++) {
+                order[i] = i;
+            }
+            generatePermutations(n, order, permutations);
+            for (int c = 0; c < playerDeck.getSize(); c++) {
+                if (playerDeck.getComponents().get(c).cardType == ExplodingKittenCard.CardType.SEETHEFUTURE) {
+                    for (int[] perm : permutations) {
+                        actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(),
+                                ekgs.discardPile.getComponentID(), c, ekgs.drawPile.getComponentID(), perm));
+                    }
                 }
             }
         }
