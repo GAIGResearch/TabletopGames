@@ -192,6 +192,10 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                 }
                 add(playerLoot.get(i).getComponentID());
             }
+            for (Compartment c: trainCompartments) {
+                add(c.lootInside.getComponentID());
+                add(c.lootOnTop.getComponentID());
+            }
             // Following round cards are not visible
             for (int i = getTurnOrder().getRoundCounter()+1; i < rounds.getSize(); i++) {
                 add(rounds.getComponents().get(i).getComponentID());
