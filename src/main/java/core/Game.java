@@ -203,6 +203,7 @@ public class Game {
         }
 
         if (gui == null) {
+            System.out.println("Ended");
             terminate();
         }
     }
@@ -484,6 +485,6 @@ public class Game {
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 50, null, false, false);
-        runMany(new ArrayList<GameType>() {{add(ColtExpress);}}, players, null, 50, null, false, false);
+        runMany(new ArrayList<GameType>() {{add(ExplodingKittens);}}, players, null, 1000, null, false, false);
     }
 }

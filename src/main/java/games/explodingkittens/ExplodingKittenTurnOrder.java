@@ -5,9 +5,11 @@ import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
+import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
     int requiredDraws;
@@ -24,14 +26,21 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
     }
 
     public void endPlayerTurnStep(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
+        ArrayList<Integer> deadPlayers = new ArrayList<>();
+        for (int i: reactivePlayers) {
+            if (gameState.getPlayerResults()[i] != Utils.GameResult.GAME_ONGOING) {
+                deadPlayers.add(i);
+            }
+        }
+        reactivePlayers.removeAll(deadPlayers);
         if (reactivePlayers.size() > 0) reactivePlayers.poll();
         else {
             requiredDraws -= 1;
             if (requiredDraws == 0 || gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
                 requiredDraws = 1;
-                turnOwner = (turnOwner + 1) % nPlayers;
-                while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING)
-                    turnOwner = (turnOwner + 1) % nPlayers;
+                endPlayerTurn(gameState);
             }
         }
     }

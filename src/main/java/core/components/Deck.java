@@ -134,7 +134,9 @@ public class Deck<T extends Component> extends Component {
      * @return true if within capacity, false otherwise.
      */
     public boolean add(T c) {
-        c.setOwnerId(ownerId);
+        if (c != null) {
+            c.setOwnerId(ownerId);
+        }
         return add(c, 0 );
     }
     

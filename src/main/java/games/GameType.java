@@ -172,12 +172,12 @@ public enum GameType {
             case Pandemic:
                 gui = new PandemicGUI(gameState, ac);
                 break;
-            case ExplodingKittens:
-                if (gameState != null) {
-                    gui = new PrototypeGUI(this, gameState, ac, 500);
-                } else {
-                    gui = new PrototypeGUI(this,null, ac, 0);
-                }
+//            case ExplodingKittens:
+//                if (gameState != null) {
+//                    gui = new PrototypeGUI(this, gameState, ac, 500);
+//                } else {
+//                    gui = new PrototypeGUI(this,null, ac, 0);
+//                }
         }
 
         return gui;

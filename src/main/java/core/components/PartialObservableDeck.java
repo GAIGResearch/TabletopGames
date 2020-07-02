@@ -1,5 +1,7 @@
 package core.components;
 
+import utilities.Pair;
+
 import java.util.*;
 
 
@@ -217,22 +219,63 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     @Override
     public void shuffle(Random rnd) {
+        Pair<ArrayList<T>, ArrayList<boolean[]>> shuffled = shuffleLists(components, elementVisibility, rnd);
+        components = shuffled.a;
+        elementVisibility = shuffled.b;
+    }
+
+    /**
+     * Shuffles a list of components and associated visibility
+     * @param comps - list of components
+     * @param vis - associated visibility
+     * @param rnd - random number generator to be used in shuffling.
+     * @return - both lists shuffled, keeping the mapping from component to visibility at the same index.
+     */
+    private Pair<ArrayList<T>, ArrayList<boolean[]>> shuffleLists(ArrayList<T> comps, ArrayList<boolean[]> vis, Random rnd) {
         ArrayList<T> tmp_components = new ArrayList<>();
         ArrayList<boolean[]> tmp_visibility = new ArrayList<>();
 
         List<Integer> indexList = new ArrayList<>();
-        for (int i = 0; i < components.size(); i++)
+        for (int i = 0; i < comps.size(); i++)
             indexList.add(i);
         Collections.shuffle(indexList, rnd);
 
         for (int targetIndex = 0; targetIndex < indexList.size(); targetIndex++){
             int sourceIndex = indexList.get(targetIndex);
-            tmp_components.add(targetIndex, components.get(sourceIndex));
-            tmp_visibility.add(targetIndex, elementVisibility.get(sourceIndex));
+            tmp_components.add(targetIndex, comps.get(sourceIndex));
+            tmp_visibility.add(targetIndex, vis.get(sourceIndex));
         }
 
-        components = tmp_components;
-        elementVisibility = tmp_visibility;
+        return new Pair(tmp_components, tmp_visibility);
+    }
+
+    /**
+     * Shuffles components based on visibility, leaving those with opposite visibility in the same place.
+     * @param rnd - random object to use for shuffling.
+     * @param playerId - player observing the deck.
+     * @param visible - if true, shuffles only visible cards; otherwise, shuffles only hidden cards.
+     */
+    public void shuffleVisible(Random rnd, int playerId, boolean visible) {
+        ArrayList<T> visibleComponents = new ArrayList<>();
+        ArrayList<boolean[]> visibility = new ArrayList<>();
+        for (int i = 0; i < components.size(); i++) {
+            boolean[] b = elementVisibility.get(i);
+            if (b[playerId] == visible) {
+                visibleComponents.add(components.get(i));
+                visibility.add(b);
+            }
+        }
+        Pair<ArrayList<T>, ArrayList<boolean[]>> shuffled = shuffleLists(visibleComponents, visibility, rnd);
+        int n = 0;
+        for (int i = 0; i < components.size(); i++) {
+            boolean[] b = elementVisibility.get(i);
+            if (b[playerId] == visible) {
+                // Draw element from shuffled lists
+                components.set(i, shuffled.a.get(n));
+                elementVisibility.set(i, shuffled.b.get(n));
+                n++;
+            }
+        }
     }
 
     @Override
