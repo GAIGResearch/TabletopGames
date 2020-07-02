@@ -66,7 +66,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
             // create a player's discard pile, which is visible to all players
             Arrays.fill(visibility, true);
-            Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i);
+            Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i, i);
             llgs.playerDiscardCards.add(discardCards);
         }
 

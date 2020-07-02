@@ -5,6 +5,7 @@ import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawComponents;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.coltexpress.actions.*;
@@ -19,7 +20,6 @@ import static core.CoreConstants.VERBOSE;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
 
 public class ColtExpressForwardModel extends AbstractForwardModel {
@@ -41,7 +41,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         cegs.playerHandCards = new ArrayList<>(cegs.getNPlayers());
         cegs.playerLoot = new ArrayList<>(cegs.getNPlayers());
         cegs.bulletsLeft = new int[cegs.getNPlayers()];
-        cegs.plannedActions = new PartialObservableDeck<>("plannedActions", cegs.getNPlayers());
+        cegs.plannedActions = new PartialObservableDeck<>("plannedActions", -1, cegs.getNPlayers());
 
         Arrays.fill(cegs.bulletsLeft, cep.nBulletsPerPlayer);
 
@@ -51,26 +51,21 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (characterType == CharacterType.Belle)
                 cegs.playerPlayingBelle = playerIndex;
 
-            boolean[] visibility = new boolean[cegs.getNPlayers()];
-            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
-            visibility[playerIndex] = true;
-
-            PartialObservableDeck<ColtExpressCard> playerCards =
-                    new PartialObservableDeck<>("playerCards" + playerIndex, visibility);
+            Deck<ColtExpressCard> playerCards = new Deck<>("playerCards" + playerIndex, playerIndex);
             for (ColtExpressCard.CardType type : cep.cardCounts.keySet()){
                 for (int j = 0; j < cep.cardCounts.get(type); j++) {
                     playerCards.add(new ColtExpressCard(playerIndex, type));
                 }
             }
             cegs.playerDecks.add(playerCards);
-            playerCards.shuffle(new Random(cep.getGameSeed()));
+            playerCards.shuffle(new Random(cep.getGameSeed()+playerIndex));
 
-            PartialObservableDeck<ColtExpressCard> playerHand = new PartialObservableDeck<>(
-                    "playerHand" + playerIndex, visibility);
+            Deck<ColtExpressCard> playerHand = new Deck<>(
+                    "playerHand" + playerIndex, playerIndex);
 
             cegs.playerHandCards.add(playerHand);
 
-            PartialObservableDeck<Loot> loot = new PartialObservableDeck<>("playerLoot" + playerIndex, visibility);
+            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex);
             for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
                 LootType lootType = e.a;
                 int value = e.b;
@@ -92,22 +87,22 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     }
 
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
-        cegs.rounds = new ArrayList<>(cep.nMaxRounds);
+        cegs.rounds = new Deck<>("Rounds", -1);
 
         // Add random round cards
         ArrayList<Integer> availableRounds = new ArrayList<>();
         for (int i = 0; i < cep.roundCards.length; i++) {
             availableRounds.add(i);
         }
-        Random r = new Random(cep.getGameSeed());
         for (int i = 0; i < cep.nMaxRounds-1; i++) {
+            Random r = new Random(cep.getGameSeed() + cegs.getTurnOrder().getRoundCounter() + i);
             int choice = r.nextInt(availableRounds.size());
             cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
             availableRounds.remove(Integer.valueOf(choice));
         }
 
         // Add 1 random end round card
-        cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
+        cegs.rounds.add(cegs.getRandomEndRoundCard(cep, cegs.getTurnOrder().getRoundCounter()));
     }
 
     @Override
@@ -177,8 +172,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
     private void distributeCards(ColtExpressGameState cegs){
         for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
-            PartialObservableDeck<ColtExpressCard> playerHand = cegs.playerHandCards.get(playerIndex);
-            PartialObservableDeck<ColtExpressCard> playerDeck = cegs.playerDecks.get(playerIndex);
+            Deck<ColtExpressCard> playerHand = cegs.playerHandCards.get(playerIndex);
+            Deck<ColtExpressCard> playerDeck = cegs.playerDecks.get(playerIndex);
 
             playerDeck.add(playerHand);
             playerHand.clear();
@@ -360,7 +355,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     }
                     break;
                 case CollectMoney:
-                    PartialObservableDeck<Loot> availableLoot = null;
+                    Deck<Loot> availableLoot = null;
                     for (Compartment compartment : cegs.trainCompartments) {
                         if (compartment.playersOnTopOfCompartment.contains(player))
                             availableLoot = compartment.lootOnTop;
@@ -462,7 +457,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 continue;
             Compartment targetCompartment = cegs.trainCompartments.get(playerCompartmentIndex+offset);
             for (Integer targetPlayer : availableTargets){
-                PartialObservableDeck<Loot> availableLoot = cegs.playerLoot.get(targetPlayer);
+                Deck<Loot> availableLoot = cegs.playerLoot.get(targetPlayer);
 
                 if (availableLoot.getSize() > 0){
                     for (Loot loot : availableLoot.getComponents())

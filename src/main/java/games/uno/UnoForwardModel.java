@@ -23,7 +23,7 @@ public class UnoForwardModel extends AbstractForwardModel {
         ugs.playerScore = new int[firstState.getNPlayers()];
         ugs.playerDecks = new ArrayList<>();
         for (int i = 0; i < ugs.getNPlayers(); i++) {
-            ugs.playerDecks.add(new Deck<>("Player " + i + " deck"));
+            ugs.playerDecks.add(new Deck<>("Player " + i + " deck", i));
         }
 
         // Create the draw deck with all the cards

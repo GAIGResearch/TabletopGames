@@ -480,10 +480,10 @@ public class Game {
 //        runOne(TicTacToe, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-        games.remove(Pandemic);
-        games.remove(TicTacToe);
-        runMany(games, players, null, 50, null, false, false);
-//        runMany(new ArrayList<GameType>() {{add(Virus);}}, players, null, 50, null, false, false);
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(Pandemic);
+//        games.remove(TicTacToe);
+//        runMany(games, players, null, 50, null, false, false);
+        runMany(new ArrayList<GameType>() {{add(ColtExpress);}}, players, null, 50, null, false, false);
     }
 }

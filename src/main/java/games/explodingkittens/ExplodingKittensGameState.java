@@ -74,6 +74,12 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        // TODO
+        return null;
+    }
+
+    @Override
     protected void _reset() {
         playerHandCards = new ArrayList<>();
         drawPile = null;

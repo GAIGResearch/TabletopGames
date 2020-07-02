@@ -160,7 +160,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     public void endRoundCard(ColtExpressGameState gameState){
         gameState.getRounds().get(currentRoundCardIndex).endRoundCardEvent(gameState);
         currentRoundCardIndex++;
-        if (currentRoundCardIndex < gameState.getRounds().size()) {
+        if (currentRoundCardIndex < gameState.getRounds().getSize()) {
             firstPlayerOfRound = (firstPlayerOfRound + 1) % nPlayers;
             turnCounter = 0;
             turnOwner = firstPlayerOfRound;
