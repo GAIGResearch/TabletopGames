@@ -196,7 +196,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     public void printDeck(Deck<ExplodingKittenCard> deck){
         StringBuilder sb = new StringBuilder();
         for (ExplodingKittenCard card : deck.getComponents()){
-            sb.append(card.cardType.toString() + "(" + card.getOwnerId() + ")");
+            sb.append(card.cardType.toString());
             sb.append(",");
         }
         if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
