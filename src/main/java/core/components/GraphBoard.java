@@ -215,9 +215,9 @@ public class GraphBoard extends Component {
         String neighboursKey = (String) board.get("neighboursKey");
         int maxNeighbours = (int) (long) board.get("maxNeighbours");
 
-        properties.put(Hash.GetInstance().hash("boardType"), new PropertyString(boardType));
+        properties.put(Hash.GetInstance().hash("boardType"), new PropertyString("boardType", boardType));
         if (board.get("img") != null) {
-            properties.put(imgHash, new PropertyString((String) board.get("img")));
+            properties.put(imgHash, new PropertyString("img", (String) board.get("img")));
         }
 
         JSONArray nodeList = (JSONArray) board.get("nodes");

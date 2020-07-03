@@ -492,12 +492,12 @@ public class Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-//        players.add(new OSLA());
-        players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLA());
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Uno, players, seed, ac, false);
+        runOne(Pandemic, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));

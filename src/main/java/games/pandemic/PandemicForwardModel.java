@@ -24,7 +24,6 @@ import java.util.Random;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
-import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 
 public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
