@@ -179,14 +179,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         // a losing player needs to discard all cards
         while (playerHandCards.get(playerID).getSize() > 0)
             playerDiscardCards.get(playerID).add(playerHandCards.get(playerID).draw());
-
-        int nPlayersActive = 0;
-        for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
-        }
-        if (nPlayersActive == 1) {
-            this.gameStatus = Utils.GameResult.GAME_END;
-        }
     }
 
     // Getters, Setters

@@ -374,7 +374,7 @@ public class Game {
                     if (detailedStatistics) {
                         System.out.println(statSummaries[i].toString());
                     } else {
-                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean());
+                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean() + " (n=" + statSummaries[i].n() + ")");
                     }
 
                     // Record in overall statistics
@@ -493,10 +493,10 @@ public class Game {
 //        runOne(TicTacToe, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, null, 50, null, false, false);
-        runMany(new ArrayList<GameType>() {{add(LoveLetter);}}, players, null, 1000, null, false, false);
+        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+        games.remove(Pandemic);
+        games.remove(TicTacToe);
+        runMany(games, players, null, 50, null, false, false);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }

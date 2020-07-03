@@ -16,7 +16,9 @@ public class LoveLetterTurnOrder extends AlternatingTurnOrder {
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
-        if (gameState.getGameStatus() != GAME_ONGOING) return;
+        if (gameState.getGameStatus() != GAME_ONGOING) {
+            return;
+        }
 
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));

@@ -2,6 +2,7 @@ package games.uno.actions;
 
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
 import core.interfaces.IPrintable;
@@ -10,6 +11,7 @@ import games.uno.cards.UnoCard;
 import games.uno.UnoGameState;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class PlayCard extends DrawCard implements IPrintable {
@@ -108,6 +110,25 @@ public class PlayCard extends DrawCard implements IPrintable {
             return getCard(gameState).toString() + "; Change to color " + color;
         }
         return "Play card " + getCard(gameState).toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayCard)) return false;
+        if (!super.equals(o)) return false;
+        PlayCard playCard = (PlayCard) o;
+        return Objects.equals(color, playCard.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), color);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new PlayCard(deckFrom, deckTo, fromIndex, color);
     }
 }
 

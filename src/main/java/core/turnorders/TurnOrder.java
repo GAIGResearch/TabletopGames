@@ -130,7 +130,9 @@ public abstract class TurnOrder {
      */
     public void endRound(AbstractGameState gameState) {
         roundCounter++;
-        if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(GAME_END);
+        if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
+            gameState.setGameStatus(GAME_END);
+        }
         else {
             turnCounter = 0;
             moveToNextPlayer(gameState, firstPlayer);

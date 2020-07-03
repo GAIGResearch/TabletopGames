@@ -158,12 +158,14 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
         // Round ends when only a single player is left, or when there are no cards left in the draw pile
         if (playersAlive == 1 || llgs.getRemainingCards() == 0) {
+            // End the round and add up points
+            HashSet<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
+
             if (checkEndOfGame(llgs)) {
                 return;  // Game is over
             }
 
             // Otherwise, end the round and set up the next
-            HashSet<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
             llgs.getTurnOrder().endRound(llgs);
             setupRound(llgs, winners);
         }
