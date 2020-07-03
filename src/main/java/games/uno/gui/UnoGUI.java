@@ -27,9 +27,11 @@ public class UnoGUI extends AbstractGUI {
     UnoDeckView drawPile;
 
     int activePlayer = -1;
+    int humanID;
 
-    public UnoGUI(AbstractGameState gameState, ActionController ac) {
+    public UnoGUI(AbstractGameState gameState, ActionController ac, int humanID) {
         super(ac, 15);
+        this.humanID = humanID;
 
         if (gameState != null) {
             activePlayer = gameState.getCurrentPlayer();
@@ -99,7 +101,9 @@ public class UnoGUI extends AbstractGUI {
             UnoGameState ugs = (UnoGameState)gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update((UnoGameState) gameState);
-                if (i == gameState.getCurrentPlayer() || ALWAYS_DISPLAY_FULL_OBSERVABLE || ALWAYS_DISPLAY_CURRENT_PLAYER) {
+                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                        || i == humanID
+                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
                     playerHands[i].setFront(true);
                 } else {
                     playerHands[i].setFront(false);

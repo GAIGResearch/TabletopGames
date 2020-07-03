@@ -225,12 +225,7 @@ public class Game {
      */
     private void updateGUI(AbstractGUI gui) {
         if (gui != null) {
-            if (PARTIAL_OBSERVABLE) {
-                // Copying again to get the player's observation, in case player modifies the object received directly.
-                gui.update(currentPlayer, gameState.copy(currentPlayer.getPlayerID()));
-            } else {
-                gui.update(currentPlayer, gameState);
-            }
+            gui.update(currentPlayer, gameState);
             try {
                 Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {
@@ -276,6 +271,14 @@ public class Game {
         return gameType;
     }
 
+    /**
+     * Retrieves the list of players in the game.
+     * @return - players list
+     */
+    public List<AbstractPlayer> getPlayers() {
+        return players;
+    }
+
     @Override
     public String toString() {
         return gameType.toString();
@@ -309,7 +312,7 @@ public class Game {
             AbstractGUI gui = null;
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
-                gui = gameToPlay.createGUI(game.getGameState(), ac);
+                gui = gameToPlay.createGUI(game, ac);
             }
 
             // Run!

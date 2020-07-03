@@ -26,6 +26,7 @@ import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import gui.PrototypeGUI;
 import players.ActionController;
+import players.HumanGUIPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,17 +162,17 @@ public enum GameType {
 
     /**
      * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
-     * @param gameState - initial game state from the game.
+     * @param game - game to create a GUI for.
      * @param ac - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    public AbstractGUI createGUI(AbstractGameState gameState, ActionController ac) {
+    public AbstractGUI createGUI(Game game, ActionController ac) {
 
         AbstractGUI gui = null;
 
         switch(this) {
             case Pandemic:
-                gui = new PandemicGUI(gameState, ac);
+                gui = new PandemicGUI(game.getGameState(), ac);
                 break;
 //            case ExplodingKittens:
 //                if (gameState != null) {
@@ -180,7 +181,14 @@ public enum GameType {
 //                    gui = new PrototypeGUI(this,null, ac, 0);
 //                }
             case Uno:
-                gui = new UnoGUI(gameState, ac);
+                int human = -1;
+                for (int i = 0; i < game.getPlayers().size(); i++) {
+                    if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
+                        human = i;
+                        break;
+                    }
+                }
+                gui = new UnoGUI(game.getGameState(), ac, human);
                 break;
         }
 
