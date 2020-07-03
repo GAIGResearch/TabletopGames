@@ -3,6 +3,8 @@ package games.uno;
 import core.AbstractGameParameters;
 
 public class UnoGameParameters extends AbstractGameParameters {
+    public String dataPath = "data/uno/";
+
     public int nNumberCards = 10;
     public int nCardsPerPlayer = 7;
     public int nWildCards = 4;
@@ -29,9 +31,14 @@ public class UnoGameParameters extends AbstractGameParameters {
         super(seed);
     }
 
+    public String getDataPath() {
+        return dataPath;
+    }
+
     @Override
     protected AbstractGameParameters _copy() {
         UnoGameParameters ugp = new UnoGameParameters(System.currentTimeMillis());
+        ugp.dataPath = dataPath;
         ugp.nNumberCards = nNumberCards;
         ugp.nCardsPerPlayer = nCardsPerPlayer;
         ugp.nWildCards = nWildCards;

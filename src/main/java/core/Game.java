@@ -12,8 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
-import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.*;
 import static games.GameType.*;
 
 public class Game {
@@ -233,7 +232,7 @@ public class Game {
                 gui.update(currentPlayer, gameState);
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {
                 System.out.println("EXCEPTION " + e);
             }
@@ -490,18 +489,18 @@ public class Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new OSLA());
-//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new OSLA());
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-//        runOne(TicTacToe, players, seed, ac, false);
+        runOne(Uno, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-        games.remove(Pandemic);
-        games.remove(TicTacToe);
-        runMany(games, players, null, 50, null, false, false);
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(Pandemic);
+//        games.remove(TicTacToe);
+//        runMany(games, players, null, 50, null, false, false);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }

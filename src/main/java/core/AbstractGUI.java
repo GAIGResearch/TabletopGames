@@ -83,8 +83,13 @@ public abstract class AbstractGUI extends JFrame {
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
+        return createActionPanel(highlights, width, height, true);
+    }
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
-        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        if (boxLayout) {
+            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        }
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
@@ -99,7 +104,9 @@ public abstract class AbstractGUI extends JFrame {
 
         JScrollPane pane = new JScrollPane(actionPanel);
         pane.setPreferredSize(new Dimension(width, height));
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        if (boxLayout) {
+            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        }
         return pane;
     }
 

@@ -11,7 +11,8 @@ public class UnoCard extends Card {
         Skip,
         Reverse,
         Draw,
-        Wild
+        Wild,
+//        SwapHands
     }
 
     public final String color;

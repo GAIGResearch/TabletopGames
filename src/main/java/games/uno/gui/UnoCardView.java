@@ -1,0 +1,64 @@
+package games.uno.gui;
+
+import core.components.Card;
+import games.uno.cards.UnoCard;
+import gui.views.ComponentView;
+import org.davidmoten.text.utils.WordWrap;
+
+import java.awt.*;
+
+import static games.uno.gui.UnoGUI.unoCardHeight;
+import static games.uno.gui.UnoGUI.unoCardWidth;
+
+public class UnoCardView extends ComponentView {
+
+    public UnoCardView(UnoCard c) {
+        super(c, unoCardWidth, unoCardHeight);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        drawCard((Graphics2D) g, true);
+    }
+
+    public void drawCard(Graphics2D g, boolean visible) {
+        drawCard(g, 0, 0, width, height, (UnoCard) component, null, null, visible);
+    }
+
+    public static void drawCard(Graphics2D g, int x, int y, int width, int height, Card card, Image front, Image back, boolean visible) {
+        if (visible && front != null) {
+            g.drawImage(front, x, y, width, height, null, null);
+        } else if (!visible && back != null) {
+            g.drawImage(back, x, y, width, height, null, null);
+        } else {
+            // Draw background
+            g.setColor(Color.lightGray);
+            g.fillRect(x, y, width - 1, height - 1);
+            g.setColor(Color.black);
+
+            // Draw card name and owner
+            String value = "Card";
+            if (card != null) {
+                value = card.getComponentName() + "(" + card.getOwnerId() + ")";
+            }
+            int w = (width * 2 - 10) / g.getFont().getSize();
+            String wrapped =
+                    WordWrap.from(value)
+                            .maxWidth(w)
+                            .insertHyphens(true) // true is the default
+                            .wrap();
+            String[] wraps = wrapped.split("\n");
+            int size = g.getFont().getSize();
+
+            int i = 0;
+            for (String s : wraps) {
+                g.drawString(s, x + 10, y + i * size + 20);
+                i++;
+            }
+
+            // Draw border
+            g.drawRect(x, y, width - 1, height - 1);
+        }
+    }
+
+}

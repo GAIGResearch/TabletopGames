@@ -20,6 +20,7 @@ import games.tictactoe.TicTacToeGameState;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
+import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
@@ -178,6 +179,9 @@ public enum GameType {
 //                } else {
 //                    gui = new PrototypeGUI(this,null, ac, 0);
 //                }
+            case Uno:
+                gui = new UnoGUI(gameState, ac);
+                break;
         }
 
         return gui;
