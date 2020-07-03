@@ -211,22 +211,16 @@ public class Deck<T extends Component> extends Component {
     public void shuffle(Random rnd) {
         Collections.shuffle(components, rnd);
     }
-    
-    /**
-     * Shuffles the deck with a new random object.
-     */
-    public void shuffle() {
-        this.shuffle(new Random());
-    }
 
     /**
      * Shuffles part of the deck, given by range [fromIndex, toIndex), leaving the rest the same.
      * @param fromIndex - index from where to start shuffling, inclusive
      * @param toIndex - index where to stop shuffling, exclusive
+     * @param rnd - random number generator used for shuffling
      */
-    public void shuffle(int fromIndex, int toIndex) {
+    public void shuffle(int fromIndex, int toIndex, Random rnd) {
         List<T> subList = components.subList(fromIndex, toIndex);
-        Collections.shuffle(subList, new Random());
+        Collections.shuffle(subList, rnd);
         int i = 0;
         for (T component: subList) {
             components.set(fromIndex + i, component);

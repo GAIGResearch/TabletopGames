@@ -10,6 +10,7 @@ import games.uno.cards.UnoCard;
 import games.uno.UnoGameState;
 
 import java.util.List;
+import java.util.Random;
 
 public class PlayCard extends DrawCard implements IPrintable {
 
@@ -27,6 +28,8 @@ public class PlayCard extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gameState) {
         UnoGameState ugs = (UnoGameState)gameState;
         super.execute(gameState);
+
+        Random r = new Random(ugs.getGameParameters().getGameSeed() + ugs.getTurnOrder().getRoundCounter());
 
         UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
         ugs.updateCurrentCard(cardToBePlayed);
@@ -53,7 +56,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                         drawDeck.remove(ugs.getCurrentCard());
                         discardDeck.add(ugs.getCurrentCard());
 
-                        drawDeck.shuffle();
+                        drawDeck.shuffle(r);
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }
@@ -71,7 +74,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                         drawDeck.remove(ugs.getCurrentCard());
                         discardDeck.add(ugs.getCurrentCard());
 
-                        drawDeck.shuffle();
+                        drawDeck.shuffle(r);
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }

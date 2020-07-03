@@ -84,10 +84,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
-        if (VERBOSE) {
-            System.out.println(action.toString());
-        }
-
         ExplodingKittenTurnOrder ekTurnOrder = (ExplodingKittenTurnOrder) gameState.getTurnOrder();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         Stack<AbstractAction> actionStack = ekgs.getActionStack();

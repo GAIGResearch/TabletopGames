@@ -4,6 +4,8 @@ import utilities.Pair;
 
 import java.util.*;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
+
 
 public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
@@ -278,11 +280,6 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         }
     }
 
-    @Override
-    public void shuffle() {
-        this.shuffle(new Random());
-    }
-
     public boolean[] getDeckVisibility() {
         return deckVisibility;
     }
@@ -307,11 +304,11 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     public String toString(int playerID){
         StringBuilder sb = new StringBuilder();
-        for (T el : getVisibleComponents(playerID)){
-            if (el==null)
+        for (int i = 0; i < components.size(); i++){
+            if (!isComponentVisible(i,playerID) && PARTIAL_OBSERVABLE)
                 sb.append("UNKNOWN");
             else
-                sb.append(el.toString());
+                sb.append(components.get(i).toString());
             sb.append(",");
         }
 

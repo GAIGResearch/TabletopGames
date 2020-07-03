@@ -28,7 +28,7 @@ public class PriestAction extends DrawCard implements IPrintable {
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
-        // set all cards to be visible by the current player
+        // Set all cards to be visible by the current player
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             for (int i = 0; i < opponentDeck.getComponents().size(); i++)
                 opponentDeck.setVisibilityOfComponent(i, playerID, true);

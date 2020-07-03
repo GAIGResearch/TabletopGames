@@ -6,17 +6,15 @@ import core.components.PartialObservableDeck;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
+import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 import static core.CoreConstants.VERBOSE;
 
 
@@ -29,12 +27,36 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         LoveLetterGameState llgs = (LoveLetterGameState)firstState;
-        LoveLetterParameters llp = (LoveLetterParameters)firstState.getGameParameters();
 
+        // Set up all variables
         llgs.drawPile = new PartialObservableDeck<>("drawPile", llgs.getNPlayers());
+        llgs.reserveCards = new PartialObservableDeck<>("reserveCards", llgs.getNPlayers());
+        llgs.affectionTokens = new int[llgs.getNPlayers()];
+        llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
+        llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
+
+        // Set up first round
+        setupRound(llgs, null);
+    }
+
+    /**
+     * Sets up a round for the game, including draw pile, reserve pile and starting player hands.
+     * @param llgs - current game state.
+     * @param previousWinners - winners of previous round.
+     */
+    private void setupRound(LoveLetterGameState llgs, HashSet<Integer> previousWinners) {
+        LoveLetterParameters llp = (LoveLetterParameters) llgs.getGameParameters();
+
+        // No protection this round
         llgs.effectProtection = new boolean[llgs.getNPlayers()];
 
+        // Reset player status
+        for (int i = 0; i < llgs.getNPlayers(); i++) {
+            llgs.setPlayerResult(Utils.GameResult.GAME_ONGOING, i);
+        }
+
         // Add all cards to the draw pile
+        llgs.drawPile.clear();
         for (HashMap.Entry<LoveLetterCard.CardType, Integer> entry : llp.cardCounts.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++) {
                 LoveLetterCard card = new LoveLetterCard(entry.getKey());
@@ -43,140 +65,217 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         // Put one card to the side, such that player's won't know all cards in the game
-        llgs.reserveCards = new PartialObservableDeck<>("reserveCards", llgs.getNPlayers());
-        llgs.drawPile.shuffle();
+        Random r = new Random(llgs.getGameParameters().getGameSeed() + llgs.getTurnOrder().getRoundCounter());
+        llgs.drawPile.shuffle(r);
+        llgs.reserveCards.clear();
         llgs.reserveCards.add(llgs.drawPile.draw());
 
-        // Give each player a single card
-        llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
-        llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
-        for (int i = 0; i < llgs.getNPlayers(); i++) {
-            // Setup player deck to be fully/partial observable
-            boolean[] visibility = new boolean[llgs.getNPlayers()];
-            Arrays.fill(visibility, !PARTIAL_OBSERVABLE);
-            visibility[i] = true;
+        // In min-player game, N more cards are on the side, but visible to all players at all times
+        if (llgs.getNPlayers() == GameType.LoveLetter.getMinPlayers()) {
+            boolean[] fullVisibility = new boolean[llgs.getNPlayers()];
+            Arrays.fill(fullVisibility, true);
+            for (int i = 0; i < llp.nCardsVisibleReserve; i++) {
+                llgs.reserveCards.add(llgs.drawPile.draw(), fullVisibility);
+            }
+        }
 
-            // add a single random card to the player's hand
-            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>("playerHand" + i,
-                    visibility.clone());
+        // Set up player hands and discards
+        llgs.playerHandCards.clear();
+        llgs.playerDiscardCards.clear();
+        for (int i = 0; i < llgs.getNPlayers(); i++) {
+            boolean[] visible = new boolean[llgs.getNPlayers()];
+            if (PARTIAL_OBSERVABLE) {
+                visible[i] = true;
+            } else {
+                Arrays.fill(visible, true);
+            }
+
+            // add random cards to the player's hand
+            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>("playerHand" + i, i, visible);
             for (int j = 0; j < llp.nCardsPerPlayer; j++) {
                 playerCards.add(llgs.drawPile.draw());
             }
             llgs.playerHandCards.add(playerCards);
 
             // create a player's discard pile, which is visible to all players
-            Arrays.fill(visibility, true);
             Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i, i);
             llgs.playerDiscardCards.add(discardCards);
         }
 
+        // Game starts with drawing cards
         llgs.setGamePhase(Draw);
+
+        if (previousWinners != null) {
+            // Random winner starts next round
+            int nextPlayer = r.nextInt(previousWinners.size());
+            int n = -1;
+            for (int i: previousWinners) {
+                n++;
+                if (n == nextPlayer) {
+                    llgs.getTurnOrder().setTurnOwner(i);
+                }
+            }
+        }
+
+        // Update components in the game state
+        llgs.updateComponents();
     }
 
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
-        if (VERBOSE) {
-            System.out.println(action.toString());
-        }
-
         // each turn begins with the player drawing a card after which one card will be played
         // switch the phase after each executed action
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
         action.execute(gameState);
 
         IGamePhase gamePhase = llgs.getGamePhase();
-        if (gamePhase == Draw)
+        if (gamePhase == Draw) {
             llgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
-        else if (gamePhase == AbstractGameState.DefaultGamePhase.Main){
+        } else if (gamePhase == AbstractGameState.DefaultGamePhase.Main) {
             llgs.setGamePhase(Draw);
-            checkEndOfGame(llgs);
-            if (llgs.getGameStatus() != Utils.GameResult.GAME_END)
-                llgs.getTurnOrder().endPlayerTurn(gameState);
-        } else
-            throw new IllegalArgumentException("The gamestate " + llgs.getGamePhase() +
+            llgs.getTurnOrder().endPlayerTurn(gameState);
+            checkEndOfRound(llgs);
+        } else {
+            throw new IllegalArgumentException("The game phase " + llgs.getGamePhase() +
                     " is not know by LoveLetterForwardModel");
+        }
     }
 
     /**
      * Checks all game end conditions for the game.
      * @param llgs - game state to check if terminal.
      */
-    private void checkEndOfGame(LoveLetterGameState llgs) {
-        // count the number of active players
+    private void checkEndOfRound(LoveLetterGameState llgs) {
+        // Count the number of active players
         int playersAlive = 0;
-        for (Utils.GameResult result : llgs.getPlayerResults())
-            if (result != Utils.GameResult.LOSE)
+        int soleWinner = -1;
+        for (int i = 0; i < llgs.getNPlayers(); i++) {
+            if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
                 playersAlive += 1;
-
-        // game ends because only a single player is left
-        if (playersAlive == 1) {
-            llgs.setGameStatus(Utils.GameResult.GAME_END);
+                soleWinner = i;
+            }
         }
-        else if (llgs.getRemainingCards() == 0){
-            // game needs to end because their are no cards left
-            llgs.setGameStatus(Utils.GameResult.GAME_END);
+
+        // Round ends when only a single player is left, or when there are no cards left in the draw pile
+        if (playersAlive == 1 || llgs.getRemainingCards() == 0) {
+            if (checkEndOfGame(llgs)) {
+                return;  // Game is over
+            }
+
+            // Otherwise, end the round and set up the next
+            HashSet<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
+            llgs.getTurnOrder().endRound(llgs);
+            setupRound(llgs, winners);
         }
     }
 
-
     /**
-     * Sets the game-state to be terminal and determines the result of each player.
+     * Checks if the game has ended (only 1 player gets maximum over the required number of affection tokens).
+     * Sets the game and player status appropriately.
+     * @param llgs - game state to check
+     * @return - true if game has ended, false otherwise
      */
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        LoveLetterGameState llgs = (LoveLetterGameState) gameState;
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
+    private boolean checkEndOfGame(LoveLetterGameState llgs) {
+        LoveLetterParameters llp = (LoveLetterParameters) llgs.getGameParameters();
 
-        // determine which player has the card with the highest value
-        List<Integer> bestPlayers = new ArrayList<>();
+        // Required tokens from parameters; if more players in the game, use the last value in the array
+        int nRequiredTokens = (llgs.getNPlayers()-1 < llp.nTokensWin.length ? llp.nTokensWin[llgs.getNPlayers()-1] :
+                llp.nTokensWin[llp.nTokensWin.length-1]);
+
+        // Find players with highest number of tokens above the required number
+        HashSet<Integer> bestPlayers = new HashSet<>();
         int bestValue = 0;
-        int points;
-        for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (gameState.getPlayerResults()[i] != Utils.GameResult.LOSE)
-                points = llgs.playerHandCards.get(i).peek().cardType.getValue();
-            else
-                points = 0;
-
-            if (points > bestValue){
-                bestValue = points;
+        for (int i = 0; i < llgs.getNPlayers(); i++) {
+            if (llgs.affectionTokens[i] >= nRequiredTokens && llgs.affectionTokens[i] > bestValue){
+                bestValue = llgs.affectionTokens[i];
                 bestPlayers.clear();
                 bestPlayers.add(i);
-            } else if (points == bestValue) {
+            } else if (llgs.affectionTokens[i] != 0 && llgs.affectionTokens[i] == bestValue) {
                 bestPlayers.add(i);
             }
         }
 
-        // if just a single player is alive, the player immediately wins the game
-        if (bestPlayers.size() == 1){
-            for (int i = 0; i < gameState.getNPlayers(); i++) {
-                gameState.setPlayerResult(Utils.GameResult.LOSE, i);
+        // One player won, game is over
+        if (bestPlayers.size() == 1) {
+            llgs.setGameStatus(Utils.GameResult.GAME_END);
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                if (bestPlayers.contains(i)) {
+                    llgs.setPlayerResult(Utils.GameResult.WIN, i);
+                } else {
+                    llgs.setPlayerResult(Utils.GameResult.LOSE, i);
+                }
             }
-            gameState.setPlayerResult(Utils.GameResult.WIN, bestPlayers.get(0));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Ends the current round and awards affection tokens to winners.
+     * @param llgs - current game state
+     * @param nPlayersAlive - number of players still in the game
+     * @param soleWinner - player ID of the winner if only one (otherwise last winner ID)
+     */
+    private HashSet<Integer> roundEnd(LoveLetterGameState llgs, int nPlayersAlive, int soleWinner) {
+        if (nPlayersAlive == 1) {
+            // They win and get 1 affection token
+            llgs.affectionTokens[soleWinner] += 1;
+            return new HashSet<Integer>() {{
+                add(soleWinner);
+            }};
         } else {
-            // else, the player with the higher sum of card values in its discard pile wins
-            // in case two or more players have the same value, they all win
-            bestValue = 0;
-            for (int i = 0; i < gameState.getNPlayers(); i++) {
-                points = 0;
-                if (gameState.getPlayerResults()[i] == Utils.GameResult.WIN)
-                    for (LoveLetterCard card : llgs.playerDiscardCards.get(i).getComponents())
-                        points += card.cardType.getValue();
-                if (points > bestValue) {
-                    bestValue = points;
-                    bestPlayers.clear();
-                    bestPlayers.add(i);
-                } else if (points == bestValue) {
-                    bestPlayers.add(i);
+            // Highest number in hand wins the round
+            HashSet<Integer> bestPlayers = new HashSet<>();
+            int bestValue = 0;
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
+                    int points = llgs.playerHandCards.get(i).peek().cardType.getValue();
+                    if (points > bestValue){
+                        bestValue = points;
+                        bestPlayers.clear();
+                        bestPlayers.add(i);
+                    } else if (points == bestValue) {
+                        bestPlayers.add(i);
+                    }
                 }
             }
 
-            for (int i = 0; i < gameState.getNPlayers(); i++) {
-                gameState.setPlayerResult(Utils.GameResult.LOSE, i);
-            }
-            for (Integer playerID : bestPlayers)
-                gameState.setPlayerResult(Utils.GameResult.WIN, playerID);
-        }
+            if (bestPlayers.size() == 1) {
+                // This is the winner of the round, 1 affection token
+                for (int i: bestPlayers) {
+                    llgs.affectionTokens[i] += 1;
+                    break;
+                }
+                return bestPlayers;
+            } else {
+                // If tie, add numbers in discard pile, highest wins
+                bestValue = 0;
+                HashSet<Integer> bestPlayersByDiscardPoints = new HashSet<>();
+                for (int i: bestPlayers) {
+                    int points = 0;
+                    for (LoveLetterCard card : llgs.playerDiscardCards.get(i).getComponents()) {
+                        points += card.cardType.getValue();
+                    }
+                    if (points > bestValue) {
+                        bestValue = points;
+                        bestPlayersByDiscardPoints.clear();
+                        bestPlayersByDiscardPoints.add(i);
+                    } else if (points == bestValue) {
+                        bestPlayersByDiscardPoints.add(i);
+                    }
+                }
+                // Everyone tied for most points here wins the round
+                for (int i: bestPlayersByDiscardPoints) {
+                    llgs.affectionTokens[i] += 1;
+                }
 
+                return bestPlayersByDiscardPoints;
+            }
+        }
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
         // Print game result
         if (VERBOSE) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));

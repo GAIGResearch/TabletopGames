@@ -191,11 +191,21 @@ public class Game {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
 
+                if (VERBOSE) {
+                    if (action != null) {
+                        System.out.println(action.toString());
+                    } else {
+                        System.out.println("NULL action (player " + activePlayer + ")");
+                    }
+                }
+
                 // Resolve action and game rules
                 forwardModel.next(gameState, action);
             } else {
                 if (firstEnd) {
-                    System.out.println("Ended");
+                    if (VERBOSE) {
+                        System.out.println("Ended");
+                    }
                     terminate();
                     firstEnd = false;
                 }
@@ -203,7 +213,9 @@ public class Game {
         }
 
         if (gui == null) {
-            System.out.println("Ended");
+            if (VERBOSE) {
+                System.out.println("Ended");
+            }
             terminate();
         }
     }
@@ -485,6 +497,6 @@ public class Game {
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 50, null, false, false);
-        runMany(new ArrayList<GameType>() {{add(ExplodingKittens);}}, players, null, 1000, null, false, false);
+        runMany(new ArrayList<GameType>() {{add(LoveLetter);}}, players, null, 1000, null, false, false);
     }
 }

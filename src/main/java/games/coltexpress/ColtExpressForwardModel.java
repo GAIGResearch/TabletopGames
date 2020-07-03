@@ -115,11 +115,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
         ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) gameState.getTurnOrder();
         if (action != null) {
-            if (VERBOSE)
-                System.out.println(action.toString());
-
             action.execute(gameState);
-
         } else {
             if (VERBOSE)
                 System.out.println("Player cannot do anything since he has drawn cards or " +

@@ -221,7 +221,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
         // Give players cards
         int nCardsPlayer = pp.n_cards_per_player.get(state.getNPlayers());
-        playerRoles.shuffle();
+        playerRoles.shuffle(rnd);
         long maxPop = 0;
         int startingPlayer = -1;
 

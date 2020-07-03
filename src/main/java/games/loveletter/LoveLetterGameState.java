@@ -12,7 +12,9 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 public class LoveLetterGameState extends AbstractGameState implements IPrintable {
@@ -34,8 +36,11 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Cards in the reserve
     PartialObservableDeck<LoveLetterCard> reserveCards;
 
-    // if true: player cannot be effected by any card effects
+    // If true: player cannot be effected by any card effects
     boolean[] effectProtection;
+
+    // Affection tokens per player
+    int[] affectionTokens;
 
     public LoveLetterGameState(AbstractGameParameters gameParameters, int nPlayers) {
         super(gameParameters, new LoveLetterTurnOrder(nPlayers));
@@ -54,7 +59,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        // TODO make sure PO
         LoveLetterGameState llgs = new LoveLetterGameState(gameParameters.copy(), getNPlayers());
         llgs.drawPile = drawPile.copy();
         llgs.reserveCards = reserveCards.copy();
@@ -65,6 +69,40 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             llgs.playerDiscardCards.add(playerDiscardCards.get(i).copy());
         }
         llgs.effectProtection = effectProtection.clone();
+        llgs.affectionTokens = affectionTokens.clone();
+
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
+                    // Hide!
+                    llgs.drawPile.add(llgs.playerHandCards.get(i));
+                    llgs.playerHandCards.get(i).clear();
+                }
+            }
+            for (int i = 0; i < llgs.reserveCards.getSize(); i++) {
+                if (!llgs.reserveCards.isComponentVisible(i, playerId)) {
+                    // Hide!
+                    llgs.drawPile.add(llgs.reserveCards.get(i));
+                }
+            }
+            Random r = new Random(llgs.getGameParameters().getGameSeed());
+            llgs.drawPile.shuffle(r);
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
+                    // New random cards
+                    for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
+                        llgs.playerHandCards.get(i).add(llgs.drawPile.draw());
+                    }
+                }
+            }
+            for (int i = 0; i < llgs.reserveCards.getSize(); i++) {
+                if (!llgs.reserveCards.isComponentVisible(i, playerId)) {
+                    // New random card
+                    llgs.reserveCards.setComponent(i, llgs.drawPile.draw());
+                }
+            }
+        }
         return llgs;
     }
 
@@ -75,8 +113,16 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // TODO
-        return null;
+        // Draw pile, other player hands and reserve cards
+        return new ArrayList<Integer>() {{
+            add(drawPile.getComponentID());
+            add(reserveCards.getComponentID());
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (playerHandCards.get(i).getDeckVisibility()[playerId]){
+                    add(playerHandCards.get(i).getComponentID());
+                }
+            }
+        }};
     }
 
     @Override
@@ -87,6 +133,13 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         drawPile = null;
         reserveCards = null;
         effectProtection = new boolean[getNPlayers()];
+    }
+
+    /**
+     * Updates components after round setup.
+     */
+    void updateComponents() {
+        this.addAllComponents();
     }
 
     /**
@@ -137,14 +190,18 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     // Getters, Setters
-    public LoveLetterCard getReserveCard(){return reserveCards.draw();}
+    public LoveLetterCard getReserveCard(){
+        return reserveCards.draw();
+    }
     public boolean isNotProtected(int playerID){
         return !effectProtection[playerID];
     }
     public void setProtection(int playerID, boolean protection){
         effectProtection[playerID] = protection;
     }
-    public int getRemainingCards(){return drawPile.getComponents().size();}
+    public int getRemainingCards(){
+        return drawPile.getSize();
+    }
     public List<PartialObservableDeck<LoveLetterCard>> getPlayerHandCards() {
         return playerHandCards;
     }
@@ -159,8 +216,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * Prints the game state.
      */
     public void printToConsole() {
-        System.out.println("Love Letter Game-State");
         System.out.println("======================");
+        System.out.println("Love Letter Game-State");
+        System.out.println("----------------------");
 
         for (int i = 0; i < playerHandCards.size(); i++){
             if (getCurrentPlayer() == i)
@@ -170,22 +228,19 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             System.out.print(playerHandCards.get(i).toString(getCurrentPlayer()));
             System.out.print(";\t Discarded: ");
             System.out.print(playerDiscardCards.get(i));
+
+            System.out.print(";\t Protected: ");
+            System.out.print(effectProtection[i]);
+            System.out.print(";\t Affection: ");
+            System.out.print(affectionTokens[i]);
+            System.out.print(";\t Status: ");
+            System.out.println(playerResults[i]);
         }
 
-        System.out.print(";\t Protected: ");
-        System.out.print(effectProtection[getCurrentPlayer()]);
-        System.out.print(";\t Status: ");
-        System.out.println(playerResults[getCurrentPlayer()]);
-
-        System.out.print("DrawPile" + ":");
-        System.out.print(drawPile);
-        System.out.println();
-
-        System.out.print("ReserveCards" + ":");
-        System.out.println(reserveCards.toString(getCurrentPlayer()));
-        System.out.println();
+        System.out.println("\nDrawPile" + ":" + drawPile.toString(getCurrentPlayer()));
+        System.out.println("ReserveCards" + ":" + reserveCards.toString(getCurrentPlayer()));
 
         System.out.println("Current GamePhase: " + gamePhase);
-        System.out.println();
+        System.out.println("======================");
     }
 }
