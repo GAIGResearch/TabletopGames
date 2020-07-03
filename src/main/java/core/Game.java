@@ -339,8 +339,12 @@ public class Game {
 
         // Save win rate statistics over all games
         StatSummary[] overall = new StatSummary[nPlayers];
+        String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new StatSummary("Overall Player " + i);
+            String[] split = players.get(i).getClass().toString().split("\\.");
+            String agentName = split[split.length-1] + "-" + i;
+            overall[i] = new StatSummary("Overall " + agentName);
+            agentNames[i] = agentName;
         }
 
         // For each game...
@@ -349,7 +353,7 @@ public class Game {
             // Save win rate statistics over all repetitions of this game
             StatSummary[] statSummaries = new StatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + i + "}");
+                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -369,6 +373,7 @@ public class Game {
             }
 
             if (game != null) {
+                System.out.println("---------------------");
                 for (int i = 0; i < nPlayers; i++) {
                     // Print statistics for this game
                     if (detailedStatistics) {
@@ -384,7 +389,7 @@ public class Game {
         }
 
         // Print final statistics
-        System.out.println("\n---------------------\n");
+        System.out.println("\n=====================\n");
         for (int i = 0; i < nPlayers; i++) {
             // Print statistics for this game
             if (detailedStatistics) {
