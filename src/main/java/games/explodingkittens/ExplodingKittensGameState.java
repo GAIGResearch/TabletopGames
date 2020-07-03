@@ -13,7 +13,10 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
+
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 
@@ -26,7 +29,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     // Cards in each player's hand, index corresponds to player ID
-    List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
+    List<Deck<ExplodingKittenCard>> playerHandCards;
     // Cards in the draw pile
     PartialObservableDeck<ExplodingKittenCard> drawPile;
     // Cards in the discard pile
@@ -52,9 +55,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        // TODO: partial observability
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
-        ekgs.drawPile = drawPile.copy();
         ekgs.discardPile = discardPile.copy();
         ekgs.playerGettingAFavor = playerGettingAFavor;
         ekgs.actionStack = new Stack<>();
@@ -62,8 +63,29 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.actionStack.add(a.copy());
         }
         ekgs.playerHandCards = new ArrayList<>();
-        for (PartialObservableDeck<ExplodingKittenCard> d: playerHandCards) {
+        for (Deck<ExplodingKittenCard> d: playerHandCards) {
             ekgs.playerHandCards.add(d.copy());
+        }
+        ekgs.drawPile = drawPile.copy();
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // Other player hands + draw deck are hidden, combine in draw pile and shuffle
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    ekgs.drawPile.add(ekgs.playerHandCards.get(i));
+                    ekgs.playerHandCards.get(i).clear();
+                }
+            }
+            Random r = new Random(ekgs.gameParameters.getGameSeed());
+
+            // Shuffles only hidden cards, if player knows what's on top those will stay in place
+            ekgs.drawPile.shuffleVisible(r, playerId, false);
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
+                        ekgs.playerHandCards.get(i).add(ekgs.drawPile.draw());
+                    }
+                }
+            }
         }
         return ekgs;
     }
@@ -71,6 +93,18 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     @Override
     protected double _getScore(int playerId) {
         return new ExplodingKittensHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<Integer>() {{
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    add(playerHandCards.get(i).getComponentID());
+                }
+            }
+            add(drawPile.getComponentID());
+        }};
     }
 
     @Override
@@ -95,6 +129,8 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
         }
+        ((ExplodingKittenTurnOrder)getTurnOrder()).endPlayerTurnStep(this);
+
     }
 
     // Getters, setters
@@ -113,7 +149,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     public Stack<AbstractAction> getActionStack() {
         return actionStack;
     }
-    public List<PartialObservableDeck<ExplodingKittenCard>> getPlayerHandCards() {
+    public List<Deck<ExplodingKittenCard>> getPlayerHandCards() {
         return playerHandCards;
     }
 
@@ -124,7 +160,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     protected void setDrawPile(PartialObservableDeck<ExplodingKittenCard> drawPile) {
         this.drawPile = drawPile;
     }
-    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards) {
+    protected void setPlayerHandCards(List<Deck<ExplodingKittenCard>> playerHandCards) {
         this.playerHandCards = playerHandCards;
     }
     protected void setActionStack(Stack<AbstractAction> actionStack) {

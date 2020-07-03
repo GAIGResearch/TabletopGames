@@ -40,13 +40,13 @@ public class VirusForwardModel extends AbstractForwardModel {
         }
 
         // Create the draw deck with all the cards
-        vgs.drawDeck = new Deck<>("DrawDeck");
+        vgs.drawDeck = new Deck<>("DrawDeck", -1);
         createCards(vgs);
 
         vgs.drawDeck.shuffle(new Random(vgs.getGameParameters().getGameSeed()));
 
         // Create the discard deck, at the beginning it is empty
-        vgs.discardDeck = new Deck<>("DiscardDeck");
+        vgs.discardDeck = new Deck<>("DiscardDeck", -1);
 
         // Draw initial cards to each player
         vgs.playerDecks = new ArrayList<>(vgs.getNPlayers());
@@ -109,7 +109,7 @@ public class VirusForwardModel extends AbstractForwardModel {
     private void drawCardsToPlayers(VirusGameState vgs) {
         for (int i = 0; i < vgs.getNPlayers(); i++) {
             String playerDeckName = "Player" + i + "Deck";
-            vgs.playerDecks.add(new Deck<>(playerDeckName));
+            vgs.playerDecks.add(new Deck<>(playerDeckName, i));
             for (int j = 0; j < 3; j++) {
                 vgs.playerDecks.get(i).add(vgs.drawDeck.draw());
             }

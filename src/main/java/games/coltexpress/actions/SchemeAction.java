@@ -7,6 +7,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.coltexpress.cards.ColtExpressCard;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -28,7 +29,11 @@ public class SchemeAction extends DrawCard implements IPrintable {
         ColtExpressCard card = (ColtExpressCard) getCard(gs);
 
         if (hidden){
-            actionList.setVisibilityOfComponent(actionList.getSize()-1, card.playerID, true);
+            actionList.setVisibilityOfComponent(0, card.playerID, true);
+        } else {
+            boolean[] allVisible = new boolean[gs.getNPlayers()];
+            Arrays.fill(allVisible, true);
+            actionList.setVisibilityOfComponent(0, allVisible);
         }
 
         return true;

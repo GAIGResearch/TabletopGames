@@ -101,7 +101,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         turnCounter++;
-        turnOwner = nextPlayer(gameState);
+        moveToNextPlayer(gameState, nextPlayer(gameState));
 
         if (VERBOSE)
             System.out.println("Next Player: " + turnOwner);
@@ -144,23 +144,14 @@ public class ColtExpressTurnOrder extends TurnOrder {
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(Utils.GameResult.GAME_END);
         else {
             turnCounter = 0;
-            turnOwner = 0;
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 
     public void endRoundCard(ColtExpressGameState gameState){
         gameState.getRounds().get(currentRoundCardIndex).endRoundCardEvent(gameState);
         currentRoundCardIndex++;
-        if (currentRoundCardIndex < gameState.getRounds().size()) {
+        if (currentRoundCardIndex < gameState.getRounds().getSize()) {
             firstPlayerOfRound = (firstPlayerOfRound + 1) % nPlayers;
             turnCounter = 0;
             turnOwner = firstPlayerOfRound;

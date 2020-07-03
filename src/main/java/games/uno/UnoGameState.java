@@ -9,7 +9,9 @@ import games.uno.cards.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
 public class UnoGameState extends AbstractGameState implements IPrintable {
@@ -79,6 +81,11 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         return currentColor;
     }
 
+    /**
+     * Calculates points for all players, as sum of values of cards in the hands of all other players in the game.
+     * @param playerID - ID of player to calculate points for
+     * @return - integer, point total
+     */
     public int calculatePlayerPoints(int playerID) {
         UnoGameParameters ugp = (UnoGameParameters) getGameParameters();
         int nPoints = 0;
@@ -111,13 +118,31 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        // TODO: partial observability
         UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
-        for (Deck<UnoCard> d: playerDecks) {
+
+        for (Deck<UnoCard> d : playerDecks) {
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
+
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // Other player cards and the draw deck are unknown.
+            // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
+            Random r = new Random(copy.gameParameters.getGameSeed());
+            for (Deck<UnoCard> d: copy.playerDecks) {
+                copy.drawDeck.add(d);
+            }
+            copy.drawDeck.shuffle(r);
+            for (Deck<UnoCard> d: copy.playerDecks) {
+                int nCards = d.getSize();
+                d.clear();
+                for (int i = 0; i < nCards; i++) {
+                    d.add(copy.drawDeck.draw());
+                }
+            }
+        }
+
         copy.discardDeck = discardDeck.copy();
         copy.currentCard = (UnoCard) currentCard.copy();
         copy.currentColor = currentColor;
@@ -128,6 +153,18 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     @Override
     protected double _getScore(int playerId) {
         return new UnoHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<Integer>() {{
+            add(drawDeck.getComponentID());
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    add(playerDecks.get(i).getComponentID());
+                }
+            }
+        }};
     }
 
     @Override

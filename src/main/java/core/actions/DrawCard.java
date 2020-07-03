@@ -95,14 +95,12 @@ public class DrawCard extends AbstractAction {
         return deckFrom == drawCard.deckFrom &&
                 deckTo == drawCard.deckTo &&
                 fromIndex == drawCard.fromIndex &&
-                toIndex == drawCard.toIndex &&
-                cardId == drawCard.cardId &&
-                executed == drawCard.executed;
+                toIndex == drawCard.toIndex;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deckFrom, deckTo, fromIndex, toIndex, cardId, executed);
+        return Objects.hash(deckFrom, deckTo, fromIndex, toIndex);
     }
 
     @Override

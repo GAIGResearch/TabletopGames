@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class LoveLetterParameters extends AbstractGameParameters {
 
-    // set the occurrence count for each card
+    // Occurrence count for each card
     HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{
         put(LoveLetterCard.CardType.Princess, 1);
         put(LoveLetterCard.CardType.Countess, 1);
@@ -22,8 +22,12 @@ public class LoveLetterParameters extends AbstractGameParameters {
         put(LoveLetterCard.CardType.Guard, 5);
     }};
 
-    // set how many cards each player draws
+    // How many cards each player draws
     public int nCardsPerPlayer = 1;
+    // How many cards are put on the side (visible) in minimum player games
+    public int nCardsVisibleReserve = 3;
+    // Affection tokens required to win, maps to number of players (2, 3, 4+)
+    public int[] nTokensWin = new int[]{7, 5, 4};
 
     public LoveLetterParameters(long seed) {
         super(seed);

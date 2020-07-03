@@ -40,12 +40,15 @@ public class CollectMoneyAction extends DrawCard {
                 lootOfCorrectType.add(available);
         }
 
-        if (lootOfCorrectType.size() == 0 && VERBOSE){
-            System.out.println();
+        if (lootOfCorrectType.size() == 0){
+            if (VERBOSE) {
+                System.out.println();
+            }
+        } else {
+            ColtExpressCard card = (ColtExpressCard) gameState.getComponentById(cardId);
+            ((ColtExpressGameState) gameState).addLoot(card.playerID,
+                    lootOfCorrectType.get(new Random().nextInt(lootOfCorrectType.size())));
         }
-        ColtExpressCard card = (ColtExpressCard) gameState.getComponentById(cardId);
-        ((ColtExpressGameState) gameState).addLoot(card.playerID,
-                lootOfCorrectType.get(new Random().nextInt(lootOfCorrectType.size())));
 
         return true;
     }

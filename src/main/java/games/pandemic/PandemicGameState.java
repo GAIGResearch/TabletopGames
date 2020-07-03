@@ -105,6 +105,14 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<Integer>() {{
+           add(getComponent(playerDeckHash).getComponentID());
+           add(getComponent(infectionHash).getComponentID());
+        }};
+    }
+
+    @Override
     protected void _reset() {
         areas = null;
         tempDeck = null;
@@ -197,13 +205,14 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
                 a = new Area(key, "Game area");
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
-                    if (PARTIAL_OBSERVABLE && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                    if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                        Random r = new Random(gs.getGameParameters().getGameSeed());
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled
-                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).n_forecast_cards, hiddenDeck.getSize());
+                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).n_forecast_cards, hiddenDeck.getSize(), r);
                         } else {
-                            hiddenDeck.shuffle();  // We know what cards are in there, a simple shuffle is enough
+                            hiddenDeck.shuffle(r);  // We know what cards are in there, a simple shuffle is enough
                         }
                         a.putComponent(e.getKey(), hiddenDeck);
                     } else {

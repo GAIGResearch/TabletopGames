@@ -7,7 +7,6 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittenCard;
-import core.CoreConstants;
 import utilities.Utils;
 
 import java.util.*;
@@ -44,14 +43,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         ekgs.getDrawPile().shuffle(rnd);
 
         // Set up player hands
-        List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
+        List<Deck<ExplodingKittenCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
         for (int i = 0; i < firstState.getNPlayers(); i++) {
-            // Set up visibility
-            boolean[] visibility = new boolean[firstState.getNPlayers()];
-            Arrays.fill(visibility, !CoreConstants.PARTIAL_OBSERVABLE);
-            visibility[i] = true;
-
-            PartialObservableDeck<ExplodingKittenCard> playerCards = new PartialObservableDeck<>("Player Cards", visibility);
+            Deck<ExplodingKittenCard> playerCards = new Deck<>("Player Cards");
             playerHandCards.add(playerCards);
 
             // Add defuse card
@@ -90,60 +84,52 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
-        if (VERBOSE) {
-            System.out.println(action.toString());
-        }
-
         ExplodingKittenTurnOrder ekTurnOrder = (ExplodingKittenTurnOrder) gameState.getTurnOrder();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         Stack<AbstractAction> actionStack = ekgs.getActionStack();
 
-        if (actionStack.size() == 0){
-            if (action instanceof IsNopeable) {
-                actionStack.add(action);
-                ekTurnOrder.registerNopeableActionByPlayer(ekgs);
-            } else {
-                action.execute(gameState);
-            }
-        } else {
-            // action is either nope or pass
-            if (action instanceof NopeAction) {
-                actionStack.add(action);
-                action.execute(gameState);
-                ekTurnOrder.registerNopeableActionByPlayer(ekgs);
-            } else {
-                ekTurnOrder.endPlayerTurnStep(gameState);
+        if (action instanceof IsNopeable) {
+            actionStack.add(action);
+            ekTurnOrder.registerNopeableActionByPlayer(ekgs);
+        } else if (action instanceof NopeAction) {
+            actionStack.add(action);
+            action.execute(gameState);
+            ekTurnOrder.registerNopeableActionByPlayer(ekgs);
+        } else if (action instanceof PassAction) {
 
-                if (ekTurnOrder.reactionsFinished()){
-                    // apply stack
-                    if (actionStack.size()%2 == 0){
-                        while (actionStack.size() > 1) {
-                            actionStack.pop();
-                        }
-                        //Action was successfully noped
-                        ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder); // TODO: this just executes super action (again), why?
-                        if (VERBOSE) {
-                            System.out.println("Action was successfully noped");
-                        }
-                    } else {
-                        if (actionStack.size() > 2 && VERBOSE) {
-                            System.out.println("All nopes were noped");
-                        }
+            ekTurnOrder.endPlayerTurnStep(gameState);
 
-                        while (actionStack.size() > 1) {
-                            actionStack.pop();
-                        }
-
-                        //Action can be played
-                        AbstractAction stackedAction = actionStack.get(0);
-                        stackedAction.execute(gameState);
+            if (ekTurnOrder.reactionsFinished()) {
+                // apply stack
+                if (actionStack.size()%2 == 0){
+                    while (actionStack.size() > 1) {
+                        actionStack.pop();
                     }
-                    actionStack.clear();
-                    if (ekgs.getGamePhase() == Nope) {
-                        ekgs.setMainGamePhase();
+                    //Action was successfully noped
+                    ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder);
+                    if (VERBOSE) {
+                        System.out.println("Action was successfully noped");
                     }
+                } else {
+                    if (actionStack.size() > 2 && VERBOSE) {
+                        System.out.println("All nopes were noped");
+                    }
+
+                    while (actionStack.size() > 1) {
+                        actionStack.pop();
+                    }
+
+                    //Action can be played
+                    AbstractAction stackedAction = actionStack.get(0);
+                    stackedAction.execute(gameState);
+                }
+                actionStack.clear();
+                if (ekgs.getGamePhase() == Nope) {
+                    ekgs.setMainGamePhase();
                 }
             }
+        } else {
+            action.execute(gameState);
         }
     }
 
@@ -155,7 +141,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void endGame(AbstractGameState gameState) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
         for (int i = 0; i < gameState.getNPlayers(); i++){
             if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING)
                 gameState.setPlayerResult(Utils.GameResult.WIN, i);

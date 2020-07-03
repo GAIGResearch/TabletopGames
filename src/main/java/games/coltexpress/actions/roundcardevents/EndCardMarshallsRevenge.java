@@ -2,6 +2,7 @@ package games.coltexpress.actions.roundcardevents;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressTypes;
@@ -21,7 +22,7 @@ public class EndCardMarshallsRevenge extends AbstractAction {
         for (Compartment c : train) {
             if (c.containsMarshal) {
                 for (Integer playerID : c.playersOnTopOfCompartment) {
-                    PartialObservableDeck<Loot> playerLoot = gameState.getLoot(playerID);
+                    Deck<Loot> playerLoot = gameState.getLoot(playerID);
                     Loot lestValueablePurse = null;
                     for (Loot loot : playerLoot.getComponents()) {
                         if (loot.getLootType() == ColtExpressTypes.LootType.Purse &&
