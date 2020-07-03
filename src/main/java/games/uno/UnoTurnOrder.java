@@ -44,16 +44,7 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
         turnCounter++;
-        turnOwner = nextPlayer(gameState);
-        int n = 0;
-        while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
-            turnOwner = nextPlayer(gameState);
-            n++;
-            if (n >= nPlayers) {
-                gameState.setGameStatus(GAME_END);
-                break;
-            }
-        }
+        moveToNextPlayer(gameState, nextPlayer(gameState));
     }
 
     @Override

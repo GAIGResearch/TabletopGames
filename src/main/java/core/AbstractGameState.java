@@ -171,6 +171,14 @@ public abstract class AbstractGameState {
     protected abstract double _getScore(int playerId);
 
     /**
+     * Provide a list of component IDs which are hidden in partially observable copies of games.
+     * Depending on the game, in the copies these might be completely missing, or just randomized.
+     * @param playerId - ID of player observing the state.
+     * @return - list of component IDs unobservable by the given player.
+     */
+    protected abstract ArrayList<Integer> _getUnknownComponentsIds(int playerId);
+
+    /**
      * Resets variables initialised for this game state.
      */
     protected abstract void _reset();
@@ -187,7 +195,7 @@ public abstract class AbstractGameState {
     }
 
     /**
-     * Provide a simple numerical assessment of the current game state, the bigger the better.
+     * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * @param playerId - player observing the state.
      * @return - double, score of current state.
@@ -196,4 +204,13 @@ public abstract class AbstractGameState {
         return _getScore(playerId);
     }
 
+    /**
+     * Retrieves a list of component IDs which are hidden in partially observable copies of games.
+     * Depending on the game, in the copies these might be completely missing, or just randomized.
+     * @param playerId - ID of player observing the state.
+     * @return - list of component IDs unobservable by the given player.
+     */
+    public final ArrayList<Integer> getUnknownComponentsIds(int playerId) {
+        return _getUnknownComponentsIds(playerId);
+    }
 }

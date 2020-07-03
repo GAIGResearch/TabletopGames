@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
@@ -52,7 +51,7 @@ public class PunchAction  extends DrawCard {
         //move player
         Set<Integer> sourceArea;
         Set<Integer> targetArea;
-        PartialObservableDeck<Loot> targetLootArea;
+        Deck<Loot> targetLootArea;
         if (source.playersOnTopOfCompartment.contains(opponentID)){
             sourceArea = source.playersOnTopOfCompartment;
             targetLootArea = source.lootOnTop;

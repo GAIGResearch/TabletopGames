@@ -7,7 +7,6 @@ import utilities.Utils;
 
 import java.util.LinkedList;
 
-import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class PandemicTurnOrder extends ReactiveTurnOrder {
@@ -50,16 +49,7 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnStep = 0;
-            turnOwner = nextPlayer(gameState);
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 
@@ -76,16 +66,7 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         else {
             turnStep = 0;
             turnCounter = 0;
-            turnOwner = 0;
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 

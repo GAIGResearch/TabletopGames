@@ -115,6 +115,7 @@ public class ColtExpressTypes {
     public enum LootType {
         Purse,
         Jewel,
-        Strongbox
+        Strongbox,
+        Unknown
     }
 }

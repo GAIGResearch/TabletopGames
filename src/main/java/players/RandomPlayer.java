@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 
+import java.util.List;
 import java.util.Random;
 
 public class RandomPlayer extends AbstractPlayer {
@@ -26,6 +27,7 @@ public class RandomPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState observation) {
         int randomAction = rnd.nextInt(observation.getActions().size());
-        return observation.getActions().get(randomAction);
+        List<AbstractAction> actions = observation.getActions();
+        return actions.get(randomAction);
     }
 }

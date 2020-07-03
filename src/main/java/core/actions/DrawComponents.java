@@ -65,18 +65,14 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DrawComponents<?> that = (DrawComponents<?>) o;
-        return executed == that.executed &&
-                deckFrom == that.deckFrom &&
+        return deckFrom == that.deckFrom &&
                 deckTo == that.deckTo &&
-                nComponents == that.nComponents &&
-                Arrays.equals(componentIds, that.componentIds);
+                nComponents == that.nComponents;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(executed, deckFrom, deckTo, nComponents);
-        result = 31 * result + Arrays.hashCode(componentIds);
-        return result;
+        return Objects.hash(deckFrom, deckTo, nComponents);
     }
 
     @Override

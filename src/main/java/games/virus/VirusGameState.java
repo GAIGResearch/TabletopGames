@@ -48,6 +48,12 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        // TODO:
+        return null;
+    }
+
+    @Override
     protected void _reset() {
         playerBodies = new ArrayList<>();
         playerDecks = new ArrayList<>();

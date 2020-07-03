@@ -191,11 +191,21 @@ public class Game {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
 
+                if (VERBOSE) {
+                    if (action != null) {
+                        System.out.println(action.toString());
+                    } else {
+                        System.out.println("NULL action (player " + activePlayer + ")");
+                    }
+                }
+
                 // Resolve action and game rules
                 forwardModel.next(gameState, action);
             } else {
                 if (firstEnd) {
-                    System.out.println("Ended");
+                    if (VERBOSE) {
+                        System.out.println("Ended");
+                    }
                     terminate();
                     firstEnd = false;
                 }
@@ -203,6 +213,9 @@ public class Game {
         }
 
         if (gui == null) {
+            if (VERBOSE) {
+                System.out.println("Ended");
+            }
             terminate();
         }
     }
@@ -326,8 +339,12 @@ public class Game {
 
         // Save win rate statistics over all games
         StatSummary[] overall = new StatSummary[nPlayers];
+        String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new StatSummary("Overall Player " + i);
+            String[] split = players.get(i).getClass().toString().split("\\.");
+            String agentName = split[split.length-1] + "-" + i;
+            overall[i] = new StatSummary("Overall " + agentName);
+            agentNames[i] = agentName;
         }
 
         // For each game...
@@ -336,7 +353,7 @@ public class Game {
             // Save win rate statistics over all repetitions of this game
             StatSummary[] statSummaries = new StatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + i + "}");
+                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -356,12 +373,13 @@ public class Game {
             }
 
             if (game != null) {
+                System.out.println("---------------------");
                 for (int i = 0; i < nPlayers; i++) {
                     // Print statistics for this game
                     if (detailedStatistics) {
                         System.out.println(statSummaries[i].toString());
                     } else {
-                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean());
+                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean() + " (n=" + statSummaries[i].n() + ")");
                     }
 
                     // Record in overall statistics
@@ -371,7 +389,7 @@ public class Game {
         }
 
         // Print final statistics
-        System.out.println("\n---------------------\n");
+        System.out.println("\n=====================\n");
         for (int i = 0; i < nPlayers; i++) {
             // Print statistics for this game
             if (detailedStatistics) {
@@ -484,6 +502,6 @@ public class Game {
         games.remove(Pandemic);
         games.remove(TicTacToe);
         runMany(games, players, null, 50, null, false, false);
-//        runMany(new ArrayList<GameType>() {{add(Virus);}}, players, null, 50, null, false, false);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }
