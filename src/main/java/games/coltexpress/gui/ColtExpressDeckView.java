@@ -1,9 +1,11 @@
 package games.coltexpress.gui;
 
+import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
+import games.coltexpress.components.Loot;
 import gui.views.CardView;
 import gui.views.ComponentView;
 import utilities.ImageIO;
@@ -15,7 +17,7 @@ import java.util.HashMap;
 
 import static games.coltexpress.gui.ColtExpressGUI.*;
 
-public class ColtExpressDeckView extends ComponentView {
+public class ColtExpressDeckView<T extends Component> extends ComponentView {
     protected boolean front;
     Image backOfCard;
     String dataPath;
@@ -27,7 +29,7 @@ public class ColtExpressDeckView extends ComponentView {
 
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
 
-    public ColtExpressDeckView(Deck<ColtExpressCard> d, boolean visible, String dataPath,
+    public ColtExpressDeckView(Deck<T> d, boolean visible, String dataPath,
                                HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         super(d, playerAreaWidth, ceCardHeight);
         this.front = visible;
@@ -56,7 +58,7 @@ public class ColtExpressDeckView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g);
+        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, height));
     }
 
     public void setFront(boolean visible) {
@@ -67,30 +69,42 @@ public class ColtExpressDeckView extends ComponentView {
         front = !front;
     }
 
-    public void drawDeck(Graphics2D g) {
+    public void drawDeck(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
-        Deck<ColtExpressCard> deck = (Deck<ColtExpressCard>) component;
+        Deck<T> deck = (Deck<T>) component;
 
         if (deck != null && deck.getSize() > 0) {
             // Draw cards, 0 index on top
-            int offset = Math.max((width-ceCardWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
             for (int i = deck.getSize()-1; i >= 0; i--) {
-                ColtExpressCard card = deck.get(i);
-                Rectangle r = new Rectangle(offset * i, 0, ceCardWidth, ceCardHeight);
-                rects[i] = r;
-                drawCard(g, card, r, (deck instanceof PartialObservableDeck?
-                        (activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
+                if (deck.get(0) instanceof ColtExpressCard) {
+                    int offset = (rect.width-ceCardWidth) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, ceCardWidth, ceCardHeight);
+                    rects[i] = r;
+                    drawCard(g, (ColtExpressCard) deck.get(i), r, deck instanceof PartialObservableDeck ?
+                            activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(i, activePlayer) : front);
+                } else  {
+                    int offset = (rect.width-defaultItemSize) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, defaultItemSize, defaultItemSize);
+                    rects[i] = r;
+                    drawLoot(g, (Loot) deck.get(i), r, front);
+                }
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
-                ColtExpressCard card = deck.get(cardHighlight);
-                Rectangle r = new Rectangle(offset * cardHighlight, 0, ceCardWidth, ceCardHeight);
-                drawCard(g, card, r, (deck instanceof PartialObservableDeck?
-                        (activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
+                if (deck.get(0) instanceof ColtExpressCard) {
+                    int offset = (rect.width-ceCardWidth) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, ceCardWidth, ceCardHeight);
+                    drawCard(g, (ColtExpressCard) deck.get(cardHighlight), r, (deck instanceof PartialObservableDeck ?
+                            (activePlayer != -1 && cardHighlight != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
+                } else  {
+                    int offset = (rect.width-defaultItemSize) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, defaultItemSize, defaultItemSize);
+                    drawLoot(g, (Loot) deck.get(cardHighlight), r, front);
+                }
             }
             g.setColor(Color.black);
-            g.drawString(""+deck.getSize(), 10, ceCardHeight - size);
+            g.drawString(""+deck.getSize(), rect.x + 10, rect.y + rect.height - size);
         }
     }
 
@@ -98,12 +112,19 @@ public class ColtExpressDeckView extends ComponentView {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + "characters/deck/" + card.cardType.name() + ".png");
         CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, visible);
         // Draw border around card in player owner's color
-        Stroke s = g.getStroke();
-        int width = 6;
-        int arc = 20;
-        g.setStroke(new BasicStroke(width));
-        g.setColor(characters.get(card.playerID).getColor());
-        g.drawRoundRect(r.x + width/2, r.y + width/2, r.width - width, r.height - width, arc, arc);
+        if (visible) {
+            Stroke s = g.getStroke();
+            int width = 6;
+            int arc = 20;
+            g.setStroke(new BasicStroke(width));
+            g.setColor(characters.get(card.playerID).getColor());
+            g.drawRoundRect(r.x + width / 2, r.y + width / 2, r.width - width, r.height - width, arc, arc);
+        }
+    }
+
+    private void drawLoot(Graphics2D g, Loot loot, Rectangle r, boolean visible) {
+        Image lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_behind.png");
+        g.drawImage(lootFace, r.x, r.y, r.width, r.height, null);
     }
 
     @Override

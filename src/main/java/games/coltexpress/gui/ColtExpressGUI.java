@@ -17,12 +17,14 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class ColtExpressGUI extends AbstractGUI {
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 130;
-    final static int ceCardWidth = 90;
-    final static int ceCardHeight = 115;
+    final static int playerAreaWidthScroll = 300;
+    final static int playerAreaHeight = 320;
+    final static int playerAreaHeightScroll = 150;
+    final static int ceCardWidth = 50;
+    final static int ceCardHeight = 65;
 
     int width, height;
-    ColtExpressPlayerView[] playerHands; // TODO: add player decks, number of bullets left, player loot
+    ColtExpressPlayerView[] playerHands;
     ColtExpressDeckView plannedActions;
     // TODO: add train view + rounds deck
 
@@ -37,7 +39,7 @@ public class ColtExpressGUI extends AbstractGUI {
             activePlayer = gameState.getCurrentPlayer();
             int nPlayers = gameState.getNPlayers();
             int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-            double nVertAreas = 3.5;
+            double nVertAreas = 3;
             this.width = playerAreaWidth * nHorizAreas;
             this.height = (int)(playerAreaHeight * nVertAreas);
 
@@ -54,15 +56,16 @@ public class ColtExpressGUI extends AbstractGUI {
             JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
             int next = 0;
             for (int i = 0; i < nPlayers; i++) {
-                ColtExpressPlayerView playerHand = new ColtExpressPlayerView(cegs.getPlayerDecks().get(i), i,
-                        cep.getDataPath(), cegs.getPlayerCharacters());
+                ColtExpressPlayerView playerHand = new ColtExpressPlayerView(i, cep.getDataPath(), cegs.getPlayerCharacters());
                 sides[next].add(playerHand);
                 sides[next].setLayout(new GridBagLayout());
                 next = (next+1) % (locations.length);
                 playerHands[i] = playerHand;
             }
             for (int i = 0; i < locations.length; i++) {
-                mainGameArea.add(sides[i], locations[i]);
+                JScrollPane jsp = new JScrollPane(sides[i]);
+                jsp.setPreferredSize(new Dimension(playerAreaWidthScroll, playerAreaHeightScroll));
+                mainGameArea.add(jsp, locations[i]);
             }
 
             // Discard and draw piles go in the center
@@ -93,20 +96,12 @@ public class ColtExpressGUI extends AbstractGUI {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 activePlayer = gameState.getCurrentPlayer();
-                playerHands[activePlayer].setCardHighlight(-1);
             }
 
             // Update decks and visibility
             ColtExpressGameState cegs = (ColtExpressGameState)gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update((ColtExpressGameState) gameState);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
-                        || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-                    playerHands[i].setFront(true);
-                } else {
-                    playerHands[i].setFront(false);
-                }
+                playerHands[i].update((ColtExpressGameState) gameState, humanID);
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
             int activePlayer = (ALWAYS_DISPLAY_CURRENT_PLAYER || ALWAYS_DISPLAY_FULL_OBSERVABLE? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1);

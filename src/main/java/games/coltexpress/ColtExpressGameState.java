@@ -266,6 +266,18 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return playerCharacters;
     }
 
+    public List<Deck<ColtExpressCard>> getPlayerHandCards() {
+        return playerHandCards;
+    }
+
+    public int[] getBulletsLeft() {
+        return bulletsLeft;
+    }
+
+    public List<Deck<Loot>> getPlayerLoot() {
+        return playerLoot;
+    }
+
     @Override
     public void printToConsole() {
         System.out.println("Colt Express Game-State");
