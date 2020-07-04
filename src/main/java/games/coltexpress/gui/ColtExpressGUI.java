@@ -5,12 +5,14 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.components.Compartment;
 import players.ActionController;
 import players.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
+import java.util.List;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
@@ -22,11 +24,13 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int playerAreaHeightScroll = 150;
     final static int ceCardWidth = 50;
     final static int ceCardHeight = 65;
+    final static int trainCarWidth = 90;
+    final static int trainCarHeight = 70;
 
     int width, height;
     ColtExpressPlayerView[] playerHands;
     ColtExpressDeckView plannedActions;
-    // TODO: add train view + rounds deck
+    ColtExpressTrainView trainView;
 
     int activePlayer = -1;
     int humanID;
@@ -47,11 +51,11 @@ public class ColtExpressGUI extends AbstractGUI {
             ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
 
             // Create main game area that will hold all game views
-            playerHands = new ColtExpressPlayerView[nPlayers];
             JPanel mainGameArea = new JPanel();
             mainGameArea.setLayout(new BorderLayout());
 
             // Player hands go on the edges
+            playerHands = new ColtExpressPlayerView[nPlayers];
             String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
             JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
             int next = 0;
@@ -68,10 +72,13 @@ public class ColtExpressGUI extends AbstractGUI {
                 mainGameArea.add(jsp, locations[i]);
             }
 
-            // Discard and draw piles go in the center
+            // Planned actions + train + rounds go in the center
             JPanel centerArea = new JPanel();
             centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
+            List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
+            trainView = new ColtExpressTrainView(train, trainCarWidth*train.size(), trainCarHeight+ceCardHeight, cep.getDataPath());
             plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
+            centerArea.add(trainView);
             centerArea.add(plannedActions);
             JPanel jp = new JPanel();
             jp.setLayout(new GridBagLayout());
