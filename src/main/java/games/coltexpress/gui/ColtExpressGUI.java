@@ -22,8 +22,9 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int ceCardHeight = 115;
 
     int width, height;
-    ColtExpressPlayerView[] playerHands;
+    ColtExpressPlayerView[] playerHands; // TODO: add player decks, number of bullets left, player loot
     ColtExpressDeckView plannedActions;
+    // TODO: add train view + rounds deck
 
     int activePlayer = -1;
     int humanID;
@@ -108,6 +109,8 @@ public class ColtExpressGUI extends AbstractGUI {
                 }
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
+            int activePlayer = (ALWAYS_DISPLAY_CURRENT_PLAYER || ALWAYS_DISPLAY_FULL_OBSERVABLE? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1);
+            plannedActions.informActivePlayer(player.getPlayerID());
 
             // Update actions
             if (player instanceof HumanGUIPlayer) {

@@ -1,6 +1,7 @@
 package games.coltexpress.gui;
 
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
 import gui.views.CardView;
@@ -22,6 +23,7 @@ public class ColtExpressDeckView extends ComponentView {
 
     Rectangle[] rects;
     int cardHighlight = -1;
+    int activePlayer = -1;
 
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
 
@@ -77,22 +79,24 @@ public class ColtExpressDeckView extends ComponentView {
                 ColtExpressCard card = deck.get(i);
                 Rectangle r = new Rectangle(offset * i, 0, ceCardWidth, ceCardHeight);
                 rects[i] = r;
-                drawCard(g, card, r);
+                drawCard(g, card, r, (deck instanceof PartialObservableDeck?
+                        (activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
                 ColtExpressCard card = deck.get(cardHighlight);
                 Rectangle r = new Rectangle(offset * cardHighlight, 0, ceCardWidth, ceCardHeight);
-                drawCard(g, card, r);
+                drawCard(g, card, r, (deck instanceof PartialObservableDeck?
+                        (activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
             }
             g.setColor(Color.black);
             g.drawString(""+deck.getSize(), 10, ceCardHeight - size);
         }
     }
 
-    private void drawCard(Graphics2D g, ColtExpressCard card, Rectangle r) {
+    private void drawCard(Graphics2D g, ColtExpressCard card, Rectangle r, boolean visible) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + "characters/deck/" + card.cardType.name() + ".png");
-        CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+        CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, visible);
         // Draw border around card in player owner's color
         Stroke s = g.getStroke();
         int width = 6;
@@ -117,5 +121,9 @@ public class ColtExpressDeckView extends ComponentView {
 
     public Rectangle[] getRects() {
         return rects;
+    }
+
+    public void informActivePlayer(int player) {
+        this.activePlayer = player;
     }
 }

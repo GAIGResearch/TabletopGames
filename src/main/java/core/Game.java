@@ -492,8 +492,8 @@ public class Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-//        players.add(new OSLA());
-        players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLA());
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
