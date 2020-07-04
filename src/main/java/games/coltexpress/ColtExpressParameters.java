@@ -15,6 +15,8 @@ import utilities.Pair;
 
 public class ColtExpressParameters extends AbstractGameParameters {
 
+    String dataPath = "data/coltexpress/";
+
     // Other parameters
     public int nCardsInHand = 6;
     public int nCardsInHandExtraDoc = 1;
@@ -126,6 +128,7 @@ public class ColtExpressParameters extends AbstractGameParameters {
     @Override
     protected AbstractGameParameters _copy() {
         ColtExpressParameters cep = new ColtExpressParameters(System.currentTimeMillis());
+        cep.dataPath = dataPath;
         cep.nCardsInHand = nCardsInHand;
         cep.nCardsInHandExtraDoc = nCardsInHandExtraDoc;
         cep.nBulletsPerPlayer = nBulletsPerPlayer;
@@ -157,4 +160,7 @@ public class ColtExpressParameters extends AbstractGameParameters {
         return cep;
     }
 
+    public String getDataPath() {
+        return dataPath;
+    }
 }

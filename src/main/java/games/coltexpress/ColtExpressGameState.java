@@ -262,6 +262,10 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return rounds;
     }
 
+    public HashMap<Integer, CharacterType> getPlayerCharacters() {
+        return playerCharacters;
+    }
+
     @Override
     public void printToConsole() {
         System.out.println("Colt Express Game-State");

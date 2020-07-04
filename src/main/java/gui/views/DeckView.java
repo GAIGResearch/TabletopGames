@@ -44,7 +44,7 @@ public class DeckView<T extends Component> extends ComponentView {
                     // Draw cards, 0 index on top
                     for (int i = deck.getSize()-1; i >= 0; i--) {
                         Card card = (Card) deck.getComponents().get(i);
-                        CardView.drawCard(g, rect.x, rect.y, rect.width, rect.height, card);
+                        CardView.drawCard(g, rect.x, rect.y, rect.width, rect.height, card, null, null, true);
                     }
                 }
             } else {

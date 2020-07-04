@@ -2,6 +2,7 @@ package games.uno.gui;
 
 import core.components.Deck;
 import games.uno.cards.UnoCard;
+import gui.views.CardView;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 
@@ -18,7 +19,7 @@ public class UnoDeckView extends ComponentView {
     int minCardOffset = 5;
 
     Rectangle[] rects;
-    int cardHighlight = -1;  // TODO: left click show card, right click back in deck
+    int cardHighlight = -1;  // left click show card, right click back in deck
 
     public UnoDeckView(Deck<UnoCard> d, boolean visible, String dataPath) {
         super(d, playerAreaWidth, unoCardHeight);
@@ -71,13 +72,13 @@ public class UnoDeckView extends ComponentView {
                 Image cardFace = getCardImage(card);
                 Rectangle r = new Rectangle(offset * i, 0, unoCardWidth, unoCardHeight);
                 rects[i] = r;
-                UnoCardView.drawCard(g, offset * i, 0, unoCardWidth, unoCardHeight, card, cardFace, backOfCard, front);
+                CardView.drawCard(g, offset * i, 0, unoCardWidth, unoCardHeight, card, cardFace, backOfCard, front);
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
                 UnoCard card = deck.get(cardHighlight);
                 Image cardFace = getCardImage(card);
-                UnoCardView.drawCard(g, offset * cardHighlight, 0, unoCardWidth, unoCardHeight, card, cardFace, backOfCard, front);
+                CardView.drawCard(g, offset * cardHighlight, 0, unoCardWidth, unoCardHeight, card, cardFace, backOfCard, front);
             }
             g.drawString(""+deck.getSize(), 10, unoCardHeight - size);
         }

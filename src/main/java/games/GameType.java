@@ -4,6 +4,7 @@ import core.*;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.gui.ColtExpressGUI;
 import games.explodingkittens.ExplodingKittenParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -170,6 +171,15 @@ public enum GameType {
 
         AbstractGUI gui = null;
 
+        // Find ID of human player, if any (-1 if none)
+        int human = -1;
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
+                human = i;
+                break;
+            }
+        }
+
         switch(this) {
             case Pandemic:
                 gui = new PandemicGUI(game.getGameState(), ac);
@@ -181,14 +191,10 @@ public enum GameType {
 //                    gui = new PrototypeGUI(this,null, ac, 0);
 //                }
             case Uno:
-                int human = -1;
-                for (int i = 0; i < game.getPlayers().size(); i++) {
-                    if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
-                        human = i;
-                        break;
-                    }
-                }
                 gui = new UnoGUI(game.getGameState(), ac, human);
+                break;
+            case ColtExpress:
+                gui = new ColtExpressGUI(game.getGameState(), ac, human);
                 break;
         }
 
