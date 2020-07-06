@@ -116,6 +116,9 @@ public class ColtExpressGUI extends AbstractGUI {
             int activePlayer = (ALWAYS_DISPLAY_CURRENT_PLAYER || ALWAYS_DISPLAY_FULL_OBSERVABLE? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1);
             plannedActions.informActivePlayer(player.getPlayerID());
 
+            // Update train view
+            trainView.update(cegs);
+
             // Update actions
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);

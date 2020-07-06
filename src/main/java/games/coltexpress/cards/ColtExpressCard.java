@@ -2,8 +2,6 @@ package games.coltexpress.cards;
 
 import core.components.Card;
 
-import java.util.Objects;
-
 public class ColtExpressCard extends Card {
     public enum CardType {
         MoveSideways,

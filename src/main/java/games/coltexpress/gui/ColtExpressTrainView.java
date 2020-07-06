@@ -1,6 +1,9 @@
 package games.coltexpress.gui;
 
+import core.components.Deck;
+import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressTypes;
+import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.ImageIO;
@@ -18,6 +21,7 @@ public class ColtExpressTrainView extends JComponent {
     int width, height;
     String dataPath;
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
+    ColtExpressGameState cegs;
 
     public ColtExpressTrainView(List<Compartment> train, String dataPath,
                                 HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
@@ -32,7 +36,9 @@ public class ColtExpressTrainView extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         drawTrain((Graphics2D) g, new Rectangle(0, 0, width, height));
-        // TODO: round cards
+
+        // TODO: round cards, hidden unless already past or current
+        Deck<RoundCard> rounds = cegs.getRounds();
     }
 
     public void drawTrain(Graphics2D g, Rectangle rect) {
@@ -120,4 +126,7 @@ public class ColtExpressTrainView extends JComponent {
         return new Dimension(width, height);
     }
 
+    public void update(ColtExpressGameState cegs) {
+        this.cegs = cegs;
+    }
 }
