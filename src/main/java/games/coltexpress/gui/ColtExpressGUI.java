@@ -24,6 +24,8 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int playerAreaHeightScroll = 150;
     final static int ceCardWidth = 50;
     final static int ceCardHeight = 65;
+    final static int roundCardWidth = 80;
+    final static int roundCardHeight = 50;
     final static int trainCarWidth = 130;
     final static int trainCarHeight = 90;
     final static int playerSize = 40;

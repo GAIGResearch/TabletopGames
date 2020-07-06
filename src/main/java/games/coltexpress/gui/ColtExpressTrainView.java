@@ -22,29 +22,32 @@ public class ColtExpressTrainView extends JComponent {
     String dataPath;
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
     ColtExpressGameState cegs;
+    ColtExpressDeckView<RoundCard> roundView;
+
+    int bottomOffset = trainCarHeight/5;
 
     public ColtExpressTrainView(List<Compartment> train, String dataPath,
                                 HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         this.train = train;
         int nCars = train.size();
         this.width = (trainCarWidth*2/3)*(nCars-1) + trainCarWidth;
-        this.height = trainCarHeight+ceCardHeight;
+        this.height = trainCarHeight+ playerSize - bottomOffset + roundCardHeight + 10;
         this.dataPath = dataPath;
         this.characters = characters;
+        roundView = new ColtExpressDeckView<>(null, true, dataPath, characters);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        // Draw train
         drawTrain((Graphics2D) g, new Rectangle(0, 0, width, height));
-
-        // TODO: round cards, hidden unless already past or current
-        Deck<RoundCard> rounds = cegs.getRounds();
+        // Draw round cards
+        roundView.drawDeck((Graphics2D) g, new Rectangle(0, trainCarHeight + playerSize - bottomOffset + 5, width, roundCardHeight));
     }
 
     public void drawTrain(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
         int x = rect.x;
-        int bottomOffset = trainCarHeight/5;
         int y = rect.y + playerSize - bottomOffset;
         for (int i = 0; i < train.size(); i++) {
             // Draw background car
@@ -128,5 +131,7 @@ public class ColtExpressTrainView extends JComponent {
 
     public void update(ColtExpressGameState cegs) {
         this.cegs = cegs;
+        this.roundView.updateComponent(cegs.getRounds());
+        this.roundView.updateGameState(cegs);
     }
 }
