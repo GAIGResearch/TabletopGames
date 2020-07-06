@@ -26,6 +26,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
     Rectangle[] rects;
     int cardHighlight = -1;
     int activePlayer = -1;
+    Color marshalColor = new Color(242, 189, 24);
 
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
 
@@ -117,8 +118,15 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
             int width = 6;
             int arc = 20;
             g.setStroke(new BasicStroke(width));
-            g.setColor(characters.get(card.playerID).getColor());
+            if (card.playerID == -1) {
+                // Marshal/neutral bullet
+                g.setColor(marshalColor);
+            } else {
+                // Player card/bullet from other player
+                g.setColor(characters.get(card.playerID).getColor());
+            }
             g.drawRoundRect(r.x + width / 2, r.y + width / 2, r.width - width, r.height - width, arc, arc);
+            g.setStroke(s);
         }
     }
 

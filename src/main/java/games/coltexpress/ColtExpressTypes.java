@@ -17,8 +17,7 @@ public class ColtExpressTypes {
         Django (new Color(43, 43, 43)),
         Tuco (new Color(225, 7, 20)),
         Doc (new Color(25, 183, 199)),
-        Belle (new Color(233, 13, 130)),
-        Marshal(new Color(242, 189, 24));
+        Belle (new Color(233, 13, 130));
 
         private Color color;
 

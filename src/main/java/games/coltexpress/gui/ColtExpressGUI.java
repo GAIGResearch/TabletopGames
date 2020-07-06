@@ -24,8 +24,10 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int playerAreaHeightScroll = 150;
     final static int ceCardWidth = 50;
     final static int ceCardHeight = 65;
-    final static int trainCarWidth = 90;
-    final static int trainCarHeight = 70;
+    final static int trainCarWidth = 130;
+    final static int trainCarHeight = 90;
+    final static int playerSize = 40;
+    final static int lootSize = 20;
 
     int width, height;
     ColtExpressPlayerView[] playerHands;
@@ -76,7 +78,7 @@ public class ColtExpressGUI extends AbstractGUI {
             JPanel centerArea = new JPanel();
             centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
             List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
-            trainView = new ColtExpressTrainView(train, trainCarWidth*train.size(), trainCarHeight+ceCardHeight, cep.getDataPath());
+            trainView = new ColtExpressTrainView(train, cep.getDataPath(), cegs.getPlayerCharacters());
             plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
             centerArea.add(trainView);
             centerArea.add(plannedActions);
