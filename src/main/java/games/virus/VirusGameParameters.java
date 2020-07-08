@@ -1,8 +1,8 @@
 package games.virus;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 
-public class VirusGameParameters extends AbstractGameParameters {
+public class VirusGameParameters extends AbstractParameters {
     public int nCardsPerOrgan = 5;
     public int nCardsPerVirus = 4;
     public int nCardsPerMedicine = 4;
@@ -14,7 +14,7 @@ public class VirusGameParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         VirusGameParameters vgp = new VirusGameParameters(System.currentTimeMillis());
         vgp.nCardsPerOrgan = nCardsPerOrgan;
         vgp.nCardsPerVirus = nCardsPerVirus;

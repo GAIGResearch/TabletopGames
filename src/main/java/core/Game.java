@@ -301,7 +301,7 @@ public class Game {
 
             // Randomize parameters
             if (randomizeParameters) {
-                AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
+                AbstractParameters gameParameters = game.getGameState().getGameParameters();
                 gameParameters.randomize();
             }
 
@@ -490,8 +490,8 @@ public class Game {
 //        players.add(new OSLA());
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-//        players.add(new MCTSPlayer());
+//        players.add(new RandomPlayer(new Random()));
+        players.add(new MCTSPlayer(System.currentTimeMillis()));
         players.add(new OSLA());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());

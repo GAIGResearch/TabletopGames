@@ -8,6 +8,8 @@ import core.interfaces.IStateHeuristic;
 import java.util.List;
 import java.util.Random;
 
+import static utilities.Utils.noise;
+
 public class OSLA extends AbstractPlayer {
 
     private Random random; // random generator for noise
@@ -49,12 +51,4 @@ public class OSLA extends AbstractPlayer {
         return bestAction;
     }
 
-    public static double noise(double input, double epsilon, double random)
-    {
-        if(input != -epsilon) {
-            return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
-        }else {
-            return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
-        }
-    }
 }

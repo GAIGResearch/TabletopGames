@@ -61,7 +61,7 @@ public class ReplaceCards extends DrawComponents {
             VirusCard card = vgs.getDiscardDeck().pick();
             vgs.getDrawDeck().add(card);
         }
-        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getGameSeed()));
+        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
     }
 
     @Override

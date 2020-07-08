@@ -22,7 +22,7 @@ public class NoCards extends AbstractAction implements IPrintable {
         Deck<UnoCard> discardDeck = ugs.getDiscardDeck();
         Deck<UnoCard> playerDeck = ugs.getPlayerDecks().get(ugs.getTurnOrder().getCurrentPlayer(gs));
 
-        Random r = new Random(ugs.getGameParameters().getGameSeed() + ugs.getTurnOrder().getRoundCounter());
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
 
         if (drawDeck.getSize() == 0) {
             drawDeck.add(discardDeck);

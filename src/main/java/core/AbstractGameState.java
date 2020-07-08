@@ -25,7 +25,7 @@ public abstract class AbstractGameState {
     }
 
     // Parameters, forward model and turn order for the game
-    protected final AbstractGameParameters gameParameters;
+    protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;
     private Area allComponents;
 
@@ -47,7 +47,7 @@ public abstract class AbstractGameState {
      * @param gameParameters - game parameters.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(AbstractGameParameters gameParameters, TurnOrder turnOrder){
+    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
     }
@@ -70,7 +70,7 @@ public abstract class AbstractGameState {
      * Resets variables initialised for this game state.
      */
     void reset(long seed) {
-        gameParameters.gameSeed = seed;
+        gameParameters.randomSeed = seed;
         reset();
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractGameState {
     public final TurnOrder getTurnOrder(){return turnOrder;}
     public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
     public final Utils.GameResult getGameStatus() {  return gameStatus; }
-    public final AbstractGameParameters getGameParameters() { return this.gameParameters; }
+    public final AbstractParameters getGameParameters() { return this.gameParameters; }
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }

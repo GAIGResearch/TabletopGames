@@ -8,7 +8,7 @@ import java.util.*;
 
 public class UnoGame extends Game {
 
-    public UnoGame(List<AbstractPlayer> agents, AbstractGameParameters gameParameters) {
+    public UnoGame(List<AbstractPlayer> agents, AbstractParameters gameParameters) {
         super(GameType.Uno, agents, new UnoForwardModel(), new UnoGameState(gameParameters, agents.size()));
     }
 
@@ -24,7 +24,7 @@ public class UnoGame extends Game {
         agents.add(new OSLA());
         agents.add(new OSLA());
 
-        AbstractGameParameters    gameParameters = new UnoGameParameters(System.currentTimeMillis());
+        AbstractParameters gameParameters = new UnoGameParameters(System.currentTimeMillis());
         Game game           = new UnoGame(agents, gameParameters);
 
         game.run(null);

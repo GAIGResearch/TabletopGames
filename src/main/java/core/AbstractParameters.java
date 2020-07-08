@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public abstract class AbstractGameParameters {
+public abstract class AbstractParameters {
 
     // Random seed for the game
-    long gameSeed;
+    protected long randomSeed;
 
-    public AbstractGameParameters(long seed) {
-        this.gameSeed = seed;
+    public AbstractParameters(long seed) {
+        this.randomSeed = seed;
     }
 
     /* Methods to be implemented by subclass */
@@ -22,7 +22,7 @@ public abstract class AbstractGameParameters {
      * Return a copy of this game parameters object, with the same parameters as in the original.
      * @return - new game parameters object.
      */
-    protected abstract AbstractGameParameters _copy();
+    protected abstract AbstractParameters _copy();
 
 
     /* Public API */
@@ -31,17 +31,17 @@ public abstract class AbstractGameParameters {
      * Retrieve the random seed for this game.
      * @return - random seed.
      */
-    public long getGameSeed() {
-        return gameSeed;
+    public long getRandomSeed() {
+        return randomSeed;
     }
 
     /**
      * Copy this game parameter object.
      * @return - new object with the same parameters, but a new random seed.
      */
-    public AbstractGameParameters copy() {
-        AbstractGameParameters copy = _copy();
-        copy.gameSeed = System.currentTimeMillis();
+    public AbstractParameters copy() {
+        AbstractParameters copy = _copy();
+        copy.randomSeed = System.currentTimeMillis();
         return copy;
     }
 
@@ -50,7 +50,7 @@ public abstract class AbstractGameParameters {
      */
     public void randomize() {
         if (this instanceof ITunableParameters) {
-            Random rnd = new Random(gameSeed);
+            Random rnd = new Random(randomSeed);
             HashMap<Integer, ArrayList<?>> searchSpace = ((ITunableParameters)this).getSearchSpace();
             for (Map.Entry<Integer, ArrayList<?>> parameter: searchSpace.entrySet()) {
                 int nValues = parameter.getValue().size();

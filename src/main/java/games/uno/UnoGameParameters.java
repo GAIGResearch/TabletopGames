@@ -1,8 +1,8 @@
 package games.uno;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 
-public class UnoGameParameters extends AbstractGameParameters {
+public class UnoGameParameters extends AbstractParameters {
     public int nNumberCards = 10;
     public int nCardsPerPlayer = 7;
     public int nWildCards = 4;
@@ -30,7 +30,7 @@ public class UnoGameParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         UnoGameParameters ugp = new UnoGameParameters(System.currentTimeMillis());
         ugp.nNumberCards = nNumberCards;
         ugp.nCardsPerPlayer = nCardsPerPlayer;
