@@ -40,7 +40,7 @@ public class ColtExpressGUI extends AbstractGUI {
     int humanID;
 
     public ColtExpressGUI(AbstractGameState gameState, ActionController ac, int humanID) {
-        super(ac, 15);
+        super(ac, 25);
         this.humanID = humanID;
 
         if (gameState != null) {

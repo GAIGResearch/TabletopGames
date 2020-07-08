@@ -71,6 +71,10 @@ public abstract class AbstractGUI extends JFrame {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
             }
+            for (int i = actions.size(); i < actionButtons.length; i++) {
+                actionButtons[i].setVisible(false);
+                actionButtons[i].setButtonAction(null, "");
+            }
         }
     }
 

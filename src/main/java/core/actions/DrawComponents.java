@@ -36,7 +36,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
         for (int i = 0; i < nComponents; i++) {
             if (from.getSize() > 0) {
-                T component = from.pick();
+                T component = from.draw();
                 componentIds[i] = component.getComponentID();
                 to.add(component);
             } else {

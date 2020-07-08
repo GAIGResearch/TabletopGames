@@ -266,9 +266,11 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     }
 
     private ArrayList<AbstractAction> schemingActions(ColtExpressGameState cegs){
-        ColtExpressParameters cep = (ColtExpressParameters)cegs.getGameParameters();
-        int player = cegs.getTurnOrder().getCurrentPlayer(cegs);
         ArrayList<AbstractAction> actions = new ArrayList<>();
+
+        ColtExpressParameters cep = (ColtExpressParameters)cegs.getGameParameters();
+        int player = cegs.getCurrentPlayer();
+
         HashSet<ColtExpressCard.CardType> types = new HashSet<>();
 
         Deck<ColtExpressCard> playerHand = cegs.playerHandCards.get(player);

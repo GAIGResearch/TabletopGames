@@ -63,7 +63,7 @@ public class PlayVirusCard extends DrawCard {
     // TODO: check it
     public void discardToDraw(VirusGameState vgs) {
         while (vgs.getDiscardDeck().getSize()>0) {
-            VirusCard card = vgs.getDiscardDeck().pick();
+            VirusCard card = vgs.getDiscardDeck().draw();
             vgs.getDrawDeck().add(card);
         }
         vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getGameSeed()));
