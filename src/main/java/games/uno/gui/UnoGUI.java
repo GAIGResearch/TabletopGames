@@ -16,17 +16,24 @@ import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class UnoGUI extends AbstractGUI {
+    // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 130;
     final static int unoCardWidth = 90;
     final static int unoCardHeight = 115;
 
+    // Width and height of total window
     int width, height;
+    // List of player hand views
     UnoPlayerView[] playerHands;
+    // Discard pile view
     UnoDeckView discardPile;
+    // Draw pile view
     UnoDeckView drawPile;
 
+    // Currently active player
     int activePlayer = -1;
+    // ID of human player
     int humanID;
 
     public UnoGUI(AbstractGameState gameState, ActionController ac, int humanID) {
@@ -34,7 +41,10 @@ public class UnoGUI extends AbstractGUI {
         this.humanID = humanID;
 
         if (gameState != null) {
+            // Initialise active player
             activePlayer = gameState.getCurrentPlayer();
+
+            // Find required size of window
             int nPlayers = gameState.getNPlayers();
             int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
             double nVertAreas = 3.5;
@@ -81,6 +91,7 @@ public class UnoGUI extends AbstractGUI {
             // Bottom area will show actions available
             JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
+            // Add all views to frame
             getContentPane().add(mainGameArea, BorderLayout.CENTER);
             getContentPane().add(infoPanel, BorderLayout.NORTH);
             getContentPane().add(actionPanel, BorderLayout.SOUTH);

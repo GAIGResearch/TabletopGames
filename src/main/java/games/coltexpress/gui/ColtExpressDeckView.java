@@ -5,6 +5,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressTurnOrder;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.actions.roundcardevents.*;
 import games.coltexpress.cards.ColtExpressCard;
@@ -15,6 +16,8 @@ import gui.views.ComponentView;
 import utilities.ImageIO;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -22,19 +25,41 @@ import java.util.HashMap;
 import static games.coltexpress.gui.ColtExpressGUI.*;
 
 public class ColtExpressDeckView<T extends Component> extends ComponentView {
+
+    // Is deck fully visible?
     protected boolean front;
+    // Is first component in deck drawn on top?
+    boolean firstOnTop;
+    // Back of card image
     Image backOfCard;
+    // Path to assets
     String dataPath;
+    // Minimum distance between components drawn
     int minCardOffset = 5;
 
+    // Rectangles where components are drawn, used for highlighting
     Rectangle[] rects;
     int cardHighlight = -1;
-    int activePlayer = -1;
-    Color marshalColor = new Color(242, 189, 24);
+    // If currently highlighting a component (on ALT press)
+    boolean highlighting;
 
+    // ID of currently active player
+    int activePlayer = -1;
+    // Color of marshal
+    Color marshalColor = new Color(242, 189, 24);
+    // List of player characters, corresponding to player IDs
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
+    // Current game state
     ColtExpressGameState cegs;
 
+    /**
+     * Constructor for a deck view, adding a mouse/key listener to allow highlight of component (highlighted component is drawn
+     * on top of all others).
+     * @param d - deck to draw
+     * @param visible - if deck is visible
+     * @param dataPath - path to assets for the deck
+     * @param characters - list of player characters
+     */
     public ColtExpressDeckView(Deck<T> d, boolean visible, String dataPath,
                                HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         super(d, playerAreaWidth, ceCardHeight);
@@ -43,6 +68,38 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         this.dataPath = dataPath;
         this.characters = characters;
 
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ALT) {
+                    highlighting = true;
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ALT) {
+                    highlighting = false;
+                    cardHighlight = -1;
+                }
+            }
+        });
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (highlighting) {
+                    for (int i = 0; i < rects.length; i++) {
+                        if (rects[i].contains(e.getPoint())) {
+                            cardHighlight = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        });
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -64,25 +121,25 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, height));
+        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, height), firstOnTop);
     }
 
-    public void setFront(boolean visible) {
-        this.front = visible;
-    }
-
-    public void flip() {
-        front = !front;
-    }
-
-    public void drawDeck(Graphics2D g, Rectangle rect) {
+    /**
+     * Draws all components in a deck, spaced out so they fill the given area.
+     * @param g - Graphics object
+     * @param rect - rectangle to draw deck in.
+     * @param firstOnTop - if true, first component is drawn on top, otherwise on bottom.
+     */
+    public void drawDeck(Graphics2D g, Rectangle rect, boolean firstOnTop) {
         int size = g.getFont().getSize();
         Deck<T> deck = (Deck<T>) component;
 
         if (deck != null && deck.getSize() > 0) {
             // Draw cards, 0 index on top
             rects = new Rectangle[deck.getSize()];
-            for (int i = deck.getSize()-1; i >= 0; i--) {
+            int i = deck.getSize()-1;
+            if (firstOnTop) i = 0;
+            while (i >= 0 && !firstOnTop || i < deck.getSize() && firstOnTop) {
                 if (deck.get(0) instanceof ColtExpressCard) {
                     // Player card
                     int offset = (rect.width-ceCardWidth) / deck.getSize();
@@ -103,6 +160,12 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     rects[i] = r;
                     boolean visible = cegs.getTurnOrder().getRoundCounter() >= i;
                     drawRoundCard(g, (RoundCard) deck.get(i), r, visible);
+                }
+
+                if (firstOnTop) {
+                    i++;
+                } else {
+                    i--;
                 }
             }
             if (cardHighlight != -1) {
@@ -133,6 +196,13 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         }
     }
 
+    /**
+     * Draws a player card, with player's color border.
+     * @param g - Graphics object
+     * @param card - card to draw
+     * @param r - rectangle to draw card in
+     * @param visible - true if visible, false otherwise (shows back of card instead and no color)
+     */
     private void drawCard(Graphics2D g, ColtExpressCard card, Rectangle r, boolean visible) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + "characters/deck/" + card.cardType.name() + ".png");
         CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, visible);
@@ -154,6 +224,13 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         }
     }
 
+    /**
+     * Draws loot, with value information only if visible.
+     * @param g - Graphics object
+     * @param loot - loot to draw
+     * @param r - rectangle to draw loot in
+     * @param visible - true if visible, false otherwise
+     */
     private void drawLoot(Graphics2D g, Loot loot, Rectangle r, boolean visible) {
         Image lootFace;
         if (visible) {
@@ -164,6 +241,13 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         g.drawImage(lootFace, r.x, r.y, r.width, r.height, null);
     }
 
+    /**
+     * Draws a round card
+     * @param g - Graphics object
+     * @param card - card to draw
+     * @param r - rectangle to draw card in
+     * @param visible - true if card is visible, false otherwise (details will not be drawn until revealed)
+     */
     private void drawRoundCard(Graphics2D g, RoundCard card, Rectangle r, boolean visible) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + "roundcards/roundCard.png");
         g.drawImage(cardFace, r.x, r.y, r.width, r.height, null);
@@ -199,6 +283,12 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                 Image roundImg = ImageIO.GetInstance().getImage(dataPath + "roundcards/" + card.getTurnTypes()[i].name() + ".png");
                 int roundWidth = (int) (roundImg.getWidth(null) * scaleW);
                 g.drawImage(roundImg, x, r.y + r.height / 3, roundWidth, roundHeight, null);
+                // Highlight current turn
+                if (((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == i) {
+                    g.setColor(Color.green);
+                    g.setStroke(new BasicStroke(3));
+                    g.drawRect(x, r.y + r.height/3, roundWidth, roundHeight);
+                }
                 x += roundWidth;
             }
 
@@ -215,6 +305,11 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         }
     }
 
+    /**
+     * Get the image corresponding to the end of round event.
+     * @param event - end of round event
+     * @return - image.
+     */
     private Image getEndImage(AbstractAction event) {
         String path = null;
         if (event instanceof EndCardHostage) {
@@ -243,23 +338,29 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         return new Dimension(width, height);
     }
 
+    // Getters, setters
     public int getCardHighlight() {
         return cardHighlight;
     }
-
     public void setCardHighlight(int cardHighlight) {
         this.cardHighlight = cardHighlight;
     }
-
     public Rectangle[] getRects() {
         return rects;
     }
-
     public void informActivePlayer(int player) {
         this.activePlayer = player;
     }
-
     public void updateGameState(ColtExpressGameState cegs) {
         this.cegs = cegs;
+    }
+    public void setFirstOnTop(boolean firstOnTop) {
+        this.firstOnTop = firstOnTop;
+    }
+    public void setFront(boolean visible) {
+        this.front = visible;
+    }
+    public void flip() {
+        front = !front;
     }
 }

@@ -15,15 +15,30 @@ import java.awt.event.MouseEvent;
 import static games.uno.gui.UnoGUI.*;
 
 public class UnoDeckView extends ComponentView {
+
+    // Is deck visible?
     protected boolean front;
+    // Back of card image
     Image backOfCard;
+    // Path to assets
     String dataPath;
+    // Minimum distance between cards drawn in deck area
     int minCardOffset = 5;
 
+    // Rectangles where cards are drawn, used for highlighting
     Rectangle[] rects;
-    int cardHighlight = -1;  // left click show card, right click back in deck
+    // Index of card highlighted
+    int cardHighlight = -1;  // left click (or ALT+hover) show card, right click back in deck
+    // If currently highlighting (ALT)
     boolean highlighting;
 
+    /**
+     * Constructor initialising information and adding key/mouse listener for card highlight (left click or ALT + hover
+     * allows showing the highlighted card on top of all others).
+     * @param d - deck to draw
+     * @param visible - true if whole deck visible
+     * @param dataPath - path to assets
+     */
     public UnoDeckView(Deck<UnoCard> d, boolean visible, String dataPath) {
         super(d, playerAreaWidth, unoCardHeight);
         this.front = visible;
@@ -86,14 +101,10 @@ public class UnoDeckView extends ComponentView {
         drawDeck((Graphics2D) g);
     }
 
-    public void setFront(boolean visible) {
-        this.front = visible;
-    }
-
-    public void flip() {
-        front = !front;
-    }
-
+    /**
+     * Draws all cards in the deck, evenly spaced.
+     * @param g - Graphics object
+     */
     public void drawDeck(Graphics2D g) {
         int size = g.getFont().getSize();
         Deck<UnoCard> deck = (Deck<UnoCard>) component;
@@ -124,6 +135,11 @@ public class UnoDeckView extends ComponentView {
         return new Dimension(width, height);
     }
 
+    /**
+     * Retrieves the image for a card from the asset folder.
+     * @param card - card to retrieve image for
+     * @return - image for card.
+     */
     private Image getCardImage(UnoCard card) {
         Image img = null;
         String colorName = card.color.substring(0, 1).toUpperCase() + card.color.substring(1).toLowerCase();
@@ -151,15 +167,20 @@ public class UnoDeckView extends ComponentView {
         return img;
     }
 
+    // Getters, setters
     public int getCardHighlight() {
         return cardHighlight;
     }
-
     public void setCardHighlight(int cardHighlight) {
         this.cardHighlight = cardHighlight;
     }
-
     public Rectangle[] getRects() {
         return rects;
+    }
+    public void setFront(boolean visible) {
+        this.front = visible;
+    }
+    public void flip() {
+        front = !front;
     }
 }

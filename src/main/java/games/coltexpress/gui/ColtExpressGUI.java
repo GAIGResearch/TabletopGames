@@ -18,6 +18,7 @@ import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class ColtExpressGUI extends AbstractGUI {
+    // Settings for display area sizes
     final static int playerAreaWidth = 300;
     final static int playerAreaWidthScroll = 290;
     final static int playerAreaHeight = 320;
@@ -31,12 +32,18 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int playerSize = 40;
     final static int lootSize = 20;
 
+    // Width and height of frame display
     int width, height;
+    // Player views
     ColtExpressPlayerView[] playerHands;
+    // Planned actions deck view
     ColtExpressDeckView plannedActions;
+    // Main train view
     ColtExpressTrainView trainView;
 
+    // Currently active player
     int activePlayer = -1;
+    // ID of human player
     int humanID;
 
     public ColtExpressGUI(AbstractGameState gameState, ActionController ac, int humanID) {
@@ -76,7 +83,6 @@ public class ColtExpressGUI extends AbstractGUI {
                 jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
                 jsp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
                 jsp.setBorder(null);
-//                sides[next].setPreferredSize(new Dimension(playerAreaWidth, playerAreaHeight));  // TODO: multiple people width
                 mainGameArea.add(jsp, locations[i]);
             }
 
@@ -121,6 +127,13 @@ public class ColtExpressGUI extends AbstractGUI {
             plannedActions.updateComponent(cegs.getPlannedActions());
             int activePlayer = (ALWAYS_DISPLAY_CURRENT_PLAYER || ALWAYS_DISPLAY_FULL_OBSERVABLE? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1);
             plannedActions.informActivePlayer(player.getPlayerID());
+
+            // Show planned actions from the first played
+            if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.ExecuteActions) {
+                plannedActions.setFirstOnTop(true);
+            } else {
+                plannedActions.setFirstOnTop(false);
+            }
 
             // Update train view
             trainView.update(cegs);

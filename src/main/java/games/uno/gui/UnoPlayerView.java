@@ -10,9 +10,9 @@ import static games.uno.gui.UnoGUI.*;
 
 public class UnoPlayerView extends UnoDeckView {
 
-    int width;
-    int height;
+    // ID of player showing
     int playerId;
+    // Number of points player has
     int nPoints;
 
     public UnoPlayerView(Deck<UnoCard> d, int playerId, String dataPath) {
@@ -22,6 +22,10 @@ public class UnoPlayerView extends UnoDeckView {
         this.playerId = playerId;
     }
 
+    /**
+     * Draws the player's hand and their number of points.
+     * @param g - Graphics object.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         drawDeck((Graphics2D) g);
@@ -29,21 +33,25 @@ public class UnoPlayerView extends UnoDeckView {
         g.drawString(nPoints + " points", playerAreaWidth/2 - 20, unoCardHeight + 10);
     }
 
-    public void setFront(boolean visible) {
-        this.front = visible;
-    }
-
-    public void flip() {
-        front = !front;
-    }
-
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
     }
 
+    /**
+     * Updates information
+     * @param gameState - current game state
+     */
     public void update(UnoGameState gameState) {
         this.component = gameState.getPlayerDecks().get(playerId);
         nPoints = gameState.getPlayerScore()[playerId];
+    }
+
+    // Getters, setters
+    public void setFront(boolean visible) {
+        this.front = visible;
+    }
+    public void flip() {
+        front = !front;
     }
 }

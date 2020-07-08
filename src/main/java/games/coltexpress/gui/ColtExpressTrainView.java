@@ -1,6 +1,5 @@
 package games.coltexpress.gui;
 
-import core.components.Deck;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.RoundCard;
@@ -17,13 +16,19 @@ import static games.coltexpress.gui.ColtExpressGUI.*;
 
 public class ColtExpressTrainView extends JComponent {
 
+    // List of compartments in the train
     List<Compartment> train;
+    // Width and height of view
     int width, height;
+    // Path to assets
     String dataPath;
+    // List of player characters, mapping to player ID
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
+    // Current game state
     ColtExpressGameState cegs;
+    // View for round cards deck
     ColtExpressDeckView<RoundCard> roundView;
-
+    // Bottom offset based on asset (to make characters and loot appear inside train)
     int bottomOffset = trainCarHeight/5;
 
     public ColtExpressTrainView(List<Compartment> train, String dataPath,
@@ -42,9 +47,14 @@ public class ColtExpressTrainView extends JComponent {
         // Draw train
         drawTrain((Graphics2D) g, new Rectangle(0, 0, width, height));
         // Draw round cards
-        roundView.drawDeck((Graphics2D) g, new Rectangle(0, trainCarHeight + playerSize - bottomOffset + 5, width, roundCardHeight));
+        roundView.drawDeck((Graphics2D) g, new Rectangle(0, trainCarHeight + playerSize - bottomOffset + 5, width, roundCardHeight), false);
     }
 
+    /**
+     * Draws the train compartments, including players, marshal and loot present
+     * @param g - Graphics object
+     * @param rect - rectangle to draw train in
+     */
     public void drawTrain(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
         int x = rect.x;
@@ -109,6 +119,12 @@ public class ColtExpressTrainView extends JComponent {
         }
     }
 
+    /**
+     * Draws an item of loot.
+     * @param g - Graphics object
+     * @param loot - loot to draw.
+     * @param r - rectangle to draw loot in.
+     */
     private void drawLoot(Graphics2D g, Loot loot, Rectangle r) {
         Image lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_behind.png");
         g.drawImage(lootFace, r.x, r.y, r.width, r.height, null);
@@ -120,6 +136,12 @@ public class ColtExpressTrainView extends JComponent {
         g.setFont(f);
     }
 
+    /**
+     * Draws a player pawn.
+     * @param g - Graphics object
+     * @param p - player ID to draw
+     * @param r - rectangle to draw token in.
+     */
     private void drawPlayer(Graphics2D g, int p, Rectangle r) {
         Image playerFace;
         if (p == -1) {
@@ -135,6 +157,10 @@ public class ColtExpressTrainView extends JComponent {
         return new Dimension(width, height);
     }
 
+    /**
+     * Updates information based on current game state.
+     * @param cegs - current game state.
+     */
     public void update(ColtExpressGameState cegs) {
         this.cegs = cegs;
         this.roundView.updateComponent(cegs.getRounds());
