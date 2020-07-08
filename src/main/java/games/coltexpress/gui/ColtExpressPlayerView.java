@@ -6,6 +6,7 @@ import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 import utilities.ImageIO;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,6 +72,9 @@ public class ColtExpressPlayerView extends JComponent {
         playerDeck = gameState.getPlayerDecks().get(playerId);
         playerHand.updateComponent(gameState.getPlayerHandCards().get(playerId));
         playerLoot.updateComponent(gameState.getLoot(playerId));
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_END) {
+            playerLoot.setFront(true);
+        }
         bulletsLeft = gameState.getBulletsLeft()[playerId];
 
         if (playerId == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER

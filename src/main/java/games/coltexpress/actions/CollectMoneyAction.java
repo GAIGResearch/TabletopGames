@@ -66,6 +66,8 @@ public class CollectMoneyAction extends DrawCard {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        if (availableLoot == -1) return "Collect loot (none)";
+        
         Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
         ColtExpressTypes.LootType lt = null;
         for (Loot available : availableLootDeck.getComponents()){

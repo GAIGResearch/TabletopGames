@@ -99,6 +99,8 @@ public class ShootPlayerAction extends DrawCard {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        if (targetID == -1) return "Shoot nobody";
+
         Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
         String character = ((ColtExpressGameState)gameState).getPlayerCharacters().get(targetID).name();
         return "Shoot " + character + (isDjango?" to c=" + target.getCompartmentID(): "");

@@ -464,10 +464,13 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 if (offset == 0 || playerCompartmentIndex + offset < 0 || playerCompartmentIndex + offset >= cegs.trainCompartments.size())
                     continue;
                 Compartment targetCompartment = cegs.trainCompartments.get(playerCompartmentIndex + offset);
+
+                // For each available target
                 for (Integer targetPlayer : availableTargets) {
                     Deck<Loot> availableLoot = cegs.playerLoot.get(targetPlayer);
 
                     if (availableLoot.getSize() > 0) {
+                        // Punch and make them drop one of their loot
                         for (Loot loot : availableLoot.getComponents()) {
                             actions.add(new PunchAction(deckFromID, deckToID, cardIdx, targetPlayer,
                                     sourceCompID, targetCompartment.getComponentID(),
