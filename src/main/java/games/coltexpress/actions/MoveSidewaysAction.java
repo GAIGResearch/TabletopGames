@@ -14,9 +14,9 @@ public class MoveSidewaysAction extends DrawCard {
     private final int sourceCompartment;
     private final int targetCompartment;
 
-    public MoveSidewaysAction(int plannedActions, int playerDeck,
+    public MoveSidewaysAction(int plannedActions, int playerDeck, int cardIdx,
                              int sourceCompartment, int targetCompartment){
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
 
@@ -81,6 +81,6 @@ public class MoveSidewaysAction extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new MoveSidewaysAction(deckFrom, deckTo, sourceCompartment, targetCompartment);
+        return new MoveSidewaysAction(deckFrom, deckTo, fromIndex, sourceCompartment, targetCompartment);
     }
 }

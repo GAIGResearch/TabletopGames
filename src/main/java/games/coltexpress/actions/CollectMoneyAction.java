@@ -16,9 +16,9 @@ public class CollectMoneyAction extends DrawCard {
     private final int availableLoot;
     private final int loot;
 
-    public CollectMoneyAction(int plannedActions, int playerDeck,
+    public CollectMoneyAction(int plannedActions, int playerDeck, int cardIdx,
                               int loot, int availableLoot) {
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
 
         this.loot = loot;
         this.availableLoot = availableLoot;
@@ -82,6 +82,6 @@ public class CollectMoneyAction extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new CollectMoneyAction(deckFrom, deckTo, loot, availableLoot);
+        return new CollectMoneyAction(deckFrom, deckTo, fromIndex, loot, availableLoot);
     }
 }

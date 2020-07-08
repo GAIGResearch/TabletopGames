@@ -310,29 +310,30 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             return actions;
         }
 
-        ColtExpressCard plannedActionCard = cegs.plannedActions.peek(cegs.plannedActions.getSize()-1);
+        int cardIdx = cegs.plannedActions.getSize()-1;
+        int deckFromID = cegs.plannedActions.getComponentID();
+        int deckToID = cegs.playerDecks.get(player).getComponentID();
+
+        ColtExpressCard plannedActionCard = cegs.plannedActions.peek(cardIdx);
         if (plannedActionCard.playerID == -1 || plannedActionCard.cardType == ColtExpressCard.CardType.Bullet) {
             throw new IllegalArgumentException("Player on planned action card is -1: " + plannedActionCard.toString());
         }
+
         if (player == plannedActionCard.playerID)
         {
             switch (plannedActionCard.cardType){
                 case Punch:
-                    createPunchingActions(cegs, actions, player);
+                    createPunchingActions(cegs, actions, player, cardIdx);
                     break;
                 case Shoot:
-                    if (cegs.bulletsLeft[player] <= 0)
-                        break;
-                    else
-                        createShootingActions(cegs, actions, player);
+                    createShootingActions(cegs, actions, player, cardIdx);
                     break;
                 case MoveVertical:
                     for (Compartment compartment : cegs.trainCompartments) {
                         if (compartment.playersInsideCompartment.contains(player) ||
                                 compartment.playersOnTopOfCompartment.contains(player)) {
                             boolean toRoof = compartment.playersInsideCompartment.contains(player);
-                            actions.add(new MoveVerticalAction(cegs.plannedActions.getComponentID(),
-                                    cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(), toRoof));
+                            actions.add(new MoveVerticalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(), toRoof));
                             break;
                         }
                     }
@@ -342,65 +343,64 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                         Compartment compartment = cegs.trainCompartments.get(i);
                         if (compartment.containsMarshal){
                             if (i > 1)
-                                actions.add(new MoveMarshalAction(cegs.plannedActions.getComponentID(),
-                                        cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(),
+                                // Move marshal left
+                                actions.add(new MoveMarshalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i-1).getComponentID()));
-                            if (i < cegs.trainCompartments.size() - 1)
-                                actions.add(new MoveMarshalAction(cegs.plannedActions.getComponentID(),
-                                        cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(),
+                            if (i < cegs.trainCompartments.size() - 2)
+                                // Move marshal right
+                                actions.add(new MoveMarshalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i+1).getComponentID()));
-
                             break;
                         }
                     }
                     break;
                 case CollectMoney:
-                    Deck<Loot> availableLoot = null;
                     for (Compartment compartment : cegs.trainCompartments) {
+                        Deck<Loot> availableLoot = null;
                         if (compartment.playersOnTopOfCompartment.contains(player))
                             availableLoot = compartment.lootOnTop;
                         else if (compartment.playersInsideCompartment.contains(player))
                             availableLoot = compartment.lootInside;
-                        if (availableLoot != null) {
+                        if (availableLoot != null && availableLoot.getSize() > 0) {
                             for (Loot loot : availableLoot.getComponents()) {
-                                actions.add(new CollectMoneyAction(cegs.plannedActions.getComponentID(),
-                                        cegs.playerDecks.get(player).getComponentID(), loot.getComponentID(), availableLoot.getComponentID()));
+                                actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx, loot.getComponentID(),
+                                        availableLoot.getComponentID()));
                             }
                             break;
                         }
                     }
                     if (actions.size() == 0) {
-                        actions.add(new CollectMoneyAction(cegs.plannedActions.getComponentID(),
-                                cegs.playerDecks.get(player).getComponentID(), -1, -1));
+                        actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx,-1, -1));
                     }
                     break;
                 case MoveSideways:
                     for (int i = 0; i < cegs.trainCompartments.size(); i++){
                         Compartment compartment = cegs.trainCompartments.get(i);
                         if (compartment.playersOnTopOfCompartment.contains(player)){
+                            // Rules for movement on top
                             for (int offset = 1; offset < ((ColtExpressParameters)cegs.getGameParameters()).nRoofMove; offset++){
                                 if ((i-offset) > 0) {
-                                    actions.add(new MoveSidewaysAction(cegs.plannedActions.getComponentID(),
-                                            cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(),
+                                    // Move left
+                                    actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                             cegs.trainCompartments.get(i-offset).getComponentID()));
                                 }
-                                if ((i+offset) < cegs.trainCompartments.size()) {
-                                    actions.add(new MoveSidewaysAction(cegs.plannedActions.getComponentID(),
-                                            cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(),
+                                if ((i+offset) < cegs.trainCompartments.size()-1) {
+                                    // Move right
+                                    actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                             cegs.trainCompartments.get(i+offset).getComponentID()));
                                 }
                             }
                             break;
-                        }
-                        else if (compartment.playersInsideCompartment.contains(player)){
+                        } else if (compartment.playersInsideCompartment.contains(player)){
+                            // Inside can only move to adjacent compartment
                             if ((i-1) > 0) {
-                                actions.add(new MoveSidewaysAction(cegs.plannedActions.getComponentID(),
-                                        cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(),
+                                // Move left
+                                actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i-1).getComponentID()));
                             }
-                            if ((i+1) < cegs.trainCompartments.size()) {
-                                actions.add(new MoveSidewaysAction(cegs.plannedActions.getComponentID(),
-                                        cegs.playerDecks.get(player).getComponentID(), compartment.getComponentID(),
+                            if ((i+1) < cegs.trainCompartments.size()-1) {
+                                // Move right
+                                actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i+1).getComponentID()));
                             }
                             break;
@@ -418,7 +418,11 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         return actions;
     }
 
-    private void createPunchingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player){
+    private void createPunchingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player, int cardIdx){
+        int deckFromID = cegs.plannedActions.getComponentID();
+        int deckToID = cegs.playerDecks.get(player).getComponentID();
+        boolean playerIsCheyenne = cegs.playerCharacters.get(player) == CharacterType.Cheyenne;
+
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
         HashSet<Integer> availableTargets = new HashSet<>();
@@ -445,50 +449,54 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 playerCompartment = compartment;
                 break;
             }
-
         }
 
-        if (availableTargets.size() > 1)
-            availableTargets.remove(cegs.playerPlayingBelle);
-        boolean playerIsCheyenne = cegs.playerCharacters.get(player) == CharacterType.Cheyenne;
-
         // punch forward or backward
-        for (int offset = -1; offset <= 1; offset++){
-            if (offset == 0 || playerCompartmentIndex+offset < 0 || playerCompartmentIndex+offset >= cegs.trainCompartments.size())
-                continue;
-            Compartment targetCompartment = cegs.trainCompartments.get(playerCompartmentIndex+offset);
-            for (Integer targetPlayer : availableTargets){
-                Deck<Loot> availableLoot = cegs.playerLoot.get(targetPlayer);
+        if (playerCompartment != null) {
+            int sourceCompID = playerCompartment.getComponentID();
 
-                if (availableLoot.getSize() > 0){
-                    for (Loot loot : availableLoot.getComponents())
-                    {
-                        actions.add(new PunchAction(cegs.plannedActions.getComponentID(),
-                                cegs.playerDecks.get(player).getComponentID(), targetPlayer,
-                                playerCompartment.getComponentID(), targetCompartment.getComponentID(),
-                                loot.getComponentID(), availableLoot.getComponentID(), playerIsCheyenne));
+            // Belle can't be a target if others are available
+            if (availableTargets.size() > 1)
+                availableTargets.remove(cegs.playerPlayingBelle);
+
+            // Create punch actions
+            for (int offset = -1; offset <= 1; offset++) {
+                if (offset == 0 || playerCompartmentIndex + offset < 0 || playerCompartmentIndex + offset >= cegs.trainCompartments.size())
+                    continue;
+                Compartment targetCompartment = cegs.trainCompartments.get(playerCompartmentIndex + offset);
+                for (Integer targetPlayer : availableTargets) {
+                    Deck<Loot> availableLoot = cegs.playerLoot.get(targetPlayer);
+
+                    if (availableLoot.getSize() > 0) {
+                        for (Loot loot : availableLoot.getComponents()) {
+                            actions.add(new PunchAction(deckFromID, deckToID, cardIdx, targetPlayer,
+                                    sourceCompID, targetCompartment.getComponentID(),
+                                    loot.getComponentID(), availableLoot.getComponentID(), playerIsCheyenne));
+                        }
+                    } else {
+                        // punch opponent that cannot drop anymore loot
+                        actions.add(new PunchAction(deckFromID, deckToID, cardIdx, targetPlayer,
+                                sourceCompID, targetCompartment.getComponentID(),
+                                -1, -1, playerIsCheyenne));
                     }
-                }
-                else {
-                    // punch opponent that cannot drop anymore loot
-                    actions.add(new PunchAction(cegs.plannedActions.getComponentID(),
-                            cegs.playerDecks.get(player).getComponentID(), targetPlayer,
-                            playerCompartment.getComponentID(), targetCompartment.getComponentID(),
-                            -1, -1, playerIsCheyenne));
                 }
             }
         }
 
         if (actions.size() == 0)
-            actions.add(new PunchAction(cegs.plannedActions.getComponentID(),
-                    cegs.playerDecks.get(player).getComponentID(), -1, -1, -1,
+            actions.add(new PunchAction(deckFromID, deckToID, cardIdx, -1, -1, -1,
                     -1, -1, playerIsCheyenne));
     }
 
-    private void createShootingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player) {
+    private void createShootingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player, int cardIdx) {
+        int deckFromID = cegs.plannedActions.getComponentID();
+        int deckToID = cegs.playerDecks.get(player).getComponentID();
+        boolean playerIsDjango = cegs.playerCharacters.get(player) == CharacterType.Django;
+
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
         boolean playerOnTop = false;
+
         for (int i = 0; i < cegs.trainCompartments.size(); i++)
         {
             Compartment compartment = cegs.trainCompartments.get(i);
@@ -505,6 +513,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         }
         if (playerCompartment != null) {
 
+            int sourceCompID = playerCompartment.getComponentID();
             HashMap<Integer, Compartment> targets = new HashMap<>();
 
             if (playerOnTop) {
@@ -560,15 +569,14 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (targets.size() > 1)
                 targets.remove(cegs.playerPlayingBelle);
 
-            boolean playerIsDjango = cegs.playerCharacters.get(player) == CharacterType.Django;
             for (Map.Entry<Integer, Compartment> entry : targets.entrySet()) {
-                actions.add(new ShootPlayerAction(cegs.plannedActions.getComponentID(), cegs.playerDecks.get(player).getComponentID(),
-                        playerCompartment.getComponentID(), entry.getValue().getComponentID(), entry.getKey(), playerIsDjango));
+                actions.add(new ShootPlayerAction(deckFromID, deckToID, cardIdx, sourceCompID,
+                        entry.getValue().getComponentID(), entry.getKey(), playerIsDjango));
             }
 
             if (actions.size() == 0)
-                actions.add(new ShootPlayerAction(cegs.plannedActions.getComponentID(), cegs.playerDecks.get(player).getComponentID(),
-                        playerCompartment.getComponentID(),-1, -1, playerIsDjango));
+                actions.add(new ShootPlayerAction(deckFromID, deckToID, cardIdx, sourceCompID,
+                        -1, -1, playerIsDjango));
         }
     }
 

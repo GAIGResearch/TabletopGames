@@ -17,9 +17,9 @@ public class ShootPlayerAction extends DrawCard {
 
     private final boolean isDjango;
 
-    public ShootPlayerAction(int plannedActions, int playerDeck,
+    public ShootPlayerAction(int plannedActions, int playerDeck, int cardIdx,
                              int playerCompartment, int targetCompartment, int targetID, boolean isDjango) {
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
         this.targetID = targetID;
         this.playerCompartment = playerCompartment;
         this.targetCompartment = targetCompartment;
@@ -106,6 +106,6 @@ public class ShootPlayerAction extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new ShootPlayerAction(deckFrom, deckTo, playerCompartment, targetCompartment, targetID, isDjango);
+        return new ShootPlayerAction(deckFrom, deckTo, fromIndex, playerCompartment, targetCompartment, targetID, isDjango);
     }
 }

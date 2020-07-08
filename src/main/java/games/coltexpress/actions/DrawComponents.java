@@ -2,8 +2,6 @@ package games.coltexpress.actions;
 
 import core.AbstractGameState;
 import core.components.Component;
-import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
 
 public class DrawComponents<T extends Component> extends core.actions.DrawComponents<T> {
     /**

@@ -13,9 +13,9 @@ public class MoveMarshalAction extends DrawCard {
     private final int sourceCompartment;
     private final int targetCompartment;
 
-    public MoveMarshalAction(int plannedActions, int playerDeck,
+    public MoveMarshalAction(int plannedActions, int playerDeck, int cardIdx,
                               int sourceCompartment, int targetCompartment){
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
 
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
@@ -67,6 +67,6 @@ public class MoveMarshalAction extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new MoveMarshalAction(deckFrom, deckTo, sourceCompartment, targetCompartment);
+        return new MoveMarshalAction(deckFrom, deckTo, fromIndex, sourceCompartment, targetCompartment);
     }
 }

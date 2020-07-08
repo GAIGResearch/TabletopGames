@@ -239,9 +239,11 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     public void addBullet(Integer playerID, Integer shooterID) {
-        this.playerDecks.get(playerID).add(new ColtExpressCard(shooterID, ColtExpressCard.CardType.Bullet));
-        if (playerCharacters.containsKey(shooterID))
-            bulletsLeft[shooterID]--;
+        if (bulletsLeft[shooterID] > 0) {
+            this.playerDecks.get(playerID).add(new ColtExpressCard(shooterID, ColtExpressCard.CardType.Bullet));
+            if (playerCharacters.containsKey(shooterID))
+                bulletsLeft[shooterID]--;
+        }
     }
 
     public LinkedList<Compartment> getTrainCompartments() {

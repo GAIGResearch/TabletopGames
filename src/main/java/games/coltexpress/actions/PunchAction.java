@@ -24,7 +24,7 @@ public class PunchAction  extends DrawCard {
     private final int availableLoot;
     private final boolean playerIsCheyenne;
 
-    public PunchAction(int plannedActions, int playerDeck,
+    public PunchAction(int plannedActions, int playerDeck, int cardIdx,
                        int opponentID, int sourceCompartment, int targetCompartment, int loot,
                        int availableLoot, boolean playerIsCheyenne) {
         super(plannedActions, playerDeck);
@@ -131,6 +131,6 @@ public class PunchAction  extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new PunchAction(deckFrom, deckTo, opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
+        return new PunchAction(deckFrom, deckTo, fromIndex, opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
     }
 }

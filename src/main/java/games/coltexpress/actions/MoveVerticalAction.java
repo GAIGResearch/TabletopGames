@@ -13,9 +13,9 @@ public class MoveVerticalAction extends DrawCard {
     private final int compartment;
     private final boolean climbRoof;
 
-    public MoveVerticalAction(int plannedActions, int playerDeck,
+    public MoveVerticalAction(int plannedActions, int playerDeck, int cardIdx,
                               int compartment, boolean toRoof){
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
 
         this.compartment = compartment;
         this.climbRoof = toRoof;
@@ -65,6 +65,6 @@ public class MoveVerticalAction extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new MoveVerticalAction(deckFrom, deckTo, compartment, climbRoof);
+        return new MoveVerticalAction(deckFrom, deckTo, fromIndex, compartment, climbRoof);
     }
 }
