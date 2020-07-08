@@ -77,7 +77,7 @@ public class ShootPlayerAction extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ShootPlayerAction)) return false;
         if (!super.equals(o)) return false;
         ShootPlayerAction that = (ShootPlayerAction) o;
         return targetID == that.targetID &&
@@ -95,6 +95,13 @@ public class ShootPlayerAction extends DrawCard {
         if (targetID != -1)
             return "Shoot player " + targetID;
         return "Player attempts to shoot but has not target available";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        String character = ((ColtExpressGameState)gameState).getPlayerCharacters().get(targetID).name();
+        return "Shoot " + character + (isDjango?" to c=" + target.getCompartmentID(): "");
     }
 
     @Override

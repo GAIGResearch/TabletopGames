@@ -42,7 +42,7 @@ public class MoveMarshalAction extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MoveMarshalAction)) return false;
         if (!super.equals(o)) return false;
         MoveMarshalAction that = (MoveMarshalAction) o;
         return sourceCompartment == that.sourceCompartment &&
@@ -56,6 +56,13 @@ public class MoveMarshalAction extends DrawCard {
 
     public String toString(){
         return "MoveMarshal to compartment " + targetCompartment;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        int idx = target.getCompartmentID();
+        return "Move marshal to comp=" + idx;
     }
 
     @Override

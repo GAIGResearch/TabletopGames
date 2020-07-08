@@ -143,4 +143,8 @@ public class ColtExpressTurnOrder extends TurnOrder {
             gameState.setGameStatus(GAME_END);
         }
     }
+
+    public int getFullPlayerTurnCounter() {
+        return fullPlayerTurnCounter;
+    }
 }

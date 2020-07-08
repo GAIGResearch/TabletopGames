@@ -50,7 +50,7 @@ public class MoveSidewaysAction extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MoveSidewaysAction)) return false;
         if (!super.equals(o)) return false;
         MoveSidewaysAction that = (MoveSidewaysAction) o;
         return sourceCompartment == that.sourceCompartment &&
@@ -64,6 +64,19 @@ public class MoveSidewaysAction extends DrawCard {
 
     public String toString(){
         return "MoveSideways";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        Compartment source = (Compartment) gameState.getComponentById(sourceCompartment);
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        int idxS = source.getCompartmentID();
+        int idxT = target.getCompartmentID();
+        if (idxT > idxS) {
+            return "Move right";
+        } else {
+            return "Move left";
+        }
     }
 
     @Override

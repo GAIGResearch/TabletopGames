@@ -42,7 +42,7 @@ public class SchemeAction extends DrawCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SchemeAction)) return false;
         if (!super.equals(o)) return false;
         SchemeAction that = (SchemeAction) o;
         return hidden == that.hidden;
@@ -55,7 +55,7 @@ public class SchemeAction extends DrawCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return ((ColtExpressCard)getCard(gameState)).cardType.name();
     }
 
     @Override

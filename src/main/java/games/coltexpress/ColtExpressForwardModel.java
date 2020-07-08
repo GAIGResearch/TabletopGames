@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.actions.DrawComponents;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
@@ -270,20 +269,33 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         ColtExpressParameters cep = (ColtExpressParameters)cegs.getGameParameters();
         int player = cegs.getTurnOrder().getCurrentPlayer(cegs);
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        for (ColtExpressCard c : cegs.playerHandCards.get(player).getComponents()){
-            if (c.cardType == ColtExpressCard.CardType.Bullet)
+        HashSet<ColtExpressCard.CardType> types = new HashSet<>();
+
+        Deck<ColtExpressCard> playerHand = cegs.playerHandCards.get(player);
+        int fromID = playerHand.getComponentID();
+        int toID = cegs.plannedActions.getComponentID();
+
+        // Add 1 action for each card type in player's hand
+        for (int i = 0; i < playerHand.getSize(); i++){
+            ColtExpressCard c = playerHand.get(i);
+            if (c.cardType == ColtExpressCard.CardType.Bullet || types.contains(c.cardType))
                 continue;
 
-            int cardIdx = cegs.playerHandCards.get(player).getComponents().indexOf(c);
-            // ghost can play a card hidden during the first turn
+            // Ghost can play a card hidden during the first turn of a round, otherwise hidden is turn is hidden
             boolean hidden = ((ColtExpressTurnOrder) cegs.getTurnOrder()).isHiddenTurn() ||
                     (cegs.playerCharacters.get(player) == CharacterType.Ghost &&
-                            cegs.getTurnOrder().getRoundCounter() == 0);
+                            ((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == 0);
 
-            actions.add(new SchemeAction(cegs.playerHandCards.get(player).getComponentID(),
-                    cegs.plannedActions.getComponentID(), cardIdx, hidden));
+            // Add action
+            actions.add(new SchemeAction(fromID, toID, i, hidden));
+            types.add(c.cardType);
         }
-        actions.add(new DrawComponents<ColtExpressCard>(cegs.playerHandCards.get(player).getComponentID(), cegs.playerDecks.get(player).getComponentID(), cep.nCardsDraw));
+
+        // Can draw cards if enough left in deck
+        int nDraw = Math.min(cegs.playerDecks.get(player).getSize(), cep.nCardsDraw);
+        if (nDraw > 0) {
+            actions.add(new DrawComponents<ColtExpressCard>(cegs.playerDecks.get(player).getComponentID(), fromID, nDraw));
+        }
         return actions;
     }
 

@@ -94,7 +94,7 @@ public class PunchAction  extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PunchAction)) return false;
         if (!super.equals(o)) return false;
         PunchAction that = (PunchAction) o;
         return opponentID == that.opponentID &&
@@ -108,6 +108,14 @@ public class PunchAction  extends DrawCard {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        String character = ((ColtExpressGameState)gameState).getPlayerCharacters().get(opponentID).name();
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        int tIdx = target.getCompartmentID();
+        return "Punch " + character + " to c=" + tIdx;
     }
 
     @Override

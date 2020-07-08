@@ -29,7 +29,7 @@ public class ColtExpressCard extends Card {
     }
 
     public String toString(){
-        return cardType.toString() + "(" + playerID + ")";
+        return cardType.name() + "(" + playerID + ")";
     }
 
     @Override

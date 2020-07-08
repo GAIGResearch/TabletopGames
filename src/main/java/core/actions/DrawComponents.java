@@ -63,7 +63,9 @@ public class DrawComponents<T extends Component> extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof DrawComponents)) {
+            return false;
+        }
         DrawComponents<?> that = (DrawComponents<?>) o;
         return deckFrom == that.deckFrom &&
                 deckTo == that.deckTo &&
