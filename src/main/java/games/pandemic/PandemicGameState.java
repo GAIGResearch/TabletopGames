@@ -6,7 +6,7 @@ import core.components.*;
 import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -128,7 +128,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      * @param pp - Game parameters.
      * @param nPlayers - number of players.
      */
-    public PandemicGameState(AbstractGameParameters pp, int nPlayers) {
+    public PandemicGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
         data = new PandemicData();
         data.load(((PandemicParameters)gameParameters).getDataPath());
@@ -206,7 +206,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
                     if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
-                        Random r = new Random(gs.getGameParameters().getGameSeed());
+                        Random r = new Random(gs.getGameParameters().getRandomSeed());
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled

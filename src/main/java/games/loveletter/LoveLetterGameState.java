@@ -1,6 +1,6 @@
 package games.loveletter;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Component;
 import core.interfaces.IGamePhase;
@@ -42,7 +42,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Affection tokens per player
     int[] affectionTokens;
 
-    public LoveLetterGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new LoveLetterTurnOrder(nPlayers));
         gamePhase = Draw;
     }
@@ -86,7 +86,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                     llgs.drawPile.add(llgs.reserveCards.get(i));
                 }
             }
-            Random r = new Random(llgs.getGameParameters().getGameSeed());
+            Random r = new Random(llgs.getGameParameters().getRandomSeed());
             llgs.drawPile.shuffle(r);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {

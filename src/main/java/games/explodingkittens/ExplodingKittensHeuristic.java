@@ -32,7 +32,7 @@ public class ExplodingKittensHeuristic implements IStateHeuristic {
             cardValues += getCardValue(ekgs, card);
         }
 
-        return cardValues/ekgs.playerHandCards.get(playerId).getSize();
+        return cardValues/(ekgs.playerHandCards.get(playerId).getSize()+1);
     }
 
     // TODO: check state more

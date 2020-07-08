@@ -31,7 +31,7 @@ public class PlayCard extends DrawCard implements IPrintable {
         UnoGameState ugs = (UnoGameState)gameState;
         super.execute(gameState);
 
-        Random r = new Random(ugs.getGameParameters().getGameSeed() + ugs.getTurnOrder().getRoundCounter());
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
 
         UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
         ugs.updateCurrentCard(cardToBePlayed);

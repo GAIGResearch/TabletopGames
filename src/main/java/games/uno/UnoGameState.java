@@ -1,6 +1,6 @@
 package games.uno;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
@@ -28,7 +28,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * @param gameParameters - game parameters.
      * @param nPlayers      - number of players for this game.
      */
-    public UnoGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new UnoTurnOrder(nPlayers));
     }
 
@@ -129,7 +129,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         if (PARTIAL_OBSERVABLE && playerId != -1) {
             // Other player cards and the draw deck are unknown.
             // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
-            Random r = new Random(copy.gameParameters.getGameSeed());
+            Random r = new Random(copy.gameParameters.getRandomSeed());
             for (Deck<UnoCard> d: copy.playerDecks) {
                 copy.drawDeck.add(d);
             }

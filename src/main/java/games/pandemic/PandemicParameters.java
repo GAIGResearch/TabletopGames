@@ -1,10 +1,10 @@
 package games.pandemic;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 
 import java.util.HashMap;
 
-public class PandemicParameters extends AbstractGameParameters {
+public class PandemicParameters extends AbstractParameters {
 
     String dataPath;
 
@@ -143,7 +143,7 @@ public class PandemicParameters extends AbstractGameParameters {
     public String getDataPath(){return dataPath;}
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         return new PandemicParameters(this);
     }
 }

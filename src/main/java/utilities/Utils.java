@@ -48,6 +48,12 @@ public abstract class Utils {
         }
     }
 
+    /**
+     * Finds index in array of String objects.
+     * @param array - array of String
+     * @param object - object to look for
+     * @return - index of String object, -1 if not found
+     */
     public static int indexOf (String[] array, String object) {
         for (int i = 0; i < array.length; i++) {
             if (object.equals(array[i])) {
@@ -56,6 +62,13 @@ public abstract class Utils {
         }
         return -1;
     }
+
+    /**
+     * Finds index of integer in array.
+     * @param array - array of integers
+     * @param object - integer to look for
+     * @return - index of integer object, -1 if not found
+     */
     public static int indexOf (int[] array, int object) {
         for (int i = 0; i < array.length; i++) {
             if (object == array[i]) {
@@ -65,6 +78,12 @@ public abstract class Utils {
         return -1;
     }
 
+    /**
+     * Generates all permutations of a given array of integers.
+     * @param n - current index to search up to
+     * @param elements - array with elements
+     * @param all - list where all permutations should be added
+     */
     public static void generatePermutations(int n, int[] elements, ArrayList<int[]> all) {
         if (n == 1) {
             all.add(elements.clone());
@@ -81,6 +100,12 @@ public abstract class Utils {
         }
     }
 
+    /**
+     * Performs a swap of 2 elements in an integer array at given indexes. Modifies original array.
+     * @param input - input array
+     * @param a - index of first element
+     * @param b - index of second element
+     */
     public static void swap(int[] input, int a, int b) {
         int tmp = input[a];
         input[a] = input[b];
@@ -114,5 +139,30 @@ public abstract class Utils {
             if (x < width-1 && y > 0) neighbours.add(new Vector2D(x+1, y-1));
         }
         return neighbours;
+    }
+
+    /**
+     * Normalizes a value in range [0, 1] given its minimum and maximum possible.
+     * @param a_value - value to normalize
+     * @param a_min - minimum possible
+     * @param a_max - maximum possible
+     * @return - normalized value
+     */
+    public static double normalise(double a_value, double a_min, double a_max) {
+        if (a_min < a_max)
+            return (a_value - a_min)/(a_max - a_min);
+        else    // if bounds are invalid, then return same value
+            return a_value;
+    }
+
+    /**
+     * Applies random noise to input.
+     * @param input - value to apply noise to.
+     * @param epsilon - how much should the noise weigh in returned value.
+     * @param random - how much noise should be applied.
+     * @return - new value with noise applied.
+     */
+    public static double noise(double input, double epsilon, double random) {
+        return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 }

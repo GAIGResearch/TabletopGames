@@ -1,6 +1,6 @@
 package games.virus;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
@@ -61,7 +61,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         discardDeck = null;
     }
 
-    public VirusGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new VirusTurnOrder(nPlayers));
     }
 

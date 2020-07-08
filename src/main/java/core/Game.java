@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.GameType;
 import players.*;
+import players.mcts.MCTSPlayer;
 import utilities.StatSummary;
 import utilities.Utils;
 
@@ -300,7 +301,7 @@ public class Game {
 
             // Randomize parameters
             if (randomizeParameters) {
-                AbstractGameParameters gameParameters = game.getGameState().getGameParameters();
+                AbstractParameters gameParameters = game.getGameState().getGameParameters();
                 gameParameters.randomize();
             }
 
@@ -489,19 +490,26 @@ public class Game {
 //        players.add(new OSLA());
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
+//        players.add(new RandomPlayer(new Random()));
+        players.add(new MCTSPlayer(System.currentTimeMillis()));
         players.add(new OSLA());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-//        runOne(TicTacToe, players, seed, ac, false);
+//        runOne(LoveLetter, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
+//        ArrayList<GameType> games = new ArrayList<>();
+//        games.add(Pandemic);
+//        games.add(LoveLetter);
+
         ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+        games.remove(LoveLetter);
         games.remove(Pandemic);
         games.remove(TicTacToe);
-        runMany(games, players, null, 50, null, false, false);
+//        runMany(games, players, null, 50, null, false, true);
+        runMany(games, players, null, 10, null, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }
