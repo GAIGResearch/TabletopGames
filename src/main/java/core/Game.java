@@ -154,6 +154,8 @@ public class Game {
             currentPlayer = players.get(activePlayer);
 
             // GUI update
+            // Get actions for the player
+            List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             updateGUI(gui);
 
             if (gameState.isNotTerminal()) {
@@ -161,9 +163,9 @@ public class Game {
                     System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
                 }
 
-                // Get actions for the player
-                List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
+                // Get player observation
                 AbstractGameState observation = gameState.copy(activePlayer);
+
                 if (observation instanceof IPrintable && VERBOSE) {
                     ((IPrintable) observation).printToConsole();
                 }
