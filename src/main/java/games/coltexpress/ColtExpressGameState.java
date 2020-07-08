@@ -246,6 +246,22 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         }
     }
 
+    public List<Integer> getBestShooters() {
+        ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
+        List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
+        int bestValue = cep.nBulletsPerPlayer;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (bulletsLeft[i] < bestValue){
+                bestValue = bulletsLeft[i];
+                playersWithMostSuccessfulShots.clear();
+                playersWithMostSuccessfulShots.add(i);
+            } else if (bulletsLeft[i] == bestValue) {
+                playersWithMostSuccessfulShots.add(i);
+            }
+        }
+        return playersWithMostSuccessfulShots;
+    }
+
     public LinkedList<Compartment> getTrainCompartments() {
         return trainCompartments;
     }

@@ -126,7 +126,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     drawRoundCard(g, (RoundCard) deck.get(cardHighlight), r, visible);
                 }
             }
-            if (!(deck.get(0) instanceof RoundCard)) {
+            if (deck.get(0) instanceof ColtExpressCard) {
                 g.setColor(Color.black);
                 g.drawString("" + deck.getSize(), rect.x + 10, rect.y + rect.height - size);
             }
@@ -155,7 +155,12 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
     }
 
     private void drawLoot(Graphics2D g, Loot loot, Rectangle r, boolean visible) {
-        Image lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_behind.png");
+        Image lootFace;
+        if (visible) {
+            lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_" + loot.getValue() + ".png");
+        } else {
+            lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_behind.png");
+        }
         g.drawImage(lootFace, r.x, r.y, r.width, r.height, null);
     }
 

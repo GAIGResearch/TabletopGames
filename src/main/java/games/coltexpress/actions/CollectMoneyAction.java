@@ -36,6 +36,7 @@ public class CollectMoneyAction extends DrawCard {
             if (available.getComponentID() == loot) {
                 ColtExpressCard card = (ColtExpressCard) getCard(gameState);
                 ((ColtExpressGameState) gameState).addLoot(card.playerID, available);
+                availableLootDeck.remove(available);
                 return true;
             }
         }
@@ -67,7 +68,7 @@ public class CollectMoneyAction extends DrawCard {
     @Override
     public String getString(AbstractGameState gameState) {
         if (availableLoot == -1) return "Collect loot (none)";
-        
+
         Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
         ColtExpressTypes.LootType lt = null;
         for (Loot available : availableLootDeck.getComponents()){

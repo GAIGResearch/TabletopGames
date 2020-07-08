@@ -35,11 +35,11 @@ public class MoveSidewaysAction extends DrawCard {
             if (target.containsMarshal){
                 ((ColtExpressGameState) gs).addNeutralBullet(card.playerID);
                 target.playersOnTopOfCompartment.add(card.playerID);
-            }
-            else
+            } else {
                 target.playersInsideCompartment.add(card.playerID);
+            }
         }
-        else{
+        else {
             source.playersOnTopOfCompartment.remove(card.playerID);
             target.playersOnTopOfCompartment.add(card.playerID);
         }
@@ -72,10 +72,11 @@ public class MoveSidewaysAction extends DrawCard {
         Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
         int idxS = source.getCompartmentID();
         int idxT = target.getCompartmentID();
+        int diff = Math.abs(idxS-idxT);
         if (idxT > idxS) {
-            return "Move right";
+            return "Move right" + (diff>1? " " + diff : "");
         } else {
-            return "Move left";
+            return "Move left" + (diff>1? " " + diff : "");
         }
     }
 

@@ -2,6 +2,7 @@ package games.coltexpress.gui;
 
 import core.components.Deck;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
@@ -30,6 +31,11 @@ public class ColtExpressPlayerView extends JComponent {
 
     Image cardBack;
 
+    int lootSum = -1;
+    boolean bestShooter;
+    int shooterReward;
+    boolean gameEnd;
+
     public ColtExpressPlayerView(int playerId, String dataPath,
                                  HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         this.playerId = playerId;
@@ -50,10 +56,27 @@ public class ColtExpressPlayerView extends JComponent {
         g.setColor(Color.black);
         g.drawString(playerCard.name(), ceCardWidth/2-20, ceCardHeight-5);
 
-        // Draw loot, bullets left
+        // Draw loot, bullets left, points total if game end
         playerLoot.drawDeck((Graphics2D) g, new Rectangle(ceCardWidth + 10, 0, defaultItemSize*2, defaultItemSize));
         g.setColor(Color.black);
         g.drawString("Bullets left: " + bulletsLeft, ceCardWidth + defaultItemSize*2 + 15, ceCardHeight*2/3);
+        if (gameEnd) {
+            if (lootSum == -1) {
+                lootSum = 0;
+                for (Loot loot: ((Deck<Loot>)playerLoot.getComponent()).getComponents()) {
+                    lootSum += loot.getValue();
+                }
+                if (bestShooter) {
+                    lootSum += shooterReward;
+                }
+            }
+            String endResult = "";
+            if (bestShooter) {
+                endResult += "* ";
+            }
+            endResult += "Total points: " + lootSum;
+            g.drawString(endResult, ceCardWidth + defaultItemSize*2 + 15, ceCardHeight/3);
+        }
 
         // Draw player deck
         g.drawImage(cardBack, 0, ceCardHeight + 5, ceCardWidth, ceCardHeight, null);
@@ -72,8 +95,11 @@ public class ColtExpressPlayerView extends JComponent {
         playerDeck = gameState.getPlayerDecks().get(playerId);
         playerHand.updateComponent(gameState.getPlayerHandCards().get(playerId));
         playerLoot.updateComponent(gameState.getLoot(playerId));
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_END) {
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_END && !gameEnd) {
+            gameEnd = true;
             playerLoot.setFront(true);
+            bestShooter = gameState.getBestShooters().contains(playerId);
+            shooterReward = ((ColtExpressParameters)gameState.getGameParameters()).shooterReward;
         }
         bulletsLeft = gameState.getBulletsLeft()[playerId];
 

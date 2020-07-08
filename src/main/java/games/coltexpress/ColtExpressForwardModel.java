@@ -185,8 +185,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         int[] pointsPerPlayer = new int[cegs.getNPlayers()];
         int[] bulletCardsPerPlayer = new int[cegs.getNPlayers()];
 
-        List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
-        int bestValue = cep.nBulletsPerPlayer;
+        List<Integer> playersWithMostSuccessfulShots = cegs.getBestShooters();
         for (int i = 0; i < cegs.getNPlayers(); i++) {
             for (Loot loot : cegs.playerLoot.get(i).getComponents())
                 pointsPerPlayer[i] += loot.getValue();
@@ -196,21 +195,13 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             for (ColtExpressCard card : cegs.playerHandCards.get(i).getComponents())
                 if (card.cardType == ColtExpressCard.CardType.Bullet)
                     bulletCardsPerPlayer[i]++;
-
-            if (cegs.bulletsLeft[i] < bestValue){
-                bestValue = cegs.bulletsLeft[i];
-                playersWithMostSuccessfulShots.clear();
-                playersWithMostSuccessfulShots.add(i);
-            } else if (cegs.bulletsLeft[i] == bestValue) {
-                playersWithMostSuccessfulShots.add(i);
-            }
         }
 
         for (Integer bestShooter : playersWithMostSuccessfulShots)
             pointsPerPlayer[bestShooter] += cep.shooterReward;
 
         LinkedList<Integer> potentialWinnersByPoints = new LinkedList<>();
-        bestValue = 0;
+        int bestValue = 0;
         for (int i = 0; i < cegs.getNPlayers(); i++) {
             if (pointsPerPlayer[i] > bestValue){
                 bestValue = pointsPerPlayer[i];
@@ -220,8 +211,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 potentialWinnersByPoints.add(i);
             }
         }
-        if (potentialWinnersByPoints.size() == 1)
-        {
+
+        if (potentialWinnersByPoints.size() == 1) {
             cegs.setPlayerResult(Utils.GameResult.WIN, potentialWinnersByPoints.get(0));
         } else {
 
@@ -379,12 +370,12 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                         if (compartment.playersOnTopOfCompartment.contains(player)){
                             // Rules for movement on top
                             for (int offset = 1; offset < ((ColtExpressParameters)cegs.getGameParameters()).nRoofMove; offset++){
-                                if ((i-offset) > 0) {
+                                if ((i-offset) >= 0) {
                                     // Move left
                                     actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                             cegs.trainCompartments.get(i-offset).getComponentID()));
                                 }
-                                if ((i+offset) < cegs.trainCompartments.size()-1) {
+                                if ((i+offset) <= cegs.trainCompartments.size()-1) {
                                     // Move right
                                     actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                             cegs.trainCompartments.get(i+offset).getComponentID()));
@@ -393,12 +384,12 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                             break;
                         } else if (compartment.playersInsideCompartment.contains(player)){
                             // Inside can only move to adjacent compartment
-                            if ((i-1) > 0) {
+                            if ((i-1) >= 0) {
                                 // Move left
                                 actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i-1).getComponentID()));
                             }
-                            if ((i+1) < cegs.trainCompartments.size()-1) {
+                            if ((i+1) <= cegs.trainCompartments.size()-1) {
                                 // Move right
                                 actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i+1).getComponentID()));
