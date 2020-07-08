@@ -19,15 +19,15 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class ColtExpressGUI extends AbstractGUI {
     final static int playerAreaWidth = 300;
-    final static int playerAreaWidthScroll = 300;
+    final static int playerAreaWidthScroll = 290;
     final static int playerAreaHeight = 320;
     final static int playerAreaHeightScroll = 150;
     final static int ceCardWidth = 50;
-    final static int ceCardHeight = 65;
+    final static int ceCardHeight = 60;
     final static int roundCardWidth = 80;
     final static int roundCardHeight = 50;
     final static int trainCarWidth = 130;
-    final static int trainCarHeight = 90;
+    final static int trainCarHeight = 80;
     final static int playerSize = 40;
     final static int lootSize = 20;
 
@@ -73,6 +73,10 @@ public class ColtExpressGUI extends AbstractGUI {
             for (int i = 0; i < locations.length; i++) {
                 JScrollPane jsp = new JScrollPane(sides[i]);
                 jsp.setPreferredSize(new Dimension(playerAreaWidthScroll, playerAreaHeightScroll));
+                jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+                jsp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                jsp.setBorder(null);
+//                sides[next].setPreferredSize(new Dimension(playerAreaWidth, playerAreaHeight));  // TODO: multiple people width
                 mainGameArea.add(jsp, locations[i]);
             }
 
@@ -90,7 +94,7 @@ public class ColtExpressGUI extends AbstractGUI {
             mainGameArea.add(jp, BorderLayout.CENTER);
 
             // Top area will show state information
-            JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
+            JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
             JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 

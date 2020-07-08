@@ -59,7 +59,7 @@ public class ColtExpressPlayerView extends JComponent {
         g.drawString("" + playerDeck.getSize(), 10, ceCardHeight*2 - 5);
 
         // Draw player hand
-        playerHand.drawDeck((Graphics2D) g, new Rectangle(ceCardWidth + 20, ceCardHeight + 5, width-ceCardWidth*2-20, ceCardHeight));
+        playerHand.drawDeck((Graphics2D) g, new Rectangle(ceCardWidth + 30, ceCardHeight + 5, width-ceCardWidth*2-30, ceCardHeight));
 
     }
 
