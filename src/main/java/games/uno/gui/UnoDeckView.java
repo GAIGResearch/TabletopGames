@@ -7,6 +7,8 @@ import gui.views.ComponentView;
 import utilities.ImageIO;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -20,6 +22,7 @@ public class UnoDeckView extends ComponentView {
 
     Rectangle[] rects;
     int cardHighlight = -1;  // left click show card, right click back in deck
+    boolean highlighting;
 
     public UnoDeckView(Deck<UnoCard> d, boolean visible, String dataPath) {
         super(d, playerAreaWidth, unoCardHeight);
@@ -27,6 +30,38 @@ public class UnoDeckView extends ComponentView {
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
         this.dataPath = dataPath;
 
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ALT) {
+                    highlighting = true;
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ALT) {
+                    highlighting = false;
+                    cardHighlight = -1;
+                }
+            }
+        });
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (highlighting) {
+                    for (int i = 0; i < rects.length; i++) {
+                        if (rects[i].contains(e.getPoint())) {
+                            cardHighlight = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        });
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

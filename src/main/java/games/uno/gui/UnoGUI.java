@@ -93,8 +93,8 @@ public class UnoGUI extends AbstractGUI {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
-                activePlayer = gameState.getCurrentPlayer();
                 playerHands[activePlayer].setCardHighlight(-1);
+                activePlayer = gameState.getCurrentPlayer();
             }
 
             // Update decks and visibility
@@ -105,11 +105,13 @@ public class UnoGUI extends AbstractGUI {
                         || i == humanID
                         || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
                     playerHands[i].setFront(true);
+                    playerHands[i].setFocusable(true);
                 } else {
                     playerHands[i].setFront(false);
                 }
             }
             discardPile.updateComponent(ugs.getDiscardDeck());
+            discardPile.setFocusable(true);
             drawPile.updateComponent(ugs.getDrawDeck());
             if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
                 drawPile.setFront(true);

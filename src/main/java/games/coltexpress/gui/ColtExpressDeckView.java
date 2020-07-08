@@ -5,7 +5,6 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressTurnOrder;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.actions.roundcardevents.*;
 import games.coltexpress.cards.ColtExpressCard;
