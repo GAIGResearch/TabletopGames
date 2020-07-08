@@ -1,8 +1,9 @@
 package games.uno;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 
-public class UnoGameParameters extends AbstractGameParameters {
+
+public class UnoGameParameters extends AbstractParameters {
     public String dataPath = "data/uno/";
 
     public int nNumberCards = 10;
@@ -36,7 +37,7 @@ public class UnoGameParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         UnoGameParameters ugp = new UnoGameParameters(System.currentTimeMillis());
         ugp.dataPath = dataPath;
         ugp.nNumberCards = nNumberCards;

@@ -1,6 +1,6 @@
 package games.loveletter;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 /** This class allows to modify the balance of the game. Each modification may result in several problems with the
  * game's logic. Please be very careful in modifying these values and check for possible consequences.
  */
-public class LoveLetterParameters extends AbstractGameParameters {
+public class LoveLetterParameters extends AbstractParameters {
 
     // Occurrence count for each card
     HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{
@@ -34,7 +34,7 @@ public class LoveLetterParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         LoveLetterParameters llp = new LoveLetterParameters(System.currentTimeMillis());
         llp.cardCounts = new HashMap<>(cardCounts);
         llp.nCardsPerPlayer = nCardsPerPlayer;

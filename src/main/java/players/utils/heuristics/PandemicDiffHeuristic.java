@@ -1,4 +1,4 @@
-package players.heuristics;
+package players.utils.heuristics;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Counter;

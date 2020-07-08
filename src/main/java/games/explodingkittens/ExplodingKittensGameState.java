@@ -1,6 +1,6 @@
 package games.explodingkittens;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.actions.AbstractAction;
@@ -39,7 +39,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Current stack of actions
     Stack<AbstractAction> actionStack;
 
-    public ExplodingKittensGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new ExplodingKittenTurnOrder(nPlayers));
         playerGettingAFavor = -1;
     }
@@ -75,17 +75,28 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
                     ekgs.playerHandCards.get(i).clear();
                 }
             }
-            Random r = new Random(ekgs.gameParameters.getGameSeed());
+            Random r = new Random(ekgs.gameParameters.getRandomSeed());
 
             // Shuffles only hidden cards, if player knows what's on top those will stay in place
             ekgs.drawPile.shuffleVisible(r, playerId, false);
+            Deck<ExplodingKittenCard> explosive = new Deck<>("tmp");
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
-                        ekgs.playerHandCards.get(i).add(ekgs.drawPile.draw());
+                        boolean added = false;
+                        while (!added) {
+                            ExplodingKittenCard card = ekgs.drawPile.draw();
+                            if (card.cardType != ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
+                                ekgs.playerHandCards.get(i).add(card);
+                                added = true;
+                            } else {
+                                explosive.add(card);
+                            }
+                        }
                     }
                 }
             }
+            ekgs.drawPile.add(explosive);
         }
         return ekgs;
     }

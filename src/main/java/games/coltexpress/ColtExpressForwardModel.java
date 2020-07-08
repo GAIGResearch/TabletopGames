@@ -25,7 +25,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
     @Override
     public void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
 
@@ -57,7 +57,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                 }
             }
             cegs.playerDecks.add(playerCards);
-            playerCards.shuffle(new Random(cep.getGameSeed()+playerIndex));
+            playerCards.shuffle(new Random(cep.getRandomSeed()+playerIndex));
 
             Deck<ColtExpressCard> playerHand = new Deck<>(
                     "playerHand" + playerIndex, playerIndex);
@@ -94,7 +94,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             availableRounds.add(i);
         }
         for (int i = 0; i < cep.nMaxRounds-1; i++) {
-            Random r = new Random(cep.getGameSeed() + cegs.getTurnOrder().getRoundCounter() + i);
+            Random r = new Random(cep.getRandomSeed() + cegs.getTurnOrder().getRoundCounter() + i);
             int choice = r.nextInt(availableRounds.size());
             cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
             availableRounds.remove(Integer.valueOf(choice));
@@ -576,7 +576,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
     private void setupTrain(ColtExpressGameState cegs) {
         // Choose random compartment configurations
-        Random random = new Random(cegs.getGameParameters().getGameSeed());
+        Random random = new Random(cegs.getGameParameters().getRandomSeed());
         ArrayList<Integer> availableCompartments = new ArrayList<>();
         for (int i = 0; i < ((ColtExpressParameters)cegs.getGameParameters()).trainCompartmentConfigurations.size() - 1; i++) {
             availableCompartments.add(i);

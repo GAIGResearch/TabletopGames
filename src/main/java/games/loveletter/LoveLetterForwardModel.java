@@ -65,7 +65,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         // Put one card to the side, such that player's won't know all cards in the game
-        Random r = new Random(llgs.getGameParameters().getGameSeed() + llgs.getTurnOrder().getRoundCounter());
+        Random r = new Random(llgs.getGameParameters().getRandomSeed() + llgs.getTurnOrder().getRoundCounter());
         llgs.drawPile.shuffle(r);
         llgs.reserveCards.clear();
         llgs.reserveCards.add(llgs.drawPile.draw());

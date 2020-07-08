@@ -116,7 +116,7 @@ public enum GameType {
             return null;
         }
 
-        AbstractGameParameters params;
+        AbstractParameters params;
         AbstractForwardModel forwardModel = null;
         AbstractGameState gameState = null;
 

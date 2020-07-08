@@ -4,13 +4,15 @@ import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
 import games.pandemic.PandemicGameState;
-import players.heuristics.PandemicDiffHeuristic;
+import players.utils.heuristics.PandemicDiffHeuristic;
 import core.interfaces.IStateHeuristic;
 import utilities.ElapsedCpuTimer;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import static utilities.Utils.noise;
 
 /* One Turn Look Ahead (4 actions)*/
 public class OTLA extends AbstractPlayer {
@@ -98,15 +100,5 @@ public class OTLA extends AbstractPlayer {
 //        for (AbstractAction a: actions){
 //            gs.next(a);
 //        }
-    }
-
-
-    public static double noise(double input, double epsilon, double random)
-    {
-        if(input != -epsilon) {
-            return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
-        }else {
-            return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
-        }
     }
 }

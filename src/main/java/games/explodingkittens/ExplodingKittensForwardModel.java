@@ -22,7 +22,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      * @param firstState - the state to be modified to the initial game state.
      */
     protected void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
         ExplodingKittenParameters ekp = (ExplodingKittenParameters)firstState.getGameParameters();

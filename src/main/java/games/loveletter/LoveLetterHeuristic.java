@@ -27,7 +27,7 @@ public class LoveLetterHeuristic implements IStateHeuristic {
 
         double cardValues = 0;
 
-        Random r = new Random(llgs.getGameParameters().getGameSeed());
+        Random r = new Random(llgs.getGameParameters().getRandomSeed());
         for (LoveLetterCard card: llgs.getPlayerHandCards().get(playerId).getComponents()) {
             if (card.cardType == LoveLetterCard.CardType.Countess) {
                 if (r.nextDouble() > COUNTESS_PLAY_THRESHOLD) {

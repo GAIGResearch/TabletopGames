@@ -39,6 +39,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
 
     // Rectangles where components are drawn, used for highlighting
     Rectangle[] rects;
+    // Index of component highlighted
     int cardHighlight = -1;
     // If currently highlighting a component (on ALT press)
     boolean highlighting;
@@ -159,7 +160,8 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     Rectangle r = new Rectangle(rect.x + offset * i, rect.y, roundCardWidth, roundCardHeight);
                     rects[i] = r;
                     boolean visible = cegs.getTurnOrder().getRoundCounter() >= i;
-                    drawRoundCard(g, (RoundCard) deck.get(i), r, visible);
+                    boolean current = cegs.getTurnOrder().getRoundCounter() == i;
+                    drawRoundCard(g, (RoundCard) deck.get(i), r, visible, current);
                 }
 
                 if (firstOnTop) {
@@ -186,7 +188,8 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     int offset = (rect.width-roundCardWidth) / deck.getSize();
                     Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, roundCardWidth, roundCardHeight);
                     boolean visible = cegs.getTurnOrder().getRoundCounter() >= cardHighlight;
-                    drawRoundCard(g, (RoundCard) deck.get(cardHighlight), r, visible);
+                    boolean current = cegs.getTurnOrder().getRoundCounter() == cardHighlight;
+                    drawRoundCard(g, (RoundCard) deck.get(cardHighlight), r, visible, current);
                 }
             }
             if (deck.get(0) instanceof ColtExpressCard) {
@@ -247,8 +250,9 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
      * @param card - card to draw
      * @param r - rectangle to draw card in
      * @param visible - true if card is visible, false otherwise (details will not be drawn until revealed)
+     * @param currentRound - true if this is the current round
      */
-    private void drawRoundCard(Graphics2D g, RoundCard card, Rectangle r, boolean visible) {
+    private void drawRoundCard(Graphics2D g, RoundCard card, Rectangle r, boolean visible, boolean currentRound) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + "roundcards/roundCard.png");
         g.drawImage(cardFace, r.x, r.y, r.width, r.height, null);
 
@@ -283,11 +287,13 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                 Image roundImg = ImageIO.GetInstance().getImage(dataPath + "roundcards/" + card.getTurnTypes()[i].name() + ".png");
                 int roundWidth = (int) (roundImg.getWidth(null) * scaleW);
                 g.drawImage(roundImg, x, r.y + r.height / 3, roundWidth, roundHeight, null);
-                // Highlight current turn
-                if (((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == i) {
+                // Highlight current turn in current round
+                if (currentRound && ((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == i) {
                     g.setColor(Color.green);
+                    Stroke s = g.getStroke();
                     g.setStroke(new BasicStroke(3));
                     g.drawRect(x, r.y + r.height/3, roundWidth, roundHeight);
+                    g.setStroke(s);
                 }
                 x += roundWidth;
             }

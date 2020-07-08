@@ -33,7 +33,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
      * @param gameParameters - parameters for the game.
      * @param nPlayers - number of players in the game.
      */
-    public PandemicForwardModel(AbstractGameParameters gameParameters, int nPlayers) {
+    public PandemicForwardModel(AbstractParameters gameParameters, int nPlayers) {
         PandemicParameters pp = (PandemicParameters) gameParameters;
 
         // Game over conditions
@@ -45,7 +45,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         // Rules
         RuleNode infectCities = new InfectCities(pp.infection_rate, pp.max_cubes_per_city, pp.n_cubes_infection);
         RuleNode forceDiscardReaction = new ForceDiscardReaction();
-        RuleNode epidemic2 = new EpidemicIntensify(new Random(pp.getGameSeed()));
+        RuleNode epidemic2 = new EpidemicIntensify(new Random(pp.getRandomSeed()));
         RuleNode forceRPreaction = new ForceRPReaction();
         RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic);
         RuleNode drawCards = new DrawCards();
@@ -130,7 +130,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         PandemicGameState state = (PandemicGameState) firstState;
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();

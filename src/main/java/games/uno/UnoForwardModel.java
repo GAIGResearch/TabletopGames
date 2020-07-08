@@ -92,7 +92,7 @@ public class UnoForwardModel extends AbstractForwardModel {
      * @param ugs - current game state.
      */
     private void setupRound(UnoGameState ugs) {
-        Random r = new Random(ugs.getGameParameters().getGameSeed() + ugs.getTurnOrder().getRoundCounter());
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
 
         // Refresh player decks
         for (int i = 0; i < ugs.getNPlayers(); i++) {

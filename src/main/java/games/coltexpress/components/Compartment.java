@@ -60,7 +60,7 @@ public class Compartment extends Component {
         HashMap<ColtExpressTypes.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
         for (Map.Entry<ColtExpressTypes.LootType, Integer> e : configuration.entrySet()) {
             for (int i = 0; i < e.getValue(); i++) {
-                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), cep.getGameSeed())));
+                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), cep.getRandomSeed())));
             }
         }
     }

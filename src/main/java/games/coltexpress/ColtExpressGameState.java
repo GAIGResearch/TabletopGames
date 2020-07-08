@@ -1,6 +1,6 @@
 package games.coltexpress;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
@@ -93,7 +93,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         }
 
         if (PARTIAL_OBSERVABLE && playerId != -1) {
-            Random r = new Random(copy.gameParameters.getGameSeed());
+            Random r = new Random(copy.gameParameters.getRandomSeed());
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // Other player hands are hidden, but it's known what's in a player's deck
@@ -223,7 +223,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         gamePhase = ColtExpressGamePhase.PlanActions;
     }
 
-    public ColtExpressGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
@@ -356,7 +356,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     RoundCard getRandomEndRoundCard(ColtExpressParameters cep, int i) {
         int nEndCards = cep.endRoundCards.length;
-        int choice = new Random(cep.getGameSeed() + i).nextInt(nEndCards);
+        int choice = new Random(cep.getRandomSeed() + i).nextInt(nEndCards);
         return getEndRoundCard(cep, choice);
     }
 
@@ -371,7 +371,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     RoundCard getRandomRoundCard(ColtExpressParameters cep, int i) {
         int nRoundCards = cep.roundCards.length;
-        int choice = new Random(cep.getGameSeed() + i).nextInt(nRoundCards);
+        int choice = new Random(cep.getRandomSeed() + i).nextInt(nRoundCards);
         return getRoundCard(cep, choice, getNPlayers());
     }
 
