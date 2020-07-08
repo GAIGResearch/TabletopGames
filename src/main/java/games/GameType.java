@@ -4,6 +4,7 @@ import core.*;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.gui.ColtExpressGUI;
 import games.explodingkittens.ExplodingKittenParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -20,11 +21,13 @@ import games.tictactoe.TicTacToeGameState;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
+import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import gui.PrototypeGUI;
 import players.ActionController;
+import players.HumanGUIPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,17 +163,26 @@ public enum GameType {
 
     /**
      * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
-     * @param gameState - initial game state from the game.
+     * @param game - game to create a GUI for.
      * @param ac - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    public AbstractGUI createGUI(AbstractGameState gameState, ActionController ac) {
+    public AbstractGUI createGUI(Game game, ActionController ac) {
 
         AbstractGUI gui = null;
 
+        // Find ID of human player, if any (-1 if none)
+        int human = -1;
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
+                human = i;
+                break;
+            }
+        }
+
         switch(this) {
             case Pandemic:
-                gui = new PandemicGUI(gameState, ac);
+                gui = new PandemicGUI(game.getGameState(), ac);
                 break;
 //            case ExplodingKittens:
 //                if (gameState != null) {
@@ -178,6 +190,12 @@ public enum GameType {
 //                } else {
 //                    gui = new PrototypeGUI(this,null, ac, 0);
 //                }
+            case Uno:
+                gui = new UnoGUI(game.getGameState(), ac, human);
+                break;
+            case ColtExpress:
+                gui = new ColtExpressGUI(game.getGameState(), ac, human);
+                break;
         }
 
         return gui;

@@ -224,7 +224,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ColtExpressTurnOrder(nPlayers, (ColtExpressParameters) gameParameters));
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
@@ -239,9 +239,27 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     public void addBullet(Integer playerID, Integer shooterID) {
-        this.playerDecks.get(playerID).add(new ColtExpressCard(shooterID, ColtExpressCard.CardType.Bullet));
-        if (playerCharacters.containsKey(shooterID))
-            bulletsLeft[shooterID]--;
+        if (shooterID == -1 || bulletsLeft[shooterID] > 0) {
+            this.playerDecks.get(playerID).add(new ColtExpressCard(shooterID, ColtExpressCard.CardType.Bullet));
+            if (playerCharacters.containsKey(shooterID))
+                bulletsLeft[shooterID]--;
+        }
+    }
+
+    public List<Integer> getBestShooters() {
+        ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
+        List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
+        int bestValue = cep.nBulletsPerPlayer;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (bulletsLeft[i] < bestValue){
+                bestValue = bulletsLeft[i];
+                playersWithMostSuccessfulShots.clear();
+                playersWithMostSuccessfulShots.add(i);
+            } else if (bulletsLeft[i] == bestValue) {
+                playersWithMostSuccessfulShots.add(i);
+            }
+        }
+        return playersWithMostSuccessfulShots;
     }
 
     public LinkedList<Compartment> getTrainCompartments() {
@@ -260,6 +278,22 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     public Deck<RoundCard> getRounds() {
         return rounds;
+    }
+
+    public HashMap<Integer, CharacterType> getPlayerCharacters() {
+        return playerCharacters;
+    }
+
+    public List<Deck<ColtExpressCard>> getPlayerHandCards() {
+        return playerHandCards;
+    }
+
+    public int[] getBulletsLeft() {
+        return bulletsLeft;
+    }
+
+    public List<Deck<Loot>> getPlayerLoot() {
+        return playerLoot;
     }
 
     @Override
@@ -291,7 +325,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         System.out.println();
         int i = 0;
         for (RoundCard round : rounds.getComponents()){
-            if (i == ((ColtExpressTurnOrder)turnOrder).getCurrentRoundCardIndex()) {
+            if (i == turnOrder.getRoundCounter()) {
                 System.out.print("->");
             }
             System.out.print(round.toString());

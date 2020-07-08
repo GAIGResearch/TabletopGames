@@ -13,8 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
-import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.*;
 import static games.GameType.*;
 
 public class Game {
@@ -156,6 +155,8 @@ public class Game {
             currentPlayer = players.get(activePlayer);
 
             // GUI update
+            // Get actions for the player
+            List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             updateGUI(gui);
 
             if (gameState.isNotTerminal()) {
@@ -163,9 +164,9 @@ public class Game {
                     System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
                 }
 
-                // Get actions for the player
-                List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
+                // Get player observation
                 AbstractGameState observation = gameState.copy(activePlayer);
+
                 if (observation instanceof IPrintable && VERBOSE) {
                     ((IPrintable) observation).printToConsole();
                 }
@@ -227,14 +228,9 @@ public class Game {
      */
     private void updateGUI(AbstractGUI gui) {
         if (gui != null) {
-            if (PARTIAL_OBSERVABLE) {
-                // Copying again to get the player's observation, in case player modifies the object received directly.
-                gui.update(currentPlayer, gameState.copy(currentPlayer.getPlayerID()));
-            } else {
-                gui.update(currentPlayer, gameState);
-            }
+            gui.update(currentPlayer, gameState);
             try {
-                Thread.sleep(100);
+                Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {
                 System.out.println("EXCEPTION " + e);
             }
@@ -278,6 +274,14 @@ public class Game {
         return gameType;
     }
 
+    /**
+     * Retrieves the list of players in the game.
+     * @return - players list
+     */
+    public List<AbstractPlayer> getPlayers() {
+        return players;
+    }
+
     @Override
     public String toString() {
         return gameType.toString();
@@ -311,7 +315,7 @@ public class Game {
             AbstractGUI gui = null;
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
-                gui = gameToPlay.createGUI(game.getGameState(), ac);
+                gui = gameToPlay.createGUI(game, ac);
             }
 
             // Run!
@@ -497,19 +501,18 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-//        runOne(LoveLetter, players, seed, ac, false);
+        runOne(ColtExpress, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(Pandemic);
 //        games.add(LoveLetter);
 
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-        games.remove(LoveLetter);
-        games.remove(Pandemic);
-        games.remove(TicTacToe);
-//        runMany(games, players, null, 50, null, false, true);
-        runMany(games, players, null, 10, null, false, true);
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(LoveLetter);
+//        games.remove(Pandemic);
+//        games.remove(TicTacToe);
+//        runMany(games, players, null, 10, null, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }

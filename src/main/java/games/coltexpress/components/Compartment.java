@@ -48,7 +48,6 @@ public class Compartment extends Component {
         pickedCount = new HashMap<>();
         stillAvailableIdx = new HashMap<>();
         for (ColtExpressTypes.LootType t: ColtExpressTypes.LootType.values()) {
-            if (t == ColtExpressTypes.LootType.Unknown) continue;
             stillAvailableIdx.put(t, new ArrayList<>());
             pickedCount.put(t, new ArrayList<>());
             for (int i = 0; i < cep.loot.get(t).size(); i++) {

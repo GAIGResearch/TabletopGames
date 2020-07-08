@@ -6,16 +6,28 @@ import games.coltexpress.cards.RoundCard;
 import utilities.Group;
 import utilities.Pair;
 
+import java.awt.*;
+
 public class ColtExpressTypes {
 
     // Character types implemented
     public enum CharacterType {
-        Ghost,
-        Cheyenne,
-        Django,
-        Tuco,
-        Doc,
-        Belle
+        Ghost (Color.white),
+        Cheyenne (new Color(66, 175, 94)),
+        Django (new Color(43, 43, 43)),
+        Tuco (new Color(225, 7, 20)),
+        Doc (new Color(25, 183, 199)),
+        Belle (new Color(233, 13, 130));
+
+        private Color color;
+
+        CharacterType(Color color) {
+            this.color = color;
+        }
+
+        public Color getColor() {
+            return color;
+        }
     }
 
     // Configurations of end cards, pairs contain:
@@ -115,7 +127,6 @@ public class ColtExpressTypes {
     public enum LootType {
         Purse,
         Jewel,
-        Strongbox,
-        Unknown
+        Strongbox
     }
 }

@@ -4,6 +4,7 @@ package games.uno.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
+import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.uno.UnoTurnOrder;
@@ -110,6 +111,16 @@ public class PlayCard extends DrawCard implements IPrintable {
             return getCard(gameState).toString() + "; Change to color " + color;
         }
         return "Play card " + getCard(gameState).toString();
+    }
+
+    @Override
+    public Card getCard(AbstractGameState gs) {
+        if (!executed) {
+            Deck<UnoCard> deck = (Deck<UnoCard>) gs.getComponentById(deckFrom);
+            if (fromIndex == deck.getSize()) return deck.get(fromIndex-1);
+            return deck.get(fromIndex);
+        }
+        return (UnoCard) gs.getComponentById(cardId);
     }
 
     @Override

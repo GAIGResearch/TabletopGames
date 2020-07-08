@@ -3,7 +3,6 @@ package games.coltexpress.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
-import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 
@@ -14,9 +13,9 @@ public class MoveVerticalAction extends DrawCard {
     private final int compartment;
     private final boolean climbRoof;
 
-    public MoveVerticalAction(int plannedActions, int playerDeck,
+    public MoveVerticalAction(int plannedActions, int playerDeck, int cardIdx,
                               int compartment, boolean toRoof){
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
 
         this.compartment = compartment;
         this.climbRoof = toRoof;
@@ -43,7 +42,7 @@ public class MoveVerticalAction extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MoveVerticalAction)) return false;
         if (!super.equals(o)) return false;
         MoveVerticalAction that = (MoveVerticalAction) o;
         return compartment == that.compartment &&
@@ -60,7 +59,12 @@ public class MoveVerticalAction extends DrawCard {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Move " + (climbRoof? "up": "down");
+    }
+
+    @Override
     public AbstractAction copy() {
-        return new MoveVerticalAction(deckFrom, deckTo, compartment, climbRoof);
+        return new MoveVerticalAction(deckFrom, deckTo, fromIndex, compartment, climbRoof);
     }
 }

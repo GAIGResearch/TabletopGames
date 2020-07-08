@@ -59,14 +59,6 @@ public class Deck<T extends Component> extends Component {
     public T pick(Random rnd) {
         return pick(rnd.nextInt(components.size()));
     }
-    
-    /**
-     * Picks a random component from the Deck with a new random object.
-     * @return a random component from the Deck
-     */
-    public T pick() {
-        return pick(new Random().nextInt(components.size()));
-    }
 
     /**
      * Picks the component in position idx from the deck

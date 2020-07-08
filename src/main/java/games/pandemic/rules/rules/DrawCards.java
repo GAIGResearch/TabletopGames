@@ -29,7 +29,7 @@ public class DrawCards extends RuleNode {
         if (drawn) {
             Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
 
-            Card c = tempDeck.pick();  // Check the drawn card
+            Card c = tempDeck.draw();  // Check the drawn card
             // If epidemic card, do epidemic, only one per draw
             if (((PropertyString) c.getProperty(nameHash)).value.hashCode() == PandemicConstants.epidemicCard) {
                 epidemic = true;

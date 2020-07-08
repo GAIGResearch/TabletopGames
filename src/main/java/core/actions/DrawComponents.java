@@ -36,7 +36,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
         for (int i = 0; i < nComponents; i++) {
             if (from.getSize() > 0) {
-                T component = from.pick();
+                T component = from.draw();
                 componentIds[i] = component.getComponentID();
                 to.add(component);
             } else {
@@ -63,7 +63,9 @@ public class DrawComponents<T extends Component> extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof DrawComponents)) {
+            return false;
+        }
         DrawComponents<?> that = (DrawComponents<?>) o;
         return deckFrom == that.deckFrom &&
                 deckTo == that.deckTo &&

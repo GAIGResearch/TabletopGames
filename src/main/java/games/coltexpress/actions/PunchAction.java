@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
@@ -24,10 +25,10 @@ public class PunchAction  extends DrawCard {
     private final int availableLoot;
     private final boolean playerIsCheyenne;
 
-    public PunchAction(int plannedActions, int playerDeck,
+    public PunchAction(int plannedActions, int playerDeck, int cardIdx,
                        int opponentID, int sourceCompartment, int targetCompartment, int loot,
                        int availableLoot, boolean playerIsCheyenne) {
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
         this.opponentID = opponentID;
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
@@ -94,7 +95,7 @@ public class PunchAction  extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PunchAction)) return false;
         if (!super.equals(o)) return false;
         PunchAction that = (PunchAction) o;
         return opponentID == that.opponentID &&
@@ -111,6 +112,29 @@ public class PunchAction  extends DrawCard {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        if (opponentID == -1) return "Punch nobody";
+
+        String character = ((ColtExpressGameState)gameState).getPlayerCharacters().get(opponentID).name();
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        int tIdx = target.getCompartmentID();
+
+        Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
+        ColtExpressTypes.LootType lt = null;
+        for (Loot available : availableLootDeck.getComponents()){
+            if (available.getComponentID() == loot) {
+                lt = available.getLootType();
+            }
+        }
+        String drop = "nothing";
+        if (loot != -1 && lt != null) {
+            drop = lt + " " + loot;
+        }
+
+        return "Punch " + character + " to c=" + tIdx + " dropping " + drop;
+    }
+
+    @Override
     public String toString(){
         if (opponentID == -1)
             return "Attempt to punch player, but no player is available.";
@@ -123,6 +147,6 @@ public class PunchAction  extends DrawCard {
 
     @Override
     public AbstractAction copy() {
-        return new PunchAction(deckFrom, deckTo, opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
+        return new PunchAction(deckFrom, deckTo, fromIndex, opponentID, sourceCompartment, targetCompartment, loot, availableLoot, playerIsCheyenne);
     }
 }

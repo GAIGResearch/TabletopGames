@@ -81,6 +81,10 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         return currentColor;
     }
 
+    public int[] getPlayerScore() {
+        return playerScore;
+    }
+
     /**
      * Calculates points for all players, as sum of values of cards in the hands of all other players in the game.
      * @param playerID - ID of player to calculate points for
@@ -130,15 +134,20 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
             // Other player cards and the draw deck are unknown.
             // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
             Random r = new Random(copy.gameParameters.getRandomSeed());
-            for (Deck<UnoCard> d: copy.playerDecks) {
-                copy.drawDeck.add(d);
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    copy.drawDeck.add(copy.playerDecks.get(i));
+                }
             }
             copy.drawDeck.shuffle(r);
-            for (Deck<UnoCard> d: copy.playerDecks) {
-                int nCards = d.getSize();
-                d.clear();
-                for (int i = 0; i < nCards; i++) {
-                    d.add(copy.drawDeck.draw());
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    Deck<UnoCard> d = copy.playerDecks.get(i);
+                    int nCards = d.getSize();
+                    d.clear();
+                    for (int j = 0; j < nCards; j++) {
+                        d.add(copy.drawDeck.draw());
+                    }
                 }
             }
         }

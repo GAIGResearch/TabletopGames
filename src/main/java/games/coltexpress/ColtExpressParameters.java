@@ -15,6 +15,8 @@ import utilities.Pair;
 
 public class ColtExpressParameters extends AbstractParameters {
 
+    String dataPath = "data/coltexpress/";
+
     // Other parameters
     public int nCardsInHand = 6;
     public int nCardsInHandExtraDoc = 1;
@@ -29,7 +31,7 @@ public class ColtExpressParameters extends AbstractParameters {
     // How many cards of each type are in a player's deck, total minimum nCardsInHand + nCardsInHandExtraDoc
     public HashMap<ColtExpressCard.CardType, Integer> cardCounts = new HashMap<ColtExpressCard.CardType, Integer>() {{
         put(ColtExpressCard.CardType.MoveSideways, 2);
-        put(ColtExpressCard.CardType.MoveUp, 2);
+        put(ColtExpressCard.CardType.MoveVertical, 2);
         put(ColtExpressCard.CardType.Punch, 1);
         put(ColtExpressCard.CardType.MoveMarshal, 1);
         put(ColtExpressCard.CardType.Shoot, 2);
@@ -126,6 +128,7 @@ public class ColtExpressParameters extends AbstractParameters {
     @Override
     protected AbstractParameters _copy() {
         ColtExpressParameters cep = new ColtExpressParameters(System.currentTimeMillis());
+        cep.dataPath = dataPath;
         cep.nCardsInHand = nCardsInHand;
         cep.nCardsInHandExtraDoc = nCardsInHandExtraDoc;
         cep.nBulletsPerPlayer = nBulletsPerPlayer;
@@ -157,4 +160,7 @@ public class ColtExpressParameters extends AbstractParameters {
         return cep;
     }
 
+    public String getDataPath() {
+        return dataPath;
+    }
 }

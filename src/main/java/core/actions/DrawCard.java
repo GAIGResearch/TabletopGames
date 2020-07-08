@@ -60,7 +60,7 @@ public class DrawCard extends AbstractAction {
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
             Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
-            return deck.getComponents().get(fromIndex);
+            return deck.get(fromIndex);
         }
         return (Card) gs.getComponentById(cardId);
     }
@@ -90,7 +90,7 @@ public class DrawCard extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof DrawCard)) return false;
         DrawCard drawCard = (DrawCard) o;
         return deckFrom == drawCard.deckFrom &&
                 deckTo == drawCard.deckTo &&

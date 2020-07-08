@@ -1,9 +1,6 @@
 package core.actions;
 
 import core.AbstractGameState;
-import core.components.Card;
-
-import java.util.Objects;
 
 /**
  * This action executes successfully automatically, it makes not changes to the game state.
@@ -23,7 +20,7 @@ public class DoNothing extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        return o != null && getClass() == o.getClass();
+        return !(o instanceof DoNothing);
     }
 
     @Override
