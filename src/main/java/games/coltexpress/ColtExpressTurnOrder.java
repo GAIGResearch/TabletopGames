@@ -85,7 +85,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         } else if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.ExecuteActions) {
             ColtExpressGameState cegs = (ColtExpressGameState) gameState;
             if (cegs.plannedActions.getSize() > 0) {
-                return cegs.plannedActions.getComponents().get(0).playerID;
+                return cegs.plannedActions.get(cegs.plannedActions.getSize()-1).playerID;
             }
             return (nPlayers + turnOwner + direction) % nPlayers;
         } else {

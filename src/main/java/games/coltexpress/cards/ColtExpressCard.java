@@ -8,7 +8,7 @@ public class ColtExpressCard extends Card {
         CollectMoney,
         Punch,
         MoveMarshal,
-        MoveUp,
+        MoveVertical,
         Shoot,
         Bullet
     }

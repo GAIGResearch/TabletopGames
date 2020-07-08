@@ -31,7 +31,7 @@ public class ColtExpressParameters extends AbstractGameParameters {
     // How many cards of each type are in a player's deck, total minimum nCardsInHand + nCardsInHandExtraDoc
     public HashMap<ColtExpressCard.CardType, Integer> cardCounts = new HashMap<ColtExpressCard.CardType, Integer>() {{
         put(ColtExpressCard.CardType.MoveSideways, 2);
-        put(ColtExpressCard.CardType.MoveUp, 2);
+        put(ColtExpressCard.CardType.MoveVertical, 2);
         put(ColtExpressCard.CardType.Punch, 1);
         put(ColtExpressCard.CardType.MoveMarshal, 1);
         put(ColtExpressCard.CardType.Shoot, 2);

@@ -310,7 +310,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             return actions;
         }
 
-        ColtExpressCard plannedActionCard = cegs.plannedActions.peek(0);
+        ColtExpressCard plannedActionCard = cegs.plannedActions.peek(cegs.plannedActions.getSize()-1);
         if (plannedActionCard.playerID == -1 || plannedActionCard.cardType == ColtExpressCard.CardType.Bullet) {
             throw new IllegalArgumentException("Player on planned action card is -1: " + plannedActionCard.toString());
         }
@@ -326,7 +326,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     else
                         createShootingActions(cegs, actions, player);
                     break;
-                case MoveUp:
+                case MoveVertical:
                     for (Compartment compartment : cegs.trainCompartments) {
                         if (compartment.playersInsideCompartment.contains(player) ||
                                 compartment.playersOnTopOfCompartment.contains(player)) {
@@ -366,6 +366,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                                 actions.add(new CollectMoneyAction(cegs.plannedActions.getComponentID(),
                                         cegs.playerDecks.get(player).getComponentID(), loot.getComponentID(), availableLoot.getComponentID()));
                             }
+                            break;
                         }
                     }
                     if (actions.size() == 0) {
