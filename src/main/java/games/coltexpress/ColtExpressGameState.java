@@ -224,7 +224,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     public ColtExpressGameState(AbstractGameParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ColtExpressTurnOrder(nPlayers, (ColtExpressParameters) gameParameters));
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
@@ -307,7 +307,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         System.out.println();
         int i = 0;
         for (RoundCard round : rounds.getComponents()){
-            if (i == ((ColtExpressTurnOrder)turnOrder).getCurrentRoundCardIndex()) {
+            if (i == turnOrder.getRoundCounter()) {
                 System.out.print("->");
             }
             System.out.print(round.toString());

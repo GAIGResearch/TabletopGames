@@ -5,6 +5,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressTurnOrder;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.actions.roundcardevents.*;
 import games.coltexpress.cards.ColtExpressCard;
@@ -101,7 +102,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     int offset = (rect.width-roundCardWidth) / deck.getSize();
                     Rectangle r = new Rectangle(rect.x + offset * i, rect.y, roundCardWidth, roundCardHeight);
                     rects[i] = r;
-                    boolean visible = (cegs.getTurnOrder().getRoundCounter() >= i);
+                    boolean visible = cegs.getTurnOrder().getRoundCounter() >= i;
                     drawRoundCard(g, (RoundCard) deck.get(i), r, visible);
                 }
             }
@@ -122,7 +123,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     // Round card
                     int offset = (rect.width-roundCardWidth) / deck.getSize();
                     Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, roundCardWidth, roundCardHeight);
-                    boolean visible = (cegs.getTurnOrder().getRoundCounter() >= cardHighlight);
+                    boolean visible = cegs.getTurnOrder().getRoundCounter() >= cardHighlight;
                     drawRoundCard(g, (RoundCard) deck.get(cardHighlight), r, visible);
                 }
             }

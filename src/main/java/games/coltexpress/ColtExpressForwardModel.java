@@ -132,16 +132,6 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             ceto.endPlayerTurn(gameState);
             if (cegs.plannedActions.getSize() == 0) {
                 ceto.endRoundCard((ColtExpressGameState) gameState);
-
-                int nPlayersInTrain = 0;
-                for (Compartment c: cegs.getTrainCompartments()) {
-                    nPlayersInTrain += c.playersOnTopOfCompartment.size();
-                    nPlayersInTrain += c.playersInsideCompartment.size();
-                }
-                if (nPlayersInTrain != cegs.getNPlayers()) {
-                    int a = 0;
-                }
-
                 distributeCards((ColtExpressGameState) gameState);
             }
         }
@@ -288,7 +278,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             // ghost can play a card hidden during the first turn
             boolean hidden = ((ColtExpressTurnOrder) cegs.getTurnOrder()).isHiddenTurn() ||
                     (cegs.playerCharacters.get(player) == CharacterType.Ghost &&
-                            ((ColtExpressTurnOrder) cegs.getTurnOrder()).getCurrentRoundCardIndex() == 0);
+                            cegs.getTurnOrder().getRoundCounter() == 0);
 
             actions.add(new SchemeAction(cegs.playerHandCards.get(player).getComponentID(),
                     cegs.plannedActions.getComponentID(), cardIdx, hidden));
