@@ -155,6 +155,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
             discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ekgs.getDrawPile());
+            drawPile.informActivePlayer(player.getPlayerID());
             if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
                 drawPile.setFront(true);
             }

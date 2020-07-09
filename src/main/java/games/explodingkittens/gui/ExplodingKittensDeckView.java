@@ -1,6 +1,7 @@
 package games.explodingkittens.gui;
 
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import gui.views.CardView;
 import gui.views.ComponentView;
@@ -36,11 +37,15 @@ public class ExplodingKittensDeckView extends ComponentView {
     int cardHighlight = -1;  // left click (or ALT+hover) show card, right click back in deck
     // If currently highlighting (ALT)
     boolean highlighting;
+    // Currently active player
+    int activePlayer = -1;
 
+    // Card images
     HashMap<Integer, Image> cardCatImageMapping;
     ArrayList<String> catImages;
     Random rnd = new Random();  // This doesn't need to use the game random seed
 
+    // Border offsets
     int border = 5;
     int borderBottom = 20;
 
@@ -140,13 +145,21 @@ public class ExplodingKittensDeckView extends ComponentView {
                 ExplodingKittensCard card = deck.get(i);
                 Rectangle r = new Rectangle(offset * i + border, border, ekCardWidth, ekCardHeight);
                 rects[i] = r;
-                drawCat(g, card, r);
+                boolean visible = front;
+                if (!visible && deck instanceof PartialObservableDeck && activePlayer != -1) {
+                    visible = ((PartialObservableDeck<ExplodingKittensCard>) deck).isComponentVisible(i, activePlayer);
+                }
+                drawCat(g, card, r, visible);
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
                 ExplodingKittensCard card = deck.get(cardHighlight);
                 Rectangle r = rects[cardHighlight];
-                drawCat(g, card, r);
+                boolean visible = front;
+                if (!visible && deck instanceof PartialObservableDeck && activePlayer != -1) {
+                    visible = ((PartialObservableDeck<ExplodingKittensCard>) deck).isComponentVisible(cardHighlight, activePlayer);
+                }
+                drawCat(g, card, r, visible);
             }
             g.drawString(""+deck.getSize(), 10, ekCardHeight - size);
         }
@@ -157,12 +170,13 @@ public class ExplodingKittensDeckView extends ComponentView {
      * @param g - Graphics object
      * @param card - card to draw on
      * @param r - rectangle in which card is to be drawn
+     * @param visible - if the card is visible or not
      */
-    private void drawCat(Graphics2D g, ExplodingKittensCard card, Rectangle r) {
+    private void drawCat(Graphics2D g, ExplodingKittensCard card, Rectangle r, boolean visible) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + card.cardType.name().toLowerCase() + ".png");
-        CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+        CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, visible);
 
-        if (front) {
+        if (visible) {
             // Draw decorative cat image if card is visible
             Image catImg;
             if (cardCatImageMapping.containsKey(card.getComponentID())) {
@@ -200,5 +214,8 @@ public class ExplodingKittensDeckView extends ComponentView {
     }
     public void flip() {
         front = !front;
+    }
+    public void informActivePlayer(int player) {
+        this.activePlayer = player;
     }
 }
