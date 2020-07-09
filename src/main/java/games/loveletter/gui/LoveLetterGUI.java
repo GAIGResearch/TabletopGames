@@ -75,7 +75,8 @@ public class LoveLetterGUI extends AbstractGUI {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    LoveLetterPlayerView playerHand = new LoveLetterPlayerView(llgs.getPlayerHandCards().get(i), i, llp.getDataPath());
+                    LoveLetterPlayerView playerHand = new LoveLetterPlayerView(llgs.getPlayerHandCards().get(i),
+                            llgs.getPlayerDiscardCards().get(i), i, llp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -125,6 +126,8 @@ public class LoveLetterGUI extends AbstractGUI {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
+            // TODO: pause after round finished, full display
+            
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();

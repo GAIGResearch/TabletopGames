@@ -27,6 +27,11 @@ public class HandmaidAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Handmaid (protect)";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }

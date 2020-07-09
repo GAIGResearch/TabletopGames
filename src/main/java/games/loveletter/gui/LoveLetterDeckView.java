@@ -119,6 +119,7 @@ public class LoveLetterDeckView extends ComponentView {
                 Rectangle r = new Rectangle(rect.x + offset * i, rect.y, llCardWidth, llCardHeight);
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+                // TODO: draw card name, effect, value
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
@@ -127,7 +128,6 @@ public class LoveLetterDeckView extends ComponentView {
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
             }
-            g.drawString(""+deck.getSize(), rect.x+10, rect.y+llCardHeight - size);
         }
     }
 

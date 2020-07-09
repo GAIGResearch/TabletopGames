@@ -43,6 +43,11 @@ public class PriestAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Priest (see cards of player " + opponentID + ")";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
@@ -50,7 +55,7 @@ public class PriestAction extends DrawCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PriestAction)) return false;
         if (!super.equals(o)) return false;
         PriestAction that = (PriestAction) o;
         return opponentID == that.opponentID;

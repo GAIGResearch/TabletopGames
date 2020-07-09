@@ -19,9 +19,15 @@ public class LoveLetterPlayerView extends LoveLetterDeckView {
     // Border offsets
     int border = 5;
     int borderBottom = 20;
+    int buffer = 10;
 
-    public LoveLetterPlayerView(Deck<LoveLetterCard> d, int playerId, String dataPath) {
-        super(d, false, dataPath);
+    Deck<LoveLetterCard> handCards;
+    Deck<LoveLetterCard> discardCards;
+
+    public LoveLetterPlayerView(Deck<LoveLetterCard> hand, Deck<LoveLetterCard> discard, int playerId, String dataPath) {
+        super(hand, false, dataPath);
+        this.handCards = hand;
+        this.discardCards = discard;
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
@@ -33,9 +39,16 @@ public class LoveLetterPlayerView extends LoveLetterDeckView {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g, new Rectangle(border, border, playerAreaWidth, llCardHeight));
+        // Draw hand
+        this.component = handCards;
+        drawDeck((Graphics2D) g, new Rectangle(border, border, llCardWidth*2, llCardHeight));
+        // Draw discard
+        this.component = discardCards;
+        this.front = true;
+        drawDeck((Graphics2D) g, new Rectangle(border + llCardWidth*2 + buffer, border, playerAreaWidth-llCardWidth*2, llCardHeight));
+        // Draw affection tokens
         g.setColor(Color.black);
-        g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border+llCardHeight + 10);
+        g.drawString(nPoints + " affection tokens", border + buffer, border+llCardHeight + buffer);
     }
 
     @Override
@@ -48,7 +61,9 @@ public class LoveLetterPlayerView extends LoveLetterDeckView {
      * @param gameState - current game state
      */
     public void update(LoveLetterGameState gameState) {
-        this.component = gameState.getPlayerHandCards().get(playerId);
+        handCards = gameState.getPlayerHandCards().get(playerId);
+        discardCards = gameState.getPlayerDiscardCards().get(playerId);
+        this.component = handCards;
         nPoints = gameState.getAffectionTokens()[playerId];
     }
 
