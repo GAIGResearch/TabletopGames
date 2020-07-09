@@ -22,9 +22,9 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 public class ExplodingKittensGUI extends AbstractGUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 130;
+    final static int playerAreaHeight = 100;
     final static int ekCardWidth = 90;
-    final static int ekCardHeight = 115;
+    final static int ekCardHeight = 110;
 
     // Width and height of total window
     int width, height;
@@ -56,7 +56,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
                 // Find required size of window
                 int nPlayers = gameState.getNPlayers();
                 int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-                double nVertAreas = 4;
+                double nVertAreas = 5;
                 this.width = playerAreaWidth * nHorizAreas;
                 this.height = (int) (playerAreaHeight * nVertAreas);
 
@@ -170,6 +170,6 @@ public class ExplodingKittensGUI extends AbstractGUI {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight);
     }
 }

@@ -20,6 +20,7 @@ import games.pandemic.gui.PandemicGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.gui.TicTacToeGUI;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
@@ -203,6 +204,10 @@ public enum GameType {
                 break;
             case LoveLetter:
                 gui = new LoveLetterGUI(game, ac, human);
+                break;
+            case TicTacToe:
+                gui = new TicTacToeGUI(game, ac);
+                break;
         }
 
         return gui;
