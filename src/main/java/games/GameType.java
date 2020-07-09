@@ -12,6 +12,7 @@ import games.explodingkittens.gui.ExplodingKittensGUI;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.gui.LoveLetterGUI;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
@@ -200,6 +201,8 @@ public enum GameType {
             case ExplodingKittens:
                 gui = new ExplodingKittensGUI(game, ac, human);
                 break;
+            case LoveLetter:
+                gui = new LoveLetterGUI(game, ac, human);
         }
 
         return gui;

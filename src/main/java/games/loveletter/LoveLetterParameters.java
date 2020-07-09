@@ -10,6 +10,8 @@ import java.util.HashMap;
  */
 public class LoveLetterParameters extends AbstractParameters {
 
+    String dataPath = "data/loveletter/";
+
     // Occurrence count for each card
     HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{
         put(LoveLetterCard.CardType.Princess, 1);
@@ -31,6 +33,10 @@ public class LoveLetterParameters extends AbstractParameters {
 
     public LoveLetterParameters(long seed) {
         super(seed);
+    }
+
+    public String getDataPath() {
+        return dataPath;
     }
 
     @Override

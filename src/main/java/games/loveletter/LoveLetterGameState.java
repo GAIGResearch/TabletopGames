@@ -203,6 +203,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     public PartialObservableDeck<LoveLetterCard> getDrawPile() {
         return drawPile;
     }
+    public int[] getAffectionTokens() {
+        return affectionTokens;
+    }
 
     /**
      * Prints the game state.
