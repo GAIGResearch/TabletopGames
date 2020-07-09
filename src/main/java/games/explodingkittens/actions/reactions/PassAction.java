@@ -1,4 +1,4 @@
-package games.explodingkittens.actions;
+package games.explodingkittens.actions.reactions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -14,7 +14,7 @@ public class PassAction extends DoNothing implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " passes.";
+        return "No NOPE";
     }
 
     @Override

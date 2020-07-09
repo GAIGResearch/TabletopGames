@@ -1,4 +1,4 @@
-package games.explodingkittens.actions;
+package games.explodingkittens.actions.reactions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,7 +6,7 @@ import core.actions.RearrangeDeckOfCards;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.cards.ExplodingKittenCard;
+import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.util.Arrays;
 
@@ -21,7 +21,7 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
 
-        PartialObservableDeck<ExplodingKittenCard> drawPile = ((ExplodingKittensGameState)gs).getDrawPile();
+        PartialObservableDeck<ExplodingKittensCard> drawPile = ((ExplodingKittensGameState)gs).getDrawPile();
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
 
         for (int i = 0; i < newCardOrder.length; i++) {
@@ -44,7 +44,7 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Choose card order: " + Arrays.toString(newCardOrder);
     }
 
     @Override

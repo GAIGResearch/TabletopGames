@@ -4,7 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 import core.turnorders.TurnOrder;
 
 public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
@@ -19,7 +19,7 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
         super.execute(gs);
         // Execute action
         gs.setMainGamePhase();
-        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+        ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         return true;
     }
 
@@ -30,7 +30,7 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " skips its draw";
+        return "Skip";
     }
 
     @Override

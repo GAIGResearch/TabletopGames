@@ -63,6 +63,10 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         return gridBoard;
     }
 
+    public ArrayList<Character> getPlayerMapping() {
+        return playerMapping;
+    }
+
     @Override
     public void printToConsole() {
         System.out.println(gridBoard.toString());

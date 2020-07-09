@@ -50,6 +50,11 @@ public class KingAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "King (trade hands with player " + opponentID + ")";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }
@@ -57,7 +62,7 @@ public class KingAction extends DrawCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof KingAction)) return false;
         if (!super.equals(o)) return false;
         KingAction that = (KingAction) o;
         return opponentID == that.opponentID;

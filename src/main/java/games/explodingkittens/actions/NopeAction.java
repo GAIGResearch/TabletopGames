@@ -4,8 +4,9 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.interfaces.IPrintable;
+import core.turnorders.TurnOrder;
 
-public class NopeAction extends DrawCard implements IPrintable {
+public class NopeAction extends DrawCard implements IPrintable, IsNopeable {
 
     public NopeAction(int deckFrom, int deckTo, int index) {
         super(deckFrom, deckTo, index);
@@ -18,7 +19,7 @@ public class NopeAction extends DrawCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " nopes the previous action";
+        return "NOPE";
     }
 
     @Override
@@ -29,5 +30,10 @@ public class NopeAction extends DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new NopeAction(deckFrom, deckTo, fromIndex);
+    }
+
+    @Override
+    public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
+        return super.execute(gs);
     }
 }

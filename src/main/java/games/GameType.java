@@ -5,12 +5,14 @@ import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
-import games.explodingkittens.ExplodingKittenParameters;
+import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.gui.ExplodingKittensGUI;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.gui.LoveLetterGUI;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
@@ -18,6 +20,7 @@ import games.pandemic.gui.PandemicGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.gui.TicTacToeGUI;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
@@ -132,7 +135,7 @@ public enum GameType {
                 gameState = new TicTacToeGameState(params, nPlayers);
                 break;
             case ExplodingKittens:
-                params = new ExplodingKittenParameters(seed);
+                params = new ExplodingKittensParameters(seed);
                 forwardModel = new ExplodingKittensForwardModel();
                 gameState = new ExplodingKittensGameState(params, nPlayers);
                 break;
@@ -191,10 +194,19 @@ public enum GameType {
 //                    gui = new PrototypeGUI(this,null, ac, 0);
 //                }
             case Uno:
-                gui = new UnoGUI(game.getGameState(), ac, human);
+                gui = new UnoGUI(game, ac, human);
                 break;
             case ColtExpress:
-                gui = new ColtExpressGUI(game.getGameState(), ac, human);
+                gui = new ColtExpressGUI(game, ac, human);
+                break;
+            case ExplodingKittens:
+                gui = new ExplodingKittensGUI(game, ac, human);
+                break;
+            case LoveLetter:
+                gui = new LoveLetterGUI(game, ac, human);
+                break;
+            case TicTacToe:
+                gui = new TicTacToeGUI(game, ac);
                 break;
         }
 

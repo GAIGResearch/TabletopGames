@@ -1,7 +1,7 @@
-package games.uno.gui;
+package games.loveletter.gui;
 
 import core.components.Deck;
-import games.uno.cards.UnoCard;
+import games.loveletter.cards.LoveLetterCard;
 import gui.views.CardView;
 import gui.views.ComponentView;
 import utilities.ImageIO;
@@ -12,9 +12,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static games.uno.gui.UnoGUI.*;
+import static games.loveletter.gui.LoveLetterGUI.*;
 
-public class UnoDeckView extends ComponentView {
+public class LoveLetterDeckView extends ComponentView {
 
     // Is deck visible?
     protected boolean front;
@@ -39,8 +39,8 @@ public class UnoDeckView extends ComponentView {
      * @param visible - true if whole deck visible
      * @param dataPath - path to assets
      */
-    public UnoDeckView(Deck<UnoCard> d, boolean visible, String dataPath) {
-        super(d, playerAreaWidth, unoCardHeight);
+    public LoveLetterDeckView(Deck<LoveLetterCard> d, boolean visible, String dataPath) {
+        super(d, playerAreaWidth, llCardHeight);
         this.front = visible;
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
         this.dataPath = dataPath;
@@ -98,7 +98,7 @@ public class UnoDeckView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, unoCardHeight));
+        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, llCardHeight));
     }
 
     /**
@@ -107,65 +107,34 @@ public class UnoDeckView extends ComponentView {
      */
     public void drawDeck(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
-        Deck<UnoCard> deck = (Deck<UnoCard>) component;
+        Deck<LoveLetterCard> deck = (Deck<LoveLetterCard>) component;
 
-        if (deck != null) {
+        if (deck != null && deck.getSize() > 0) {
             // Draw cards, 0 index on top
-            int offset = Math.max((rect.width-unoCardWidth) / deck.getSize(), minCardOffset);
+            int offset = Math.max((rect.width-llCardWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
             for (int i = deck.getSize()-1; i >= 0; i--) {
-                UnoCard card = deck.get(i);
-                Image cardFace = getCardImage(card);
-                Rectangle r = new Rectangle(rect.x + offset * i, rect.y, unoCardWidth, unoCardHeight);
+                LoveLetterCard card = deck.get(i);
+                Image cardFace = ImageIO.GetInstance().getImage(dataPath + card.cardType.name().toLowerCase() + ".png");
+                Rectangle r = new Rectangle(rect.x + offset * i, rect.y, llCardWidth, llCardHeight);
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+                // TODO: draw card name, effect, value
+                // TODO: visibility
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
-                UnoCard card = deck.get(cardHighlight);
-                Image cardFace = getCardImage(card);
+                LoveLetterCard card = deck.get(cardHighlight);
+                Image cardFace = ImageIO.GetInstance().getImage(dataPath + card.cardType.name().toLowerCase() + ".png");
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
             }
-            g.drawString(""+deck.getSize(), rect.x+10, rect.y+unoCardHeight - size);
         }
     }
 
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
-    }
-
-    /**
-     * Retrieves the image for a card from the asset folder.
-     * @param card - card to retrieve image for
-     * @return - image for card.
-     */
-    private Image getCardImage(UnoCard card) {
-        Image img = null;
-        String colorName = card.color.substring(0, 1).toUpperCase() + card.color.substring(1).toLowerCase();
-        switch(card.type) {
-            case Number:
-                img = ImageIO.GetInstance().getImage(dataPath + colorName + card.number + ".png");
-                break;
-            case Skip:
-                img = ImageIO.GetInstance().getImage(dataPath + colorName + "Skip.png");
-                break;
-            case Reverse:
-                img = ImageIO.GetInstance().getImage(dataPath + colorName + "Reverse.png");
-                break;
-            case Draw:
-                img = ImageIO.GetInstance().getImage(dataPath + colorName + "Draw" + card.drawN + ".png");
-                break;
-            case Wild:
-                if (card.drawN > 0) {
-                    img = ImageIO.GetInstance().getImage(dataPath + "WildDraw" + card.drawN + ".png");
-                } else {
-                    img = ImageIO.GetInstance().getImage(dataPath + "Wild.png");
-                }
-                break;
-        }
-        return img;
     }
 
     // Getters, setters

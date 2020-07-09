@@ -3,12 +3,16 @@ package games.uno.gui;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
 import players.ActionController;
 import players.HumanGUIPlayer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
@@ -36,65 +40,85 @@ public class UnoGUI extends AbstractGUI {
     // ID of human player
     int humanID;
 
-    public UnoGUI(AbstractGameState gameState, ActionController ac, int humanID) {
+    // Border highlight of active player
+    Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
+    Border[] playerViewBorders;
+
+    public UnoGUI(Game game, ActionController ac, int humanID) {
         super(ac, 15);
         this.humanID = humanID;
 
-        if (gameState != null) {
-            // Initialise active player
-            activePlayer = gameState.getCurrentPlayer();
+        if (game != null) {
+            AbstractGameState gameState = game.getGameState();
+            if (gameState != null) {
+                // Initialise active player
+                activePlayer = gameState.getCurrentPlayer();
 
-            // Find required size of window
-            int nPlayers = gameState.getNPlayers();
-            int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-            double nVertAreas = 3.5;
-            this.width = playerAreaWidth * nHorizAreas;
-            this.height = (int)(playerAreaHeight * nVertAreas);
+                // Find required size of window
+                int nPlayers = gameState.getNPlayers();
+                int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
+                double nVertAreas = 3.5;
+                this.width = playerAreaWidth * nHorizAreas;
+                this.height = (int) (playerAreaHeight * nVertAreas);
 
-            UnoGameState ugs = (UnoGameState) gameState;
-            UnoGameParameters ugp = (UnoGameParameters) gameState.getGameParameters();
+                UnoGameState ugs = (UnoGameState) gameState;
+                UnoGameParameters ugp = (UnoGameParameters) gameState.getGameParameters();
 
-            // Create main game area that will hold all game views
-            playerHands = new UnoPlayerView[nPlayers];
-            JPanel mainGameArea = new JPanel();
-            mainGameArea.setLayout(new BorderLayout());
+                // Create main game area that will hold all game views
+                playerHands = new UnoPlayerView[nPlayers];
+                playerViewBorders = new Border[nPlayers];
+                JPanel mainGameArea = new JPanel();
+                mainGameArea.setLayout(new BorderLayout());
 
-            // Player hands go on the edges
-            String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
-            JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
-            int next = 0;
-            for (int i = 0; i < nPlayers; i++) {
-                UnoPlayerView playerHand = new UnoPlayerView(ugs.getPlayerDecks().get(i), i, ugp.getDataPath());
-                sides[next].add(playerHand);
-                sides[next].setLayout(new GridBagLayout());
-                next = (next+1) % (locations.length);
-                playerHands[i] = playerHand;
+                // Player hands go on the edges
+                String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
+                JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
+                int next = 0;
+                for (int i = 0; i < nPlayers; i++) {
+                    UnoPlayerView playerHand = new UnoPlayerView(ugs.getPlayerDecks().get(i), i, ugp.getDataPath());
+
+                    // Get agent name
+                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
+                    String agentName = split[split.length - 1];
+
+                    // Create border, layouts and keep track of this view
+                    TitledBorder title = BorderFactory.createTitledBorder(
+                            BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + agentName + "]",
+                            TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
+                    playerViewBorders[i] = title;
+                    playerHand.setBorder(title);
+
+                    sides[next].add(playerHand);
+                    sides[next].setLayout(new GridBagLayout());
+                    next = (next + 1) % (locations.length);
+                    playerHands[i] = playerHand;
+                }
+                for (int i = 0; i < locations.length; i++) {
+                    mainGameArea.add(sides[i], locations[i]);
+                }
+
+                // Discard and draw piles go in the center
+                JPanel centerArea = new JPanel();
+                centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
+                discardPile = new UnoDeckView(ugs.getDiscardDeck(), true, ugp.getDataPath());
+                drawPile = new UnoDeckView(ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath());
+                centerArea.add(drawPile);
+                centerArea.add(discardPile);
+                JPanel jp = new JPanel();
+                jp.setLayout(new GridBagLayout());
+                jp.add(centerArea);
+                mainGameArea.add(jp, BorderLayout.CENTER);
+
+                // Top area will show state information
+                JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
+                // Bottom area will show actions available
+                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+
+                // Add all views to frame
+                getContentPane().add(mainGameArea, BorderLayout.CENTER);
+                getContentPane().add(infoPanel, BorderLayout.NORTH);
+                getContentPane().add(actionPanel, BorderLayout.SOUTH);
             }
-            for (int i = 0; i < locations.length; i++) {
-                mainGameArea.add(sides[i], locations[i]);
-            }
-
-            // Discard and draw piles go in the center
-            JPanel centerArea = new JPanel();
-            centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-            discardPile = new UnoDeckView(ugs.getDiscardDeck(), true, ugp.getDataPath());
-            drawPile = new UnoDeckView(ugs.getDiscardDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath());
-            centerArea.add(drawPile);
-            centerArea.add(discardPile);
-            JPanel jp = new JPanel();
-            jp.setLayout(new GridBagLayout());
-            jp.add(centerArea);
-            mainGameArea.add(jp, BorderLayout.CENTER);
-
-            // Top area will show state information
-            JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
-            // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
-
-            // Add all views to frame
-            getContentPane().add(mainGameArea, BorderLayout.CENTER);
-            getContentPane().add(infoPanel, BorderLayout.NORTH);
-            getContentPane().add(actionPanel, BorderLayout.SOUTH);
         }
 
         setFrameProperties();
@@ -119,6 +143,15 @@ public class UnoGUI extends AbstractGUI {
                     playerHands[i].setFocusable(true);
                 } else {
                     playerHands[i].setFront(false);
+                }
+
+                // Highlight active player
+                if (i == gameState.getCurrentPlayer()) {
+                    Border compound = BorderFactory.createCompoundBorder(
+                            highlightActive, playerViewBorders[i]);
+                    playerHands[i].setBorder(compound);
+                } else {
+                    playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
             discardPile.updateComponent(ugs.getDiscardDeck());

@@ -2,7 +2,7 @@ package games.explodingkittens.cards;
 
 import core.components.Card;
 
-public class ExplodingKittenCard extends Card {
+public class ExplodingKittensCard extends Card {
     public enum CardType {
         EXPLODING_KITTEN,
         DEFUSE,
@@ -21,18 +21,18 @@ public class ExplodingKittenCard extends Card {
 
     public CardType cardType;
 
-    public ExplodingKittenCard(CardType cardType) {
+    public ExplodingKittensCard(CardType cardType) {
         super(cardType.toString());
         this.cardType = cardType;
     }
 
-    public ExplodingKittenCard(CardType cardType, int ID) {
+    public ExplodingKittensCard(CardType cardType, int ID) {
         super(cardType.toString(), ID);
         this.cardType = cardType;
     }
 
     @Override
     public Card copy() {
-        return new ExplodingKittenCard(cardType, componentID);
+        return new ExplodingKittensCard(cardType, componentID);
     }
 }

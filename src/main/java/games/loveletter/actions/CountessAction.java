@@ -20,6 +20,11 @@ public class CountessAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Countess (auto discard with King/Prince)";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }

@@ -3,7 +3,6 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
@@ -69,6 +68,11 @@ public class PrinceAction extends DrawCard implements IPrintable {
     @Override
     public String toString(){
         return "Prince - player "+ opponentID + " discards its card and draws a new one";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Prince (player " + opponentID + " discards card, draws card)";
     }
 
     @Override

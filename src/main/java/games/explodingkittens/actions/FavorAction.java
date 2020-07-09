@@ -4,7 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import core.turnorders.TurnOrder;
 
@@ -28,7 +28,7 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
         ekgs.setGamePhase(Favor);
         ekgs.setPlayerGettingAFavor(gs.getTurnOrder().getCurrentPlayer(gs));
 
-        ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
+        ExplodingKittensTurnOrder ekto = (ExplodingKittensTurnOrder) gs.getTurnOrder();
         ekto.registerFavorAction(target);
         return true;
     }
@@ -43,6 +43,11 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return String.format("Ask player %d for a favor", target);
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
@@ -50,7 +55,7 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof FavorAction)) return false;
         if (!super.equals(o)) return false;
         FavorAction that = (FavorAction) o;
         return target == that.target;
@@ -65,4 +70,5 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     public AbstractAction copy() {
         return new FavorAction(deckFrom, deckTo, fromIndex, target);
     }
+
 }
