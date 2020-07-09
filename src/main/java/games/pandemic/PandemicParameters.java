@@ -64,7 +64,7 @@ public class PandemicParameters extends AbstractParameters {
 
         // How many cards are drawn for each counter
         this.infection_rate = new int[infection_rate.length];
-        System.arraycopy(infection_rate, 0, pandemicParameters.infection_rate, 0, infection_rate.length);
+        System.arraycopy(pandemicParameters.infection_rate, 0, infection_rate, 0, infection_rate.length);
 
         // Number of cards each player receives.
         this.n_cards_per_player = new HashMap<>();

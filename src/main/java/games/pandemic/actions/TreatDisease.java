@@ -16,7 +16,6 @@ import static core.CoreConstants.nameHash;
 
 public class TreatDisease extends AbstractAction {
 
-    //PandemicParameters gp;
     private int initialDiseaseCubes;
     private String color;
     private String city;

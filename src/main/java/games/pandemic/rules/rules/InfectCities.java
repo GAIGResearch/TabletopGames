@@ -1,7 +1,6 @@
 package games.pandemic.rules.rules;
 
 import core.AbstractGameState;
-import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
@@ -27,23 +26,19 @@ public class InfectCities extends RuleNode {
     protected boolean run(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
         if (!pgs.isQuietNight()) {
-
+            // Infecting with top cards of infection deck if it's not a quiet night
             Counter infectionCounter = (Counter)((PandemicGameState)gs).getComponent(infectionRateHash);
             int noCardsDrawn = infection_rate[infectionCounter.getValue()];
-            Deck<Card> tempDeck = pgs.getTempDeck();
             Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
             Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-            DrawCard action = new DrawCard(infectionDeck.getComponentID(), tempDeck.getComponentID(), 0);
-            for (int i = 0; i < noCardsDrawn; i++) {  // Draw infection cards into a new deck
-                action.execute(gs);
+            for (int c = 0; c < noCardsDrawn; c++) {  // Check the drawn cards and infect cities
+                new InfectCity(infectionDeck.getComponentID(), infectionDiscardDeck.getComponentID(), 0,
+                        max_cubes_per_city, n_cubes_infection).execute(gs);
             }
-            for (int c = 0; c < tempDeck.getSize(); c++) {  // Check the drawn cards and infect cities
-                new InfectCity(tempDeck.getComponentID(), infectionDiscardDeck.getComponentID(), c, max_cubes_per_city, n_cubes_infection).execute(gs);
-            }
-            pgs.clearTempDeck();
-            ((PandemicGameState) gs).setQuietNight(false);
             return true;
         }
+        // No more quiet night, no more epidemic
+        ((PandemicGameState) gs).setQuietNight(false);
         ((PandemicGameState)gs).setEpidemic(false);
         ((PandemicGameState)gs).setNCardsDrawn(0);
         return false;

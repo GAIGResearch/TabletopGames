@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import static core.CoreConstants.VERBOSE;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
@@ -308,5 +309,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             gameState.setPlayerResult(gameState.getGameStatus(), i);
         }
+//        if (VERBOSE) {
+            System.out.println(gameState.getGameStatus());
+//        }
     }
 }
