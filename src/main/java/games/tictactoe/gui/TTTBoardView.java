@@ -12,7 +12,7 @@ import static core.AbstractGUI.defaultItemSize;
 
 public class TTTBoardView extends ComponentView {
 
-    Rectangle[] rects;  // TODO: use these for highlights + action trimming
+    Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
 
     public TTTBoardView(GridBoard<Character> gridBoard) {
@@ -87,8 +87,11 @@ public class TTTBoardView extends ComponentView {
         g.setColor(Color.black);
         g.drawRect(x, y, defaultItemSize, defaultItemSize);
 
-        // Paint element in cell TODO bigger
-        g.drawString(element.toString(), x + defaultItemSize /2, y + defaultItemSize);
+        // Paint element in cell
+        Font f = g.getFont();
+        g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize*3/2));
+        g.drawString(element.toString(), x + defaultItemSize/16, y + defaultItemSize - defaultItemSize/16);
+        g.setFont(f);
     }
 
     public ArrayList<Rectangle> getHighlight() {
