@@ -195,7 +195,7 @@ public enum GameType {
                 gui = new UnoGUI(game.getGameState(), ac, human);
                 break;
             case ColtExpress:
-                gui = new ColtExpressGUI(game.getGameState(), ac, human);
+                gui = new ColtExpressGUI(game, ac, human);
                 break;
             case ExplodingKittens:
                 gui = new ExplodingKittensGUI(game, ac, human);
