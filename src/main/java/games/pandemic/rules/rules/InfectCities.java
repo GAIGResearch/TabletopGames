@@ -35,12 +35,11 @@ public class InfectCities extends RuleNode {
                 new InfectCity(infectionDeck.getComponentID(), infectionDiscardDeck.getComponentID(), 0,
                         max_cubes_per_city, n_cubes_infection).execute(gs);
             }
-            return true;
         }
         // No more quiet night, no more epidemic
         ((PandemicGameState) gs).setQuietNight(false);
         ((PandemicGameState)gs).setEpidemic(false);
         ((PandemicGameState)gs).setNCardsDrawn(0);
-        return false;
+        return true;
     }
 }

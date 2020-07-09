@@ -309,8 +309,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             gameState.setPlayerResult(gameState.getGameStatus(), i);
         }
-//        if (VERBOSE) {
+        if (VERBOSE) {
             System.out.println(gameState.getGameStatus());
-//        }
+        }
     }
 }
