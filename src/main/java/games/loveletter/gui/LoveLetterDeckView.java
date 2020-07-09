@@ -120,6 +120,7 @@ public class LoveLetterDeckView extends ComponentView {
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
                 // TODO: draw card name, effect, value
+                // TODO: visibility
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
