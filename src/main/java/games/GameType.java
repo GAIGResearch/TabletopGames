@@ -192,7 +192,7 @@ public enum GameType {
 //                    gui = new PrototypeGUI(this,null, ac, 0);
 //                }
             case Uno:
-                gui = new UnoGUI(game.getGameState(), ac, human);
+                gui = new UnoGUI(game, ac, human);
                 break;
             case ColtExpress:
                 gui = new ColtExpressGUI(game, ac, human);

@@ -98,35 +98,36 @@ public class UnoDeckView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g);
+        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, unoCardHeight));
     }
 
     /**
      * Draws all cards in the deck, evenly spaced.
      * @param g - Graphics object
      */
-    public void drawDeck(Graphics2D g) {
+    public void drawDeck(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
         Deck<UnoCard> deck = (Deck<UnoCard>) component;
 
         if (deck != null) {
             // Draw cards, 0 index on top
-            int offset = Math.max((width-unoCardWidth) / deck.getSize(), minCardOffset);
+            int offset = Math.max((rect.width-unoCardWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
             for (int i = deck.getSize()-1; i >= 0; i--) {
                 UnoCard card = deck.get(i);
                 Image cardFace = getCardImage(card);
-                Rectangle r = new Rectangle(offset * i, 0, unoCardWidth, unoCardHeight);
+                Rectangle r = new Rectangle(rect.x + offset * i, rect.y, unoCardWidth, unoCardHeight);
                 rects[i] = r;
-                CardView.drawCard(g, offset * i, 0, unoCardWidth, unoCardHeight, card, cardFace, backOfCard, front);
+                CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
                 UnoCard card = deck.get(cardHighlight);
                 Image cardFace = getCardImage(card);
-                CardView.drawCard(g, offset * cardHighlight, 0, unoCardWidth, unoCardHeight, card, cardFace, backOfCard, front);
+                Rectangle r = rects[cardHighlight];
+                CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
             }
-            g.drawString(""+deck.getSize(), 10, unoCardHeight - size);
+            g.drawString(""+deck.getSize(), rect.x+10, rect.y+unoCardHeight - size);
         }
     }
 

@@ -15,10 +15,14 @@ public class UnoPlayerView extends UnoDeckView {
     // Number of points player has
     int nPoints;
 
+    // Border offsets
+    int border = 5;
+    int borderBottom = 20;
+
     public UnoPlayerView(Deck<UnoCard> d, int playerId, String dataPath) {
         super(d, false, dataPath);
-        this.width = playerAreaWidth;
-        this.height = playerAreaHeight;
+        this.width = playerAreaWidth + border*2;
+        this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
     }
 
@@ -28,9 +32,9 @@ public class UnoPlayerView extends UnoDeckView {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g);
+        drawDeck((Graphics2D) g, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
         g.setColor(Color.black);
-        g.drawString(nPoints + " points", playerAreaWidth/2 - 20, unoCardHeight + 10);
+        g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border+unoCardHeight + 10);
     }
 
     @Override
