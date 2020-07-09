@@ -22,6 +22,7 @@ import static core.CoreConstants.*;
 
 public class PandemicBoardView extends JComponent {
     private Image background;
+    private Image cardBackPD, cardBackInf;
     private GraphBoard graphBoard;
     private int width;
     private int height;
@@ -73,7 +74,11 @@ public class PandemicBoardView extends JComponent {
         this.graphBoard = ((PandemicGameState) gs).getWorld();
         String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
 
+        // Background and card bakcs
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);
+        cardBackInf = ImageIO.GetInstance().getImage(dataPath + "CardBackInfections.png");
+        cardBackPD = ImageIO.GetInstance().getImage(dataPath + "CardBackPD.png");
+
         // infection rate marker
         Counter infectionRateCounter = (Counter) gameState.getComponent(PandemicConstants.infectionRateHash);
         this.infectionRateCounterImg = ImageIO.GetInstance().getImage(dataPath +
@@ -340,9 +345,9 @@ public class PandemicBoardView extends JComponent {
         g.setFont(labelFontS);
         g.drawString("Planner Deck", (int)plannerDeckLocation.getX(), (int)plannerDeckLocation.getY() - fontSize);
 
-        drawDeck(g, (Deck<Card>) gameState.getComponent(infectionHash), null, null, infectionDeckLocation, false);
+        drawDeck(g, (Deck<Card>) gameState.getComponent(infectionHash), null, cardBackInf, infectionDeckLocation, false);
         g.drawString("Infection Deck", (int)infectionDeckLocation.getX(), (int)infectionDeckLocation.getY() - fontSize);
-        drawDeck(g, (Deck<Card>) gameState.getComponent(playerDeckHash), null, null, playerDeckLocation, false);
+        drawDeck(g, (Deck<Card>) gameState.getComponent(playerDeckHash), null, cardBackPD, playerDeckLocation, false);
         g.drawString("Player Deck", (int)playerDeckLocation.getX(), (int)playerDeckLocation.getY() - fontSize);
         g.setFont(f);
 

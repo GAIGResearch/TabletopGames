@@ -30,8 +30,11 @@ public class PandemicCounterView extends CounterView {
             g.setColor(Color.black);
         }
 
+        Font f = g.getFont();
+        g.setFont(new Font(f.getName(), Font.BOLD, 36));
         int value = ((Counter)component).getValue();
-        g.drawString(""+value, 5, 15);
+        g.drawString(""+value, width/2-10, width-10);
+        g.setFont(f);
 
         if (color != null) {
             g.setColor(color);

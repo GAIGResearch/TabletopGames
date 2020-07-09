@@ -45,17 +45,15 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof AddResearchStationWithCardFrom)) return false;
         if (!super.equals(o)) return false;
         AddResearchStationWithCardFrom that = (AddResearchStationWithCardFrom) o;
-        return cardIdx == that.cardIdx &&
-                cardId == that.cardId &&
-                executed == that.executed;
+        return cardIdx == that.cardIdx;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardIdx, cardId, executed);
+        return Objects.hash(super.hashCode(), cardIdx);
     }
 
     @Override
@@ -66,9 +64,9 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom {
     @Override
     public String toString() {
         return "AddResearchStationWithCardFrom{" +
-                "cardIdx=" + cardIdx +
-                ", cardId=" + cardId +
-                ", executed=" + executed +
+                "fromCity='" + fromCity + '\'' +
+                ", toCity='" + city + '\'' +
+                ", cardIdx=" + cardIdx +
                 '}';
     }
 }

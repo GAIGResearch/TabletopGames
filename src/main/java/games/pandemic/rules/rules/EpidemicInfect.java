@@ -29,6 +29,7 @@ public class EpidemicInfect extends RuleNode {
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
         // 2. N cubes on bottom card in infection deck, then add this card on top of infection discard
-        return new InfectCity(infectionDeck.getComponentID(), infectionDiscard.getComponentID(), infectionDeck.getSize()-1, max_cubes_per_city, n_cubes_epidemic).execute(gs);
+        return new InfectCity(infectionDeck.getComponentID(), infectionDiscard.getComponentID(),
+                infectionDeck.getSize()-1, max_cubes_per_city, n_cubes_epidemic).execute(gs);
     }
 }
