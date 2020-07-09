@@ -28,7 +28,7 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " shuffles the draw pile.";
+        return "Shuffle draw deck";
     }
 
     @Override

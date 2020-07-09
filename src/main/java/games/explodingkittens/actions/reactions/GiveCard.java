@@ -1,13 +1,13 @@
-package games.explodingkittens.actions;
+package games.explodingkittens.actions.reactions;
 
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.cards.ExplodingKittenCard;
+import games.explodingkittens.cards.ExplodingKittensCard;
 
 public class GiveCard extends DrawCard implements IPrintable {
 
@@ -18,11 +18,11 @@ public class GiveCard extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
-        ExplodingKittenTurnOrder ekto = ((ExplodingKittenTurnOrder) gs.getTurnOrder());
-        Deck<ExplodingKittenCard> from = (Deck<ExplodingKittenCard>) ekgs.getComponentById(deckFrom);
-        Deck<ExplodingKittenCard> to = (Deck<ExplodingKittenCard>) ekgs.getComponentById(deckTo);
+        ExplodingKittensTurnOrder ekto = ((ExplodingKittensTurnOrder) gs.getTurnOrder());
+        Deck<ExplodingKittensCard> from = (Deck<ExplodingKittensCard>) ekgs.getComponentById(deckFrom);
+        Deck<ExplodingKittensCard> to = (Deck<ExplodingKittensCard>) ekgs.getComponentById(deckTo);
 
-        ExplodingKittenCard c = from.pick(fromIndex);
+        ExplodingKittensCard c = from.pick(fromIndex);
         to.add(c);
         gs.setMainGamePhase();
         ekto.endPlayerTurnStep(gs);
@@ -37,8 +37,7 @@ public class GiveCard extends DrawCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " gives card " + getCard(gameState).getComponentName()
-                + " for a favor";
+        return "Give " + getCard(gameState).getComponentName() + " for a favor";
     }
 
     @Override

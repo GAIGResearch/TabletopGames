@@ -3,6 +3,7 @@ package games.explodingkittens;
 import core.AbstractGameState;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
+import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -11,10 +12,11 @@ import java.util.LinkedList;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
-public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
+public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
+    // Number of cards the player is required to draw
     int requiredDraws;
 
-    public ExplodingKittenTurnOrder(int nPlayers){
+    public ExplodingKittensTurnOrder(int nPlayers){
         super(nPlayers);
         requiredDraws = 1;
     }
@@ -25,6 +27,10 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
         requiredDraws = 1;
     }
 
+    /**
+     * Ends one sequence of actions, when the player draws a card. Possibly ending its turn if all steps have been done.
+     * @param gameState - current game state.
+     */
     public void endPlayerTurnStep(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
@@ -45,16 +51,38 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
         }
     }
 
+    /**
+     * If a nopeable action was played, players with a NOPE card can react.
+     * @param gameState - current game state.
+     */
     public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState){
-        addAllReactivePlayersButCurrent(gameState);
-        gameState.setGamePhase(Nope);
+        reactivePlayers.clear();
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
+            for (ExplodingKittensCard ekp: gameState.getPlayerHandCards().get(i).getComponents()) {
+                if (ekp.cardType == ExplodingKittensCard.CardType.NOPE) {
+                    reactivePlayers.add(i);
+                    break;
+                }
+            }
+        }
+        if (reactivePlayers.size() > 0) {
+            gameState.setGamePhase(Nope);
+        }
     }
 
+    /**
+     * If a favor action was played, player requested has to react and give a card.
+     * @param player - player asked for a favor.
+     */
     public void registerFavorAction(int player){
         reactivePlayers.clear();
         addReactivePlayer(player);
     }
 
+    /**
+     * If an attack action was played, turn immediately changes to attacked player who has to play two turns.
+     * @param attackTarget - player attacked.
+     */
     public void registerAttackAction(int attackTarget){
         requiredDraws = 2;
         turnOwner = attackTarget;
@@ -62,7 +90,7 @@ public class ExplodingKittenTurnOrder extends ReactiveTurnOrder {
 
     @Override
     protected TurnOrder _copy() {
-        ExplodingKittenTurnOrder to = new ExplodingKittenTurnOrder(nPlayers);
+        ExplodingKittensTurnOrder to = new ExplodingKittensTurnOrder(nPlayers);
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         to.requiredDraws = requiredDraws;
         return to;

@@ -5,9 +5,10 @@ import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
-import games.explodingkittens.ExplodingKittenParameters;
+import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.gui.ExplodingKittensGUI;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
@@ -132,7 +133,7 @@ public enum GameType {
                 gameState = new TicTacToeGameState(params, nPlayers);
                 break;
             case ExplodingKittens:
-                params = new ExplodingKittenParameters(seed);
+                params = new ExplodingKittensParameters(seed);
                 forwardModel = new ExplodingKittensForwardModel();
                 gameState = new ExplodingKittensGameState(params, nPlayers);
                 break;
@@ -195,6 +196,9 @@ public enum GameType {
                 break;
             case ColtExpress:
                 gui = new ColtExpressGUI(game.getGameState(), ac, human);
+                break;
+            case ExplodingKittens:
+                gui = new ExplodingKittensGUI(game, ac, human);
                 break;
         }
 

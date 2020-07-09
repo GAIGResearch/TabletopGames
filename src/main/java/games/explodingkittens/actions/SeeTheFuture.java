@@ -22,7 +22,7 @@ public class SeeTheFuture extends AbstractAction implements IsNopeable, IPrintab
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "See the future";
     }
 
     public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {

@@ -2,7 +2,7 @@ package games.explodingkittens;
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
 import games.explodingkittens.actions.IsNopeable;
-import games.explodingkittens.cards.ExplodingKittenCard;
+import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
 public class ExplodingKittensHeuristic implements IStateHeuristic {
@@ -28,7 +28,7 @@ public class ExplodingKittensHeuristic implements IStateHeuristic {
             return 1;
 
         double cardValues = 0.0;
-        for (ExplodingKittenCard card: ekgs.playerHandCards.get(playerId).getComponents()) {
+        for (ExplodingKittensCard card: ekgs.playerHandCards.get(playerId).getComponents()) {
             cardValues += getCardValue(ekgs, card);
         }
 
@@ -36,7 +36,7 @@ public class ExplodingKittensHeuristic implements IStateHeuristic {
     }
 
     // TODO: check state more
-    double getCardValue(ExplodingKittensGameState ekgs, ExplodingKittenCard card) {
+    double getCardValue(ExplodingKittensGameState ekgs, ExplodingKittensCard card) {
         switch(card.cardType) {
             case EXPLODING_KITTEN:
                 return explodingValue;

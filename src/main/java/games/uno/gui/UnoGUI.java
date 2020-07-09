@@ -78,7 +78,7 @@ public class UnoGUI extends AbstractGUI {
             JPanel centerArea = new JPanel();
             centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
             discardPile = new UnoDeckView(ugs.getDiscardDeck(), true, ugp.getDataPath());
-            drawPile = new UnoDeckView(ugs.getDiscardDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath());
+            drawPile = new UnoDeckView(ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath());
             centerArea.add(drawPile);
             centerArea.add(discardPile);
             JPanel jp = new JPanel();

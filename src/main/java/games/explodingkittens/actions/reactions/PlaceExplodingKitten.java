@@ -1,10 +1,10 @@
-package games.explodingkittens.actions;
+package games.explodingkittens.actions.reactions;
 
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 
 public class PlaceExplodingKitten extends DrawCard implements IPrintable {
 
@@ -17,7 +17,7 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
         boolean success = super.execute(gs);
 
         gs.setMainGamePhase();
-        ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+        ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         return success;
     }
 
@@ -28,7 +28,7 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return String.format("Player %d defuses the kitten and places it at index  %d", gameState.getCurrentPlayer(), toIndex);
+        return String.format("[DEFUSED] Place kitten at index %d", toIndex);
     }
 
     @Override
