@@ -18,13 +18,11 @@ public class Dice extends Component {
 
     public Dice() {
         this(6);  // By default d6
-        value = roll();
     }
 
     public Dice(int nSides) {
         super(ComponentType.DICE);
         this.nSides = nSides;
-        value = roll();
     }
 
     private Dice(int nSides, int value, int ID) {
@@ -62,14 +60,6 @@ public class Dice extends Component {
      */
     public int roll(Random r) {
         return r.nextInt(this.nSides) + 1;
-    }
-
-    /**
-     * Rolls the die and returns result for roll in range [1, nSides].
-     * @return - int, value of roll.
-     */
-    public int roll() {
-        return new Random().nextInt(this.nSides) + 1;
     }
 
     @Override
