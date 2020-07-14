@@ -294,7 +294,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
     private ArrayList<AbstractAction> stealingActions(ColtExpressGameState cegs)
     {
-        int player = cegs.getTurnOrder().getCurrentPlayer(cegs);
+        int player = cegs.getCurrentPlayer();
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (cegs.plannedActions.getSize() == 0) {
             actions.add(new DoNothing());
@@ -333,11 +333,11 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     for (int i = 0; i < cegs.trainCompartments.size(); i++){
                         Compartment compartment = cegs.trainCompartments.get(i);
                         if (compartment.containsMarshal){
-                            if (i > 1)
+                            if (i > 0)
                                 // Move marshal left
                                 actions.add(new MoveMarshalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i-1).getComponentID()));
-                            if (i < cegs.trainCompartments.size() - 2)
+                            if (i < cegs.trainCompartments.size() - 1)
                                 // Move marshal right
                                 actions.add(new MoveMarshalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
                                         cegs.trainCompartments.get(i+1).getComponentID()));
@@ -353,15 +353,19 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                         else if (compartment.playersInsideCompartment.contains(player))
                             availableLoot = compartment.lootInside;
                         if (availableLoot != null && availableLoot.getSize() > 0) {
+                            HashSet<LootType> lootTypes = new HashSet<>();
                             for (Loot loot : availableLoot.getComponents()) {
-                                actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx, loot.getComponentID(),
+                                lootTypes.add(loot.getLootType());
+                            }
+                            for (LootType lt: lootTypes) {
+                                actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx, lt,
                                         availableLoot.getComponentID()));
                             }
                             break;
                         }
                     }
                     if (actions.size() == 0) {
-                        actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx,-1, -1));
+                        actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx,null, -1));
                     }
                     break;
                 case MoveSideways:

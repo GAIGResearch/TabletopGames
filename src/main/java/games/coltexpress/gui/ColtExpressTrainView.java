@@ -129,11 +129,11 @@ public class ColtExpressTrainView extends JComponent {
         Image lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_behind.png");
         g.drawImage(lootFace, r.x, r.y, r.width, r.height, null);
         // Draw component ID for identification in actions available
-        Font f = g.getFont();
-        g.setFont(new Font(f.getName(), Font.PLAIN, 8));
-        g.setColor(Color.black);
-        g.drawString(loot.getComponentID()+"", r.x, r.y + 15);
-        g.setFont(f);
+//        Font f = g.getFont();
+//        g.setFont(new Font(f.getName(), Font.PLAIN, 8));
+//        g.setColor(Color.black);
+//        g.drawString(loot.getComponentID()+"", r.x, r.y + 15);
+//        g.setFont(f);
     }
 
     /**
