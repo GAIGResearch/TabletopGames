@@ -260,6 +260,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         ColtExpressParameters cep = (ColtExpressParameters)cegs.getGameParameters();
+        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
         int player = cegs.getCurrentPlayer();
 
         HashSet<ColtExpressCard.CardType> types = new HashSet<>();
@@ -274,10 +275,9 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (c.cardType == ColtExpressCard.CardType.Bullet || types.contains(c.cardType))
                 continue;
 
-            // Ghost can play a card hidden during the first turn of a round, otherwise hidden is turn is hidden
-            boolean hidden = ((ColtExpressTurnOrder) cegs.getTurnOrder()).isHiddenTurn() ||
-                    (cegs.playerCharacters.get(player) == CharacterType.Ghost &&
-                            ((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == 0);
+            // Ghost can play a card hidden during the first turn of a round, otherwise hidden if turn is hidden
+            boolean hidden = ceto.isHiddenTurn() ||
+                    (cegs.playerCharacters.get(player) == CharacterType.Ghost && ceto.getFullPlayerTurnCounter() == 0);
 
             // Add action
             actions.add(new SchemeAction(fromID, toID, i, hidden));
@@ -465,17 +465,21 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     Deck<Loot> availableLoot = cegs.playerLoot.get(targetPlayer);
 
                     if (availableLoot.getSize() > 0) {
-                        // Punch and make them drop one of their loot
+                        // Punch and make them drop random loot of type
+                        HashSet<LootType> lootTypes = new HashSet<>();
                         for (Loot loot : availableLoot.getComponents()) {
+                            lootTypes.add(loot.getLootType());
+                        }
+                        for (LootType lt: lootTypes) {
                             actions.add(new PunchAction(deckFromID, deckToID, cardIdx, targetPlayer,
                                     sourceCompID, targetCompartment.getComponentID(),
-                                    loot.getComponentID(), availableLoot.getComponentID(), playerIsCheyenne));
+                                    lt, availableLoot.getComponentID(), playerIsCheyenne));
                         }
                     } else {
                         // punch opponent that cannot drop anymore loot
                         actions.add(new PunchAction(deckFromID, deckToID, cardIdx, targetPlayer,
                                 sourceCompID, targetCompartment.getComponentID(),
-                                -1, -1, playerIsCheyenne));
+                                null, -1, playerIsCheyenne));
                     }
                 }
             }
@@ -483,7 +487,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
         if (actions.size() == 0)
             actions.add(new PunchAction(deckFromID, deckToID, cardIdx, -1, -1, -1,
-                    -1, -1, playerIsCheyenne));
+                    null, -1, playerIsCheyenne));
     }
 
     private void createShootingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player, int cardIdx) {

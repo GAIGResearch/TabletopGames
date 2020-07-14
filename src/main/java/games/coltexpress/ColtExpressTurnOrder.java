@@ -47,6 +47,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         ceto.currentTurnType = currentTurnType;
         ceto.direction = direction;
         ceto.firstAction = firstAction;
+        ceto.fullPlayerTurnCounter = fullPlayerTurnCounter;
         return ceto;
     }
 
