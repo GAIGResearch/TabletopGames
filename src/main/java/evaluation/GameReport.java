@@ -5,6 +5,8 @@ import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
 import players.RandomPlayer;
+import players.utils.RandomTestPlayer;
+import utilities.StatSummary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +38,6 @@ public class GameReport {
     }
 
     /**
-     * Total number of game states possible in the game.
-     * @param game - game to test.
-     */
-    public static void stateSpaceSize(GameType game) {
-        // Unsure
-    }
-
-    /**
      * Amount of hidden information in the game.
      * @param game - game to test.
      */
@@ -53,6 +47,7 @@ public class GameReport {
 
     /**
      * How fast the game works.
+     *  - ForwardModel.setup()
      *  - ForwardModel.next()
      *  - ForwardModel.computeAvailableActions()
      *  - GameState.copy()
@@ -107,23 +102,40 @@ public class GameReport {
      * @param game - game to test.
      */
     public static void gameLength(GameType game) {
+        int nRep = 50;
+        int nPlayers = 2;
 
-    }
+        System.out.println("--------------------\nGame Length Test: " + game.name() + "\n--------------------");
 
-    /**
-     * Number of actions taken by one player in a turn.
-     * @param game - game to test.
-     */
-    public static void turnLength(GameType game) {
+        double nDecisions = 0;
+        double nTicks = 0;
+        double nRounds = 0;
+        double nActionsPerTurn = 0;
+        for (int i = 0; i < nRep; i++) {
+            Game g = game.createGameInstance(nPlayers);
+            List<AbstractPlayer> players = new ArrayList<>();
+            for (int j = 0; j < nPlayers; j++) {
+                players.add(new RandomPlayer());
+            }
 
-    }
+            if (g != null) {
+                g.reset(players);
+                g.run();
+                nDecisions += g.getNDecisions();
+                nTicks += g.getTick();
+                nRounds += g.getGameState().getTurnOrder().getRoundCounter();
+                nActionsPerTurn += g.getNActionsPerTurn();
+            }
+        }
 
-    /**
-     * How stochastic is a game? Counts number of calls for the random seed.
-     * @param game - game to test.
-     */
-    public static void stochasticity(GameType game) {
+        if (nDecisions != 0) {
+            System.out.println("# decisions: " + (nDecisions / nRep));
+            System.out.println("# ticks: " + (nTicks / nRep));
+            System.out.println("# rounds: " + (nRounds / nRep));
+            System.out.println("# actions/turn: " + (nActionsPerTurn / nRep));
+        }
 
+        System.out.println();
     }
 
     /**
@@ -131,7 +143,35 @@ public class GameReport {
      * @param game - game to test.
      */
     public static void rewardSparsity(GameType game) {
+        int nRep = 50;
+        int nPlayers = 2;
 
+        System.out.println("--------------------\nReward Sparsity Test: " + game.name() + "\n--------------------");
+
+        StatSummary stDev = new StatSummary();
+        for (int i = 0; i < nRep; i++) {
+            Game g = game.createGameInstance(nPlayers);
+            List<AbstractPlayer> players = new ArrayList<>();
+            for (int j = 0; j < nPlayers; j++) {
+                players.add(new RandomTestPlayer());
+            }
+
+            if (g != null) {
+                g.reset(players);
+                g.run();
+
+                for (AbstractPlayer p: players) {
+                    RandomTestPlayer rtp = (RandomTestPlayer) p;
+                    stDev.add(rtp.getScores());
+                }
+            }
+        }
+
+        if (stDev.n() != 0) {
+            System.out.println(stDev.toString());
+        }
+
+        System.out.println();
     }
 
     /**
@@ -152,16 +192,15 @@ public class GameReport {
         actionSpace(game);
         branchingFactor(game);
         stateSize(game);
-        stateSpaceSize(game);
         hiddenInformation(game);
+//        stateSpaceSize(game); * not implemented
 
         // Speed tests
-        gameSpeed(game);
-        gameLength(game);
-        turnLength(game);
+//        gameSpeed(game);
+//        gameLength(game);
 
         // Other tests
-        stochasticity(game);
+//        stochasticity(game); * not implemented
         rewardSparsity(game);
         skillDepth(game);
     }

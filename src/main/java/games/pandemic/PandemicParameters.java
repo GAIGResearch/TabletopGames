@@ -12,6 +12,8 @@ public class PandemicParameters extends AbstractParameters {
 
     int max_cubes_per_city = 3;  // More cause outbreak
 
+    int n_city_cards = 48;
+    int n_event_cards = 5;
     int n_epidemic_cards = 4;
     int n_cubes_epidemic = 3;
 
@@ -26,6 +28,7 @@ public class PandemicParameters extends AbstractParameters {
 
     int max_cards_per_player = 7;  // Max cards in hand per player
     int n_cards_draw = 2;  // Number of cards players draw each turn
+
 
     // Number of cards each player receives.
     HashMap<Integer, Integer> n_cards_per_player = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player

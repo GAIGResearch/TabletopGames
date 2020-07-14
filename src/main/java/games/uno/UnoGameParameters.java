@@ -6,8 +6,9 @@ import core.AbstractParameters;
 public class UnoGameParameters extends AbstractParameters {
     public String dataPath = "data/uno/";
 
-    public int nNumberCards = 10;
     public int nCardsPerPlayer = 7;
+
+    public int nNumberCards = 10;
     public int nWildCards = 4;
     public int nSkipCards = 2;
     public int nReverseCards = 2;
