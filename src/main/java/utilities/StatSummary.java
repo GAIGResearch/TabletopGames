@@ -115,6 +115,10 @@ public class StatSummary {
         }
     }
 
+    public double sum(){
+        return sum;
+    }
+
     public double getLastAdded() {
         return lastAdded;
     }
@@ -125,7 +129,7 @@ public class StatSummary {
 
     @Override
 	public String toString() {
-        String s = (name == null) ? "" : name + "\n";
+        String s = (name == null) ? "" : (name + "\n");
         s +=    " min   = " + min() + "\n" +
                 " max   = " + max() + "\n" +
                 " ave   = " + mean() + "\n" +
@@ -135,11 +139,12 @@ public class StatSummary {
                 " sumsq = " + sumsq + "\n" +
                 " n     = " + n + "\n";
         return s;
-
     }
 
-    public double sum(){
-        return sum;
+    public String shortString() {
+        return (name == null) ? "" : (name + ": [") + min() + ", " + max() + "] avg=" + String.format("%.2f", mean())
+                + "; sd=" + String.format("%.2f", sd())
+                ;
     }
 
     public StatSummary copy()

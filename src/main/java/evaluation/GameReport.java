@@ -6,6 +6,7 @@ import core.Game;
 import games.GameType;
 import players.RandomPlayer;
 import players.utils.RandomTestPlayer;
+import utilities.LineChart;
 import utilities.StatSummary;
 
 import java.util.ArrayList;
@@ -13,12 +14,59 @@ import java.util.List;
 
 public class GameReport {
 
+    static int nRep = 50;
+    static int nPlayers = 2;
+
     /**
      * Number of actions available from any one game state.
      * @param game - game to test.
      */
     public static void actionSpace(GameType game) {
-        // Run game with OSLA, count actions, print stats and show plots
+        System.out.println("--------------------\nAction Space Test: " + game.name() + "\n--------------------");
+
+        StatSummary actionSpace = new StatSummary("All");
+        ArrayList<StatSummary> sumData = new ArrayList<>();
+
+        for (int i = 0; i < nRep; i++) {
+            Game g = game.createGameInstance(nPlayers);
+            List<AbstractPlayer> players = new ArrayList<>();
+            for (int j = 0; j < nPlayers; j++) {
+                players.add(new RandomPlayer());
+            }
+
+            if (g != null) {
+                g.reset(players);
+                g.run();
+                for (int j = 0; j < g.getTick(); j++) {
+                    double size = g.getActionSpaceSize().get(j).b;
+                    actionSpace.add(size);
+
+                    if (j >= sumData.size()) {
+                        sumData.add(new StatSummary("" + j));
+                    }
+                    sumData.get(j).add(size);
+                }
+            }
+        }
+
+        if (actionSpace.n() != 0) {
+
+            // Average and make plot
+            double[] xData = new double[sumData.size()];
+            double[] yData = new double[sumData.size()];
+            double[] yErr = new double[sumData.size()];
+            for (int i = 0; i < sumData.size(); i++) {
+                xData[i] = i;
+                yData[i] = sumData.get(i).mean();
+                yErr[i] = sumData.get(i).stdErr();
+            }
+            LineChart lc = new LineChart(xData, yData, yErr, game.name() + "Action Space Size",
+                    "game tick", "action space size", "Size", false);
+
+            System.out.println(actionSpace.shortString());
+        }
+
+        System.out.println();
     }
 
     /**
@@ -54,9 +102,6 @@ public class GameReport {
      * @param game - game to test.
      */
     public static void gameSpeed(GameType game) {
-        int nRep = 50;
-        int nPlayers = 2;
-
         System.out.println("--------------------\nSpeed Test: " + game.name() + "\n--------------------");
 
         double nextT = 0;
@@ -102,9 +147,6 @@ public class GameReport {
      * @param game - game to test.
      */
     public static void gameLength(GameType game) {
-        int nRep = 50;
-        int nPlayers = 2;
-
         System.out.println("--------------------\nGame Length Test: " + game.name() + "\n--------------------");
 
         double nDecisions = 0;
@@ -143,9 +185,6 @@ public class GameReport {
      * @param game - game to test.
      */
     public static void rewardSparsity(GameType game) {
-        int nRep = 50;
-        int nPlayers = 2;
-
         System.out.println("--------------------\nReward Sparsity Test: " + game.name() + "\n--------------------");
 
         StatSummary stDev = new StatSummary();
@@ -201,7 +240,7 @@ public class GameReport {
 
         // Other tests
 //        stochasticity(game); * not implemented
-        rewardSparsity(game);
+//        rewardSparsity(game);
         skillDepth(game);
     }
 
