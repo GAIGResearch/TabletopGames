@@ -62,8 +62,7 @@ public class GameReport {
         int nRep = 50;
         int nPlayers = 2;
 
-        System.out.println("\n--------------------\nSpeed Test\n--------------------\n");
-        System.out.println(game.name());
+        System.out.println("--------------------\nSpeed Test: " + game.name() + "\n--------------------");
 
         double nextT = 0;
         double copyT = 0;
