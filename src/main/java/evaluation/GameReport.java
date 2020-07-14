@@ -62,11 +62,13 @@ public class GameReport {
         int nRep = 50;
         int nPlayers = 2;
 
+        System.out.println("\n--------------------\nSpeed Test\n--------------------\n");
+        System.out.println(game.name());
+
         double nextT = 0;
         double copyT = 0;
         double actionT = 0;
         double setupT = 0;
-
         for (int i = 0; i < nRep; i++) {
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -167,7 +169,6 @@ public class GameReport {
 
     public static void main(String[] args) {
         for (GameType gt: GameType.values()) {
-            System.out.println(gt.name());
             run(gt);
         }
 //        run(GameType.Pandemic);
