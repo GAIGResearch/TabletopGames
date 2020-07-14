@@ -9,15 +9,22 @@ import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensG
 
 public class SeeTheFuture extends AbstractAction implements IsNopeable, IPrintable {
 
+    int playerID;
+
+    public SeeTheFuture(int playerID) {
+        this.playerID = playerID;
+    }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         gs.setGamePhase(SeeTheFuture);
+        gs.getTurnOrder().setTurnOwner(playerID);
         return true;
     }
 
     @Override
     public String toString() {//overriding the toString() method
-        return "Player wants to see the future";
+        return "Player" + playerID + "wants to see the future";
     }
 
     @Override
@@ -36,16 +43,16 @@ public class SeeTheFuture extends AbstractAction implements IsNopeable, IPrintab
 
     @Override
     public AbstractAction copy() {
-        return new SeeTheFuture();
+        return new SeeTheFuture(playerID);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SeeTheFuture;
+        return obj instanceof SeeTheFuture && ((SeeTheFuture) obj).playerID == playerID;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return playerID;
     }
 }

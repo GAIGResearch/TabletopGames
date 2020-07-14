@@ -114,8 +114,10 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-            System.out.println("Unsupported number of players: " + nPlayers
-                    + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
+            if (VERBOSE) {
+                System.out.println("Unsupported number of players: " + nPlayers
+                        + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
+            }
             return null;
         }
 
@@ -176,16 +178,18 @@ public enum GameType {
 
         // Find ID of human player, if any (-1 if none)
         int human = -1;
-        for (int i = 0; i < game.getPlayers().size(); i++) {
-            if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
-                human = i;
-                break;
+        if (game != null && game.getPlayers() != null) {
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
+                    human = i;
+                    break;
+                }
             }
         }
 
         switch(this) {
             case Pandemic:
-                gui = new PandemicGUI(game.getGameState(), ac);
+                gui = new PandemicGUI(game, ac);
                 break;
 //            case ExplodingKittens:
 //                if (gameState != null) {

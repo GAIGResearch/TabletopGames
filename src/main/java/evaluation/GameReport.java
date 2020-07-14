@@ -1,6 +1,12 @@
 package evaluation;
 
+import core.AbstractPlayer;
+import core.Game;
 import games.GameType;
+import players.RandomPlayer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameReport {
 
@@ -45,27 +51,42 @@ public class GameReport {
     }
 
     /**
-     * How fast the next function computes the next state.
+     * How fast the game works.
+     *  - ForwardModel.next()
+     *  - ForwardModel.computeAvailableActions()
+     *  - GameState.copy()
      * @param game - game to test.
      */
-    public static void gameSpeedNext(GameType game) {
+    public static void gameSpeed(GameType game) {
+        int nRep = 50;
+        int nPlayers = 2;
 
-    }
+        double nextT = 0;
+        double copyT = 0;
+        double actionT = 0;
+        for (int i = 0; i < nRep; i++) {
+            Game g = game.createGameInstance(nPlayers);
+            List<AbstractPlayer> players = new ArrayList<>();
+            for (int j = 0; j < nPlayers; j++) {
+                players.add(new RandomPlayer());
+            }
 
-    /**
-     * How fast the copy function computes the next state.
-     * @param game - game to test.
-     */
-    public static void gameSpeedCopy(GameType game) {
+            if (g != null) {
+                g.reset(players);
+                g.run();
+                nextT += g.getNextTime();
+                copyT += g.getCopyTime();
+                actionT += g.getActionComputeTime();
+            }
+        }
 
-    }
+        if (nextT != 0) {
+            System.out.println("GS.copy(): " + String.format("%6.3e", 1e+9 / (copyT / nRep)) + " executions/second");
+            System.out.println("FM.next(): " + String.format("%6.3e", 1e+9 / (nextT / nRep)) + " executions/second");
+            System.out.println("FM.computeAvailableActions(): " + String.format("%6.3e", 1e+9 / (actionT / nRep)) + " executions/second");
+        }
 
-    /**
-     * How fast can the game calculate the actions available for the player.
-     * @param game - game to test.
-     */
-    public static void gameSpeedComputeActions(GameType game) {
-
+        System.out.println();
     }
 
     /**
@@ -122,9 +143,7 @@ public class GameReport {
         hiddenInformation(game);
 
         // Speed tests
-        gameSpeedNext(game);
-        gameSpeedCopy(game);
-        gameSpeedComputeActions(game);
+        gameSpeed(game);
         gameLength(game);
         turnLength(game);
 
@@ -135,6 +154,10 @@ public class GameReport {
     }
 
     public static void main(String[] args) {
-        run(GameType.Pandemic);
+        for (GameType gt: GameType.values()) {
+            System.out.println(gt.name());
+            run(gt);
+        }
+//        run(GameType.Pandemic);
     }
 }
