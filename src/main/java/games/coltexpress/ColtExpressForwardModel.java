@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
@@ -307,7 +308,12 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
         ColtExpressCard plannedActionCard = cegs.plannedActions.peek(cardIdx);
         if (plannedActionCard.playerID == -1 || plannedActionCard.cardType == ColtExpressCard.CardType.Bullet) {
-            throw new IllegalArgumentException("Player on planned action card is -1: " + plannedActionCard.toString());
+            if (VERBOSE) {
+                System.out.println("Player on planned action card is -1: " + plannedActionCard.toString());
+            }
+            new DrawCard(deckFromID, deckToID, cardIdx).execute(cegs);
+            actions.add(new DoNothing());
+            return actions;
         }
 
         if (player == plannedActionCard.playerID)

@@ -1,5 +1,6 @@
 package evaluation;
 
+import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
@@ -64,6 +65,8 @@ public class GameReport {
         double nextT = 0;
         double copyT = 0;
         double actionT = 0;
+        double setupT = 0;
+
         for (int i = 0; i < nRep; i++) {
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -72,16 +75,25 @@ public class GameReport {
             }
 
             if (g != null) {
+                // Setup timer
+                AbstractForwardModel fm = g.getForwardModel();
+                long s = System.nanoTime();
+                fm.setup(g.getGameState());
+                setupT += (System.nanoTime() - s);
+
+                // Run timers
                 g.reset(players);
                 g.run();
                 nextT += g.getNextTime();
                 copyT += g.getCopyTime();
                 actionT += g.getActionComputeTime();
+
             }
         }
 
         if (nextT != 0) {
             System.out.println("GS.copy(): " + String.format("%6.3e", 1e+9 / (copyT / nRep)) + " executions/second");
+            System.out.println("FM.setup(): " + String.format("%6.3e", 1e+9 / (setupT / nRep)) + " executions/second");
             System.out.println("FM.next(): " + String.format("%6.3e", 1e+9 / (nextT / nRep)) + " executions/second");
             System.out.println("FM.computeAvailableActions(): " + String.format("%6.3e", 1e+9 / (actionT / nRep)) + " executions/second");
         }

@@ -30,7 +30,9 @@ public class Game {
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
 
-    private double nextTime, copyTime, agentTime, actionComputeTime;
+    // Timers for various function calls
+    private double setupTime, nextTime, copyTime, agentTime, actionComputeTime;
+    // Game tick, number of iterations of game loop
     private int tick;
 
     /**
@@ -73,13 +75,7 @@ public class Game {
                 player.initializePlayer(observation);
             }
         }
-
-        // Reset timers
-        nextTime = 0;
-        copyTime = 0;
-        agentTime = 0;
-        actionComputeTime = 0;
-        tick = 0;
+        resetTimers();
     }
 
     /**
@@ -97,12 +93,7 @@ public class Game {
             }
         }
 
-        // Reset timers
-        nextTime = 0;
-        copyTime = 0;
-        agentTime = 0;
-        actionComputeTime = 0;
-        tick = 0;
+        resetTimers();
     }
 
     /**
@@ -127,12 +118,7 @@ public class Game {
             player.initializePlayer(observation);
         }
 
-        // Reset timers
-        nextTime = 0;
-        copyTime = 0;
-        agentTime = 0;
-        actionComputeTime = 0;
-        tick = 0;
+        resetTimers();
     }
 
     /**
@@ -158,11 +144,18 @@ public class Game {
             player.initializePlayer(observation);
         }
 
-        // Reset timers
+        resetTimers();
+    }
+
+    /**
+     * All timers and game tick set to 0.
+     */
+    public void resetTimers() {
         nextTime = 0;
         copyTime = 0;
         agentTime = 0;
         actionComputeTime = 0;
+        setupTime = 0;
         tick = 0;
     }
 
@@ -305,6 +298,13 @@ public class Game {
         }
 
         // Timers should average
+        terminateTimers();
+    }
+
+    /**
+     * Timers average at the end of the game.
+     */
+    private void terminateTimers() {
         nextTime /= tick;
         copyTime /= tick;
         agentTime /= tick;
