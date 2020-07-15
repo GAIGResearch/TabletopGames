@@ -1,33 +1,43 @@
 package evaluation;
 
 import core.AbstractForwardModel;
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import evaluation.testplayers.RandomTestPlayer;
 import games.GameType;
 import players.RandomPlayer;
-import evaluation.testplayers.RandomTestPlayer;
+import utilities.BoxPlot;
 import utilities.LineChart;
 import utilities.StatSummary;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GameReport {
 
-    static int nRep = 50;
-    static int nPlayers = 2;
+    static boolean VERBOSE = false;
+    static int nRep = 100;
 
     /**
      * Number of actions available from any one game state.
      * @param game - game to test.
+     * @param nPlayers - number of players taking part in this test.
+     * @param lc - line chart to add this data to, can be null if only printing required
      */
-    public static void actionSpace(GameType game) {
-        System.out.println("--------------------\nAction Space Test: " + game.name() + "\n--------------------");
+    public static StatSummary actionSpace(GameType game, int nPlayers, LineChart lc) {
+        if (VERBOSE) {
+            System.out.println("--------------------\nAction Space Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+        }
 
-        StatSummary actionSpace = new StatSummary("All");
+        StatSummary actionSpace = new StatSummary(game.name() + "-" + nPlayers + "p");
+        StatSummary actionSpaceOnePerRep = new StatSummary(game.name() + "-" + nPlayers + "p");
         ArrayList<StatSummary> sumData = new ArrayList<>();
 
         for (int i = 0; i < nRep; i++) {
+            StatSummary ss = new StatSummary();
+
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
             for (int j = 0; j < nPlayers; j++) {
@@ -40,57 +50,63 @@ public class GameReport {
                 for (int j = 0; j < g.getTick(); j++) {
                     double size = g.getActionSpaceSize().get(j).b;
                     actionSpace.add(size);
+                    ss.add(size);
 
                     if (j >= sumData.size()) {
-                        sumData.add(new StatSummary("" + j));
+                        sumData.add(new StatSummary(nPlayers + "-" + j));
                     }
                     sumData.get(j).add(size);
                 }
             }
+
+            actionSpaceOnePerRep.add(ss.mean());
         }
 
         if (actionSpace.n() != 0) {
 
-            // Average and make plot
-            double[] xData = new double[sumData.size()];
-            double[] yData = new double[sumData.size()];
-            double[] yErr = new double[sumData.size()];
-            for (int i = 0; i < sumData.size(); i++) {
-                xData[i] = i;
-                yData[i] = sumData.get(i).mean();
-                yErr[i] = sumData.get(i).stdErr();
+            if (lc != null) {
+                // Add to plot
+                double[] yData = new double[sumData.size()];
+                for (int i = 0; i < sumData.size(); i++) {
+                    yData[i] = sumData.get(i).mean();
+                }
+                lc.addSeries(yData, game.name() + "-" + nPlayers + "p");
             }
-            LineChart lc = new LineChart(xData, yData, yErr, game.name() + "Action Space Size",
-                    "game tick", "action space size", "Size", false);
 
-            System.out.println(actionSpace.shortString());
+            if (VERBOSE) {
+                System.out.println(actionSpace.shortString());
+            }
+        }
+
+        if (VERBOSE) {
+            System.out.println();
+        }
+        return actionSpaceOnePerRep;
+    }
+
+    /**
+     * General game tests, available after setup:
+     * - State size: size of a game state, i.e. number of components.
+     * - Hidden information: Amount of hidden information in the game, i.e. number of hidden components
+     * @param game - game to test.
+     * @param nPlayers - number of players taking part in this test.
+     */
+    public static void generalTest(GameType game, int nPlayers) {
+        System.out.println("--------------------\nGeneral Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+
+        Game g = game.createGameInstance(nPlayers);
+        if (g != null) {
+            AbstractGameState gs = g.getGameState();
+            System.out.println("State size: " + gs.getAllComponents().size());
+
+            StatSummary ss = new StatSummary();
+            for (int i = 0; i < nPlayers; i++) {
+                ss.add(gs.getUnknownComponentsIds(i).size());
+            }
+            System.out.println("Hidden information: " + ss.shortString());
         }
 
         System.out.println();
-    }
-
-    /**
-     * Number of distinct states that can be reached from any one game state.
-     * @param game - game to test.
-     */
-    public static void branchingFactor(GameType game) {
-        // Run game with OSLA, count unique states from actions, print stats and show plots
-    }
-
-    /**
-     * Size of a game state, i.e. number of components.
-     * @param game - game to test.
-     */
-    public static void stateSize(GameType game) {
-        // Number of components
-    }
-
-    /**
-     * Amount of hidden information in the game.
-     * @param game - game to test.
-     */
-    public static void hiddenInformation(GameType game) {
-        // Number of hidden components
     }
 
     /**
@@ -100,9 +116,10 @@ public class GameReport {
      *  - ForwardModel.computeAvailableActions()
      *  - GameState.copy()
      * @param game - game to test.
+     * @param nPlayers - number of players taking part in this test.
      */
-    public static void gameSpeed(GameType game) {
-        System.out.println("--------------------\nSpeed Test: " + game.name() + "\n--------------------");
+    public static void gameSpeed(GameType game, int nPlayers) {
+        System.out.println("--------------------\nSpeed Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
 
         double nextT = 0;
         double copyT = 0;
@@ -145,9 +162,10 @@ public class GameReport {
     /**
      * How many decisions players take in a game from beginning to end. Alternatively, number of rounds.
      * @param game - game to test.
+     * @param nPlayers - number of players taking part in this test.
      */
-    public static void gameLength(GameType game) {
-        System.out.println("--------------------\nGame Length Test: " + game.name() + "\n--------------------");
+    public static void gameLength(GameType game, int nPlayers) {
+        System.out.println("--------------------\nGame Length Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
 
         double nDecisions = 0;
         double nTicks = 0;
@@ -181,13 +199,18 @@ public class GameReport {
     }
 
     /**
-     * How sparse is the reward signal in the scoring function? Calculates granularity of possible values between -1 and 1.
+     * Several tests involving player playing and gathering statistics about their observations:
+     *  - Reward sparsity: How sparse is the reward signal in the scoring function? Calculates granularity of possible
+     *  values between -1 and 1.
+     *  - Branching factor: Number of distinct states that can be reached from any one game state.
      * @param game - game to test.
+     * @param nPlayers - number of players taking part in this test.
      */
-    public static void rewardSparsity(GameType game) {
-        System.out.println("--------------------\nReward Sparsity Test: " + game.name() + "\n--------------------");
+    public static void playerObservationTest(GameType game, int nPlayers) {
+        System.out.println("--------------------\nPlayer Observation Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
 
-        StatSummary stDev = new StatSummary();
+        StatSummary rs = new StatSummary("Reward Sparsity");
+        StatSummary bf = new StatSummary("Branching Factor");
         for (int i = 0; i < nRep; i++) {
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -201,53 +224,75 @@ public class GameReport {
 
                 for (AbstractPlayer p: players) {
                     RandomTestPlayer rtp = (RandomTestPlayer) p;
-                    stDev.add(rtp.getScores());
+                    rs.add(rtp.getScores());
+                    bf.add(rtp.getBranchingFactor());
                 }
             }
         }
 
-        if (stDev.n() != 0) {
-            System.out.println(stDev.toString());
+        if (rs.n() != 0) {
+            System.out.println(rs.toString());
+            System.out.println(bf.toString());
         }
 
         System.out.println();
     }
 
     /**
-     * Calculates the difference in performance between skilled and unskilled players. Signals if better agents perform
-     * worse, or if random performs better.
-     * @param game - game to test.
+     * Calculates and plots together all games for each number of players (if the game can support the given number).
+     * @param games - games to plot.
      */
-    public static void skillDepth(GameType game) {
+    public static void actionSpaceTestAllGames(ArrayList<GameType> games) {
+        int min = GameType.getMinPlayersAllGames();
+        int max = GameType.getMaxPlayersAllGames();
 
+        for (int p = min; p <= max; p++) {
+
+            LineChart lc = new LineChart("Action Space Size " + p + "p", "game tick", "action space size");
+            lc.setVisible(false);
+            BoxPlot bp = new BoxPlot("Action Space Size " + p + "p", "game", "action space size");
+            bp.setVisible(false);
+
+            for (GameType gt : games) {
+                if (gt.getMinPlayers() > p && gt.getMaxPlayers() < p) continue;
+                StatSummary ss = actionSpace(gt, p, lc);
+
+                bp.addSeries(ss.getElements(), gt.name());
+                lc.setVisible(true);
+                bp.setVisible(true);
+            }
+        }
     }
 
     /**
-     * Runs tests for the given game.
-     * @param game - game to test.
+     * Calculates and plots together all player numbers for each game, one plot per game.
+     * @param games - games to plot.
      */
-    public static void run(GameType game) {
-        // Action and state tests
-        actionSpace(game);
-        branchingFactor(game);
-        stateSize(game);
-        hiddenInformation(game);
-//        stateSpaceSize(game); * not implemented
+    public static void actionSpaceTestAllPlayers(ArrayList<GameType> games) {
+        for (GameType gt: games) {
 
-        // Speed tests
-//        gameSpeed(game);
-//        gameLength(game);
+            LineChart lc = new LineChart("Action Space Size " + gt.name(), "game tick", "action space size");
+            lc.setVisible(false);
+            BoxPlot bp = new BoxPlot("Action Space Size " + gt.name(), "game", "action space size");
+            bp.setVisible(false);
 
-        // Other tests
-//        stochasticity(game); * not implemented
-//        rewardSparsity(game);
-        skillDepth(game);
+            for (int p = gt.getMinPlayers(); p <= gt.getMaxPlayers(); p++) {
+                StatSummary ss = actionSpace(gt, p, lc);
+
+                bp.addSeries(ss.getElements(), p + "p");
+                lc.setVisible(true);
+                bp.setVisible(true);
+            }
+        }
     }
 
     public static void main(String[] args) {
-        for (GameType gt: GameType.values()) {
-            run(gt);
-        }
-//        run(GameType.Pandemic);
+
+        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+        games.remove(GameType.Uno);
+
+        // Action space tests
+        actionSpaceTestAllGames(games);
+        actionSpaceTestAllPlayers(games);
     }
 }

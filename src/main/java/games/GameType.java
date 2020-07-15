@@ -358,6 +358,20 @@ public enum GameType {
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
+    public static int getMinPlayersAllGames() {
+        int min = Integer.MAX_VALUE;
+        for (GameType gt: GameType.values()) {
+            if (gt.minPlayers < min) min = gt.minPlayers;
+        }
+        return min;
+    }
+    public static int getMaxPlayersAllGames() {
+        int max = Integer.MIN_VALUE;
+        for (GameType gt: GameType.values()) {
+            if (gt.minPlayers > max) max = gt.minPlayers;
+        }
+        return max;
+    }
 
     /**
      * Creates an instance of the given game type with nPlayers number of players and a new random seed.
