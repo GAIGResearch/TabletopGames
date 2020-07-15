@@ -35,7 +35,7 @@ public class PandemicGame extends Game {
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         PandemicGame game = new PandemicGame(players, params);
 
-        AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
+        AbstractGUI gui = new PandemicGUI(game, ac);
         game.run(gui);
 
 //        game.run(null);

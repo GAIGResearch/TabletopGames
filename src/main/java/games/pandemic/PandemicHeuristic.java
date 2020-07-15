@@ -19,6 +19,7 @@ public class PandemicHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         PandemicGameState pgs = (PandemicGameState) gs;
+        PandemicParameters pp = (PandemicParameters)gs.getGameParameters();
         Utils.GameResult gameStatus = gs.getGameStatus();
 
         if(gameStatus == Utils.GameResult.LOSE)
@@ -27,12 +28,14 @@ public class PandemicHeuristic implements IStateHeuristic {
             return 1;
 
         // Compute a score
-        int nOutbreaks = ((Counter)pgs.getComponent(PandemicConstants.outbreaksHash)).getValue();
-        int nCardsInPile = ((Deck)pgs.getComponent(PandemicConstants.playerDeckHash)).getSize();
-        int nCardsInHand = ((Deck)pgs.getComponentActingPlayer(CoreConstants.playerHandHash)).getSize();
-        int nResearchStations = ((Counter)pgs.getComponent(PandemicConstants.researchStationHash)).getValue();
-        int nCuresDiscovered = 0;
-        int nDiseaseCubes = 0;
+        Counter outbreaks = (Counter)pgs.getComponent(PandemicConstants.outbreaksHash);
+        int nOutbreaks = outbreaks.getValue()/outbreaks.getMaximum();
+        int nTotalCardsPlayerDeck = pp.n_city_cards + pp.n_event_cards + pp.n_epidemic_cards;
+        int nCardsInPile = ((Deck)pgs.getComponent(PandemicConstants.playerDeckHash)).getSize()/nTotalCardsPlayerDeck;
+        int nCardsInHand = ((Deck)pgs.getComponentActingPlayer(CoreConstants.playerHandHash)).getSize()/(pp.max_cards_per_player+2);
+        int nResearchStations = ((Counter)pgs.getComponent(PandemicConstants.researchStationHash)).getValue()/pp.n_research_stations;
+        double nCuresDiscovered = 0;
+        double nDiseaseCubes = 0;
 
         for (int i = 0; i < PandemicConstants.colors.length; i++){
             nDiseaseCubes += ((Counter)pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + PandemicConstants.colors[i]))).getValue();
@@ -40,8 +43,13 @@ public class PandemicHeuristic implements IStateHeuristic {
                 nCuresDiscovered += 1;
         }
 
-        return nCuresDiscovered * FACTOR_CURES + nCardsInHand * FACTOR_CARDS_IN_HAND + nDiseaseCubes * FACTOR_CUBES +
-                nCardsInPile * FACTOR_CARDS_IN_PILE + nOutbreaks * FACTOR_OUTBREAKS + nResearchStations * FACTOR_RS;
+        return (nCuresDiscovered/PandemicConstants.colors.length) * FACTOR_CURES
+                + nCardsInHand * FACTOR_CARDS_IN_HAND
+                + (nDiseaseCubes/pp.n_initial_disease_cubes) * FACTOR_CUBES
+                + nCardsInPile * FACTOR_CARDS_IN_PILE
+                + nOutbreaks * FACTOR_OUTBREAKS
+                + nResearchStations * FACTOR_RS
+                ;
     }
 
 }

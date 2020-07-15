@@ -2,10 +2,7 @@ package core;
 
 import core.interfaces.ITunableParameters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public abstract class AbstractParameters {
 
@@ -23,6 +20,13 @@ public abstract class AbstractParameters {
      * @return - new game parameters object.
      */
     protected abstract AbstractParameters _copy();
+
+    /**
+     * Checks if the given object is the same as the current.
+     * @param o - other object to test equals for.
+     * @return true if the two objects are equal, false otherwise
+     */
+    protected abstract boolean _equals(Object o);
 
 
     /* Public API */
@@ -73,5 +77,18 @@ public abstract class AbstractParameters {
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not resetting.");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractParameters)) return false;
+        AbstractParameters that = (AbstractParameters) o;
+        return randomSeed == that.randomSeed && _equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(randomSeed);
     }
 }

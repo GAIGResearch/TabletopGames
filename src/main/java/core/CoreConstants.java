@@ -8,7 +8,7 @@ public class CoreConstants {
     public final static boolean DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED = false;
     public final static boolean ALWAYS_DISPLAY_FULL_OBSERVABLE = false;
     public final static boolean ALWAYS_DISPLAY_CURRENT_PLAYER = false;
-    public final static long FRAME_SLEEP_MS = 1000;
+    public final static long FRAME_SLEEP_MS = 100;
 
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";

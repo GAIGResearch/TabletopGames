@@ -11,10 +11,7 @@ import core.interfaces.IPrintable;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
+import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
@@ -125,6 +122,24 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         discardPile = null;
         playerGettingAFavor = -1;
         actionStack = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExplodingKittensGameState)) return false;
+        if (!super.equals(o)) return false;
+        ExplodingKittensGameState gameState = (ExplodingKittensGameState) o;
+        return playerGettingAFavor == gameState.playerGettingAFavor &&
+                Objects.equals(playerHandCards, gameState.playerHandCards) &&
+                Objects.equals(drawPile, gameState.drawPile) &&
+                Objects.equals(discardPile, gameState.discardPile) &&
+                Objects.equals(actionStack, gameState.actionStack);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerHandCards, drawPile, discardPile, playerGettingAFavor, actionStack);
     }
 
     /**

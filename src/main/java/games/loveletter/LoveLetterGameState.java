@@ -10,9 +10,7 @@ import core.interfaces.IPrintable;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
@@ -133,6 +131,28 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         drawPile = null;
         reserveCards = null;
         effectProtection = new boolean[getNPlayers()];
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LoveLetterGameState)) return false;
+        if (!super.equals(o)) return false;
+        LoveLetterGameState that = (LoveLetterGameState) o;
+        return Objects.equals(playerHandCards, that.playerHandCards) &&
+                Objects.equals(playerDiscardCards, that.playerDiscardCards) &&
+                Objects.equals(drawPile, that.drawPile) &&
+                Objects.equals(reserveCards, that.reserveCards) &&
+                Arrays.equals(effectProtection, that.effectProtection) &&
+                Arrays.equals(affectionTokens, that.affectionTokens);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), playerHandCards, playerDiscardCards, drawPile, reserveCards);
+        result = 31 * result + Arrays.hashCode(effectProtection);
+        result = 31 * result + Arrays.hashCode(affectionTokens);
+        return result;
     }
 
     /**

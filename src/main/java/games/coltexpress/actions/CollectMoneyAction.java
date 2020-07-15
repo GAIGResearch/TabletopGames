@@ -10,14 +10,15 @@ import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 
 import java.util.Objects;
+import java.util.Random;
 
 public class CollectMoneyAction extends DrawCard {
 
     private final int availableLoot;
-    private final int loot;
+    private final ColtExpressTypes.LootType loot;
 
     public CollectMoneyAction(int plannedActions, int playerDeck, int cardIdx,
-                              int loot, int availableLoot) {
+                              ColtExpressTypes.LootType loot, int availableLoot) {
         super(plannedActions, playerDeck, cardIdx);
 
         this.loot = loot;
@@ -27,20 +28,27 @@ public class CollectMoneyAction extends DrawCard {
     @Override
     public boolean execute(AbstractGameState gameState) {
         super.execute(gameState);
-        if (loot == -1) {
+        if (loot == null) {
             return false;
         }
 
+        // Find all loot of type
+        Deck<Loot> possible = new Deck<>("tmp");
         Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
         for (Loot available : availableLootDeck.getComponents()){
-            if (available.getComponentID() == loot) {
-                ColtExpressCard card = (ColtExpressCard) getCard(gameState);
-                ((ColtExpressGameState) gameState).addLoot(card.playerID, available);
-                availableLootDeck.remove(available);
-                return true;
+            if (available.getLootType() == loot) {
+                possible.add(available);
             }
         }
 
+        // Choose random loot of type to collect
+        if (possible.getSize() > 0) {
+            Loot available = possible.pick(new Random(gameState.getGameParameters().getRandomSeed()));
+            ColtExpressCard card = (ColtExpressCard) getCard(gameState);
+            ((ColtExpressGameState) gameState).addLoot(card.playerID, available);
+            availableLootDeck.remove(available);
+            return true;
+        }
         return false;
     }
 
@@ -60,26 +68,18 @@ public class CollectMoneyAction extends DrawCard {
     }
 
     public String toString(){
-        if (loot == -1)
+        if (loot == null)
             return "Attempt to collect loot but no loot is available";
-        return "Collect loot";
+        return "Collect " + loot.name();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         if (availableLoot == -1) return "Collect loot (none)";
-
-        Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
-        ColtExpressTypes.LootType lt = null;
-        for (Loot available : availableLootDeck.getComponents()){
-            if (available.getComponentID() == loot) {
-                lt = available.getLootType();
-            }
-        }
-        if (loot == -1 || lt == null) {
+        if (loot == null) {
             return "Collect loot (none)";
         } else {
-            return "Collect loot (" + lt + " " + loot + ")";
+            return "Collect loot (" + loot + ")";
         }
     }
 
