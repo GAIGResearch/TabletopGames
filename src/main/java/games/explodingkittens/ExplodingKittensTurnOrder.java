@@ -8,6 +8,7 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Objects;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -94,5 +95,19 @@ public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         to.requiredDraws = requiredDraws;
         return to;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExplodingKittensTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        ExplodingKittensTurnOrder that = (ExplodingKittensTurnOrder) o;
+        return requiredDraws == that.requiredDraws;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), requiredDraws);
     }
 }

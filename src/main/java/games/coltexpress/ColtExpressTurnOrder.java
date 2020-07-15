@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
 
+import java.util.Objects;
+
 import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
@@ -147,5 +149,23 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     public int getFullPlayerTurnCounter() {
         return fullPlayerTurnCounter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ColtExpressTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        ColtExpressTurnOrder that = (ColtExpressTurnOrder) o;
+        return firstPlayerOfRound == that.firstPlayerOfRound &&
+                direction == that.direction &&
+                firstAction == that.firstAction &&
+                fullPlayerTurnCounter == that.fullPlayerTurnCounter &&
+                currentTurnType == that.currentTurnType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), firstPlayerOfRound, currentTurnType, direction, firstAction, fullPlayerTurnCounter);
     }
 }

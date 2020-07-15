@@ -12,6 +12,7 @@ import core.turnorders.AlternatingTurnOrder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character>, IVectorObservation {
@@ -56,6 +57,21 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     @Override
     protected void _reset() {
         gridBoard = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TicTacToeGameState)) return false;
+        if (!super.equals(o)) return false;
+        TicTacToeGameState that = (TicTacToeGameState) o;
+        return Objects.equals(gridBoard, that.gridBoard) &&
+                Objects.equals(playerMapping, that.playerMapping);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), gridBoard, playerMapping);
     }
 
     @Override

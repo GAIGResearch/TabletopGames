@@ -7,7 +7,6 @@ import org.knowm.xchart.style.markers.Marker;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class LineChart extends JFrame {
 

@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
 import players.RandomPlayer;
-import players.utils.RandomTestPlayer;
+import evaluation.testplayers.RandomTestPlayer;
 import utilities.LineChart;
 import utilities.StatSummary;
 

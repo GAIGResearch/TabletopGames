@@ -7,7 +7,6 @@ import utilities.Utils;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
 
 public class BoardNode extends Component {
 
@@ -116,17 +115,6 @@ public class BoardNode extends Component {
     public void loadBoardNode(JSONObject node) {
         this.componentName = (String) ( (JSONArray) node.get("name")).get(1);
         parseComponent(this, node);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        BoardNode boardNode = (BoardNode) o;
-        return maxNeighbours == boardNode.maxNeighbours &&
-                Objects.equals(neighbours, boardNode.neighbours) &&
-                Objects.equals(neighbourSideMapping, boardNode.neighbourSideMapping);
     }
 
     @Override
