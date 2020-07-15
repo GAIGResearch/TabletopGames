@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static games.GameType.*;
+
 public class GameReport {
 
     static boolean VERBOSE = false;
@@ -238,6 +240,8 @@ public class GameReport {
         System.out.println();
     }
 
+    /* Helper methods */
+
     /**
      * Calculates and plots together all games for each number of players (if the game can support the given number).
      * @param games - games to plot.
@@ -286,13 +290,36 @@ public class GameReport {
         }
     }
 
+    /**
+     * Main method to run this class, with various options/examples given
+     * @param args - program arguments, ignored
+     */
     public static void main(String[] args) {
 
+        // 1. Action space tests, plots per game with all player numbers, or per player number with all games
         ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
         games.remove(GameType.Uno);
-
-        // Action space tests
         actionSpaceTestAllGames(games);
         actionSpaceTestAllPlayers(games);
+
+        // 2. Run action space test on Pandemic with 2 players, plots only
+//        LineChart lc = new LineChart("Action Space Size (Pandemic 2p)", "game tick", "action space size");
+//        VERBOSE = false;
+//        actionSpace(Pandemic, 2, lc);
+
+        // 3. Run action space test on Pandemic with 2 players, printed report
+//        VERBOSE = true;
+//        actionSpace(Pandemic, 2, null);
+
+        // 4. Run each test with printed reports on each game
+//        int nPlayers = 2;
+//        VERBOSE = true;
+//        for (GameType gt: GameType.values()) {
+//            actionSpace(gt, nPlayers, null);
+//            generalTest(gt, nPlayers);
+//            gameSpeed(gt, nPlayers);
+//            gameLength(gt, nPlayers);
+//            playerObservationTest(gt, nPlayers);
+//        }
     }
 }
