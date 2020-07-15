@@ -1,5 +1,7 @@
 package utilities;
 
+import java.util.ArrayList;
+
 /**
  This class is used to model the statistics of several numbers.  For the statistics
  we choose here it is not necessary to store all the numbers - just keeping a running total
@@ -16,7 +18,9 @@ public class StatSummary {
     private double mean, median, sd;
 
     private double lastAdded;
-    boolean valid;
+    private boolean valid;
+
+    private ArrayList<Double> elements;
 
     public StatSummary() {
         this("");
@@ -35,6 +39,7 @@ public class StatSummary {
         min = Double.POSITIVE_INFINITY;
         max = Double.NEGATIVE_INFINITY;
         valid = false;
+        elements = new ArrayList<>();
     }
 
     public double max() {
@@ -93,6 +98,7 @@ public class StatSummary {
         min = Math.min(min, ss.min);
         lastAdded = ss.lastAdded;
         valid = false;
+        elements.addAll(ss.getElements());
     }
 
     public void add(double d) {
@@ -103,6 +109,7 @@ public class StatSummary {
         max = Math.max(max, d);
         lastAdded = d;
         valid = false;
+        elements.add(d);
     }
 
     public void add(Number n) {
@@ -115,6 +122,10 @@ public class StatSummary {
         }
     }
 
+    public double sum(){
+        return sum;
+    }
+
     public double getLastAdded() {
         return lastAdded;
     }
@@ -125,7 +136,7 @@ public class StatSummary {
 
     @Override
 	public String toString() {
-        String s = (name == null) ? "" : name + "\n";
+        String s = (name == null) ? "" : (name + "\n");
         s +=    " min   = " + min() + "\n" +
                 " max   = " + max() + "\n" +
                 " ave   = " + mean() + "\n" +
@@ -135,11 +146,16 @@ public class StatSummary {
                 " sumsq = " + sumsq + "\n" +
                 " n     = " + n + "\n";
         return s;
-
     }
 
-    public double sum(){
-        return sum;
+    public String shortString() {
+        return (name == null) ? "" : (name + ": [") + min() + ", " + max() + "] avg=" + String.format("%.2f", mean())
+                + "; sd=" + String.format("%.2f", sd())
+                ;
+    }
+
+    public ArrayList<Double> getElements() {
+        return elements;
     }
 
     public StatSummary copy()

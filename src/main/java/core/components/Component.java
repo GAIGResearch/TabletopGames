@@ -227,12 +227,9 @@ public abstract class Component {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Component)) return false;
         Component component = (Component) o;
-        return componentID == ((Component) o).componentID && ownerId == ((Component) o).ownerId &&
-                type == component.type &&
-                componentName.equals(((Component) o).componentName) &&
-                Objects.equals(properties, component.properties);
+        return componentID == ((Component) o).componentID;
     }
 
     @Override

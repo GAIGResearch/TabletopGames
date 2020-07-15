@@ -319,5 +319,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
         return sb.toString();
     }
+
+    @Override
+    public String toString(){
+        return super.toString();
+    }
 }
 

@@ -20,17 +20,25 @@ public class UnoHeuristic implements IStateHeuristic {
         if (gameStatus == Utils.GameResult.WIN)
             return 1;
 
+        int nColors = ugp.colors.length;
+        int deckSize = ugp.nDrawCards * ugp.specialDrawCards.length * nColors
+                + ugp.nReverseCards * nColors
+                + ugp.nSkipCards * nColors
+                + ugp.nNumberCards * nColors
+                + ugp.nWildCards * ugp.specialWildDrawCards.length
+                ;
+
         double F_OPPONENT = FACTOR_OPPONENT/(ugs.getNPlayers()-1);
         double rawScore = 0;
         for (int i = 0; i < ugs.getNPlayers(); i++) {
-            double s = 1.0*ugs.calculatePlayerPoints(playerId)/(ugp.nWinPoints*2);
+            double s = 1.0*ugs.calculatePlayerPoints(i)/(ugp.nWinPoints*2);
             if (i == playerId) {
                 rawScore += s * FACTOR_PLAYER;
             } else {
                 rawScore += s * F_OPPONENT;
             }
         }
-        rawScore += FACTOR_N_CARDS * ugs.getPlayerDecks().get(playerId).getSize()/ugp.nCardsPerPlayer;
+        rawScore += FACTOR_N_CARDS * ugs.getPlayerDecks().get(playerId).getSize()/deckSize;
 
 //        System.out.println(rawScore);
         return rawScore;

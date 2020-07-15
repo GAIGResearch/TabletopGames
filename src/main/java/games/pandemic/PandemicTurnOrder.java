@@ -6,6 +6,7 @@ import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import java.util.LinkedList;
+import java.util.Objects;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
@@ -77,5 +78,20 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         pto.turnStep = turnStep;
         pto.nStepsPerTurn = nStepsPerTurn;
         return pto;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PandemicTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        PandemicTurnOrder that = (PandemicTurnOrder) o;
+        return nStepsPerTurn == that.nStepsPerTurn &&
+                turnStep == that.turnStep;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), nStepsPerTurn, turnStep);
     }
 }

@@ -10,6 +10,7 @@ import games.virus.components.VirusBody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class VirusGameState extends AbstractGameState implements IPrintable {
     List<VirusBody>       playerBodies;   // Each player has a body
@@ -59,6 +60,23 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         playerDecks = new ArrayList<>();
         drawDeck = null;
         discardDeck = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VirusGameState)) return false;
+        if (!super.equals(o)) return false;
+        VirusGameState that = (VirusGameState) o;
+        return Objects.equals(playerBodies, that.playerBodies) &&
+                Objects.equals(playerDecks, that.playerDecks) &&
+                Objects.equals(drawDeck, that.drawDeck) &&
+                Objects.equals(discardDeck, that.discardDeck);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerBodies, playerDecks, drawDeck, discardDeck);
     }
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {

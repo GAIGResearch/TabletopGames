@@ -21,12 +21,12 @@ public class PunchAction  extends DrawCard {
     private final int opponentID;
     private final int sourceCompartment;
     private final int targetCompartment;
-    private final int loot;
+    private final ColtExpressTypes.LootType loot;
     private final int availableLoot;
     private final boolean playerIsCheyenne;
 
     public PunchAction(int plannedActions, int playerDeck, int cardIdx,
-                       int opponentID, int sourceCompartment, int targetCompartment, int loot,
+                       int opponentID, int sourceCompartment, int targetCompartment, ColtExpressTypes.LootType loot,
                        int availableLoot, boolean playerIsCheyenne) {
         super(plannedActions, playerDeck, cardIdx);
         this.opponentID = opponentID;
@@ -73,15 +73,16 @@ public class PunchAction  extends DrawCard {
 
         //drop loot
         LinkedList<Loot> potentialLoot = new LinkedList<>();
-        if (loot != -1){
+        if (loot != null){
             for (Loot l : availableLootDeck.getComponents()){
-                if (l.getComponentID() == loot)
+                if (l.getLootType() == loot)
                     potentialLoot.add(l);
             }
 
             if (potentialLoot.size() > 0){
-                Loot chosenLoot = potentialLoot.get(new Random().nextInt(potentialLoot.size()));
-                if (playerIsCheyenne)
+                Random r = new Random(gameState.getGameParameters().getRandomSeed());
+                Loot chosenLoot = potentialLoot.get(r.nextInt(potentialLoot.size()));
+                if (playerIsCheyenne && loot == ColtExpressTypes.LootType.Purse)
                     ((ColtExpressGameState) gameState).addLoot(card.playerID, chosenLoot);
                 else
                     targetLootArea.add(chosenLoot);
@@ -119,16 +120,9 @@ public class PunchAction  extends DrawCard {
         Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
         int tIdx = target.getCompartmentID();
 
-        Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
-        ColtExpressTypes.LootType lt = null;
-        for (Loot available : availableLootDeck.getComponents()){
-            if (available.getComponentID() == loot) {
-                lt = available.getLootType();
-            }
-        }
         String drop = "nothing";
-        if (loot != -1 && lt != null) {
-            drop = lt + " " + loot;
+        if (loot != null) {
+            drop = loot.name();
         }
 
         return "Punch " + character + " to c=" + tIdx + " dropping " + drop;
@@ -138,7 +132,7 @@ public class PunchAction  extends DrawCard {
     public String toString(){
         if (opponentID == -1)
             return "Attempt to punch player, but no player is available.";
-        if (loot == -1)
+        if (loot == null)
             return "Punch player " + opponentID + " without him dropping any loot.";
         if (playerIsCheyenne)
             return "Punch player " + opponentID + " and (maybe) steal him a random Purse";

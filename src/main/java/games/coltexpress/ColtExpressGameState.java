@@ -45,6 +45,13 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     // The round cards
     Deck<RoundCard> rounds;
 
+    public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
+        gamePhase = ColtExpressGamePhase.PlanActions;
+        trainCompartments = new LinkedList<>();
+        playerPlayingBelle = -1;
+    }
+
     @Override
     public List<Component> _getAllComponents() {
         List<Component> components = new ArrayList<>();
@@ -158,7 +165,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             for (Map.Entry<Integer, ArrayList<Integer>> e: cardReplacements.entrySet()) {
                 copy.playerDecks.get(e.getKey()).shuffle(r);
                 for (int i: e.getValue()) {
-                    // TODO: This might be a bullet card...
+                    // This might be a bullet card...
                     copy.plannedActions.setComponent(i, copy.playerDecks.get(e.getKey()).draw());
                 }
             }
@@ -223,21 +230,52 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         gamePhase = ColtExpressGamePhase.PlanActions;
     }
 
-    public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
-        gamePhase = ColtExpressGamePhase.PlanActions;
-        trainCompartments = new LinkedList<>();
-        playerPlayingBelle = -1;
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ColtExpressGameState)) return false;
+        if (!super.equals(o)) return false;
+        ColtExpressGameState gameState = (ColtExpressGameState) o;
+        return playerPlayingBelle == gameState.playerPlayingBelle &&
+                Objects.equals(playerHandCards, gameState.playerHandCards) &&
+                Objects.equals(playerDecks, gameState.playerDecks) &&
+                Objects.equals(playerLoot, gameState.playerLoot) &&
+                Arrays.equals(bulletsLeft, gameState.bulletsLeft) &&
+                Objects.equals(playerCharacters, gameState.playerCharacters) &&
+                Objects.equals(plannedActions, gameState.plannedActions) &&
+                Objects.equals(trainCompartments, gameState.trainCompartments) &&
+                Objects.equals(rounds, gameState.rounds);
     }
 
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), playerHandCards, playerDecks, playerLoot, playerCharacters, playerPlayingBelle, plannedActions, trainCompartments, rounds);
+        result = 31 * result + Arrays.hashCode(bulletsLeft);
+        return result;
+    }
+
+    /**
+     * Adds loot collected by player
+     * @param playerID - ID of player collecting loot
+     * @param loot - loot collected
+     */
     public void addLoot(Integer playerID, Loot loot) {
         playerLoot.get(playerID).add(loot);
     }
 
+    /**
+     * Adds a neutral bullet for player
+     * @param playerID - ID of player receiving the bullet
+     */
     public void addNeutralBullet(Integer playerID) {
         addBullet(playerID, -1);
     }
 
+    /**
+     * Adds a bullet from another player
+     * @param playerID - player receiving the bullet
+     * @param shooterID - player sending the bullet
+     */
     public void addBullet(Integer playerID, Integer shooterID) {
         if (shooterID == -1 || bulletsLeft[shooterID] > 0) {
             this.playerDecks.get(playerID).add(new ColtExpressCard(shooterID, ColtExpressCard.CardType.Bullet));
@@ -246,6 +284,10 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         }
     }
 
+    /**
+     * Calculates the current best shooters depending on the number of bullets left per player
+     * @return - list of player IDs tied for lowest number of bullets left
+     */
     public List<Integer> getBestShooters() {
         ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
         List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
@@ -262,36 +304,31 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return playersWithMostSuccessfulShots;
     }
 
+    // Getters, setters
     public LinkedList<Compartment> getTrainCompartments() {
         return trainCompartments;
     }
-
-    public Deck<Loot> getLoot(int playerID){return playerLoot.get(playerID);}
-
+    public Deck<Loot> getLoot(int playerID) {
+        return playerLoot.get(playerID);
+    }
     public PartialObservableDeck<ColtExpressCard> getPlannedActions() {
         return plannedActions;
     }
-
     public List<Deck<ColtExpressCard>> getPlayerDecks() {
         return playerDecks;
     }
-
     public Deck<RoundCard> getRounds() {
         return rounds;
     }
-
     public HashMap<Integer, CharacterType> getPlayerCharacters() {
         return playerCharacters;
     }
-
     public List<Deck<ColtExpressCard>> getPlayerHandCards() {
         return playerHandCards;
     }
-
     public int[] getBulletsLeft() {
         return bulletsLeft;
     }
-
     public List<Deck<Loot>> getPlayerLoot() {
         return playerLoot;
     }

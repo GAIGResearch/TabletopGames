@@ -183,6 +183,12 @@ public abstract class AbstractGameState {
      */
     protected abstract void _reset();
 
+    /**
+     * Checks if the given object is the same as the current.
+     * @param o - other object to test equals for.
+     * @return true if the two objects are equal, false otherwise
+     */
+    protected abstract boolean _equals(Object o);
 
     /* ####### Public AI agent API ####### */
 
@@ -212,5 +218,27 @@ public abstract class AbstractGameState {
      */
     public final ArrayList<Integer> getUnknownComponentsIds(int playerId) {
         return _getUnknownComponentsIds(playerId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractGameState)) return false;
+        AbstractGameState gameState = (AbstractGameState) o;
+        return Objects.equals(gameParameters, gameState.gameParameters) &&
+                Objects.equals(turnOrder, gameState.turnOrder) &&
+                Objects.equals(allComponents, gameState.allComponents) &&
+                Objects.equals(availableActions, gameState.availableActions) &&
+                gameStatus == gameState.gameStatus &&
+                Arrays.equals(playerResults, gameState.playerResults) &&
+                Objects.equals(gamePhase, gameState.gamePhase) &&
+                _equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameParameters, turnOrder, allComponents, availableActions, gameStatus, gamePhase, data);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        return result;
     }
 }

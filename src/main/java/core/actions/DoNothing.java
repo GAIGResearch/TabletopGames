@@ -20,7 +20,7 @@ public class DoNothing extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        return !(o instanceof DoNothing);
+        return o instanceof DoNothing;
     }
 
     @Override
