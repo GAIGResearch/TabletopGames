@@ -56,12 +56,17 @@ public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
      * If a nopeable action was played, players with a NOPE card can react.
      * @param gameState - current game state.
      */
-    public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState){
+    public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState, int currentPlayer){
         reactivePlayers.clear();
-        for (int i = 0; i < gameState.getNPlayers(); i++) {
-            for (ExplodingKittensCard ekp: gameState.getPlayerHandCards().get(i).getComponents()) {
+        for (int i = 1; i <= gameState.getNPlayers(); i++) {
+            int nopingPlayer = (currentPlayer + i) % gameState.getNPlayers();
+
+            if (nopingPlayer == currentPlayer && !((ExplodingKittensParameters) gameState.getGameParameters()).nopeOwnCards)
+                continue;
+
+            for (ExplodingKittensCard ekp: gameState.getPlayerHandCards().get(nopingPlayer).getComponents()) {
                 if (ekp.cardType == ExplodingKittensCard.CardType.NOPE) {
-                    reactivePlayers.add(i);
+                    reactivePlayers.add(nopingPlayer);
                     break;
                 }
             }

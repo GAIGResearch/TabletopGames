@@ -16,6 +16,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     // Visibility of each component in the deck, order corresponds to order of elements in the deck;
     protected ArrayList<boolean[]> elementVisibility = new ArrayList<>();
 
+    public boolean getVisibilityForPlayer(int elementIdx, int playerID){
+        return elementVisibility.get(elementIdx)[playerID];
+    }
 
     public PartialObservableDeck(String id, boolean[] defaultVisibility) {
         this(id, -1, defaultVisibility);
@@ -147,6 +150,19 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     public boolean add(T c, int index, boolean[] visibilityPerPlayer) {
         this.elementVisibility.add(index, visibilityPerPlayer.clone());
         return super.add(c, index);
+    }
+
+    /**
+     * Adds a full other deck to this deck, ignoring capacity.
+     * @param d - other deck to add to this deck.
+     * @param index - the position in which the elements of d should be inserted in this deck.
+     * @return true if not over capacity, false otherwise.
+     */
+    public boolean add(Deck<T> d, int index){
+        for (int i = 0; i < d.components.size(); i++){
+            this.elementVisibility.add(index, deckVisibility.clone());
+        }
+        return super.add(d, index);
     }
 
     /**

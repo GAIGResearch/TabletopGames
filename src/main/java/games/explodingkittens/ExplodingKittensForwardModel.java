@@ -96,10 +96,15 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         if (action instanceof IsNopeable) {
             actionStack.add(action);
-            ekTurnOrder.registerNopeableActionByPlayer(ekgs);
+            ekTurnOrder.registerNopeableActionByPlayer(ekgs, ekTurnOrder.getCurrentPlayer(ekgs));
             if (action instanceof NopeAction) {
                 // Nope cards added immediately to avoid infinite nopeage
                 action.execute(ekgs);
+            } else {
+                if (ekTurnOrder.reactionsFinished()){
+                    action.execute(ekgs);
+                    actionStack.clear();
+                }
             }
         } else if (action instanceof PassAction) {
 
@@ -321,6 +326,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
             int numberOfCards = ekgs.drawPile.getSize();
             int n = Math.min(((ExplodingKittensParameters) ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
             if (n > 0) {
+
                 ArrayList<int[]> permutations = new ArrayList<>();
                 int[] order = new int[n];
                 for (int i = 0; i < n; i++) {

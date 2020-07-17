@@ -28,6 +28,7 @@ public class ExplodingKittensParameters extends AbstractParameters {
     public int nCardsPerPlayer = 7;
     public int nDefuseCards = 6;
     public int nSeeFutureCards = 3;
+    public boolean nopeOwnCards = true;
 
     public ExplodingKittensParameters(long seed) {
         super(seed);
