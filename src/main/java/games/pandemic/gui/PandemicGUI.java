@@ -57,6 +57,7 @@ public class PandemicGUI extends AbstractGUI {
         super(ac, 721);
         if (game == null || ac == null) return;
 
+        gameState = (PandemicGameState) game.getGameState();
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
         this.gameState = (PandemicGameState) game.getGameState();
