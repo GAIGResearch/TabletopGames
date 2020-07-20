@@ -9,8 +9,7 @@ public class VirusCard extends Card {
         Brain,
         Stomach,
         Bone,
-        Wild,
-        None
+        Wild
     }
 
     public enum VirusCardType {

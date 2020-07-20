@@ -14,22 +14,16 @@ public class VirusBody extends Component {
     {
         super(Utils.ComponentType.TOKEN);
         organs = new HashMap<>();
-        for (VirusCard.OrganType oType : VirusCard.OrganType.values()) {
-            if (oType != VirusCard.OrganType.None && oType != VirusCard.OrganType.Wild) {
-                organs.put(oType, new VirusOrgan());
-            }
-        }
+        for (VirusCard.OrganType oType : VirusCard.OrganType.values())
+            organs.put(oType, new VirusOrgan());
     }
 
     protected VirusBody(int ID)
     {
         super(Utils.ComponentType.TOKEN, ID);
         organs = new HashMap<>();
-        for (VirusCard.OrganType oType : VirusCard.OrganType.values()) {
-            if (oType != VirusCard.OrganType.None && oType != VirusCard.OrganType.Wild) {
-                organs.put(oType, new VirusOrgan());
-            }
-        }
+        for (VirusCard.OrganType oType : VirusCard.OrganType.values())
+            organs.put(oType, new VirusOrgan());
     }
 
     @Override
@@ -59,7 +53,25 @@ public class VirusBody extends Component {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.None;
     }
 
-    public boolean hasOrganImmunised(VirusCard.OrganType organ) {
+    /**
+     * Returns true is the body has an organ of type organ vaccinated with a wild card
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganVaccinatedWild(VirusCard.OrganType organ) {
+        return organs.get(organ).state == VirusOrgan.VirusOrganState.VaccinatedWild;
+    }
+
+    /**
+     * Returns true is the body has an organ of type organ infected with a wild card
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganInfectedWild(VirusCard.OrganType organ) {
+        return organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
+    }
+
+    public boolean organNotYetImmunised(VirusCard.OrganType organ) {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.Immunised;
     }
 
@@ -68,43 +80,44 @@ public class VirusBody extends Component {
         organs.get(card.organ).cards.add(card);
     }
 
-    public VirusOrgan.VirusOrganState applyMedicine(VirusCard card) {
-        VirusOrgan.VirusOrganState newState = organs.get(card.organ).applyMedicine();
-        organs.get(card.organ).cards.add(card);
+    public VirusOrgan.VirusOrganState applyMedicine(VirusCard card, VirusCard.OrganType organ) {
+        VirusOrgan.VirusOrganState newState = organs.get(organ).applyMedicine(card.organ == VirusCard.OrganType.Wild);
+        organs.get(organ).cards.add(card);
         return newState;
     }
 
-    public VirusOrgan.VirusOrganState applyVirus(VirusCard card) {
-        VirusOrgan.VirusOrganState newState = organs.get(card.organ).applyVirus();
-        organs.get(card.organ).cards.add(card);
+    public VirusOrgan.VirusOrganState applyVirus(VirusCard card, VirusCard.OrganType organ) {
+        VirusOrgan.VirusOrganState newState = organs.get(organ).applyVirus(card.organ == VirusCard.OrganType.Wild);
+        organs.get(organ).cards.add(card);
         return newState;
     }
 
-    public VirusCard removeAVirusCard(VirusCard card)
+    public VirusCard removeAVirusCard(VirusCard card, VirusCard.OrganType organ)
     {
-        return organs.get(card.organ).removeAVirusCard();
+        return organs.get(organ).removeAVirusCard();
     }
 
-    public VirusCard removeAMedicineCard(VirusCard card)
+    public VirusCard removeAMedicineCard(VirusCard card, VirusCard.OrganType organ)
     {
-        return organs.get(card.organ).removeAMedicineCard();
+        return organs.get(organ).removeAMedicineCard();
     }
 
-    public VirusCard removeAnOrganCard(VirusCard card)
+    public VirusCard removeAnOrganCard(VirusCard card, VirusCard.OrganType organ)
     {
-        return organs.get(card.organ).removeAnOrganCard();
+        return organs.get(organ).removeAnOrganCard();
     }
 
-    // Return true if the body has all organs and they are healthy
-    public boolean areAllOrganHealthy()
+    /**
+     * Return the number of health organs
+       * @return - the number of health organs
+     */
+    public int getNOrganHealthy()
     {
-        boolean allHealthy = true;
+        int nHealthy = 0;
         for (VirusOrgan organ: organs.values()) {
-            if (!organ.isHealthy()) {
-                allHealthy = false;
-            }
+            if (organ.isHealthy())
+                nHealthy ++;
         }
-        return allHealthy;
+        return nHealthy;
     }
-
 }

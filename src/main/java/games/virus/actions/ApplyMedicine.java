@@ -11,9 +11,11 @@ import games.virus.cards.VirusCard;
 import java.util.Objects;
 
 public class ApplyMedicine extends PlayVirusCard implements IPrintable {
+    private VirusCard.OrganType organ;
 
-    public ApplyMedicine(int deckFrom, int deckTo, int fromIndex, int bodyId) {
+    public ApplyMedicine(int deckFrom, int deckTo, int fromIndex, int bodyId, VirusCard.OrganType organ) {
         super(deckFrom, deckTo, fromIndex, bodyId);
+        this.organ = organ;
     }
 
     @Override
@@ -23,20 +25,20 @@ public class ApplyMedicine extends PlayVirusCard implements IPrintable {
         VirusCard card = (VirusCard)getCard(gs);
         VirusBody body = getBody(gs);
         VirusGameState vgs = (VirusGameState) gs;
-        VirusOrgan.VirusOrganState newState = body.applyMedicine(card);
+        VirusOrgan.VirusOrganState newState = body.applyMedicine(card, organ);
 
         // discard cards?
         if (newState == VirusOrgan.VirusOrganState.Neutral)
         {
-            vgs.getDiscardDeck().add(body.removeAMedicineCard(card));
-            vgs.getDiscardDeck().add(body.removeAVirusCard(card));
+            vgs.getDiscardDeck().add(body.removeAMedicineCard(card, organ));
+            vgs.getDiscardDeck().add(body.removeAVirusCard(card, organ));
         }
         return true;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Apply " + getCard(gameState).toString() + " on body of player " + gameState.getCurrentPlayer();
+        return "Apply " + getCard(gameState).toString() + " on " + organ + " of player " + gameState.getCurrentPlayer();
     }
 
     @Override
@@ -60,6 +62,6 @@ public class ApplyMedicine extends PlayVirusCard implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new ApplyMedicine(deckFrom, deckTo, fromIndex, bodyId);
+        return new ApplyMedicine(deckFrom, deckTo, fromIndex, bodyId, organ);
     }
 }
