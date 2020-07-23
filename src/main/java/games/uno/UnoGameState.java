@@ -7,9 +7,7 @@ import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.uno.cards.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
@@ -183,6 +181,27 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         discardDeck = null;
         currentCard = null;
         currentColor = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UnoGameState)) return false;
+        if (!super.equals(o)) return false;
+        UnoGameState that = (UnoGameState) o;
+        return Objects.equals(playerDecks, that.playerDecks) &&
+                Objects.equals(drawDeck, that.drawDeck) &&
+                Objects.equals(discardDeck, that.discardDeck) &&
+                Objects.equals(currentCard, that.currentCard) &&
+                Objects.equals(currentColor, that.currentColor) &&
+                Arrays.equals(playerScore, that.playerScore);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, discardDeck, currentCard, currentColor);
+        result = 31 * result + Arrays.hashCode(playerScore);
+        return result;
     }
 
     @Override

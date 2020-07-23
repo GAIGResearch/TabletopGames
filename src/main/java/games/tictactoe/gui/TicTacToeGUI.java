@@ -24,6 +24,7 @@ public class TicTacToeGUI extends AbstractGUI {
 
     public TicTacToeGUI(Game game, ActionController ac) {
         super(ac, 1);
+        if (game == null) return;
 
         TicTacToeGameState gameState = (TicTacToeGameState) game.getGameState();
         view = new TTTBoardView(gameState.getGridBoard());

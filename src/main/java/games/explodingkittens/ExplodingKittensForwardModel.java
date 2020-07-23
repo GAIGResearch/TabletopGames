@@ -96,10 +96,15 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         if (action instanceof IsNopeable) {
             actionStack.add(action);
-            ekTurnOrder.registerNopeableActionByPlayer(ekgs);
+            ekTurnOrder.registerNopeableActionByPlayer(ekgs, ekTurnOrder.getCurrentPlayer(ekgs));
             if (action instanceof NopeAction) {
                 // Nope cards added immediately to avoid infinite nopeage
                 action.execute(ekgs);
+            } else {
+                if (ekTurnOrder.reactionsFinished()){
+                    action.execute(ekgs);
+                    actionStack.clear();
+                }
             }
         } else if (action instanceof PassAction) {
 
@@ -174,7 +179,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         // Could update an existing list instead of generating a new list every time we query this function
 
         // Find actions for the player depending on current game phase
-        int player = ekgs.getTurnOrder().getCurrentPlayer(ekgs);
+        int player = ekgs.getCurrentPlayer();
         if (AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
             actions = playerActions(ekgs, player);
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
@@ -203,7 +208,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         HashSet<ExplodingKittensCard.CardType> types = new HashSet<>();
         for (int c = 0; c < playerDeck.getSize(); c++) {
-            ExplodingKittensCard card = playerDeck.getComponents().get(c);
+            ExplodingKittensCard card = playerDeck.get(c);
             if (types.contains(card.cardType)) continue;
             types.add(card.cardType);
 
@@ -241,7 +246,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     actions.add(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture());
+                    actions.add(new SeeTheFuture(playerID));
                     break;
                 default:
                     System.out.println("No actions known for cardtype: " + card.cardType.toString());
@@ -307,25 +312,36 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
     private ArrayList<AbstractAction> seeTheFutureActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
-        List<ExplodingKittensCard> cards = ekgs.drawPile.getComponents();
-        int numberOfCards = ekgs.drawPile.getSize();
-        int n = Math.min(((ExplodingKittensParameters)ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
-        if (n > 0) {
-            ArrayList<int[]> permutations = new ArrayList<>();
-            int[] order = new int[n];
-            for (int i = 0; i < n; i++) {
-                order[i] = i;
-            }
-            generatePermutations(n, order, permutations);
-            for (int c = 0; c < playerDeck.getSize(); c++) {
-                if (playerDeck.getComponents().get(c).cardType == ExplodingKittensCard.CardType.SEETHEFUTURE) {
-                    for (int[] perm : permutations) {
-                        actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(),
-                                ekgs.discardPile.getComponentID(), c, ekgs.drawPile.getComponentID(), perm));
-                    }
-                }
+
+        int cardIdx = -1;
+        for (int c = 0; c < playerDeck.getSize(); c++) {
+            if (playerDeck.get(c).cardType == ExplodingKittensCard.CardType.SEETHEFUTURE) {
+                cardIdx = c;
+                break;
             }
         }
+
+        if (cardIdx != -1) {
+            List<ExplodingKittensCard> cards = ekgs.drawPile.getComponents();
+            int numberOfCards = ekgs.drawPile.getSize();
+            int n = Math.min(((ExplodingKittensParameters) ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
+            if (n > 0) {
+
+                ArrayList<int[]> permutations = new ArrayList<>();
+                int[] order = new int[n];
+                for (int i = 0; i < n; i++) {
+                    order[i] = i;
+                }
+                generatePermutations(n, order, permutations);
+                for (int[] perm : permutations) {
+                    actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(),
+                            ekgs.discardPile.getComponentID(), cardIdx, ekgs.drawPile.getComponentID(), perm));
+                }
+            }
+        } else {
+            System.out.println("ERROR: Player doesn't have see the future card");
+        }
+
         return actions;
     }
 }

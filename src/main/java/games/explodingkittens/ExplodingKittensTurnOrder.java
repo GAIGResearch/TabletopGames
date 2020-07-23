@@ -8,6 +8,7 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Objects;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -55,12 +56,17 @@ public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
      * If a nopeable action was played, players with a NOPE card can react.
      * @param gameState - current game state.
      */
-    public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState){
+    public void registerNopeableActionByPlayer(ExplodingKittensGameState gameState, int currentPlayer){
         reactivePlayers.clear();
-        for (int i = 0; i < gameState.getNPlayers(); i++) {
-            for (ExplodingKittensCard ekp: gameState.getPlayerHandCards().get(i).getComponents()) {
+        for (int i = 1; i <= gameState.getNPlayers(); i++) {
+            int nopingPlayer = (currentPlayer + i) % gameState.getNPlayers();
+
+            if (nopingPlayer == currentPlayer && !((ExplodingKittensParameters) gameState.getGameParameters()).nopeOwnCards)
+                continue;
+
+            for (ExplodingKittensCard ekp: gameState.getPlayerHandCards().get(nopingPlayer).getComponents()) {
                 if (ekp.cardType == ExplodingKittensCard.CardType.NOPE) {
-                    reactivePlayers.add(i);
+                    reactivePlayers.add(nopingPlayer);
                     break;
                 }
             }
@@ -94,5 +100,19 @@ public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         to.requiredDraws = requiredDraws;
         return to;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExplodingKittensTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        ExplodingKittensTurnOrder that = (ExplodingKittensTurnOrder) o;
+        return requiredDraws == that.requiredDraws;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), requiredDraws);
     }
 }

@@ -42,7 +42,12 @@ public abstract class AbstractForwardModel {
     protected abstract void _setup(AbstractGameState firstState);
 
     /**
-     * Applies the given action to the game state and executes any other game rules.
+     * Applies the given action to the game state and executes any other game rules. Steps to follow:
+     *      - execute player action
+     *      - execute any game rules applicable
+     *      - check game over conditions, and if any trigger, set the gameStatus and playerResults variables
+     *      appropriately (and return)
+     *      - move to the next player where applicable
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */

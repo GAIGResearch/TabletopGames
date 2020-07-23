@@ -11,10 +11,7 @@ import core.interfaces.IPrintable;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
+import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
@@ -69,6 +66,8 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         ekgs.drawPile = drawPile.copy();
         if (PARTIAL_OBSERVABLE && playerId != -1) {
             // Other player hands + draw deck are hidden, combine in draw pile and shuffle
+            // Note: this considers the agent to track opponent's cards that are known to him by itself
+            // e.g. in case the agent has previously given a favor card to its opponent
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     ekgs.drawPile.add(ekgs.playerHandCards.get(i));
@@ -84,8 +83,14 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
                         boolean added = false;
+                        int cardIndex = 0;
                         while (!added) {
-                            ExplodingKittensCard card = ekgs.drawPile.draw();
+                            // if the card is visible to the player we cannot move it somewhere else
+                            if (ekgs.drawPile.getVisibilityForPlayer(cardIndex, playerId)){
+                                cardIndex++;
+                                continue;
+                            }
+                            ExplodingKittensCard card = ekgs.drawPile.pick(cardIndex);
                             if (card.cardType != ExplodingKittensCard.CardType.EXPLODING_KITTEN) {
                                 ekgs.playerHandCards.get(i).add(card);
                                 added = true;
@@ -99,6 +104,10 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.drawPile.add(explosive);
         }
         return ekgs;
+    }
+
+    private void moveHiddenCards(PartialObservableDeck<?> from, PartialObservableDeck<?> to){
+
     }
 
     @Override
@@ -125,6 +134,24 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         discardPile = null;
         playerGettingAFavor = -1;
         actionStack = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExplodingKittensGameState)) return false;
+        if (!super.equals(o)) return false;
+        ExplodingKittensGameState gameState = (ExplodingKittensGameState) o;
+        return playerGettingAFavor == gameState.playerGettingAFavor &&
+                Objects.equals(playerHandCards, gameState.playerHandCards) &&
+                Objects.equals(drawPile, gameState.drawPile) &&
+                Objects.equals(discardPile, gameState.discardPile) &&
+                Objects.equals(actionStack, gameState.actionStack);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerHandCards, drawPile, discardPile, playerGettingAFavor, actionStack);
     }
 
     /**

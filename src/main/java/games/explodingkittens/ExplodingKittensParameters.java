@@ -4,6 +4,7 @@ import core.AbstractParameters;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ExplodingKittensParameters extends AbstractParameters {
 
@@ -27,6 +28,7 @@ public class ExplodingKittensParameters extends AbstractParameters {
     public int nCardsPerPlayer = 7;
     public int nDefuseCards = 6;
     public int nSeeFutureCards = 3;
+    public boolean nopeOwnCards = true;
 
     public ExplodingKittensParameters(long seed) {
         super(seed);
@@ -44,5 +46,23 @@ public class ExplodingKittensParameters extends AbstractParameters {
         ekp.nDefuseCards = nDefuseCards;
         ekp.nSeeFutureCards = nSeeFutureCards;
         return ekp;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExplodingKittensParameters)) return false;
+        if (!super.equals(o)) return false;
+        ExplodingKittensParameters that = (ExplodingKittensParameters) o;
+        return nCardsPerPlayer == that.nCardsPerPlayer &&
+                nDefuseCards == that.nDefuseCards &&
+                nSeeFutureCards == that.nSeeFutureCards &&
+                Objects.equals(dataPath, that.dataPath) &&
+                Objects.equals(cardCounts, that.cardCounts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), dataPath, cardCounts, nCardsPerPlayer, nDefuseCards, nSeeFutureCards);
     }
 }

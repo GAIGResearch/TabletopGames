@@ -165,6 +165,12 @@ public abstract class TurnOrder {
         return (nPlayers+turnOwner+1) % nPlayers;
     }
 
+    /**
+     * Moves to the given turn order. If the given player is not playing anymore, the next player still in the game
+     * will be the turn owner instead.
+     * @param gameState - current game state
+     * @param newTurnOwner - new turn owner.
+     */
     public final void moveToNextPlayer(AbstractGameState gameState, int newTurnOwner) {
         turnOwner = newTurnOwner;
         int n = 0;
@@ -187,12 +193,13 @@ public abstract class TurnOrder {
                 turnOwner == turnOrder.turnOwner &&
                 roundCounter == turnOrder.roundCounter &&
                 firstPlayer == turnOrder.firstPlayer &&
+                turnCounter == turnOrder.turnCounter &&
                 nMaxRounds == turnOrder.nMaxRounds;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nPlayers, turnOwner, roundCounter, firstPlayer, nMaxRounds);
+        return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
 
 }

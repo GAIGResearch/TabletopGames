@@ -160,6 +160,40 @@ public class ColtExpressParameters extends AbstractParameters {
         return cep;
     }
 
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ColtExpressParameters)) return false;
+        if (!super.equals(o)) return false;
+        ColtExpressParameters that = (ColtExpressParameters) o;
+        return nCardsInHand == that.nCardsInHand &&
+                nCardsInHandExtraDoc == that.nCardsInHandExtraDoc &&
+                nBulletsPerPlayer == that.nBulletsPerPlayer &&
+                nMaxRounds == that.nMaxRounds &&
+                shooterReward == that.shooterReward &&
+                nCardsDraw == that.nCardsDraw &&
+                nRoofMove == that.nRoofMove &&
+                nCardHostageReward == that.nCardHostageReward &&
+                nCardTakeItAllReward == that.nCardTakeItAllReward &&
+                Objects.equals(dataPath, that.dataPath) &&
+                Objects.equals(cardCounts, that.cardCounts) &&
+                Arrays.equals(characterTypes, that.characterTypes) &&
+                Arrays.equals(endRoundCards, that.endRoundCards) &&
+                Arrays.equals(roundCards, that.roundCards) &&
+                Objects.equals(trainCompartmentConfigurations, that.trainCompartmentConfigurations) &&
+                Objects.equals(playerStartLoot, that.playerStartLoot) &&
+                Objects.equals(loot, that.loot);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dataPath, nCardsInHand, nCardsInHandExtraDoc, nBulletsPerPlayer, nMaxRounds, shooterReward, nCardsDraw, nRoofMove, nCardHostageReward, nCardTakeItAllReward, cardCounts, trainCompartmentConfigurations, playerStartLoot, loot);
+        result = 31 * result + Arrays.hashCode(characterTypes);
+        result = 31 * result + Arrays.hashCode(endRoundCards);
+        result = 31 * result + Arrays.hashCode(roundCards);
+        return result;
+    }
+
     public String getDataPath() {
         return dataPath;
     }

@@ -2,7 +2,9 @@ package games.pandemic;
 
 import core.AbstractParameters;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class PandemicParameters extends AbstractParameters {
 
@@ -12,6 +14,8 @@ public class PandemicParameters extends AbstractParameters {
 
     int max_cubes_per_city = 3;  // More cause outbreak
 
+    int n_city_cards = 48;
+    int n_event_cards = 5;
     int n_epidemic_cards = 4;
     int n_cubes_epidemic = 3;
 
@@ -26,6 +30,7 @@ public class PandemicParameters extends AbstractParameters {
 
     int max_cards_per_player = 7;  // Max cards in hand per player
     int n_cards_draw = 2;  // Number of cards players draw each turn
+
 
     // Number of cards each player receives.
     HashMap<Integer, Integer> n_cards_per_player = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
@@ -48,6 +53,8 @@ public class PandemicParameters extends AbstractParameters {
 
         this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
         this.max_cubes_per_city = pandemicParameters.max_cubes_per_city;  // More cause outbreak
+        this.n_city_cards = pandemicParameters.n_city_cards;
+        this.n_event_cards = pandemicParameters.n_event_cards;
         this.n_epidemic_cards = pandemicParameters.n_epidemic_cards;
         this.n_cubes_epidemic = pandemicParameters.n_cubes_epidemic;
         this.n_infection_cards_setup = pandemicParameters.n_infection_cards_setup;
@@ -145,5 +152,40 @@ public class PandemicParameters extends AbstractParameters {
     @Override
     protected AbstractParameters _copy() {
         return new PandemicParameters(this);
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PandemicParameters)) return false;
+        if (!super.equals(o)) return false;
+        PandemicParameters that = (PandemicParameters) o;
+        return lose_max_outbreak == that.lose_max_outbreak &&
+                max_cubes_per_city == that.max_cubes_per_city &&
+                n_city_cards == that.n_city_cards &&
+                n_event_cards == that.n_event_cards &&
+                n_epidemic_cards == that.n_epidemic_cards &&
+                n_cubes_epidemic == that.n_cubes_epidemic &&
+                n_infection_cards_setup == that.n_infection_cards_setup &&
+                n_infections_setup == that.n_infections_setup &&
+                n_cubes_infection == that.n_cubes_infection &&
+                n_initial_disease_cubes == that.n_initial_disease_cubes &&
+                n_cards_for_cure == that.n_cards_for_cure &&
+                n_cards_for_cure_reduced == that.n_cards_for_cure_reduced &&
+                n_forecast_cards == that.n_forecast_cards &&
+                max_cards_per_player == that.max_cards_per_player &&
+                n_cards_draw == that.n_cards_draw &&
+                n_actions_per_turn == that.n_actions_per_turn &&
+                n_research_stations == that.n_research_stations &&
+                Objects.equals(dataPath, that.dataPath) &&
+                Arrays.equals(infection_rate, that.infection_rate) &&
+                Objects.equals(n_cards_per_player, that.n_cards_per_player);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dataPath, lose_max_outbreak, max_cubes_per_city, n_city_cards, n_event_cards, n_epidemic_cards, n_cubes_epidemic, n_infection_cards_setup, n_infections_setup, n_cubes_infection, n_initial_disease_cubes, n_cards_for_cure, n_cards_for_cure_reduced, n_forecast_cards, max_cards_per_player, n_cards_draw, n_cards_per_player, n_actions_per_turn, n_research_stations);
+        result = 31 * result + Arrays.hashCode(infection_rate);
+        return result;
     }
 }

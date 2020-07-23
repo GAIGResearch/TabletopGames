@@ -49,7 +49,8 @@ public class RearrangeDeckOfCards extends DrawCard {
         }
         Deck<Card> draws = new Deck<>("Temp Draws from: " + rd.getComponentName());
         draws.setComponents(new ArrayList<>(Arrays.asList(cards)));
-        return result & rd.add(draws);
+        //return result & rd.add(draws);
+        return result & rd.add(draws, 0);
     }
 
     // Getters

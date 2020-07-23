@@ -2,6 +2,7 @@ package games.pandemic.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.*;
 import core.actions.AbstractAction;
 import core.components.Card;
@@ -52,13 +53,14 @@ public class PandemicGUI extends AbstractGUI {
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUI(AbstractGameState gameState, ActionController ac) {
+    public PandemicGUI(Game game, ActionController ac) {
         super(ac, 721);
-        if (gameState == null || ac == null) return;
+        if (game == null || ac == null) return;
 
+        gameState = (PandemicGameState) game.getGameState();
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
-        this.gameState = (PandemicGameState) gameState;
+        this.gameState = (PandemicGameState) game.getGameState();
         boardView = new PandemicBoardView(gameState);
 
         handCardHighlights = new ArrayList[nPlayers];

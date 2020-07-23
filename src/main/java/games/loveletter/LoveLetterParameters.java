@@ -3,7 +3,9 @@ package games.loveletter;
 import core.AbstractParameters;
 import games.loveletter.cards.LoveLetterCard;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 /** This class allows to modify the balance of the game. Each modification may result in several problems with the
  * game's logic. Please be very careful in modifying these values and check for possible consequences.
@@ -45,5 +47,25 @@ public class LoveLetterParameters extends AbstractParameters {
         llp.cardCounts = new HashMap<>(cardCounts);
         llp.nCardsPerPlayer = nCardsPerPlayer;
         return llp;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LoveLetterParameters)) return false;
+        if (!super.equals(o)) return false;
+        LoveLetterParameters that = (LoveLetterParameters) o;
+        return nCardsPerPlayer == that.nCardsPerPlayer &&
+                nCardsVisibleReserve == that.nCardsVisibleReserve &&
+                Objects.equals(dataPath, that.dataPath) &&
+                Objects.equals(cardCounts, that.cardCounts) &&
+                Arrays.equals(nTokensWin, that.nTokensWin);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dataPath, cardCounts, nCardsPerPlayer, nCardsVisibleReserve);
+        result = 31 * result + Arrays.hashCode(nTokensWin);
+        return result;
     }
 }

@@ -123,6 +123,26 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         researchStationLocations = new ArrayList<>();
     }
 
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PandemicGameState)) return false;
+        if (!super.equals(o)) return false;
+        PandemicGameState that = (PandemicGameState) o;
+        return quietNight == that.quietNight &&
+                epidemic == that.epidemic &&
+                nCardsDrawn == that.nCardsDrawn &&
+                Objects.equals(areas, that.areas) &&
+                Objects.equals(tempDeck, that.tempDeck) &&
+                Objects.equals(world, that.world) &&
+                Objects.equals(researchStationLocations, that.researchStationLocations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), areas, tempDeck, world, quietNight, epidemic, nCardsDrawn, researchStationLocations);
+    }
+
     /**
      * Constructor. Calls super with objects corresponding to this game and loads the data for the game.
      * @param pp - Game parameters.

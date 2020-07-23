@@ -35,4 +35,9 @@ public class ExplodingKittensCard extends Card {
     public Card copy() {
         return new ExplodingKittensCard(cardType, componentID);
     }
+
+    @Override
+    public String toString() {
+        return cardType.name();
+    }
 }

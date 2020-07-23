@@ -3,6 +3,7 @@ package core.turnorders;
 import core.AbstractGameState;
 
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Queue;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -69,5 +70,19 @@ public class ReactiveTurnOrder extends TurnOrder {
                 reactivePlayers.add(i);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReactiveTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        ReactiveTurnOrder that = (ReactiveTurnOrder) o;
+        return Objects.equals(reactivePlayers, that.reactivePlayers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), reactivePlayers);
     }
 }

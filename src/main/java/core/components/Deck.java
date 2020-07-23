@@ -160,6 +160,20 @@ public class Deck<T extends Component> extends Component {
     }
 
     /**
+     * Adds a full other deck to this deck, ignoring capacity.
+     * @param d - other deck to add to this deck.
+     * @param index - the position in which the elements of d should be inserted in this deck.
+     * @return true if not over capacity, false otherwise.
+     */
+    public boolean add(Deck<T> d, int index){
+        components.addAll(index, d.components);
+        for (T comp: d.components) {
+            comp.setOwnerId(ownerId);
+        }
+        return capacity == -1 || components.size() <= capacity;
+    }
+
+    /**
      * Remove the given component.
      * @param component - component to remove.
      * @return true if successfully removed, false otherwise.
@@ -374,7 +388,7 @@ public class Deck<T extends Component> extends Component {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Deck)) return false;
         if (!super.equals(o)) return false;
         Deck<?> deck = (Deck<?>) o;
         return capacity == deck.capacity &&
