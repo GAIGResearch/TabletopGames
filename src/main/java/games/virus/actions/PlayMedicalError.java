@@ -3,6 +3,7 @@ package games.virus.actions;
 import com.sun.nio.sctp.NotificationHandler;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
@@ -36,22 +37,22 @@ public class PlayMedicalError extends PlayVirusCard implements IPrintable {
 
         for (VirusCard.OrganType organType : VirusCard.OrganType.values()) {
             if (myBody.hasOrgan(organType)) {
-                VirusOrgan organ = myBody.removeOrgan(organType);
-                temp.addExistingOrgan(organ, organType);
+                Deck<VirusCard> cards = myBody.removeOrgan(organType);
+                temp.addExistingOrgan(cards, organType);
             }
         }
 
         for (VirusCard.OrganType organType : VirusCard.OrganType.values()) {
             if (otherBody.hasOrgan(organType)) {
-                VirusOrgan organ = otherBody.removeOrgan(organType);
-                myBody.addExistingOrgan(organ, organType);
+                Deck<VirusCard> cards = otherBody.removeOrgan(organType);
+                myBody.addExistingOrgan(cards, organType);
             }
         }
 
         for (VirusCard.OrganType organType : VirusCard.OrganType.values()) {
             if (temp.hasOrgan(organType)) {
-                VirusOrgan organ = temp.removeOrgan(organType);
-                otherBody.addExistingOrgan(organ, organType);
+                Deck<VirusCard> cards = temp.removeOrgan(organType);
+                otherBody.addExistingOrgan(cards, organType);
             }
         }
 

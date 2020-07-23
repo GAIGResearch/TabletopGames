@@ -7,6 +7,7 @@ import core.components.Deck;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
@@ -16,7 +17,7 @@ import java.util.Random;
 public class ReplaceCards extends DrawComponents {
     protected int deckDraw;
 
-    public ReplaceCards(int deckFrom, int deckTo, int [] cardIds, int deckDraw) {
+    public ReplaceCards(int deckFrom, int deckTo, ArrayList<Integer> cardIds, int deckDraw) {
         super(deckFrom, deckTo, cardIds);
         this.deckDraw = deckDraw;
     }
@@ -30,7 +31,7 @@ public class ReplaceCards extends DrawComponents {
         // After discarding a card, the player must draw a card from the draw deck.
         // It is is empty, move all cards from discard deck to draw one and shuffle.
         // After, draw a card and add it to the player hand.
-        for (int i = 0; i < ids.length; i++) {
+        for (int i = 0; i < ids.size(); i++) {
             if (drawDeck.getSize() == 0)
                 discardToDraw((VirusGameState)gs);
             from.add(drawDeck.draw());

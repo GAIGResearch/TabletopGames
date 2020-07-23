@@ -163,29 +163,26 @@ public class VirusForwardModel extends AbstractForwardModel {
         for (int i = 0; i < vgp.maxCardsDiscard; i++)
             actions.add(new ReplaceOneCard(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), i, vgs.drawDeck.getComponentID()));
 
-/*
-        // Discard two cards: 0,1 or 0,2 or 1,2
-        // TODO: it should be generalized to any player hand size
-        int [] cardsToBeDiscarded01 = new int[2];
-        int [] cardsToBeDiscarded02 = new int[2];
-        int [] cardsToBeDiscarded12 = new int[2];
+        // Discard 2 cards
+        ArrayList<Integer> cardsToBeDiscarded = new ArrayList<Integer>();
+        cardsToBeDiscarded.add(0);
+        cardsToBeDiscarded.add(1);
+        actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded, vgs.drawDeck.getComponentID()));
 
+        cardsToBeDiscarded.clear();
+        cardsToBeDiscarded.add(0);
+        cardsToBeDiscarded.add(2);
+        actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded, vgs.drawDeck.getComponentID()));
 
-        cardsToBeDiscarded01[0] = 0;
-        cardsToBeDiscarded01[1] = 1;
-        actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded01, vgs.drawDeck.getComponentID()));
+        cardsToBeDiscarded.clear();
 
-        cardsToBeDiscarded02[0] = 0;
-        cardsToBeDiscarded02[1] = 2;
-        actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded02, vgs.drawDeck.getComponentID()));
-
-        cardsToBeDiscarded12[0] = 1;
-        cardsToBeDiscarded12[1] = 2;
-        actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded12, vgs.drawDeck.getComponentID()));
+        cardsToBeDiscarded.add(1);
+        cardsToBeDiscarded.add(2);
+        actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded, vgs.drawDeck.getComponentID()));
 
         // Discard all cards
         actions.add(new ReplaceAllCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), vgs.drawDeck.getComponentID(), playerHand.getSize()));
-*/
+
         return actions;
     }
 

@@ -2,6 +2,7 @@ package games.virus.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
@@ -35,10 +36,11 @@ public class PlayTransplant extends PlayVirusCard implements IPrintable {
         VirusBody myBody    = (VirusBody) vgs.getComponentById(bodyId);
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherBodyId);
 
-        VirusOrgan myOrgan    = myBody.removeOrgan(myOrganType);
-        VirusOrgan otherOrgan = otherBody.removeOrgan(otherOrganType);
-        myBody.addExistingOrgan(otherOrgan, otherOrganType);
-        otherBody.addExistingOrgan(myOrgan, myOrganType);
+        Deck<VirusCard> myCards    = myBody.removeOrgan(myOrganType);
+        Deck<VirusCard> otherCards = myBody.removeOrgan(otherOrganType);
+
+        myBody.addExistingOrgan(otherCards, otherOrganType);
+        otherBody.addExistingOrgan(myCards, myOrganType);
 
         return true;
     }

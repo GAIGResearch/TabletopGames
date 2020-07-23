@@ -1,6 +1,7 @@
 package games.virus.components;
 
 import core.components.Component;
+import core.components.Deck;
 import games.virus.cards.VirusCard;
 import utilities.Utils;
 
@@ -90,7 +91,6 @@ public class VirusBody extends Component {
                 organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
     }
 
-
     public boolean organNotYetImmunised(VirusCard.OrganType organ) {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.Immunised;
     }
@@ -100,15 +100,42 @@ public class VirusBody extends Component {
         organs.get(card.organ).cards.add(card);
     }
 
-    public void addExistingOrgan(VirusOrgan organ, VirusCard.OrganType organType) {
-        organs.put(organType, organ);
+    public void addExistingOrgan(Deck<VirusCard> cards, VirusCard.OrganType organType) {
+        for (int i=0; i< cards.getSize(); i++) {
+            organs.get(organType).cards.add(cards.get(i));
+        }
+
+        if (cards.getSize() == 1)
+            organs.get(organType).state = VirusOrgan.VirusOrganState.Neutral;
+        else if (cards.getSize() == 2)
+        {
+            if (organs.get(organType).cards.get(1).type == VirusCard.VirusCardType.Medicine) {
+                if (organs.get(organType).cards.get(1).organ == VirusCard.OrganType.Wild)
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.VaccinatedWild;
+                else
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.Vaccinated;
+            }
+            else if (organs.get(organType).cards.get(1).type == VirusCard.VirusCardType.Virus)
+            {
+                if (organs.get(organType).cards.get(1).organ == VirusCard.OrganType.Wild)
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.InfectedWild;
+                else
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.Infected;
+            }
+        }
     }
 
-    public VirusOrgan removeOrgan(VirusCard.OrganType organType)
+    /**
+     * Returns the cards in the organ organType and set the state of the organ to None
+     * @param organType: organ type
+     * @return Deck<VirusCard> included in the organ
+     */
+    public Deck<VirusCard> removeOrgan(VirusCard.OrganType organType)
     {
-        VirusOrgan organ = organs.get(organType);
-        organs.remove(organType);
-        return organ;
+        Deck<VirusCard> cards = organs.get(organType).cards.copy();
+        organs.get(organType).cards.clear();
+        organs.get(organType).state = VirusOrgan.VirusOrganState.None;
+        return cards;
     }
 
     public VirusOrgan.VirusOrganState applyMedicine(VirusCard card, VirusCard.OrganType organ) {
