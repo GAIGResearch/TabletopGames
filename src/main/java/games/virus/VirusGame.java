@@ -25,7 +25,7 @@ public class VirusGame extends Game {
         agents.add(new HumanConsolePlayer());
 
         //AbstractParameters gameParameters = new VirusGameParameters(System.currentTimeMillis());
-        AbstractParameters gameParameters = new VirusGameParameters(1); // TO DEBUG
+        AbstractParameters gameParameters = new VirusGameParameters(2); // TO DEBUG
         Game game           = new VirusGame(agents, gameParameters);
 
         game.run(null);

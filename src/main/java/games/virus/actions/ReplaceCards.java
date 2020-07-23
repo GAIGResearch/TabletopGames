@@ -24,7 +24,7 @@ public class ReplaceCards extends DrawComponents {
     @Override
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
-        Deck<VirusCard> from = (Deck<VirusCard>) gs.getComponentById(deckFrom);
+        Deck<VirusCard> from     = (Deck<VirusCard>) gs.getComponentById(deckFrom);
         Deck<VirusCard> drawDeck = (Deck<VirusCard>) gs.getComponentById(deckDraw);
 
         // After discarding a card, the player must draw a card from the draw deck.
@@ -58,7 +58,6 @@ public class ReplaceCards extends DrawComponents {
     }
 
     // Move all cards from discard deck to draw one and shuffle
-    // TODO: check it
     public void discardToDraw(VirusGameState vgs) {
         while (vgs.getDiscardDeck().getSize()>0) {
             VirusCard card = vgs.getDiscardDeck().draw();

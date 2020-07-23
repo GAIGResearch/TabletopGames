@@ -30,8 +30,8 @@ public class ApplyMedicine extends PlayVirusCard implements IPrintable {
         // discard cards?
         if (newState == VirusOrgan.VirusOrganState.Neutral)
         {
-            vgs.getDiscardDeck().add(body.removeAMedicineCard(card, organ));
-            vgs.getDiscardDeck().add(body.removeAVirusCard(card, organ));
+            vgs.getDiscardDeck().add(body.removeAMedicineCard(organ));
+            vgs.getDiscardDeck().add(body.removeAVirusCard(organ));
         }
         return true;
     }
@@ -52,12 +52,12 @@ public class ApplyMedicine extends PlayVirusCard implements IPrintable {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ApplyMedicine that = (ApplyMedicine) o;
-        return bodyId == that.bodyId;
+        return organ == that.organ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), bodyId);
+        return Objects.hash(super.hashCode(), organ);
     }
 
     @Override

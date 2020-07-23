@@ -50,7 +50,7 @@ public class VirusBody extends Component {
     }
 
     public boolean hasOrgan(VirusCard.OrganType organ) {
-        return organs.get(organ).state != VirusOrgan.VirusOrganState.None;
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state != VirusOrgan.VirusOrganState.None;
     }
 
     /**
@@ -63,6 +63,15 @@ public class VirusBody extends Component {
     }
 
     /**
+     * Returns true is the body has an organ of type organ in neutral state (i.e. no virus, no medicines)
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganNeutral(VirusCard.OrganType organ) {
+        return organs.get(organ).state == VirusOrgan.VirusOrganState.Neutral;
+    }
+
+    /**
      * Returns true is the body has an organ of type organ infected with a wild card
      * @param organ: organ type
      * @return true or false
@@ -71,6 +80,17 @@ public class VirusBody extends Component {
         return organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
     }
 
+    /**
+     * Returns true is the body has an organ of type organ infected with a virus (including the wild virus)
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganInfected(VirusCard.OrganType organ) {
+        return organs.get(organ).state == VirusOrgan.VirusOrganState.Infected ||
+                organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
+    }
+
+
     public boolean organNotYetImmunised(VirusCard.OrganType organ) {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.Immunised;
     }
@@ -78,6 +98,17 @@ public class VirusBody extends Component {
     public void addOrgan(VirusCard card) {
         organs.get(card.organ).initialiseOrgan();
         organs.get(card.organ).cards.add(card);
+    }
+
+    public void addExistingOrgan(VirusOrgan organ, VirusCard.OrganType organType) {
+        organs.put(organType, organ);
+    }
+
+    public VirusOrgan removeOrgan(VirusCard.OrganType organType)
+    {
+        VirusOrgan organ = organs.get(organType);
+        organs.remove(organType);
+        return organ;
     }
 
     public VirusOrgan.VirusOrganState applyMedicine(VirusCard card, VirusCard.OrganType organ) {
@@ -92,17 +123,17 @@ public class VirusBody extends Component {
         return newState;
     }
 
-    public VirusCard removeAVirusCard(VirusCard card, VirusCard.OrganType organ)
+    public VirusCard removeAVirusCard(VirusCard.OrganType organ)
     {
         return organs.get(organ).removeAVirusCard();
     }
 
-    public VirusCard removeAMedicineCard(VirusCard card, VirusCard.OrganType organ)
+    public VirusCard removeAMedicineCard(VirusCard.OrganType organ)
     {
         return organs.get(organ).removeAMedicineCard();
     }
 
-    public VirusCard removeAnOrganCard(VirusCard card, VirusCard.OrganType organ)
+    public VirusCard removeAnOrganCard(VirusCard.OrganType organ)
     {
         return organs.get(organ).removeAnOrganCard();
     }
