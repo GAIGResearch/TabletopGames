@@ -16,7 +16,8 @@ public class VirusBody extends Component {
         super(Utils.ComponentType.TOKEN);
         organs = new HashMap<>();
         for (VirusCard.OrganType oType : VirusCard.OrganType.values())
-            organs.put(oType, new VirusOrgan());
+            if (oType != VirusCard.OrganType.Treatment)
+                organs.put(oType, new VirusOrgan());
     }
 
     protected VirusBody(int ID)
@@ -100,24 +101,31 @@ public class VirusBody extends Component {
         organs.get(card.organ).cards.add(card);
     }
 
-    public void addExistingOrgan(Deck<VirusCard> cards, VirusCard.OrganType organType) {
-        for (int i=0; i< cards.getSize(); i++) {
+    /**
+     * Add cards to an organ (at state None) and actualize the state
+     * @param organType: organ type
+     */
+    public void addCardsToOrgan(Deck<VirusCard> cards, VirusCard.OrganType organType) {
+        // add cards in the correct order
+        for (int i=cards.getSize()-1; i>=0; i--) {
             organs.get(organType).cards.add(cards.get(i));
         }
 
+        // card 0th is the virus or medicine
+        // card 1st is the organ
         if (cards.getSize() == 1)
             organs.get(organType).state = VirusOrgan.VirusOrganState.Neutral;
         else if (cards.getSize() == 2)
         {
-            if (organs.get(organType).cards.get(1).type == VirusCard.VirusCardType.Medicine) {
-                if (organs.get(organType).cards.get(1).organ == VirusCard.OrganType.Wild)
+            if (organs.get(organType).cards.get(0).type == VirusCard.VirusCardType.Medicine) {
+                if (organs.get(organType).cards.get(0).organ == VirusCard.OrganType.Wild)
                     organs.get(organType).state = VirusOrgan.VirusOrganState.VaccinatedWild;
                 else
                     organs.get(organType).state = VirusOrgan.VirusOrganState.Vaccinated;
             }
-            else if (organs.get(organType).cards.get(1).type == VirusCard.VirusCardType.Virus)
+            else if (organs.get(organType).cards.get(0).type == VirusCard.VirusCardType.Virus)
             {
-                if (organs.get(organType).cards.get(1).organ == VirusCard.OrganType.Wild)
+                if (organs.get(organType).cards.get(0).organ == VirusCard.OrganType.Wild)
                     organs.get(organType).state = VirusOrgan.VirusOrganState.InfectedWild;
                 else
                     organs.get(organType).state = VirusOrgan.VirusOrganState.Infected;

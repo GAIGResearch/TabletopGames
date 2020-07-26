@@ -37,10 +37,10 @@ public class PlayTransplant extends PlayVirusCard implements IPrintable {
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherBodyId);
 
         Deck<VirusCard> myCards    = myBody.removeOrgan(myOrganType);
-        Deck<VirusCard> otherCards = myBody.removeOrgan(otherOrganType);
+        Deck<VirusCard> otherCards = otherBody.removeOrgan(otherOrganType);
 
-        myBody.addExistingOrgan(otherCards, otherOrganType);
-        otherBody.addExistingOrgan(myCards, myOrganType);
+        myBody.addCardsToOrgan(otherCards, otherOrganType);
+        otherBody.addCardsToOrgan(myCards, myOrganType);
 
         return true;
     }

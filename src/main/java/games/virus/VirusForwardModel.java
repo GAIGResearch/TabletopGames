@@ -164,7 +164,7 @@ public class VirusForwardModel extends AbstractForwardModel {
             actions.add(new ReplaceOneCard(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), i, vgs.drawDeck.getComponentID()));
 
         // Discard 2 cards
-        ArrayList<Integer> cardsToBeDiscarded = new ArrayList<Integer>();
+        ArrayList<Integer> cardsToBeDiscarded = new ArrayList<>();
         cardsToBeDiscarded.add(0);
         cardsToBeDiscarded.add(1);
         actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded, vgs.drawDeck.getComponentID()));
@@ -175,7 +175,6 @@ public class VirusForwardModel extends AbstractForwardModel {
         actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded, vgs.drawDeck.getComponentID()));
 
         cardsToBeDiscarded.clear();
-
         cardsToBeDiscarded.add(1);
         cardsToBeDiscarded.add(2);
         actions.add(new ReplaceCards(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), cardsToBeDiscarded, vgs.drawDeck.getComponentID()));
@@ -261,7 +260,7 @@ public class VirusForwardModel extends AbstractForwardModel {
                         gameState.discardDeck.getComponentID(),
                         cardIdx,
                         myBody.getComponentID(),
-                        otherPlayer, otherPlayerHand));
+                        otherPlayer, otherPlayerHand.getComponentID()));
             }
         }
     }
@@ -279,7 +278,6 @@ public class VirusForwardModel extends AbstractForwardModel {
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
 
-
         for (VirusCard.OrganType myOrganType: VirusCard.OrganType.values())
         {
             if (myBody.hasOrgan(myOrganType) && myBody.hasOrganInfected(myOrganType))
@@ -289,15 +287,34 @@ public class VirusForwardModel extends AbstractForwardModel {
                         VirusBody otherBody = gameState.playerBodies.get(otherPlayerId);
 
                         for (VirusCard.OrganType otherOrganType: VirusCard.OrganType.values()) {
-                            if (otherBody.hasOrganNeutral(otherOrganType)) {
-                                actions.add(new PlaySpreading(playerHand.getComponentID(),
-                                        gameState.discardDeck.getComponentID(),
-                                        cardIdx,
-                                        myBody.getComponentID(),
-                                        otherPlayerId,
-                                        otherBody.getComponentID(),
-                                        myOrganType,
-                                        otherOrganType));
+                            if (card.organ == Wild)
+                            {
+                                if (otherBody.hasOrganNeutral(otherOrganType))
+                                {
+                                    actions.add(new PlaySpreading(playerHand.getComponentID(),
+                                            gameState.discardDeck.getComponentID(),
+                                            cardIdx,
+                                            myBody.getComponentID(),
+                                            otherPlayerId,
+                                            otherBody.getComponentID(),
+                                            myOrganType,
+                                            otherOrganType));
+                                }
+                            }
+                            else
+                            {
+                                if ( (myOrganType == otherOrganType && otherBody.hasOrganNeutral(otherOrganType)) ||
+                                        (otherOrganType == Wild) )
+                                {
+                                    actions.add(new PlaySpreading(playerHand.getComponentID(),
+                                            gameState.discardDeck.getComponentID(),
+                                            cardIdx,
+                                            myBody.getComponentID(),
+                                            otherPlayerId,
+                                            otherBody.getComponentID(),
+                                            myOrganType,
+                                            otherOrganType));
+                                }
                             }
                         }
                     }
@@ -320,7 +337,9 @@ public class VirusForwardModel extends AbstractForwardModel {
                         if (myBody.hasOrgan(myOrganType) &&
                                 myBody.organNotYetImmunised(myOrganType) &&
                                 otherBody.hasOrgan(otherOrganType) &&
-                                otherBody.organNotYetImmunised(otherOrganType))
+                                otherBody.organNotYetImmunised(otherOrganType) &&
+                                !myBody.hasOrgan(otherOrganType) &&
+                                !otherBody.hasOrgan(myOrganType))
                         {
                             actions.add(new PlayTransplant(playerHand.getComponentID(),
                                     gameState.discardDeck.getComponentID(),

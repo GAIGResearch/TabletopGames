@@ -19,7 +19,6 @@ public class VirusGameParameters extends AbstractParameters {
     public int nCardsPerTreatmentLatexGlove   = 1;
     public int nCardsPerTreatmentMedicalError = 1;
 
-
     public VirusGameParameters(long seed) {
         super(seed);
     }
@@ -42,7 +41,6 @@ public class VirusGameParameters extends AbstractParameters {
         vgp.nCardsPerTreatmentLatexGlove = nCardsPerTreatmentLatexGlove;
         vgp.nCardsPerTreatmentMedicalError = nCardsPerTreatmentMedicalError;
 
-
         return vgp;
     }
 
@@ -55,12 +53,20 @@ public class VirusGameParameters extends AbstractParameters {
         return nCardsPerOrgan == that.nCardsPerOrgan &&
                 nCardsPerVirus == that.nCardsPerVirus &&
                 nCardsPerMedicine == that.nCardsPerMedicine &&
-                nCardsPerTreatment == that.nCardsPerTreatment &&
-                maxCardsDiscard == that.maxCardsDiscard;
+                maxCardsDiscard == that.maxCardsDiscard &&
+                nCardsPerWildOrgan == that.nCardsPerWildOrgan  &&
+                nCardsPerWildVirus   == that.nCardsPerWildVirus &&
+                nCardsPerWildMedicine == that.nCardsPerWildMedicine &&
+                nCardsPerTreatmentSpreading == that.nCardsPerTreatmentSpreading &&
+                nCardsPerTreatmentTransplant == that.nCardsPerTreatmentTransplant &&
+                nCardsPerTreatmentOrganThief == that.nCardsPerTreatmentOrganThief &&
+                nCardsPerTreatmentLatexGlove == that.nCardsPerTreatmentLatexGlove &&
+                nCardsPerTreatmentMedicalError == that.nCardsPerTreatmentMedicalError;
     }
-
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), nCardsPerOrgan, nCardsPerVirus, nCardsPerMedicine, nCardsPerTreatment, maxCardsDiscard);
+        return Objects.hash(super.hashCode(), nCardsPerOrgan, nCardsPerVirus, nCardsPerMedicine, maxCardsDiscard,     nCardsPerWildOrgan,nCardsPerWildVirus,nCardsPerWildMedicine,nCardsPerTreatmentSpreading,nCardsPerTreatmentTransplant,nCardsPerTreatmentOrganThief,nCardsPerTreatmentLatexGlove,nCardsPerTreatmentMedicalError);
     }
 }
+
+

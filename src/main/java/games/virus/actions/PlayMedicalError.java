@@ -38,21 +38,21 @@ public class PlayMedicalError extends PlayVirusCard implements IPrintable {
         for (VirusCard.OrganType organType : VirusCard.OrganType.values()) {
             if (myBody.hasOrgan(organType)) {
                 Deck<VirusCard> cards = myBody.removeOrgan(organType);
-                temp.addExistingOrgan(cards, organType);
+                temp.addCardsToOrgan(cards, organType);
             }
         }
 
         for (VirusCard.OrganType organType : VirusCard.OrganType.values()) {
             if (otherBody.hasOrgan(organType)) {
                 Deck<VirusCard> cards = otherBody.removeOrgan(organType);
-                myBody.addExistingOrgan(cards, organType);
+                myBody.addCardsToOrgan(cards, organType);
             }
         }
 
         for (VirusCard.OrganType organType : VirusCard.OrganType.values()) {
             if (temp.hasOrgan(organType)) {
                 Deck<VirusCard> cards = temp.removeOrgan(organType);
-                otherBody.addExistingOrgan(cards, organType);
+                otherBody.addCardsToOrgan(cards, organType);
             }
         }
 

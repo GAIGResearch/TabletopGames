@@ -12,11 +12,12 @@ import java.util.Objects;
 
 public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
     private int otherPlayerId;
-    private Deck<VirusCard> otherPlayerHand;
-    public PlayLatexGlove(int deckFrom, int deckTo, int fromIndex, int bodyId, int otherPlayerId, Deck<VirusCard> otherPlayerHand) {
+    private int otherPlayerHandId;
+
+    public PlayLatexGlove(int deckFrom, int deckTo, int fromIndex, int bodyId, int otherPlayerId, int otherPlayerHandId) {
         super(deckFrom, deckTo, fromIndex, bodyId);
-        this.otherPlayerId = otherPlayerId;
-        this.otherPlayerHand = otherPlayerHand;
+        this.otherPlayerId     = otherPlayerId;
+        this.otherPlayerHandId = otherPlayerHandId;
     }
 
     @Override
@@ -25,10 +26,11 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
         super.execute(gs);
 
         // Discard three card on other player hand
-        Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
+        Deck<Card> to              = (Deck<Card>) gs.getComponentById(deckTo);
+        Deck<Card> otherPlayerHand = (Deck<Card>) gs.getComponentById(otherPlayerHandId);
 
         for (int i=0; i<3; i++) {
-            VirusCard card = otherPlayerHand.pick(0);
+            VirusCard card = (VirusCard) otherPlayerHand.pick(0);
             to.add(card, toIndex);
         }
         return true;
@@ -53,11 +55,11 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), otherPlayerId, otherPlayerHand);
+        return Objects.hash(super.hashCode(), otherPlayerId, otherPlayerHandId);
     }
 
     @Override
     public AbstractAction copy() {
-        return new PlayLatexGlove(deckFrom, deckTo, fromIndex, bodyId, otherPlayerId, otherPlayerHand);
+        return new PlayLatexGlove(deckFrom, deckTo, fromIndex, bodyId, otherPlayerId, otherPlayerHandId);
     }
 }

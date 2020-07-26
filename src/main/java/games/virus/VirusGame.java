@@ -4,6 +4,7 @@ import core.*;
 import games.GameType;
 import players.HumanConsolePlayer;
 import players.OSLA;
+import players.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +22,12 @@ public class VirusGame extends Game {
         //agents.add(new OSLA());
         //agents.add(new OSLA());
         //agents.add(new OSLA());
-        agents.add(new HumanConsolePlayer());
-        agents.add(new HumanConsolePlayer());
+        //agents.add(new HumanConsolePlayer());
+        //agents.add(new HumanConsolePlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
 
-        //AbstractParameters gameParameters = new VirusGameParameters(System.currentTimeMillis());
-        AbstractParameters gameParameters = new VirusGameParameters(2); // TO DEBUG
+        AbstractParameters gameParameters = new VirusGameParameters(System.currentTimeMillis());
         Game game           = new VirusGame(agents, gameParameters);
 
         game.run(null);

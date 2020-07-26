@@ -32,7 +32,7 @@ public class PlayOrganThief extends PlayVirusCard implements IPrintable {
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherBodyId);
 
         Deck<VirusCard> cards = otherBody.removeOrgan(organ);
-        myBody.addExistingOrgan(cards, organ);
+        myBody.addCardsToOrgan(cards, organ);
 
         return true;
     }
