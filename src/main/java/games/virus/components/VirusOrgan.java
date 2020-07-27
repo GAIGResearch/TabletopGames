@@ -77,7 +77,6 @@ public class VirusOrgan extends Component {
             state = VirusOrganState.None;
         else if (state == VirusOrganState.Vaccinated || state==VirusOrganState.VaccinatedWild)
             state = VirusOrganState.Neutral;
-
         return state;
     }
 

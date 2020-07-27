@@ -61,7 +61,7 @@ public class VirusBody extends Component {
      * @return true or false
      */
     public boolean hasOrganVaccinatedWild(VirusCard.OrganType organ) {
-        return organs.get(organ).state == VirusOrgan.VirusOrganState.VaccinatedWild;
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state == VirusOrgan.VirusOrganState.VaccinatedWild;
     }
 
     /**
@@ -70,7 +70,7 @@ public class VirusBody extends Component {
      * @return true or false
      */
     public boolean hasOrganNeutral(VirusCard.OrganType organ) {
-        return organs.get(organ).state == VirusOrgan.VirusOrganState.Neutral;
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state == VirusOrgan.VirusOrganState.Neutral;
     }
 
     /**
@@ -79,7 +79,7 @@ public class VirusBody extends Component {
      * @return true or false
      */
     public boolean hasOrganInfectedWild(VirusCard.OrganType organ) {
-        return organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
     }
 
     /**

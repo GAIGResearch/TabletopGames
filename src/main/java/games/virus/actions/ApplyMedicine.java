@@ -22,9 +22,9 @@ public class ApplyMedicine extends PlayVirusCard implements IPrintable {
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
 
-        VirusCard card = (VirusCard)getCard(gs);
-        VirusBody body = getBody(gs);
-        VirusGameState vgs = (VirusGameState) gs;
+        VirusCard                  card     = (VirusCard)getCard(gs);
+        VirusBody                  body     = getBody(gs);
+        VirusGameState             vgs      = (VirusGameState) gs;
         VirusOrgan.VirusOrganState newState = body.applyMedicine(card, organ);
 
         // discard cards?

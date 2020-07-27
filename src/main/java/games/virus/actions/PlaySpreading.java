@@ -9,6 +9,8 @@ import games.virus.components.VirusBody;
 
 import java.util.Objects;
 
+import static games.virus.components.VirusOrgan.VirusOrganState.Neutral;
+
 public class PlaySpreading extends PlayVirusCard implements IPrintable {
 
     private int                 otherPlayerId;
@@ -35,6 +37,7 @@ public class PlaySpreading extends PlayVirusCard implements IPrintable {
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherPlayerBodyId);
 
         VirusCard card = myBody.removeAVirusCard(myOrganType);
+        myBody.organs.get(myOrganType).state= Neutral;
         otherBody.applyVirus(card, otherOrganType);
 
         return true;

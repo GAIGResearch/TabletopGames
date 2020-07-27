@@ -282,12 +282,13 @@ public class VirusForwardModel extends AbstractForwardModel {
         {
             if (myBody.hasOrgan(myOrganType) && myBody.hasOrganInfected(myOrganType))
             {
+                boolean isWild = myBody.hasOrganInfectedWild(myOrganType);
                 for (int otherPlayerId = 0; otherPlayerId < gameState.getNPlayers(); otherPlayerId++) {
                     if (otherPlayerId != playerId) {
                         VirusBody otherBody = gameState.playerBodies.get(otherPlayerId);
 
                         for (VirusCard.OrganType otherOrganType: VirusCard.OrganType.values()) {
-                            if (card.organ == Wild)
+                            if (isWild)
                             {
                                 if (otherBody.hasOrganNeutral(otherOrganType))
                                 {
@@ -303,8 +304,7 @@ public class VirusForwardModel extends AbstractForwardModel {
                             }
                             else
                             {
-                                if ( (myOrganType == otherOrganType && otherBody.hasOrganNeutral(otherOrganType)) ||
-                                        (otherOrganType == Wild) )
+                                if (otherBody.hasOrganNeutral(otherOrganType) && (myOrganType == otherOrganType || otherOrganType == Wild))
                                 {
                                     actions.add(new PlaySpreading(playerHand.getComponentID(),
                                             gameState.discardDeck.getComponentID(),
