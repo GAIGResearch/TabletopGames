@@ -84,14 +84,30 @@ public class ColtExpressTurnOrder extends TurnOrder {
     @Override
     public int nextPlayer(AbstractGameState gameState) {
         if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.DraftCharacter) {
+            // Return next player
             return (nPlayers + turnOwner + direction) % nPlayers;
         } else if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.ExecuteActions) {
+            // Return ID of player on the next card in the planned actions deck
             ColtExpressGameState cegs = (ColtExpressGameState) gameState;
             if (cegs.plannedActions.getSize() > 0) {
-                return cegs.plannedActions.get(cegs.plannedActions.getSize()-1).playerID;
+                int idx = cegs.plannedActions.getSize()-1;
+                int id = cegs.plannedActions.get(idx).playerID;
+
+                // ID could be -1 if bullets introduced in the deck (e.g. by GS copy with PO), try to find the next one
+                // and remove the illegal card from the deck
+                while (id == -1 && idx > 0) {
+                    cegs.plannedActions.remove(idx);
+                    idx--;
+                    id = cegs.plannedActions.get(idx).playerID;
+                    if (id != -1) return id;
+                }
+                // If no legal cards left, return next player
+                return (nPlayers + turnOwner + direction) % nPlayers;
             }
+            // Return next player if no cards in deck
             return (nPlayers + turnOwner + direction) % nPlayers;
         } else {
+            // Return next player in the round, double up if a double turn
             if (currentTurnType == RoundCard.TurnType.DoubleTurn) {
                 if (firstAction) {
                     firstAction = false;

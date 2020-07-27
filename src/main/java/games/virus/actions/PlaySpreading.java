@@ -56,13 +56,13 @@ public class PlaySpreading extends PlayVirusCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlaySpreading)) return false;
         PlaySpreading that = (PlaySpreading) o;
         return super.equals(o) &&
                 otherPlayerId == that.otherPlayerId &&
                 otherPlayerBodyId == that.otherPlayerBodyId &&
                 myOrganType == that.myOrganType &&
-                otherOrganType == otherOrganType;
+                otherOrganType == that.otherOrganType;
     }
 
     @Override

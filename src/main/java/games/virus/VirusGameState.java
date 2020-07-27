@@ -11,10 +11,13 @@ import games.virus.components.VirusBody;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
+
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
 public class VirusGameState extends AbstractGameState implements IPrintable {
     List<VirusBody>       playerBodies;   // Each player has a body
-    List<Deck<VirusCard>> playerDecks;    // Each player has a deck withh 3 cards
+    List<Deck<VirusCard>> playerDecks;    // Each player has a deck with 3 cards
     Deck<VirusCard>       drawDeck;       // The deck with the not yet played cards, It is not visible for any player
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
@@ -30,7 +33,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        // TODO: partial observability
         VirusGameState vgs = new VirusGameState(gameParameters.copy(), getNPlayers());
         vgs.drawDeck = drawDeck.copy();
         vgs.discardDeck = discardDeck.copy();
@@ -39,6 +41,23 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         for (int i = 0; i < getNPlayers(); i++) {
             vgs.playerDecks.add(playerDecks.get(i).copy());
             vgs.playerBodies.add((VirusBody) playerBodies.get(i).copy());
+        }
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // Draw deck and opponent hand cards are hidden. Shuffle all together and deal random cards for opponents.
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (playerId != i) {
+                    vgs.drawDeck.add(vgs.playerDecks.get(i));
+                    vgs.playerDecks.get(i).clear();
+                }
+            }
+            vgs.drawDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (playerId != i) {
+                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
+                        vgs.playerDecks.get(i).add(vgs.drawDeck.draw());
+                    }
+                }
+            }
         }
         return vgs;
     }
@@ -50,8 +69,20 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // TODO:
-        return null;
+        return new ArrayList<Integer>() {{
+            add(drawDeck.getComponentID());
+            for (Component c: drawDeck.getComponents()) {
+                add(c.getComponentID());
+            }
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    add(playerDecks.get(i).getComponentID());
+                    for (Component c: playerDecks.get(i).getComponents()) {
+                        add(c.getComponentID());
+                    }
+                }
+            }
+        }};
     }
 
     @Override

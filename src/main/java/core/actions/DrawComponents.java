@@ -15,7 +15,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
     private int[] componentIds;        // Component IDs for all components moved from one deck to the other
     private boolean executed;          // Indicates if the action executed
-    protected ArrayList<Integer> ids;  // Ids of the components to be moved
+    protected ArrayList<Integer> idxs;  // Ids of the components to be moved
 
     /**
      * Moves the first N components from one deck to another.
@@ -27,11 +27,11 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
         this.nComponents = nComponents;
-        this.ids = new ArrayList<>();
+        this.idxs = new ArrayList<>();
 
         // the first nComponents will be moved
         for (int i=0; i<nComponents; i++)
-            ids.add(i);
+            idxs.add(i);
     }
 
     /**
@@ -43,10 +43,10 @@ public class DrawComponents<T extends Component> extends AbstractAction {
     public DrawComponents(int deckFrom, int deckTo, ArrayList<Integer> ids) {
         this.deckFrom = deckFrom;
         this.deckTo = deckTo;
-        this.ids = new ArrayList<>();
+        this.idxs = new ArrayList<>();
         this.nComponents = ids.size();
 
-        this.ids.addAll(ids);
+        this.idxs.addAll(ids);
     }
 
     @Override
@@ -56,17 +56,18 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         Deck<T> from = (Deck<T>) gs.getComponentById(deckFrom);
         Deck<T> to   = (Deck<T>) gs.getComponentById(deckTo);
 
-        for (int i = 0; i < ids.size(); i++) {
-            if (from.getSize() > 0) {
-                T component = from.pick(ids.get(i));
+        ArrayList<Integer> indexes = new ArrayList<>(idxs);
+        if (from.getSize() > indexes.size()) {
+            for (int i = 0; i < indexes.size(); i++) {
+                T component = from.pick(indexes.get(i));
                 // actualize ids
-                for (int j=i; j<ids.size(); j++)
-                    ids.set(j,ids.get(j) - 1);
+                for (int j = i; j< indexes.size(); j++)
+                    indexes.set(j, indexes.get(j) - 1);
                 componentIds[i] = component.getComponentID();
                 to.add(component);
-            } else {
-                return false;
             }
+        } else {
+            return false;
         }
 
         return true;
@@ -74,7 +75,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new DrawComponents<T>(deckFrom, deckTo, ids);
+        return new DrawComponents<T>(deckFrom, deckTo, idxs);
     }
 
     public T getComponent(AbstractGameState gs, int idx) {
@@ -95,12 +96,12 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         return deckFrom == that.deckFrom &&
                 deckTo == that.deckTo &&
                 nComponents == that.nComponents &&
-                ids.equals(that.ids);
+                idxs.equals(that.idxs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deckFrom, deckTo, nComponents, ids);
+        return Objects.hash(deckFrom, deckTo, nComponents, idxs);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
             }
         } else {
             for (int i = 0; i < nComponents; i++) {
-                components += from.peek(ids.get(i)).getComponentName() + ", ";
+                components += from.peek(idxs.get(i)).getComponentName() + ", ";
             }
         }
         components += "}";
@@ -123,7 +124,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
                 ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
                 ", nComponents=" + nComponents +
                 ", components=" + components +
-                ", ids=" + ids.toString() +
+                ", idxs=" + idxs.toString() +
                 '}';
     }
 
@@ -133,7 +134,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
                 "deckFrom=" + deckFrom +
                 ", deckTo=" + deckTo +
                 ", nComponents=" + nComponents +
-                ", ids=" + ids.toString() +
+                ", ids=" + idxs.toString() +
                 ", fromIds=" + Arrays.toString(componentIds) +
                 ", executed=" + executed +
                 '}';

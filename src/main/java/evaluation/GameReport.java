@@ -9,6 +9,7 @@ import games.GameType;
 import players.RandomPlayer;
 import utilities.BoxPlot;
 import utilities.LineChart;
+import utilities.Pair;
 import utilities.StatSummary;
 
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ import static games.GameType.*;
 
 public class GameReport {
 
-    static boolean VERBOSE = false;
-    static int nRep = 100;
+    static boolean VERBOSE = true;
+    static int nRep = 1000;
 
     /**
      * Number of actions available from any one game state.
@@ -93,22 +94,35 @@ public class GameReport {
      * @param game - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static void generalTest(GameType game, int nPlayers) {
-        System.out.println("--------------------\nGeneral Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+    public static Pair<Integer, StatSummary> generalTest(GameType game, int nPlayers) {
+        if (VERBOSE) {
+            System.out.println("--------------------\nGeneral Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+        }
 
         Game g = game.createGameInstance(nPlayers);
+        Pair<Integer, StatSummary> ret = null;
         if (g != null) {
             AbstractGameState gs = g.getGameState();
-            System.out.println("State size: " + gs.getAllComponents().size());
+            if (VERBOSE) {
+                System.out.println("State size: " + gs.getAllComponents().size());
+            }
 
+            // TODO: run games
             StatSummary ss = new StatSummary();
             for (int i = 0; i < nPlayers; i++) {
                 ss.add(gs.getUnknownComponentsIds(i).size());
             }
-            System.out.println("Hidden information: " + ss.shortString());
+            if (VERBOSE) {
+                System.out.println("Hidden information: " + ss.shortString());
+            }
+
+            ret = new Pair<>(gs.getAllComponents().size(), ss);
         }
 
-        System.out.println();
+        if (VERBOSE) {
+            System.out.println();
+        }
+        return ret;
     }
 
     /**
@@ -120,13 +134,21 @@ public class GameReport {
      * @param game - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static void gameSpeed(GameType game, int nPlayers) {
-        System.out.println("--------------------\nSpeed Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+    public static StatSummary[] gameSpeed(GameType game, int nPlayers) {
+        if (VERBOSE) {
+            System.out.println("--------------------\nSpeed Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+        }
 
-        double nextT = 0;
-        double copyT = 0;
-        double actionT = 0;
-        double setupT = 0;
+        StatSummary[] ret = new StatSummary[4];
+        StatSummary nextT = new StatSummary();
+        ret[0] = nextT;
+        StatSummary copyT = new StatSummary();
+        ret[1] = copyT;
+        StatSummary actionT = new StatSummary();
+        ret[2] = actionT;
+        StatSummary setupT = new StatSummary();
+        ret[3] = setupT;
+
         for (int i = 0; i < nRep; i++) {
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -139,26 +161,29 @@ public class GameReport {
                 AbstractForwardModel fm = g.getForwardModel();
                 long s = System.nanoTime();
                 fm.setup(g.getGameState());
-                setupT += (System.nanoTime() - s);
+                setupT.add(1e+9 / (System.nanoTime() - s));
 
                 // Run timers
                 g.reset(players);
                 g.run();
-                nextT += g.getNextTime();
-                copyT += g.getCopyTime();
-                actionT += g.getActionComputeTime();
+                nextT.add(1e+9 / g.getNextTime());
+                copyT.add(1e+9 / g.getCopyTime());
+                actionT.add(1e+9 / g.getActionComputeTime());
 
             }
         }
 
-        if (nextT != 0) {
-            System.out.println("GS.copy(): " + String.format("%6.3e", 1e+9 / (copyT / nRep)) + " executions/second");
-            System.out.println("FM.setup(): " + String.format("%6.3e", 1e+9 / (setupT / nRep)) + " executions/second");
-            System.out.println("FM.next(): " + String.format("%6.3e", 1e+9 / (nextT / nRep)) + " executions/second");
-            System.out.println("FM.computeAvailableActions(): " + String.format("%6.3e", 1e+9 / (actionT / nRep)) + " executions/second");
+        if (nextT.n() != 0 && VERBOSE) {
+            System.out.println("GS.copy(): " + String.format("%6.3e", (copyT.mean())) + " executions/second");
+            System.out.println("FM.setup(): " + String.format("%6.3e", (setupT.mean())) + " executions/second");
+            System.out.println("FM.next(): " + String.format("%6.3e",  (nextT.mean())) + " executions/second");
+            System.out.println("FM.computeAvailableActions(): " + String.format("%6.3e", (actionT.mean())) + " executions/second");
         }
 
-        System.out.println();
+        if (VERBOSE) {
+            System.out.println();
+        }
+        return ret;
     }
 
     /**
@@ -166,13 +191,21 @@ public class GameReport {
      * @param game - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static void gameLength(GameType game, int nPlayers) {
-        System.out.println("--------------------\nGame Length Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+    public static StatSummary[] gameLength(GameType game, int nPlayers) {
+        if (VERBOSE) {
+            System.out.println("--------------------\nGame Length Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+        }
 
-        double nDecisions = 0;
-        double nTicks = 0;
-        double nRounds = 0;
-        double nActionsPerTurn = 0;
+        StatSummary[] ret = new StatSummary[4];
+        StatSummary nDecisions = new StatSummary();
+        StatSummary nTicks = new StatSummary();
+        StatSummary nRounds = new StatSummary();
+        StatSummary nActionsPerTurn = new StatSummary();
+        ret[0] = nDecisions;
+        ret[1] = nTicks;
+        ret[2] = nRounds;
+        ret[3] = nActionsPerTurn;
+
         for (int i = 0; i < nRep; i++) {
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -183,21 +216,26 @@ public class GameReport {
             if (g != null) {
                 g.reset(players);
                 g.run();
-                nDecisions += g.getNDecisions();
-                nTicks += g.getTick();
-                nRounds += g.getGameState().getTurnOrder().getRoundCounter();
-                nActionsPerTurn += g.getNActionsPerTurn();
+                nDecisions.add(g.getNDecisions());
+                nTicks.add(g.getTick());
+                nRounds.add(g.getGameState().getTurnOrder().getRoundCounter());
+                nActionsPerTurn.add(g.getNActionsPerTurn());
             }
         }
 
-        if (nDecisions != 0) {
-            System.out.println("# decisions: " + (nDecisions / nRep));
-            System.out.println("# ticks: " + (nTicks / nRep));
-            System.out.println("# rounds: " + (nRounds / nRep));
-            System.out.println("# actions/turn: " + (nActionsPerTurn / nRep));
+        if (nDecisions.n() != 0) {
+            if (VERBOSE) {
+                System.out.println("# decisions: " + (nDecisions.mean()));
+                System.out.println("# ticks: " + (nTicks.mean()));
+                System.out.println("# rounds: " + (nRounds.mean()));
+                System.out.println("# actions/turn: " + (nActionsPerTurn.mean()));
+            }
         }
 
-        System.out.println();
+        if (VERBOSE) {
+            System.out.println();
+        }
+        return ret;
     }
 
     /**
@@ -208,8 +246,10 @@ public class GameReport {
      * @param game - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static void playerObservationTest(GameType game, int nPlayers) {
-        System.out.println("--------------------\nPlayer Observation Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+    public static Pair<StatSummary, StatSummary> playerObservationTest(GameType game, int nPlayers) {
+        if (VERBOSE) {
+            System.out.println("--------------------\nPlayer Observation Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
+        }
 
         StatSummary rs = new StatSummary("Reward Sparsity");
         StatSummary bf = new StatSummary("Branching Factor");
@@ -233,11 +273,16 @@ public class GameReport {
         }
 
         if (rs.n() != 0) {
-            System.out.println(rs.toString());
-            System.out.println(bf.toString());
+            if (VERBOSE) {
+                System.out.println(rs.toString());
+                System.out.println(bf.toString());
+            }
         }
 
-        System.out.println();
+        if (VERBOSE) {
+            System.out.println();
+        }
+        return new Pair<>(rs, bf);
     }
 
     /* Helper methods */
@@ -297,10 +342,10 @@ public class GameReport {
     public static void main(String[] args) {
 
         // 1. Action space tests, plots per game with all player numbers, or per player number with all games
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-        games.remove(GameType.Uno);
-        actionSpaceTestAllGames(games);
-        actionSpaceTestAllPlayers(games);
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(GameType.Uno);
+//        actionSpaceTestAllGames(games);
+//        actionSpaceTestAllPlayers(games);
 
         // 2. Run action space test on Pandemic with 2 players, plots only
 //        LineChart lc = new LineChart("Action Space Size (Pandemic 2p)", "game tick", "action space size");
@@ -313,13 +358,69 @@ public class GameReport {
 
         // 4. Run each test with printed reports on each game
 //        int nPlayers = 2;
-//        VERBOSE = true;
-//        for (GameType gt: GameType.values()) {
-//            actionSpace(gt, nPlayers, null);
-//            generalTest(gt, nPlayers);
-//            gameSpeed(gt, nPlayers);
-//            gameLength(gt, nPlayers);
-//            playerObservationTest(gt, nPlayers);
-//        }
+        VERBOSE = false;
+        for (GameType gt: GameType.values()) {
+            if (gt == Pandemic) continue;
+//            if (gt == Virus) continue;
+            if (gt == Uno) continue;
+            if (gt == ExplodingKittens) continue;
+            if (gt == LoveLetter) continue;
+            if (gt == TicTacToe) continue;
+            if (gt == ColtExpress) continue;
+
+            StatSummary as = new StatSummary("Action space size (" + gt.name() + ")");
+            StatSummary ss = new StatSummary("State size (" + gt.name() + ")");
+            StatSummary hidi = new StatSummary("Hidden info size (" + gt.name() + ")");
+            StatSummary cp = new StatSummary("GS.copy() (" + gt.name() + ") exe/sec");
+            StatSummary sp = new StatSummary("FM.setup() (" + gt.name() + ") exe/sec");
+            StatSummary ne = new StatSummary("FM.next() (" + gt.name() + ") exe/sec");
+            StatSummary ac = new StatSummary("FM.actions() (" + gt.name() + ") exe/sec");
+            StatSummary nd = new StatSummary("#decisions (" + gt.name() + ")");
+            StatSummary nt = new StatSummary("#ticks (" + gt.name() + ")");
+            StatSummary nr = new StatSummary("#rounds (" + gt.name() + ")");
+            StatSummary napt = new StatSummary("#apt (" + gt.name() + ")");
+            StatSummary rs = new StatSummary("Reward Sparsity (" + gt.name() + ")");
+            StatSummary bf = new StatSummary("Branching Factor (" + gt.name() + ")");
+
+            for (int i = gt.getMinPlayers(); i <= gt.getMaxPlayers(); i++) {
+                System.out.println(gt.name() + " " + i);
+                as.add(actionSpace(gt, i, null));
+
+                Pair<Integer, StatSummary> ret = generalTest(gt, i);
+                ss.add(ret.a);
+                hidi.add(ret.b);
+
+                StatSummary[] rett = gameSpeed(gt, i);
+                cp.add(rett[0]);
+                sp.add(rett[1]);
+                ne.add(rett[2]);
+                ac.add(rett[3]);
+
+                StatSummary[] rettt = gameLength(gt, i);
+                nd.add(rettt[0]);
+                nt.add(rettt[1]);
+                nr.add(rettt[2]);
+                napt.add(rettt[3]);
+
+                Pair<StatSummary, StatSummary> retttt = playerObservationTest(gt, i);
+                rs.add(retttt.a);
+                bf.add(retttt.b);
+            }
+
+            System.out.println(as.shortString());
+            System.out.println(ss.shortString());
+            System.out.println(hidi.shortString());
+            System.out.println("Hidden info perc: " + (hidi.mean() * 100.0 / ss.mean()));
+            System.out.println(cp.shortString(true));
+            System.out.println(sp.shortString(true));
+            System.out.println(ne.shortString(true));
+            System.out.println(ac.shortString(true));
+            System.out.println(nd.shortString());
+            System.out.println(nt.shortString());
+            System.out.println(nr.shortString());
+            System.out.println(napt.shortString());
+            System.out.println(rs.shortString());
+            System.out.println(bf.shortString());
+        }
     }
 }

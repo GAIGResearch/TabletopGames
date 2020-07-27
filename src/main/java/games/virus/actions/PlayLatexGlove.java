@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
+import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
@@ -29,7 +30,8 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
         Deck<Card> to              = (Deck<Card>) gs.getComponentById(deckTo);
         Deck<Card> otherPlayerHand = (Deck<Card>) gs.getComponentById(otherPlayerHandId);
 
-        for (int i=0; i<3; i++) {
+        int nCards = ((VirusGameParameters)gs.getGameParameters()).nCardsDiscardLatexGlove;
+        for (int i=0; i<nCards; i++) {
             VirusCard card = (VirusCard) otherPlayerHand.pick(0);
             to.add(card, toIndex);
         }
@@ -49,7 +51,7 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlayLatexGlove)) return false;
         return super.equals(o);
     }
 

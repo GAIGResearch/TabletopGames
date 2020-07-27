@@ -73,7 +73,7 @@ public class PlayMedicalError extends PlayVirusCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlayMedicalError)) return false;
         if (!super.equals(o)) return false;
         PlayMedicalError that = (PlayMedicalError) o;
         return playerId == that.playerId && otherPlayerId == that.otherPlayerId && otherBodyId == that.otherBodyId;

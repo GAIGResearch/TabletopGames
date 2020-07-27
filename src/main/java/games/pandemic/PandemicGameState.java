@@ -107,8 +107,16 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<Integer>() {{
-           add(getComponent(playerDeckHash).getComponentID());
-           add(getComponent(infectionHash).getComponentID());
+            Deck<Card> pd = (Deck<Card>) getComponent(playerDeckHash);
+            Deck<Card> id = (Deck<Card>) getComponent(infectionHash);
+            add(pd.getComponentID());
+            add(id.getComponentID());
+            for (Component c: pd.getComponents()) {
+                add(c.getComponentID());
+            }
+            for (Component c: id.getComponents()) {
+                add(c.getComponentID());
+            }
         }};
     }
 

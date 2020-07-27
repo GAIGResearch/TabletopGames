@@ -50,7 +50,7 @@ public class PlayOrganThief extends PlayVirusCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlayOrganThief)) return false;
         if (!super.equals(o)) return false;
         PlayOrganThief that = (PlayOrganThief) o;
         return otherPlayerId == that.otherPlayerId && otherBodyId == that.otherBodyId && organ == that.organ;

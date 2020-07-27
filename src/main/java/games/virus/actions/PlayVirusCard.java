@@ -40,7 +40,7 @@ public class PlayVirusCard extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlayVirusCard)) return false;
         if (!super.equals(o)) return false;
         PlayVirusCard that = (PlayVirusCard) o;
         return bodyId == that.bodyId;
