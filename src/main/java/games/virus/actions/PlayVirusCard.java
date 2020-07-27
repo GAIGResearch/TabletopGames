@@ -24,9 +24,6 @@ public class PlayVirusCard extends DrawCard {
         int playerId = vgs.getCurrentPlayer();
         super.execute(gs);
 
-        VirusCard card = (VirusCard) getCard(gs);
-        VirusBody body = (VirusBody) vgs.getComponentById(bodyId);
-
         if (vgs.getDrawDeck().getSize() == 0)
             discardToDraw(vgs);
 

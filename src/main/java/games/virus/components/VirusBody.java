@@ -1,6 +1,7 @@
 package games.virus.components;
 
 import core.components.Component;
+import core.components.Deck;
 import games.virus.cards.VirusCard;
 import utilities.Utils;
 
@@ -14,22 +15,17 @@ public class VirusBody extends Component {
     {
         super(Utils.ComponentType.TOKEN);
         organs = new HashMap<>();
-        for (VirusCard.OrganType oType : VirusCard.OrganType.values()) {
-            if (oType != VirusCard.OrganType.None && oType != VirusCard.OrganType.Wild) {
+        for (VirusCard.OrganType oType : VirusCard.OrganType.values())
+            if (oType != VirusCard.OrganType.Treatment)
                 organs.put(oType, new VirusOrgan());
-            }
-        }
     }
 
     protected VirusBody(int ID)
     {
         super(Utils.ComponentType.TOKEN, ID);
         organs = new HashMap<>();
-        for (VirusCard.OrganType oType : VirusCard.OrganType.values()) {
-            if (oType != VirusCard.OrganType.None && oType != VirusCard.OrganType.Wild) {
-                organs.put(oType, new VirusOrgan());
-            }
-        }
+        for (VirusCard.OrganType oType : VirusCard.OrganType.values())
+            organs.put(oType, new VirusOrgan());
     }
 
     @Override
@@ -56,10 +52,47 @@ public class VirusBody extends Component {
     }
 
     public boolean hasOrgan(VirusCard.OrganType organ) {
-        return organs.get(organ).state != VirusOrgan.VirusOrganState.None;
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state != VirusOrgan.VirusOrganState.None;
     }
 
-    public boolean hasOrganImmunised(VirusCard.OrganType organ) {
+    /**
+     * Returns true is the body has an organ of type organ vaccinated with a wild card
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganVaccinatedWild(VirusCard.OrganType organ) {
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state == VirusOrgan.VirusOrganState.VaccinatedWild;
+    }
+
+    /**
+     * Returns true is the body has an organ of type organ in neutral state (i.e. no virus, no medicines)
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganNeutral(VirusCard.OrganType organ) {
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state == VirusOrgan.VirusOrganState.Neutral;
+    }
+
+    /**
+     * Returns true is the body has an organ of type organ infected with a wild card
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganInfectedWild(VirusCard.OrganType organ) {
+        return organ != VirusCard.OrganType.Treatment && organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
+    }
+
+    /**
+     * Returns true is the body has an organ of type organ infected with a virus (including the wild virus)
+     * @param organ: organ type
+     * @return true or false
+     */
+    public boolean hasOrganInfected(VirusCard.OrganType organ) {
+        return organs.get(organ).state == VirusOrgan.VirusOrganState.Infected ||
+                organs.get(organ).state == VirusOrgan.VirusOrganState.InfectedWild;
+    }
+
+    public boolean organNotYetImmunised(VirusCard.OrganType organ) {
         return organs.get(organ).state != VirusOrgan.VirusOrganState.Immunised;
     }
 
@@ -68,43 +101,89 @@ public class VirusBody extends Component {
         organs.get(card.organ).cards.add(card);
     }
 
-    public VirusOrgan.VirusOrganState applyMedicine(VirusCard card) {
-        VirusOrgan.VirusOrganState newState = organs.get(card.organ).applyMedicine();
-        organs.get(card.organ).cards.add(card);
-        return newState;
-    }
+    /**
+     * Add cards to an organ (at state None) and actualize the state
+     * @param organType: organ type
+     */
+    public void addCardsToOrgan(Deck<VirusCard> cards, VirusCard.OrganType organType) {
+        // add cards in the correct order
+        for (int i=cards.getSize()-1; i>=0; i--) {
+            organs.get(organType).cards.add(cards.get(i));
+        }
 
-    public VirusOrgan.VirusOrganState applyVirus(VirusCard card) {
-        VirusOrgan.VirusOrganState newState = organs.get(card.organ).applyVirus();
-        organs.get(card.organ).cards.add(card);
-        return newState;
-    }
-
-    public VirusCard removeAVirusCard(VirusCard card)
-    {
-        return organs.get(card.organ).removeAVirusCard();
-    }
-
-    public VirusCard removeAMedicineCard(VirusCard card)
-    {
-        return organs.get(card.organ).removeAMedicineCard();
-    }
-
-    public VirusCard removeAnOrganCard(VirusCard card)
-    {
-        return organs.get(card.organ).removeAnOrganCard();
-    }
-
-    // Return true if the body has all organs and they are healthy
-    public boolean areAllOrganHealthy()
-    {
-        boolean allHealthy = true;
-        for (VirusOrgan organ: organs.values()) {
-            if (!organ.isHealthy()) {
-                allHealthy = false;
+        // card 0th is the virus or medicine
+        // card 1st is the organ
+        if (cards.getSize() == 1)
+            organs.get(organType).state = VirusOrgan.VirusOrganState.Neutral;
+        else if (cards.getSize() == 2)
+        {
+            if (organs.get(organType).cards.get(0).type == VirusCard.VirusCardType.Medicine) {
+                if (organs.get(organType).cards.get(0).organ == VirusCard.OrganType.Wild)
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.VaccinatedWild;
+                else
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.Vaccinated;
+            }
+            else if (organs.get(organType).cards.get(0).type == VirusCard.VirusCardType.Virus)
+            {
+                if (organs.get(organType).cards.get(0).organ == VirusCard.OrganType.Wild)
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.InfectedWild;
+                else
+                    organs.get(organType).state = VirusOrgan.VirusOrganState.Infected;
             }
         }
-        return allHealthy;
     }
 
+    /**
+     * Returns the cards in the organ organType and set the state of the organ to None
+     * @param organType: organ type
+     * @return Deck<VirusCard> included in the organ
+     */
+    public Deck<VirusCard> removeOrgan(VirusCard.OrganType organType)
+    {
+        Deck<VirusCard> cards = organs.get(organType).cards.copy();
+        organs.get(organType).cards.clear();
+        organs.get(organType).state = VirusOrgan.VirusOrganState.None;
+        return cards;
+    }
+
+    public VirusOrgan.VirusOrganState applyMedicine(VirusCard card, VirusCard.OrganType organ) {
+        VirusOrgan.VirusOrganState newState = organs.get(organ).applyMedicine(card.organ == VirusCard.OrganType.Wild);
+        organs.get(organ).cards.add(card);
+        return newState;
+    }
+
+    public VirusOrgan.VirusOrganState applyVirus(VirusCard card, VirusCard.OrganType organ) {
+        VirusOrgan.VirusOrganState newState = organs.get(organ).applyVirus(card.organ == VirusCard.OrganType.Wild);
+        organs.get(organ).cards.add(card);
+        return newState;
+    }
+
+    public VirusCard removeAVirusCard(VirusCard.OrganType organ)
+    {
+        return organs.get(organ).removeAVirusCard();
+    }
+
+    public VirusCard removeAMedicineCard(VirusCard.OrganType organ)
+    {
+        return organs.get(organ).removeAMedicineCard();
+    }
+
+    public VirusCard removeAnOrganCard(VirusCard.OrganType organ)
+    {
+        return organs.get(organ).removeAnOrganCard();
+    }
+
+    /**
+     * Return the number of health organs
+       * @return - the number of health organs
+     */
+    public int getNOrganHealthy()
+    {
+        int nHealthy = 0;
+        for (VirusOrgan organ: organs.values()) {
+            if (organ.isHealthy())
+                nHealthy ++;
+        }
+        return nHealthy;
+    }
 }

@@ -1,24 +1,24 @@
 package games.virus.actions;
 
+
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DrawComponents;
+import core.actions.DrawCard;
 import core.components.Deck;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
 /**
- * Move n components (deckFrom -> deckTo), and draw n others to replace them (deckDraw -> deckFrom).
+ * Move 1 component (deckFrom -> deckTo), and draw another to replace them (deckDraw -> deckFrom).
  */
-public class ReplaceCards extends DrawComponents {
+public class ReplaceOneCard extends DrawCard {
     protected int deckDraw;
 
-    public ReplaceCards(int deckFrom, int deckTo, ArrayList<Integer> cardIds, int deckDraw) {
-        super(deckFrom, deckTo, cardIds);
+    public ReplaceOneCard(int deckFrom, int deckTo, int fromIndex, int deckDraw) {
+        super(deckFrom, deckTo, fromIndex);
         this.deckDraw = deckDraw;
     }
 
@@ -31,31 +31,11 @@ public class ReplaceCards extends DrawComponents {
         // After discarding a card, the player must draw a card from the draw deck.
         // It is is empty, move all cards from discard deck to draw one and shuffle.
         // After, draw a card and add it to the player hand.
-        for (int i = 0; i < ids.size(); i++) {
-            if (drawDeck.getSize() == 0)
-                discardToDraw((VirusGameState)gs);
-            from.add(drawDeck.draw());
-        }
+        if (drawDeck.getSize() == 0)
+            discardToDraw((VirusGameState)gs);
+        from.add(drawDeck.draw());
+
         return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        ReplaceCards that = (ReplaceCards) o;
-        return deckDraw == that.deckDraw;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), deckDraw);
-    }
-
-    @Override
-    public void printToConsole() {
-        System.out.println("Replace virus cards");
     }
 
     // Move all cards from discard deck to draw one and shuffle
@@ -67,8 +47,31 @@ public class ReplaceCards extends DrawComponents {
         vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ReplaceOneCard that = (ReplaceOneCard) o;
+        return deckDraw == that.deckDraw;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), deckDraw);
+    }
+
+    @Override
+    public void printToConsole() {
+        System.out.println("Replace one virus card");
+    }
+
     @Override
     public AbstractAction copy() {
-        return new ReplaceCards(deckFrom, deckTo, ids, deckDraw);
+        return new ReplaceOneCard(deckFrom, deckTo, fromIndex, deckDraw);
     }
 }
+
+
+

@@ -24,14 +24,12 @@ public class AddOrgan extends PlayVirusCard implements IPrintable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        AddOrgan addOrgan = (AddOrgan) o;
-        return bodyId == addOrgan.bodyId;
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), bodyId);
+        return Objects.hash(super.hashCode());
     }
 
     @Override

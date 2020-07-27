@@ -10,7 +10,7 @@ public class VirusCard extends Card {
         Stomach,
         Bone,
         Wild,
-        None
+        Treatment
     }
 
     public enum VirusCardType {
