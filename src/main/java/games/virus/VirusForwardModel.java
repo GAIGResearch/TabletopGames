@@ -127,7 +127,7 @@ public class VirusForwardModel extends AbstractForwardModel {
      */
     public void checkGameEnd(VirusGameState vgs) {
         for (int i = 0; i < vgs.getNPlayers(); i++) {
-            if (vgs.playerBodies.get(i).getNOrganHealthy()>=4) {
+            if (vgs.playerBodies.get(i).getNOrganHealthy() >= VirusCard.OrganType.values().length-2) {
                 for (int j = 0; j < vgs.getNPlayers(); j++) {
                     if (i == j)
                         vgs.setPlayerResult(Utils.GameResult.WIN, i);
@@ -154,7 +154,7 @@ public class VirusForwardModel extends AbstractForwardModel {
             actions.add(new DrawNewPlayerHand(playerHand.getComponentID()));
             return actions;
         }
-        
+
         // Playable cards actions
         for (int i = 0; i < playerHand.getSize(); i++)
             addActionsForCard(vgs, playerHand.peek(i), actions, playerHand);
