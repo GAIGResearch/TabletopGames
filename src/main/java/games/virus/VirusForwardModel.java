@@ -138,6 +138,13 @@ public class VirusForwardModel extends AbstractForwardModel {
                 break;
             }
         }
+        int nMaxRounds = ((VirusGameParameters)vgs.getGameParameters()).nMaxRounds;
+        if (vgs.getGameStatus() == Utils.GameResult.GAME_ONGOING && vgs.getTurnOrder().getRoundCounter() >= nMaxRounds) {
+            for (int i = 0; i < vgs.getNPlayers(); i++) {
+                vgs.setPlayerResult(Utils.GameResult.DRAW, i);
+                vgs.setGameStatus(Utils.GameResult.GAME_END);
+            }
+        }
     }
 
     @Override
