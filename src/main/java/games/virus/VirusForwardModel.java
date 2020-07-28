@@ -111,10 +111,11 @@ public class VirusForwardModel extends AbstractForwardModel {
      * @param vgs - Virus game state
      */
     private void drawCardsToPlayers(VirusGameState vgs) {
+        int nCards = ((VirusGameParameters)vgs.getGameParameters()).nCardsPlayerHand;
         for (int i = 0; i < vgs.getNPlayers(); i++) {
             String playerDeckName = "Player" + i + "Deck";
             vgs.playerDecks.add(new Deck<>(playerDeckName, i));
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < nCards; j++) {
                 vgs.playerDecks.get(i).add(vgs.drawDeck.draw());
             }
         }
@@ -153,12 +154,12 @@ public class VirusForwardModel extends AbstractForwardModel {
             actions.add(new DrawNewPlayerHand(playerHand.getComponentID()));
             return actions;
         }
-
+        
         // Playable cards actions
         for (int i = 0; i < playerHand.getSize(); i++)
             addActionsForCard(vgs, playerHand.peek(i), actions, playerHand);
 
-        // Create DiscardCard actions. The player can always discard 1, 2 or 3 cards
+        // Create DiscardCard actions. The player can always discard 1, 2 or 3 cards TODO: variable player hand card size
         // Discard one card
         for (int i = 0; i < vgp.maxCardsDiscard; i++)
             actions.add(new ReplaceOneCard(playerHand.getComponentID(), vgs.discardDeck.getComponentID(), i, vgs.drawDeck.getComponentID()));

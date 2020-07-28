@@ -57,12 +57,9 @@ public class PlayVirusCard extends DrawCard {
     }
 
     // Move all cards from discard deck to draw one and shuffle
-    // TODO: check it
     public void discardToDraw(VirusGameState vgs) {
-        while (vgs.getDiscardDeck().getSize()>0) {
-            VirusCard card = vgs.getDiscardDeck().draw();
-            vgs.getDrawDeck().add(card);
-        }
+        vgs.getDrawDeck().add(vgs.getDiscardDeck());
+        vgs.getDiscardDeck().clear();
         vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
     }
 

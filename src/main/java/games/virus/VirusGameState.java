@@ -5,6 +5,7 @@ import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
+import core.turnorders.AlternatingTurnOrder;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 
@@ -20,6 +21,10 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     List<Deck<VirusCard>> playerDecks;    // Each player has a deck with 3 cards
     Deck<VirusCard>       drawDeck;       // The deck with the not yet played cards, It is not visible for any player
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
+
+    public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+    }
 
     @Override
     protected List<Component> _getAllComponents() {
@@ -110,10 +115,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         return Objects.hash(super.hashCode(), playerBodies, playerDecks, drawDeck, discardDeck);
     }
 
-    public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new VirusTurnOrder(nPlayers));
-    }
-
     public Deck<VirusCard> getDiscardDeck() {
         return discardDeck;
     }
@@ -132,26 +133,22 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public void printToConsole() {
-        int nPlayers = playerBodies.size();
-        String[] stringStr = new String[nPlayers+3];
+        int nPlayers = getNPlayers();
 
-        stringStr[0] = "----------------------------------------------------";
+        System.out.println("----------------------------------------------------");
 
-        for (int i=0; i<nPlayers; i++)
-            stringStr[i+1] = "Player " + i + "    -> Body: " + playerBodies.get(i).toString();
+        for (int i=0; i<nPlayers; i++) {
+            if (i == getCurrentPlayer()) System.out.print(">>> ");
+            System.out.println("Player " + i + "    -> Body: " + playerBodies.get(i).toString());
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("Player Hand -> ");
-
-        for (VirusCard card : playerDecks.get(getCurrentPlayer()).getComponents()) {
-            sb.append(card.toString());
-            sb.append(" ");
+            if (i == getCurrentPlayer()) System.out.print(">>> ");
+            System.out.println("Player " + i + "    -> Player Hand (" + playerDecks.get(i).getComponentID() + "): " + playerDecks.get(i).toString());
         }
-        stringStr[nPlayers+1] = sb.toString();
-        stringStr[nPlayers+2] = "----------------------------------------------------";
 
-        for (String s : stringStr){
-            System.out.println(s);
-        }
+        System.out.println();
+        System.out.println("Draw deck (" + drawDeck.getComponentID() + "): " + drawDeck.toString());
+        System.out.println("Discard (" + discardDeck.getComponentID() + "): " + discardDeck.toString());
+
+        System.out.println("----------------------------------------------------");
     }
 }

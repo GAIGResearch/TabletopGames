@@ -57,7 +57,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         Deck<T> to   = (Deck<T>) gs.getComponentById(deckTo);
 
         ArrayList<Integer> indexes = new ArrayList<>(idxs);
-        if (from.getSize() > indexes.size()) {
+        if (from.getSize() >= indexes.size()) {
             for (int i = 0; i < indexes.size(); i++) {
                 T component = from.pick(indexes.get(i));
                 // actualize ids

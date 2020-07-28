@@ -32,7 +32,7 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
 
         int nCards = ((VirusGameParameters)gs.getGameParameters()).nCardsDiscardLatexGlove;
         for (int i=0; i<nCards; i++) {
-            VirusCard card = (VirusCard) otherPlayerHand.pick(0);
+            VirusCard card = (VirusCard) otherPlayerHand.draw();
             to.add(card, toIndex);
         }
         return true;
