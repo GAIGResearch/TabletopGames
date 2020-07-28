@@ -5,6 +5,10 @@ import core.AbstractParameters;
 import java.util.Objects;
 
 public class VirusGameParameters extends AbstractParameters {
+    public int nMaxRounds              = 100;
+    public int nCardsPlayerHand        = 3;
+    public int nCardsDiscardLatexGlove = 3;
+
     public int nCardsPerOrgan        = 5;
     public int nCardsPerVirus        = 4;
     public int nCardsPerMedicine     = 4;
@@ -18,6 +22,7 @@ public class VirusGameParameters extends AbstractParameters {
     public int nCardsPerTreatmentOrganThief   = 3;
     public int nCardsPerTreatmentLatexGlove   = 1;
     public int nCardsPerTreatmentMedicalError = 1;
+
 
     public VirusGameParameters(long seed) {
         super(seed);

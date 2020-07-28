@@ -18,7 +18,7 @@ public class BoxPlot extends JFrame {
 
         // Create Chart
         chart = new BoxChartBuilder()
-                        .width(600)
+                        .height(400)
                         .title("")
                         .xAxisTitle(xLabel)
                         .yAxisTitle(yLabel)
@@ -29,6 +29,9 @@ public class BoxPlot extends JFrame {
         chart.getStyler().setMarkerSize(8);
         chart.getStyler().setBoxplotCalCulationMethod(BoxStyler.BoxplotCalCulationMethod.N_PLUS_1);
         chart.getStyler().setXAxisLabelRotation(45);
+        chart.getStyler().setAxisTitleFont(new Font("Arial", Font.BOLD, 20));
+        chart.getStyler().setAxisTickLabelsFont(new Font("Arial", Font.PLAIN, 16));
+        chart.getStyler().setLegendFont(new Font("Arial", Font.PLAIN, 18));
 
         setTitle(title);
         setLayout(new BorderLayout());

@@ -121,9 +121,17 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     add(playerHandCards.get(i).getComponentID());
+                    for (Component c: playerHandCards.get(i).getComponents()) {
+                        add(c.getComponentID());
+                    }
                 }
             }
             add(drawPile.getComponentID());
+            for (int i = 0; i < drawPile.getSize(); i++) {
+                if (!drawPile.isComponentVisible(i, playerId)) {
+                    add(drawPile.get(i).getComponentID());
+                }
+            }
         }};
     }
 

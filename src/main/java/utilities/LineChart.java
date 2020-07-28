@@ -43,6 +43,9 @@ public class LineChart extends JFrame {
         chart.getStyler().setChartTitleVisible(false);
         chart.getStyler().setLegendVisible(true);
         chart.getStyler().setMarkerSize(0);
+        chart.getStyler().setAxisTitleFont(new Font("Arial", Font.BOLD, 20));
+        chart.getStyler().setAxisTickLabelsFont(new Font("Arial", Font.PLAIN, 16));
+        chart.getStyler().setLegendFont(new Font("Arial", Font.PLAIN, 18));
 
         setTitle(title);
         setLayout(new BorderLayout());

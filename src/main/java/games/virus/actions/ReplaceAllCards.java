@@ -3,6 +3,7 @@ package games.virus.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawComponents;
+import core.components.Component;
 import core.components.Deck;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
@@ -30,7 +31,8 @@ public class ReplaceAllCards extends DrawComponents {
         for (int i = 0; i < nComponents; i++) {
             if (drawDeck.getSize() == 0)
                 discardToDraw((VirusGameState)gs);
-            from.add(drawDeck.draw());
+            VirusCard c = drawDeck.draw();
+            from.add(c);
         }
         return true;
     }
@@ -38,7 +40,7 @@ public class ReplaceAllCards extends DrawComponents {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ReplaceAllCards)) return false;
         if (!super.equals(o)) return false;
         ReplaceAllCards that = (ReplaceAllCards) o;
         return deckDraw == that.deckDraw;
@@ -56,10 +58,8 @@ public class ReplaceAllCards extends DrawComponents {
 
     // Move all cards from discard deck to draw one and shuffle
     public void discardToDraw(VirusGameState vgs) {
-        while (vgs.getDiscardDeck().getSize()>0) {
-            VirusCard card = vgs.getDiscardDeck().draw();
-            vgs.getDrawDeck().add(card);
-        }
+        vgs.getDrawDeck().add(vgs.getDiscardDeck());
+        vgs.getDiscardDeck().clear();
         vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
     }
 

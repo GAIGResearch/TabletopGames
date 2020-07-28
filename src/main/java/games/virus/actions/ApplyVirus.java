@@ -56,7 +56,7 @@ public class ApplyVirus extends PlayVirusCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ApplyVirus)) return false;
         if (!super.equals(o)) return false;
         ApplyVirus that = (ApplyVirus) o;
         return organ == that.organ && otherPlayerId == that.otherPlayerId;

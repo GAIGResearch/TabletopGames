@@ -149,8 +149,14 @@ public class StatSummary {
     }
 
     public String shortString() {
-        return (name == null) ? "" : (name + ": [") + min() + ", " + max() + "] avg=" + String.format("%.2f", mean())
-                + "; sd=" + String.format("%.2f", sd())
+        return shortString(false);
+    }
+
+    public String shortString(boolean scientificNotation) {
+        return (name == null) ? "[" : (name + ": [") + min() + ", " + max() + "]"
+                + " avg=" + (scientificNotation? String.format("%6.3e", (mean())) : String.format("%.2f", mean()))
+                + "; sd=" + (scientificNotation? String.format("%6.3e", (sd())) : String.format("%.2f", sd()))
+                + "; se=" + (scientificNotation? String.format("%6.3e", (stdErr())) : String.format("%.2f", stdErr()))
                 ;
     }
 

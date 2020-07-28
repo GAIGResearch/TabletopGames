@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
+import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 import games.virus.components.VirusBody;
@@ -26,8 +27,9 @@ public class DrawNewPlayerHand extends AbstractAction implements IPrintable {
         Deck<VirusCard> playerHand    =  (Deck<VirusCard>) vgs.getComponentById(playerHandId);
         Deck<VirusCard> drawDeck      =  vgs.getDrawDeck();
 
+        int nCards = ((VirusGameParameters)gs.getGameParameters()).nCardsPlayerHand;
         // Draw three cards
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<nCards; i++) {
             // After discarding a card, the player must draw a card from the draw deck.
             // It is is empty, move all cards from discard deck to draw one and shuffle.
             // After, draw a card and add it to the player hand.
@@ -60,7 +62,7 @@ public class DrawNewPlayerHand extends AbstractAction implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof DrawNewPlayerHand)) return false;
         DrawNewPlayerHand that = (DrawNewPlayerHand) o;
         return playerHandId == that.playerHandId;
     }
