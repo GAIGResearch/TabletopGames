@@ -47,9 +47,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         ekgs.getDrawPile().shuffle(rnd);
 
         // Set up player hands
-        List<Deck<ExplodingKittensCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
+        List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
         for (int i = 0; i < firstState.getNPlayers(); i++) {
-            Deck<ExplodingKittensCard> playerCards = new Deck<>("Player Cards");
+            boolean[] visible = new boolean[firstState.getNPlayers()];
+            visible[i] = true;
+            PartialObservableDeck<ExplodingKittensCard> playerCards = new PartialObservableDeck<>("Player Cards", visible);
             playerHandCards.add(playerCards);
 
             // Add defuse card
@@ -96,6 +98,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         if (action instanceof IsNopeable) {
             actionStack.add(action);
+            ((IsNopeable) action).actionPlayed(ekgs);
+
             ekTurnOrder.registerNopeableActionByPlayer(ekgs, ekTurnOrder.getCurrentPlayer(ekgs));
             if (action instanceof NopeAction) {
                 // Nope cards added immediately to avoid infinite nopeage
@@ -117,7 +121,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                         actionStack.pop();
                     }
                     //Action was successfully noped
-                    ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder);
+                    ((IsNopeable) actionStack.pop()).nopedExecute(gameState);
                     if (VERBOSE) {
                         System.out.println("Action was successfully noped");
                     }
@@ -246,7 +250,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     actions.add(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture(playerID));
+                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
                     break;
                 default:
                     System.out.println("No actions known for cardtype: " + card.cardType.toString());

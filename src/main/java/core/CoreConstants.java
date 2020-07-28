@@ -3,7 +3,7 @@ package core;
 import utilities.Hash;
 
 public class CoreConstants {
-    public final static boolean VERBOSE = false;
+    public final static boolean VERBOSE = true;
     public final static boolean PARTIAL_OBSERVABLE = true;
     public final static boolean DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED = false;
     public final static boolean ALWAYS_DISPLAY_FULL_OBSERVABLE = false;

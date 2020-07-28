@@ -13,6 +13,10 @@ public class MCTSPlayer extends AbstractPlayer {
     // Parameters for this player
     MCTSParams params;
 
+    public MCTSPlayer() {
+        this(System.currentTimeMillis());
+    }
+
     public MCTSPlayer(long seed)
     {
         this.params = new MCTSParams(seed);

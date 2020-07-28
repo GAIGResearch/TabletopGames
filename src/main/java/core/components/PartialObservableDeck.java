@@ -20,6 +20,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         return elementVisibility.get(elementIdx)[playerID];
     }
 
+    public boolean[] getVisibilityOfComponent(int elementIdx){
+        return elementVisibility.get(elementIdx);
+    }
+
     public PartialObservableDeck(String id, boolean[] defaultVisibility) {
         this(id, -1, defaultVisibility);
     }
