@@ -12,18 +12,20 @@ public class Individual implements Comparable {
     AbstractGameState[] gameStates;   // Game states in individual.
     double value;                     // Fitness of individual, to be maximised.
     int length;                       // Actual length of individual, <= actions.length
+    double discountFactor;            // Discount factor for calculating rewards
 
     private Random gen;               // Random generator
 
-    Individual(int L, AbstractForwardModel fm, AbstractGameState gs, int playerID, Random gen) {
+    Individual(int L, double discountFactor, AbstractForwardModel fm, AbstractGameState gs, int playerID, Random gen) {
         // Initialize
         this.gen = gen;
+        this.discountFactor = discountFactor;
         actions = new AbstractAction[L];
         gameStates = new AbstractGameState[L+1];
         gameStates[0] = gs.copy();
 
         // Rollout with random actions and assign fitness value
-        this.value = rollout(gs, fm, 0, L, playerID);
+        rollout(gs, fm, 0, L, playerID);  // TODO: cheating, init should also count FM calls
     }
 
     // Copy constructor
@@ -31,6 +33,7 @@ public class Individual implements Comparable {
         actions = new AbstractAction[I.actions.length];
         gameStates = new AbstractGameState[I.gameStates.length];
         length = I.length;
+        discountFactor = I.discountFactor;
 
         for (int i = 0; i < length; i++){
             actions[i] = I.actions[i].copy();
@@ -61,26 +64,30 @@ public class Individual implements Comparable {
             int endIndex = actions.length;
             // Game state to start from
             AbstractGameState gs = gameStates[startIndex];
-            // Perform rollout and assign new value
-            this.value = rollout(gs, fm, startIndex, endIndex, playerID);
-
-            return length - startIndex;
+            // Perform rollout and return number of FM calls taken
+            return rollout(gs, fm, startIndex, endIndex, playerID);
         }
         return 0;
     }
 
     /**
      * Performs a rollout with random actions from startIndex to endIndex in the individual, from root game state gs.
-     * Evaluates the final state reached and returns this value.
+     * Evaluates the final state reached and returns the number of calls to the FM.next() function.
      * @param gs - root game state from which to start rollout
      * @param fm - forward model
      * @param startIndex - index in individual from which to start rollout
      * @param endIndex - index in individual where to end rollout
      * @param playerID - ID of player, used in state evaluation
-     * @return - value of final state reached after rollout.
+     * @return - number of calls to the FM.next() function
      */
-    private double rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID) {
+    private int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID) {
         length = 0;
+        int fmCalls = 0;
+        double delta = 0;
+        for (int i = 0; i < startIndex; i++) {
+            double score = gameStates[i+1].getScore(playerID);
+            delta += Math.pow(discountFactor, i) * score;
+        }
         for (int i = startIndex; i < endIndex; i++){
             // Rolls from chosen index to the end, randomly changing actions and game states
             // Length of individual is updated depending on if it reaches a terminal game state
@@ -88,21 +95,41 @@ public class Individual implements Comparable {
                 // Copy the game state
                 AbstractGameState gsCopy = gs.copy();
                 List<AbstractAction> currentActions = gsCopy.getActions();
+                AbstractAction action = null;
+                if (currentActions.size() > 0) {
+                    action = currentActions.get(gen.nextInt(currentActions.size()));
+                }
 
                 // Advance game state with random action
-                actions[i] = currentActions.get(gen.nextInt(currentActions.size()));
-                fm.next(gsCopy, actions[i]);
+                fm.next(gsCopy, action);
+                fmCalls ++;
                 // Compute available actions and store this state
                 fm.computeAvailableActions(gsCopy);
-                gameStates[i + 1] = gsCopy;
+
+                // If it's my turn, store this in the individual
+                boolean iAmMoving = (gameStates[i].getCurrentPlayer() == playerID);
+                if (iAmMoving) {
+                    gameStates[i + 1] = gsCopy;
+                    actions[i] = action;
+
+                    // Individual length increased
+                    length++;
+
+                    // Add value of state, discounted
+                    double score = gameStates[i+1].getScore(playerID);
+                    delta += Math.pow(discountFactor, i) * score;
+                } else {
+                    i--;
+                }
+
                 gs = gsCopy;
-                // Individual length increased
-                length++;
             } else {
                 break;
             }
         }
-        return gs.getScore(playerID);
+//        this.value = gs.getScore(playerID);
+        this.value = delta;
+        return fmCalls;
     }
 
     @Override

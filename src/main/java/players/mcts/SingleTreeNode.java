@@ -254,7 +254,10 @@ class SingleTreeNode
 
             while (!finishRollout(rolloutState, thisDepth)) {
                 int nActions = rolloutState.getActions().size();
-                AbstractAction next = rolloutState.getActions().get(player.rnd.nextInt(nActions));
+                AbstractAction next = null;
+                if (nActions > 0) {
+                    next = rolloutState.getActions().get(player.rnd.nextInt(nActions));
+                }
                 advance(rolloutState, next);
                 thisDepth++;
             }

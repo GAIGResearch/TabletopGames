@@ -43,7 +43,7 @@ public class RMHC extends AbstractPlayer {
         fmCalls = 0;
 
         // Initialise individual
-        bestIndividual = new Individual(params.horizon, getForwardModel(), stateObs, getPlayerID(), randomGenerator);
+        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator);
         fmCalls += bestIndividual.length;
 
         // Run evolution

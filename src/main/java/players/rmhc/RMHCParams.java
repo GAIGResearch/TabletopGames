@@ -10,6 +10,7 @@ import java.util.List;
 
 public class RMHCParams extends PlayerParameters implements ITunableParameters {
     public int horizon = 10;
+    public double discountFactor = 0.9;
 
     public RMHCParams(long seed) {
         super(seed);
