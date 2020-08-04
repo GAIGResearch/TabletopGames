@@ -643,7 +643,7 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = null; //new ActionController(); //null;
+        ActionController ac = new ActionController(); //null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
@@ -654,26 +654,27 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-        players.add(new RMHC());
+//        players.add(new RMHC());
         players.add(new MCTSPlayer());
 //        players.add(new OSLA());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
 //        runOne(ExplodingKittens, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
-//        ArrayList<GameType> games = new ArrayList<>();
+        ArrayList<GameType> games = new ArrayList<>();
+        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
 //        games.add(LoveLetter);
 //        runMany(games, players, null, 50, null, false, false);
 
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
-        games.remove(Pandemic);
+//        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-        runMany(games, players, null, 10, null, false, true);
+        runMany(games, players, null, 1, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }

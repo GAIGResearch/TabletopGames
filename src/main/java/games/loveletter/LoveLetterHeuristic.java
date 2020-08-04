@@ -18,11 +18,11 @@ public class LoveLetterHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         LoveLetterGameState llgs = (LoveLetterGameState) gs;
         LoveLetterParameters llp = (LoveLetterParameters) gs.getGameParameters();
-        Utils.GameResult gameStatus = gs.getGameStatus();
+        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (gameStatus == Utils.GameResult.LOSE)
+        if (playerResult == Utils.GameResult.LOSE)
             return -1;
-        if (gameStatus == Utils.GameResult.WIN)
+        if (playerResult == Utils.GameResult.WIN)
             return 1;
 
         double cardValues = 0;

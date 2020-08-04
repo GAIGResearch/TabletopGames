@@ -13,11 +13,11 @@ public class UnoHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         UnoGameState ugs = (UnoGameState) gs;
         UnoGameParameters ugp = ((UnoGameParameters)ugs.getGameParameters());
-        Utils.GameResult gameStatus = gs.getGameStatus();
+        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (gameStatus == Utils.GameResult.LOSE)
+        if (playerResult == Utils.GameResult.LOSE)
             return -1;
-        if (gameStatus == Utils.GameResult.WIN)
+        if (playerResult == Utils.GameResult.WIN)
             return 1;
 
         int nColors = ugp.colors.length;

@@ -22,11 +22,11 @@ public class ColtExpressHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         ColtExpressGameState cegs = (ColtExpressGameState) gs;
         ColtExpressParameters cep = (ColtExpressParameters) gs.getGameParameters();
-        Utils.GameResult gameStatus = gs.getGameStatus();
+        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (gameStatus == Utils.GameResult.LOSE)
+        if (playerResult == Utils.GameResult.LOSE)
             return -1;
-        if (gameStatus == Utils.GameResult.WIN)
+        if (playerResult == Utils.GameResult.WIN)
             return 1;
 
         // Number of bullets left for the player

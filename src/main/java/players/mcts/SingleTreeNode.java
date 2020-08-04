@@ -175,7 +175,7 @@ class SingleTreeNode
         AbstractGameState nextState = state.copy();
         List<AbstractAction> availableActions = nextState.getActions();
         List<AbstractAction> nextActions = advance(nextState, availableActions.get(chosenAction));
-        SingleTreeNode tn = new SingleTreeNode(player, nextActions.size(), root, depth == 0 ? this : root, nextState);
+        SingleTreeNode tn = new SingleTreeNode(player, nextActions.size(), this, depth == 0 ? this : root, nextState);
         children[chosenAction] = tn;
         return tn;
     }

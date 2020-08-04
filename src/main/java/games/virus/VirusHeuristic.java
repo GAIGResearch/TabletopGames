@@ -11,11 +11,11 @@ public class VirusHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         VirusGameState vgs = (VirusGameState) gs;
-        Utils.GameResult gameStatus = gs.getGameStatus();
+        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (gameStatus == Utils.GameResult.LOSE)
+        if (playerResult == Utils.GameResult.LOSE)
             return -1;
-        if (gameStatus == Utils.GameResult.WIN)
+        if (playerResult == Utils.GameResult.WIN)
             return 1;
 
         int nHealthyOrgans = 0;

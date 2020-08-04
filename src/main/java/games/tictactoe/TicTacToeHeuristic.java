@@ -12,12 +12,14 @@ public class TicTacToeHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         TicTacToeGameState ttgs = (TicTacToeGameState) gs;
-        Utils.GameResult gameStatus = gs.getGameStatus();
+        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(gameStatus == Utils.GameResult.LOSE)
+        if(playerResult == Utils.GameResult.LOSE) {
             return -1;
-        if(gameStatus == Utils.GameResult.WIN)
+        }
+        if(playerResult == Utils.GameResult.WIN) {
             return 1;
+        }
 
         // Count how many lines of player characters + rest empty, the more player characters the better
         int[] nPlayer = new int[ttgs.gridBoard.getWidth()];
