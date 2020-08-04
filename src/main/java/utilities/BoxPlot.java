@@ -32,6 +32,8 @@ public class BoxPlot extends JFrame {
         chart.getStyler().setAxisTitleFont(new Font("Arial", Font.BOLD, 20));
         chart.getStyler().setAxisTickLabelsFont(new Font("Arial", Font.PLAIN, 16));
         chart.getStyler().setLegendFont(new Font("Arial", Font.PLAIN, 18));
+        chart.getStyler().setPlotBackgroundColor(Color.white);
+        chart.getStyler().setChartBackgroundColor(Color.white);
 
         setTitle(title);
         setLayout(new BorderLayout());
