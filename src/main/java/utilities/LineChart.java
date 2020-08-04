@@ -35,7 +35,7 @@ public class LineChart extends JFrame {
         // Create Chart
         chart = new XYChartBuilder()
                         .width(600)
-                        .height(400)
+                        .height(300)
                         .title("")
                         .xAxisTitle(xLabel)
                         .yAxisTitle(yLabel)
@@ -46,6 +46,8 @@ public class LineChart extends JFrame {
         chart.getStyler().setAxisTitleFont(new Font("Arial", Font.BOLD, 20));
         chart.getStyler().setAxisTickLabelsFont(new Font("Arial", Font.PLAIN, 16));
         chart.getStyler().setLegendFont(new Font("Arial", Font.PLAIN, 18));
+        chart.getStyler().setPlotBackgroundColor(Color.white);
+        chart.getStyler().setChartBackgroundColor(Color.white);
 
         setTitle(title);
         setLayout(new BorderLayout());

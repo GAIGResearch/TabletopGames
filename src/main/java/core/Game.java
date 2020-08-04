@@ -235,7 +235,7 @@ public class Game {
                 // Either ask player which action to use or, in case no actions are available, report the updated observation
                 AbstractAction action = null;
                 if (observedActions.size() > 0) {
-                    if (observedActions.size() == 1) {
+                    if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
                         // Can only do 1 action, so do it.
                         action = observedActions.get(0);
                         currentPlayer.registerUpdatedObservation(observation);
