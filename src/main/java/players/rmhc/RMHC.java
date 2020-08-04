@@ -1,78 +1,68 @@
-package players;
+package players.rmhc;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
+import players.utils.PlayerConstants;
 import utilities.ElapsedCpuTimer;
-import utilities.Utils;
 
 import java.util.*;
 
-import static core.Game.runOne;
-import static games.GameType.TicTacToe;
-
 
 public class RMHC extends AbstractPlayer {
-    // Public Parameters
-    public final static int time_to_act = 100; // in milliseconds
 
-    // Parameters
-    private int HORIZON = 10;
-    private IStateHeuristic stateHeuristic = null;
-
-    // Constants
-    private final long BREAK_MS = 10;
-
-    // Class vars
+    RMHCParams params;
     private Individual bestIndividual;
     private final Random randomGenerator;
 
     // Budgets
-    private ElapsedCpuTimer timer;
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
-    private boolean keepIterating = true;
-    private long remaining;
+    private int fmCalls = 0;
 
-    /**
-     * Public constructor with state observation and time due.
-     *
-     */
     public RMHC() {
-        randomGenerator = new Random();
-        this.timer = new ElapsedCpuTimer();
+        this(System.currentTimeMillis());
     }
 
-    public void setHORIZON(int HORIZON) {
-        this.HORIZON = HORIZON;
+    public RMHC(RMHCParams params) {
+        randomGenerator = new Random(params.getRandomSeed());
+        this.params = params;
     }
 
-    public void setStateHeuristic(IStateHeuristic stateHeuristic) {
-        this.stateHeuristic = stateHeuristic;
+    public RMHC(long seed) {
+        randomGenerator = new Random(seed);
+        params = new RMHCParams(seed);
     }
 
     @Override
     public AbstractAction getAction(AbstractGameState stateObs){
-        this.timer = new ElapsedCpuTimer();
+        ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         avgTimeTaken = 0;
         acumTimeTaken = 0;
         numIters = 0;
-        remaining = timer.remainingTimeMillis();
-        keepIterating = true;
+        fmCalls = 0;
 
-        // INITIALISE POPULATION
-        bestIndividual = new Individual(HORIZON, getForwardModel(), stateObs, getPlayerID(), randomGenerator);
+        // Initialise individual
+        bestIndividual = new Individual(params.horizon, getForwardModel(), stateObs, getPlayerID(), randomGenerator);
+        fmCalls += bestIndividual.length;
 
-        // RUN EVOLUTION
-        remaining = timer.remainingTimeMillis();
-        while (remaining > avgTimeTaken && remaining > BREAK_MS && keepIterating) {
+        // Run evolution
+        boolean keepIterating = true;
+        while (keepIterating) {
             runIteration(stateObs);
-            remaining = timer.remainingTimeMillis();
+
+            // Check budget depending on budget type
+            if (params.budgetType == PlayerConstants.BUDGET_TIME) {
+                long remaining = timer.remainingTimeMillis();
+                keepIterating = remaining > avgTimeTaken && remaining > params.breakMS;
+            } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
+                keepIterating = fmCalls < params.fmCallsBudget;
+            } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
+                keepIterating = numIters < params.iterationsBudget;
+            }
         }
 
-        // RETURN ACTION
+        // Return first action of best individual
         return bestIndividual.actions[0];
     }
 
@@ -83,12 +73,15 @@ public class RMHC extends AbstractPlayer {
     private void runIteration(AbstractGameState stateObs) {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
+        // Create new individual through mutation
         Individual newIndividual = new Individual(bestIndividual);
-        newIndividual.mutate(getForwardModel(), getPlayerID());
+        fmCalls += newIndividual.mutate(getForwardModel(), getPlayerID());
 
+        // Keep new individual if better than current
         if (newIndividual.value > bestIndividual.value)
             bestIndividual = newIndividual;
 
+        // Update budgets
         numIters++;
         acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
         avgTimeTaken = acumTimeTaken / numIters;

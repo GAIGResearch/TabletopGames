@@ -5,13 +5,15 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.*;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHC;
 import utilities.Pair;
 import utilities.StatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
@@ -641,7 +643,7 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
+        ActionController ac = null; //new ActionController(); //null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
@@ -649,27 +651,29 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new OSLA());
-        players.add(new RandomPlayer(new Random()));
-        players.add(new RandomPlayer(new Random()));
-//        players.add(new RandomPlayer(new Random()));
-//        players.add(new MCTSPlayer(System.currentTimeMillis()));
-        players.add(new OSLA());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+        players.add(new RMHC());
+        players.add(new MCTSPlayer());
+//        players.add(new OSLA());
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Pandemic, players, seed, ac, false);
+//        runOne(ExplodingKittens, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(Pandemic);
+//        games.add(ExplodingKittens);
 //        games.add(LoveLetter);
+//        runMany(games, players, null, 50, null, false, false);
 
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
-//        games.remove(Pandemic);
+        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, null, 10, null, false, true);
+        runMany(games, players, null, 10, null, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }

@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 
 public class NopeAction extends DrawCard implements IPrintable, IsNopeable {
 
@@ -33,7 +32,12 @@ public class NopeAction extends DrawCard implements IPrintable, IsNopeable {
     }
 
     @Override
-    public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.execute(gs);
+    public void nopedExecute(AbstractGameState gs) {
+        super.execute(gs);
+    }
+
+    @Override
+    public void actionPlayed(AbstractGameState gs) {
+        // Doesn't need to do anything, this card is played automatically.
     }
 }

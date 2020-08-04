@@ -26,7 +26,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     // Cards in each player's hand, index corresponds to player ID
-    List<Deck<ExplodingKittensCard>> playerHandCards;
+    List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
     // Cards in the draw pile
     PartialObservableDeck<ExplodingKittensCard> drawPile;
     // Cards in the discard pile
@@ -60,7 +60,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.actionStack.add(a.copy());
         }
         ekgs.playerHandCards = new ArrayList<>();
-        for (Deck<ExplodingKittensCard> d: playerHandCards) {
+        for (PartialObservableDeck<ExplodingKittensCard> d: playerHandCards) {
             ekgs.playerHandCards.add(d.copy());
         }
         ekgs.drawPile = drawPile.copy();
@@ -70,18 +70,30 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             // e.g. in case the agent has previously given a favor card to its opponent
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
-                    ekgs.drawPile.add(ekgs.playerHandCards.get(i));
-                    ekgs.playerHandCards.get(i).clear();
+                    // Take all cards the player can't see from other players and put them in the draw pile.
+                    ArrayList<ExplodingKittensCard> cs = new ArrayList<>();
+                    for (int j = 0; j < ekgs.playerHandCards.get(i).getSize(); j++) {
+                        if (!ekgs.playerHandCards.get(i).isComponentVisible(j, playerId)) {
+                            ExplodingKittensCard c = ekgs.playerHandCards.get(i).get(j);
+                            ekgs.drawPile.add(c, ekgs.playerHandCards.get(i).getVisibilityOfComponent(j).clone());
+                            cs.add(c);
+                        }
+                    }
+                    for (ExplodingKittensCard c: cs) {
+                        ekgs.playerHandCards.get(i).remove(c);
+                    }
                 }
             }
             Random r = new Random(ekgs.gameParameters.getRandomSeed());
 
-            // Shuffles only hidden cards, if player knows what's on top those will stay in place
+            // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
             ekgs.drawPile.shuffleVisible(r, playerId, false);
             Deck<ExplodingKittensCard> explosive = new Deck<>("tmp");
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
+                        // Add back random cards for all components not visible to this player
+                        if (playerHandCards.get(i).isComponentVisible(j, playerId)) continue;
                         boolean added = false;
                         int cardIndex = 0;
                         while (!added) {
@@ -195,7 +207,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     public Stack<AbstractAction> getActionStack() {
         return actionStack;
     }
-    public List<Deck<ExplodingKittensCard>> getPlayerHandCards() {
+    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
         return playerHandCards;
     }
 
@@ -206,7 +218,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
         this.drawPile = drawPile;
     }
-    protected void setPlayerHandCards(List<Deck<ExplodingKittensCard>> playerHandCards) {
+    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
         this.playerHandCards = playerHandCards;
     }
     protected void setActionStack(Stack<AbstractAction> actionStack) {
@@ -216,44 +228,39 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Printing functions for the game state and decks.
 
     public void printToConsole() {
-        System.out.println("Exploding Kittens Game-State");
-        System.out.println("============================");
+        System.out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        String s = "============================\n";
 
         int currentPlayer = turnOrder.getCurrentPlayer(this);
 
         for (int i = 0; i < getNPlayers(); i++){
             if (currentPlayer == i)
-                System.out.print(">>> Player " + i + ":");
+                s += ">>> Player " + i + ":";
             else
-                System.out.print("Player " + i + ":");
-            printDeck(playerHandCards.get(i));
+                s += "Player " + i + ":";
+            s += playerHandCards.get(i).toString() + "\n";
         }
 
-        System.out.print("DrawPile" + ":");
-        printDeck(drawPile);
+        s += "\nDrawPile: ";
+        s += drawPile.toString() + "\n";
 
-        System.out.print("DiscardPile" + ":");
-        printDeck(discardPile);
+        s += "DiscardPile: ";
+        s += discardPile.toString() + "\n";
 
-        System.out.println("Current GamePhase: " + gamePhase);
-        System.out.println("Missing Draws: " + ((ExplodingKittensTurnOrder)turnOrder).requiredDraws);
-    }
-
-    public void printDeck(Deck<ExplodingKittensCard> deck){
-        StringBuilder sb = new StringBuilder();
-        for (ExplodingKittensCard card : deck.getComponents()){
-            sb.append(card.cardType.toString());
-            sb.append(",");
+        s += "Action stack: ";
+        for (AbstractAction a: actionStack) {
+            s += a.toString() + ",";
         }
-        if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-        System.out.println(sb.toString());
-        //System.out.println();
-    }
+        s = s.substring(0, s.length()-1);
+        s += "\n\n";
 
-    private void printActionStack(){
-        System.out.print("Action Stack:");
-        for (AbstractAction a : actionStack) {
-            System.out.print(a.toString() + ",");
-        }
+        s += "Current GamePhase: " + gamePhase + "\n";
+        s += "Missing Draws: " + ((ExplodingKittensTurnOrder)turnOrder).requiredDraws + "\n";
+        s += "============================\n";
+        return s;
     }
 }
