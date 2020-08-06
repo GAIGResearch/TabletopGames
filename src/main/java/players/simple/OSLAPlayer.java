@@ -1,4 +1,4 @@
-package players;
+package players.simple;
 
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
@@ -10,17 +10,17 @@ import java.util.Random;
 
 import static utilities.Utils.noise;
 
-public class OSLA extends AbstractPlayer {
+public class OSLAPlayer extends AbstractPlayer {
 
     private Random random; // random generator for noise
     private IStateHeuristic stateHeuristic;
     public double epsilon = 1e-6;
 
-    public OSLA(){
+    public OSLAPlayer(){
         this.random = new Random();
     }
 
-    public OSLA(Random random)
+    public OSLAPlayer(Random random)
     {
         this.random = random;
     }

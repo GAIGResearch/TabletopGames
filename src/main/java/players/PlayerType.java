@@ -1,16 +1,20 @@
-package players.utils;
+package players;
 
 import core.*;
-import players.*;
+import players.human.ActionController;
+import players.human.HumanConsolePlayer;
+import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import static core.CoreConstants.*;
-import static players.utils.PlayerType.Property.*;
+import static players.PlayerType.Property.*;
 
 /**
  * Encapsulates all players available in the framework.
@@ -75,7 +79,7 @@ public enum PlayerType {
                 player = new RandomPlayer(r);
                 break;
             case OSLA:
-                player = new OSLA(r);
+                player = new OSLAPlayer(r);
                 break;
             case MCTS:
                 if (params == null) {

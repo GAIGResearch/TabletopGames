@@ -1,4 +1,4 @@
-package players;
+package players.human;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;

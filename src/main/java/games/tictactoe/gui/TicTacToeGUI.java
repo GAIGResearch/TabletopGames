@@ -7,8 +7,8 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import games.tictactoe.TicTacToeGameState;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 import utilities.Utils;
 
 import javax.swing.*;

@@ -2,8 +2,8 @@ package games.loveletter;
 
 import core.*;
 import games.GameType;
-import players.OSLA;
-import players.RandomPlayer;
+import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class LoveLetterGame extends Game {
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
-        agents.add(new OSLA());
+        agents.add(new OSLAPlayer());
 
         for (int i=0; i<1; i++) {
             // setup game

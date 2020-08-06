@@ -6,7 +6,7 @@ import utilities.ElapsedCpuTimer;
 import java.util.List;
 import java.util.Random;
 
-import static players.utils.PlayerConstants.*;
+import static players.PlayerConstants.*;
 import static utilities.Utils.noise;
 
 class SingleTreeNode

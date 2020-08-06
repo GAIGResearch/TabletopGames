@@ -1,4 +1,4 @@
-package players.utils;
+package players;
 
 public class PlayerConstants {
     public static final int BUDGET_TIME = 0;

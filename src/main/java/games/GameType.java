@@ -29,8 +29,8 @@ import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import gui.PrototypeGUI;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import java.util.ArrayList;
 import java.util.List;

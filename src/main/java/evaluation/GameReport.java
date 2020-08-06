@@ -6,14 +6,13 @@ import core.AbstractPlayer;
 import core.Game;
 import evaluation.testplayers.RandomTestPlayer;
 import games.GameType;
-import players.RandomPlayer;
+import players.simple.RandomPlayer;
 import utilities.BoxPlot;
 import utilities.LineChart;
 import utilities.Pair;
 import utilities.StatSummary;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static games.GameType.*;

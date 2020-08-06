@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.AbstractForwardModel;
 import core.Game;
 import games.GameType;
-import players.RandomPlayer;
+import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;

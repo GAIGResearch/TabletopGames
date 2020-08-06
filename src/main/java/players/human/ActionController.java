@@ -1,4 +1,4 @@
-package players;
+package players.human;
 
 import core.actions.AbstractAction;
 

@@ -2,7 +2,7 @@ package players.rmhc;
 
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
-import players.utils.PlayerParameters;
+import players.PlayerParameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;

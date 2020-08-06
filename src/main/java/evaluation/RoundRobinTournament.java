@@ -2,10 +2,10 @@ package evaluation;
 
 import core.AbstractPlayer;
 import games.GameType;
-import players.OSLA;
-import players.RandomPlayer;
+import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import players.mcts.MCTSPlayer;
-import players.rmhc.RMHC;
+import players.rmhc.RMHCPlayer;
 import utilities.Utils;
 
 import java.util.LinkedList;
@@ -34,8 +34,8 @@ public class RoundRobinTournament extends AbstractTournament {
         /* 2. Set up players */
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         agents.add(new RandomPlayer());
-        agents.add(new RMHC());
-        agents.add(new OSLA());
+        agents.add(new RMHCPlayer());
+        agents.add(new OSLAPlayer());
         agents.add(new MCTSPlayer());
 
         // Run!

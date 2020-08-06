@@ -2,7 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import gui.WindowInput;
-import players.ActionController;
+import players.human.ActionController;
 import utilities.Utils;
 
 import javax.swing.*;

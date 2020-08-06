@@ -2,7 +2,7 @@ package games.uno;
 
 import core.*;
 import games.GameType;
-import players.OSLA;
+import players.simple.OSLAPlayer;
 
 import java.util.*;
 
@@ -18,11 +18,11 @@ public class UnoGame extends Game {
 //        agents.add(new HumanConsolePlayer());
 //        agents.add(new HumanConsolePlayer());
 //        agents.add(new HumanConsolePlayer());
-        agents.add(new OSLA());
-        agents.add(new OSLA());
-        agents.add(new OSLA());
-        agents.add(new OSLA());
-        agents.add(new OSLA());
+        agents.add(new OSLAPlayer());
+        agents.add(new OSLAPlayer());
+        agents.add(new OSLAPlayer());
+        agents.add(new OSLAPlayer());
+        agents.add(new OSLAPlayer());
 
         AbstractParameters gameParameters = new UnoGameParameters(System.currentTimeMillis());
         Game game           = new UnoGame(agents, gameParameters);

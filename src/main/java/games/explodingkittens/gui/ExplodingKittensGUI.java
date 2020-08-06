@@ -6,8 +6,8 @@ import core.AbstractPlayer;
 import core.Game;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensGameState;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;

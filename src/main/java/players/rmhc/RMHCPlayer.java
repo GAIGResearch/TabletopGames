@@ -3,13 +3,13 @@ package players.rmhc;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import players.utils.PlayerConstants;
+import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 
 import java.util.*;
 
 
-public class RMHC extends AbstractPlayer {
+public class RMHCPlayer extends AbstractPlayer {
 
     RMHCParams params;
     private Individual bestIndividual;
@@ -20,16 +20,16 @@ public class RMHC extends AbstractPlayer {
     private int numIters = 0;
     private int fmCalls = 0;
 
-    public RMHC() {
+    public RMHCPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public RMHC(RMHCParams params) {
+    public RMHCPlayer(RMHCParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
     }
 
-    public RMHC(long seed) {
+    public RMHCPlayer(long seed) {
         randomGenerator = new Random(seed);
         params = new RMHCParams(seed);
     }

@@ -1,4 +1,4 @@
-package players.utils;
+package players;
 
 import core.AbstractParameters;
 import core.interfaces.IStateHeuristic;

@@ -2,11 +2,11 @@ package games.virus;
 
 import core.*;
 import games.GameType;
-import players.*;
+import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 // Official Rules
@@ -23,8 +23,8 @@ public class VirusGame extends Game {
         //agents.add(new RandomPlayer());
 
         agents.add(new RandomPlayer());
-        agents.add(new OSLA());
-        agents.add(new OSLA());
+        agents.add(new OSLAPlayer());
+        agents.add(new OSLAPlayer());
         agents.add(new RandomPlayer());
 
         // Play n games and return the pct of wins of each player
