@@ -3,11 +3,13 @@ package games.explodingkittens.actions;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
+import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
-import core.turnorders.TurnOrder;
+import games.explodingkittens.cards.ExplodingKittensCard;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Favor;
@@ -28,18 +30,33 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
         ekgs.setGamePhase(Favor);
         ekgs.setPlayerGettingAFavor(gs.getTurnOrder().getCurrentPlayer(gs));
 
-        ExplodingKittenTurnOrder ekto = (ExplodingKittenTurnOrder) gs.getTurnOrder();
+        ExplodingKittensTurnOrder ekto = (ExplodingKittensTurnOrder) gs.getTurnOrder();
         ekto.registerFavorAction(target);
         return true;
     }
 
-    public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.execute(gs);
+    @Override
+    public void nopedExecute(AbstractGameState gs) {
+        super.execute(gs);
+    }
+
+    @Override
+    public void actionPlayed(AbstractGameState gs) {
+        // Mark card as visible in the player's deck to all other players
+        PartialObservableDeck<ExplodingKittensCard> from = (PartialObservableDeck<ExplodingKittensCard>) gs.getComponentById(deckFrom);
+        boolean[] vis = new boolean[gs.getNPlayers()];
+        Arrays.fill(vis, true);
+        from.setVisibilityOfComponent(fromIndex, vis);
     }
 
     @Override
     public String toString(){//overriding the toString() method
         return String.format("Player asks Player %d for a favor", target);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return String.format("Ask player %d for a favor", target);
     }
 
     @Override
@@ -50,7 +67,7 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof FavorAction)) return false;
         if (!super.equals(o)) return false;
         FavorAction that = (FavorAction) o;
         return target == that.target;
@@ -65,4 +82,5 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     public AbstractAction copy() {
         return new FavorAction(deckFrom, deckTo, fromIndex, target);
     }
+
 }

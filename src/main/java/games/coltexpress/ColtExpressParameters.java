@@ -1,6 +1,6 @@
 package games.coltexpress;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import games.coltexpress.cards.ColtExpressCard;
 import utilities.Group;
 
@@ -13,7 +13,9 @@ import static games.coltexpress.ColtExpressTypes.RegularRoundCard.*;
 
 import utilities.Pair;
 
-public class ColtExpressParameters extends AbstractGameParameters {
+public class ColtExpressParameters extends AbstractParameters {
+
+    String dataPath = "data/coltexpress/";
 
     // Other parameters
     public int nCardsInHand = 6;
@@ -29,7 +31,7 @@ public class ColtExpressParameters extends AbstractGameParameters {
     // How many cards of each type are in a player's deck, total minimum nCardsInHand + nCardsInHandExtraDoc
     public HashMap<ColtExpressCard.CardType, Integer> cardCounts = new HashMap<ColtExpressCard.CardType, Integer>() {{
         put(ColtExpressCard.CardType.MoveSideways, 2);
-        put(ColtExpressCard.CardType.MoveUp, 2);
+        put(ColtExpressCard.CardType.MoveVertical, 2);
         put(ColtExpressCard.CardType.Punch, 1);
         put(ColtExpressCard.CardType.MoveMarshal, 1);
         put(ColtExpressCard.CardType.Shoot, 2);
@@ -124,8 +126,9 @@ public class ColtExpressParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         ColtExpressParameters cep = new ColtExpressParameters(System.currentTimeMillis());
+        cep.dataPath = dataPath;
         cep.nCardsInHand = nCardsInHand;
         cep.nCardsInHandExtraDoc = nCardsInHandExtraDoc;
         cep.nBulletsPerPlayer = nBulletsPerPlayer;
@@ -157,4 +160,41 @@ public class ColtExpressParameters extends AbstractGameParameters {
         return cep;
     }
 
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ColtExpressParameters)) return false;
+        if (!super.equals(o)) return false;
+        ColtExpressParameters that = (ColtExpressParameters) o;
+        return nCardsInHand == that.nCardsInHand &&
+                nCardsInHandExtraDoc == that.nCardsInHandExtraDoc &&
+                nBulletsPerPlayer == that.nBulletsPerPlayer &&
+                nMaxRounds == that.nMaxRounds &&
+                shooterReward == that.shooterReward &&
+                nCardsDraw == that.nCardsDraw &&
+                nRoofMove == that.nRoofMove &&
+                nCardHostageReward == that.nCardHostageReward &&
+                nCardTakeItAllReward == that.nCardTakeItAllReward &&
+                Objects.equals(dataPath, that.dataPath) &&
+                Objects.equals(cardCounts, that.cardCounts) &&
+                Arrays.equals(characterTypes, that.characterTypes) &&
+                Arrays.equals(endRoundCards, that.endRoundCards) &&
+                Arrays.equals(roundCards, that.roundCards) &&
+                Objects.equals(trainCompartmentConfigurations, that.trainCompartmentConfigurations) &&
+                Objects.equals(playerStartLoot, that.playerStartLoot) &&
+                Objects.equals(loot, that.loot);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dataPath, nCardsInHand, nCardsInHandExtraDoc, nBulletsPerPlayer, nMaxRounds, shooterReward, nCardsDraw, nRoofMove, nCardHostageReward, nCardTakeItAllReward, cardCounts, trainCompartmentConfigurations, playerStartLoot, loot);
+        result = 31 * result + Arrays.hashCode(characterTypes);
+        result = 31 * result + Arrays.hashCode(endRoundCards);
+        result = 31 * result + Arrays.hashCode(roundCards);
+        return result;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
 }

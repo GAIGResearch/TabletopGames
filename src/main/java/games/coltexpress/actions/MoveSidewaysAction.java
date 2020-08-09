@@ -14,9 +14,9 @@ public class MoveSidewaysAction extends DrawCard {
     private final int sourceCompartment;
     private final int targetCompartment;
 
-    public MoveSidewaysAction(int plannedActions, int playerDeck,
+    public MoveSidewaysAction(int plannedActions, int playerDeck, int cardIdx,
                              int sourceCompartment, int targetCompartment){
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
         this.sourceCompartment = sourceCompartment;
         this.targetCompartment = targetCompartment;
 
@@ -35,14 +35,13 @@ public class MoveSidewaysAction extends DrawCard {
             if (target.containsMarshal){
                 ((ColtExpressGameState) gs).addNeutralBullet(card.playerID);
                 target.playersOnTopOfCompartment.add(card.playerID);
-            }
-            else
+            } else {
                 target.playersInsideCompartment.add(card.playerID);
+            }
         }
-        else{
+        else {
             source.playersOnTopOfCompartment.remove(card.playerID);
             target.playersOnTopOfCompartment.add(card.playerID);
-
         }
 
         return true;
@@ -51,7 +50,7 @@ public class MoveSidewaysAction extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MoveSidewaysAction)) return false;
         if (!super.equals(o)) return false;
         MoveSidewaysAction that = (MoveSidewaysAction) o;
         return sourceCompartment == that.sourceCompartment &&
@@ -68,7 +67,21 @@ public class MoveSidewaysAction extends DrawCard {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        Compartment source = (Compartment) gameState.getComponentById(sourceCompartment);
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        int idxS = source.getCompartmentID();
+        int idxT = target.getCompartmentID();
+        int diff = Math.abs(idxS-idxT);
+        if (idxT > idxS) {
+            return "Move right" + (diff>1? " " + diff : "");
+        } else {
+            return "Move left" + (diff>1? " " + diff : "");
+        }
+    }
+
+    @Override
     public AbstractAction copy() {
-        return new MoveSidewaysAction(deckFrom, deckTo, sourceCompartment, targetCompartment);
+        return new MoveSidewaysAction(deckFrom, deckTo, fromIndex, sourceCompartment, targetCompartment);
     }
 }

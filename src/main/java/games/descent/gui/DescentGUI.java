@@ -4,8 +4,8 @@ import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import games.descent.DescentGameState;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;

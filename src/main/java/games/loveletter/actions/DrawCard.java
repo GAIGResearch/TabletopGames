@@ -22,7 +22,7 @@ public class DrawCard extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Draw card";
     }
 
     @Override

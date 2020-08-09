@@ -65,7 +65,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         for (int i = 0; i < DescentConstants.archetypes.length; i++) {
             archetypes.add(i);
         }
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
         dgs.heroes = new ArrayList<>();
         for (int i = 1; i < dgs.getNPlayers(); i++) {
             // Choose random archetype from those remaining

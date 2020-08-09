@@ -42,7 +42,12 @@ public abstract class AbstractForwardModel {
     protected abstract void _setup(AbstractGameState firstState);
 
     /**
-     * Applies the given action to the game state and executes any other game rules.
+     * Applies the given action to the game state and executes any other game rules. Steps to follow:
+     *      - execute player action
+     *      - execute any game rules applicable
+     *      - check game over conditions, and if any trigger, set the gameStatus and playerResults variables
+     *      appropriately (and return)
+     *      - move to the next player where applicable
      * @param currentState - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
@@ -71,13 +76,14 @@ public abstract class AbstractForwardModel {
      * or play a random action for them instead.
      * Subclasses can overwrite for their own behaviour.
      * @param gameState - game state in which illegal action was attempted.
+     * @param action - action played
      */
-    protected void illegalActionPlayed(AbstractGameState gameState) {
+    protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
         if (DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED) {
             gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             gameState.turnOrder.endPlayerTurn(gameState);
         } else {
-            int randomAction = new Random(gameState.getGameParameters().getGameSeed()).nextInt(gameState.getActions().size());
+            int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(gameState.getActions().size());
             next(gameState, gameState.getActions().get(randomAction));
         }
     }
@@ -104,7 +110,7 @@ public abstract class AbstractForwardModel {
             if (VERBOSE) {
                 System.out.println("Invalid action.");
             }
-            illegalActionPlayed(currentState);
+            illegalActionPlayed(currentState, action);
         }
     }
 

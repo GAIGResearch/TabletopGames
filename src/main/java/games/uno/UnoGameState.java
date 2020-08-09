@@ -1,15 +1,15 @@
 package games.uno;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.uno.cards.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
 public class UnoGameState extends AbstractGameState implements IPrintable {
@@ -17,7 +17,8 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     Deck<UnoCard>        drawDeck;
     Deck<UnoCard>        discardDeck;
     UnoCard              currentCard;
-    String currentColor;
+    String               currentColor;
+    int[]                playerScore;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -25,7 +26,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * @param gameParameters - game parameters.
      * @param nPlayers      - number of players for this game.
      */
-    public UnoGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new UnoTurnOrder(nPlayers));
     }
 
@@ -78,25 +79,105 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         return currentColor;
     }
 
+    public int[] getPlayerScore() {
+        return playerScore;
+    }
+
+    /**
+     * Calculates points for all players, as sum of values of cards in the hands of all other players in the game.
+     * @param playerID - ID of player to calculate points for
+     * @return - integer, point total
+     */
+    public int calculatePlayerPoints(int playerID) {
+        UnoGameParameters ugp = (UnoGameParameters) getGameParameters();
+        int nPoints = 0;
+        for (int otherPlayer = 0; otherPlayer < getNPlayers(); otherPlayer++) {
+            if (otherPlayer != playerID) {
+                for (UnoCard card : playerDecks.get(otherPlayer).getComponents()) {
+                    switch (card.type) {
+                        case Number:
+                            nPoints += card.number;
+                            break;
+                        case Skip:
+                            nPoints += ugp.nSkipPoints;
+                            break;
+                        case Reverse:
+                            nPoints += ugp.nReversePoints;
+                            break;
+                        case Draw:
+                            nPoints += ugp.nDraw2Points;
+                            break;
+                        case Wild:
+                            if (card.drawN == 0) nPoints += ugp.nWildPoints;
+                            else nPoints += ugp.nWildDrawPoints;
+                            break;
+                    }
+                }
+            }
+        }
+        return nPoints;
+    }
+
     @Override
     protected AbstractGameState _copy(int playerId) {
-        // TODO: partial observability
         UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
-        for (Deck<UnoCard> d: playerDecks) {
+
+        for (Deck<UnoCard> d : playerDecks) {
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
+
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // Other player cards and the draw deck are unknown.
+            // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
+            Random r = new Random(copy.gameParameters.getRandomSeed());
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    copy.drawDeck.add(copy.playerDecks.get(i));
+                }
+            }
+            copy.drawDeck.shuffle(r);
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    Deck<UnoCard> d = copy.playerDecks.get(i);
+                    int nCards = d.getSize();
+                    d.clear();
+                    for (int j = 0; j < nCards; j++) {
+                        d.add(copy.drawDeck.draw());
+                    }
+                }
+            }
+        }
+
         copy.discardDeck = discardDeck.copy();
         copy.currentCard = (UnoCard) currentCard.copy();
         copy.currentColor = currentColor;
+        copy.playerScore = playerScore.clone();
         return copy;
     }
 
     @Override
     protected double _getScore(int playerId) {
-        // TODO: heuristic
-        return 0;
+        return new UnoHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<Integer>() {{
+            add(drawDeck.getComponentID());
+            for (Component c: drawDeck.getComponents()) {
+                add(c.getComponentID());
+            }
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    add(playerDecks.get(i).getComponentID());
+                    for (Component c: playerDecks.get(i).getComponents()) {
+                        add(c.getComponentID());
+                    }
+                }
+            }
+        }};
     }
 
     @Override
@@ -106,6 +187,27 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         discardDeck = null;
         currentCard = null;
         currentColor = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UnoGameState)) return false;
+        if (!super.equals(o)) return false;
+        UnoGameState that = (UnoGameState) o;
+        return Objects.equals(playerDecks, that.playerDecks) &&
+                Objects.equals(drawDeck, that.drawDeck) &&
+                Objects.equals(discardDeck, that.discardDeck) &&
+                Objects.equals(currentCard, that.currentCard) &&
+                Objects.equals(currentColor, that.currentColor) &&
+                Arrays.equals(playerScore, that.playerScore);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, discardDeck, currentCard, currentColor);
+        result = 31 * result + Arrays.hashCode(playerScore);
+        return result;
     }
 
     @Override

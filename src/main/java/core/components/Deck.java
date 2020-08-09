@@ -24,14 +24,19 @@ public class Deck<T extends Component> extends Component {
     protected int capacity;  // Capacity of the deck (maximum number of elements)
     protected ArrayList<T> components;  // List of components in this deck
 
-    public Deck(String name)
+    public Deck(String name) {
+        this(name, -1);
+    }
+
+    public Deck(String name, int ownerId)
     {
         super(ComponentType.DECK, name);
         this.components = new ArrayList<>();
+        this.ownerId = ownerId;
         this.capacity = -1;
     }
 
-    protected Deck(String name, int ID)
+    protected Deck(String name, int ownerId, int ID)
     {
         super(ComponentType.DECK, name, ID);
         this.components = new ArrayList<>();
@@ -53,14 +58,6 @@ public class Deck<T extends Component> extends Component {
      */
     public T pick(Random rnd) {
         return pick(rnd.nextInt(components.size()));
-    }
-    
-    /**
-     * Picks a random component from the Deck with a new random object.
-     * @return a random component from the Deck
-     */
-    public T pick() {
-        return pick(new Random().nextInt(components.size()));
     }
 
     /**
@@ -129,6 +126,9 @@ public class Deck<T extends Component> extends Component {
      * @return true if within capacity, false otherwise.
      */
     public boolean add(T c) {
+        if (c != null) {
+            c.setOwnerId(ownerId);
+        }
         return add(c, 0 );
     }
     
@@ -141,6 +141,7 @@ public class Deck<T extends Component> extends Component {
     public boolean add(T c, int index) {
         if (c==null)
             throw new IllegalArgumentException("null cannot be added to a Deck");
+        c.setOwnerId(ownerId);
         components.add(index, c);
         return capacity == -1 || components.size() <= capacity;
     }
@@ -152,6 +153,23 @@ public class Deck<T extends Component> extends Component {
      */
     public boolean add(Deck<T> d){
         components.addAll(d.components);
+        for (T comp: d.components) {
+            comp.setOwnerId(ownerId);
+        }
+        return capacity == -1 || components.size() <= capacity;
+    }
+
+    /**
+     * Adds a full other deck to this deck, ignoring capacity.
+     * @param d - other deck to add to this deck.
+     * @param index - the position in which the elements of d should be inserted in this deck.
+     * @return true if not over capacity, false otherwise.
+     */
+    public boolean add(Deck<T> d, int index){
+        components.addAll(index, d.components);
+        for (T comp: d.components) {
+            comp.setOwnerId(ownerId);
+        }
         return capacity == -1 || components.size() <= capacity;
     }
 
@@ -161,6 +179,7 @@ public class Deck<T extends Component> extends Component {
      * @return true if successfully removed, false otherwise.
      */
     public boolean remove(T component) {
+        component.setOwnerId(-1);
         int index = components.indexOf(component);
         if (index != -1){
             return remove(index);
@@ -175,6 +194,7 @@ public class Deck<T extends Component> extends Component {
      */
     public boolean remove(int idx) {
         if (idx >= 0 && idx < components.size()) {
+            components.get(idx).setOwnerId(-1);
             components.remove(idx);
             return true;
         }
@@ -185,6 +205,9 @@ public class Deck<T extends Component> extends Component {
      * Removes all the components from the deck.
      */
     public void clear() {
+        for (T comp: components) {
+            comp.setOwnerId(-1);
+        }
         components.clear();
     }
     
@@ -194,22 +217,16 @@ public class Deck<T extends Component> extends Component {
     public void shuffle(Random rnd) {
         Collections.shuffle(components, rnd);
     }
-    
-    /**
-     * Shuffles the deck with a new random object.
-     */
-    public void shuffle() {
-        this.shuffle(new Random());
-    }
 
     /**
      * Shuffles part of the deck, given by range [fromIndex, toIndex), leaving the rest the same.
      * @param fromIndex - index from where to start shuffling, inclusive
      * @param toIndex - index where to stop shuffling, exclusive
+     * @param rnd - random number generator used for shuffling
      */
-    public void shuffle(int fromIndex, int toIndex) {
+    public void shuffle(int fromIndex, int toIndex, Random rnd) {
         List<T> subList = components.subList(fromIndex, toIndex);
-        Collections.shuffle(subList, new Random());
+        Collections.shuffle(subList, rnd);
         int i = 0;
         for (T component: subList) {
             components.set(fromIndex + i, component);
@@ -261,6 +278,28 @@ public class Deck<T extends Component> extends Component {
      */
     public void setComponents(ArrayList<T> components) {
         this.components = components;
+        for (T comp: components) {
+            comp.setOwnerId(ownerId);
+        }
+    }
+
+    /**
+     * Sets the index to the given component.
+     * @param idx - index of component to replace.
+     * @param component - new component.
+     */
+    public void setComponent(int idx, T component) {
+        component.setOwnerId(ownerId);
+        components.set(idx, component);
+    }
+
+    /**
+     * Shortcut for retrieving a specific component.
+     * @param idx - index of component queried
+     * @return - component at given index.
+     */
+    public T get(int idx) {
+        return components.get(idx);
     }
 
     /**
@@ -269,7 +308,7 @@ public class Deck<T extends Component> extends Component {
      */
     public Deck<T> copy()
     {
-        Deck<T> dp = new Deck<>(componentName, componentID);
+        Deck<T> dp = new Deck<>(componentName, ownerId, componentID);
         copyTo(dp);
         return dp;
     }
@@ -317,7 +356,7 @@ public class Deck<T extends Component> extends Component {
      * @param deck - deck to load in JSON format
      */
     public static Deck<Card> loadDeckOfCards(JSONObject deck) {
-        Deck<Card> newDeck = new Deck<>((String) ( (JSONArray) deck.get("name")).get(1));
+        Deck<Card> newDeck = new Deck<>((String) ( (JSONArray) deck.get("name")).get(1), -1);
         JSONArray deckcards = (JSONArray) deck.get("cards");
 
         for(Object o : deckcards)
@@ -349,7 +388,7 @@ public class Deck<T extends Component> extends Component {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Deck)) return false;
         if (!super.equals(o)) return false;
         Deck<?> deck = (Deck<?>) o;
         return capacity == deck.capacity &&

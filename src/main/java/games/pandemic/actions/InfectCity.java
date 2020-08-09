@@ -142,7 +142,7 @@ public class InfectCity extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof InfectCity)) return false;
         if (!super.equals(o)) return false;
         InfectCity that = (InfectCity) o;
         return count == that.count &&

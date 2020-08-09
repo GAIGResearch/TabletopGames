@@ -28,7 +28,7 @@ public class RemoveComponentFromDeck<T extends Component> extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof RemoveComponentFromDeck)) return false;
         if (!super.equals(o)) return false;
         RemoveComponentFromDeck that = (RemoveComponentFromDeck) o;
         return deck == that.deck &&

@@ -1,7 +1,7 @@
 package games.descent;
 
-import core.AbstractGameParameters;
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.components.Component;
 import core.components.GraphBoard;
 import core.components.GridBoard;
@@ -12,10 +12,7 @@ import games.descent.components.Hero;
 import games.descent.components.Monster;
 import utilities.Vector2D;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class DescentGameState extends AbstractGameState implements IPrintable {
 
@@ -44,7 +41,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players for this game.
      */
-    public DescentGameState(AbstractGameParameters gameParameters, int nPlayers) {
+    public DescentGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new DescentTurnOrder(nPlayers));
         tiles = new HashMap<>();
         data = new DescentGameData();
@@ -95,8 +92,39 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        // TODO
+        return null;
+    }
+
+    @Override
     protected void _reset() {
         // TODO
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DescentGameState)) return false;
+        if (!super.equals(o)) return false;
+        DescentGameState that = (DescentGameState) o;
+        return overlordPlayer == that.overlordPlayer &&
+                Objects.equals(tiles, that.tiles) &&
+                Arrays.equals(tileReferences, that.tileReferences) &&
+                Objects.equals(gridReferences, that.gridReferences) &&
+                Objects.equals(masterBoard, that.masterBoard) &&
+                Objects.equals(masterBoardOccupancy, that.masterBoardOccupancy) &&
+                Objects.equals(masterGraph, that.masterGraph) &&
+                Objects.equals(heroes, that.heroes) &&
+                Objects.equals(overlord, that.overlord) &&
+                Objects.equals(monsters, that.monsters);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), tiles, gridReferences, masterBoard, masterBoardOccupancy, masterGraph, heroes, overlord, monsters, overlordPlayer);
+        result = 31 * result + Arrays.hashCode(tileReferences);
+        return result;
     }
 
     DescentGameData getData() {

@@ -1,10 +1,12 @@
 package games.descent;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
+
+import java.util.Objects;
 
 import static games.descent.DescentTypes.Campaign.HeirsOfBlood;
 
-public class DescentParameters extends AbstractGameParameters {
+public class DescentParameters extends AbstractParameters {
 
     public String dataPath = "data/descent/";
     public DescentTypes.Campaign campaign = HeirsOfBlood;
@@ -23,9 +25,28 @@ public class DescentParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         DescentParameters copy = new DescentParameters(System.currentTimeMillis());
         // TODO
         return copy;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DescentParameters)) return false;
+        if (!super.equals(o)) return false;
+        DescentParameters that = (DescentParameters) o;
+        return nActionsPerPlayer == that.nActionsPerPlayer &&
+                pitFallHpCost == that.pitFallHpCost &&
+                lavaHpCost == that.lavaHpCost &&
+                waterMoveCost == that.waterMoveCost &&
+                Objects.equals(dataPath, that.dataPath) &&
+                campaign == that.campaign;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), dataPath, campaign, nActionsPerPlayer, pitFallHpCost, lavaHpCost, waterMoveCost);
     }
 }

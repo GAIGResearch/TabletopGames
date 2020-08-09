@@ -7,8 +7,8 @@ import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import games.descent.DescentTypes;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 import utilities.Pair;
 import utilities.Vector2D;
 

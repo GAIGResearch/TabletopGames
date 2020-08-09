@@ -2,6 +2,7 @@ package games.pandemic.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.*;
 import core.actions.AbstractAction;
 import core.components.Card;
@@ -14,8 +15,8 @@ import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 import utilities.Hash;
 
 import javax.swing.*;
@@ -52,13 +53,14 @@ public class PandemicGUI extends AbstractGUI {
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUI(AbstractGameState gameState, ActionController ac) {
+    public PandemicGUI(Game game, ActionController ac) {
         super(ac, 721);
-        if (gameState == null || ac == null) return;
+        if (game == null || ac == null) return;
 
+        gameState = (PandemicGameState) game.getGameState();
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
-        this.gameState = (PandemicGameState) gameState;
+        this.gameState = (PandemicGameState) game.getGameState();
         boardView = new PandemicBoardView(gameState);
 
         handCardHighlights = new ArrayList[nPlayers];
@@ -75,7 +77,7 @@ public class PandemicGUI extends AbstractGUI {
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel(highlights, 300, 200);
+        JComponent actionPanel = createActionPanel(highlights, 300, 80);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(gameStateInfo);
@@ -196,10 +198,27 @@ public class PandemicGUI extends AbstractGUI {
     }
 
     protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {
-        JPanel gameInfo = super.createGameStateInfoPanel("Pandemic", gameState, 300, defaultInfoPanelHeight);
+
+        JPanel gameInfo = new JPanel();
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("<html><h1>Pandemic</h1></html>"));
+
+        updateGameStateInfo(gameState);
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
+        gameInfo.add(gamePhase);
+        gameInfo.add(turnOwner);
+        gameInfo.add(turn);
+        gameInfo.add(currentPlayer);
         gameInfo.add(gameTurnStep);
 
-        return gameInfo;
+        gameInfo.setPreferredSize(new Dimension(300, defaultInfoPanelHeight+5));
+
+        JPanel wrapper = new JPanel();
+        wrapper.add(gameInfo);
+        wrapper.setLayout(new GridBagLayout());
+        return wrapper;
     }
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
@@ -522,4 +541,10 @@ public class PandemicGUI extends AbstractGUI {
         }
         return false;
     }
+
+//    @Override
+//    public Dimension getPreferredSize() {
+//        Dimension boardSize = boardView.getPreferredSize();
+//        return new Dimension((int)(boardSize.getWidth() + (cardWidth + offset*2)*(nPlayers+1)), (int)boardSize.getHeight());
+//    }
 }

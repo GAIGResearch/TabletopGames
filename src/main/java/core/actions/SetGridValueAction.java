@@ -32,13 +32,13 @@ public class SetGridValueAction<T> extends AbstractAction implements IPrintable 
 
     @Override
     public AbstractAction copy() {
-        return new SetGridValueAction<T>(gridBoard, x, y, value);
+        return new SetGridValueAction<>(gridBoard, x, y, value);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SetGridValueAction)) return false;
         SetGridValueAction<?> that = (SetGridValueAction<?>) o;
         return gridBoard == that.gridBoard &&
                 x == that.x &&

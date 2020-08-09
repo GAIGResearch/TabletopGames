@@ -24,9 +24,6 @@ public class PlayVirusCard extends DrawCard {
         int playerId = vgs.getCurrentPlayer();
         super.execute(gs);
 
-        VirusCard card = (VirusCard) getCard(gs);
-        VirusBody body = (VirusBody) vgs.getComponentById(bodyId);
-
         if (vgs.getDrawDeck().getSize() == 0)
             discardToDraw(vgs);
 
@@ -43,7 +40,7 @@ public class PlayVirusCard extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlayVirusCard)) return false;
         if (!super.equals(o)) return false;
         PlayVirusCard that = (PlayVirusCard) o;
         return bodyId == that.bodyId;
@@ -60,13 +57,10 @@ public class PlayVirusCard extends DrawCard {
     }
 
     // Move all cards from discard deck to draw one and shuffle
-    // TODO: check it
     public void discardToDraw(VirusGameState vgs) {
-        while (vgs.getDiscardDeck().getSize()>0) {
-            VirusCard card = vgs.getDiscardDeck().pick();
-            vgs.getDrawDeck().add(card);
-        }
-        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getGameSeed()));
+        vgs.getDrawDeck().add(vgs.getDiscardDeck());
+        vgs.getDiscardDeck().clear();
+        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
     }
 
     @Override

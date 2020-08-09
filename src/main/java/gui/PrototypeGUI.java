@@ -9,8 +9,8 @@ import games.GameType;
 import gui.views.AreaView;
 import gui.views.CardView;
 import gui.views.ComponentView;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;

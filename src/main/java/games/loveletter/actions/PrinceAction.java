@@ -3,10 +3,11 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
+
+import java.util.Objects;
 
 /**
  * The targeted player discards its current and draws a new one.
@@ -24,7 +25,7 @@ public class PrinceAction extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+        Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
         Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(opponentID);
         Deck<LoveLetterCard> drawPile = llgs.getDrawPile();
 
@@ -50,11 +51,28 @@ public class PrinceAction extends DrawCard implements IPrintable {
         return super.execute(gs);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PrinceAction)) return false;
+        if (!super.equals(o)) return false;
+        PrinceAction that = (PrinceAction) o;
+        return opponentID == that.opponentID;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), opponentID);
+    }
 
     @Override
     public String toString(){
         return "Prince - player "+ opponentID + " discards its card and draws a new one";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Prince (player " + opponentID + " discards card, draws card)";
     }
 
     @Override
@@ -64,6 +82,6 @@ public class PrinceAction extends DrawCard implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new PriestAction(deckFrom, deckTo, fromIndex, opponentID);
+        return new PrinceAction(deckFrom, deckTo, fromIndex, opponentID);
     }
 }

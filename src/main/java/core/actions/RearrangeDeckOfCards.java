@@ -49,7 +49,8 @@ public class RearrangeDeckOfCards extends DrawCard {
         }
         Deck<Card> draws = new Deck<>("Temp Draws from: " + rd.getComponentName());
         draws.setComponents(new ArrayList<>(Arrays.asList(cards)));
-        return result & rd.add(draws);
+        //return result & rd.add(draws);
+        return result & rd.add(draws, 0);
     }
 
     // Getters
@@ -63,7 +64,7 @@ public class RearrangeDeckOfCards extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof RearrangeDeckOfCards)) return false;
         if (!super.equals(o)) return false;
         RearrangeDeckOfCards that = (RearrangeDeckOfCards) o;
         return rearrangeDeck == that.rearrangeDeck &&

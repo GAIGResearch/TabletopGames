@@ -5,9 +5,9 @@ import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittenTurnOrder;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.cards.ExplodingKittenCard;
+import games.explodingkittens.cards.ExplodingKittensCard;
 
 import static core.CoreConstants.VERBOSE;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse;
@@ -21,23 +21,22 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
-        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
-        Deck<ExplodingKittenCard> from = ((ExplodingKittensGameState) gs).getDrawPile();
-        Deck<ExplodingKittenCard> to = ((ExplodingKittensGameState) gs).getPlayerHandCards().get(playerID);
-        Deck<ExplodingKittenCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
+        int playerID = gs.getCurrentPlayer();
+        Deck<ExplodingKittensCard> from = ((ExplodingKittensGameState) gs).getDrawPile();
+        Deck<ExplodingKittensCard> to = ((ExplodingKittensGameState) gs).getPlayerHandCards().get(playerID);
+        Deck<ExplodingKittensCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
 
         // Draw the card for the player
         super.execute(gs);
 
         // Execute exploding kitten effect
-        ExplodingKittenCard c = (ExplodingKittenCard) getCard(gs);
-        c.setOwnerId(playerID);
-        ExplodingKittenCard.CardType type = c.cardType;
-        if (type == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
+        ExplodingKittensCard c = (ExplodingKittensCard) getCard(gs);
+        ExplodingKittensCard.CardType type = c.cardType;
+        if (type == ExplodingKittensCard.CardType.EXPLODING_KITTEN) {
             // An exploding kitten was drawn, check if player has defuse card
             int defuseCard = -1;
             for (int card = 0; card < to.getSize(); card++){
-                if (to.getComponents().get(card).cardType == ExplodingKittenCard.CardType.DEFUSE) {
+                if (to.getComponents().get(card).cardType == ExplodingKittensCard.CardType.DEFUSE) {
                     defuseCard = card;
                     break;
                 }
@@ -50,13 +49,12 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
                 if (VERBOSE) {
                     System.out.println("Player " + playerID + " died");
                 }
-                ((ExplodingKittensGameState) gs).killPlayer(playerID);
                 discardDeck.add(to);
                 to.clear();
-                ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+                ((ExplodingKittensGameState) gs).killPlayer(playerID);
             }
         } else {
-            ((ExplodingKittenTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+            ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         }
         return true;
     }
@@ -68,7 +66,7 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " draws a card";
+        return "Draw card";
     }
 
     @Override

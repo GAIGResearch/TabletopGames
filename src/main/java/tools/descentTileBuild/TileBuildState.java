@@ -1,13 +1,14 @@
 package tools.descentTileBuild;
 
-import core.AbstractGameParameters;
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.turnorders.AlternatingTurnOrder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class TileBuildState extends AbstractGameState {
 
@@ -18,7 +19,7 @@ public class TileBuildState extends AbstractGameState {
      *
      * @param gameParameters - game parameters.
      */
-    public TileBuildState(AbstractGameParameters gameParameters, int nPlayers) {
+    public TileBuildState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
@@ -42,7 +43,26 @@ public class TileBuildState extends AbstractGameState {
     }
 
     @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<>();
+    }
+
+    @Override
     protected void _reset() {
         tile = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TileBuildState)) return false;
+        if (!super.equals(o)) return false;
+        TileBuildState that = (TileBuildState) o;
+        return Objects.equals(tile, that.tile);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), tile);
     }
 }

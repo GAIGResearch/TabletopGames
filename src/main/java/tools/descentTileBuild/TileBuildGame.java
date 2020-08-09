@@ -2,8 +2,8 @@ package tools.descentTileBuild;
 
 import core.AbstractPlayer;
 import core.Game;
-import players.ActionController;
-import players.HumanGUIPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import java.util.ArrayList;
 

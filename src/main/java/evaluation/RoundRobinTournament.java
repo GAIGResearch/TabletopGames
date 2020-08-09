@@ -2,7 +2,10 @@ package evaluation;
 
 import core.AbstractPlayer;
 import games.GameType;
-import players.RandomPlayer;
+import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
 import utilities.Utils;
 
 import java.util.LinkedList;
@@ -22,17 +25,18 @@ public class RoundRobinTournament extends AbstractTournament {
     @SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
     public static void main(String[] args){
         /* 1. Settings for the tournament */
-        GameType gameToPlay = Virus;
-        int nPlayersTotal = 5;
-        int nPlayersPerGame = 4;
+        GameType gameToPlay = TicTacToe;
+        int nPlayersTotal = 4;
+        int nPlayersPerGame = 2;
         int nGamesPerMatchUp = 100;
         boolean selfPlay = false;
 
         /* 2. Set up players */
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
-        for (int i = 0; i < nPlayersTotal; i++){
-            agents.add(new RandomPlayer());
-        }
+        agents.add(new RandomPlayer());
+        agents.add(new RMHCPlayer());
+        agents.add(new OSLAPlayer());
+        agents.add(new MCTSPlayer());
 
         // Run!
         AbstractTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay);
@@ -70,13 +74,15 @@ public class RoundRobinTournament extends AbstractTournament {
     @Override
     public void runTournament() {
         for (int g = 0; g < games.size(); g++) {
-            System.out.println("Playing " + games.get(g).getGameType());
+            System.out.println("Playing " + games.get(g).getGameType().name());
 
             LinkedList<Integer> matchUp = new LinkedList<>();
             createAndRunMatchUp(matchUp, g);
 
-            for (int i = 0; i < this.agents.size(); i++)
+            for (int i = 0; i < this.agents.size(); i++) {
                 System.out.println(this.agents.get(i).toString() + " got " + pointsPerPlayer[i] + " points");
+                System.out.println(this.agents.get(i).toString() + " won " + pointsPerPlayer[i]/600.0 + "% games");
+            }
         }
     }
 

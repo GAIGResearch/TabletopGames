@@ -117,16 +117,7 @@ public abstract class TurnOrder {
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
-            turnOwner = nextPlayer(gameState);
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 
@@ -139,19 +130,12 @@ public abstract class TurnOrder {
      */
     public void endRound(AbstractGameState gameState) {
         roundCounter++;
-        if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(GAME_END);
+        if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
+            gameState.setGameStatus(GAME_END);
+        }
         else {
             turnCounter = 0;
-            turnOwner = 0;
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, firstPlayer);
         }
     }
 
@@ -165,12 +149,39 @@ public abstract class TurnOrder {
     }
 
     /**
+     * Sets the current turn owner
+     * @param owner - new owner of turn
+     */
+    public void setTurnOwner(int owner) {
+        this.turnOwner = owner;
+    }
+
+    /**
      * Calculates the next player who should have a turn.
      * @param gameState - current game state.
      * @return - int, player ID in range [0, nPlayers)
      */
     public int nextPlayer(AbstractGameState gameState) {
         return (nPlayers+turnOwner+1) % nPlayers;
+    }
+
+    /**
+     * Moves to the given turn order. If the given player is not playing anymore, the next player still in the game
+     * will be the turn owner instead.
+     * @param gameState - current game state
+     * @param newTurnOwner - new turn owner.
+     */
+    public final void moveToNextPlayer(AbstractGameState gameState, int newTurnOwner) {
+        turnOwner = newTurnOwner;
+        int n = 0;
+        while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
+            turnOwner = nextPlayer(gameState);
+            n++;
+            if (n >= nPlayers) {
+                gameState.setGameStatus(GAME_END);
+                break;
+            }
+        }
     }
 
     @Override
@@ -182,11 +193,13 @@ public abstract class TurnOrder {
                 turnOwner == turnOrder.turnOwner &&
                 roundCounter == turnOrder.roundCounter &&
                 firstPlayer == turnOrder.firstPlayer &&
+                turnCounter == turnOrder.turnCounter &&
                 nMaxRounds == turnOrder.nMaxRounds;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nPlayers, turnOwner, roundCounter, firstPlayer, nMaxRounds);
+        return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
+
 }

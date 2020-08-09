@@ -2,7 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import gui.WindowInput;
-import players.ActionController;
+import players.human.ActionController;
 import utilities.Utils;
 
 import javax.swing.*;
@@ -15,7 +15,7 @@ import java.util.List;
 public abstract class AbstractGUI extends JFrame {
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
-    public static int defaultInfoPanelHeight = 100;
+    public static int defaultInfoPanelHeight = 160;
     public static int defaultCardWidth = 100, defaultCardHeight = 80;
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
     public static int defaultDisplayWidth = 500, defaultDisplayHeight = 400;
@@ -71,6 +71,10 @@ public abstract class AbstractGUI extends JFrame {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
             }
+            for (int i = actions.size(); i < actionButtons.length; i++) {
+                actionButtons[i].setVisible(false);
+                actionButtons[i].setButtonAction(null, "");
+            }
         }
     }
 
@@ -83,8 +87,13 @@ public abstract class AbstractGUI extends JFrame {
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
+        return createActionPanel(highlights, width, height, true);
+    }
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
-        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        if (boxLayout) {
+            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        }
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
@@ -99,7 +108,9 @@ public abstract class AbstractGUI extends JFrame {
 
         JScrollPane pane = new JScrollPane(actionPanel);
         pane.setPreferredSize(new Dimension(width, height));
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        if (boxLayout) {
+            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        }
         return pane;
     }
 
@@ -125,7 +136,10 @@ public abstract class AbstractGUI extends JFrame {
 
         gameInfo.setPreferredSize(new Dimension(width, height));
 
-        return gameInfo;
+        JPanel wrapper = new JPanel();
+        wrapper.add(gameInfo);
+        wrapper.setLayout(new GridBagLayout());
+        return wrapper;
     }
 
     /**

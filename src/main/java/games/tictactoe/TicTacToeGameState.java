@@ -1,6 +1,6 @@
 package games.tictactoe;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.AbstractGameState;
@@ -9,10 +9,10 @@ import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
 import utilities.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character>, IVectorObservation {
@@ -23,7 +23,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         add('o');
     }};
 
-    public TicTacToeGameState(AbstractGameParameters gameParameters, int nPlayers){
+    public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers){
         super(gameParameters, new AlternatingTurnOrder(nPlayers));
     }
 
@@ -46,22 +46,12 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     protected double _getScore(int playerId) {
-        if (getGameStatus() == Utils.GameResult.WIN)
-            return 1;
-        else if (getGameStatus() == Utils.GameResult.DRAW)
-            return 0;
-        else if (getGameStatus() == Utils.GameResult.LOSE)
-            return -1;
-        else
-            return 0;
+        return new TicTacToeHeuristic().evaluateState(this, playerId);
+    }
 
-//        int nChars = 0;
-//        for (int i = 0; i < gridBoard.getWidth(); i++) {
-//            for (int j = 0; j < gridBoard.getHeight(); j++) {
-//                if (gridBoard.getElement(i, j) == playerMapping.get(playerId)) nChars++;
-//            }
-//        }
-//        return nChars;
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<>();  // Always fully observable
     }
 
     @Override
@@ -70,8 +60,27 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TicTacToeGameState)) return false;
+        if (!super.equals(o)) return false;
+        TicTacToeGameState that = (TicTacToeGameState) o;
+        return Objects.equals(gridBoard, that.gridBoard) &&
+                Objects.equals(playerMapping, that.playerMapping);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), gridBoard, playerMapping);
+    }
+
+    @Override
     public GridBoard<Character> getGridBoard() {
         return gridBoard;
+    }
+
+    public ArrayList<Character> getPlayerMapping() {
+        return playerMapping;
     }
 
     @Override

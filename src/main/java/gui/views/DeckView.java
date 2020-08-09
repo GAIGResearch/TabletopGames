@@ -36,7 +36,7 @@ public class DeckView<T extends Component> extends ComponentView {
     public static <T extends Component> void drawDeck(Graphics2D g, Deck<T> deck, String name, Image background,
                                                       Rectangle rect, boolean front) {
         if (background != null) {
-            g.drawImage(background, rect.x, rect.y, null, null);
+            g.drawImage(background, rect.x, rect.y, rect.width, rect.height, null, null);
         } else {
             if (front && deck != null && deck.getSize() > 0) {
                 Component c = deck.peek();
@@ -44,7 +44,7 @@ public class DeckView<T extends Component> extends ComponentView {
                     // Draw cards, 0 index on top
                     for (int i = deck.getSize()-1; i >= 0; i--) {
                         Card card = (Card) deck.getComponents().get(i);
-                        CardView.drawCard(g, rect.x, rect.y, rect.width, rect.height, card);
+                        CardView.drawCard(g, rect.x, rect.y, rect.width, rect.height, card, null, null, true);
                     }
                 }
             } else {

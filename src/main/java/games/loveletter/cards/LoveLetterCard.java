@@ -21,6 +21,8 @@ public class LoveLetterCard extends Card {
         }
 
         public int getValue(){ return value;}
+
+        public static int getMaxCardValue() { return 8; }
     }
 
     public final CardType cardType;
@@ -30,12 +32,17 @@ public class LoveLetterCard extends Card {
         this.cardType = cardType;
     }
 
+    public LoveLetterCard(CardType cardType, int componentID) {
+        super(cardType.toString(), componentID);
+        this.cardType = cardType;
+    }
+
     public String toString(){
         return cardType.toString();
     }
 
     @Override
     public Card copy() {
-        return new LoveLetterCard(cardType);
+        return new LoveLetterCard(cardType, componentID);
     }
 }

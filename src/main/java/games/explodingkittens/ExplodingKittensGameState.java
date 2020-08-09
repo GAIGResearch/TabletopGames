@@ -1,6 +1,6 @@
 package games.explodingkittens;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.actions.AbstractAction;
@@ -8,12 +8,12 @@ import core.components.Deck;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.cards.ExplodingKittenCard;
+import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 
@@ -26,18 +26,18 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     // Cards in each player's hand, index corresponds to player ID
-    List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards;
+    List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
     // Cards in the draw pile
-    PartialObservableDeck<ExplodingKittenCard> drawPile;
+    PartialObservableDeck<ExplodingKittensCard> drawPile;
     // Cards in the discard pile
-    Deck<ExplodingKittenCard> discardPile;
+    Deck<ExplodingKittensCard> discardPile;
     // Player ID of the player currently getting a favor
     int playerGettingAFavor;
     // Current stack of actions
     Stack<AbstractAction> actionStack;
 
-    public ExplodingKittensGameState(AbstractGameParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ExplodingKittenTurnOrder(nPlayers));
+    public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers));
         playerGettingAFavor = -1;
     }
 
@@ -53,7 +53,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     @Override
     protected AbstractGameState _copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
-        ekgs.drawPile = drawPile.copy();
         ekgs.discardPile = discardPile.copy();
         ekgs.playerGettingAFavor = playerGettingAFavor;
         ekgs.actionStack = new Stack<>();
@@ -61,16 +60,91 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.actionStack.add(a.copy());
         }
         ekgs.playerHandCards = new ArrayList<>();
-        for (PartialObservableDeck<ExplodingKittenCard> d: playerHandCards) {
+        for (PartialObservableDeck<ExplodingKittensCard> d: playerHandCards) {
             ekgs.playerHandCards.add(d.copy());
+        }
+        ekgs.drawPile = drawPile.copy();
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // Other player hands + draw deck are hidden, combine in draw pile and shuffle
+            // Note: this considers the agent to track opponent's cards that are known to him by itself
+            // e.g. in case the agent has previously given a favor card to its opponent
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    // Take all cards the player can't see from other players and put them in the draw pile.
+                    ArrayList<ExplodingKittensCard> cs = new ArrayList<>();
+                    for (int j = 0; j < ekgs.playerHandCards.get(i).getSize(); j++) {
+                        if (!ekgs.playerHandCards.get(i).isComponentVisible(j, playerId)) {
+                            ExplodingKittensCard c = ekgs.playerHandCards.get(i).get(j);
+                            ekgs.drawPile.add(c, ekgs.playerHandCards.get(i).getVisibilityOfComponent(j).clone());
+                            cs.add(c);
+                        }
+                    }
+                    for (ExplodingKittensCard c: cs) {
+                        ekgs.playerHandCards.get(i).remove(c);
+                    }
+                }
+            }
+            Random r = new Random(ekgs.gameParameters.getRandomSeed());
+
+            // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
+            ekgs.drawPile.shuffleVisible(r, playerId, false);
+            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp");
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
+                        // Add back random cards for all components not visible to this player
+                        if (playerHandCards.get(i).isComponentVisible(j, playerId)) continue;
+                        boolean added = false;
+                        int cardIndex = 0;
+                        while (!added) {
+                            // if the card is visible to the player we cannot move it somewhere else
+                            if (ekgs.drawPile.getVisibilityForPlayer(cardIndex, playerId)){
+                                cardIndex++;
+                                continue;
+                            }
+                            ExplodingKittensCard card = ekgs.drawPile.pick(cardIndex);
+                            if (card.cardType != ExplodingKittensCard.CardType.EXPLODING_KITTEN) {
+                                ekgs.playerHandCards.get(i).add(card);
+                                added = true;
+                            } else {
+                                explosive.add(card);
+                            }
+                        }
+                    }
+                }
+            }
+            ekgs.drawPile.add(explosive);
         }
         return ekgs;
     }
 
+    private void moveHiddenCards(PartialObservableDeck<?> from, PartialObservableDeck<?> to){
+
+    }
+
     @Override
     protected double _getScore(int playerId) {
-        // TODO heuristic
-        return 0;
+        return new ExplodingKittensHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<Integer>() {{
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    add(playerHandCards.get(i).getComponentID());
+                    for (Component c: playerHandCards.get(i).getComponents()) {
+                        add(c.getComponentID());
+                    }
+                }
+            }
+            add(drawPile.getComponentID());
+            for (int i = 0; i < drawPile.getSize(); i++) {
+                if (!drawPile.isComponentVisible(i, playerId)) {
+                    add(drawPile.get(i).getComponentID());
+                }
+            }
+        }};
     }
 
     @Override
@@ -80,6 +154,24 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         discardPile = null;
         playerGettingAFavor = -1;
         actionStack = null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExplodingKittensGameState)) return false;
+        if (!super.equals(o)) return false;
+        ExplodingKittensGameState gameState = (ExplodingKittensGameState) o;
+        return playerGettingAFavor == gameState.playerGettingAFavor &&
+                Objects.equals(playerHandCards, gameState.playerHandCards) &&
+                Objects.equals(drawPile, gameState.drawPile) &&
+                Objects.equals(discardPile, gameState.discardPile) &&
+                Objects.equals(actionStack, gameState.actionStack);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerHandCards, drawPile, discardPile, playerGettingAFavor, actionStack);
     }
 
     /**
@@ -95,36 +187,38 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
         }
+        ((ExplodingKittensTurnOrder)getTurnOrder()).endPlayerTurnStep(this);
+
     }
 
     // Getters, setters
     public int getPlayerGettingAFavor() {
         return playerGettingAFavor;
     }
-    public PartialObservableDeck<ExplodingKittenCard> getDrawPile() {
+    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
         return drawPile;
     }
     public void setPlayerGettingAFavor(int playerGettingAFavor) {
         this.playerGettingAFavor = playerGettingAFavor;
     }
-    public Deck<ExplodingKittenCard> getDiscardPile() {
+    public Deck<ExplodingKittensCard> getDiscardPile() {
         return discardPile;
     }
     public Stack<AbstractAction> getActionStack() {
         return actionStack;
     }
-    public List<PartialObservableDeck<ExplodingKittenCard>> getPlayerHandCards() {
+    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
         return playerHandCards;
     }
 
     // Protected, only accessible in this package and subclasses
-    protected void setDiscardPile(Deck<ExplodingKittenCard> discardPile) {
+    protected void setDiscardPile(Deck<ExplodingKittensCard> discardPile) {
         this.discardPile = discardPile;
     }
-    protected void setDrawPile(PartialObservableDeck<ExplodingKittenCard> drawPile) {
+    protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
         this.drawPile = drawPile;
     }
-    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards) {
+    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
         this.playerHandCards = playerHandCards;
     }
     protected void setActionStack(Stack<AbstractAction> actionStack) {
@@ -134,44 +228,39 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Printing functions for the game state and decks.
 
     public void printToConsole() {
-        System.out.println("Exploding Kittens Game-State");
-        System.out.println("============================");
+        System.out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        String s = "============================\n";
 
         int currentPlayer = turnOrder.getCurrentPlayer(this);
 
         for (int i = 0; i < getNPlayers(); i++){
             if (currentPlayer == i)
-                System.out.print(">>> Player " + i + ":");
+                s += ">>> Player " + i + ":";
             else
-                System.out.print("Player " + i + ":");
-            printDeck(playerHandCards.get(i));
+                s += "Player " + i + ":";
+            s += playerHandCards.get(i).toString() + "\n";
         }
 
-        System.out.print("DrawPile" + ":");
-        printDeck(drawPile);
+        s += "\nDrawPile: ";
+        s += drawPile.toString() + "\n";
 
-        System.out.print("DiscardPile" + ":");
-        printDeck(discardPile);
+        s += "DiscardPile: ";
+        s += discardPile.toString() + "\n";
 
-        System.out.println("Current GamePhase: " + gamePhase);
-        System.out.println("Missing Draws: " + ((ExplodingKittenTurnOrder)turnOrder).requiredDraws);
-    }
-
-    public void printDeck(Deck<ExplodingKittenCard> deck){
-        StringBuilder sb = new StringBuilder();
-        for (ExplodingKittenCard card : deck.getComponents()){
-            sb.append(card.cardType.toString());
-            sb.append(",");
+        s += "Action stack: ";
+        for (AbstractAction a: actionStack) {
+            s += a.toString() + ",";
         }
-        if (sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-        System.out.println(sb.toString());
-        //System.out.println();
-    }
+        s = s.substring(0, s.length()-1);
+        s += "\n\n";
 
-    private void printActionStack(){
-        System.out.print("Action Stack:");
-        for (AbstractAction a : actionStack) {
-            System.out.print(a.toString() + ",");
-        }
+        s += "Current GamePhase: " + gamePhase + "\n";
+        s += "Missing Draws: " + ((ExplodingKittensTurnOrder)turnOrder).requiredDraws + "\n";
+        s += "============================\n";
+        return s;
     }
 }

@@ -1,7 +1,6 @@
 package core.properties;
 
 import org.json.simple.JSONArray;
-import utilities.Hash;
 import utilities.Vector2D;
 
 import java.util.Objects;
