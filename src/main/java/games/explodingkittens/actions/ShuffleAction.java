@@ -3,10 +3,13 @@ package games.explodingkittens.actions;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
+import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import core.turnorders.TurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.cards.ExplodingKittensCard;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
@@ -17,7 +20,7 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(new Random(gs.getGameParameters().getGameSeed()));
+        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(new Random(gs.getGameParameters().getRandomSeed()));
         return super.execute(gs);
     }
 
@@ -28,12 +31,21 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " shuffles the draw pile.";
+        return "Shuffle draw deck";
     }
 
     @Override
-    public boolean nopedExecute(AbstractGameState gs, TurnOrder turnOrder) {
-        return super.execute(gs);
+    public void nopedExecute(AbstractGameState gs) {
+        super.execute(gs);
+    }
+
+    @Override
+    public void actionPlayed(AbstractGameState gs) {
+        // Mark card as visible in the player's deck to all other players
+        PartialObservableDeck<ExplodingKittensCard> from = (PartialObservableDeck<ExplodingKittensCard>) gs.getComponentById(deckFrom);
+        boolean[] vis = new boolean[gs.getNPlayers()];
+        Arrays.fill(vis, true);
+        from.setVisibilityOfComponent(fromIndex, vis);
     }
 
     @Override

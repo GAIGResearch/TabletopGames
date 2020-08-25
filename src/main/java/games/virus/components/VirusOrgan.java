@@ -15,7 +15,9 @@ public class VirusOrgan extends Component {
         None,
         Neutral,
         Vaccinated,
+        VaccinatedWild,
         Infected,
+        InfectedWild,
         Immunised
     }
 
@@ -36,45 +38,45 @@ public class VirusOrgan extends Component {
         cards = new Deck<>("DeckOnOrgan");
     }
 
-    public void applyCard(VirusCard card)
-    {
-        switch (card.type) {
-            case Organ:
-                initialiseOrgan();
-                break;
-            case Medicine:
-                applyMedicine();
-                break;
-            case Virus:
-                applyVirus();
-                break;
-        }
-    }
-
     public void initialiseOrgan()
     {
         state = VirusOrganState.Neutral;
     }
 
-    public VirusOrganState applyMedicine() {
-        if (state == VirusOrganState.Neutral)
-            state = VirusOrganState.Vaccinated;
-        else if (state == VirusOrganState.Vaccinated)
-            state = VirusOrganState.Immunised;
-        else if (state == VirusOrganState.Infected)
-            state = VirusOrganState.Neutral;
+    public boolean isVaccinatedWild() {
+        return state == VirusOrganState.VaccinatedWild;
+    }
 
+    public boolean isInfectedWild() {
+        return state == VirusOrganState.InfectedWild;
+    }
+
+
+    public VirusOrganState applyMedicine(boolean isWild) {
+        if (state == VirusOrganState.Neutral) {
+            if (isWild)
+                state = VirusOrganState.VaccinatedWild;
+            else
+                state = VirusOrganState.Vaccinated;
+        }
+        else if (state == VirusOrganState.Vaccinated || state==VirusOrganState.VaccinatedWild)
+            state = VirusOrganState.Immunised;
+        else if (state == VirusOrganState.Infected || state == VirusOrganState.InfectedWild)
+            state = VirusOrganState.Neutral;
         return state;
     }
 
-    public VirusOrganState applyVirus() {
-        if (state == VirusOrganState.Neutral)
-            state = VirusOrganState.Infected;
-        else if (state == VirusOrganState.Infected)
+    public VirusOrganState applyVirus(boolean isWild) {
+        if (state == VirusOrganState.Neutral) {
+            if (isWild)
+                state = VirusOrganState.InfectedWild;
+            else
+                state = VirusOrganState.Infected;
+        }
+        else if (state == VirusOrganState.Infected || state == VirusOrganState.InfectedWild)
             state = VirusOrganState.None;
-        else if (state == VirusOrganState.Immunised)
+        else if (state == VirusOrganState.Vaccinated || state==VirusOrganState.VaccinatedWild)
             state = VirusOrganState.Neutral;
-
         return state;
     }
 
@@ -131,16 +133,19 @@ public class VirusOrgan extends Component {
     @Override
     public String toString() {
         String s = "";
-        if      (state == VirusOrganState.None)       s = "None      ";
-        else if (state == VirusOrganState.Neutral)    s = ANSI_BLUE  + "Neutral   " + ANSI_RESET;
-        else if (state == VirusOrganState.Infected)   s = ANSI_RED   + "Infected  " + ANSI_RESET;
-        else if (state == VirusOrganState.Immunised)  s = ANSI_GREEN + "Immunised " + ANSI_RESET;
-        else if (state == VirusOrganState.Vaccinated) s = ANSI_GREEN + "Vaccinated" + ANSI_RESET;
+        if      (state == VirusOrganState.None)           s =              "None          ";
+        else if (state == VirusOrganState.Neutral)        s = ANSI_BLUE  + "Neutral       " + ANSI_RESET;
+        else if (state == VirusOrganState.Infected)       s = ANSI_RED   + "Infected      " + ANSI_RESET;
+        else if (state == VirusOrganState.InfectedWild)   s = ANSI_RED   + "InfectedWild  " + ANSI_RESET;
+        else if (state == VirusOrganState.Immunised)      s = ANSI_GREEN + "Immunised     " + ANSI_RESET;
+        else if (state == VirusOrganState.Vaccinated)     s = ANSI_GREEN + "Vaccinated    " + ANSI_RESET;
+        else if (state == VirusOrganState.VaccinatedWild) s = ANSI_GREEN + "VaccinatedWild" + ANSI_RESET;
         return s;
     }
 
     public boolean isHealthy() {
-        return state == VirusOrganState.Neutral || state == VirusOrganState.Vaccinated || state == VirusOrganState.Immunised;
+        return state == VirusOrganState.Neutral        || state == VirusOrganState.Vaccinated ||
+               state == VirusOrganState.VaccinatedWild || state == VirusOrganState.Immunised;
     }
 
     public Deck<VirusCard> getCards() {

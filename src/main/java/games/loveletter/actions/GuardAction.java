@@ -45,6 +45,11 @@ public class GuardAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Guard (guess player " + opponentID + " holds " + cardType.name() + ")";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
@@ -52,7 +57,7 @@ public class GuardAction extends DrawCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof GuardAction)) return false;
         if (!super.equals(o)) return false;
         GuardAction that = (GuardAction) o;
         return opponentID == that.opponentID &&

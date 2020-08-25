@@ -2,6 +2,8 @@ package core.turnorders;
 
 import core.AbstractGameState;
 
+import java.util.Objects;
+
 public class AlternatingTurnOrder extends TurnOrder {
     protected int direction;
 
@@ -29,5 +31,19 @@ public class AlternatingTurnOrder extends TurnOrder {
 
     public void reverse(){
         direction *= -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AlternatingTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        AlternatingTurnOrder that = (AlternatingTurnOrder) o;
+        return direction == that.direction;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), direction);
     }
 }

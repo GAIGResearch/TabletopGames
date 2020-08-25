@@ -6,8 +6,8 @@ import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import java.util.LinkedList;
+import java.util.Objects;
 
-import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class PandemicTurnOrder extends ReactiveTurnOrder {
@@ -50,16 +50,7 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnStep = 0;
-            turnOwner = nextPlayer(gameState);
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 
@@ -76,16 +67,7 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         else {
             turnStep = 0;
             turnCounter = 0;
-            turnOwner = 0;
-            int n = 0;
-            while (gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
-                turnOwner = nextPlayer(gameState);
-                n++;
-                if (n >= nPlayers) {
-                    gameState.setGameStatus(GAME_END);
-                    break;
-                }
-            }
+            moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 
@@ -96,5 +78,20 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
         pto.turnStep = turnStep;
         pto.nStepsPerTurn = nStepsPerTurn;
         return pto;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PandemicTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        PandemicTurnOrder that = (PandemicTurnOrder) o;
+        return nStepsPerTurn == that.nStepsPerTurn &&
+                turnStep == that.turnStep;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), nStepsPerTurn, turnStep);
     }
 }

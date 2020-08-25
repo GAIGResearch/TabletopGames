@@ -292,7 +292,12 @@ public class GameFlowDiagram extends JFrame {
             this.id = n.getId();
             this.y = level;
             this.x = xAllocation[level]++;
-            this.name = n.getClass().toString().split("\\.")[4];
+            String[] sp = n.getClass().toString().split("\\.");
+            if (sp.length > 4) {
+                this.name = sp[4];
+            } else {
+                this.name = sp[3];
+            }
             this.actionRequired = n.requireAction();
             this.nextPlayer = n.isNextPlayerNode();
             if (n instanceof RuleNode) {

@@ -1,8 +1,6 @@
 package core.properties;
 
 
-import java.util.Objects;
-
 public class PropertyInt extends Property
 {
     public int value;

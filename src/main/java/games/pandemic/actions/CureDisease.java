@@ -54,10 +54,9 @@ public class CureDisease extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof CureDisease)) return false;
         CureDisease that = (CureDisease) o;
-        return Objects.equals(color, that.color) &&
-                Objects.equals(cardIds, that.cardIds);
+        return Objects.equals(color, that.color) && cardIds.equals(that.cardIds);
     }
 
     public ArrayList<Integer> getCards() {

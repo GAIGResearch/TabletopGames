@@ -3,9 +3,9 @@ package games.pandemic;
 import core.*;
 import games.GameType;
 import games.pandemic.gui.PandemicGUI;
-import players.ActionController;
-import players.OSLA;
-import players.RandomPlayer;
+import players.human.ActionController;
+import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.util.*;
@@ -29,13 +29,13 @@ public class PandemicGame extends Game {
         players.add(new RandomPlayer(new Random()));
         players.add(new RandomPlayer(new Random()));
 //        players.add(new HumanGUIPlayer(ac));
-        players.add(new OSLA());
+        players.add(new OSLAPlayer());
 
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         PandemicGame game = new PandemicGame(players, params);
 
-        AbstractGUI gui = new PandemicGUI((PandemicGameState)game.getGameState(), ac);
+        AbstractGUI gui = new PandemicGUI(game, ac);
         game.run(gui);
 
 //        game.run(null);

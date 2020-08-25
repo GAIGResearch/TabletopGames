@@ -35,13 +35,13 @@ public class GraphBoard extends Component {
         boardNodes = new ArrayList<>();
     }
 
-    private GraphBoard(String name, int ID)
+    GraphBoard(String name, int ID)
     {
         super(ComponentType.BOARD, name, ID);
         boardNodes = new ArrayList<>();
     }
 
-    private GraphBoard(int ID)
+    GraphBoard(int ID)
     {
         super(ComponentType.BOARD, ID);
         boardNodes = new ArrayList<>();
@@ -135,6 +135,49 @@ public class GraphBoard extends Component {
         this.boardNodes = boardNodes;
     }
 
+    public void addBoardNode(BoardNode bn) {
+        this.boardNodes.add(bn);
+    }
+
+    public void removeBoardNode(BoardNode bn) {
+        this.boardNodes.remove(bn);
+    }
+
+    public void breakConnection(BoardNode bn1, BoardNode bn2) {
+        bn1.removeNeighbour(bn2);
+        bn2.removeNeighbour(bn1);
+
+        // Check if they have at least 1 more neighbour on this board. If not, remove node from this board
+        boolean inBoard = false;
+        for (BoardNode n: bn1.getNeighbours()) {
+            if (boardNodes.contains(n)) {
+                inBoard = true;
+                break;
+            }
+        }
+        if (!inBoard) boardNodes.remove(bn1);
+
+        inBoard = false;
+        for (BoardNode n: bn2.getNeighbours()) {
+            if (boardNodes.contains(n)) {
+                inBoard = true;
+                break;
+            }
+        }
+        if (!inBoard) boardNodes.remove(bn2);
+    }
+
+    public void addConnection(BoardNode bn1, BoardNode bn2) {
+        bn1.addNeighbour(bn2);
+        bn2.addNeighbour(bn1);
+        if (!boardNodes.contains(bn1)) {
+            boardNodes.add(bn1);
+        }
+        if (!boardNodes.contains(bn2)) {
+            boardNodes.add(bn2);
+        }
+    }
+
     /**
      * Loads all boards from a JSON file.
      * @param filename - path to file.
@@ -172,9 +215,9 @@ public class GraphBoard extends Component {
         String neighboursKey = (String) board.get("neighboursKey");
         int maxNeighbours = (int) (long) board.get("maxNeighbours");
 
-        properties.put(Hash.GetInstance().hash("boardType"), new PropertyString(boardType));
+        properties.put(Hash.GetInstance().hash("boardType"), new PropertyString("boardType", boardType));
         if (board.get("img") != null) {
-            properties.put(imgHash, new PropertyString((String) board.get("img")));
+            properties.put(imgHash, new PropertyString("img", (String) board.get("img")));
         }
 
         JSONArray nodeList = (JSONArray) board.get("nodes");

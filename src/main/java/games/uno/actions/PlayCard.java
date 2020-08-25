@@ -2,7 +2,9 @@ package games.uno.actions;
 
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.actions.DrawCard;
+import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.uno.UnoTurnOrder;
@@ -10,6 +12,8 @@ import games.uno.cards.UnoCard;
 import games.uno.UnoGameState;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 public class PlayCard extends DrawCard implements IPrintable {
 
@@ -27,6 +31,8 @@ public class PlayCard extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gameState) {
         UnoGameState ugs = (UnoGameState)gameState;
         super.execute(gameState);
+
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
 
         UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
         ugs.updateCurrentCard(cardToBePlayed);
@@ -53,7 +59,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                         drawDeck.remove(ugs.getCurrentCard());
                         discardDeck.add(ugs.getCurrentCard());
 
-                        drawDeck.shuffle();
+                        drawDeck.shuffle(r);
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }
@@ -71,7 +77,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                         drawDeck.remove(ugs.getCurrentCard());
                         discardDeck.add(ugs.getCurrentCard());
 
-                        drawDeck.shuffle();
+                        drawDeck.shuffle(r);
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }
@@ -105,6 +111,35 @@ public class PlayCard extends DrawCard implements IPrintable {
             return getCard(gameState).toString() + "; Change to color " + color;
         }
         return "Play card " + getCard(gameState).toString();
+    }
+
+    @Override
+    public Card getCard(AbstractGameState gs) {
+        if (!executed) {
+            Deck<UnoCard> deck = (Deck<UnoCard>) gs.getComponentById(deckFrom);
+            if (fromIndex == deck.getSize()) return deck.get(fromIndex-1);
+            return deck.get(fromIndex);
+        }
+        return (UnoCard) gs.getComponentById(cardId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayCard)) return false;
+        if (!super.equals(o)) return false;
+        PlayCard playCard = (PlayCard) o;
+        return Objects.equals(color, playCard.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), color);
+    }
+
+    @Override
+    public AbstractAction copy() {
+        return new PlayCard(deckFrom, deckTo, fromIndex, color);
     }
 }
 

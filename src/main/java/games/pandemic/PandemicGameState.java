@@ -6,8 +6,7 @@ import core.components.*;
 import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
-import core.AbstractGameParameters;
-import players.heuristics.PandemicHeuristic;
+import core.AbstractParameters;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -102,9 +101,23 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
 
     @Override
     protected double _getScore(int playerId) {
-        // Martin's heuristic. // TODO maybe improvements?
-        PandemicHeuristic ph = new PandemicHeuristic(this);
-        return ph.evaluateState(this);
+        return new PandemicHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<Integer>() {{
+            Deck<Card> pd = (Deck<Card>) getComponent(playerDeckHash);
+            Deck<Card> id = (Deck<Card>) getComponent(infectionHash);
+            add(pd.getComponentID());
+            add(id.getComponentID());
+            for (Component c: pd.getComponents()) {
+                add(c.getComponentID());
+            }
+            for (Component c: id.getComponents()) {
+                add(c.getComponentID());
+            }
+        }};
     }
 
     @Override
@@ -118,12 +131,32 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         researchStationLocations = new ArrayList<>();
     }
 
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PandemicGameState)) return false;
+        if (!super.equals(o)) return false;
+        PandemicGameState that = (PandemicGameState) o;
+        return quietNight == that.quietNight &&
+                epidemic == that.epidemic &&
+                nCardsDrawn == that.nCardsDrawn &&
+                Objects.equals(areas, that.areas) &&
+                Objects.equals(tempDeck, that.tempDeck) &&
+                Objects.equals(world, that.world) &&
+                Objects.equals(researchStationLocations, that.researchStationLocations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), areas, tempDeck, world, quietNight, epidemic, nCardsDrawn, researchStationLocations);
+    }
+
     /**
      * Constructor. Calls super with objects corresponding to this game and loads the data for the game.
      * @param pp - Game parameters.
      * @param nPlayers - number of players.
      */
-    public PandemicGameState(AbstractGameParameters pp, int nPlayers) {
+    public PandemicGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
         data = new PandemicData();
         data.load(((PandemicParameters)gameParameters).getDataPath());
@@ -200,13 +233,14 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
                 a = new Area(key, "Game area");
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
-                    if (PARTIAL_OBSERVABLE && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                    if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                        Random r = new Random(gs.getGameParameters().getRandomSeed());
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled
-                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).n_forecast_cards, hiddenDeck.getSize());
+                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).n_forecast_cards, hiddenDeck.getSize(), r);
                         } else {
-                            hiddenDeck.shuffle();  // We know what cards are in there, a simple shuffle is enough
+                            hiddenDeck.shuffle(r);  // We know what cards are in there, a simple shuffle is enough
                         }
                         a.putComponent(e.getKey(), hiddenDeck);
                     } else {

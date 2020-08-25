@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import static core.CoreConstants.VERBOSE;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
-import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 
 public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
@@ -34,7 +34,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
      * @param gameParameters - parameters for the game.
      * @param nPlayers - number of players in the game.
      */
-    public PandemicForwardModel(AbstractGameParameters gameParameters, int nPlayers) {
+    public PandemicForwardModel(AbstractParameters gameParameters, int nPlayers) {
         PandemicParameters pp = (PandemicParameters) gameParameters;
 
         // Game over conditions
@@ -46,7 +46,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         // Rules
         RuleNode infectCities = new InfectCities(pp.infection_rate, pp.max_cubes_per_city, pp.n_cubes_infection);
         RuleNode forceDiscardReaction = new ForceDiscardReaction();
-        RuleNode epidemic2 = new EpidemicIntensify(new Random(pp.getGameSeed()));
+        RuleNode epidemic2 = new EpidemicIntensify(new Random(pp.getRandomSeed()));
         RuleNode forceRPreaction = new ForceRPReaction();
         RuleNode epidemic1 = new EpidemicInfect(pp.max_cubes_per_city, pp.n_cubes_epidemic);
         RuleNode drawCards = new DrawCards();
@@ -131,7 +131,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         PandemicGameState state = (PandemicGameState) firstState;
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();
@@ -157,7 +157,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         state.areas.put(-1, gameArea);
 
         // Load the board
-        state.world = _data.findBoard("cities");
+        state.world = _data.findGraphBoard("cities");
         gameArea.putComponent(pandemicBoardHash, state.world);
 
         // Initialize game state variables
@@ -221,7 +221,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
         // Give players cards
         int nCardsPlayer = pp.n_cards_per_player.get(state.getNPlayers());
-        playerRoles.shuffle();
+        playerRoles.shuffle(rnd);
         long maxPop = 0;
         int startingPlayer = -1;
 
@@ -266,7 +266,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             int index = i * range + i + rnd.nextInt(range);
 
             Card card = new Card("Epidemic");
-            card.setProperty(nameHash, new PropertyString("epidemic"));
+            card.setProperty(new PropertyString("name", "epidemic"));
             playerDeck.add(card, index);
 
         }
@@ -308,6 +308,9 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
     protected void endGame(AbstractGameState gameState) {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             gameState.setPlayerResult(gameState.getGameStatus(), i);
+        }
+        if (VERBOSE) {
+            System.out.println(gameState.getGameStatus());
         }
     }
 }

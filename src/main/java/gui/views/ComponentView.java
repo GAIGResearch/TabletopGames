@@ -33,4 +33,10 @@ public abstract class ComponentView extends JComponent {
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
     }
+
+    @Override
+    public void setPreferredSize(Dimension preferredSize) {
+        this.width = preferredSize.width;
+        this.height = preferredSize.height;
+    }
 }

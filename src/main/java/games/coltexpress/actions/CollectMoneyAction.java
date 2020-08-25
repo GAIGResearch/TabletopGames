@@ -5,23 +5,21 @@ import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Deck;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Random;
-
-import static core.CoreConstants.VERBOSE;
 
 public class CollectMoneyAction extends DrawCard {
 
     private final int availableLoot;
-    private final int loot;
+    private final ColtExpressTypes.LootType loot;
 
-    public CollectMoneyAction(int plannedActions, int playerDeck,
-                              int loot, int availableLoot) {
-        super(plannedActions, playerDeck);
+    public CollectMoneyAction(int plannedActions, int playerDeck, int cardIdx,
+                              ColtExpressTypes.LootType loot, int availableLoot) {
+        super(plannedActions, playerDeck, cardIdx);
 
         this.loot = loot;
         this.availableLoot = availableLoot;
@@ -30,30 +28,34 @@ public class CollectMoneyAction extends DrawCard {
     @Override
     public boolean execute(AbstractGameState gameState) {
         super.execute(gameState);
-        if (loot == -1)
+        if (loot == null) {
             return false;
+        }
 
+        // Find all loot of type
+        Deck<Loot> possible = new Deck<>("tmp");
         Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
-        LinkedList<Loot> lootOfCorrectType = new LinkedList<>();
         for (Loot available : availableLootDeck.getComponents()){
-            if (available.getComponentID() == loot)
-                lootOfCorrectType.add(available);
+            if (available.getLootType() == loot) {
+                possible.add(available);
+            }
         }
 
-        if (lootOfCorrectType.size() == 0 && VERBOSE){
-            System.out.println();
+        // Choose random loot of type to collect
+        if (possible.getSize() > 0) {
+            Loot available = possible.pick(new Random(gameState.getGameParameters().getRandomSeed()));
+            ColtExpressCard card = (ColtExpressCard) getCard(gameState);
+            ((ColtExpressGameState) gameState).addLoot(card.playerID, available);
+            availableLootDeck.remove(available);
+            return true;
         }
-        ColtExpressCard card = (ColtExpressCard) gameState.getComponentById(cardId);
-        ((ColtExpressGameState) gameState).addLoot(card.playerID,
-                lootOfCorrectType.get(new Random().nextInt(lootOfCorrectType.size())));
-
-        return true;
+        return false;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof CollectMoneyAction)) return false;
         if (!super.equals(o)) return false;
         CollectMoneyAction that = (CollectMoneyAction) o;
         return availableLoot == that.availableLoot &&
@@ -66,13 +68,23 @@ public class CollectMoneyAction extends DrawCard {
     }
 
     public String toString(){
-        if (loot == -1)
+        if (loot == null)
             return "Attempt to collect loot but no loot is available";
-        return "Collect loot";
+        return "Collect " + loot.name();
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        if (availableLoot == -1) return "Collect loot (none)";
+        if (loot == null) {
+            return "Collect loot (none)";
+        } else {
+            return "Collect loot (" + loot + ")";
+        }
     }
 
     @Override
     public AbstractAction copy() {
-        return new CollectMoneyAction(deckFrom, deckTo, loot, availableLoot);
+        return new CollectMoneyAction(deckFrom, deckTo, fromIndex, loot, availableLoot);
     }
 }

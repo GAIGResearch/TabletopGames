@@ -17,9 +17,9 @@ public class ShootPlayerAction extends DrawCard {
 
     private final boolean isDjango;
 
-    public ShootPlayerAction(int plannedActions, int playerDeck,
+    public ShootPlayerAction(int plannedActions, int playerDeck, int cardIdx,
                              int playerCompartment, int targetCompartment, int targetID, boolean isDjango) {
-        super(plannedActions, playerDeck);
+        super(plannedActions, playerDeck, cardIdx);
         this.targetID = targetID;
         this.playerCompartment = playerCompartment;
         this.targetCompartment = targetCompartment;
@@ -77,7 +77,7 @@ public class ShootPlayerAction extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ShootPlayerAction)) return false;
         if (!super.equals(o)) return false;
         ShootPlayerAction that = (ShootPlayerAction) o;
         return targetID == that.targetID &&
@@ -98,7 +98,16 @@ public class ShootPlayerAction extends DrawCard {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        if (targetID == -1) return "Shoot nobody";
+
+        Compartment target = (Compartment) gameState.getComponentById(targetCompartment);
+        String character = ((ColtExpressGameState)gameState).getPlayerCharacters().get(targetID).name();
+        return "Shoot " + character + (isDjango?" to c=" + target.getCompartmentID(): "");
+    }
+
+    @Override
     public AbstractAction copy() {
-        return new ShootPlayerAction(deckFrom, deckTo, playerCompartment, targetCompartment, targetID, isDjango);
+        return new ShootPlayerAction(deckFrom, deckTo, fromIndex, playerCompartment, targetCompartment, targetID, isDjango);
     }
 }

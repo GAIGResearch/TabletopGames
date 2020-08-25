@@ -27,6 +27,11 @@ public class PrincessAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Princess (lose game)";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(toString());
     }

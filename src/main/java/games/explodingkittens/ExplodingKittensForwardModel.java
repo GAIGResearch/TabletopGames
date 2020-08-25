@@ -6,8 +6,11 @@ import core.AbstractForwardModel;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.actions.*;
-import games.explodingkittens.cards.ExplodingKittenCard;
-import core.CoreConstants;
+import games.explodingkittens.actions.reactions.ChooseSeeTheFutureOrder;
+import games.explodingkittens.actions.reactions.GiveCard;
+import games.explodingkittens.actions.reactions.PassAction;
+import games.explodingkittens.actions.reactions.PlaceExplodingKitten;
+import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
 import java.util.*;
@@ -23,45 +26,42 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      * @param firstState - the state to be modified to the initial game state.
      */
     protected void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
-        ExplodingKittenParameters ekp = (ExplodingKittenParameters)firstState.getGameParameters();
+        ExplodingKittensParameters ekp = (ExplodingKittensParameters)firstState.getGameParameters();
 
         // Set up draw pile deck
-        PartialObservableDeck<ExplodingKittenCard> drawPile = new PartialObservableDeck<>("Draw Pile", firstState.getNPlayers());
+        PartialObservableDeck<ExplodingKittensCard> drawPile = new PartialObservableDeck<>("Draw Pile", firstState.getNPlayers());
         ekgs.setDrawPile(drawPile);
 
         // Add all cards but defuse and exploding kittens
-        for (HashMap.Entry<ExplodingKittenCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
-            if (entry.getKey() == ExplodingKittenCard.CardType.DEFUSE || entry.getKey() == ExplodingKittenCard.CardType.EXPLODING_KITTEN)
+        for (HashMap.Entry<ExplodingKittensCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
+            if (entry.getKey() == ExplodingKittensCard.CardType.DEFUSE || entry.getKey() == ExplodingKittensCard.CardType.EXPLODING_KITTEN)
                 continue;
             for (int i = 0; i < entry.getValue(); i++) {
-                ExplodingKittenCard card = new ExplodingKittenCard(entry.getKey());
+                ExplodingKittensCard card = new ExplodingKittensCard(entry.getKey());
                 drawPile.add(card);
             }
         }
         ekgs.getDrawPile().shuffle(rnd);
 
         // Set up player hands
-        List<PartialObservableDeck<ExplodingKittenCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
+        List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
         for (int i = 0; i < firstState.getNPlayers(); i++) {
-            // Set up visibility
-            boolean[] visibility = new boolean[firstState.getNPlayers()];
-            Arrays.fill(visibility, !CoreConstants.PARTIAL_OBSERVABLE);
-            visibility[i] = true;
-
-            PartialObservableDeck<ExplodingKittenCard> playerCards = new PartialObservableDeck<>("Player Cards", visibility);
+            boolean[] visible = new boolean[firstState.getNPlayers()];
+            visible[i] = true;
+            PartialObservableDeck<ExplodingKittensCard> playerCards = new PartialObservableDeck<>("Player Cards", visible);
             playerHandCards.add(playerCards);
 
             // Add defuse card
-            ExplodingKittenCard defuse =  new ExplodingKittenCard(ExplodingKittenCard.CardType.DEFUSE);
+            ExplodingKittensCard defuse =  new ExplodingKittensCard(ExplodingKittensCard.CardType.DEFUSE);
             defuse.setOwnerId(i);
             playerCards.add(defuse);
 
             // Add N random cards from the deck
             for (int j = 0; j < ekp.nCardsPerPlayer; j++) {
-                ExplodingKittenCard c = ekgs.getDrawPile().draw();
+                ExplodingKittensCard c = ekgs.getDrawPile().draw();
                 c.setOwnerId(i);
                 playerCards.add(c);
             }
@@ -71,16 +71,18 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         // Add remaining defuse cards and exploding kitten cards to the deck and shuffle again
         for (int i = ekgs.getNPlayers(); i < ekp.nDefuseCards; i++){
-            ExplodingKittenCard defuse = new ExplodingKittenCard(ExplodingKittenCard.CardType.DEFUSE);
+            ExplodingKittensCard defuse = new ExplodingKittensCard(ExplodingKittensCard.CardType.DEFUSE);
             drawPile.add(defuse);
         }
-        for (int i = 0; i < ekgs.getNPlayers() + ekp.cardCounts.get(ExplodingKittenCard.CardType.EXPLODING_KITTEN); i++){
-            ExplodingKittenCard explodingKitten = new ExplodingKittenCard(ExplodingKittenCard.CardType.EXPLODING_KITTEN);
+        for (int i = 0; i < ekgs.getNPlayers() + ekp.cardCounts.get(ExplodingKittensCard.CardType.EXPLODING_KITTEN); i++){
+            ExplodingKittensCard explodingKitten = new ExplodingKittensCard(ExplodingKittensCard.CardType.EXPLODING_KITTEN);
             drawPile.add(explodingKitten);
         }
         drawPile.shuffle(rnd);
 
         ekgs.setActionStack(new Stack<>());
+
+        ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
     }
 
     /**
@@ -90,60 +92,59 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
-        if (VERBOSE) {
-            System.out.println(action.toString());
-        }
-
-        ExplodingKittenTurnOrder ekTurnOrder = (ExplodingKittenTurnOrder) gameState.getTurnOrder();
+        ExplodingKittensTurnOrder ekTurnOrder = (ExplodingKittensTurnOrder) gameState.getTurnOrder();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         Stack<AbstractAction> actionStack = ekgs.getActionStack();
 
-        if (actionStack.size() == 0){
-            if (action instanceof IsNopeable) {
-                actionStack.add(action);
-                ekTurnOrder.registerNopeableActionByPlayer(ekgs);
-            } else {
-                action.execute(gameState);
-            }
-        } else {
-            // action is either nope or pass
+        if (action instanceof IsNopeable) {
+            actionStack.add(action);
+            ((IsNopeable) action).actionPlayed(ekgs);
+
+            ekTurnOrder.registerNopeableActionByPlayer(ekgs, ekTurnOrder.getCurrentPlayer(ekgs));
             if (action instanceof NopeAction) {
-                actionStack.add(action);
-                action.execute(gameState);
-                ekTurnOrder.registerNopeableActionByPlayer(ekgs);
+                // Nope cards added immediately to avoid infinite nopeage
+                action.execute(ekgs);
             } else {
-                ekTurnOrder.endPlayerTurnStep(gameState);
-
                 if (ekTurnOrder.reactionsFinished()){
-                    // apply stack
-                    if (actionStack.size()%2 == 0){
-                        while (actionStack.size() > 1) {
-                            actionStack.pop();
-                        }
-                        //Action was successfully noped
-                        ((IsNopeable) actionStack.pop()).nopedExecute(gameState, ekTurnOrder); // TODO: this just executes super action (again), why?
-                        if (VERBOSE) {
-                            System.out.println("Action was successfully noped");
-                        }
-                    } else {
-                        if (actionStack.size() > 2 && VERBOSE) {
-                            System.out.println("All nopes were noped");
-                        }
-
-                        while (actionStack.size() > 1) {
-                            actionStack.pop();
-                        }
-
-                        //Action can be played
-                        AbstractAction stackedAction = actionStack.get(0);
-                        stackedAction.execute(gameState);
-                    }
+                    action.execute(ekgs);
                     actionStack.clear();
-                    if (ekgs.getGamePhase() == Nope) {
-                        ekgs.setMainGamePhase();
-                    }
                 }
             }
+        } else if (action instanceof PassAction) {
+
+            ekTurnOrder.endPlayerTurnStep(gameState);
+
+            if (ekTurnOrder.reactionsFinished()) {
+                // apply stack
+                if (actionStack.size()%2 == 0){
+                    while (actionStack.size() > 1) {
+                        actionStack.pop();
+                    }
+                    //Action was successfully noped
+                    ((IsNopeable) actionStack.pop()).nopedExecute(gameState);
+                    if (VERBOSE) {
+                        System.out.println("Action was successfully noped");
+                    }
+                } else {
+                    if (actionStack.size() > 2 && VERBOSE) {
+                        System.out.println("All nopes were noped");
+                    }
+
+                    while (actionStack.size() > 1) {
+                        actionStack.pop();
+                    }
+
+                    //Action can be played
+                    AbstractAction stackedAction = actionStack.get(0);
+                    stackedAction.execute(gameState);
+                }
+                actionStack.clear();
+                if (ekgs.getGamePhase() == Nope) {
+                    ekgs.setMainGamePhase();
+                }
+            }
+        } else {
+            action.execute(gameState);
         }
     }
 
@@ -155,7 +156,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void endGame(AbstractGameState gameState) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
         for (int i = 0; i < gameState.getNPlayers(); i++){
             if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING)
                 gameState.setPlayerResult(Utils.GameResult.WIN, i);
@@ -178,9 +178,12 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         ArrayList<AbstractAction> actions;
-        // todo the actions per player do not change a lot in between two turns
-        // i would strongly recommend to update an existing list instead of generating a new list everytime we query this function
-        int player = ekgs.getTurnOrder().getCurrentPlayer(ekgs);
+
+        // The actions per player do not change a lot in between two turns
+        // Could update an existing list instead of generating a new list every time we query this function
+
+        // Find actions for the player depending on current game phase
+        int player = ekgs.getCurrentPlayer();
         if (AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
             actions = playerActions(ekgs, player);
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
@@ -205,11 +208,14 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
     private ArrayList<AbstractAction> playerActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = ekgs.playerHandCards.get(playerID);
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
 
-        // todo: only add unique actions
+        HashSet<ExplodingKittensCard.CardType> types = new HashSet<>();
         for (int c = 0; c < playerDeck.getSize(); c++) {
-            ExplodingKittenCard card = playerDeck.getComponents().get(c);
+            ExplodingKittensCard card = playerDeck.get(c);
+            if (types.contains(card.cardType)) continue;
+            types.add(card.cardType);
+
             switch (card.cardType) {
                 case DEFUSE:
                 case MELONCAT:
@@ -244,7 +250,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     actions.add(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture());
+                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
                     break;
                 default:
                     System.out.println("No actions known for cardtype: " + card.cardType.toString());
@@ -268,10 +274,10 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
     private ArrayList<AbstractAction> placeKittenActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = ekgs.playerHandCards.get(playerID);
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
         int explodingKittenCard = -1;
         for (int i = 0; i < playerDeck.getSize(); i++) {
-            if (playerDeck.getComponents().get(i).cardType == ExplodingKittenCard.CardType.EXPLODING_KITTEN) {
+            if (playerDeck.getComponents().get(i).cardType == ExplodingKittensCard.CardType.EXPLODING_KITTEN) {
                 explodingKittenCard = i;
                 break;
             }
@@ -286,9 +292,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
     private ArrayList<AbstractAction> nopeActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = ekgs.playerHandCards.get(playerID);
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
         for (int c = 0; c < playerDeck.getSize(); c++) {
-            if (playerDeck.getComponents().get(c).cardType == ExplodingKittenCard.CardType.NOPE) {
+            if (playerDeck.getComponents().get(c).cardType == ExplodingKittensCard.CardType.NOPE) {
                 actions.add(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                 break;
             }
@@ -299,8 +305,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
     private ArrayList<AbstractAction> favorActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = ekgs.playerHandCards.get(playerID);
-        Deck<ExplodingKittenCard> receiverDeck = ekgs.playerHandCards.get(ekgs.playerGettingAFavor);
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
+        Deck<ExplodingKittensCard> receiverDeck = ekgs.playerHandCards.get(ekgs.playerGettingAFavor);
         for (int card = 0; card < playerDeck.getSize(); card++) {
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
         }
@@ -309,24 +315,37 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
     private ArrayList<AbstractAction> seeTheFutureActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<ExplodingKittenCard> playerDeck = ekgs.playerHandCards.get(playerID);
-        List<ExplodingKittenCard> cards = ekgs.drawPile.getComponents();
-        int numberOfCards = ekgs.drawPile.getSize();
-        int n = Math.min(((ExplodingKittenParameters)ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
-        ArrayList<int[]> permutations = new ArrayList<>();
-        int[] order = new int[n];
-        for (int i = 0; i < n; i++) {
-            order[i] = i;
-        }
-        generatePermutations(n, order, permutations);
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
+
+        int cardIdx = -1;
         for (int c = 0; c < playerDeck.getSize(); c++) {
-            if (playerDeck.getComponents().get(c).cardType == ExplodingKittenCard.CardType.SEETHEFUTURE) {
-                for (int[] perm : permutations) {
-                    actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(),
-                            ekgs.discardPile.getComponentID(), c, ekgs.drawPile.getComponentID(), perm));
-                }
+            if (playerDeck.get(c).cardType == ExplodingKittensCard.CardType.SEETHEFUTURE) {
+                cardIdx = c;
+                break;
             }
         }
+
+        if (cardIdx != -1) {
+            List<ExplodingKittensCard> cards = ekgs.drawPile.getComponents();
+            int numberOfCards = ekgs.drawPile.getSize();
+            int n = Math.min(((ExplodingKittensParameters) ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
+            if (n > 0) {
+
+                ArrayList<int[]> permutations = new ArrayList<>();
+                int[] order = new int[n];
+                for (int i = 0; i < n; i++) {
+                    order[i] = i;
+                }
+                generatePermutations(n, order, permutations);
+                for (int[] perm : permutations) {
+                    actions.add(new ChooseSeeTheFutureOrder(playerDeck.getComponentID(),
+                            ekgs.discardPile.getComponentID(), cardIdx, ekgs.drawPile.getComponentID(), perm));
+                }
+            }
+        } else {
+            System.out.println("ERROR: Player doesn't have see the future card");
+        }
+
         return actions;
     }
 }

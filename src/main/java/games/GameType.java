@@ -1,16 +1,18 @@
 package games;
 
 import core.*;
-import core.components.GridBoard;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
-import games.explodingkittens.ExplodingKittenParameters;
+import games.coltexpress.gui.ColtExpressGUI;
+import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.gui.ExplodingKittensGUI;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.gui.LoveLetterGUI;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
@@ -18,17 +20,17 @@ import games.pandemic.gui.PandemicGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.gui.TicTacToeGUI;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
+import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import gui.PrototypeGUI;
-import players.ActionController;
-import games.catan.CatanGameState;
-import games.catan.CatanForwardModel;
-import games.catan.CatanParameters;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,15 +73,10 @@ public enum GameType {
     ColtExpress (2, 6,
             new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
-    Carcassonne (2, 5,
-            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
-            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
-    // todo catan is just a copy of pandemic
-    Catan(2, 4,
-                     new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
-            new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
-        add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }});
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }});
+//    Carcassonne (2, 5,
+//            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
+//            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -103,10 +100,6 @@ public enum GameType {
                 return Virus;
             case "coltexpress":
                 return ColtExpress;
-            case "carcassonne":
-                return Carcassonne;
-            case "cata":
-                return Catan;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -121,12 +114,14 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-            System.out.println("Unsupported number of players: " + nPlayers
-                    + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
+            if (VERBOSE) {
+                System.out.println("Unsupported number of players: " + nPlayers
+                        + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
+            }
             return null;
         }
 
-        AbstractGameParameters params;
+        AbstractParameters params;
         AbstractForwardModel forwardModel = null;
         AbstractGameState gameState = null;
 
@@ -142,7 +137,7 @@ public enum GameType {
                 gameState = new TicTacToeGameState(params, nPlayers);
                 break;
             case ExplodingKittens:
-                params = new ExplodingKittenParameters(seed);
+                params = new ExplodingKittensParameters(seed);
                 forwardModel = new ExplodingKittensForwardModel();
                 gameState = new ExplodingKittensGameState(params, nPlayers);
                 break;
@@ -165,38 +160,58 @@ public enum GameType {
                 params = new ColtExpressParameters(seed);
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
-            case Catan:
-                params = new CatanParameters(seed);
-                forwardModel = new CatanForwardModel();
-                gameState = new CatanGameState(params, nPlayers);
+                break;
         }
 
-        if (forwardModel != null) {
-            return new Game(this, forwardModel, gameState);
-        }
-        return null;
+        return new Game(this, forwardModel, gameState);
     }
 
     /**
      * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
-     * @param gameState - initial game state from the game.
+     * @param game - game to create a GUI for.
      * @param ac - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    public AbstractGUI createGUI(AbstractGameState gameState, ActionController ac) {
+    public AbstractGUI createGUI(Game game, ActionController ac) {
 
         AbstractGUI gui = null;
 
+        // Find ID of human player, if any (-1 if none)
+        int human = -1;
+        if (game != null && game.getPlayers() != null) {
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
+                    human = i;
+                    break;
+                }
+            }
+        }
+
         switch(this) {
             case Pandemic:
-                gui = new PandemicGUI(gameState, ac);
+                gui = new PandemicGUI(game, ac);
+                break;
+//            case ExplodingKittens:
+//                if (gameState != null) {
+//                    gui = new PrototypeGUI(this, gameState, ac, 500);
+//                } else {
+//                    gui = new PrototypeGUI(this,null, ac, 0);
+//                }
+            case Uno:
+                gui = new UnoGUI(game, ac, human);
+                break;
+            case ColtExpress:
+                gui = new ColtExpressGUI(game, ac, human);
                 break;
             case ExplodingKittens:
-                if (gameState != null) {
-                    gui = new PrototypeGUI(this, gameState, ac, 500);
-                } else {
-                    gui = new PrototypeGUI(this,null, ac, 0);
-                }
+                gui = new ExplodingKittensGUI(game, ac, human);
+                break;
+            case LoveLetter:
+                gui = new LoveLetterGUI(game, ac, human);
+                break;
+            case TicTacToe:
+                gui = new TicTacToeGUI(game, ac);
+                break;
         }
 
         return gui;
@@ -228,7 +243,11 @@ public enum GameType {
         Trains,
         CityBuilding,
         Medieval,
-        TerritoryBuilding;
+        TerritoryBuilding,
+        Adventure,
+        Exploration,
+        Fantasy,
+        Miniatures;
 
         /**
          * Retrieves a list of all games within this category.
@@ -280,7 +299,15 @@ public enum GameType {
         Influence,
         MapAddition,
         TilePlacement,
-        PatternBuilding;
+        PatternBuilding,
+        GameMaster,
+        DiceRolling,
+        GridMovement,
+        LineOfSight,
+        ModularBoard,
+        MovementPoints,
+        MultipleMaps,
+        Campaign;
 
         /**
          * Retrieves a list of all games using this mechanic.
@@ -330,6 +357,20 @@ public enum GameType {
     }
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
+    }
+    public static int getMinPlayersAllGames() {
+        int min = Integer.MAX_VALUE;
+        for (GameType gt: GameType.values()) {
+            if (gt.minPlayers < min) min = gt.minPlayers;
+        }
+        return min;
+    }
+    public static int getMaxPlayersAllGames() {
+        int max = Integer.MIN_VALUE;
+        for (GameType gt: GameType.values()) {
+            if (gt.minPlayers > max) max = gt.minPlayers;
+        }
+        return max;
     }
 
     /**

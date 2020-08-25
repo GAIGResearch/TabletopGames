@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class Token extends Component {
-    private String tokenType;
+    protected String tokenType;
 
     public Token(String name){
         super(ComponentType.TOKEN, name);
@@ -78,7 +78,7 @@ public class Token extends Component {
      * Creates a Token objects from a JSON object.
      * @param token - JSON to parse into Token object.
      */
-    private void loadToken(JSONObject token) {
+    protected void loadToken(JSONObject token) {
         this.tokenType = (String) ( (JSONArray) token.get("type")).get(1);
         this.componentName = (String) token.get("id");
         parseComponent(this, token);

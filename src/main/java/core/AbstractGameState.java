@@ -25,7 +25,7 @@ public abstract class AbstractGameState {
     }
 
     // Parameters, forward model and turn order for the game
-    protected final AbstractGameParameters gameParameters;
+    protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;
     private Area allComponents;
 
@@ -47,7 +47,7 @@ public abstract class AbstractGameState {
      * @param gameParameters - game parameters.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(AbstractGameParameters gameParameters, TurnOrder turnOrder){
+    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder){
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
     }
@@ -70,7 +70,7 @@ public abstract class AbstractGameState {
      * Resets variables initialised for this game state.
      */
     void reset(long seed) {
-        gameParameters.gameSeed = seed;
+        gameParameters.randomSeed = seed;
         reset();
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractGameState {
     public final TurnOrder getTurnOrder(){return turnOrder;}
     public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
     public final Utils.GameResult getGameStatus() {  return gameStatus; }
-    public final AbstractGameParameters getGameParameters() { return this.gameParameters; }
+    public final AbstractParameters getGameParameters() { return this.gameParameters; }
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
@@ -171,10 +171,24 @@ public abstract class AbstractGameState {
     protected abstract double _getScore(int playerId);
 
     /**
+     * Provide a list of component IDs which are hidden in partially observable copies of games.
+     * Depending on the game, in the copies these might be completely missing, or just randomized.
+     * @param playerId - ID of player observing the state.
+     * @return - list of component IDs unobservable by the given player.
+     */
+    protected abstract ArrayList<Integer> _getUnknownComponentsIds(int playerId);
+
+    /**
      * Resets variables initialised for this game state.
      */
     protected abstract void _reset();
 
+    /**
+     * Checks if the given object is the same as the current.
+     * @param o - other object to test equals for.
+     * @return true if the two objects are equal, false otherwise
+     */
+    protected abstract boolean _equals(Object o);
 
     /* ####### Public AI agent API ####### */
 
@@ -187,7 +201,7 @@ public abstract class AbstractGameState {
     }
 
     /**
-     * Provide a simple numerical assessment of the current game state, the bigger the better.
+     * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * @param playerId - player observing the state.
      * @return - double, score of current state.
@@ -196,4 +210,35 @@ public abstract class AbstractGameState {
         return _getScore(playerId);
     }
 
+    /**
+     * Retrieves a list of component IDs which are hidden in partially observable copies of games.
+     * Depending on the game, in the copies these might be completely missing, or just randomized.
+     * @param playerId - ID of player observing the state.
+     * @return - list of component IDs unobservable by the given player.
+     */
+    public final ArrayList<Integer> getUnknownComponentsIds(int playerId) {
+        return _getUnknownComponentsIds(playerId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractGameState)) return false;
+        AbstractGameState gameState = (AbstractGameState) o;
+        return Objects.equals(gameParameters, gameState.gameParameters) &&
+                Objects.equals(turnOrder, gameState.turnOrder) &&
+                Objects.equals(allComponents, gameState.allComponents) &&
+                Objects.equals(availableActions, gameState.availableActions) &&
+                gameStatus == gameState.gameStatus &&
+                Arrays.equals(playerResults, gameState.playerResults) &&
+                Objects.equals(gamePhase, gameState.gamePhase) &&
+                _equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameParameters, turnOrder, allComponents, availableActions, gameStatus, gamePhase, data);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        return result;
+    }
 }

@@ -2,15 +2,13 @@ package games.coltexpress.cards;
 
 import core.components.Card;
 
-import java.util.Objects;
-
 public class ColtExpressCard extends Card {
     public enum CardType {
         MoveSideways,
         CollectMoney,
         Punch,
         MoveMarshal,
-        MoveUp,
+        MoveVertical,
         Shoot,
         Bullet
     }
@@ -31,7 +29,7 @@ public class ColtExpressCard extends Card {
     }
 
     public String toString(){
-        return cardType.toString() + "(" + playerID + ")";
+        return cardType.name() + "(" + playerID + ")";
     }
 
     @Override

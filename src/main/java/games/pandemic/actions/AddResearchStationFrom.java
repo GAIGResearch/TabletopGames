@@ -9,7 +9,6 @@ import games.pandemic.PandemicGameState;
 
 import java.util.Objects;
 
-import static games.pandemic.PandemicConstants.*;
 import static core.CoreConstants.nameHash;
 
 
@@ -30,7 +29,7 @@ public class AddResearchStationFrom extends AddResearchStation {
         // Remove research station from "fromCity" location
         BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, fromCity);
         if (bn != null) {
-            bn.setProperty(researchStationHash, new PropertyBoolean(false));
+            bn.setProperty(new PropertyBoolean("researchStation", false));
             pgs.removeResearchStation(((PropertyString) bn.getProperty(nameHash)).value);
         }
 

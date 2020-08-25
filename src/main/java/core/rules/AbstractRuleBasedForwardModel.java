@@ -53,7 +53,11 @@ public abstract class AbstractRuleBasedForwardModel extends AbstractForwardModel
      */
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        if (nextRule == null) return;
+        if (nextRule == null) {
+            nextRule = lastRule.getNext();  // Go back to parent, skip it and go to next rule
+            if (nextRule == null) nextRule = root;
+            return;
+        }
 
         do {
             if (nextRule.requireAction()) {

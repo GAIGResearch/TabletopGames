@@ -54,6 +54,11 @@ public class BaronAction extends DrawCard implements IPrintable {
     }
 
     @Override
+    public String getString(AbstractGameState gameState) {
+        return "Baron (compare cards with player " + opponentID + ")";
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }
@@ -61,7 +66,7 @@ public class BaronAction extends DrawCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof BaronAction)) return false;
         if (!super.equals(o)) return false;
         BaronAction that = (BaronAction) o;
         return opponentID == that.opponentID;

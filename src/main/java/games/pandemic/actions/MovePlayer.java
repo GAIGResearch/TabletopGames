@@ -44,7 +44,7 @@ public class MovePlayer extends AbstractAction {
         prop.getValues().add(playerIdx);
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
-        playerCard.setProperty(PandemicConstants.playerLocationHash, new PropertyString(city));
+        playerCard.setProperty(new PropertyString("playerLocation", city));
     }
 
     public static void removePlayer(PandemicGameState gs, String city, int playerIdx) {
@@ -53,7 +53,7 @@ public class MovePlayer extends AbstractAction {
         prop.getValues().remove(Integer.valueOf(playerIdx));
 
         Card playerCard = (Card) gs.getComponent(PandemicConstants.playerCardHash, playerIdx);
-        playerCard.setProperty(PandemicConstants.playerLocationHash, new PropertyString(null));
+        playerCard.setProperty(new PropertyString("playerLocation", null));
     }
 
     public String getDestination(){

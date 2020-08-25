@@ -1,7 +1,7 @@
 package games.coltexpress.components;
 
 import core.components.Component;
-import core.components.PartialObservableDeck;
+import core.components.Deck;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.ColtExpressTypes;
 import utilities.Utils;
@@ -11,8 +11,8 @@ import java.util.*;
 
 public class Compartment extends Component {
 
-    public PartialObservableDeck<Loot> lootInside;
-    public PartialObservableDeck<Loot> lootOnTop;
+    public Deck<Loot> lootInside;
+    public Deck<Loot> lootOnTop;
     public Set<Integer> playersInsideCompartment;
     public Set<Integer> playersOnTopOfCompartment;
 
@@ -25,8 +25,8 @@ public class Compartment extends Component {
 
     private Compartment(int nPlayers, int compartmentID, int ID){
         super(Utils.ComponentType.BOARD_NODE, ID);
-        this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
-        this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
+        this.lootInside = new Deck<>("lootInside");
+        this.lootOnTop = new Deck<>("lootOntop");
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();
@@ -36,8 +36,8 @@ public class Compartment extends Component {
 
     public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
         super(Utils.ComponentType.BOARD_NODE);
-        this.lootInside = new PartialObservableDeck<>("lootInside", nPlayers);
-        this.lootOnTop = new PartialObservableDeck<>("lootOntop", nPlayers);
+        this.lootInside = new Deck<>("lootInside");
+        this.lootOnTop = new Deck<>("lootOntop");
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();
@@ -60,7 +60,7 @@ public class Compartment extends Component {
         HashMap<ColtExpressTypes.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
         for (Map.Entry<ColtExpressTypes.LootType, Integer> e : configuration.entrySet()) {
             for (int i = 0; i < e.getValue(); i++) {
-                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), cep.getGameSeed())));
+                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), cep.getRandomSeed())));
             }
         }
     }
@@ -110,11 +110,11 @@ public class Compartment extends Component {
         playersOnTopOfCompartment.remove(playerID);
     }
 
-    public PartialObservableDeck<Loot> getLootInside() {
+    public Deck<Loot> getLootInside() {
         return lootInside;
     }
 
-    public PartialObservableDeck<Loot> getLootOnTop() {
+    public Deck<Loot> getLootOnTop() {
         return lootOnTop;
     }
 

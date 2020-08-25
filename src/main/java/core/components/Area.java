@@ -110,4 +110,12 @@ public class Area extends Component {
             putComponent(c);
         }
     }
+
+    /**
+     * Returns the size of this area, i.e. number of components in it.
+     * @return - size of components map.
+     */
+    public int size() {
+        return components.size();
+    }
 }

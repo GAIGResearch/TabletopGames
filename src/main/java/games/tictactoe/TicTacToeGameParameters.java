@@ -1,13 +1,14 @@
 package games.tictactoe;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
-public class TicTacToeGameParameters extends AbstractGameParameters implements ITunableParameters {
+public class TicTacToeGameParameters extends AbstractParameters implements ITunableParameters {
     public int gridSize = 3;
 
     public TicTacToeGameParameters(long seed) {
@@ -15,10 +16,24 @@ public class TicTacToeGameParameters extends AbstractGameParameters implements I
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         TicTacToeGameParameters tttgp = new TicTacToeGameParameters(System.currentTimeMillis());
         tttgp.gridSize = gridSize;
         return tttgp;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TicTacToeGameParameters)) return false;
+        if (!super.equals(o)) return false;
+        TicTacToeGameParameters that = (TicTacToeGameParameters) o;
+        return gridSize == that.gridSize;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), gridSize);
     }
 
     @Override

@@ -16,7 +16,7 @@ public class EndCardPickPocket extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
-        Random random = new Random(gs.getGameParameters().getGameSeed());
+        Random random = new Random(gs.getGameParameters().getRandomSeed());
 
         LinkedList<Compartment> train = gameState.getTrainCompartments();
         for (Compartment currentCompartment : train) {

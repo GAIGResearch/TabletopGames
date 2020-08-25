@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.TurnOrder;
 
+import java.util.Objects;
+
 import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
@@ -44,16 +46,7 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
         turnCounter++;
-        turnOwner = nextPlayer(gameState);
-        int n = 0;
-        while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
-            turnOwner = nextPlayer(gameState);
-            n++;
-            if (n >= nPlayers) {
-                gameState.setGameStatus(GAME_END);
-                break;
-            }
-        }
+        moveToNextPlayer(gameState, nextPlayer(gameState));
     }
 
     @Override
@@ -62,6 +55,20 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         uto.skipTurn = skipTurn;
         uto.direction = direction;
         return uto;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UnoTurnOrder)) return false;
+        if (!super.equals(o)) return false;
+        UnoTurnOrder that = (UnoTurnOrder) o;
+        return skipTurn == that.skipTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), skipTurn);
     }
 }
 

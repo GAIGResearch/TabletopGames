@@ -45,25 +45,23 @@ public class MovePlayerWithCard extends MovePlayer {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MovePlayerWithCard)) return false;
         if (!super.equals(o)) return false;
         MovePlayerWithCard that = (MovePlayerWithCard) o;
-        return cardIdx == that.cardIdx &&
-                cardId == that.cardId &&
-                executed == that.executed;
+        return cardIdx == that.cardIdx;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardIdx, cardId, executed);
+        return Objects.hash(super.hashCode(), cardIdx);
     }
 
     @Override
     public String toString() {
         return "MovePlayerWithCard{" +
-                "cardIdx=" + cardIdx +
-                ", cardId=" + cardId +
-                ", executed=" + executed +
+                "playerIdx=" + playerIdx +
+                ", destination='" + destination + '\'' +
+                ", cardIdx=" + cardIdx +
                 '}';
     }
 

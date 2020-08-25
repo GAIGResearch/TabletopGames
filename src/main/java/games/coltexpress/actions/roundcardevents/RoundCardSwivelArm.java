@@ -11,12 +11,16 @@ public class RoundCardSwivelArm extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        ColtExpressGameState cegs = (ColtExpressGameState) gs;
+
         LinkedList<Compartment> train = ((ColtExpressGameState)gs).getTrainCompartments();
         Compartment caboose = train.get(0);
-        for (Compartment compartment : train) {
+        for (int i = 1; i < train.size(); i++) {
+            Compartment compartment = train.get(i);
             caboose.playersOnTopOfCompartment.addAll(compartment.playersOnTopOfCompartment);
             compartment.playersOnTopOfCompartment.clear();
         }
+
         return true;
     }
 

@@ -11,7 +11,8 @@ public class UnoCard extends Card {
         Skip,
         Reverse,
         Draw,
-        Wild
+        Wild,
+//        SwapHands
     }
 
     public final String color;
@@ -48,9 +49,17 @@ public class UnoCard extends Card {
         this.drawN = drawN;
     }
 
+    private UnoCard(UnoCardType type, String color, int number, int drawN, int componentID) {
+        super(type.toString(), componentID);
+        this.color = color;
+        this.type = type;
+        this.number = number;
+        this.drawN = drawN;
+    }
+
     @Override
     public Card copy() {
-        return new UnoCard(type, color, number, drawN);
+        return new UnoCard(type, color, number, drawN, componentID);
     }
 
     public boolean isPlayable(UnoGameState gameState) {
