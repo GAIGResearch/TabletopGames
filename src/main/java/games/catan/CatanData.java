@@ -69,7 +69,7 @@ public class CatanData extends AbstractGameData {
         for (CatanParameters.Resources res: CatanParameters.Resources.values()) {
             for (int i = 0; i < params.n_resource_cards; i++) {
                 Card c = new Card();
-                c.setProperty(CatanConstants.cardType, new PropertyString("cardType", res.name()));
+                c.setProperty(new PropertyString("cardType", res.name()));
                 resourceDeck.add(c);
             }
         }
@@ -103,26 +103,6 @@ public class CatanData extends AbstractGameData {
 
 
 
-    }
-
-    @Override
-    public GraphBoard findBoard(String name) {
-        return null;
-    }
-
-    @Override
-    public Counter findCounter(String name) {
-        return null;
-    }
-
-    @Override
-    public Token findToken(String name) {
-        return null;
-    }
-
-    @Override
-    public Deck findDeck(String name) {
-        return null;
     }
 
 }

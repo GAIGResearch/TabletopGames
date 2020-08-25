@@ -1,10 +1,10 @@
 package games.catan;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 
 import java.util.HashMap;
 
-public class CatanParameters extends AbstractGameParameters {
+public class CatanParameters extends AbstractParameters {
     private String dataPath;
     int n_actions_per_turn = 1;
 
@@ -29,8 +29,13 @@ public class CatanParameters extends AbstractGameParameters {
     }
 
     @Override
-    protected AbstractGameParameters _copy() {
+    protected AbstractParameters _copy() {
         return null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        return false;
     }
 
     HashMap<TileType, Integer> tileCounts = new HashMap<CatanParameters.TileType, Integer>() {{

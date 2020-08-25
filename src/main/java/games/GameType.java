@@ -1,6 +1,7 @@
 package games;
 
 import core.*;
+import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -28,6 +29,9 @@ import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
+import games.catan.CatanForwardModel;
+import games.catan.CatanParameters;
+import games.catan.CatanGameState;
 import gui.PrototypeGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -73,10 +77,14 @@ public enum GameType {
     ColtExpress (2, 6,
             new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }});
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+    Catan(2, 4,
+            new ArrayList<Category>() {{ add(Strategy); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); }});
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
+
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -100,6 +108,8 @@ public enum GameType {
                 return Virus;
             case "coltexpress":
                 return ColtExpress;
+            case "catan":
+                return Catan;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -161,6 +171,10 @@ public enum GameType {
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
                 break;
+            case Catan:
+                params = new CatanParameters(seed);
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
         }
 
         return new Game(this, forwardModel, gameState);
@@ -211,6 +225,9 @@ public enum GameType {
                 break;
             case TicTacToe:
                 gui = new TicTacToeGUI(game, ac);
+                break;
+            case Catan:
+                gui = new CatanGUI(game, ac);
                 break;
         }
 

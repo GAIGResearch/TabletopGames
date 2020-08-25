@@ -27,7 +27,7 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         // todo set everything to the state
-        Random rnd = new Random(firstState.getGameParameters().getGameSeed());
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters)state.getGameParameters();

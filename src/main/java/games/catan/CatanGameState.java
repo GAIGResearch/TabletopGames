@@ -1,6 +1,6 @@
 package games.catan;
 
-import core.AbstractGameParameters;
+import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Area;
 import core.components.Component;
@@ -18,7 +18,7 @@ public class CatanGameState extends AbstractGameState {
     HashMap<Integer, Area> areas;
 
     // todo get turnorder right
-    public CatanGameState(AbstractGameParameters pp, int nPlayers) {
+    public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
 
         data = new CatanData((CatanParameters)pp);
@@ -63,6 +63,11 @@ public class CatanGameState extends AbstractGameState {
         this.areas = null;
     }
 
+    @Override
+    protected boolean _equals(Object o) {
+        return false;
+    }
+
 
     // todo implement methods below
 
@@ -74,5 +79,10 @@ public class CatanGameState extends AbstractGameState {
     @Override
     protected double _getScore(int playerId) {
         return 0;
+    }
+
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return null;
     }
 }
