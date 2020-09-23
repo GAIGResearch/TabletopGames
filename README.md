@@ -8,7 +8,7 @@
 
 This project includes implementations for various tabletop games with a common API for AI agents to play the games.
 
-The current list of implemented games:
+Currently implemented games:
 - [x] Tic-Tac-Toe
 - [x] Love Letter (Seiji Kanai 2012)
 - [x] Uno (Merle Robbins 1971)
@@ -17,12 +17,16 @@ The current list of implemented games:
 - [x] Colt Express (Christophe Raimbault 2014)
 - [x] Pandemic (Matt Leacock 2008)
 
-Work in progress:
+Games in progress:
 - [ ] Settlers of Catan (Klaus Teuber 1995)
 - [ ] Carcassone (Klaus-Jürgen Wrede 2000)
 - [ ] Descent (Jesper Ejsing, John Goodenough, Frank Walls 2005)
 
+To get started the [wiki](https://github.com/GAIGResearch/TabletopGames/wiki) provides various guides and descriptions of the framework.
+Another good resource is our continuously updated paper "DESIGN AND IMPLEMENTATION OF TAG: A TABLETOP GAMES FRAMEWORK".
 
-- purpose of the project
-- current state of the project
-- getting started
+To cite TAG in your work, cite this paper:
+```
+[Add citation here]
+```
+
