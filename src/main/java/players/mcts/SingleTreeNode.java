@@ -263,12 +263,19 @@ class SingleTreeNode
             }
 
             // Evaluate final state and return normalised score
-            return rolloutState.getScore(player.getPlayerID());
-//            return player.params.gameHeuristic.evaluateState(rolloutState, player.getPlayerID());
+            if (player.heuristic != null){
+                return player.heuristic.evaluateState(rolloutState, player.getPlayerID());
+            } else {
+                return rolloutState.getScore(player.getPlayerID());
+            }
+
         } else {
             // Evaluate the state without doing a rollout of these are disabled, return normalised score
-            return state.getScore(player.getPlayerID());
-//           return player.params.gameHeuristic.evaluateState(state, player.getPlayerID());
+            if (player.heuristic != null){
+                return player.heuristic.evaluateState(state, player.getPlayerID());
+            } else {
+                return state.getScore(player.getPlayerID());
+            }
         }
     }
 

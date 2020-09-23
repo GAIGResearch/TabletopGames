@@ -2,6 +2,7 @@ package players.rmhc;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
 
 import java.util.List;
 import java.util.Random;
@@ -15,14 +16,16 @@ public class Individual implements Comparable {
     double discountFactor;            // Discount factor for calculating rewards
 
     private Random gen;               // Random generator
+    IStateHeuristic heuristic;
 
-    Individual(int L, double discountFactor, AbstractForwardModel fm, AbstractGameState gs, int playerID, Random gen) {
+    Individual(int L, double discountFactor, AbstractForwardModel fm, AbstractGameState gs, int playerID, Random gen, IStateHeuristic heuristic) {
         // Initialize
         this.gen = gen;
         this.discountFactor = discountFactor;
         actions = new AbstractAction[L];
         gameStates = new AbstractGameState[L+1];
         gameStates[0] = gs.copy();
+        this.heuristic = heuristic;
 
         // Rollout with random actions and assign fitness value
         rollout(gs, fm, 0, L, playerID);  // TODO: cheating, init should also count FM calls
@@ -85,7 +88,13 @@ public class Individual implements Comparable {
         int fmCalls = 0;
         double delta = 0;
         for (int i = 0; i < startIndex; i++) {
-            double score = gameStates[i+1].getScore(playerID);
+            double score;
+            if (this.heuristic != null){
+                score = heuristic.evaluateState(gameStates[i+1], playerID);
+            } else {
+                score = gameStates[i+1].getScore(playerID);
+            }
+
             delta += Math.pow(discountFactor, i) * score;
         }
         for (int i = startIndex; i < endIndex; i++){
@@ -116,7 +125,12 @@ public class Individual implements Comparable {
                     length++;
 
                     // Add value of state, discounted
-                    double score = gameStates[i+1].getScore(playerID);
+                    double score;
+                    if (this.heuristic != null){
+                        score = heuristic.evaluateState(gameStates[i+1], playerID);
+                    } else {
+                        score = gameStates[i+1].getScore(playerID);
+                    }
                     delta += Math.pow(discountFactor, i) * score;
                 } else {
                     i--;
