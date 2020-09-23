@@ -4,6 +4,8 @@ import core.AbstractPlayer;
 import core.AbstractForwardModel;
 import core.Game;
 import games.GameType;
+import games.catan.gui.CatanGUI;
+import players.human.ActionController;
 import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
@@ -33,8 +35,7 @@ public class CatanGame extends Game {
 
         CatanGame game = new CatanGame(agents, params, forwardModel, gs);
 
-        // todo add GUI
-        game.run(null);
+        game.run(new CatanGUI(game, new ActionController()));
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);

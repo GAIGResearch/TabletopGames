@@ -12,7 +12,7 @@ import java.util.List;
 
 public class CatanGameState extends AbstractGameState {
     private CatanData data;
-    public GraphBoard board;
+    protected CatanBoard board;
 
     // Collection of areas, mapped to player ID. -1 is the general game area containing the board, counters and several decks.
     HashMap<Integer, Area> areas;
@@ -20,14 +20,12 @@ public class CatanGameState extends AbstractGameState {
     // todo get turnorder right
     public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
-
         data = new CatanData((CatanParameters)pp);
         data.load(((CatanParameters)gameParameters).getDataPath());
     }
 
     private GraphBoard setupBoard(){
-        board = new GraphBoard();
-        // setup all the hexes in the game
+        board = new CatanBoard((CatanParameters)gameParameters);
         return board;
     }
 
@@ -84,5 +82,13 @@ public class CatanGameState extends AbstractGameState {
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return null;
+    }
+
+    public CatanBoard getBoard(){
+        return board.copy();
+    }
+
+    void addComponents() {
+        super.addAllComponents();
     }
 }
