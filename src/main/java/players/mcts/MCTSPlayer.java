@@ -3,6 +3,8 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
+
 import java.util.List;
 import java.util.Random;
 
@@ -12,6 +14,8 @@ public class MCTSPlayer extends AbstractPlayer {
     Random rnd;
     // Parameters for this player
     MCTSParams params;
+    // Heuristics used for the agent
+    IStateHeuristic heuristic;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -26,6 +30,23 @@ public class MCTSPlayer extends AbstractPlayer {
     public MCTSPlayer(MCTSParams params) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
+    }
+
+    public MCTSPlayer(IStateHeuristic heuristic){
+        this(System.currentTimeMillis());
+        this.heuristic = heuristic;
+    }
+
+    public MCTSPlayer(long seed, IStateHeuristic heuristic){
+        this.params = new MCTSParams(seed);
+        rnd = new Random(seed);
+        this.heuristic = heuristic;
+    }
+
+    public MCTSPlayer( MCTSParams params, IStateHeuristic heuristic){
+        this.params = params;
+        rnd = new Random(this.params.getRandomSeed());
+        this.heuristic = heuristic;
     }
 
     @Override

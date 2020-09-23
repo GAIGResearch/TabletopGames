@@ -13,8 +13,9 @@ import static utilities.Utils.noise;
 public class OSLAPlayer extends AbstractPlayer {
 
     private Random random; // random generator for noise
-    private IStateHeuristic stateHeuristic;
     public double epsilon = 1e-6;
+    // Heuristics used for the agent
+    IStateHeuristic heuristic;
 
     public OSLAPlayer(){
         this.random = new Random();
@@ -25,9 +26,18 @@ public class OSLAPlayer extends AbstractPlayer {
         this.random = random;
     }
 
+    public OSLAPlayer(IStateHeuristic heuristic){
+        this.heuristic = heuristic;
+        this.random = new Random();
+    }
+
+    public OSLAPlayer(IStateHeuristic heuristic, Random random){
+        this.heuristic = heuristic;
+        this.random = random;
+    }
+
     @Override
     public AbstractAction getAction(AbstractGameState gs ) {
-//        stateHeuristic = new PandemicDiffHeuristic((PandemicGameState)observation);
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
@@ -36,17 +46,20 @@ public class OSLAPlayer extends AbstractPlayer {
         for (AbstractAction action : actions) {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);
-            double valState = gsCopy.getScore(this.getPlayerID()); //stateHeuristic.evaluateState((AbstractGameState)gsCopy);
+            double valState = 0;
+            if (heuristic != null){
+                valState = heuristic.evaluateState(gsCopy, this.getPlayerID());
+            } else {
+                valState = gsCopy.getScore(this.getPlayerID());
+            }
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());
-//            System.out.println(valState);
 
             if (Q > maxQ) {
                 maxQ = Q;
                 bestAction = action;
             }
         }
-//        System.out.println();
 
         return bestAction;
     }

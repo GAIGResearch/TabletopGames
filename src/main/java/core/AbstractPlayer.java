@@ -1,6 +1,5 @@
 package core;
 
-
 import core.actions.AbstractAction;
 
 public abstract class AbstractPlayer {
