@@ -5,9 +5,7 @@ import core.AbstractGameState;
 import core.components.Area;
 import core.components.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class CatanGameState extends AbstractGameState {
     private CatanData data;
@@ -27,13 +25,34 @@ public class CatanGameState extends AbstractGameState {
     }
 
     private CatanTile[][] generateBoard(){
+        // Shuffle the tile types
+        // todo do the same with the numbers
+        ArrayList<CatanParameters.TileType> tileList = new ArrayList<>();
+        for (Map.Entry tileCount : ((CatanParameters)gameParameters).tileCounts.entrySet()){
+            for (int i = 0; i < (int)tileCount.getValue(); i++) {
+                tileList.add((CatanParameters.TileType)tileCount.getKey());
+            }
+        }
+        Collections.shuffle(tileList);
+
         board = new CatanTile[7][7];
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
-                board[x][y] = new CatanTile(x, y);
+                CatanTile tile = new CatanTile(x, y);
+                if (x == 0 || y == 0 || x == board.length -1 || y == board[x].length -1){
+                    tile.setTileType(CatanParameters.TileType.SEA);
+                }
+                else if (x == 3 && y == 3){
+                    tile.setTileType(CatanParameters.TileType.DESERT);
+                }
+                // todo another condition is to detect the 4 corners and set them to sea
+                else if (tileList.size() > 0)
+                    tile.setTileType(tileList.remove(0));
+                board[x][y] = tile;
             }
         }
-        return new CatanBoard((CatanParameters)gameParameters).board;
+
+        return board;
     }
 
     @Override

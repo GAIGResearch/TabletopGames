@@ -4,7 +4,6 @@ import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import games.catan.CatanBoard;
 import games.catan.CatanGameState;
 import games.catan.CatanTile;
 import players.human.ActionController;

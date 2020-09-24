@@ -22,6 +22,9 @@ public class CatanTile {
     public void setTileType(CatanParameters.TileType type){
         this.tileType = type;
     }
+    public CatanParameters.TileType getType(){
+        return this.tileType;
+    }
 
     private Polygon createHexagon() {
         Polygon polygon = new Polygon();
