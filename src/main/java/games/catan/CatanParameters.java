@@ -14,6 +14,7 @@ public class CatanParameters extends AbstractParameters {
     int n_cities = 4;
     int n_roads = 15;
     int n_resource_cards = 19;
+    int n_tiles_per_row = 7;
 
     public CatanParameters(long seed){
         super(seed);

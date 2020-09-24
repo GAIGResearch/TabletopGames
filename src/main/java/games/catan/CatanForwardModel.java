@@ -34,7 +34,6 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanData data = state.getData();
 
         state.areas = new HashMap<>();
-        state.board = new CatanBoard(params);
 
         // todo distribute everything to player
         for (int i = 0; i < state.getNPlayers(); i++) {

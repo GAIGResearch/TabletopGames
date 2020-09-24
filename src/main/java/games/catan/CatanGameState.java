@@ -4,7 +4,6 @@ import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Area;
 import core.components.Component;
-import core.components.GraphBoard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +11,7 @@ import java.util.List;
 
 public class CatanGameState extends AbstractGameState {
     private CatanData data;
-    protected CatanBoard board;
+    protected CatanTile[][] board;
 
     // Collection of areas, mapped to player ID. -1 is the general game area containing the board, counters and several decks.
     HashMap<Integer, Area> areas;
@@ -22,11 +21,19 @@ public class CatanGameState extends AbstractGameState {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
         data = new CatanData((CatanParameters)pp);
         data.load(((CatanParameters)gameParameters).getDataPath());
+
+        board = generateBoard();
+
     }
 
-    private GraphBoard setupBoard(){
-        board = new CatanBoard((CatanParameters)gameParameters);
-        return board;
+    private CatanTile[][] generateBoard(){
+        board = new CatanTile[7][7];
+        for (int x = 0; x < board.length; x++){
+            for (int y = 0; y < board[x].length; y++){
+                board[x][y] = new CatanTile(x, y);
+            }
+        }
+        return new CatanBoard((CatanParameters)gameParameters).board;
     }
 
     @Override
@@ -84,8 +91,8 @@ public class CatanGameState extends AbstractGameState {
         return null;
     }
 
-    public CatanBoard getBoard(){
-        return board.copy();
+    public CatanTile[][] getBoard(){
+        return board;
     }
 
     void addComponents() {

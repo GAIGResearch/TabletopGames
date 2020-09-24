@@ -1,71 +1,27 @@
 package games.catan;
 
-import core.components.BoardNode;
 import core.components.GraphBoard;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-class CatanBoardNode{
-    int x, y;
-    int[] edges;
-    int[] vertices;
-    CatanParameters.TileType tileType;
-    int number;
-
-    public CatanBoardNode(CatanParameters.TileType tileType){
-        this.tileType = tileType;
-        this.number = number;
-    }
-
-    public void setCoords(int x, int y){
-        this.x = x;
-        this.y = y;
-    }
-
-    public void setNumber(int number){
-        this.number = number;
-    }
-
-    public boolean addRoad(int edge){
-        if (this.edges[edge] == 1) return false;
-        this.edges[edge] = 1;
-        return true;
-    }
-
-    public boolean addSettlement(int vertex){
-        if (this.vertices[vertex] >= 1) return false;
-        this.vertices[vertex] = 1;
-        return true;
-    }
-
-    public boolean addCity(int vertex){
-        if (this.vertices[vertex] != 1) return false;
-        this.vertices[vertex] = 2;
-        return true;
-    }
-
-}
-
 public class CatanBoard extends GraphBoard {
-    // represent board using cube coordinates
-    // more info on https://www.redblobgames.com/grids/hexagons/
-    CatanBoardNode[][] board;
+    // CatanBoard stores everything on the board
+    // tiles, cards, resources
+    CatanTile[][] board;
     int[] robberLocation = new int[2];
 
     public CatanBoard(CatanParameters params){
-        generateBoard(params);
+        board = generateBoard(params);
     }
 
-
-    public void generateBoard(CatanParameters params){
-        // todo get 7 from parameters
+    public CatanTile[][] generateBoard(CatanParameters params){
         // todo steps:
         // 2, distribute all the resource tiles with number tokens
         // 3, distribute sea tiles
-        board = new CatanBoardNode[7][7];
+        board = new CatanTile[params.n_tiles_per_row][params.n_tiles_per_row];
+        for (int x = 0; x < board.length; x++){
+            for (int y = 0; y < board[x].length; y++){
+                board[x][y] = new CatanTile(x, y);
+            }
+        }
 
 //        ArrayList<CatanParameters.TileType> tileList = new ArrayList<>();
 //        for (Map.Entry tileCount : params.tileCounts.entrySet()){
@@ -121,6 +77,7 @@ public class CatanBoard extends GraphBoard {
 ////            robberLocation[0] = row;
 ////            robberLocation[1] = col;
 //        }
+        return board;
 
 
 
