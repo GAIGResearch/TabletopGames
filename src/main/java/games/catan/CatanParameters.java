@@ -48,9 +48,6 @@ public class CatanParameters extends AbstractParameters {
 //        put(CatanParameters.TileType.DESERT, 1);
     }};
 
-    // put(CatanParameters.TileType.SEA, 18);
-    //
-
 
     // todo that could be simplified
     // [2, 12]    x 1

@@ -1,14 +1,22 @@
 package games.catan;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
 
 public class CatanTile {
     public final int radius = 40;
-    // x and y are the center locations
+    // todo re-rendering might be required due resizing the window so instead of hexagon getHexagon() could work better
+    // x and y are the centre locations
     private int x;
     private int y;
+
+    public double x_coord;
+    public double y_coord;
     int[] edges;
     int[] vertices;
+    // hexagon is the actual object that can be drawn on the screen
     private Polygon hexagon;
     CatanParameters.TileType tileType;
     int number;
@@ -38,16 +46,16 @@ public class CatanTile {
         double offset_y ;
         double offset_x;
         if (y % 2 == 0) {
-            // first line
+            // even lines
             offset_x = width;
             offset_y = height * 0.5;
         } else {
-            // second line
+            // odd lines
             offset_x = width * 0.5;
             offset_y = height * 0.5;
         }
-        double x_coord = offset_x + x * width;
-        double y_coord = offset_y + y * height * 0.75;
+        x_coord = offset_x + x * width;
+        y_coord = offset_y + y * height * 0.75;
         for (int i = 0; i < 6; i++) {
             double angle_deg = i * 60 - 30;
             double angle_rad = Math.PI / 180 * angle_deg;
@@ -60,6 +68,10 @@ public class CatanTile {
 
     public Polygon getHexagon(){
         return hexagon;
+    }
+
+    public int getNumber(){
+        return number;
     }
 
     public void setNumber(int number){
@@ -82,5 +94,21 @@ public class CatanTile {
         if (this.vertices[vertex] != 1) return false;
         this.vertices[vertex] = 2;
         return true;
+    }
+
+    public int distance(CatanTile tile){
+        int[] this_coord = to_cube(this);
+        int[] other_coord = to_cube(tile);
+        int dist = (Math.abs(this_coord[0] - other_coord[0]) +
+                Math.abs(this_coord[1] - other_coord[1]) + Math.abs(this_coord[2] - other_coord[2])) / 2;
+        return dist;
+    }
+
+    public int[] to_cube(CatanTile tile){
+        int[] cube = new int[3];
+        cube[0] = tile.x - (tile.y + (tile.y % 2)) / 2;
+        cube[2] = tile.y;
+        cube[1] = - cube[0] - cube[2];
+        return cube;
     }
 }

@@ -1,13 +1,11 @@
 package games.catan.gui;
 
-import games.catan.CatanBoard;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class CatanBoardView extends JComponent {
     // todo calculate the optimal radius for the hexagons
@@ -36,10 +34,28 @@ public class CatanBoardView extends JComponent {
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
-                g.setColor(tileColourLookup(board[x][y]));
-                g.fillPolygon(board[x][y].getHexagon());
+                CatanTile tile = board[x][y];
+                g.setColor(tileColourLookup(tile));
+                g.fillPolygon(tile.getHexagon());
                 g.setColor(Color.BLACK);
-                g.drawPolygon(board[x][y].getHexagon());
+                g.drawPolygon(tile.getHexagon());
+
+                String type = "" + tile.getType();
+                String number = "" + tile.getNumber();
+                g.drawString(type, (int)tile.x_coord - 20, (int)tile.y_coord);
+                if (!number.equals("0"))
+                    g.drawString(number, (int)tile.x_coord, (int)tile.y_coord+20);
+
+                // lines below render cube coordinates and distances from middle
+//                String s = Arrays.toString(tile.to_cube(tile));
+//                String mid = Arrays.toString(tile.to_cube(board[3][3]));
+//                String dist = "" + tile.distance(board[3][3]);
+//                g.drawString(s, (int)tile.x_coord - 20, (int)tile.y_coord - 20);
+//                g.drawString(mid, (int)tile.x_coord - 20, (int)tile.y_coord);
+//                g.setColor(Color.ORANGE);
+//                g.drawString(dist, (int)tile.x_coord - 20, (int)tile.y_coord + 20);
+
+
             }
         }
     }
@@ -58,7 +74,7 @@ public class CatanBoardView extends JComponent {
         }else if (tile.getType() == CatanParameters.TileType.PASTURE){
             return Color.GREEN;
         } else if (tile.getType() == CatanParameters.TileType.HILLS){
-            return Color.BLACK;
+            return Color.ORANGE;
         } else{
             return Color.WHITE;
         }

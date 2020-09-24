@@ -18,7 +18,7 @@ public class CatanGameState extends AbstractGameState {
     public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
         data = new CatanData((CatanParameters)pp);
-        data.load(((CatanParameters)gameParameters).getDataPath());
+//        data.load(((CatanParameters)gameParameters).getDataPath());
 
         board = generateBoard();
 
@@ -33,21 +33,38 @@ public class CatanGameState extends AbstractGameState {
                 tileList.add((CatanParameters.TileType)tileCount.getKey());
             }
         }
+
+        ArrayList<Integer> numberList = new ArrayList<>();
+        for (Map.Entry numberCount : ((CatanParameters)gameParameters).numberTokens.entrySet()){
+            for (int i = 0; i < (int)numberCount.getValue(); i++) {
+                numberList.add((Integer)numberCount.getKey());
+            }
+        }
+        // shuffle collections so we get randomized tiles and tokens on them
         Collections.shuffle(tileList);
+        Collections.shuffle(numberList);
 
         board = new CatanTile[7][7];
+        int mid_x = board.length/2;
+        int mid_y = board[0].length/2;
+
+        CatanTile midTile = new CatanTile(mid_x, mid_y);
+        midTile.setTileType(CatanParameters.TileType.DESERT);
+
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
                 CatanTile tile = new CatanTile(x, y);
-                if (x == 0 || y == 0 || x == board.length -1 || y == board[x].length -1){
+                // mid_x should be the same as the distance
+                if (midTile.distance(tile) >= mid_x){
                     tile.setTileType(CatanParameters.TileType.SEA);
                 }
-                else if (x == 3 && y == 3){
-                    tile.setTileType(CatanParameters.TileType.DESERT);
+                else if (x == mid_x && y == mid_y){
+                    tile = midTile;
                 }
-                // todo another condition is to detect the 4 corners and set them to sea
-                else if (tileList.size() > 0)
+                else if (tileList.size() > 0) {
                     tile.setTileType(tileList.remove(0));
+                    tile.setNumber(numberList.remove(0));
+                }
                 board[x][y] = tile;
             }
         }
