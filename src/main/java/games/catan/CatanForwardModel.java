@@ -7,6 +7,8 @@ import core.actions.DoNothing;
 import core.components.*;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyString;
+import games.catan.actions.BuildRoad;
+import games.catan.actions.BuildSettlement;
 
 import java.util.*;
 
@@ -59,6 +61,12 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanGameState gs = (CatanGameState) currentState;
         gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
         action.execute(gs);
+
+        Random rnd = new Random();
+        int row = rnd.nextInt(7);
+        int col = rnd.nextInt(7);
+        int edge = rnd.nextInt(6);
+        new BuildSettlement(row, col, edge).execute(gs);
 
     }
 

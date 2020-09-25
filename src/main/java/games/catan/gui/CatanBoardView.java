@@ -46,6 +46,23 @@ public class CatanBoardView extends JComponent {
                 if (!number.equals("0"))
                     g.drawString(number, (int)tile.x_coord, (int)tile.y_coord+20);
 
+                // draw roads
+                // todo (mb) road coordinates are wrong or should handle them differently currently draws large oval
+                int[] roads = tile.getRoads();
+                for (int i = 0; i < roads.length; i++){
+                    if (roads[i] == 1){
+                        drawRoad(g, tile.getEdgeCoords(i), Color.CYAN);
+                    }
+                }
+
+                // draw settlements
+                int[] settlements = tile.getSettlements();
+                for (int i = 0; i < settlements.length; i++){
+                    if (settlements[i] == 1){
+                        drawSettlement(g, tile.getVerticesCoords(i), Color.CYAN);
+                    }
+                }
+
                 // lines below render cube coordinates and distances from middle
 //                String s = Arrays.toString(tile.to_cube(tile));
 //                String mid = Arrays.toString(tile.to_cube(board[3][3]));
@@ -78,5 +95,21 @@ public class CatanBoardView extends JComponent {
         } else{
             return Color.WHITE;
         }
+    }
+
+    public void drawRoad(Graphics2D g, Point[] location, Color color){
+        // Assume that logic is checked somewhere else
+//        int width = 5;
+//        int length = 30;
+        // todo rotations to get the sizing right?
+        g.setColor(color);
+        g.fillRect(location[0].x, location[0].y, location[1].x, location[1].y);
+
+    }
+
+    public void drawSettlement(Graphics2D g, Point point, Color color){
+        int RADIUS = 10;
+        g.setColor(color);
+        g.fillOval(point.x, point.y, RADIUS, RADIUS);
     }
 }

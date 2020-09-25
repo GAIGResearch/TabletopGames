@@ -1,21 +1,23 @@
 package games.catan;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Stream;
 
 public class CatanTile {
-    public final int radius = 40;
-    // todo re-rendering might be required due resizing the window so instead of hexagon getHexagon() could work better
-    // x and y are the centre locations
-    private int x;
-    private int y;
+    // todo (mb) variables should be private
 
+    public final int radius = 40;
+    // x and y are r-even representation coordinates
+    public int x;
+    public int y;
+    // x_coord, y_coord are the coordinates to the centre of the hex in pixels
     public double x_coord;
     public double y_coord;
     int[] edges;
     int[] vertices;
+
+    // coordinates to vertices and edges to facilitate drawing roads
+    Point[] verticesCoords;
+    Point[][] edgeCoords;
     // hexagon is the actual object that can be drawn on the screen
     private Polygon hexagon;
     CatanParameters.TileType tileType;
@@ -24,7 +26,12 @@ public class CatanTile {
     public CatanTile(int x, int y) {
         this.x = x;
         this.y = y;
-        this.hexagon = createHexagon();
+        edges = new int[6];
+        vertices = new int[6];
+        verticesCoords = new Point[6];
+        edgeCoords = new Point[6][2];
+        hexagon = createHexagon();
+
     }
 
     public void setTileType(CatanParameters.TileType type){
@@ -61,6 +68,8 @@ public class CatanTile {
             double angle_rad = Math.PI / 180 * angle_deg;
             int xval = (int) (x_coord + radius * Math.cos(angle_rad));
             int yval = (int) (y_coord + radius * Math.sin(angle_rad));
+            verticesCoords[i] = new Point(xval, yval);
+            edgeCoords[i] = new Point[]{new Point(xval, yval), new Point(xval + 2, yval + 2)};
             polygon.addPoint(xval, yval);
         }
         return polygon;
@@ -84,10 +93,18 @@ public class CatanTile {
         return true;
     }
 
+    public int[] getRoads(){
+        return edges;
+    }
+
     public boolean addSettlement(int vertex){
         if (this.vertices[vertex] >= 1) return false;
         this.vertices[vertex] = 1;
         return true;
+    }
+
+    public int[] getSettlements(){
+        return this.vertices;
     }
 
     public boolean addCity(int vertex){
@@ -110,5 +127,13 @@ public class CatanTile {
         cube[2] = tile.y;
         cube[1] = - cube[0] - cube[2];
         return cube;
+    }
+
+    public Point getVerticesCoords(int vertex){
+        return verticesCoords[vertex];
+    }
+
+    public Point[] getEdgeCoords(int edge){
+        return edgeCoords[edge];
     }
 }
