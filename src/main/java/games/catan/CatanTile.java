@@ -12,8 +12,8 @@ public class CatanTile {
     // x_coord, y_coord are the coordinates to the centre of the hex in pixels
     public double x_coord;
     public double y_coord;
-    int[] edges;
-    int[] vertices;
+    int[] roads;
+    int[] settlements;
 
     // coordinates to vertices and edges to facilitate drawing roads
     Point[] verticesCoords;
@@ -26,12 +26,21 @@ public class CatanTile {
     public CatanTile(int x, int y) {
         this.x = x;
         this.y = y;
-        edges = new int[6];
-        vertices = new int[6];
+        roads = new int[6];
+        settlements = new int[6];
         verticesCoords = new Point[6];
         edgeCoords = new Point[6][2];
         hexagon = createHexagon();
+    }
 
+    public CatanTile(int x, int y, int[] edges, int[] vertices) {
+        this.x = x;
+        this.y = y;
+        this.roads = edges;
+        this.settlements = vertices;
+        verticesCoords = new Point[6];
+        edgeCoords = new Point[6][2];
+        hexagon = createHexagon();
     }
 
     public void setTileType(CatanParameters.TileType type){
@@ -88,28 +97,28 @@ public class CatanTile {
     }
 
     public boolean addRoad(int edge){
-        if (this.edges[edge] == 1) return false;
-        this.edges[edge] = 1;
+        if (this.roads[edge] == 1) return false;
+        this.roads[edge] = 1;
         return true;
     }
 
     public int[] getRoads(){
-        return edges;
+        return roads;
     }
 
     public boolean addSettlement(int vertex){
-        if (this.vertices[vertex] >= 1) return false;
-        this.vertices[vertex] = 1;
+        if (this.settlements[vertex] >= 1) return false;
+        this.settlements[vertex] = 1;
         return true;
     }
 
     public int[] getSettlements(){
-        return this.vertices;
+        return this.settlements;
     }
 
     public boolean addCity(int vertex){
-        if (this.vertices[vertex] != 1) return false;
-        this.vertices[vertex] = 2;
+        if (this.settlements[vertex] != 1) return false;
+        this.settlements[vertex] = 2;
         return true;
     }
 

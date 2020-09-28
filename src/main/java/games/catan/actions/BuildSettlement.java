@@ -20,7 +20,14 @@ public class BuildSettlement extends AbstractAction {
         // todo (mb) check if valid
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
-        board[this.row][this.col].addSettlement(vertex);
+
+        if (vertex == 0){
+            board[row][col].addSettlement(vertex);
+            if (col-1 >= 0)
+                    board[row][col-1].addSettlement(2);
+            if (row+1 < board.length)
+                board[row+1][col].addSettlement(4);
+        }
         return true;
     }
 

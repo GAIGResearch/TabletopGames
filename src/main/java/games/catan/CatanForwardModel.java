@@ -5,15 +5,11 @@ import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
-import core.properties.PropertyBoolean;
-import core.properties.PropertyString;
-import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
 
 import java.util.*;
 
 import static core.CoreConstants.playerHandHash;
-import static games.pandemic.PandemicConstants.playerCardHash;
 
 public class CatanForwardModel extends AbstractForwardModel {
     private int rollCounter;
@@ -66,7 +62,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         int row = rnd.nextInt(7);
         int col = rnd.nextInt(7);
         int edge = rnd.nextInt(6);
-        new BuildSettlement(row, col, edge).execute(gs);
+        new BuildSettlement(row, col, 0).execute(gs);
 
     }
 
@@ -129,6 +125,8 @@ public class CatanForwardModel extends AbstractForwardModel {
             }
         }
 
+        // todo traverse through the board and set vertices and edges
+
         return board;
     }
 
@@ -141,5 +139,14 @@ public class CatanForwardModel extends AbstractForwardModel {
         int num2 = r2.nextInt(6);
 
         return num1 + num2 + 2;
+    }
+
+    public void setVertices(CatanTile[][] board, int row, int column, int vertex, int value){
+        // Sets the neighbours of a given vertex to a given value
+        if (vertex == 0){
+            board[row][column].settlements[vertex] = value;
+            board[row][column-1].settlements[vertex] = value;
+            board[row+1][column].settlements[vertex] = value;
+        }
     }
 }
