@@ -85,8 +85,11 @@ public class CatanTile {
             int xval = (int) (x_coord + radius * Math.cos(angle_rad));
             int yval = (int) (y_coord + radius * Math.sin(angle_rad));
             verticesCoords[i] = new Point(xval, yval);
-            edgeCoords[i] = new Point[]{new Point(xval, yval), new Point(xval + 2, yval + 2)};
             polygon.addPoint(xval, yval);
+        }
+        // set correct coordinates for edges
+        for (int i = 0; i < verticesCoords.length; i++){
+            edgeCoords[i] = new Point[]{verticesCoords[i], verticesCoords[(i + 1) % 6]};
         }
         return polygon;
     }
@@ -104,7 +107,6 @@ public class CatanTile {
     }
 
     public boolean addRoad(int edge, int playerID){
-        // todo test
         // if null -> uninitialized
         if (this.roads[edge] == null){
             this.roads[edge] = new Road(playerID);

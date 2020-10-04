@@ -35,9 +35,10 @@ public class CatanBoardView extends JComponent {
 
     private void drawBoard(Graphics2D g) {
 
+        // Draw board
         CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++){
-            for (int y = 0; y < board[x].length; y++){
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
                 g.setColor(tileColourLookup(tile));
                 g.fillPolygon(tile.getHexagon());
@@ -46,23 +47,35 @@ public class CatanBoardView extends JComponent {
 
                 String type = "" + tile.getType();
                 String number = "" + tile.getNumber();
-                g.drawString(type, (int)tile.x_coord - 20, (int)tile.y_coord);
+                g.drawString(type, (int) tile.x_coord - 20, (int) tile.y_coord);
                 if (!number.equals("0"))
-                    g.drawString(number, (int)tile.x_coord, (int)tile.y_coord+20);
+                    g.drawString(number, (int) tile.x_coord, (int) tile.y_coord + 20);
+            }
+        }
+
+        // Draw roads top of board
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
 
                 // draw roads
-                // todo (mb) road coordinates are wrong or should handle them differently currently draws large oval
                 Road[] roads = tile.getRoads();
-                for (int i = 0; i < roads.length; i++){
+                for (int i = 0; i < roads.length; i++) {
                     if (roads[i] != null)
                         drawRoad(g, tile.getEdgeCoords(i), CatanConstants.PlayerColors[roads[i].getOwner()]);
                 }
+            }
+        }
+        // Finally draw settlements
+        for (int x = 0; x < board.length; x++){
+            for (int y = 0; y < board[x].length; y++){
+                CatanTile tile = board[x][y];
 
                 // draw settlements
                 Settlement[] settlements = tile.getSettlements();
                 for (int i = 0; i < settlements.length; i++){
                     if (settlements[i] != null)
-                        drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()]);
+                        drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
                 }
 
                 // lines below render cube coordinates and distances from middle
@@ -100,18 +113,36 @@ public class CatanBoardView extends JComponent {
     }
 
     public void drawRoad(Graphics2D g, Point[] location, Color color){
-        // Assume that logic is checked somewhere else
-//        int width = 5;
-//        int length = 30;
-        // todo rotations to get the sizing right?
         g.setColor(color);
-        g.fillRect(location[0].x, location[0].y, location[1].x, location[1].y);
+        Stroke stroke = g.getStroke();
+        g.setStroke(new BasicStroke(5));
+        g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
+        g.setStroke(stroke);
 
     }
 
-    public void drawSettlement(Graphics2D g, Point point, Color color){
+    public void drawSettlement(Graphics2D g, Point point, Color color, int city){
+        /* / \  settl.  / \___  city
+        * |   |         |    |
+        * -----         ------
+        * */
         int RADIUS = 10;
+        // Create a polygon to contain x,y coordinates
+        Polygon settlement = new Polygon();
+        settlement.addPoint(point.x - RADIUS/2, point.y-RADIUS/2);
+        settlement.addPoint(point.x, point.y - RADIUS);
+        settlement.addPoint(point.x + RADIUS/2, point.y-RADIUS/2);
+        if (city == 2){
+            settlement.addPoint(point.x + RADIUS, point.y - RADIUS/2);
+            settlement.addPoint(point.x + RADIUS, point.y + RADIUS/2);
+        }
+        settlement.addPoint(point.x + RADIUS/2, point.y+RADIUS/2);
+        settlement.addPoint(point.x - RADIUS/2, point.y+RADIUS/2);
+
         g.setColor(color);
-        g.fillOval(point.x, point.y, RADIUS, RADIUS);
+        g.fillPolygon(settlement);
+        g.setColor(Color.BLACK);
+        g.drawPolygon(settlement);
+
     }
 }

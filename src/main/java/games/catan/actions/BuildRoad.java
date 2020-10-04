@@ -20,11 +20,14 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // todo (mb) check if valid
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
-        board[this.row][this.col].addRoad(edge, playerID);
-        return true;
+        if (board[row][col].getRoads()[edge] == null) {
+            board[this.row][this.col].addRoad(edge, playerID);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -34,7 +37,12 @@ public class BuildRoad extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other instanceof BuildRoad){
+            BuildRoad otherAction = (BuildRoad)other;
+            return row == otherAction.row && col == otherAction.col && edge == otherAction.edge && playerID == otherAction.playerID;
+        }
         return false;
     }
 

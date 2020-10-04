@@ -5,6 +5,7 @@ import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
+import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
 
 import java.util.*;
@@ -55,14 +56,12 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         CatanGameState gs = (CatanGameState) currentState;
+        // todo (mb) make sure that reactions are handled correctly (trading)
+//        if (((CatanTurnOrder)gs.getTurnOrder()).reactionsFinished()){
+//            gs.setMainGamePhase();
+//        }
         gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
         action.execute(gs);
-
-        Random rnd = new Random();
-        int row = rnd.nextInt(7);
-        int col = rnd.nextInt(7);
-        int edge = rnd.nextInt(6);
-        new BuildSettlement(row, col, 0).execute(gs);
 
         // end player's turn
         gs.getTurnOrder().endPlayerTurn(gs);
@@ -72,9 +71,22 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
+//        actions.add(new DoNothing());
 
-        // TODO in initial phase each player places 2 roads and 2 settlements on the board
+        // todo (mb) determine where to build settlement
+        Random rnd = new Random();
+        int row = rnd.nextInt(7);
+        int col = rnd.nextInt(7);
+        int edge = rnd.nextInt(6);
+        actions.add(new BuildSettlement(row, col, edge, gameState.getCurrentPlayer()));
+
+        // todo (mb) determine where the player can put roads
+        row = rnd.nextInt(7);
+        col = rnd.nextInt(7);
+        edge = rnd.nextInt(6);
+        actions.add(new BuildRoad(row, col, edge, gameState.getCurrentPlayer()));
+
+        // TODO (mb) in initial phase each player places 2 roads and 2 settlements on the board
 
         return actions;
     }
