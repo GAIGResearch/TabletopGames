@@ -64,6 +64,9 @@ public class CatanForwardModel extends AbstractForwardModel {
         int edge = rnd.nextInt(6);
         new BuildSettlement(row, col, 0).execute(gs);
 
+        // end player's turn
+        gs.getTurnOrder().endPlayerTurn(gs);
+
     }
 
     @Override
@@ -126,6 +129,12 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // todo traverse through the board and set vertices and edges
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                System.out.println("tile " + tile);
+            }
+        }
 
         return board;
     }
@@ -141,12 +150,12 @@ public class CatanForwardModel extends AbstractForwardModel {
         return num1 + num2 + 2;
     }
 
-    public void setVertices(CatanTile[][] board, int row, int column, int vertex, int value){
-        // Sets the neighbours of a given vertex to a given value
-        if (vertex == 0){
-            board[row][column].settlements[vertex] = value;
-            board[row][column-1].settlements[vertex] = value;
-            board[row+1][column].settlements[vertex] = value;
-        }
-    }
+//    public void setVertices(CatanTile[][] board, int row, int column, int vertex, int value){
+//        // Sets the neighbours of a given vertex to a given value
+//        if (vertex == 0){
+//            board[row][column].settlements[vertex] = value;
+//            board[row][column-1].settlements[vertex] = value;
+//            board[row+1][column].settlements[vertex] = value;
+//        }
+//    }
 }

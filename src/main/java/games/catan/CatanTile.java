@@ -1,8 +1,15 @@
 package games.catan;
 
+import games.catan.components.Road;
+import games.catan.components.Settlement;
+
 import java.awt.*;
 
 public class CatanTile {
+    /*
+    Implementation of a Hexagon structure using "even-r" representation, meaning that the hexagons are oriented with
+    having their "pointy" side facing up and every odd row is offset by 0.5 * width.
+    */
     // todo (mb) variables should be private
 
     public final int radius = 40;
@@ -12,8 +19,8 @@ public class CatanTile {
     // x_coord, y_coord are the coordinates to the centre of the hex in pixels
     public double x_coord;
     public double y_coord;
-    int[] roads;
-    int[] settlements;
+    Road[] roads;
+    Settlement[] settlements;
 
     // coordinates to vertices and edges to facilitate drawing roads
     Point[] verticesCoords;
@@ -26,14 +33,14 @@ public class CatanTile {
     public CatanTile(int x, int y) {
         this.x = x;
         this.y = y;
-        roads = new int[6];
-        settlements = new int[6];
+        roads = new Road[6];
+        settlements = new Settlement[6];
         verticesCoords = new Point[6];
         edgeCoords = new Point[6][2];
         hexagon = createHexagon();
     }
 
-    public CatanTile(int x, int y, int[] edges, int[] vertices) {
+    public CatanTile(int x, int y, Road[] edges, Settlement[] vertices) {
         this.x = x;
         this.y = y;
         this.roads = edges;
@@ -96,30 +103,38 @@ public class CatanTile {
         this.number = number;
     }
 
-    public boolean addRoad(int edge){
-        if (this.roads[edge] == 1) return false;
-        this.roads[edge] = 1;
-        return true;
+    public boolean addRoad(int edge, int playerID){
+        // todo test
+        // if null -> uninitialized
+        if (this.roads[edge] == null){
+            this.roads[edge] = new Road(playerID);
+            return true;
+        }
+        return false;
     }
 
-    public int[] getRoads(){
+    public Road[] getRoads(){
         return roads;
     }
 
-    public boolean addSettlement(int vertex){
-        if (this.settlements[vertex] >= 1) return false;
-        this.settlements[vertex] = 1;
-        return true;
+    public boolean addSettlement(int vertex, int playerID){
+        if (this.settlements[vertex] == null){
+            this.settlements[vertex] = new Settlement(playerID);
+            return true;
+        }
+        return false;
     }
 
-    public int[] getSettlements(){
+    public Settlement[] getSettlements(){
         return this.settlements;
     }
 
     public boolean addCity(int vertex){
-        if (this.settlements[vertex] != 1) return false;
-        this.settlements[vertex] = 2;
-        return true;
+        if (this.settlements[vertex] == null){
+            return false;
+        } else{
+            return this.settlements[vertex].upgrade();
+        }
     }
 
     public int distance(CatanTile tile){
@@ -130,13 +145,7 @@ public class CatanTile {
         return dist;
     }
 
-    public int[] to_cube(CatanTile tile){
-        int[] cube = new int[3];
-        cube[0] = tile.x - (tile.y + (tile.y % 2)) / 2;
-        cube[2] = tile.y;
-        cube[1] = - cube[0] - cube[2];
-        return cube;
-    }
+
 
     public Point getVerticesCoords(int vertex){
         return verticesCoords[vertex];
@@ -144,5 +153,29 @@ public class CatanTile {
 
     public Point[] getEdgeCoords(int edge){
         return edgeCoords[edge];
+    }
+
+    // Static methods
+    public static int[] to_cube(CatanTile tile){
+        int[] cube = new int[3];
+        cube[0] = tile.x - (tile.y + (tile.y % 2)) / 2;
+        cube[2] = tile.y;
+        cube[1] = - cube[0] - cube[2];
+        return cube;
+    }
+
+    public static int[] get_neighbour_on_edge(CatanTile tile, int edge){
+        // returns coordinates to the other tile in the given direction
+        // Even-r offset mapping; Different layouts require different values
+        int[][][] evenr_directions = {
+                {{1, 0}, {1, -1}, {0, -1},
+                        {-1, 0}, {0, 1}, {1, 1}},
+                {{1, 0}, {0, -1}, {-1, -1},
+                        {-1, 0}, {-1, 1}, {0, 1}}
+        };
+        int parity = tile.x & 1;
+        int[] direction = evenr_directions[parity][edge];
+        return new int[]{tile.x + direction[0], tile.y + direction[1]};
+
     }
 }

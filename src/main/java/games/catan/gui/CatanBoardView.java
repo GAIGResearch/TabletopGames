@@ -1,8 +1,12 @@
 package games.catan.gui;
 
+import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
+import games.catan.components.Road;
+import games.catan.components.Settlement;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
@@ -48,19 +52,17 @@ public class CatanBoardView extends JComponent {
 
                 // draw roads
                 // todo (mb) road coordinates are wrong or should handle them differently currently draws large oval
-                int[] roads = tile.getRoads();
+                Road[] roads = tile.getRoads();
                 for (int i = 0; i < roads.length; i++){
-                    if (roads[i] == 1){
-                        drawRoad(g, tile.getEdgeCoords(i), Color.CYAN);
-                    }
+                    if (roads[i] != null)
+                        drawRoad(g, tile.getEdgeCoords(i), CatanConstants.PlayerColors[roads[i].getOwner()]);
                 }
 
                 // draw settlements
-                int[] settlements = tile.getSettlements();
+                Settlement[] settlements = tile.getSettlements();
                 for (int i = 0; i < settlements.length; i++){
-                    if (settlements[i] == 1){
-                        drawSettlement(g, tile.getVerticesCoords(i), Color.CYAN);
-                    }
+                    if (settlements[i] != null)
+                        drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()]);
                 }
 
                 // lines below render cube coordinates and distances from middle

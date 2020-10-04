@@ -9,11 +9,13 @@ public class BuildRoad extends AbstractAction {
     int row;
     int col;
     int edge;
+    int playerID;
 
-    public BuildRoad(int row, int col, int edge){
+    public BuildRoad(int row, int col, int edge, int playerID){
         this.row = row;
         this.col = col;
         this.edge = edge;
+        this.playerID = playerID;
     }
 
     @Override
@@ -21,13 +23,13 @@ public class BuildRoad extends AbstractAction {
         // todo (mb) check if valid
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
-        board[this.row][this.col].addRoad(edge);
+        board[this.row][this.col].addRoad(edge, playerID);
         return true;
     }
 
     @Override
     public AbstractAction copy() {
-        BuildRoad copy = new BuildRoad(row, col, edge);
+        BuildRoad copy = new BuildRoad(row, col, edge, playerID);
         return copy;
     }
 

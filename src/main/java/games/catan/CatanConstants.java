@@ -2,6 +2,8 @@ package games.catan;
 
 import utilities.Hash;
 
+import java.awt.*;
+
 
 public class CatanConstants {
     public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
@@ -18,4 +20,7 @@ public class CatanConstants {
     public final static int cardType = Hash.GetInstance().hash("cardType");
 
     public final static int countHash = Hash.GetInstance().hash("count");
+
+    public final static Color[] PlayerColors = new Color[]{Color.RED, Color.YELLOW, Color.BLUE, Color.GREEN};
+
 }
