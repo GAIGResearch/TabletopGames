@@ -1,5 +1,7 @@
 package utilities;
 
+import core.components.Deck;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -165,4 +167,17 @@ public abstract class Utils {
     public static double noise(double input, double epsilon, double random) {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
+
+    public interface IDeckProcessor<T extends core.components.Component> {
+        double processDeck(T card);
+    }
+    public static <T extends core.components.Component> double summariseDeck(Deck<T> deck, IDeckProcessor<T> processor) {
+        double retValue = 0.0;
+        for (int index = 0; index < deck.getSize(); index++) {
+            retValue += processor.processDeck(deck.peek(index));
+        }
+        return retValue;
+    }
 }
+
+

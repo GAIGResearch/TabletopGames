@@ -2,8 +2,8 @@ package games.dominion;
 
 import core.*;
 import core.components.*;
-import core.turnorders.*;
 import games.dominion.cards.*;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -19,19 +19,19 @@ public class DominionGameState extends AbstractGameState {
     // Then Decks for each player - Hand, Discard and Draw
 
     // TODO: Convert these to use PartialObservableDecks
-    Deck<Card>[] playerHands;
-    Deck<Card>[] playerDrawPiles;
-    Deck<Card>[] playerDiscards;
+    Deck<DominionCard>[] playerHands;
+    Deck<DominionCard>[] playerDrawPiles;
+    Deck<DominionCard>[] playerDiscards;
 
     // Trash pile and other global decks
-    Deck<Card> trashPile;
+    Deck<DominionCard> trashPile;
 
 
     /**
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param nPlayers      - number of players
+     * @param nPlayers       - number of players
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new DominionTurnOrder(nPlayers));
@@ -83,8 +83,12 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected double _getScore(int playerId) {
-        return 0;
+        double score = Utils.summariseDeck(playerDiscards[playerId], DominionCard::victoryPoints);
+        score += Utils.summariseDeck(playerDrawPiles[playerId], DominionCard::victoryPoints);
+        score += Utils.summariseDeck(playerHands[playerId], DominionCard::victoryPoints);
+        return score;
     }
+
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
@@ -110,8 +114,8 @@ public class DominionGameState extends AbstractGameState {
         for (int i = 0; i < playerCount; i++) {
             playerHands[i] = new Deck<>("Hand of Player " + i + 1);
             for (int j = 0; j < 5; j++) {
-                playerDrawPiles[i].add(new DominionCard(CardType.COPPER));
-                playerDrawPiles[i].add(new DominionCard(CardType.ESTATE));
+                playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
+                playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
             }
             playerDrawPiles[i].shuffle(rnd);
             for (int k = 0; k < 5; k++) playerHands[i].add(playerDrawPiles[i].draw());
@@ -134,6 +138,13 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected boolean _equals(Object o) {
-        return false;
+        if (this == o) return true;
+        if (!(o instanceof DominionGameState)) return false;
+        DominionGameState other = (DominionGameState) o;
+        return cardsAvailable.equals(other.cardsAvailable) &&
+                Arrays.equals(playerHands, other.playerHands) &&
+                Arrays.equals(playerDiscards, other.playerDiscards) &&
+                Arrays.equals(playerDrawPiles, other.playerDrawPiles) &&
+                trashPile.equals(other.trashPile);
     }
 }
