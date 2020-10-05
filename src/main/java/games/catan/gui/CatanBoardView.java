@@ -45,6 +45,10 @@ public class CatanBoardView extends JComponent {
                 g.setColor(Color.BLACK);
                 g.drawPolygon(tile.getHexagon());
 
+                if (tile.getRobber()){
+                    drawRobber(g, new Point((int)tile.x_coord, (int)tile.y_coord));
+                }
+
                 String type = "" + tile.getType();
                 String number = "" + tile.getNumber();
                 g.drawString(type, (int) tile.x_coord - 20, (int) tile.y_coord);
@@ -110,6 +114,12 @@ public class CatanBoardView extends JComponent {
         } else{
             return Color.WHITE;
         }
+    }
+
+    public void drawRobber(Graphics2D g, Point point){
+        int RADIUS = 10;
+        g.setColor(Color.BLACK);
+        g.fillOval(point.x, point.y, RADIUS, RADIUS);
     }
 
     public void drawRoad(Graphics2D g, Point[] location, Color color){

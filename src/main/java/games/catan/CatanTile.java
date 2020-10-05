@@ -16,19 +16,23 @@ public class CatanTile {
     // x and y are r-even representation coordinates
     public int x;
     public int y;
+
     // x_coord, y_coord are the coordinates to the centre of the hex in pixels
     public double x_coord;
     public double y_coord;
+
     Road[] roads;
     Settlement[] settlements;
 
     // coordinates to vertices and edges to facilitate drawing roads
+    // hexagon is the actual object that can be drawn on the screen
     Point[] verticesCoords;
     Point[][] edgeCoords;
-    // hexagon is the actual object that can be drawn on the screen
     private Polygon hexagon;
+
     CatanParameters.TileType tileType;
     int number;
+    boolean robber;
 
     public CatanTile(int x, int y) {
         this.x = x;
@@ -38,6 +42,7 @@ public class CatanTile {
         verticesCoords = new Point[6];
         edgeCoords = new Point[6][2];
         hexagon = createHexagon();
+        robber = false;
     }
 
     public CatanTile(int x, int y, Road[] edges, Settlement[] vertices) {
@@ -48,6 +53,7 @@ public class CatanTile {
         verticesCoords = new Point[6];
         edgeCoords = new Point[6][2];
         hexagon = createHexagon();
+        robber = false;
     }
 
     public void setTileType(CatanParameters.TileType type){
@@ -92,6 +98,22 @@ public class CatanTile {
             edgeCoords[i] = new Point[]{verticesCoords[i], verticesCoords[(i + 1) % 6]};
         }
         return polygon;
+    }
+
+    public boolean getRobber(){
+        return robber;
+    }
+
+    public void placeRobber(){
+        this.robber = true;
+    }
+
+    public boolean removeRobber(){
+        if (this.robber){
+            this.robber = false;
+            return true;
+        }
+        return false;
     }
 
     public Polygon getHexagon(){
@@ -147,8 +169,6 @@ public class CatanTile {
         return dist;
     }
 
-
-
     public Point getVerticesCoords(int vertex){
         return verticesCoords[vertex];
     }
@@ -178,6 +198,5 @@ public class CatanTile {
         int parity = tile.x & 1;
         int[] direction = evenr_directions[parity][edge];
         return new int[]{tile.x + direction[0], tile.y + direction[1]};
-
     }
 }

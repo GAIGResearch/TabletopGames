@@ -97,7 +97,7 @@ public class CatanData extends AbstractGameData {
         developmentDeck.add(tmpDeck);
 
 
-        // add decks to decks
+        // merge decks
         decks.add(resourceDeck);
         decks.addAll(developmentDeck);
 

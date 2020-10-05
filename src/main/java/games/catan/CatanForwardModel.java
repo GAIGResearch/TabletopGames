@@ -31,12 +31,13 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters)state.getGameParameters();
+        // data is read in from JSON it has all the cards, tokens and counters
         CatanData data = state.getData();
 
         state.setBoard(generateBoard(params));
         state.areas = new HashMap<>();
 
-        // todo distribute everything to player
+        // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = new Area(i, "Player Area");
             Deck<Card> playerHand = new Deck<>("Player Hand");
@@ -71,23 +72,34 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-//        actions.add(new DoNothing());
+        CatanGameState gs = (CatanGameState)gameState;
+        if (gs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
+            System.out.println("setting settlements with roads");
+            // TODO (mb) in initial phase each player places 2 roads and 2 settlements on the board
+        }
+        if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
+//            actions.add(new DoNothing());
+        }
 
-        // todo (mb) determine where to build settlement
+        // todo (mb) instead of random determine where to build settlement
         Random rnd = new Random();
         int row = rnd.nextInt(7);
         int col = rnd.nextInt(7);
         int edge = rnd.nextInt(6);
         actions.add(new BuildSettlement(row, col, edge, gameState.getCurrentPlayer()));
 
-        // todo (mb) determine where the player can put roads
+        // todo (mb) instead of random determine where the player can put roads
         row = rnd.nextInt(7);
         col = rnd.nextInt(7);
         edge = rnd.nextInt(6);
         actions.add(new BuildRoad(row, col, edge, gameState.getCurrentPlayer()));
 
-        // TODO (mb) in initial phase each player places 2 roads and 2 settlements on the board
 
+        // todo (mb) some notes on rules
+        // 1, victory cards may only be played when player has 10+ points, can be in the same turn when drawn
+        // 2, other dev cards cannot be played on the same turn when they are drawn and only 1 card per turn is playable
+        // 3, distance rule - each settlement requires 2 edge distance from other settlements
+        // 4, trade is a negotiation in the game - should player send an offer to all other players?
         return actions;
     }
 
@@ -131,6 +143,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
                 else if (x == mid_x && y == mid_y){
                     tile = midTile;
+                    tile.placeRobber();
                 }
                 else if (tileList.size() > 0) {
                     tile.setTileType(tileList.remove(0));

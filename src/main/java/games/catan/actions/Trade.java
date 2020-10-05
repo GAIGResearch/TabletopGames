@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 public class Trade extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
+        // todo (mb) make trade offer and set the game phase to TradeReaction and make sure intended player has to react
         return false;
     }
 

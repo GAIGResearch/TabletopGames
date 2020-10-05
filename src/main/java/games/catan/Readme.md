@@ -10,6 +10,23 @@ The tiles are represented as individual Hexagons using the "r-even" representati
 
 Each tile contains its x (row) and y (column) coordinates in the "r-even" representation. "x_coord" and "y_coord" are their coordinates on the rendered screen. 
 
+Currently working on setting references to all edges and vertices, so adding a new settlement to a hex would also show up on the neightbouring tiles and same with the roads (edges).
+
+Easier tasks:
+- Setup scoring system ```(gameState.score[playerID])``` - longest road, most knights + other calculations and related events
+- Distribute and handle cards
+- Actions related to buying - check if player has resources, return card to game and purchase item - if card keep it hand, if settlement, road then place it on the map
+- Robber rules
+- Play development cards
+- Assign Harbors
+- Harbor actions
+
+Harder tasks:
+- Edge, vertex referencing correctly + distance rule (+ longest road calculation)
+- TurnOrder
+- Event Reaction system
+- Trading - how to handle negotiation?
+
 ## Catan Actions
 
 ### Progress
