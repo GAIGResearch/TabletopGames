@@ -126,7 +126,7 @@ class SingleTreeNode
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.rolloutLength) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.rolloutLength && cur.children.length > 0) {
             if (cur.notFullyExpanded()) {
                 // Node found! Expand it and return new child
                 return cur.expand();
