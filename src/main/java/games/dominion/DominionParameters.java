@@ -7,17 +7,18 @@ import java.util.*;
 
 public class DominionParameters extends AbstractParameters {
 
-    Set<CardType> cardsUsed = new HashSet<>();
+    Map<CardType, Integer> cardsUsed = new HashMap<>();
 
     public DominionParameters(long seed) {
         super(seed);
     }
 
-    public DominionParameters(long seed, String... cards) {
+    public DominionParameters(long seed, String[] cards, Map<String, Integer> overrideCount) {
         super(seed);
         for (String cardName : cards) {
             try {
-                cardsUsed.add(CardType.valueOf(cardName));
+                int number = overrideCount.getOrDefault(cardName, 10);
+                cardsUsed.put(CardType.valueOf(cardName), number);
             } catch (Exception e) {
                 System.out.println("Error initialising Parameters with " + cardName);
                 System.out.println(e.getMessage());
@@ -27,16 +28,17 @@ public class DominionParameters extends AbstractParameters {
 
     public static DominionParameters firstGame(long seed) {
         DominionParameters retValue = new DominionParameters(seed);
-        retValue.cardsUsed.add(CardType.CELLAR);
-        retValue.cardsUsed.add(CardType.MARKET);
-        retValue.cardsUsed.add(CardType.MERCHANT);
-        retValue.cardsUsed.add(CardType.MILITIA);
-        retValue.cardsUsed.add(CardType.MINE);
-        retValue.cardsUsed.add(CardType.MOAT);
-        retValue.cardsUsed.add(CardType.REMODEL);
-        retValue.cardsUsed.add(CardType.SMITHY);
-        retValue.cardsUsed.add(CardType.VILLAGE);
-        retValue.cardsUsed.add(CardType.WORKSHOP);
+        retValue.cardsUsed.put(CardType.CELLAR, 10);
+        retValue.cardsUsed.put(CardType.MARKET, 10);
+        retValue.cardsUsed.put(CardType.MERCHANT, 10);
+        retValue.cardsUsed.put(CardType.MILITIA, 10);
+        retValue.cardsUsed.put(CardType.MINE, 10);
+        retValue.cardsUsed.put(CardType.MOAT, 10);
+        retValue.cardsUsed.put(CardType.REMODEL, 10);
+        retValue.cardsUsed.put(CardType.SMITHY, 10);
+        retValue.cardsUsed.put(CardType.VILLAGE, 10);
+        retValue.cardsUsed.put(CardType.WORKSHOP, 10);
+        // Note that the three Victory cards and three Treasure cards are always included
         return retValue;
     }
 

@@ -1,5 +1,7 @@
 package games.dominion.cards;
 
+import java.util.*;
+
 public enum CardType {
     CURSE(0, 0, -1),
     ESTATE(2, 0, 1),
@@ -51,4 +53,11 @@ public enum CardType {
     public int getCost(){return cost;}
     public int getTreasure(){return treasure;}
     public int getVictory(){return victory;}
+
+    public static Set<CardType> infiniteSupplyCards = new HashSet();
+    static {
+        infiniteSupplyCards.add(CardType.COPPER);
+        infiniteSupplyCards.add(CardType.SILVER);
+        infiniteSupplyCards.add(CardType.GOLD);
+    }
 }
