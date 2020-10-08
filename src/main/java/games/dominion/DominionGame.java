@@ -19,7 +19,7 @@ public class DominionGame extends Game {
         // create list of players
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer());
-        agents.add(new MCTSPlayer());
+        agents.add(new OSLAPlayer());
         agents.add(new RandomPlayer());
         agents.add(new OSLAPlayer());
 

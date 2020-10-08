@@ -3,6 +3,7 @@ package games.dominion;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import games.dominion.actions.BuyCard;
 import games.dominion.cards.ActionCard;
 import games.dominion.cards.CardType;
@@ -26,6 +27,7 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
+        firstState.setGamePhase(DominionGameState.DominionGamePhase.Play);
         // Nothing to do yet - this is all done by firstState._reset() which is always called immediately before this
     }
 
@@ -50,15 +52,15 @@ public class DominionForwardModel extends AbstractForwardModel {
         switch (state.getGamePhase().toString()) {
             case "Play":
                 boolean hasNoActionCardInHand = state.playerHands[playerID].getComponents().stream().noneMatch(c -> c instanceof ActionCard);
-                if (state.getPlayerState(playerID).actions < 1 || hasNoActionCardInHand) {
+                if (state.actionsLeftForCurrentPlayer < 1 || hasNoActionCardInHand) {
                     // change phase
                     state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
                     // no change to current player
                 }
                 break;
             case "Buy":
-                if (state.getPlayerState(playerID).buys < 1) {
-                    state.getPlayerState(playerID).endOfTurnCleanUp();
+                if (state.buysLeftForCurrentPlayer < 1 || action instanceof DoNothing) {
+                    state.endOfTurnCleanUp(playerID);
                     // change phase
                     if (state.gameOver()) {
                         endOfGameProcessing(state);
@@ -99,15 +101,17 @@ public class DominionForwardModel extends AbstractForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                return Collections.emptyList();
+                return Arrays.asList(new DoNothing());
             // No Action cards are yet implemented
             case "Buy":
                 // we return every available card for purchase within our price range
-                int budget = state.playerStates[playerID].availableSpend();
-                return state.cardsAvailable.keySet().stream()
+                int budget = state.availableSpend(playerID);
+                List<AbstractAction> options = state.cardsAvailable.keySet().stream()
                         .filter(ct -> state.cardsAvailable.get(ct) > 0 && ct.getCost() <= budget)
                         .map(ct -> new BuyCard(ct, playerID))
                         .collect(Collectors.toList());
+                options.add(new DoNothing());
+                return options;
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }

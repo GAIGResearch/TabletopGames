@@ -54,10 +54,4 @@ public enum CardType {
     public int getTreasure(){return treasure;}
     public int getVictory(){return victory;}
 
-    public static Set<CardType> infiniteSupplyCards = new HashSet();
-    static {
-        infiniteSupplyCards.add(CardType.COPPER);
-        infiniteSupplyCards.add(CardType.SILVER);
-        infiniteSupplyCards.add(CardType.GOLD);
-    }
 }

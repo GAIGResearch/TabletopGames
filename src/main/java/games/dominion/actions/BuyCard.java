@@ -3,7 +3,6 @@ package games.dominion.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dominion.DominionGameState;
-import games.dominion.DominionPlayerState;
 import games.dominion.cards.*;
 
 import java.util.Objects;
@@ -32,11 +31,10 @@ public class BuyCard extends DominionAction {
         // ii) Removing the card from the table and adding it to the player's discard pile
         // iii) Updating the available money and buy actions
         DominionGameState state = (DominionGameState) gs;
-        DominionPlayerState playerState = state.getPlayerState(buyingPlayer);
-        if (playerState.currentBuys() > 0 && playerState.availableSpend() >= cardType.getCost()) {
+        if (state.buysLeft() > 0 && state.availableSpend(buyingPlayer) >= cardType.getCost()) {
             if (state.removeCardFromTable(cardType)) {
-                playerState.changeBuys(-1);
-                playerState.changeSpend(cardType.getCost());
+                state.changeBuys(-1);
+                state.spend(cardType.getCost());
                 return true;
             }
         }
