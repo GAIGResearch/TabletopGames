@@ -62,7 +62,8 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public boolean gameOver() {
-        return cardsAvailable.values().stream().filter(i -> i == 0).count() >= 3;
+        return cardsAvailable.get(CardType.PROVINCE) == 0 ||
+                cardsAvailable.values().stream().filter(i -> i == 0).count() >= 3;
     }
 
     /**
