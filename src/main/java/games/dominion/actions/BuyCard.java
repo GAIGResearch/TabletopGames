@@ -6,10 +6,12 @@ import games.dominion.DominionGameState;
 import games.dominion.DominionPlayerState;
 import games.dominion.cards.*;
 
+import java.util.Objects;
+
 public class BuyCard extends DominionAction {
 
-    CardType cardType;
-    int buyingPlayer;
+    final CardType cardType;
+    final int buyingPlayer;
 
     public BuyCard(CardType cardToBuy, int playerID) {
         buyingPlayer = playerID;
@@ -49,21 +51,31 @@ public class BuyCard extends DominionAction {
      */
     @Override
     public AbstractAction copy() {
-        return null;
+        // all state is immutable, so no need
+        return this;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (obj instanceof BuyCard) {
+            BuyCard other = (BuyCard) obj;
+            return other.cardType == cardType && other.buyingPlayer == buyingPlayer;
+        }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(buyingPlayer, cardType);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return this.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "BuyCard: " + cardType + " by player " + buyingPlayer;
     }
 }

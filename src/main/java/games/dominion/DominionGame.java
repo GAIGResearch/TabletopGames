@@ -2,32 +2,34 @@ package games.dominion;
 
 import core.*;
 import games.GameType;
+import players.mcts.MCTSPlayer;
+import players.simple.*;
 
-import java.util.List;
+import java.util.*;
 
 public class DominionGame extends Game {
-    /**
-     * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
-     * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
-     *
-     * @param type
-     * @param players   - players taking part in this game.
-     * @param realModel - forward model used to apply game rules.
-     * @param gameState - object used to track the state of the game in a moment in time.
-     */
-    public DominionGame(GameType type, List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
-        super(type, players, realModel, gameState);
+
+    public DominionGame(List<AbstractPlayer> players, DominionParameters params) {
+        super(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(params, players.size()));
     }
 
-    /**
-     * Game constructor. Receives a forward model and a game state.
-     * Performs initialisation of the game state and forward model objects.
-     *
-     * @param type
-     * @param model     - forward model used to apply game rules.
-     * @param gameState - object used to track the state of the game in a moment in time.
-     */
-    public DominionGame(GameType type, AbstractForwardModel model, AbstractGameState gameState) {
-        super(type, model, gameState);
+
+    public static void main(String[] args){
+
+        // create list of players
+        ArrayList<AbstractPlayer> agents = new ArrayList<>();
+        agents.add(new RandomPlayer());
+        agents.add(new MCTSPlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new OSLAPlayer());
+
+        for (int i=0; i<1; i++) {
+            // setup game
+            DominionParameters params = new DominionParameters(System.currentTimeMillis());
+            Game game = new DominionGame(agents, params);
+
+            // run game
+            game.run(null);
+        }
     }
 }

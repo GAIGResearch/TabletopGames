@@ -12,8 +12,7 @@ public class DominionGameState extends AbstractGameState {
 
     public enum DominionGamePhase implements IGamePhase {
         Play,
-        Buy,
-        CleanUp
+        Buy
     }
 
     Random rnd;
@@ -62,6 +61,10 @@ public class DominionGameState extends AbstractGameState {
         return false;
     }
 
+    public boolean gameOver() {
+        return cardsAvailable.values().stream().filter(i -> i == 0).count() >= 3;
+    }
+
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
      * This method is called after initialising the game state.
@@ -70,7 +73,12 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        return null;
+        List<Component> components = new ArrayList<>();
+        components.addAll(Arrays.asList(playerHands));
+        components.addAll(Arrays.asList(playerDiscards));
+        components.addAll(Arrays.asList(playerDrawPiles));
+        components.add(trashPile);
+        return components;
     }
 
     /**
@@ -121,7 +129,7 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return null;
+        return new ArrayList<>();
     }
 
     /**

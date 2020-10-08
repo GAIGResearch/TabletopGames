@@ -3,8 +3,16 @@ package games.dominion;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.dominion.actions.BuyCard;
+import games.dominion.cards.ActionCard;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
+import utilities.Utils;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DominionForwardModel extends AbstractForwardModel {
     /**
@@ -18,7 +26,7 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-
+        // Nothing to do yet - this is all done by firstState._reset() which is always called immediately before this
     }
 
     /**
@@ -34,7 +42,48 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
+        DominionGameState state = (DominionGameState) currentState;
 
+        action.execute(state);
+        int playerID = state.getCurrentPlayer();
+
+        switch (state.getGamePhase().toString()) {
+            case "Play":
+                boolean hasNoActionCardInHand = state.playerHands[playerID].getComponents().stream().noneMatch(c -> c instanceof ActionCard);
+                if (state.getPlayerState(playerID).actions < 1 || hasNoActionCardInHand) {
+                    // change phase
+                    state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+                    // no change to current player
+                }
+                break;
+            case "Buy":
+                if (state.getPlayerState(playerID).buys < 1) {
+                    state.getPlayerState(playerID).endOfTurnCleanUp();
+                    // change phase
+                    if (state.gameOver()) {
+                        endOfGameProcessing(state);
+                    } else {
+                        state.setGamePhase(DominionGameState.DominionGamePhase.Play);
+                        state.getTurnOrder().nextPlayer(state);
+                    }
+                }
+                break;
+            default:
+                throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
+        }
+
+    }
+
+    private void endOfGameProcessing(DominionGameState state) {
+        state.setGameStatus(Utils.GameResult.GAME_END);
+        int[] finalScores = new int[state.playerCount];
+        for (int p = 0; p < state.playerCount; p++) {
+            finalScores[p] = (int) state.getScore(p);
+        }
+        int winningScore = Arrays.stream(finalScores).max().getAsInt();
+        for (int p = 0; p < state.playerCount; p++) {
+            state.setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
+        }
     }
 
     /**
@@ -45,7 +94,23 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        return null;
+        DominionGameState state = (DominionGameState) gameState;
+        int playerID = state.getCurrentPlayer();
+
+        switch (state.getGamePhase().toString()) {
+            case "Play":
+                return Collections.emptyList();
+            // No Action cards are yet implemented
+            case "Buy":
+                // we return every available card for purchase within our price range
+                int budget = state.playerStates[playerID].availableSpend();
+                return state.cardsAvailable.keySet().stream()
+                        .filter(ct -> state.cardsAvailable.get(ct) > 0 && ct.getCost() <= budget)
+                        .map(ct -> new BuyCard(ct, playerID))
+                        .collect(Collectors.toList());
+            default:
+                throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
+        }
     }
 
     /**
@@ -55,6 +120,7 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected AbstractForwardModel _copy() {
-        return null;
+        // no internal state as yet
+        return this;
     }
 }
