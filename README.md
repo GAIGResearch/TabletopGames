@@ -13,6 +13,7 @@ The Tabletop Games Framework (TAG) is a Java-based benchmark for developing mode
 ## Games
 Currently implemented games:
 - [x] Tic-Tac-Toe
+- [x] Dots and Boxes
 - [x] Love Letter (Seiji Kanai 2012)
 - [x] Uno (Merle Robbins 1971)
 - [x] Virus! (Cabrero and others 2015)
