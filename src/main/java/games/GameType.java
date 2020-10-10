@@ -5,6 +5,10 @@ import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
+import games.dotsboxes.DBForwardModel;
+import games.dotsboxes.DBGUI;
+import games.dotsboxes.DBGameState;
+import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -73,7 +77,10 @@ public enum GameType {
     ColtExpress (2, 6,
             new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }});
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+    DotsAndBoxes(2, 6,
+            new ArrayList<Category>(){{ add(Simple); add(Abstract); add(TerritoryBuilding); }},
+            new ArrayList<Mechanic>(){{ add(Enclosure); }});
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
@@ -100,6 +107,8 @@ public enum GameType {
                 return Virus;
             case "coltexpress":
                 return ColtExpress;
+            case "dotsandboxes":
+                return DotsAndBoxes;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -161,6 +170,10 @@ public enum GameType {
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
                 break;
+            case DotsAndBoxes:
+                params = new DBParameters(seed);
+                forwardModel = new DBForwardModel();
+                gameState = new DBGameState(params, nPlayers);
         }
 
         return new Game(this, forwardModel, gameState);
@@ -212,6 +225,12 @@ public enum GameType {
             case TicTacToe:
                 gui = new TicTacToeGUI(game, ac);
                 break;
+            case DotsAndBoxes:
+                if (game != null) {
+                    gui = new DBGUI(game.getGameState(), ac);
+                } else {
+                    gui = new PrototypeGUI(null, null, ac, 100);
+                }
         }
 
         return gui;
@@ -307,7 +326,8 @@ public enum GameType {
         ModularBoard,
         MovementPoints,
         MultipleMaps,
-        Campaign;
+        Campaign,
+        Enclosure;
 
         /**
          * Retrieves a list of all games using this mechanic.
