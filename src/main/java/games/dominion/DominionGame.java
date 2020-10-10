@@ -2,6 +2,7 @@ package games.dominion;
 
 import core.*;
 import games.GameType;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.simple.*;
 
@@ -19,8 +20,8 @@ public class DominionGame extends Game {
         // create list of players
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer());
-        agents.add(new OSLAPlayer());
-        agents.add(new RandomPlayer());
+        agents.add(new MCTSPlayer());
+        agents.add(new BigMoney());
         agents.add(new OSLAPlayer());
 
         for (int i=0; i<1; i++) {

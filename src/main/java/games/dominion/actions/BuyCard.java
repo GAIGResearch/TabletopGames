@@ -2,6 +2,8 @@ package games.dominion.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DrawCard;
+import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.*;
 
@@ -9,8 +11,8 @@ import java.util.Objects;
 
 public class BuyCard extends DominionAction {
 
-    final CardType cardType;
-    final int buyingPlayer;
+    public final CardType cardType;
+    public final int buyingPlayer;
 
     public BuyCard(CardType cardToBuy, int playerID) {
         buyingPlayer = playerID;
@@ -35,6 +37,7 @@ public class BuyCard extends DominionAction {
             if (state.removeCardFromTable(cardType)) {
                 state.changeBuys(-1);
                 state.spend(cardType.getCost());
+                state.addCard(cardType, buyingPlayer, DominionConstants.DeckType.DISCARD);
                 return true;
             }
         }

@@ -57,6 +57,8 @@ public class DominionCard extends Card {
         return type.getCost();
     }
 
+    public CardType cardType() {return type; }
+
     @Override
     public Card copy() {
         // Currently all cards are immutable - so we can save resources when copying

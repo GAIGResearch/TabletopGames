@@ -43,7 +43,9 @@ public enum CardType {
     WITCH(5, 0, 0),
     ARTISAN(4, 0, 0);
 
-    private int cost, treasure, victory;
+    private final int cost;
+    private final int treasure;
+    private final int victory;
 
     private CardType(int cost, int treasure, int victory) {
         this.cost = cost;

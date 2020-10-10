@@ -3,6 +3,8 @@ package core.components;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -242,6 +244,25 @@ public class Deck<T extends Component> extends Component {
     public List<T> getComponents() {
         return components;
     }
+
+    public Stream<T> stream() {
+        return components.stream();
+    }
+    public double sumDouble(Function<T, Double> lambda) {
+        double retValue = 0.0;
+        for (T c : components) {
+            retValue += lambda.apply(c);
+        }
+        return retValue;
+    }
+    public int sumInt(Function<T, Integer> lambda) {
+        int retValue = 0;
+        for (T c : components) {
+            retValue += lambda.apply(c);
+        }
+        return retValue;
+    }
+
 
     /**
      * @return the size of this deck (number of components in it).

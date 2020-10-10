@@ -60,13 +60,11 @@ public class DominionForwardModel extends AbstractForwardModel {
                 break;
             case "Buy":
                 if (state.buysLeftForCurrentPlayer < 1 || action instanceof DoNothing) {
-                    state.endOfTurnCleanUp(playerID);
                     // change phase
                     if (state.gameOver()) {
                         endOfGameProcessing(state);
                     } else {
-                        state.setGamePhase(DominionGameState.DominionGamePhase.Play);
-                        state.getTurnOrder().nextPlayer(state);
+                        state.endOfTurn(playerID);
                     }
                 }
                 break;
