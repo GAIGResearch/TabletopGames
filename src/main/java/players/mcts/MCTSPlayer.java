@@ -16,6 +16,7 @@ public class MCTSPlayer extends AbstractPlayer {
     MCTSParams params;
     AbstractPlayer rolloutStrategy;
     String name;
+    private boolean debug = true;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -44,6 +45,8 @@ public class MCTSPlayer extends AbstractPlayer {
         SingleTreeNode root = new SingleTreeNode(this, allActions.size());
         root.setRootGameState(root, gameState);
         root.mctsSearch();
+        if (debug)
+            System.out.println(root.toString());
 
         // Return best action
         return allActions.get(root.mostVisitedAction());

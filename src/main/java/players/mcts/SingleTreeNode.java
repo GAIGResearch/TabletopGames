@@ -1,17 +1,16 @@
 package players.mcts;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
+import core.*;
 import core.actions.AbstractAction;
-import utilities.ElapsedCpuTimer;
-import java.util.List;
-import java.util.Random;
+import utilities.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static players.PlayerConstants.*;
 import static utilities.Utils.noise;
 
-class SingleTreeNode
-{
+class SingleTreeNode {
     // Root node of tree
     private SingleTreeNode root;
     // Parent of this node
@@ -58,11 +57,11 @@ class SingleTreeNode
 
     /**
      * Initializes the root node
+     *
      * @param root - root node
-     * @param gs - root game state
+     * @param gs   - root game state
      */
-    void setRootGameState(SingleTreeNode root, AbstractGameState gs)
-    {
+    void setRootGameState(SingleTreeNode root, AbstractGameState gs) {
         this.state = gs;
         this.root = root;
     }
@@ -78,7 +77,7 @@ class SingleTreeNode
         long remaining;
         int remainingLimit = 5;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
-        if(player.params.budgetType == BUDGET_TIME) {
+        if (player.params.budgetType == BUDGET_TIME) {
             elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
         }
 
@@ -86,7 +85,7 @@ class SingleTreeNode
         int numIters = 0;
 
         boolean stop = false;
-        while(!stop){
+        while (!stop) {
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
@@ -100,16 +99,16 @@ class SingleTreeNode
             numIters++;
 
             // Check stopping condition
-            if(player.params.budgetType == BUDGET_TIME) {
+            if (player.params.budgetType == BUDGET_TIME) {
                 // Time budget
-                acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
-                avgTimeTaken  = acumTimeTaken/numIters;
+                acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
+                avgTimeTaken = acumTimeTaken / numIters;
                 remaining = elapsedTimer.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
-            } else if(player.params.budgetType == BUDGET_ITERATIONS) {
+            } else if (player.params.budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
                 stop = numIters >= player.params.iterationsBudget;
-            } else if(player.params.budgetType == BUDGET_FM_CALLS) {
+            } else if (player.params.budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
                 stop = fmCallsCount > player.params.fmCallsBudget;
             }
@@ -118,8 +117,9 @@ class SingleTreeNode
 
     /**
      * Selection + expansion steps.
-     *  - Tree is traversed until a node not fully expanded is found.
-     *  - A new child of this node is added to the tree.
+     * - Tree is traversed until a node not fully expanded is found.
+     * - A new child of this node is added to the tree.
+     *
      * @return - new node added to the tree.
      */
     private SingleTreeNode treePolicy() {
@@ -142,6 +142,7 @@ class SingleTreeNode
 
     /**
      * Checks if a node is fully expanded.
+     *
      * @return true if node not fully expanded, false otherwise.
      */
     private boolean notFullyExpanded() {
@@ -155,6 +156,7 @@ class SingleTreeNode
 
     /**
      * Expands the node by creating a new random child node and adding to the tree.
+     *
      * @return - new child node.
      */
     private SingleTreeNode expand() {
@@ -183,12 +185,12 @@ class SingleTreeNode
 
     /**
      * Advance the current game state with the given action, count the FM call and compute the next available actions.
-     * @param gs - current game state
+     *
+     * @param gs  - current game state
      * @param act - action to apply
      * @return - list of actions available in the next state
      */
-    private List<AbstractAction> advance(AbstractGameState gs, AbstractAction act)
-    {
+    private List<AbstractAction> advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
         root.fmCallsCount++;
         return player.getForwardModel().computeAvailableActions(gs);
@@ -196,6 +198,7 @@ class SingleTreeNode
 
     /**
      * Apply UCB1 equation to choose a child.
+     *
      * @return - child node with the highest UCB value.
      */
     private SingleTreeNode uct() {
@@ -204,12 +207,12 @@ class SingleTreeNode
         boolean iAmMoving = (state.getCurrentPlayer() == player.getPlayerID());
 
         double[] values = new double[this.children.length];
-        for(int i = 0; i < this.children.length; i++) {
+        for (int i = 0; i < this.children.length; i++) {
             SingleTreeNode child = children[i];
 
             // Find child value
             double hvVal = child.totValue;
-            double childValue =  hvVal / (child.nVisits + player.params.epsilon);
+            double childValue = hvVal / (child.nVisits + player.params.epsilon);
 
             // Find UCB value
             double uctValue = childValue +
@@ -225,8 +228,8 @@ class SingleTreeNode
         // Find child with highest UCB value, maximising for ourselves and minimizing for opponents
         int which = -1;
         double bestValue = iAmMoving ? -Double.MAX_VALUE : Double.MAX_VALUE;
-        for(int i = 0; i < values.length; ++i) {
-            if ((iAmMoving && values[i] > bestValue) || (!iAmMoving && values[i] < bestValue)){
+        for (int i = 0; i < values.length; ++i) {
+            if ((iAmMoving && values[i] > bestValue) || (!iAmMoving && values[i] < bestValue)) {
                 which = i;
                 bestValue = values[i];
             }
@@ -244,10 +247,10 @@ class SingleTreeNode
 
     /**
      * Perform a Monte Carlo rollout from this node.
+     *
      * @return - value of rollout.
      */
-    private double rollOut()
-    {
+    private double rollOut() {
         if (player.params.rolloutsEnabled) {
             // If rollouts are enabled, select random actions for the rollout
             AbstractGameState rolloutState = state.copy();
@@ -276,12 +279,12 @@ class SingleTreeNode
 
     /**
      * Checks if rollout is finished. Rollouts end on maximum length, or if game ended.
+     *
      * @param rollerState - current state
-     * @param depth - current depth
+     * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState, int depth)
-    {
+    private boolean finishRollout(AbstractGameState rollerState, int depth) {
         if (depth >= player.params.rolloutLength)
             return true;
 
@@ -291,10 +294,10 @@ class SingleTreeNode
 
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
+     *
      * @param result - value of rollout to backup
      */
-    private void backUp(double result)
-    {
+    private void backUp(double result) {
         SingleTreeNode n = this;
         while (n != null) {
             n.nVisits++;
@@ -305,6 +308,7 @@ class SingleTreeNode
 
     /**
      * Calculates the most visited child from the root.
+     *
      * @return - most visited child index.
      */
     int mostVisitedAction() {
@@ -312,7 +316,7 @@ class SingleTreeNode
         double bestValue = -Double.MAX_VALUE;
         boolean allEqual = true;
 
-        for (int i=0; i<children.length; i++) {
+        for (int i = 0; i < children.length; i++) {
             if (children[i] != null) {
                 double childValue = children[i].nVisits;
 
@@ -347,14 +351,14 @@ class SingleTreeNode
 
     /**
      * Finds the child from the root with the highest value.
+     *
      * @return - child with highest value.
      */
-    int bestAction()
-    {
+    int bestAction() {
         int selected = -1;
         double bestValue = -Double.MAX_VALUE;
 
-        for (int i=0; i<children.length; i++) {
+        for (int i = 0; i < children.length; i++) {
             if (children[i] != null) {
                 double childValue = children[i].totValue / (children[i].nVisits + player.params.epsilon);
 
@@ -369,12 +373,70 @@ class SingleTreeNode
             }
         }
 
-        if (selected == -1)
-        {
+        if (selected == -1) {
             System.out.println("Unexpected selection: Q value!");
             selected = 0;
         }
 
         return selected;
+    }
+
+    public String getTreeStatistics() {
+        StringBuilder retValue = new StringBuilder(player.name + "\n");
+        // We recurse from the root node, tracking the number of nodes at each depth
+        int maxDepth = 100;
+        int depthReached = 0;
+        int[] nodesAtDepth = new int[maxDepth];
+        int[] leavesAtDepth = new int[maxDepth];
+        Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
+        nodeQueue.add(root);
+        while (!nodeQueue.isEmpty()) {
+            SingleTreeNode node = nodeQueue.poll();
+            if (node.depth <= maxDepth) {
+                nodesAtDepth[node.depth]++;
+                for (SingleTreeNode child : node.children) {
+                    if (child != null)
+                        nodeQueue.add(child);
+                }
+                if (Arrays.stream(node.children).allMatch(Objects::isNull))
+                    leavesAtDepth[node.depth]++;
+            }
+            if (node.depth > depthReached)
+                depthReached = node.depth;
+        }
+
+        int totalNodes = Arrays.stream(nodesAtDepth).sum();
+        int totalLeaves = Arrays.stream(leavesAtDepth).sum();
+        double[] nodeDistribution = Arrays.stream(nodesAtDepth, 0, depthReached+1).asDoubleStream().map(i -> i / totalNodes).toArray();
+        double[] leafDistribution = Arrays.stream(leavesAtDepth, 0, depthReached+1).asDoubleStream().map(i -> i / totalLeaves).toArray();
+        retValue.append(String.format("%d nodes and %d leaves, with maximum depth %d\n", totalNodes, totalLeaves, depthReached));
+        List<String> nodeDist = Arrays.stream(nodeDistribution).mapToObj(n -> String.format("%2.0f%%", n * 100.0)).collect(Collectors.toList());
+        List<String> leafDist = Arrays.stream(leafDistribution).mapToObj(n -> String.format("%2.0f%%", n * 100.0)).collect(Collectors.toList());
+        retValue.append(String.format("\tNodes  by depth: %s\n", String.join(", ", nodeDist)));
+        retValue.append(String.format("\tLeaves by depth: %s\n", String.join(", ", leafDist)));
+
+        return retValue.toString();
+    }
+
+    @Override
+    public String toString() {
+        // we return some interesting data on this node
+        // child actions
+        // visits and values for each
+        StringBuilder retValue = new StringBuilder();
+        retValue.append(String.format("%s, %d total visits, value %.2f, with %d children, depth %d, FMCalls %d: \n",
+                player.name, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
+        List<SingleTreeNode> sortedChildren = Arrays.stream(children).sorted(
+                Comparator.comparingInt(o -> -o.nVisits)
+        ).collect(Collectors.toList());
+        for (SingleTreeNode child : sortedChildren) {
+            int i = Arrays.asList(children).indexOf(child);
+            String actionName = state.getActions().get(i).toString();
+            if (actionName.length() > 30)
+                actionName = actionName.substring(0, 30);
+            retValue.append(String.format("\t%-30s  visits: %d\tvalue %.2f\n", actionName, children[i].nVisits, children[i].totValue / children[i].nVisits));
+        }
+        retValue.append(getTreeStatistics());
+        return retValue.toString();
     }
 }
