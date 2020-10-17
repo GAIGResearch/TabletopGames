@@ -126,7 +126,7 @@ public class Game {
             // Create initial state observation
             AbstractGameState observation = gameState.copy(id);
             // Give player their ID
-            player.playerID = id++;
+            player.setPlayerID(id++);
             // Allow player to initialize
 
             player.initializePlayer(observation);
@@ -152,7 +152,7 @@ public class Game {
             // Create initial state observation
             AbstractGameState observation = gameState.copy(id);
             // Give player their ID
-            player.playerID = id++;
+            player.setPlayerID(id++);
             // Allow player to initialize
 
             player.initializePlayer(observation);

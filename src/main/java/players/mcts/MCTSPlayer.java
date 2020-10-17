@@ -3,6 +3,8 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import players.simple.RandomPlayer;
+
 import java.util.List;
 import java.util.Random;
 
@@ -12,20 +14,20 @@ public class MCTSPlayer extends AbstractPlayer {
     Random rnd;
     // Parameters for this player
     MCTSParams params;
+    AbstractPlayer rolloutStrategy;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public MCTSPlayer(long seed)
-    {
-        this.params = new MCTSParams(seed);
-        rnd = new Random(seed);
+    public MCTSPlayer(long seed) {
+        this(new MCTSParams(seed));
     }
 
     public MCTSPlayer(MCTSParams params) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
+        rolloutStrategy = params.getRolloutStrategy();
     }
 
     @Override
@@ -41,4 +43,5 @@ public class MCTSPlayer extends AbstractPlayer {
         // Return best action
         return allActions.get(root.mostVisitedAction());
     }
+
 }

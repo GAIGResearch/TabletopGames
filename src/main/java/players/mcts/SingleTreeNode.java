@@ -1,6 +1,7 @@
 package players.mcts;
 
 import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import utilities.ElapsedCpuTimer;
 import java.util.List;
@@ -252,16 +253,17 @@ class SingleTreeNode
             AbstractGameState rolloutState = state.copy();
             int thisDepth = this.depth;
 
+            AbstractPlayer rolloutStrategy = player.rolloutStrategy;
             while (!finishRollout(rolloutState, thisDepth)) {
-                int nActions = rolloutState.getActions().size();
-                AbstractAction next = null;
-                if (nActions > 0) {
+//                int nActions = rolloutState.getActions().size();
+                rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
+                AbstractAction next = rolloutStrategy.getAction(rolloutState);
+/*                if (nActions > 0) {
                     next = rolloutState.getActions().get(player.rnd.nextInt(nActions));
-                }
+                }*/
                 advance(rolloutState, next);
                 thisDepth++;
             }
-
             // Evaluate final state and return normalised score
             return rolloutState.getScore(player.getPlayerID());
 //            return player.params.gameHeuristic.evaluateState(rolloutState, player.getPlayerID());
