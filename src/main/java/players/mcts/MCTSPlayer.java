@@ -15,6 +15,7 @@ public class MCTSPlayer extends AbstractPlayer {
     // Parameters for this player
     MCTSParams params;
     AbstractPlayer rolloutStrategy;
+    String name;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -25,9 +26,13 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     public MCTSPlayer(MCTSParams params) {
+        this(params, "MCTSPlayer");
+    }
+    public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
+        this.name = name;
     }
 
     @Override
@@ -44,4 +49,9 @@ public class MCTSPlayer extends AbstractPlayer {
         return allActions.get(root.mostVisitedAction());
     }
 
+    public void setName(String name) {this.name = name;}
+    @Override
+    public String toString() {
+        return name;
+    }
 }

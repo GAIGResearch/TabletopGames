@@ -17,13 +17,14 @@ public class RoundRobinTournament extends AbstractTournament {
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private final int gamesPerMatchUp;
+    private int matchUpsRun;
     private final boolean selfPlay;
 
     /**
      * Main function, creates an runs the tournament with the given settings and players.
      */
     @SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
-    public static void main(String[] args){
+    public static void main(String[] args) {
         /* 1. Settings for the tournament */
         GameType gameToPlay = TicTacToe;
         int nPlayersTotal = 4;
@@ -45,16 +46,17 @@ public class RoundRobinTournament extends AbstractTournament {
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
-     * @param agents - players for the tournament.
-     * @param gameToPlay - game to play in this tournament.
-     * @param playersPerGame - number of players per game.
+     *
+     * @param agents          - players for the tournament.
+     * @param gameToPlay      - game to play in this tournament.
+     * @param playersPerGame  - number of players per game.
      * @param gamesPerMatchUp - number of games for each combination of players.
-     * @param selfPlay - true if agents are allowed to play copies of themselves.
+     * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay){
+                                int gamesPerMatchUp, boolean selfPlay) {
         super(agents, gameToPlay, playersPerGame);
-        if (!selfPlay && playersPerGame >= this.agents.size()) {
+        if (!selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or allow self-play.");
         }
@@ -80,23 +82,23 @@ public class RoundRobinTournament extends AbstractTournament {
             createAndRunMatchUp(matchUp, g);
 
             for (int i = 0; i < this.agents.size(); i++) {
-                System.out.println(this.agents.get(i).toString() + " got " + pointsPerPlayer[i] + " points");
-                System.out.println(this.agents.get(i).toString() + " won " + pointsPerPlayer[i]/600.0 + "% games");
+                System.out.println(String.format("%s got %d points ", agents.get(i), pointsPerPlayer[i]));
+                System.out.println(String.format("%s won %.1f%% of the games ", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun)));
             }
         }
     }
 
     /**
      * Recursively creates one combination of players and evaluates it.
+     *
      * @param matchUp - current combination of players, updated recursively.
      * @param gameIdx - index of game to play with this match-up.
      */
-    public void createAndRunMatchUp(LinkedList<Integer> matchUp, int gameIdx){
-        if (matchUp.size() == playersPerGame.get(gameIdx)){
+    public void createAndRunMatchUp(LinkedList<Integer> matchUp, int gameIdx) {
+        if (matchUp.size() == playersPerGame.get(gameIdx)) {
             evaluateMatchUp(matchUp, gameIdx);
-        }
-        else {
-            for (Integer agentID : this.agentIDs){
+        } else {
+            for (Integer agentID : this.agentIDs) {
                 if (selfPlay || !matchUp.contains(agentID)) {
                     matchUp.add(agentID);
                     createAndRunMatchUp(matchUp, gameIdx);
@@ -108,10 +110,11 @@ public class RoundRobinTournament extends AbstractTournament {
 
     /**
      * Evaluates one combination of players.
+     *
      * @param agentIDs - IDs of agents participating in this run.
-     * @param gameIdx - index of game to play in this evaluation.
+     * @param gameIdx  - index of game to play in this evaluation.
      */
-    private void evaluateMatchUp(LinkedList<Integer> agentIDs, int gameIdx){
+    private void evaluateMatchUp(LinkedList<Integer> agentIDs, int gameIdx) {
         System.out.println("Evaluate " + agentIDs.toString());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
         for (int agentID : agentIDs)
@@ -126,5 +129,6 @@ public class RoundRobinTournament extends AbstractTournament {
                 pointsPerPlayer[agentIDs.get(j)] += results[j] == Utils.GameResult.WIN ? 1 : 0;
             }
         }
+        matchUpsRun++;
     }
 }

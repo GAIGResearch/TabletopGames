@@ -26,7 +26,7 @@ public class DominionGame extends Game {
         bigMoneyRollout.rolloutType = "BigMoney";
 
         agents.add(new MCTSPlayer());
-        agents.add(new MCTSPlayer(bigMoneyRollout));
+        agents.add(new MCTSPlayer(bigMoneyRollout, "MCTS_BMRollout"));
         agents.add(new BigMoney());
         agents.add(new OSLAPlayer());
 
@@ -41,7 +41,7 @@ public class DominionGame extends Game {
 
 
         // Run!
-        AbstractTournament tournament = new RoundRobinTournament(new LinkedList<>(agents), GameType.Dominion, 4, 1, true);
+        AbstractTournament tournament = new RoundRobinTournament(new LinkedList<>(agents), GameType.Dominion, 4, 5, false);
         tournament.runTournament();
     }
 }

@@ -52,4 +52,9 @@ public class BigMoney extends AbstractPlayer {
 
         }
     }
+
+    @Override
+    public String toString() {
+        return "BigMoney";
+    }
 }
