@@ -1,15 +1,14 @@
 package players.mcts;
 
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.interfaces.ITunableParameters;
+import core.*;
+import core.interfaces.*;
+import org.json.simple.*;
+import org.json.simple.parser.*;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
 public class MCTSParams extends PlayerParameters implements ITunableParameters {
 
@@ -117,5 +116,36 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
 
     public AbstractPlayer getRolloutStrategy() {
         return new RandomPlayer(new Random(randomSeed));
+    }
+
+    public static MCTSParams fromJSON(String filename) {
+        List<String> expectedKeys = Arrays.asList("seed", "K", "rolloutLength", "rolloutsEnabled", "epsilon", "rolloutType");
+
+        try {
+            FileReader reader = new FileReader(filename);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
+            long seed = (long) rawData.getOrDefault("seed", System.currentTimeMillis());
+            MCTSParams retValue = new MCTSParams(seed);
+
+            retValue.K = (double) rawData.getOrDefault("K", retValue.K);
+            retValue.rolloutLength = ((Long) rawData.getOrDefault("rolloutLength", retValue.rolloutLength)).intValue();
+            retValue.rolloutsEnabled = (boolean) rawData.getOrDefault("rolloutsEnabled", retValue.rolloutsEnabled);
+            retValue.epsilon = (double) rawData.getOrDefault("epsilon", retValue.epsilon);
+            retValue.rolloutType = (String) rawData.getOrDefault("rolloutType", retValue.rolloutType);
+
+            // We should also check that there are no other properties in there
+            for (Object key : rawData.keySet()) {
+                if (key instanceof String && !expectedKeys.contains(key)) {
+                    System.out.println("Unexpected key in JSON for MCTSParameters : " + key);
+                }
+            }
+
+            return retValue;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError(e.getMessage() + " : problem loading MCTSParams from file " + filename);
+        }
     }
 }

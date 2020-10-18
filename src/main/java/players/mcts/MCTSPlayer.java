@@ -16,7 +16,7 @@ public class MCTSPlayer extends AbstractPlayer {
     MCTSParams params;
     AbstractPlayer rolloutStrategy;
     String name;
-    private boolean debug = true;
+    private boolean debug = false;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -47,6 +47,7 @@ public class MCTSPlayer extends AbstractPlayer {
         root.mctsSearch();
         if (debug)
             System.out.println(root.toString());
+
 
         // Return best action
         return allActions.get(root.mostVisitedAction());

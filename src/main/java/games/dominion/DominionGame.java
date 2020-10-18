@@ -30,21 +30,21 @@ public class DominionGame extends Game {
         agents.add(new MCTSPlayer());
         agents.add(new MCTSPlayer(bigMoneyRollout, "MCTS_BMRollout"));
         agents.add(new BigMoney());
-        agents.add(new OSLAPlayer());
+        agents.add(new RandomPlayer());
 
         int nGames = 1;
-        for (int i = 0; i < nGames; i++) {
+/*        for (int i = 0; i < nGames; i++) {
             // setup game
             DominionParameters params = new DominionParameters(System.currentTimeMillis());
             Game game = new DominionGame(agents, params);
 
             // run game
             game.run(null);
-        }
+        }*/
 
 
         // Run!
-/*        AbstractTournament tournament = new RoundRobinTournament(new LinkedList<>(agents), GameType.Dominion, 4, 5, false);
-        tournament.runTournament();*/
+        AbstractTournament tournament = new RoundRobinTournament(new LinkedList<>(agents), GameType.Dominion, 4, 10, false);
+        tournament.runTournament();
     }
 }
