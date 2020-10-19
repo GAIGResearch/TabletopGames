@@ -1,14 +1,10 @@
 package utilities;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import core.components.Deck;
-import core.components.PartialObservableDeck;
+import core.components.*;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class Utils {
 

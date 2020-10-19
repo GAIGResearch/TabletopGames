@@ -1,6 +1,6 @@
 package players.mcts;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import core.AbstractPlayer;
 import evodef.AgentSearchSpace;
 import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class MCTSSearchSpace extends AgentSearchSpace<MCTSPlayer> {
+public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
 
     private MCTSParams baseParams;
 
