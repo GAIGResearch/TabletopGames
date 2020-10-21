@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.*;
 import core.interfaces.*;
+import games.dominion.BigMoney;
 import org.json.simple.*;
 import org.json.simple.parser.*;
 import players.PlayerParameters;
@@ -115,6 +116,8 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
     }
 
     public AbstractPlayer getRolloutStrategy() {
+        if (rolloutType.equals("BigMoney"))
+            return new BigMoney();
         return new RandomPlayer(new Random(randomSeed));
     }
 

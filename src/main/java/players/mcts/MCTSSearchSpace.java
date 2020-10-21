@@ -2,8 +2,6 @@ package players.mcts;
 
 import core.AbstractPlayer;
 import evodef.AgentSearchSpace;
-import kotlin.jvm.JvmClassMappingKt;
-import kotlin.reflect.KClass;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -12,24 +10,20 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
 
     private MCTSParams baseParams;
 
-    public MCTSSearchSpace(MCTSParams defaultParams, @NotNull String searchSpaceFile) {
+    public MCTSSearchSpace(MCTSParams defaultParams, String searchSpaceFile) {
         super(searchSpaceFile);
         baseParams = defaultParams;
     }
 
-    public static <T> KClass<T> getKClass(Class<T> cls){
-        return JvmClassMappingKt.getKotlinClass(cls);
-    }
-
     @NotNull
     @Override
-    public Map<String, KClass<?>> getTypes() {
-        Map<String, KClass<?>> retValue  = new HashMap<>();
-        retValue.put("K", getKClass(Integer.class));
-        retValue.put("rolloutLength", getKClass(Integer.class));
-        retValue.put("rolloutsEnabled", getKClass(Boolean.class));
-        retValue.put("rolloutType", getKClass(String.class));
-        retValue.put("epsilon", getKClass(Double.class));
+    public Map<String, Class<?>> getTypes() {
+        Map<String, Class<?>> retValue  = new HashMap<>();
+        retValue.put("K", Double.class);
+        retValue.put("rolloutLength", Integer.class);
+        retValue.put("rolloutsEnabled", Boolean.class);
+        retValue.put("rolloutType", String.class);
+        retValue.put("epsilon", Double.class);
         return retValue;
     }
 

@@ -1,15 +1,9 @@
 package evaluation;
 
 import core.AbstractPlayer;
-import evodef.EvoAlg;
-import evodef.LandscapeModel;
-import evodef.SearchSpace;
-import evodef.SolutionEvaluator;
+import evodef.*;
 import games.GameType;
-import games.dominion.BigMoney;
-import games.dominion.DominionForwardModel;
-import games.dominion.DominionGameState;
-import games.dominion.DominionParameters;
+import games.dominion.*;
 import ntbea.*;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSSearchSpace;
@@ -32,14 +26,15 @@ public class ParameterSearch {
                         "\t<number of NTBEA iterations>\n" +
                         "\t<game type>" +
                         "Then there are a number of optional arguments:\n" +
-                        "\tbaseAgent=     The filename for the baseAgent (from which the searchSpace definition deviates)" +
+      //                  "\tbaseAgent=     The filename for the baseAgent (from which the searchSpace definition deviates)" +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)" +
-                        "\topponent=      The filename for the agent used as the opponent" +
-                        "\tGameParams=    The filename with game params to use" +
+      //                  "\topponent=      The filename for the agent used as the opponent" +
+      //                  "\tGameParams=    The filename with game params to use" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 100.0" +
                         "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100)" +
-                        "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation"
+                        "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation"     +
+                        "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run"
         );
 
         if (argsList.size() < 3)
@@ -52,9 +47,12 @@ public class ParameterSearch {
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
         double kExplore = getArg(args, "kExplore", 100.0);
+        boolean verbose = Arrays.asList(args).contains("verbose");
 
-        //TODO: Convert SearchSpace file to be from JSON (once NTBEA code allows that)
-        // TODO: Replace default MCTSPArams with the baseParams from command line
+        // TODO: Convert SearchSpace file to be from JSON (once NTBEA code allows that)
+        // TODO: Replace default MCTSParams with the marked defaults in the same JSON file (the values with single options)
+        // TODO: Support for other games - easy by parameter
+        // TODO: Support for opponent configurations to be loaded from file.
         MCTSSearchSpace searchSpace = new MCTSSearchSpace(new MCTSParams(System.currentTimeMillis()), searchSpaceFile);
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
         int twoTupleSize = IntStream.range(0, searchSpace.nDims() - 1)
@@ -90,28 +88,30 @@ public class ParameterSearch {
         long seed = 42;
         List<AbstractPlayer> opponents = new ArrayList<>();
         opponents.add(new BigMoney());
+        opponents.add(new BigMoney());
+        opponents.add(new BigMoney());
 
-        // TODO: Need a game solution evaluator
+        int nPlayers = 4;
+
         SolutionEvaluator evaluator = new GameEvaluator(
-                GameType.Dominion,
+                new DominionGame(params, nPlayers),
                 searchSpace,
-                new DominionForwardModel(),
-                new DominionGameState(params, 4),
-                4,
                 opponents,
                 new Random(seed),
-                false
+                true
         );
 
-        long startTime = System.currentTimeMillis();
+        Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
+        for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
+            Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
+            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+            printDetailsOfRun(retValue, searchSpace);
+            if (retValue.a.a > bestResult.a.a)
+                bestResult = retValue;
 
-        Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, false);
-        Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-        printDetailsOfRun(retValue, searchSpace);
-
-        // TODO: Add repeats of main NTBEA and print out the final recommendation
-//            System.out.println("\nFinal Recommendation: ");
-//            printDetailsOfRun(retValue, searchSpace);
+        }
+            System.out.println("\nFinal Recommendation: ");
+            printDetailsOfRun(bestResult, searchSpace);
     }
 
 

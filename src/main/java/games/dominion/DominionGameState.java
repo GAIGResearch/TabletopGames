@@ -46,7 +46,7 @@ public class DominionGameState extends AbstractGameState {
         super(gameParameters, new DominionTurnOrder(nPlayers));
         rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
-        _reset();
+        this._reset();
     }
 
     public boolean removeCardFromTable(CardType type) {

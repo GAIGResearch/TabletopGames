@@ -8,28 +8,25 @@ import java.util.*;
 
 public class GameEvaluator implements SolutionEvaluator {
 
+    Game game;
     AgentSearchSpace<AbstractPlayer> searchSpace;
-    AbstractForwardModel forwardModel;
-    AbstractGameState initialState;
-    GameType gameType;
     int nPlayers;
     List<AbstractPlayer> opponents;
     int nEvals = 0;
     Random rnd;
     boolean avoidOppDupes;
 
-    public GameEvaluator(GameType gameType, AgentSearchSpace<AbstractPlayer> searchSpace,
-                         AbstractForwardModel forwardModel, AbstractGameState initialState,
-                         int nPlayers, List<AbstractPlayer> opponents, Random rnd,
+    public GameEvaluator(Game game, AgentSearchSpace<AbstractPlayer> searchSpace,
+                         List<AbstractPlayer> opponents, Random rnd,
                          boolean avoidOpponentDuplicates) {
+        this.game = game;
         this.searchSpace = searchSpace;
-        this.forwardModel = forwardModel;
-        this.initialState = initialState.copy();
-        this.gameType = gameType;
-        this.nPlayers = nPlayers;
+        this.nPlayers = game.getGameState().getNPlayers();
         this.opponents = opponents;
         this.rnd = rnd;
         this.avoidOppDupes = avoidOpponentDuplicates;
+        if (avoidOppDupes && opponents.size() < nPlayers - 1)
+            throw new AssertionError("Insufficient Opponents to avoid duplicates");
     }
 
     @Override
@@ -52,20 +49,19 @@ public class GameEvaluator implements SolutionEvaluator {
 
         // We can reduce variance here by cycling the playerIndex on each iteration
         int playerIndex = nEvals % nPlayers;
-        allPlayers.add(playerIndex, player);
         for (int i = 0; i < nPlayers; i++) {
             if (i != playerIndex) {
                 int oppIndex = 0;
-                if (avoidOppDupes && opponents.size() < nPlayers - 1)
-                    throw new AssertionError("Insufficient Opponents to avoid duplicates");
                 do {
                     oppIndex = rnd.nextInt(opponents.size());
                 } while (avoidOppDupes && allPlayers.contains(opponents.get(oppIndex)));
-                allPlayers.add(i, opponents.get(oppIndex));
+                allPlayers.add(opponents.get(oppIndex));
+            } else {
+                allPlayers.add(player);
             }
         }
 
-        Game game = new Game(gameType, allPlayers, forwardModel, initialState.copy());
+        game.reset(allPlayers, rnd.nextLong());
 
         game.run();
 
