@@ -53,7 +53,7 @@ public class ParameterSearch {
         // TODO: Replace default MCTSParams with the marked defaults in the same JSON file (the values with single options)
         // TODO: Support for other games - easy by parameter
         // TODO: Support for opponent configurations to be loaded from file.
-        MCTSSearchSpace searchSpace = new MCTSSearchSpace(new MCTSParams(System.currentTimeMillis()), searchSpaceFile);
+        MCTSSearchSpace searchSpace = new MCTSSearchSpace(searchSpaceFile);
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
         int twoTupleSize = IntStream.range(0, searchSpace.nDims() - 1)
                 .map(i -> searchSpace.nValues(i) *
@@ -76,7 +76,7 @@ public class ParameterSearch {
         for (int i = 0; i < searchSpace.nDims(); i++) {
             int finalI = i;
             String allValues = IntStream.range(0, searchSpace.nValues(i)).mapToObj(j -> searchSpace.value(finalI, j)).map(Object::toString).collect(Collectors.joining(", "));
-            System.out.println(String.format("%20s has %d values %s", searchSpace.name(i), searchSpace.nValues(i), allValues));
+            System.out.printf("%20s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
         }
 
         NTupleSystem landscapeModel = new NTupleSystem(searchSpace);
@@ -103,6 +103,7 @@ public class ParameterSearch {
 
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
+            landscapeModel.reset();
             Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace);

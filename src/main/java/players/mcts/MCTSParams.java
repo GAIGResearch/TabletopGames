@@ -121,8 +121,8 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         return new RandomPlayer(new Random(randomSeed));
     }
 
+    public final static List<String> expectedKeys = Arrays.asList("seed", "K", "rolloutLength", "rolloutsEnabled", "epsilon", "rolloutType");
     public static MCTSParams fromJSON(String filename) {
-        List<String> expectedKeys = Arrays.asList("seed", "K", "rolloutLength", "rolloutsEnabled", "epsilon", "rolloutType");
 
         try {
             FileReader reader = new FileReader(filename);

@@ -3,12 +3,22 @@ package players.mcts;
 import core.AbstractPlayer;
 import evodef.AgentSearchSpace;
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import java.io.FileReader;
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
 
     private MCTSParams baseParams;
+
+    public MCTSSearchSpace(String jsonFile) {
+        super(convertToSuperFormat(jsonFile));
+        baseParams = MCTSParams.fromJSON(jsonFile);
+    }
 
     public MCTSSearchSpace(MCTSParams defaultParams, String searchSpaceFile) {
         super(searchSpaceFile);
@@ -18,7 +28,7 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
     @NotNull
     @Override
     public Map<String, Class<?>> getTypes() {
-        Map<String, Class<?>> retValue  = new HashMap<>();
+        Map<String, Class<?>> retValue = new HashMap<>();
         retValue.put("K", Double.class);
         retValue.put("rolloutLength", Integer.class);
         retValue.put("rolloutsEnabled", Boolean.class);
@@ -37,5 +47,36 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
         params.rolloutType = (String) settingsMap.getOrDefault("rolloutType", params.rolloutType);
         params.epsilon = (double) settingsMap.getOrDefault("epsilon", params.epsilon);
         return new MCTSPlayer(params);
+    }
+
+    private static List<String> convertToSuperFormat(String jsonFile) {
+        List<String> retValue = new ArrayList<>();
+        try {
+            FileReader reader = new FileReader(jsonFile);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
+            for (Object key : rawData.keySet()) {
+                if (key instanceof String) {
+                    if (MCTSParams.expectedKeys.contains(key)) {
+                        Object data = rawData.get(key);
+                        if (data instanceof Object[]) {
+                            // we have a set of options for this parameter
+                            Object[] arr = (Object[]) data;
+                            StringBuilder results = new StringBuilder(key + "=");
+                            results.append(Arrays.stream(arr).map(Object::toString).collect(Collectors.joining(", ")));
+                            results.append("\n");
+                        }
+                    } else {
+                        System.out.println("Unexpected key in JSON for MCTSParameters : " + key);
+                    }
+                }
+            }
+            return retValue;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError(e.getMessage() + " : problem loading MCTSSearchSpace from file " + jsonFile);
+        }
+
     }
 }
