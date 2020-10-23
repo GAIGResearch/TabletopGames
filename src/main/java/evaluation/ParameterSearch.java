@@ -206,7 +206,7 @@ public class ParameterSearch {
             double avg = Arrays.stream(results).average().getAsDouble();
             double stdErr = Math.sqrt(Arrays.stream(results)
                     .map(d -> Math.pow(d - avg, 2.0)).sum()
-                    / (evalGames - 1.0));
+                    / (evalGames - 1.0)) / (evalGames - 1.0);
 
             return new Pair<>(avg, stdErr);
         } else {
