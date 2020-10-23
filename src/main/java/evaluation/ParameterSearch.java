@@ -5,8 +5,10 @@ import evodef.*;
 import games.GameType;
 import games.dominion.*;
 import ntbea.*;
+import players.PlayerFactory;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSSearchSpace;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.StatSummary;
 
@@ -26,14 +28,13 @@ public class ParameterSearch {
                         "\t<number of NTBEA iterations>\n" +
                         "\t<game type>" +
                         "Then there are a number of optional arguments:\n" +
-      //                  "\tbaseAgent=     The filename for the baseAgent (from which the searchSpace definition deviates)" +
+                        "\tnPlayers=      The total number of players in each game (the default is game.Min#players)  " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)" +
-      //                  "\topponent=      The filename for the agent used as the opponent" +
-      //                  "\tGameParams=    The filename with game params to use" +
+                        "\topponent=      The filename for the agent used as opponent. Default is a Random player." +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 100.0" +
                         "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100)" +
-                        "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation"     +
+                        "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation" +
                         "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run"
         );
 
@@ -42,12 +43,14 @@ public class ParameterSearch {
         String searchSpaceFile = args[0];
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
-        if (game != GameType.Dominion)
-            throw new AssertionError("Only Dominion currently supported");
+//        if (game != GameType.Dominion)
+//            throw new AssertionError("Only Dominion currently supported");
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
         double kExplore = getArg(args, "kExplore", 100.0);
+        String opponentFile = getArg(args, "opponent", "");
         boolean verbose = Arrays.asList(args).contains("verbose");
+        int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
 
         // TODO: Convert SearchSpace file to be from JSON (once NTBEA code allows that)
         // TODO: Replace default MCTSParams with the marked defaults in the same JSON file (the values with single options)
@@ -63,7 +66,8 @@ public class ParameterSearch {
         int threeTupleSize = IntStream.range(0, searchSpace.nDims() - 2)
                 .map(i -> searchSpace.nValues(i) *
                         IntStream.range(i + 1, searchSpace.nDims()).map(j ->
-                                searchSpace.nValues(j) * IntStream.range(j + 1, searchSpace.nDims()).map(searchSpace::nValues).sum()
+                                searchSpace.nValues(j) * IntStream.range(j + 1, searchSpace.nDims())
+                                        .map(searchSpace::nValues).sum()
                         ).sum()
                 ).sum();
 
@@ -75,7 +79,10 @@ public class ParameterSearch {
 
         for (int i = 0; i < searchSpace.nDims(); i++) {
             int finalI = i;
-            String allValues = IntStream.range(0, searchSpace.nValues(i)).mapToObj(j -> searchSpace.value(finalI, j)).map(Object::toString).collect(Collectors.joining(", "));
+            String allValues = IntStream.range(0, searchSpace.nValues(i))
+                    .mapToObj(j -> searchSpace.value(finalI, j))
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
             System.out.printf("%20s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
         }
 
@@ -84,17 +91,15 @@ public class ParameterSearch {
         landscapeModel.addTuples();
 
         NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, kExplore, hood);
-        DominionParameters params = new DominionParameters(42);
         long seed = 42;
         List<AbstractPlayer> opponents = new ArrayList<>();
-        opponents.add(new BigMoney());
-        opponents.add(new BigMoney());
-        opponents.add(new BigMoney());
-
-        int nPlayers = 4;
+        for (int i = 0; i < nPlayers; i++) {
+            AbstractPlayer opponent = opponentFile.isEmpty() ? new RandomPlayer() : PlayerFactory.fromJSONFile(opponentFile);
+            opponents.add(opponent);
+        }
 
         SolutionEvaluator evaluator = new GameEvaluator(
-                new DominionGame(params, nPlayers),
+                game.createGameInstance(nPlayers, seed),
                 searchSpace,
                 opponents,
                 new Random(seed),
@@ -111,8 +116,8 @@ public class ParameterSearch {
                 bestResult = retValue;
 
         }
-            System.out.println("\nFinal Recommendation: ");
-            printDetailsOfRun(bestResult, searchSpace);
+        System.out.println("\nFinal Recommendation: ");
+        printDetailsOfRun(bestResult, searchSpace);
     }
 
 

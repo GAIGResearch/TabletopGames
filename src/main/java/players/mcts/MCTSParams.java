@@ -121,34 +121,44 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         return new RandomPlayer(new Random(randomSeed));
     }
 
-    public final static List<String> expectedKeys = Arrays.asList("seed", "K", "rolloutLength", "rolloutsEnabled", "epsilon", "rolloutType");
-    public static MCTSParams fromJSON(String filename) {
+    public final static List<String> expectedKeys = Arrays.asList("algorithm", "seed", "K", "rolloutLength", "rolloutsEnabled", "epsilon", "rolloutType");
 
+    @SuppressWarnings("unchecked")
+    private static <T> T getParam(String name, JSONObject json, T defaultValue) {
+        Object data = json.getOrDefault(name, defaultValue);
+        if (data.getClass() == defaultValue.getClass())
+            return (T) data;
+        return defaultValue;
+    }
+
+    public static MCTSParams fromJSONFile(String filename) {
         try {
             FileReader reader = new FileReader(filename);
             JSONParser jsonParser = new JSONParser();
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            long seed = (long) rawData.getOrDefault("seed", System.currentTimeMillis());
-            MCTSParams retValue = new MCTSParams(seed);
-
-            retValue.K = (double) rawData.getOrDefault("K", retValue.K);
-            retValue.rolloutLength = ((Long) rawData.getOrDefault("rolloutLength", retValue.rolloutLength)).intValue();
-            retValue.rolloutsEnabled = (boolean) rawData.getOrDefault("rolloutsEnabled", retValue.rolloutsEnabled);
-            retValue.epsilon = (double) rawData.getOrDefault("epsilon", retValue.epsilon);
-            retValue.rolloutType = (String) rawData.getOrDefault("rolloutType", retValue.rolloutType);
-
-            // We should also check that there are no other properties in there
-            for (Object key : rawData.keySet()) {
-                if (key instanceof String && !expectedKeys.contains(key)) {
-                    System.out.println("Unexpected key in JSON for MCTSParameters : " + key);
-                }
-            }
-
-            return retValue;
-
+            return fromJSON(rawData);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError(e.getMessage() + " : problem loading MCTSParams from file " + filename);
         }
+    }
+
+    public static MCTSParams fromJSON(JSONObject rawData) {
+        long seed = getParam("seed", rawData, System.currentTimeMillis());
+        MCTSParams retValue = new MCTSParams(seed);
+
+        retValue.K = getParam("K", rawData, retValue.K);
+        retValue.rolloutLength = getParam("rolloutLength", rawData, retValue.rolloutLength);
+        retValue.rolloutsEnabled = getParam("rolloutsEnabled", rawData, retValue.rolloutsEnabled);
+        retValue.epsilon = getParam("epsilon", rawData, retValue.epsilon);
+        retValue.rolloutType = getParam("rolloutType", rawData, retValue.rolloutType);
+
+        // We should also check that there are no other properties in there
+        for (Object key : rawData.keySet()) {
+            if (key instanceof String && !expectedKeys.contains(key)) {
+                System.out.println("Unexpected key in JSON for MCTSParameters : " + key);
+            }
+        }
+
+        return retValue;
     }
 }

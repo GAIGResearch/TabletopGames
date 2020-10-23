@@ -3,11 +3,11 @@ package players.mcts;
 import core.AbstractPlayer;
 import evodef.AgentSearchSpace;
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.FileReader;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,7 +17,7 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
 
     public MCTSSearchSpace(String jsonFile) {
         super(convertToSuperFormat(jsonFile));
-        baseParams = MCTSParams.fromJSON(jsonFile);
+        baseParams = MCTSParams.fromJSONFile(jsonFile);
     }
 
     public MCTSSearchSpace(MCTSParams defaultParams, String searchSpaceFile) {
@@ -59,12 +59,12 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
                 if (key instanceof String) {
                     if (MCTSParams.expectedKeys.contains(key)) {
                         Object data = rawData.get(key);
-                        if (data instanceof Object[]) {
+                        if (data instanceof JSONArray) {
                             // we have a set of options for this parameter
-                            Object[] arr = (Object[]) data;
-                            StringBuilder results = new StringBuilder(key + "=");
-                            results.append(Arrays.stream(arr).map(Object::toString).collect(Collectors.joining(", ")));
-                            results.append("\n");
+                            JSONArray arr = (JSONArray) data;
+                            String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
+                                    "\n";
+                            retValue.add(results);
                         }
                     } else {
                         System.out.println("Unexpected key in JSON for MCTSParameters : " + key);

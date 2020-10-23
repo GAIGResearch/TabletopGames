@@ -25,7 +25,7 @@ public class DominionGame extends Game {
 
         // create list of players
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        DominionMCTSParameters bigMoneyRollout = new DominionMCTSParameters(8743);
+        MCTSParams bigMoneyRollout = new MCTSParams(8743);
         bigMoneyRollout.rolloutType = "BigMoney";
         bigMoneyRollout.rolloutsEnabled = true;
         bigMoneyRollout.rolloutLength = 100;
