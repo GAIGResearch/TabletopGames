@@ -13,7 +13,7 @@ import java.io.*;
 
 public class PlayerFactory {
 
-    private static JSONParser parser = new JSONParser();
+    private static final JSONParser parser = new JSONParser();
 
     public static AbstractPlayer fromJSONFile(String jsonFile) {
         try {

@@ -2,7 +2,6 @@ package evaluation;
 
 import core.*;
 import evodef.*;
-import games.GameType;
 
 import java.util.*;
 
@@ -51,7 +50,7 @@ public class GameEvaluator implements SolutionEvaluator {
         int playerIndex = nEvals % nPlayers;
         for (int i = 0; i < nPlayers; i++) {
             if (i != playerIndex) {
-                int oppIndex = 0;
+                int oppIndex;
                 do {
                     oppIndex = rnd.nextInt(opponents.size());
                 } while (avoidOppDupes && allPlayers.contains(opponents.get(oppIndex)));

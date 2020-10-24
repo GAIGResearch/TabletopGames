@@ -34,6 +34,8 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
         retValue.put("rolloutsEnabled", Boolean.class);
         retValue.put("rolloutType", String.class);
         retValue.put("epsilon", Double.class);
+        retValue.put("budgetType", Integer.class);
+        retValue.put("budget", Integer.class);
         return retValue;
     }
 
@@ -46,6 +48,10 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
         params.rolloutsEnabled = (boolean) settingsMap.getOrDefault("rolloutsEnabled", params.rolloutsEnabled);
         params.rolloutType = (String) settingsMap.getOrDefault("rolloutType", params.rolloutType);
         params.epsilon = (double) settingsMap.getOrDefault("epsilon", params.epsilon);
+        params.budgetType = (int) settingsMap.getOrDefault("budgetType", params.budgetType);
+        params.fmCallsBudget = (int) settingsMap.getOrDefault("budget", params.fmCallsBudget);
+        params.timeBudget = (int) settingsMap.getOrDefault("budget", params.timeBudget);
+        params.iterationsBudget = (int) settingsMap.getOrDefault("budget", params.iterationsBudget);
         return new MCTSPlayer(params);
     }
 

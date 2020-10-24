@@ -52,10 +52,6 @@ public class ParameterSearch {
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
 
-        // TODO: Convert SearchSpace file to be from JSON (once NTBEA code allows that)
-        // TODO: Replace default MCTSParams with the marked defaults in the same JSON file (the values with single options)
-        // TODO: Support for other games - easy by parameter
-        // TODO: Support for opponent configurations to be loaded from file.
         MCTSSearchSpace searchSpace = new MCTSSearchSpace(searchSpaceFile);
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
         int twoTupleSize = IntStream.range(0, searchSpace.nDims() - 1)
@@ -205,8 +201,7 @@ public class ParameterSearch {
 
             double avg = Arrays.stream(results).average().getAsDouble();
             double stdErr = Math.sqrt(Arrays.stream(results)
-                    .map(d -> Math.pow(d - avg, 2.0)).sum()
-                    / (evalGames - 1.0)) / (evalGames - 1.0);
+                    .map(d -> Math.pow(d - avg, 2.0)).sum()) / (evalGames - 1.0);
 
             return new Pair<>(avg, stdErr);
         } else {

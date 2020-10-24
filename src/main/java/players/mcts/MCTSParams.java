@@ -5,6 +5,7 @@ import core.interfaces.*;
 import games.dominion.BigMoney;
 import org.json.simple.*;
 import org.json.simple.parser.*;
+import players.PlayerConstants;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
@@ -121,7 +122,8 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         return new RandomPlayer(new Random(randomSeed));
     }
 
-    public final static List<String> expectedKeys = Arrays.asList("algorithm", "seed", "K", "rolloutLength", "rolloutsEnabled", "epsilon", "rolloutType");
+    public final static List<String> expectedKeys = Arrays.asList("algorithm", "seed", "K", "rolloutLength",
+            "rolloutsEnabled", "epsilon", "rolloutType", "budgetType", "budget", "breakMS");
 
     @SuppressWarnings("unchecked")
     private static <T> T getParam(String name, JSONObject json, T defaultValue) {
@@ -151,6 +153,21 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         retValue.rolloutsEnabled = getParam("rolloutsEnabled", rawData, retValue.rolloutsEnabled);
         retValue.epsilon = getParam("epsilon", rawData, retValue.epsilon);
         retValue.rolloutType = getParam("rolloutType", rawData, retValue.rolloutType);
+        retValue.budgetType = getParam("budgetType", rawData, retValue.budgetType);
+        int budget = getParam("budget", rawData, -1);
+        switch (retValue.budgetType) {
+            case PlayerConstants.BUDGET_TIME:
+                retValue.timeBudget = (budget == -1) ? retValue.timeBudget : budget;
+                break;
+            case PlayerConstants.BUDGET_ITERATIONS:
+                retValue.iterationsBudget = (budget == -1) ? retValue.iterationsBudget : budget;
+                break;
+            case PlayerConstants.BUDGET_FM_CALLS:
+                retValue.fmCallsBudget = (budget == -1) ? retValue.fmCallsBudget : budget;
+                break;
+            default:
+                throw new AssertionError("Unknown Budget Type " + retValue.budgetType);
+        }
 
         // We should also check that there are no other properties in there
         for (Object key : rawData.keySet()) {
