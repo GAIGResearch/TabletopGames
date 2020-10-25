@@ -1,7 +1,7 @@
 package utilities;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 public abstract class Utils {
@@ -164,5 +164,24 @@ public abstract class Utils {
      */
     public static double noise(double input, double epsilon, double random) {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
+    }
+
+    public static <T> T getArg(String[] args, String name, T defaultValue) {
+        Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
+        if (raw.isPresent()) {
+            String rawString = raw.get().split("=")[1];
+            if (defaultValue instanceof Integer) {
+                return (T) Integer.valueOf(rawString);
+            } else if (defaultValue instanceof Double) {
+                return (T) Double.valueOf(rawString);
+            } else if (defaultValue instanceof Boolean) {
+                return (T) Boolean.valueOf(rawString);
+            } else if (defaultValue instanceof String){
+                return (T) rawString;
+            } else {
+                throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
+            }
+        }
+        return defaultValue;
     }
 }
