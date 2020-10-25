@@ -16,20 +16,27 @@ public class MCTSPlayer extends AbstractPlayer {
     MCTSParams params;
     // Heuristics used for the agent
     IStateHeuristic heuristic;
+    AbstractPlayer rolloutStrategy;
+    String name;
+    private boolean debug = false;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public MCTSPlayer(long seed)
-    {
+    public MCTSPlayer(long seed) {
         this.params = new MCTSParams(seed);
         rnd = new Random(seed);
     }
 
     public MCTSPlayer(MCTSParams params) {
+        this(params, "MCTSPlayer");
+    }
+    public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
+        rolloutStrategy = params.getRolloutStrategy();
+        this.name = name;
     }
 
     public MCTSPlayer(IStateHeuristic heuristic){
@@ -58,8 +65,17 @@ public class MCTSPlayer extends AbstractPlayer {
         SingleTreeNode root = new SingleTreeNode(this, allActions.size());
         root.setRootGameState(root, gameState);
         root.mctsSearch();
+        if (debug)
+            System.out.println(root.toString());
+
 
         // Return best action
         return allActions.get(root.mostVisitedAction());
+    }
+
+    public void setName(String name) {this.name = name;}
+    @Override
+    public String toString() {
+        return name;
     }
 }
