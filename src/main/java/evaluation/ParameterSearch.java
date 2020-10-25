@@ -22,21 +22,24 @@ public class ParameterSearch {
 
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        if (argsList.contains("--help") || argsList.contains("-h")) System.out.println(
-                "The first three arguments must be \n" +
-                        "\t<filename for searchSpace definition>\n" +
-                        "\t<number of NTBEA iterations>\n" +
-                        "\t<game type>" +
-                        "Then there are a number of optional arguments:\n" +
-                        "\tnPlayers=      The total number of players in each game (the default is game.Min#players)  " +
-                        "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)" +
-                        "\topponent=      The filename for the agent used as opponent. Default is a Random player." +
-                        "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples" +
-                        "\tkExplore=      The k to use in NTBEA - defaults to 100.0" +
-                        "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100)" +
-                        "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation" +
-                        "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run"
-        );
+        if (argsList.contains("--help") || argsList.contains("-h")) {
+            System.out.println(
+                    "The first three arguments must be \n" +
+                            "\t<filename for searchSpace definition>\n" +
+                            "\t<number of NTBEA iterations>\n" +
+                            "\t<game type> \n" +
+                            "Then there are a number of optional arguments:\n" +
+                            "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
+                            "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
+                            "\topponent=      The filename for the agent used as opponent. Default is a Random player. \n" +
+                            "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
+                            "\tkExplore=      The k to use in NTBEA - defaults to 100.0 \n" +
+                            "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) \n" +
+                            "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
+                            "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n"
+            );
+            return;
+        }
 
         if (argsList.size() < 3)
             throw new AssertionError("Must specify at least three parameters: searchSpace, NTBEA iterations, game");
