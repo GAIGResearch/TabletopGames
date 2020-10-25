@@ -129,4 +129,14 @@ public class CoreGameLoop {
         assertTrue(state.gameOver());
     }
 
+    @Test
+    public void canPlayACardFromHand() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void cannotPlayACardWithNoActionsLeft() {
+        fail("Not yet implemented");
+    }
+
 }

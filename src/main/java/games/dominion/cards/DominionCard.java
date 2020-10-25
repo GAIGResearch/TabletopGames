@@ -1,10 +1,25 @@
 package games.dominion.cards;
 
 import core.components.*;
+import games.dominion.actions.DominionAction;
+import games.dominion.actions.Laboratory;
+import games.dominion.actions.Smithy;
+import games.dominion.actions.Village;
+
+import java.util.*;
 
 public class DominionCard extends Card {
 
+    private static Map<CardType, DominionAction> typeToAction = new HashMap<>();
+    static {
+        typeToAction.put(CardType.VILLAGE, new Village());
+        typeToAction.put(CardType.LABORATORY, new Laboratory());
+        typeToAction.put(CardType.SMITHY, new Smithy());
+    }
+
+
     CardType type;
+
 
     private DominionCard(CardType type) {
         super(type.name());
@@ -17,6 +32,7 @@ public class DominionCard extends Card {
     private static DominionCard province = new DominionCard(CardType.PROVINCE);
     private static DominionCard duchy = new DominionCard(CardType.DUCHY);
     private static DominionCard estate = new DominionCard(CardType.ESTATE);
+    private static DominionCard village = new DominionCard(CardType.VILLAGE);
 
     public static DominionCard create(CardType type) {
         switch (type) {
@@ -32,6 +48,8 @@ public class DominionCard extends Card {
                 return duchy;
             case PROVINCE:
                 return province;
+            case VILLAGE:
+                return village;
             default:
                 throw new AssertionError("Not yet implemented : " + type);
         }
@@ -43,6 +61,10 @@ public class DominionCard extends Card {
 
     public boolean isTreasureCard() {
         return type.getTreasure() > 0;
+    }
+
+    public boolean isActionCard() {
+        return type.isActionCard();
     }
 
     public int victoryPoints() {
@@ -57,7 +79,16 @@ public class DominionCard extends Card {
         return type.getCost();
     }
 
-    public CardType cardType() {return type; }
+    public CardType cardType() {
+        return type;
+    }
+
+    public DominionAction getAction() {
+        DominionAction retValue = typeToAction.get(type);
+        if (retValue == null)
+            throw new AssertionError("No action found for " + type);
+        return retValue;
+    }
 
     @Override
     public Card copy() {

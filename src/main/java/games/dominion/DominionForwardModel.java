@@ -5,14 +5,14 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dominion.actions.BuyCard;
-import games.dominion.cards.ActionCard;
-import games.dominion.cards.CardType;
-import games.dominion.cards.DominionCard;
+import games.dominion.cards.*;
+import games.dominion.DominionConstants.*;
 import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DominionForwardModel extends AbstractForwardModel {
@@ -51,7 +51,8 @@ public class DominionForwardModel extends AbstractForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                boolean hasNoActionCardInHand = state.playerHands[playerID].getComponents().stream().noneMatch(c -> c instanceof ActionCard);
+                boolean hasNoActionCardInHand = state.getDeck(DeckType.HAND, playerID).stream()
+                        .noneMatch(DominionCard::isActionCard);
                 if (state.actionsLeftForCurrentPlayer < 1 || hasNoActionCardInHand) {
                     // change phase
                     state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
@@ -99,6 +100,13 @@ public class DominionForwardModel extends AbstractForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
+                if (state.actionsLeft() > 0) {
+                    Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
+                            .filter(DominionCard::isActionCard).collect(Collectors.toSet());
+                    List<AbstractAction> availableActions = actionCards.stream().map(DominionCard::getAction).collect(Collectors.toList());
+                    availableActions.add(new DoNothing());
+                    return availableActions;
+                }
                 return Arrays.asList(new DoNothing());
             // No Action cards are yet implemented
             case "Buy":

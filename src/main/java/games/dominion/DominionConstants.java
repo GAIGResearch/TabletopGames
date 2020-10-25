@@ -1,7 +1,5 @@
 package games.dominion;
 
-import utilities.Hash;
-
 public class DominionConstants {
 
     public enum DeckType {

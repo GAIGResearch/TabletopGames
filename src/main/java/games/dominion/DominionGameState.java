@@ -1,11 +1,9 @@
 package games.dominion;
 
 import core.*;
-import core.actions.DrawCard;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import games.dominion.cards.*;
-import utilities.Utils;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
@@ -56,7 +54,7 @@ public class DominionGameState extends AbstractGameState {
         }
         return false;
     }
-    public boolean addCard(CardType type, int playerId, DeckType deck) {
+    public void addCard(CardType type, int playerId, DeckType deck) {
         DominionCard newCard = DominionCard.create(type);
         switch (deck) {
             case HAND:
@@ -74,7 +72,6 @@ public class DominionGameState extends AbstractGameState {
             default:
                 throw new AssertionError("Invalid Deck type " + deck);
         }
-        return true;
     }
 
     public void endOfTurn(int playerID) {
@@ -85,17 +82,12 @@ public class DominionGameState extends AbstractGameState {
         // 3) shuffle and move discard if we run out
         Deck<DominionCard> hand = playerHands[playerID];
         Deck<DominionCard> discard = playerDiscards[playerID];
-        Deck<DominionCard> draw = playerDrawPiles[playerID];
 
         discard.add(hand);
         hand.clear();
-        for (int i = 0; i < 5; i++) {
-            if (draw.getSize() == 0) {
-                draw.add(discard);
-                discard.clear();
-            }
-            hand.add(draw.draw());
-        }
+        for (int i = 0; i < 5; i++)
+            drawCard(playerID);
+
         actionsLeftForCurrentPlayer = 1;
         spentSoFar = 0;
         buysLeftForCurrentPlayer = 1;
@@ -106,6 +98,30 @@ public class DominionGameState extends AbstractGameState {
     public boolean gameOver() {
         return cardsAvailable.get(CardType.PROVINCE) == 0 ||
                 cardsAvailable.values().stream().filter(i -> i == 0).count() >= 3;
+    }
+
+    public boolean drawCard(int playerId) {
+        return drawCard(playerId, DeckType.DRAW, playerId, DeckType.HAND);
+    }
+    public boolean drawCard(int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
+        Deck<DominionCard> source = getDeck(fromDeck, fromPlayer);
+        Deck<DominionCard> destination = getDeck(toDeck, toPlayer);
+        if (source.getSize() == 0) {
+            // do stuff
+            if (fromDeck == DeckType.DRAW) {
+                Deck<DominionCard> discard = getDeck(DeckType.DISCARD, fromPlayer);
+                if (discard.getSize() == 0)
+                    return false;
+                source.add(discard);
+                discard.clear();
+                source.shuffle(rnd);
+            } else {
+                return false;
+            }
+        }
+        DominionCard cardDrawn = source.draw();
+        destination.add(cardDrawn);
+        return true;
     }
 
     public int actionsLeft() {

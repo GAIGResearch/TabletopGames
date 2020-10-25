@@ -3,13 +3,13 @@ package games.dominion.cards;
 import java.util.*;
 
 public enum CardType {
-    CURSE(0, 0, -1),
-    ESTATE(2, 0, 1),
-    DUCHY(5, 0, 3),
-    PROVINCE(8, 0, 6),
-    COPPER(0, 1, 0),
-    SILVER(3, 2, 0),
-    GOLD(6, 3, 0),
+    CURSE(0, 0, -1, false),
+    ESTATE(2, 0, 1, false),
+    DUCHY(5, 0, 3, false),
+    PROVINCE(8, 0, 6, false),
+    COPPER(0, 1, 0, false),
+    SILVER(3, 2, 0, false),
+    GOLD(6, 3, 0, false),
     CHANCELLOR(3, 0, 0),
     WOODCUTTER(3, 0, 0),
     FEAST(5, 0, 0),
@@ -46,14 +46,24 @@ public enum CardType {
     private final int cost;
     private final int treasure;
     private final int victory;
+    private final boolean action;
 
     private CardType(int cost, int treasure, int victory) {
         this.cost = cost;
         this.treasure = treasure;
         this.victory = victory;
+        this.action = true;
     }
+    private CardType(int cost, int treasure, int victory, boolean action) {
+        this.cost = cost;
+        this.treasure = treasure;
+        this.victory = victory;
+        this.action = action;
+    }
+
     public int getCost(){return cost;}
     public int getTreasure(){return treasure;}
     public int getVictory(){return victory;}
+    public boolean isActionCard(){return action;}
 
 }
