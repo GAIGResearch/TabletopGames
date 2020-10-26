@@ -115,14 +115,28 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         }
     }
 
+    /**
+     * @return Returns the AbstractPlayer policy that will take actions during an MCTS rollout.
+     *         This defaults to a Random player.
+     */
     public AbstractPlayer getRolloutStrategy() {
-        // For future expansion (used in Dominion)
         return new RandomPlayer(new Random(randomSeed));
     }
 
+    /**
+     * The set of keys that can be in the JSON file. If we find anything not in this list we log the fact to the console
+     *  to highlight potential typos
+     */
     public final static List<String> expectedKeys = Arrays.asList("algorithm", "seed", "K", "rolloutLength",
             "rolloutsEnabled", "epsilon", "rolloutType", "budgetType", "budget", "breakMS");
 
+    /**
+     * @param name Name of the parameter. This will be validated as one of a possible set of expectedKeys
+     * @param json The JSONObject containing the data we want to extract the parameter from.
+     * @param defaultValue The default value to use for the parameter if we can't find it in json.
+     * @param <T> The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
+     * @return The value of the parameter found.
+     */
     @SuppressWarnings("unchecked")
     private static <T> T getParam(String name, JSONObject json, T defaultValue) {
         Object data = json.getOrDefault(name, defaultValue);
@@ -131,6 +145,12 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         return defaultValue;
     }
 
+    /**
+     * Instantiate parameters from a JSON file
+     *
+     * @param filename The file with the JSON format data
+     * @return The full set of parameters extracted from the file
+     */
     public static MCTSParams fromJSONFile(String filename) {
         try {
             FileReader reader = new FileReader(filename);
@@ -142,6 +162,9 @@ public class MCTSParams extends PlayerParameters implements ITunableParameters {
         }
     }
 
+    /**
+     * Instantiate paramaters from a JSONObject
+     */
     public static MCTSParams fromJSON(JSONObject rawData) {
         long seed = getParam("seed", rawData, System.currentTimeMillis());
         MCTSParams retValue = new MCTSParams(seed);
