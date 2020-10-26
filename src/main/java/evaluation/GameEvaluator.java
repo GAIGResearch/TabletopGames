@@ -4,6 +4,9 @@ import core.*;
 import evodef.*;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  *  Game Evaluator is used for NTBEA optimisation of parameters. It implements the SolutionEvaluator interface.
@@ -88,12 +91,17 @@ public class GameEvaluator implements SolutionEvaluator {
 
         // We can reduce variance here by cycling the playerIndex on each iteration
         int playerIndex = nEvals % nPlayers;
+
+        // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
+        // if we allow duplicates, then we randomise them all independently
+        List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(Collectors.toList());
+        Collections.shuffle(opponentOrdering);
+        int count = 0;
         for (int i = 0; i < nPlayers; i++) {
             if (i != playerIndex) {
-                int oppIndex;
-                do {
-                    oppIndex = rnd.nextInt(opponents.size());
-                } while (avoidOppDupes && allPlayers.contains(opponents.get(oppIndex)));
+                int oppIndex = (avoidOppDupes) ? count++ : rnd.nextInt(opponents.size());
+                if (count >= opponents.size())
+                    throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
                 allPlayers.add(opponents.get(oppIndex));
             } else {
                 allPlayers.add(player);
