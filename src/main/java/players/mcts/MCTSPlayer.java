@@ -17,7 +17,6 @@ public class MCTSPlayer extends AbstractPlayer {
     // Heuristics used for the agent
     IStateHeuristic heuristic;
     AbstractPlayer rolloutStrategy;
-    String name;
     private boolean debug = false;
 
     public MCTSPlayer() {
@@ -36,7 +35,7 @@ public class MCTSPlayer extends AbstractPlayer {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
-        this.name = name;
+        setName(name);
     }
 
     public MCTSPlayer(IStateHeuristic heuristic){
@@ -73,9 +72,4 @@ public class MCTSPlayer extends AbstractPlayer {
         return allActions.get(root.mostVisitedAction());
     }
 
-    public void setName(String name) {this.name = name;}
-    @Override
-    public String toString() {
-        return name;
-    }
 }
