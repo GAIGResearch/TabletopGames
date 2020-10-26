@@ -28,7 +28,11 @@ public class ParameterSearch {
                         "Then there are a number of optional arguments:\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
-                        "\topponent=      The filename for the agent used as opponent. Default is a Random player. \n" +
+                        "\topponent=      The agent used as opponent. Default is a Random player. \n" +
+                        "\t               This can either be a json-format file detailing the parameters, or\n" +
+                        "\t               one of mcts|rmhc|random|osla|<className>  \n" +
+                        "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
+                        "\t               with a no-argument constructor\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 100.0 \n" +
                         "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) \n" +
@@ -45,7 +49,7 @@ public class ParameterSearch {
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
         double kExplore = getArg(args, "kExplore", 100.0);
-        String opponentFile = getArg(args, "opponent", "");
+        String opponentDescriptor = getArg(args, "opponent", "");
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
@@ -90,7 +94,7 @@ public class ParameterSearch {
         // Set up opponents
         List<AbstractPlayer> opponents = new ArrayList<>();
         for (int i = 0; i < nPlayers; i++) {
-            AbstractPlayer opponent = opponentFile.isEmpty() ? new RandomPlayer() : PlayerFactory.fromJSONFile(opponentFile);
+            AbstractPlayer opponent = opponentDescriptor.isEmpty() ? new RandomPlayer() : PlayerFactory.createPlayer(opponentDescriptor);
             opponents.add(opponent);
         }
 
