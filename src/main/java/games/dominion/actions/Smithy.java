@@ -3,8 +3,14 @@ package games.dominion.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dominion.DominionGameState;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 
 public class Smithy extends DominionAction {
+
+    public Smithy(int playerId) {
+        super(CardType.SMITHY, playerId);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -24,20 +30,5 @@ public class Smithy extends DominionAction {
     public AbstractAction copy() {
         return this;
         // no state
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof Smithy);
-    }
-
-    @Override
-    public int hashCode() {
-        return 287230;
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return "SMITHY";
     }
 }

@@ -3,8 +3,15 @@ package games.dominion.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dominion.DominionGameState;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 
 public class Village extends DominionAction {
+
+
+    public Village(int playerId) {
+        super(CardType.VILLAGE, playerId);
+    }
 
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -30,20 +37,5 @@ public class Village extends DominionAction {
     public AbstractAction copy() {
         // no state ... or do I want to retain a history of the cards drawn?
         return this;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof Village);
-    }
-
-    @Override
-    public int hashCode() {
-        return 376298;
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return "VILLAGE";
     }
 }

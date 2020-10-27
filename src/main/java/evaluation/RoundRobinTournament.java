@@ -1,5 +1,6 @@
 package evaluation;
 
+import core.AbstractParameters;
 import core.AbstractPlayer;
 import games.GameType;
 import players.simple.OSLAPlayer;
@@ -53,8 +54,8 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay) {
+    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay,
+                                int playersPerGame, int gamesPerMatchUp, boolean selfPlay) {
         super(agents, gameToPlay, playersPerGame);
         if (!selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +

@@ -1,27 +1,13 @@
 package games.dominion.cards;
 
 import core.components.*;
-import games.dominion.actions.DominionAction;
-import games.dominion.actions.Laboratory;
-import games.dominion.actions.Smithy;
-import games.dominion.actions.Village;
-
-import java.util.*;
+import games.dominion.actions.*;
 
 public class DominionCard extends Card {
 
-    private static Map<CardType, DominionAction> typeToAction = new HashMap<>();
-    static {
-        typeToAction.put(CardType.VILLAGE, new Village());
-        typeToAction.put(CardType.LABORATORY, new Laboratory());
-        typeToAction.put(CardType.SMITHY, new Smithy());
-    }
-
-
     CardType type;
 
-
-    private DominionCard(CardType type) {
+    protected DominionCard(CardType type) {
         super(type.name());
         this.type = type;
     }
@@ -32,7 +18,6 @@ public class DominionCard extends Card {
     private static DominionCard province = new DominionCard(CardType.PROVINCE);
     private static DominionCard duchy = new DominionCard(CardType.DUCHY);
     private static DominionCard estate = new DominionCard(CardType.ESTATE);
-    private static DominionCard village = new DominionCard(CardType.VILLAGE);
 
     public static DominionCard create(CardType type) {
         switch (type) {
@@ -49,7 +34,12 @@ public class DominionCard extends Card {
             case PROVINCE:
                 return province;
             case VILLAGE:
-                return village;
+            case SMITHY:
+            case LABORATORY:
+            case WOODCUTTER:
+            case MARKET:
+            case FESTIVAL:
+                return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
         }
@@ -65,6 +55,25 @@ public class DominionCard extends Card {
 
     public boolean isActionCard() {
         return type.isActionCard();
+    }
+
+    public DominionAction getAction(int playerId) {
+        switch (type) {
+            case VILLAGE:
+                return new Village(playerId);
+            case SMITHY:
+                return new Smithy(playerId);
+            case LABORATORY:
+                return new Laboratory(playerId);
+            case WOODCUTTER:
+                return new Woodcutter(playerId);
+            case FESTIVAL:
+                return new Festival(playerId);
+            case MARKET:
+                return new Market(playerId);
+            default:
+                throw new AssertionError("No action for : " + type);
+        }
     }
 
     public int victoryPoints() {
@@ -83,19 +92,11 @@ public class DominionCard extends Card {
         return type;
     }
 
-    public DominionAction getAction() {
-        DominionAction retValue = typeToAction.get(type);
-        if (retValue == null)
-            throw new AssertionError("No action found for " + type);
-        return retValue;
-    }
-
     @Override
     public Card copy() {
         // Currently all cards are immutable - so we can save resources when copying
         return this;
     }
-
 }
 
 

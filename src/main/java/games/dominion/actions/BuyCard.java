@@ -9,7 +9,7 @@ import games.dominion.cards.*;
 
 import java.util.Objects;
 
-public class BuyCard extends DominionAction {
+public class BuyCard extends AbstractAction {
 
     public final CardType cardType;
     public final int buyingPlayer;

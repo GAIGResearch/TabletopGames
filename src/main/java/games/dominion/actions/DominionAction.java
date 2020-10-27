@@ -1,18 +1,63 @@
 package games.dominion.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.dominion.DominionConstants.*;
 import games.dominion.DominionGameState;
+import games.dominion.DominionGameState.*;
+import games.dominion.cards.CardType;
+
+import java.util.Objects;
 
 public abstract class DominionAction extends AbstractAction {
+
+    protected CardType type;
+    protected int player;
+
+    protected DominionAction(CardType type, int playerId) {
+        this.type = type;
+        this.player = playerId;
+    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
+        if (state.getCurrentPlayer() != player)
+            throw new AssertionError("Attempting to play an action out of turn");
         if (state.actionsLeft() < 1)
             throw new AssertionError("Insufficient actions to play action card " + this.toString());
+        if (state.getGamePhase() != DominionGamePhase.Play)
+            throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase");
+        if (!state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
+            throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d",type, player));
+        }
         state.changeActions(-1);
         return _execute(state);
     }
 
     abstract boolean _execute(DominionGameState state);
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DominionAction) {
+            DominionAction other = (DominionAction) obj;
+            return type == other.type && player == other.player;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, player);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return type.name() + " : Player " + player;
+    }
 }

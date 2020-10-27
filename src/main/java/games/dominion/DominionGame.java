@@ -28,17 +28,24 @@ public class DominionGame extends Game {
         MCTSParams bigMoneyRollout = new MCTSParams(8743);
         bigMoneyRollout.rolloutType = "BigMoney";
         bigMoneyRollout.rolloutsEnabled = true;
+        bigMoneyRollout.K = 5.0;
         bigMoneyRollout.rolloutLength = 100;
+
+        MCTSParams actionRollout = new MCTSParams(8743);
+        actionRollout.rolloutType = "PlayActions";
+        actionRollout.rolloutsEnabled = true;
+        actionRollout.K = 5.0;
+        actionRollout.rolloutLength = 100;
 
         agents.add(new MCTSPlayer());
         agents.add(new MCTSPlayer(bigMoneyRollout, "MCTS_BMRollout"));
+        agents.add(new MCTSPlayer(actionRollout, "MCTS_ActionRollout"));
         agents.add(new BigMoney());
-        agents.add(new RandomPlayer());
 
         int nGames = 1;
 /*        for (int i = 0; i < nGames; i++) {
             // setup game
-            DominionParameters params = new DominionParameters(System.currentTimeMillis());
+            DominionParameters params = DominionParameters.workingCards(System.currentTimeMillis());
             Game game = new DominionGame(agents, params);
 
             // run game
@@ -47,7 +54,7 @@ public class DominionGame extends Game {
 
 
         // Run!
-        AbstractTournament tournament = new RoundRobinTournament(new LinkedList<>(agents), GameType.Dominion, 4, 10, false);
+        AbstractTournament tournament = new RoundRobinTournament(new LinkedList<>(agents), GameType.Dominion,4, 10, false);
         tournament.runTournament();
     }
 }

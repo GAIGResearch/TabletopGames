@@ -51,9 +51,7 @@ public class DominionForwardModel extends AbstractForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                boolean hasNoActionCardInHand = state.getDeck(DeckType.HAND, playerID).stream()
-                        .noneMatch(DominionCard::isActionCard);
-                if (state.actionsLeftForCurrentPlayer < 1 || hasNoActionCardInHand) {
+                if (state.actionsLeftForCurrentPlayer < 1 || action instanceof DoNothing) {
                     // change phase
                     state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
                     // no change to current player
@@ -103,7 +101,7 @@ public class DominionForwardModel extends AbstractForwardModel {
                 if (state.actionsLeft() > 0) {
                     Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
                             .filter(DominionCard::isActionCard).collect(Collectors.toSet());
-                    List<AbstractAction> availableActions = actionCards.stream().map(DominionCard::getAction).collect(Collectors.toList());
+                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID)).collect(Collectors.toList());
                     availableActions.add(new DoNothing());
                     return availableActions;
                 }

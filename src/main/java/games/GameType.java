@@ -168,7 +168,7 @@ public enum GameType {
                 gameState = new ColtExpressGameState(params, nPlayers);
                 break;
             case Dominion:
-                params = new DominionParameters(seed);
+                params = DominionParameters.workingCards(seed);
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
         }

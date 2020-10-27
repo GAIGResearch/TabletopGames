@@ -3,8 +3,15 @@ package games.dominion.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dominion.DominionGameState;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 
 public class Laboratory extends DominionAction {
+
+    public Laboratory(int playerId) {
+        super(CardType.LABORATORY, playerId);
+    }
+
     @Override
     boolean _execute(DominionGameState state) {
         state.drawCard(state.getCurrentPlayer());
@@ -24,18 +31,4 @@ public class Laboratory extends DominionAction {
         return this;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof Laboratory);
-    }
-
-    @Override
-    public int hashCode() {
-        return 43935;
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return "LABORATORY";
-    }
 }

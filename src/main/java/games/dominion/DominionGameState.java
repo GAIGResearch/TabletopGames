@@ -26,6 +26,7 @@ public class DominionGameState extends AbstractGameState {
     Deck<DominionCard>[] playerHands;
     Deck<DominionCard>[] playerDrawPiles;
     Deck<DominionCard>[] playerDiscards;
+    Deck<DominionCard>[] playerTableaux;
 
     int buysLeftForCurrentPlayer = 1;
     int actionsLeftForCurrentPlayer = 1;
@@ -54,24 +55,11 @@ public class DominionGameState extends AbstractGameState {
         }
         return false;
     }
-    public void addCard(CardType type, int playerId, DeckType deck) {
+
+    public void addCard(CardType type, int playerId, DeckType deckType) {
         DominionCard newCard = DominionCard.create(type);
-        switch (deck) {
-            case HAND:
-                playerHands[playerId].add(newCard);
-                break;
-            case DRAW:
-                playerDrawPiles[playerId].add(newCard);
-                break;
-            case DISCARD:
-                playerDiscards[playerId].add(newCard);
-                break;
-            case TRASH:
-                trashPile.add(newCard);
-                break;
-            default:
-                throw new AssertionError("Invalid Deck type " + deck);
-        }
+        Deck<DominionCard> deck = getDeck(deckType, playerId);
+        deck.add(newCard);
     }
 
     public void endOfTurn(int playerID) {
@@ -82,8 +70,11 @@ public class DominionGameState extends AbstractGameState {
         // 3) shuffle and move discard if we run out
         Deck<DominionCard> hand = playerHands[playerID];
         Deck<DominionCard> discard = playerDiscards[playerID];
+        Deck<DominionCard> table = playerTableaux[playerID];
 
         discard.add(hand);
+        discard.add(table);
+        table.clear();
         hand.clear();
         for (int i = 0; i < 5; i++)
             drawCard(playerID);
@@ -103,6 +94,7 @@ public class DominionGameState extends AbstractGameState {
     public boolean drawCard(int playerId) {
         return drawCard(playerId, DeckType.DRAW, playerId, DeckType.HAND);
     }
+
     public boolean drawCard(int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
         Deck<DominionCard> source = getDeck(fromDeck, fromPlayer);
         Deck<DominionCard> destination = getDeck(toDeck, toPlayer);
@@ -122,6 +114,24 @@ public class DominionGameState extends AbstractGameState {
         DominionCard cardDrawn = source.draw();
         destination.add(cardDrawn);
         return true;
+    }
+
+    public boolean moveCard(CardType type, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
+        DominionCard cardToMove = getDeck(fromDeck, fromPlayer).stream()
+                .filter(c -> c.cardType() == type)
+                .findFirst().orElse(null);
+        if (cardToMove == null)
+            return false;
+
+        return moveCard(cardToMove, fromPlayer, fromDeck, toPlayer, toDeck);
+    }
+    public boolean moveCard(DominionCard cardToMove, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
+        boolean cardFound = getDeck(fromDeck, fromPlayer).remove(cardToMove);
+        if (cardFound) {
+            getDeck(toDeck, toPlayer).add(cardToMove);
+            return true;
+        }
+        return false;
     }
 
     public int actionsLeft() {
@@ -162,6 +172,7 @@ public class DominionGameState extends AbstractGameState {
         List<Component> components = new ArrayList<>();
         components.addAll(Arrays.asList(playerHands));
         components.addAll(Arrays.asList(playerDiscards));
+        components.addAll(Arrays.asList(playerTableaux));
         components.addAll(Arrays.asList(playerDrawPiles));
         components.add(trashPile);
         return components;
@@ -175,6 +186,8 @@ public class DominionGameState extends AbstractGameState {
                 return playerDrawPiles[playerId];
             case DISCARD:
                 return playerDiscards[playerId];
+            case TABLE:
+                return playerTableaux[playerId];
             case TRASH:
                 return trashPile;
         }
@@ -187,22 +200,18 @@ public class DominionGameState extends AbstractGameState {
             case SUPPLY:
                 return cardsAvailable.getOrDefault(type, 0);
             case HAND:
-                allCards = playerHands[playerId];
-                break;
+            case TABLE:
             case DRAW:
-                allCards = playerDrawPiles[playerId];
-                break;
             case DISCARD:
-                allCards = playerDiscards[playerId];
-                break;
             case TRASH:
-                allCards = trashPile;
+                allCards = getDeck(deck, playerId);
                 break;
             case ALL:
                 allCards = new Deck<>("temp");
                 allCards.add(playerHands[playerId]);
                 allCards.add(playerDiscards[playerId]);
                 allCards.add(playerDrawPiles[playerId]);
+                allCards.add(playerTableaux[playerId]);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + deck);
@@ -227,6 +236,7 @@ public class DominionGameState extends AbstractGameState {
             retValue.playerHands[p] = playerHands[p].copy();
             retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
             retValue.playerDiscards[p] = playerDiscards[p].copy();
+            retValue.playerTableaux[p] = playerTableaux[p].copy();
         }
         retValue.trashPile = trashPile.copy();
         retValue.buysLeftForCurrentPlayer = buysLeftForCurrentPlayer;
@@ -247,6 +257,7 @@ public class DominionGameState extends AbstractGameState {
     protected double _getScore(int playerId) {
         int score = playerHands[playerId].sumInt(DominionCard::victoryPoints);
         score += playerDiscards[playerId].sumInt(DominionCard::victoryPoints);
+        score += playerTableaux[playerId].sumInt(DominionCard::victoryPoints);
         score += playerDrawPiles[playerId].sumInt(DominionCard::victoryPoints);
         return score;
     }
@@ -272,11 +283,13 @@ public class DominionGameState extends AbstractGameState {
         playerHands = new Deck[playerCount];
         playerDrawPiles = new Deck[playerCount];
         playerDiscards = new Deck[playerCount];
+        playerTableaux = new Deck[playerCount];
         trashPile = new Deck("Trash");
         for (int i = 0; i < playerCount; i++) {
             playerHands[i] = new Deck<>("Hand of Player " + i + 1);
             playerDrawPiles[i] = new Deck<>("Drawpile of Player " + i + 1);
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1);
+            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1);
             for (int j = 0; j < 7; j++)
                 playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < 3; j++)
@@ -315,6 +328,7 @@ public class DominionGameState extends AbstractGameState {
         return cardsAvailable.equals(other.cardsAvailable) &&
                 Arrays.equals(playerHands, other.playerHands) &&
                 Arrays.equals(playerDiscards, other.playerDiscards) &&
+                Arrays.equals(playerTableaux, other.playerTableaux) &&
                 Arrays.equals(playerDrawPiles, other.playerDrawPiles) &&
                 trashPile.equals(other.trashPile) &&
                 buysLeftForCurrentPlayer == other.buysLeftForCurrentPlayer &&

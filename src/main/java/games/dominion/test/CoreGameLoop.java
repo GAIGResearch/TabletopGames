@@ -4,8 +4,9 @@ import core.AbstractPlayer;
 import core.actions.DoNothing;
 import core.components.*;
 import games.dominion.*;
+import games.dominion.DominionGameState.*;
 import games.dominion.DominionConstants.*;
-import games.dominion.actions.BuyCard;
+import games.dominion.actions.*;
 import games.dominion.cards.*;
 import org.junit.*;
 
@@ -80,10 +81,15 @@ public class CoreGameLoop {
     public void endOfRoundCleanUpAsExpected() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        state.addCard(CardType.COPPER, 0, DeckType.TABLE);
+        state.addCard(CardType.COPPER, 1, DeckType.TABLE);
+        assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
         state.endOfTurn(0);
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(0, state.getDeck(DeckType.DRAW, 0).getSize());
-        assertEquals(5, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(0, state.getDeck(DeckType.TABLE, 0).getSize());
+        assertEquals(1, state.getDeck(DeckType.TABLE, 1).getSize());
+        assertEquals(6, state.getDeck(DeckType.DISCARD, 0).getSize());
         assertEquals(DominionGameState.DominionGamePhase.Play, state.getGamePhase());
     }
 
@@ -95,7 +101,8 @@ public class CoreGameLoop {
         BuyCard newBuy = new BuyCard(CardType.SILVER, 0);
         state.spend(-1); // to guarantee they can afford it
         assertEquals(0, state.cardsOfType(CardType.SILVER, 0, DeckType.ALL));
-        newBuy.execute(state);
+        fm.computeAvailableActions(state);
+        fm.next(state, newBuy);
         assertEquals(1, state.cardsOfType(CardType.SILVER, 0, DeckType.ALL));
         assertEquals(7, state.cardsOfType(CardType.COPPER, 0, DeckType.ALL));
         assertEquals(3, state.cardsOfType(CardType.ESTATE, 0, DeckType.ALL));
@@ -103,7 +110,29 @@ public class CoreGameLoop {
         assertEquals(0, state.cardsOfType(CardType.SILVER, 0, DeckType.HAND));
         assertEquals(0, state.cardsOfType(CardType.SILVER, 0, DeckType.DRAW));
         assertEquals(silverAvailable - 1, state.cardsOfType(CardType.SILVER, 0, DeckType.SUPPLY));
-        assertEquals(0, state.buysLeft());
+        assertEquals(1, state.buysLeft());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+    }
+
+    @Test
+    public void canBuyMoreThanOneCard() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        BuyCard newBuy = new BuyCard(CardType.COPPER, 0);
+        state.changeBuys(3);
+        for (int i = 0; i < 4; i++) {
+            assertEquals(4-i, state.buysLeft());
+            assertEquals(i, state.cardsOfType(CardType.COPPER, 0, DeckType.DISCARD));
+            fm.computeAvailableActions(state);
+            assertTrue(state.getActions().contains(new DoNothing()));
+            assertTrue(state.getActions().contains(newBuy));
+            fm.computeAvailableActions(state);
+            fm.next(state, newBuy);
+        }
+        assertEquals(1, state.buysLeft());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(11, state.cardsOfType(CardType.COPPER, 0, DeckType.ALL));
     }
 
     @Test
@@ -131,12 +160,61 @@ public class CoreGameLoop {
 
     @Test
     public void canPlayACardFromHand() {
-        fail("Not yet implemented");
+        DominionGameState state = (DominionGameState) game.getGameState();
+        fm.computeAvailableActions(state);
+        assertEquals(1, state.getActions().size());
+        assertTrue(state.getActions().contains(new DoNothing()));
+        state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
+        fm.computeAvailableActions(state);
+        assertEquals(2, state.getActions().size());
+        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new Village(0)));
+        state.addCard(CardType.SMITHY, 0, DeckType.HAND);
+        fm.computeAvailableActions(state);
+        assertEquals(3, state.getActions().size());
+        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new Village(0)));
+        assertTrue(state.getActions().contains(new Smithy(0)));
+    }
+
+    @Test
+    public void cannotPlayAnActionCardDuringBuyPhase() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
+        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        fm.computeAvailableActions(state);
+        assertTrue(state.getActions().contains(new DoNothing()));
+        assertFalse(state.getActions().contains(new Village(0)));
     }
 
     @Test
     public void cannotPlayACardWithNoActionsLeft() {
-        fail("Not yet implemented");
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
+        state.addCard(CardType.SMITHY, 0, DeckType.HAND);
+        (new Smithy(0)).execute(state);
+        assertEquals(0, state.actionsLeft());
+        fm.computeAvailableActions(state);
+        assertEquals(1, state.getActions().size());
+        assertTrue(state.getActions().contains(new DoNothing()));
+    }
+
+    @Test
+    public void playingActionCardMovesItToTableau() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
+        fm.computeAvailableActions(state);
+        fm.next(state, new Village(0));
+        assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
+    }
+
+    @Test
+    public void playingLastActionMovesToBuyPhase() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.WOODCUTTER, 0, DeckType.HAND);
+        fm.computeAvailableActions(state);
+        fm.next(state, new Woodcutter(0));
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 
 }
