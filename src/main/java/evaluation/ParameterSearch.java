@@ -99,6 +99,10 @@ public class ParameterSearch {
         }
 
         // Initialise the GameEvaluator that will do all the heavy lifting
+
+        // TODO: We need to add a constructor for Game to take AbstractParameters - and call that here!
+        // We then create the game instance within SolutionEvaluator, as we may be tuning the game, so will need to create
+        // it afresh for each iteration
         SolutionEvaluator evaluator = new GameEvaluator(
                 game.createGameInstance(nPlayers, seed),
                 searchSpace,

@@ -113,4 +113,6 @@ public interface ITunableParameters<T> {
      */
     T instantiate();
 
+    String getJSONDescription();
+
 }

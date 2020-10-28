@@ -1,6 +1,7 @@
 package evaluation;
 
 import core.*;
+import core.interfaces.ITunableParameters;
 import evodef.*;
 
 import java.util.*;
@@ -17,7 +18,8 @@ import java.util.stream.IntStream;
 public class GameEvaluator implements SolutionEvaluator {
 
     Game game;
-    AgentSearchSpace<AbstractPlayer> searchSpace;
+    ITPSearchSpace<?> searchSpace;
+    ITunableParameters<?> tunableParameters;
     int nPlayers;
     List<AbstractPlayer> opponents;
     int nEvals = 0;
@@ -28,7 +30,7 @@ public class GameEvaluator implements SolutionEvaluator {
      * GameEvaluator
      *
      * @param game The game that will be run for each trial. After each trial it is reset().
-     * @param searchSpace The AgentSearchSpace that defines the parameter space we are optimising over.
+     * @param parametersToTune The ITunableParameters object that defines the parameter space we are optimising over.
      *                    This will vary with whatever is being optimised.
      * @param opponents A List of opponents to be played against. In each trial a random set of these opponents will be
      *                  used in addition to the main agent being tested.
@@ -40,11 +42,12 @@ public class GameEvaluator implements SolutionEvaluator {
      *                                any state, or that make any use of their playerId. (So RandomPlayer is fine.)
      *
      */
-    public GameEvaluator(Game game, AgentSearchSpace<AbstractPlayer> searchSpace,
+    public <T> GameEvaluator(Game game, ITunableParameters<T> parametersToTune,
                          List<AbstractPlayer> opponents, Random rnd,
                          boolean avoidOpponentDuplicates) {
         this.game = game;
-        this.searchSpace = searchSpace;
+        this.tunableParameters = parametersToTune;
+        this.searchSpace = new ITPSearchSpace<>(parametersToTune);
         this.nPlayers = game.getGameState().getNPlayers();
         this.opponents = opponents;
         this.rnd = rnd;
@@ -86,11 +89,14 @@ public class GameEvaluator implements SolutionEvaluator {
 
         double finalScore = 0.0;
 
-        AbstractPlayer player = searchSpace.getAgent(settings);
+        Object configuredThing = searchSpace.getAgent(settings);
+        boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
+
         List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
 
         // We can reduce variance here by cycling the playerIndex on each iteration
-        int playerIndex = nEvals % nPlayers;
+        // If we're not tuning the player, then setting index to -99 means we just use the provided opponents list
+        int playerIndex = tuningPlayer ? nEvals % nPlayers : -99;
 
         // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
         // if we allow duplicates, then we randomise them all independently
@@ -104,7 +110,7 @@ public class GameEvaluator implements SolutionEvaluator {
                     throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
                 allPlayers.add(opponents.get(oppIndex));
             } else {
-                allPlayers.add(player);
+                allPlayers.add((AbstractPlayer) configuredThing);
             }
         }
 
