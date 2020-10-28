@@ -55,7 +55,7 @@ public abstract class AbstractParameters {
     public void randomize() {
         if (this instanceof ITunableParameters) {
             Random rnd = new Random(randomSeed);
-            HashMap<Integer, ArrayList<?>> searchSpace = ((ITunableParameters)this).getSearchSpace();
+            Map<Integer, ArrayList<?>> searchSpace = ((ITunableParameters)this).getSearchSpace();
             for (Map.Entry<Integer, ArrayList<?>> parameter: searchSpace.entrySet()) {
                 int nValues = parameter.getValue().size();
                 int randomChoice = rnd.nextInt(nValues);
@@ -72,7 +72,7 @@ public abstract class AbstractParameters {
      */
     public void reset() {
         if (this instanceof ITunableParameters) {
-            HashMap<Integer, Object> defaultValues = ((ITunableParameters)this).getDefaultParameterValues();
+            Map<Integer, Object> defaultValues = ((ITunableParameters)this).getDefaultParameterValues();
             ((ITunableParameters)this).setParameterValues(defaultValues);
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not resetting.");

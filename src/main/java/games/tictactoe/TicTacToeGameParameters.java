@@ -3,12 +3,9 @@ package games.tictactoe;
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class TicTacToeGameParameters extends AbstractParameters implements ITunableParameters {
+public class TicTacToeGameParameters extends AbstractParameters implements ITunableParameters<TicTacToeGame> {
     public int gridSize = 3;
 
     public TicTacToeGameParameters(long seed) {
@@ -37,7 +34,7 @@ public class TicTacToeGameParameters extends AbstractParameters implements ITuna
     }
 
     @Override
-    public HashMap<Integer, ArrayList<?>> getSearchSpace() {
+    public Map<Integer, ArrayList<?>> getSearchSpace() {
         return new HashMap<Integer, ArrayList<?>>() {{
             put(0, new ArrayList<Integer>() {{
                 add(3);
@@ -76,6 +73,11 @@ public class TicTacToeGameParameters extends AbstractParameters implements ITuna
     public String getParameterName(int parameterId) {
         if (parameterId == 0) return "Grid size";
         return null;
+    }
+
+    @Override
+    public TicTacToeGame instantiate() {
+        return new TicTacToeGame(this);
     }
 
 }

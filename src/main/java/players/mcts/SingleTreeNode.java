@@ -384,7 +384,7 @@ class SingleTreeNode
     }
 
     public String getTreeStatistics() {
-        StringBuilder retValue = new StringBuilder(player.name + "\n");
+        StringBuilder retValue = new StringBuilder(player.toString() + "\n");
         // We recurse from the root node, tracking the number of nodes at each depth
         int maxDepth = 100;
         int depthReached = 0;
@@ -427,7 +427,7 @@ class SingleTreeNode
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         retValue.append(String.format("%s, %d total visits, value %.2f, with %d children, depth %d, FMCalls %d: \n",
-                player.name, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
+                player, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
         List<SingleTreeNode> sortedChildren = Arrays.stream(children).sorted(
                 Comparator.comparingInt(o -> -o.nVisits)
         ).collect(Collectors.toList());

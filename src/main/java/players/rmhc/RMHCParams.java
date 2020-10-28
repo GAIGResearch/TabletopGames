@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class RMHCParams extends PlayerParameters implements ITunableParameters {
+public class RMHCParams extends PlayerParameters implements ITunableParameters<RMHCPlayer> {
     public int horizon = 10;
     public double discountFactor = 0.9;
 
@@ -70,5 +70,10 @@ public class RMHCParams extends PlayerParameters implements ITunableParameters {
             System.out.println("Unknown parameter " + parameterId);
             return null;
         }
+    }
+
+    @Override
+    public RMHCPlayer instantiate() {
+        return new RMHCPlayer(this);
     }
 }
