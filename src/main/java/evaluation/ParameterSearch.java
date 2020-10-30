@@ -1,20 +1,25 @@
 package evaluation;
 
 import core.AbstractPlayer;
+import core.interfaces.ITunableParameters;
 import evodef.*;
 import games.GameType;
 import ntbea.*;
+import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.mcts.MCTSSearchSpace;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.StatSummary;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static utilities.Utils.getArg;
+import static utilities.Utils.loadJSONFile;
 
 public class ParameterSearch {
 
@@ -25,7 +30,7 @@ public class ParameterSearch {
                         "\t<filename for searchSpace definition> or <ITunableParameters class>\n" +
                         "\t<number of NTBEA iterations>\n" +
                         "\t<game type> \n" +
-                "Then there are a number of optional arguments:\n" +
+                        "Then there are a number of optional arguments:\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\topponent=      The agent used as opponent. Default is a Random player. \n" +
@@ -43,7 +48,6 @@ public class ParameterSearch {
 
         if (argsList.size() < 3)
             throw new AssertionError("Must specify at least three parameters: searchSpace, NTBEA iterations, game");
-        String searchSpaceFile = args[0];
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
@@ -54,8 +58,28 @@ public class ParameterSearch {
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
 
-        // Create the Searchspace (MCTS only at the moment), and report some useful stuff to the console.
-        MCTSSearchSpace searchSpace = new MCTSSearchSpace(searchSpaceFile);
+        // Create the SearchSpace, and report some useful stuff to the console.
+        ITPSearchSpace searchSpace;
+        boolean fileExists = (new File(args[0])).exists();
+        try {
+            String className = args[0];
+            Constructor<ITunableParameters> constructor;
+            JSONObject json = null;
+            if (fileExists) {
+                // We import the file as a JSONObject
+                json = loadJSONFile(args[0]);
+                className = (String) json.get("class");
+            }
+            // we pull in the ITP referred to in the JSON file, or directly as args[0]
+            Class<ITunableParameters> itpClass = (Class<ITunableParameters>) Class.forName(className);
+            constructor = itpClass.getConstructor();
+            ITunableParameters itp = constructor.newInstance();
+            // We then initialise the ITPSearchSpace with this ITP and the JSON details
+            searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
+        } catch (Exception e) {
+            throw new AssertionError("Error loading ITunableParameters class in " + args[0]);
+        }
+
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
         int twoTupleSize = IntStream.range(0, searchSpace.nDims() - 1)
                 .map(i -> searchSpace.nValues(i) *
@@ -100,14 +124,19 @@ public class ParameterSearch {
 
         // Initialise the GameEvaluator that will do all the heavy lifting
 
-        // TODO: We need to add a constructor for Game to take AbstractParameters - and call that here!
+        // TODO: We need to add a constructor for Game to take AbstractParameters and nPlayers - and call that here!
         // We then create the game instance within SolutionEvaluator, as we may be tuning the game, so will need to create
         // it afresh for each iteration
+
+        // TODO: At some later point we also need to allow different evaluation functions to be used. Win/Lose / Score / Ordinal position
+        // and then for Game tuning other items that measure how close the result is, etc.
+
         SolutionEvaluator evaluator = new GameEvaluator(
-                game.createGameInstance(nPlayers, seed),
+                game,
                 searchSpace,
+                nPlayers,
                 opponents,
-                new Random(seed),
+                seed,
                 true
         );
 
@@ -134,14 +163,14 @@ public class ParameterSearch {
      * This just prints out some useful info on the NTBEA results. It lists the full underlying recommended
      * parameter settings, and the estimated mean score of these (with std error).
      *
-     * @param data The results of the NTBEA trials.
-     *             The Pair<Double, Double> is the mean and std error on the mean for the final recommendation,
-     *             as calculated from the post-NTBEA evaluation trials.
-     *             The double[] is the best sampled settings from the main NTBEA trials (that are then evaluated to get
-     *             a more accurate estimate of their utility).
+     * @param data        The results of the NTBEA trials.
+     *                    The Pair<Double, Double> is the mean and std error on the mean for the final recommendation,
+     *                    as calculated from the post-NTBEA evaluation trials.
+     *                    The double[] is the best sampled settings from the main NTBEA trials (that are then evaluated to get
+     *                    a more accurate estimate of their utility).
      * @param searchSpace The relevant searchSpace
      */
-    private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, MCTSSearchSpace searchSpace) {
+    private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace) {
         System.out.println(String.format("Recommended settings have score %.3g +/- %.3g:\t%s\n %s",
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(Collectors.joining(", ")),
@@ -165,19 +194,19 @@ public class ParameterSearch {
     /**
      * The workhorse.
      *
-     * @param evaluator         The SolutionEvaluator that provides a sample score for a set of parameters
-     * @param searchFramework   The NTBEA search framework. This maintains the model of parameter space
-     *                          and decides what settings to try next.
-     * @param totalRuns         The total number of NTBEA trials.
-     * @param reportEvery       This can be used to report interim progress (but only used if logResults=true)
-     *                          Will report current NTBEA stats after this number of trials.
-     * @param evalGames         The number of evaluation trials to run on the final NBEA recommendation.
-     *                          This is to get a good estimate of the true value of the recommendation.
-     * @param logResults        If true, then logs lots of data on the process. (Marginal statistics in each dimension
-     *                          and the Top 10 Tuples by trials.) This can be useful to visualise the parameter
-     *                          landscape beyond the simple final recommendation and get a feel for which dimensions
-     *                          really matter.
-     * @return                  This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
+     * @param evaluator       The SolutionEvaluator that provides a sample score for a set of parameters
+     * @param searchFramework The NTBEA search framework. This maintains the model of parameter space
+     *                        and decides what settings to try next.
+     * @param totalRuns       The total number of NTBEA trials.
+     * @param reportEvery     This can be used to report interim progress (but only used if logResults=true)
+     *                        Will report current NTBEA stats after this number of trials.
+     * @param evalGames       The number of evaluation trials to run on the final NBEA recommendation.
+     *                        This is to get a good estimate of the true value of the recommendation.
+     * @param logResults      If true, then logs lots of data on the process. (Marginal statistics in each dimension
+     *                        and the Top 10 Tuples by trials.) This can be useful to visualise the parameter
+     *                        landscape beyond the simple final recommendation and get a feel for which dimensions
+     *                        really matter.
+     * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
      */
     public static Pair<Double, Double> runNTBEA(SolutionEvaluator evaluator,
                                                 EvoAlg searchFramework,

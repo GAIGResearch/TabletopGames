@@ -1,6 +1,12 @@
 package utilities;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.awt.*;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -183,5 +189,15 @@ public abstract class Utils {
             }
         }
         return defaultValue;
+    }
+
+    public static JSONObject loadJSONFile(String fileName) {
+        try {
+            FileReader reader = new FileReader(fileName);
+            JSONParser parser = new JSONParser();
+            return (JSONObject) parser.parse(reader);
+        } catch (IOException | ParseException e) {
+            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage());
+        }
     }
 }

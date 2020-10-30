@@ -121,7 +121,7 @@ public enum GameType {
      * @param seed - seed for this game.
      * @return - instance of Game object; null if game not implemented.
      */
-    public Game createGameInstance(int nPlayers, long seed) {
+    public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
             if (VERBOSE) {
                 System.out.println("Unsupported number of players: " + nPlayers
@@ -130,7 +130,6 @@ public enum GameType {
             return null;
         }
 
-        AbstractParameters params;
         AbstractForwardModel forwardModel = null;
         AbstractGameState gameState = null;
 
@@ -399,7 +398,33 @@ public enum GameType {
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis());
+        return createGameInstance(nPlayers, System.currentTimeMillis(), defaultParams(System.currentTimeMillis()));
+    }
+    public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
+        return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
+    }
+
+    public AbstractParameters defaultParams(long seed) {
+        switch(this) {
+            case Pandemic:
+                return new PandemicParameters("data/pandemic/", seed);
+            case TicTacToe:
+                return new TicTacToeGameParameters(seed);
+            case ExplodingKittens:
+                return new ExplodingKittensParameters(seed);
+            case LoveLetter:
+                return new LoveLetterParameters(seed);
+            case Uno:
+                return new UnoGameParameters(seed);
+            case Virus:
+                return new VirusGameParameters(seed);
+            case ColtExpress:
+                return new ColtExpressParameters(seed);
+            case DotsAndBoxes:
+                return new DBParameters(seed);
+            default:
+                throw new AssertionError("No default Parameters specified for GameType : " + this.name());
+        }
     }
 
     @Override

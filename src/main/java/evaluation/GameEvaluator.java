@@ -3,11 +3,12 @@ package evaluation;
 import core.*;
 import core.interfaces.ITunableParameters;
 import evodef.*;
+import games.GameType;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.*;
+import static java.util.stream.Collectors.*;
 
 /**
  *  Game Evaluator is used for NTBEA optimisation of parameters. It implements the SolutionEvaluator interface.
@@ -17,9 +18,8 @@ import java.util.stream.IntStream;
  */
 public class GameEvaluator implements SolutionEvaluator {
 
-    Game game;
-    ITPSearchSpace<?> searchSpace;
-    ITunableParameters<?> tunableParameters;
+    GameType game;
+    ITPSearchSpace searchSpace;
     int nPlayers;
     List<AbstractPlayer> opponents;
     int nEvals = 0;
@@ -36,21 +36,21 @@ public class GameEvaluator implements SolutionEvaluator {
      *                  used in addition to the main agent being tested.
      *                  To use the same set of opponents in each game, this should contain N-1 AbstractPlayers, where
      *                  N is the number of players in the game.
-     * @param rnd       Random thingy.
+     * @param seed      Random seed to use
      * @param avoidOpponentDuplicates If this is true, then each individual in opponents will only be used once per game.
      *                                If this is false, then it is important not to use AbstractPlayers that maintain
      *                                any state, or that make any use of their playerId. (So RandomPlayer is fine.)
      *
      */
-    public <T> GameEvaluator(Game game, ITunableParameters<T> parametersToTune,
-                         List<AbstractPlayer> opponents, Random rnd,
-                         boolean avoidOpponentDuplicates) {
+    public <T> GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
+                             int nPlayers,
+                             List<AbstractPlayer> opponents, long seed,
+                             boolean avoidOpponentDuplicates) {
         this.game = game;
-        this.tunableParameters = parametersToTune;
-        this.searchSpace = new ITPSearchSpace<>(parametersToTune);
-        this.nPlayers = game.getGameState().getNPlayers();
+        this.searchSpace = parametersToTune;
+        this.nPlayers = nPlayers;
         this.opponents = opponents;
-        this.rnd = rnd;
+        this.rnd = new Random(seed);
         this.avoidOppDupes = avoidOpponentDuplicates;
         if (avoidOppDupes && opponents.size() < nPlayers - 1)
             throw new AssertionError("Insufficient Opponents to avoid duplicates");
@@ -91,6 +91,7 @@ public class GameEvaluator implements SolutionEvaluator {
 
         Object configuredThing = searchSpace.getAgent(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
+        boolean tuningGame = configuredThing instanceof Game;
 
         List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
 
@@ -100,7 +101,7 @@ public class GameEvaluator implements SolutionEvaluator {
 
         // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
         // if we allow duplicates, then we randomise them all independently
-        List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(Collectors.toList());
+        List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(toList());
         Collections.shuffle(opponentOrdering);
         int count = 0;
         for (int i = 0; i < nPlayers; i++) {
@@ -114,11 +115,12 @@ public class GameEvaluator implements SolutionEvaluator {
             }
         }
 
-        game.reset(allPlayers, rnd.nextLong());
+        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers);
+        newGame.reset(allPlayers, rnd.nextLong());
 
-        game.run();
+        newGame.run();
 
-        AbstractGameState finalState = game.getGameState();
+        AbstractGameState finalState = newGame.getGameState();
         finalScore += finalState.getScore(playerIndex);
 
         nEvals++;

@@ -12,24 +12,24 @@ import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 
 /**
  * Factory class for creating AbstractPlayers from JSON configuration file.
  * All three methods return an AbstractPlayer, with the configuration defined in a JSON file, a JSONObject
  * or a JSON-format String respectively.
- *
+ * <p>
  * The crucial property in the JSON file is algorithm:
- *      "algorithm" : "mcts"
- *
+ * "algorithm" : "mcts"
+ * <p>
  * This can take any value for which PlayerParams exists that can be instantiated from a JSON file, plus:
  * - "random"
  * - "osla"
  * - "heuristic"
- *
+ * <p>
  * "random" and "osla" require no further properties.
  * "heuristic" requires a further property of:
- *       "class" : "<fullNameOfClassThatImplementsAbstractPlayerWithANoArgumentConstructor>"
- *
+ * "class" : "<fullNameOfClassThatImplementsAbstractPlayerWithANoArgumentConstructor>"
  */
 public class PlayerFactory {
 
@@ -74,7 +74,9 @@ public class PlayerFactory {
                 if (className == null)
                     throw new AssertionError("No class name specified for heuristic agent");
                 try {
-                    return (AbstractPlayer) Class.forName(className).newInstance();
+                    Class<?> clazz = Class.forName(className);
+                    Constructor<?> constructor = clazz.getConstructor();
+                    return (AbstractPlayer) constructor.newInstance();
                 } catch (Exception e) {
                     System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
                     throw new AssertionError("Error loading Class");
@@ -89,9 +91,9 @@ public class PlayerFactory {
      * The input can be one of a few things:
      * 1) A JSON file - in which case this is used to generate a player using fromJSONFile()
      * 2) A simple String with any of:
-     *          "mcts", "rmhc", "osla", "random", "className"
-     *    The first four of these will return the appropriate player with default parameters
-     *    Anything else is interpreted as a class name that implements AbstractPlayer with a no-argument constructor
+     * "mcts", "rmhc", "osla", "random", "className"
+     * The first four of these will return the appropriate player with default parameters
+     * Anything else is interpreted as a class name that implements AbstractPlayer with a no-argument constructor
      *
      * @param data
      * @return
@@ -110,7 +112,7 @@ public class PlayerFactory {
         // if we get here then the file does not exist
 
         String input = data.toLowerCase();
-        switch (input)  {
+        switch (input) {
             case "random":
                 return new RandomPlayer();
             case "osla":
@@ -121,7 +123,9 @@ public class PlayerFactory {
                 return new RMHCPlayer(new RMHCParams(System.currentTimeMillis()));
             default:
                 try {
-                    return (AbstractPlayer) Class.forName(data).newInstance();
+                    Class<?> clazz = Class.forName(data);
+                    Constructor<?> constructor = clazz.getConstructor();
+                    return (AbstractPlayer) constructor.newInstance();
                 } catch (Exception e) {
                     System.out.println("Error loading heuristic class " + data + " : " + e.getMessage());
                     throw new AssertionError("Error loading Class");

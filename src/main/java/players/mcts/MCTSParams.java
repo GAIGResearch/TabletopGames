@@ -11,7 +11,7 @@ import players.simple.RandomPlayer;
 import java.io.FileReader;
 import java.util.*;
 
-public class MCTSParams extends PlayerParameters implements ITunableParameters<MCTSPlayer> {
+public class MCTSParams extends PlayerParameters implements ITunableParameters {
 
     public double K = Math.sqrt(2);
     public int rolloutLength = 10;

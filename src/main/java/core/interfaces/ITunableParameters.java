@@ -1,13 +1,14 @@
 package core.interfaces;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import players.PlayerConstants;
+import players.mcts.MCTSParams;
+
+import java.io.FileReader;
 import java.util.*;
 
-/**
- * @param <T> This should either be AbstractPlayer or Game (or a subclass thereof),
- *            as these are the two items that are 'Tunable'.
- *            (although this list may expand in the future)
- */
-public interface ITunableParameters<T> {
+public interface ITunableParameters {
 
     /**
      * Retrieve a mapping from int ID to list of possible values, one entry for each parameter.
@@ -102,7 +103,7 @@ public interface ITunableParameters<T> {
      * @param settings The precise settings to be used. The keys
      * @return Returns an instance of the Generic T created using the specified settings
      */
-    default T instantiate(Map<Integer, Object> settings) {
+    default Object instantiate(Map<Integer, Object> settings) {
         setParameterValues(settings);
         return instantiate();
     }
@@ -111,8 +112,75 @@ public interface ITunableParameters<T> {
      * @return Returns the Generic T corresponding to the current settings
      *         (will use all defaults if setParameterValue has not been called at all)
      */
-    T instantiate();
+    Object instantiate();
 
     String getJSONDescription();
+
+    /**
+     * Instantiate parameters from a JSON file
+     *
+     * @param filename The file with the JSON format data
+     * @return The full set of parameters extracted from the file
+     */
+    public static ITunableParameters fromJSONFile(String filename) {
+        try {
+            FileReader reader = new FileReader(filename);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
+            return fromJSON(rawData);
+        } catch (Exception e) {
+            throw new AssertionError(e.getMessage() + " : problem loading TunableParameters from file " + filename);
+        }
+    }
+
+    static ITunableParameters fromJSON(JSONObject rawData) {
+        long seed = getParam("seed", rawData, System.currentTimeMillis());
+        MCTSParams retValue = new MCTSParams(seed);
+
+        retValue.K = getParam("K", rawData, retValue.K);
+        retValue.rolloutLength = getParam("rolloutLength", rawData, retValue.rolloutLength);
+        retValue.rolloutsEnabled = getParam("rolloutsEnabled", rawData, retValue.rolloutsEnabled);
+        retValue.epsilon = getParam("epsilon", rawData, retValue.epsilon);
+        retValue.rolloutType = getParam("rolloutType", rawData, retValue.rolloutType);
+        retValue.budgetType = getParam("budgetType", rawData, retValue.budgetType);
+        int budget = getParam("budget", rawData, -1);
+        switch (retValue.budgetType) {
+            case PlayerConstants.BUDGET_TIME:
+                retValue.timeBudget = (budget == -1) ? retValue.timeBudget : budget;
+                break;
+            case PlayerConstants.BUDGET_ITERATIONS:
+                retValue.iterationsBudget = (budget == -1) ? retValue.iterationsBudget : budget;
+                break;
+            case PlayerConstants.BUDGET_FM_CALLS:
+                retValue.fmCallsBudget = (budget == -1) ? retValue.fmCallsBudget : budget;
+                break;
+            default:
+                throw new AssertionError("Unknown Budget Type " + retValue.budgetType);
+        }
+
+        // We should also check that there are no other properties in
+        for (Object key : rawData.keySet()) {
+            if (key instanceof String && !expectedKeys.contains(key)) {
+                System.out.println("Unexpected key in JSON for MCTSParameters : " + key);
+            }
+        }
+
+        return retValue;
+    }
+
+    /**
+     * @param name Name of the parameter. This will be validated as one of a possible set of expectedKeys
+     * @param json The JSONObject containing the data we want to extract the parameter from.
+     * @param defaultValue The default value to use for the parameter if we can't find it in json.
+     * @param <T> The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
+     * @return The value of the parameter found.
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T getParam(String name, JSONObject json, T defaultValue) {
+        Object data = json.getOrDefault(name, defaultValue);
+        if (data.getClass() == defaultValue.getClass())
+            return (T) data;
+        return defaultValue;
+    }
 
 }

@@ -5,7 +5,7 @@ import core.interfaces.ITunableParameters;
 
 import java.util.*;
 
-public class TicTacToeGameParameters extends AbstractParameters implements ITunableParameters<TicTacToeGame> {
+public class TicTacToeGameParameters extends AbstractParameters implements ITunableParameters {
     public int gridSize = 3;
 
     public TicTacToeGameParameters(long seed) {
