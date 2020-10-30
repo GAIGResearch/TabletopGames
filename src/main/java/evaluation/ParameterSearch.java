@@ -22,10 +22,10 @@ public class ParameterSearch {
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h")) System.out.println(
                 "The first three arguments must be \n" +
-                        "\t<filename for searchSpace definition>\n" +
+                        "\t<filename for searchSpace definition> or <ITunableParameters class>\n" +
                         "\t<number of NTBEA iterations>\n" +
                         "\t<game type> \n" +
-                        "Then there are a number of optional arguments:\n" +
+                "Then there are a number of optional arguments:\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\topponent=      The agent used as opponent. Default is a Random player. \n" +
