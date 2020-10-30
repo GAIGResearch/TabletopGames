@@ -1,12 +1,10 @@
 package evaluation;
 
 import core.*;
-import core.interfaces.ITunableParameters;
 import evodef.*;
 import games.GameType;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.*;
 import static java.util.stream.Collectors.*;
 
@@ -87,8 +85,6 @@ public class GameEvaluator implements SolutionEvaluator {
     @Override
     public double evaluate(double[] settings) {
 
-        double finalScore = 0.0;
-
         Object configuredThing = searchSpace.getAgent(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;
@@ -119,13 +115,10 @@ public class GameEvaluator implements SolutionEvaluator {
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
-
         AbstractGameState finalState = newGame.getGameState();
-        finalScore += finalState.getScore(playerIndex);
 
         nEvals++;
-
-        return finalScore;
+        return finalState.getScore(playerIndex);
     }
 
     /**

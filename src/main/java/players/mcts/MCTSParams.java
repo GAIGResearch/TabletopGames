@@ -1,7 +1,6 @@
 package players.mcts;
 
 import core.*;
-import core.interfaces.ITunableParameters;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import players.PlayerConstants;
@@ -11,7 +10,7 @@ import players.simple.RandomPlayer;
 import java.io.FileReader;
 import java.util.*;
 
-public class MCTSParams extends PlayerParameters implements ITunableParameters {
+public class MCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
     public int rolloutLength = 10;
