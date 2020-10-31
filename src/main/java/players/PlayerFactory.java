@@ -1,6 +1,7 @@
 package players;
 
 import core.AbstractPlayer;
+import evaluation.TunableParameters;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -66,7 +67,9 @@ public class PlayerFactory {
             case "osla":
                 return new OSLAPlayer();
             case "mcts":
-                return new MCTSPlayer(MCTSParams.fromJSON(json));
+                MCTSParams params = new MCTSParams(System.currentTimeMillis());
+                TunableParameters.loadFromJSON(params, json);
+                return new MCTSPlayer(params);
             case "rmhc":
                 throw new AssertionError("RMHC from JSON Not yet implemented");
             case "heuristic":

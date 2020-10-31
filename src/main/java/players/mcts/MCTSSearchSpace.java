@@ -1,3 +1,4 @@
+/*
 package players.mcts;
 
 import core.AbstractPlayer;
@@ -11,15 +12,18 @@ import java.io.FileReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+*/
 /**
  * Implements a SearchSpace for MCTSParams to enable optimisation
- */
+ *//*
+
 public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
 
     // baseParams defines the default values to use for all parameters that are not being searched currently
     private MCTSParams baseParams;
 
-    /**
+    */
+/**
      * Instantiates a SearchSpace from a json file.
      * An example such JSON File is:
      * {
@@ -37,7 +41,8 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
      * The other parameters (rolloutType and epsilon) have single values to be used in all cases.
      *
      * @param jsonFile
-     */
+     *//*
+
     public MCTSSearchSpace(String jsonFile) {
         super(convertToSuperFormat(jsonFile));
         baseParams = MCTSParams.fromJSONFile(jsonFile);
@@ -57,7 +62,8 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
         return retValue;
     }
 
-    /**
+    */
+/**
      * This generates an MCTSPlayer using the settings provided.
      * These settings must be indexed in exactly the same order as in the SearchSpace.
      *
@@ -65,7 +71,8 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
      *
      * @param settings
      * @return
-     */
+     *//*
+
     @Override
     public MCTSPlayer getAgent(@NotNull double[] settings) {
         Map<String, Object> settingsMap = settingsToMap(settings);
@@ -82,7 +89,8 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
         return new MCTSPlayer(params);
     }
 
-    /**
+    */
+/**
      * This helper method caters for the discrepancy between formats supported by the NTBEA library used and JSON.
      * The library expects a List<String> format, with each entry in the List being of the format:
      *   parameterName = value1, value2, value3 ...
@@ -91,7 +99,8 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
      * can be called.
      * @param jsonFile
      * @return
-     */
+     *//*
+
     private static List<String> convertToSuperFormat(String jsonFile) {
         List<String> retValue = new ArrayList<>();
         try {
@@ -123,3 +132,4 @@ public class MCTSSearchSpace extends AgentSearchSpace<AbstractPlayer> {
 
     }
 }
+*/

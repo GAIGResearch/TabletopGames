@@ -3,13 +3,12 @@ package evaluation;
 import core.interfaces.ITunableParameters;
 import evodef.AgentSearchSpace;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
-import players.mcts.MCTSParams;
 
 import java.io.FileReader;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.*;
 
 /**
@@ -28,8 +27,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      * @param tunableParameters The ITunableParameters object we want to optimise over.
      */
     public ITPSearchSpace(ITunableParameters tunableParameters) {
-        super(convertToSuperFormat(tunableParameters.getJSONDescription(), tunableParameters));
-        itp = tunableParameters;
+        super(convertToSuperFormatString(tunableParameters.getJSONDescription(), tunableParameters), tunableParameters.getParameterTypes());
     }
 
     /**
@@ -53,35 +51,30 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      *                          interface.
      */
     public ITPSearchSpace(ITunableParameters tunableParameters, String jsonFile) {
-        super(convertToSuperFormat(jsonFile, tunableParameters));
+        super(convertToSuperFormatFile(jsonFile, tunableParameters), tunableParameters.getParameterTypes());
         itp = tunableParameters;
-        validate();
     }
     public ITPSearchSpace(ITunableParameters tunableParameters, JSONObject json) {
-        super(convertToSuperFormat(json, tunableParameters));
+        super(convertToSuperFormatJSON(json, tunableParameters), tunableParameters.getParameterTypes());
         itp = tunableParameters;
-        validate();
-    }
-
-    @NotNull
-    @Override
-    public Map<String, Class<?>> getTypes() {
-        // TODO: Fill in
-        return null;
     }
 
     @Override
-    public Object getAgent(@NotNull double[] doubles) {
-        // TODO: Fill in
-        return null;
+    public Object getAgent(@NotNull double[] settings) {
+        throw new AssertionError("This shouldn't ever be called...note to self to clean up the NTBEA library");
     }
 
-    private void validate() {
-        // TODO: add validation checks between this.itp and this.getSearchDimensions()
-        // TODO: If there are any parameters not defined in this.getSearchDimensions(), then use the default from itp
+    public Object getAgent(int[] settings) {
+        // we first need to update itp with the specified parameters, and then instantiate
+        for (int i = 0; i < settings.length; i++) {
+            String pName = itp.getParameterName(i);
+            Object value = itp.getPossibleValues(pName).get(settings[i]);
+            itp.setParameterValue(pName, value);
+        }
+        return itp.instantiate();
     }
 
-    private static List<String> convertToSuperFormat(JSONObject json, ITunableParameters itp) {
+    private static List<String> convertToSuperFormatJSON(JSONObject json, ITunableParameters itp) {
         List<String> retValue = new ArrayList<>();
         for (Object key : json.keySet()) {
             if (key instanceof String) {
@@ -102,12 +95,24 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         return retValue;
     }
 
-    private static List<String> convertToSuperFormat(String jsonFile, ITunableParameters itp) {
+    private static List<String> convertToSuperFormatString(String json, ITunableParameters itp) {
+        try {
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(json);
+            return convertToSuperFormatJSON(rawData, itp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError(e.getClass() + " : " + e.getMessage() + " : problem loading ITPSearchSpace from String " + json);
+        }
+
+    }
+
+    private static List<String> convertToSuperFormatFile(String jsonFile, ITunableParameters itp) {
         try {
             FileReader reader = new FileReader(jsonFile);
             JSONParser jsonParser = new JSONParser();
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            return convertToSuperFormat(rawData, itp);
+            return convertToSuperFormatJSON(rawData, itp);
         } catch (Exception e) {
             e.printStackTrace();
             throw new AssertionError(e.getMessage() + " : problem loading ITPSearchSpace from file " + jsonFile);

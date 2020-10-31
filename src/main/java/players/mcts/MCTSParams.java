@@ -1,13 +1,8 @@
 package players.mcts;
 
 import core.*;
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import players.PlayerConstants;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
-
-import java.io.FileReader;
 import java.util.*;
 
 public class MCTSParams extends PlayerParameters {
@@ -17,7 +12,18 @@ public class MCTSParams extends PlayerParameters {
     public boolean rolloutsEnabled = false;
     public double epsilon = 1e-6;
     public String rolloutType = "Random";
+    public final Map<String, Class<?>> types = new HashMap<>();
+    {
+       types.put("K", double.class);
+       types.put("rolloutLength", int.class);
+       types.put("rolloutsEnabled", boolean.class);
+       types.put("epsilon", double.class);
+       types.put("rolloutType", String.class);
+    }
 
+    public MCTSParams() {
+        this(System.currentTimeMillis());
+    }
     public MCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -25,6 +31,16 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutsEnabled", false, Arrays.asList(false, true));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", "Random");
+    }
+
+    /**
+     * Names all parameters for printing purposes.
+     *
+     * @return mapping from int ID of parameter to parameter name.
+     */
+    @Override
+    public Map<String, Class<?>> getParameterTypes() {
+        return types;
     }
 
     @Override

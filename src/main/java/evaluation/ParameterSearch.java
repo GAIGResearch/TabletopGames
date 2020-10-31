@@ -7,7 +7,6 @@ import games.GameType;
 import ntbea.*;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
-import players.mcts.MCTSSearchSpace;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.StatSummary;
@@ -77,7 +76,8 @@ public class ParameterSearch {
             // We then initialise the ITPSearchSpace with this ITP and the JSON details
             searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
         } catch (Exception e) {
-            throw new AssertionError("Error loading ITunableParameters class in " + args[0]);
+            e.printStackTrace();
+            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "Error loading ITunableParameters class in " + args[0]);
         }
 
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));

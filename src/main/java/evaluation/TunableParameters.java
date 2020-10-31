@@ -29,6 +29,12 @@ import static java.util.stream.Collectors.*;
  */
 public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
 
+    /**
+     * Zero-argument constructor used for auto-tuning
+     */
+    public TunableParameters() {
+        this(System.currentTimeMillis());
+    }
     public TunableParameters(long seed) {
         super(seed);
     }
@@ -199,7 +205,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
             loadFromJSON(params, rawData);
         } catch (Exception e) {
-            throw new AssertionError(e.getMessage() + " : problem loading TunableParameters from file " + filename);
+            throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
         }
     }
 
@@ -207,16 +213,18 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * Instantiate paramaters from a JSONObject
      */
     public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
-        for (String pName : params.parameterNames) {
-            Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName));
-            Class<?> clazz = params.parameterTypes.get(pName);
-            if (pValue instanceof List) {
-                // Not sure if this casting is helpful or not...
-                params.addTunableParameter(pName, clazz.cast(params.getDefaultParameterValue(pName)),
-                        ((List<?>) pValue).stream().map(clazz::cast).collect(toList()));
+        List<String> allParams = params.getParameterNames();
+        for (String pName : allParams) {
+     //       Class<?> clazz = params.parameterTypes.get(pName);
+            if (isParamSingular(pName, rawData)) {
+                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName));
+                params.addTunableParameter(pName,pValue);
             } else {
-                params.addTunableParameter(pName, clazz.cast(params.getDefaultParameterValue(pName)));
+                Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
+                params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
+                        new ArrayList<>(((List<?>) pValue)));
             }
+
         }
 /*        int budget = getParam("budget", rawData, -1);
         switch (retValue.budgetType) {
@@ -234,8 +242,10 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         }*/
 
         // We should also check that there are no other properties in there
+        allParams.add("algorithm");
+        allParams.add("parametersType");
         for (Object key : rawData.keySet()) {
-            if (key instanceof String && !params.parameterNames.contains(key)) {
+            if (key instanceof String && !allParams.contains(key)) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
             }
         }
@@ -254,6 +264,15 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
         return defaultValue;
+    }
+    private static boolean isParamSingular(String name, JSONObject json) {
+        return !(json.get(name) instanceof List);
+    }
+    private static <T> List<T> getParamList(String name, JSONObject json, T defaultValue) {
+        Object data = json.getOrDefault(name, defaultValue);
+        if (!(data instanceof List))
+            throw new AssertionError("JSON does not contain an Array as expected for " + name);
+        return (List<T>) data;
     }
 
     /**

@@ -70,7 +70,40 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     @Override
     public double evaluate(int[] settings) {
-        return evaluate(searchSpace.convertSettings(settings));
+        Object configuredThing = searchSpace.getAgent(settings);
+        boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
+        boolean tuningGame = configuredThing instanceof Game;
+
+        List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
+
+        // We can reduce variance here by cycling the playerIndex on each iteration
+        // If we're not tuning the player, then setting index to -99 means we just use the provided opponents list
+        int playerIndex = tuningPlayer ? nEvals % nPlayers : -99;
+
+        // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
+        // if we allow duplicates, then we randomise them all independently
+        List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(toList());
+        Collections.shuffle(opponentOrdering);
+        int count = 0;
+        for (int i = 0; i < nPlayers; i++) {
+            if (i != playerIndex) {
+                int oppIndex = (avoidOppDupes) ? count++ : rnd.nextInt(opponents.size());
+                if (count >= opponents.size())
+                    throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
+                allPlayers.add(opponents.get(oppIndex));
+            } else {
+                allPlayers.add((AbstractPlayer) configuredThing);
+            }
+        }
+
+        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers);
+        newGame.reset(allPlayers, rnd.nextLong());
+
+        newGame.run();
+        AbstractGameState finalState = newGame.getGameState();
+
+        nEvals++;
+        return finalState.getScore(playerIndex);
     }
 
     /**

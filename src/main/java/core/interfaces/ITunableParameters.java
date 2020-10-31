@@ -103,4 +103,10 @@ public interface ITunableParameters {
         return names;
     }
 
+    /**
+     * Names all parameters for printing purposes.
+     * @return mapping from int ID of parameter to parameter name.
+     */
+    Map<String, Class<?>> getParameterTypes();
+
 }
