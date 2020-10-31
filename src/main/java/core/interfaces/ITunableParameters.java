@@ -72,7 +72,7 @@ public interface ITunableParameters {
      * @param values - mapping from int ID of parameter to its new value.
      *                 or mapping from the name of the parameter as a String
      */
-    default void setParameterValues(Map<Object, Object> values) {
+    default void setParameterValues(Map<?, Object> values) {
         for (Object descriptor: values.keySet()) {
             String name = (descriptor instanceof String) ? (String) descriptor : getParameterName((Integer) descriptor);
             setParameterValue(name, values.get(descriptor));

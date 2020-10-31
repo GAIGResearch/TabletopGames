@@ -55,32 +55,100 @@ public enum GameType {
      * Add here all games, planned or implemented.
      */
     Pandemic(2, 4,
-            new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
-            new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
-            add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }}),
-    TicTacToe (2, 2,
-            new ArrayList<Category>() {{ add(Simple); add(Abstract); }},
-            new ArrayList<Mechanic>() {{ add(PatternBuilding); }}),
-    ExplodingKittens (2, 5,
-            new ArrayList<Category>() {{ add(Strategy); add(Animals); add(Cards); add(ComicBook); add(Humour); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(HotPotato); add(PlayerElimination); add(PushYourLuck);
-            add(SetCollection); add(TakeThat); }}),
-    LoveLetter (2, 4,
-            new ArrayList<Category>() {{ add(Cards); add(Deduction); add(Renaissance); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(PlayerElimination); }}),
-    Uno (2, 10,
-            new ArrayList<Category>() {{ add(Cards); add(ComicBook); add(Number); add(MoviesTVRadio); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(LoseATurn); add(TakeThat); }}),
-    Virus (2, 6,
-            new ArrayList<Category>() {{ add(Cards); add(Medical); }},
-            new ArrayList<Mechanic>() {{ add(CardDrafting); add(SetCollection); add(TakeThat); }}),
-    ColtExpress (2, 6,
-            new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
-            new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Medical);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(ActionPoints);
+                add(Cooperative);
+                add(HandManagement);
+                add(PointToPointMovement);
+                add(SetCollection);
+                add(Trading);
+                add(VariablePlayerPowers);
+            }}),
+    TicTacToe(2, 2,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PatternBuilding);
+            }}),
+    ExplodingKittens(2, 5,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Animals);
+                add(Cards);
+                add(ComicBook);
+                add(Humour);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(HotPotato);
+                add(PlayerElimination);
+                add(PushYourLuck);
+                add(SetCollection);
+                add(TakeThat);
+            }}),
+    LoveLetter(2, 4,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Deduction);
+                add(Renaissance);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(PlayerElimination);
+            }}),
+    Uno(2, 10,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(ComicBook);
+                add(Number);
+                add(MoviesTVRadio);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(LoseATurn);
+                add(TakeThat);
+            }}),
+    Virus(2, 6,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Medical);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(CardDrafting);
+                add(SetCollection);
+                add(TakeThat);
+            }}),
+    ColtExpress(2, 6,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(AmericanWest);
+                add(Fighting);
+                add(Trains);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(ActionQueue);
+                add(HandManagement);
+                add(Memory);
+                add(ProgrammedEvent);
+                add(SimultaneousActionSelection);
+                add(TakeThat);
+                add(VariablePlayerPowers);
+            }}),
     DotsAndBoxes(2, 6,
-            new ArrayList<Category>(){{ add(Simple); add(Abstract); add(TerritoryBuilding); }},
-            new ArrayList<Mechanic>(){{ add(Enclosure); }});
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+                add(TerritoryBuilding);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Enclosure);
+            }});
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
@@ -88,6 +156,7 @@ public enum GameType {
     /**
      * Converts a given string to the enum type corresponding to the game.
      * Add here all games, planned or implemented.
+     *
      * @param game - string of a game type
      * @return - GameType corresponding to String
      */
@@ -117,8 +186,9 @@ public enum GameType {
     /**
      * Creates an instance of the given game type, with a specific number of players and game seed.
      * Add here all games implemented.
+     *
      * @param nPlayers - number of players taking part in the game, used for initialisation.
-     * @param seed - seed for this game.
+     * @param seed     - seed for this game.
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
@@ -133,7 +203,7 @@ public enum GameType {
         AbstractForwardModel forwardModel = null;
         AbstractGameState gameState = null;
 
-        switch(this) {
+        switch (this) {
             case Pandemic:
                 params = new PandemicParameters("data/pandemic/", seed);
                 forwardModel = new PandemicForwardModel(params, nPlayers);
@@ -180,8 +250,9 @@ public enum GameType {
 
     /**
      * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
+     *
      * @param game - game to create a GUI for.
-     * @param ac - ActionController object allowing for user interaction with the GUI.
+     * @param ac   - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
     public AbstractGUI createGUI(Game game, ActionController ac) {
@@ -199,7 +270,7 @@ public enum GameType {
             }
         }
 
-        switch(this) {
+        switch (this) {
             case Pandemic:
                 gui = new PandemicGUI(game, ac);
                 break;
@@ -269,11 +340,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games within this category.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (gt.getCategories().contains(this)) {
                     games.add(gt);
                 }
@@ -283,11 +355,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games that are NOT within this category.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGamesExcluding() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (!gt.getCategories().contains(this)) {
                     games.add(gt);
                 }
@@ -330,11 +403,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games using this mechanic.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (gt.getMechanics().contains(this)) {
                     games.add(gt);
                 }
@@ -344,11 +418,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games that do NOT use this mechanic.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGamesExcluding() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (!gt.getMechanics().contains(this)) {
                     games.add(gt);
                 }
@@ -368,25 +443,30 @@ public enum GameType {
     public int getMinPlayers() {
         return minPlayers;
     }
+
     public int getMaxPlayers() {
         return maxPlayers;
     }
+
     public ArrayList<Category> getCategories() {
         return categories;
     }
+
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
+
     public static int getMinPlayersAllGames() {
         int min = Integer.MAX_VALUE;
-        for (GameType gt: GameType.values()) {
+        for (GameType gt : GameType.values()) {
             if (gt.minPlayers < min) min = gt.minPlayers;
         }
         return min;
     }
+
     public static int getMaxPlayersAllGames() {
         int max = Integer.MIN_VALUE;
-        for (GameType gt: GameType.values()) {
+        for (GameType gt : GameType.values()) {
             if (gt.minPlayers > max) max = gt.minPlayers;
         }
         return max;
@@ -394,18 +474,24 @@ public enum GameType {
 
     /**
      * Creates an instance of the given game type with nPlayers number of players and a new random seed.
+     *
      * @param nPlayers - number of players for the game.
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
         return createGameInstance(nPlayers, System.currentTimeMillis(), defaultParams(System.currentTimeMillis()));
     }
+
+    public Game createGameInstance(int nPlayers, long seed) {
+        return createGameInstance(nPlayers, seed, defaultParams(seed));
+    }
+
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
         return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
     }
 
     public AbstractParameters defaultParams(long seed) {
-        switch(this) {
+        switch (this) {
             case Pandemic:
                 return new PandemicParameters("data/pandemic/", seed);
             case TicTacToe:
@@ -433,21 +519,21 @@ public enum GameType {
         AbstractGUI g = createGUI(null, null);
         boolean gui = g != null;
         boolean prototypeGUI = g instanceof PrototypeGUI;
-        return (gui? prototypeGUI? ANSI_CYAN : ANSI_BLUE : implemented? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
+        return (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : implemented ? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
                 "\n\tminPlayers = " + minPlayers +
                 "\n\tmaxPlayers = " + maxPlayers +
                 "\n\tcategories = " + categories +
                 "\n\tmechanics = " + mechanics +
-                (implemented? ANSI_GREEN: ANSI_RED) +
+                (implemented ? ANSI_GREEN : ANSI_RED) +
                 "\n\timplemented = " + implemented + ANSI_RESET +
-                (gui? prototypeGUI? ANSI_CYAN : ANSI_BLUE : ANSI_RED) +
+                (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : ANSI_RED) +
                 "\n\tGUI = " + gui + ANSI_RESET +
                 "\n}\n";
     }
 
     public static void main(String[] args) {
         System.out.println("Games available in the framework: \n");
-        for (GameType gt: GameType.values()) {
+        for (GameType gt : GameType.values()) {
             System.out.println(gt.toString());
         }
     }

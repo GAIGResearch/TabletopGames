@@ -2,6 +2,8 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
+import players.PlayerConstants;
+import players.PlayerParameters;
 import utilities.ElapsedCpuTimer;
 
 import java.util.*;
@@ -76,7 +78,7 @@ class SingleTreeNode
         double avgTimeTaken;
         double acumTimeTaken = 0;
         long remaining;
-        int remainingLimit = 5;
+        int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if(player.params.budgetType == BUDGET_TIME) {
             elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
@@ -100,18 +102,19 @@ class SingleTreeNode
             numIters++;
 
             // Check stopping condition
-            if(player.params.budgetType == BUDGET_TIME) {
+            PlayerConstants budgetType = player.params.budgetType;
+            if(budgetType == BUDGET_TIME) {
                 // Time budget
                 acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
                 avgTimeTaken  = acumTimeTaken/numIters;
                 remaining = elapsedTimer.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
-            } else if(player.params.budgetType == BUDGET_ITERATIONS) {
+            } else if(budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= player.params.iterationsBudget;
-            } else if(player.params.budgetType == BUDGET_FM_CALLS) {
+                stop = numIters >=  player.params.iterationsBudget;
+            } else if(budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = fmCallsCount > player.params.fmCallsBudget;
+                stop = fmCallsCount >  player.params.fmCallsBudget;
             }
         }
     }
