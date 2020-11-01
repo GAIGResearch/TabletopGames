@@ -26,7 +26,7 @@ public class ParameterSearch {
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h")) System.out.println(
                 "The first three arguments must be \n" +
-                        "\t<filename for searchSpace definition> or <ITunableParameters class>\n" +
+                        "\t<filename for searchSpace definition> or <ITunableParameters classname>\n" +
                         "\t<number of NTBEA iterations>\n" +
                         "\t<game type> \n" +
                         "Then there are a number of optional arguments:\n" +
@@ -46,7 +46,7 @@ public class ParameterSearch {
         );
 
         if (argsList.size() < 3)
-            throw new AssertionError("Must specify at least three parameters: searchSpace, NTBEA iterations, game");
+            throw new AssertionError("Must specify at least three parameters: searchSpace/ITunableParameters, NTBEA iterations, game");
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
@@ -69,7 +69,7 @@ public class ParameterSearch {
                 json = loadJSONFile(args[0]);
                 className = (String) json.get("class");
                 if (className == null)
-                    throw new AssertionError("No class property found in JSON file.");
+                    throw new AssertionError("No class property found in JSON file. This is required to specify the ITunableParameters class that the file complements");
             }
             // we pull in the ITP referred to in the JSON file, or directly as args[0]
             Class<ITunableParameters> itpClass = (Class<ITunableParameters>) Class.forName(className);

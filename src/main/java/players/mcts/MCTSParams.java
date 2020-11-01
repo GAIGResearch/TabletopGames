@@ -5,13 +5,15 @@ import players.PlayerParameters;
 import players.simple.RandomPlayer;
 import java.util.*;
 
+import static players.mcts.MCTSEnums.strategies.RANDOM;
+
 public class MCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
     public int rolloutLength = 10;
     public boolean rolloutsEnabled = false;
     public double epsilon = 1e-6;
-    public String rolloutType = "Random";
+    public MCTSEnums.strategies rolloutType = RANDOM;           ;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -22,7 +24,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
         addTunableParameter("rolloutsEnabled", false, Arrays.asList(false, true));
         addTunableParameter("epsilon", 1e-6);
-        addTunableParameter("rolloutType", "Random");
+        addTunableParameter("rolloutType", RANDOM);
     }
 
     @Override
@@ -32,7 +34,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutLength = (int) getParameterValue("rolloutLength");
         rolloutsEnabled = (boolean) getParameterValue("rolloutsEnabled");
         epsilon = (double) getParameterValue("epsilon");
-        rolloutType = (String) getParameterValue("rolloutType");
+        rolloutType = (MCTSEnums.strategies) getParameterValue("rolloutType");
     }
 
     @Override
