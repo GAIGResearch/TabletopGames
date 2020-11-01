@@ -19,7 +19,7 @@ public abstract class PlayerParameters extends TunableParameters {
 
     public PlayerParameters(long seed) {
         super(seed);
- //       addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
+        addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
         addTunableParameter("iterationsBudget", 200);
         addTunableParameter("fmCallsBudget", 4000);
         addTunableParameter("timeBudget", 100);
@@ -28,7 +28,11 @@ public abstract class PlayerParameters extends TunableParameters {
 
     @Override
     public void _reset() {
-
+        iterationsBudget = (int) getParameterValue("iterationsBudget");
+        fmCallsBudget = (int) getParameterValue("fmCallsBudget");
+        timeBudget = (int) getParameterValue("timeBudget");
+        breakMS = (int) getParameterValue("breakMS");
+        budgetType = (PlayerConstants) getParameterValue("budgetType");
     }
 
     protected boolean _equals(Object o) {

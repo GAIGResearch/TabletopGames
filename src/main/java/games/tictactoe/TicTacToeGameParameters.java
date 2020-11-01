@@ -7,25 +7,21 @@ import java.util.*;
 
 public class TicTacToeGameParameters extends TunableParameters {
 
-    public static final String gridSize = "gridSize";
-    public static final Map<String, Class<?>> types = new HashMap<>();
+    public int gridSize = 3;
 
     public TicTacToeGameParameters(long seed) {
         super(seed);
-        setParameterValue(gridSize, 3);
-        types.put(gridSize, int.class);
+        addTunableParameter("gridSize", 3, Arrays.asList(3, 4, 5, 6));
     }
 
     @Override
     public void _reset() {
-        // do nothing here as we use getParameter to access gridSize
+        gridSize = (int) getParameterValue("gridSize");
     }
 
     @Override
     protected AbstractParameters _copy() {
-        TicTacToeGameParameters tttgp = new TicTacToeGameParameters(System.currentTimeMillis());
-        tttgp.setParameterValue(gridSize, getParameterValue(gridSize));
-        return tttgp;
+        return new TicTacToeGameParameters(System.currentTimeMillis());
     }
 
     @Override
@@ -45,15 +41,6 @@ public class TicTacToeGameParameters extends TunableParameters {
     public String getParameterName(int parameterId) {
         if (parameterId == 0) return "Grid size";
         return null;
-    }
-
-    /**
-     * Retrieve the types of all parameters.
-     *
-     */
-    @Override
-    public Map<String, Class<?>> getParameterTypes() {
-        return types;
     }
 
     @Override

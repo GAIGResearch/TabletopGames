@@ -2,23 +2,22 @@ package evaluation;
 
 import core.interfaces.ITunableParameters;
 import evodef.AgentSearchSpace;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 
 import java.io.FileReader;
 import java.util.*;
-import java.util.function.Function;
+import static java.util.stream.Collectors.*;
 import java.util.stream.*;
 
 /**
  * This is a wrapper around ITunableParameters<T> (the TAG standard) to implement the AgentSearchSpace
  * interface used by the NTBEA library.
- *
  */
 public class ITPSearchSpace extends AgentSearchSpace<Object> {
 
     ITunableParameters itp;
+    Map<Integer, String> tunedIndexToParameterName = new HashMap<>();
 
     /**
      * Constructor of a SearchSpace to use all the default values defined by an
@@ -28,6 +27,12 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      */
     public ITPSearchSpace(ITunableParameters tunableParameters) {
         super(convertToSuperFormatString(tunableParameters.getJSONDescription(), tunableParameters), tunableParameters.getParameterTypes());
+        initialiseITP(tunableParameters);
+    }
+    private void initialiseITP(ITunableParameters tunableParameters) {
+        itp = tunableParameters;
+        tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
+                .collect(toMap(i -> i, i -> getSearchKeys().get(i)));
     }
 
     /**
@@ -52,23 +57,20 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      */
     public ITPSearchSpace(ITunableParameters tunableParameters, String jsonFile) {
         super(convertToSuperFormatFile(jsonFile, tunableParameters), tunableParameters.getParameterTypes());
-        itp = tunableParameters;
-    }
-    public ITPSearchSpace(ITunableParameters tunableParameters, JSONObject json) {
-        super(convertToSuperFormatJSON(json, tunableParameters), tunableParameters.getParameterTypes());
-        itp = tunableParameters;
+        initialiseITP(tunableParameters);
     }
 
-    @Override
-    public Object getAgent(@NotNull double[] settings) {
-        throw new AssertionError("This shouldn't ever be called...note to self to clean up the NTBEA library");
+    public ITPSearchSpace(ITunableParameters tunableParameters, JSONObject json) {
+        super(convertToSuperFormatJSON(json, tunableParameters), tunableParameters.getParameterTypes());
+        initialiseITP(tunableParameters);
     }
 
     public Object getAgent(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         for (int i = 0; i < settings.length; i++) {
-            String pName = itp.getParameterName(i);
-            Object value = itp.getPossibleValues(pName).get(settings[i]);
+            String pName = tunedIndexToParameterName.get(i);
+            Object value = value(i, settings[i]);
+         //   Object value = itp.getPossibleValues(pName).get(settings[i]);
             itp.setParameterValue(pName, value);
         }
         return itp.instantiate();
@@ -86,6 +88,11 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
                         retValue.add(results);
+                    } else {
+                        // this defines a default we should be using in itp
+                        if (data == null)
+                            throw new AssertionError("We have a problem with null data in JSON file using key " + key);
+                        itp.setParameterValue((String) key, data);
                     }
                 } else {
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + key);

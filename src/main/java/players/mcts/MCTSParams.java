@@ -12,14 +12,6 @@ public class MCTSParams extends PlayerParameters {
     public boolean rolloutsEnabled = false;
     public double epsilon = 1e-6;
     public String rolloutType = "Random";
-    public final Map<String, Class<?>> types = new HashMap<>();
-    {
-       types.put("K", double.class);
-       types.put("rolloutLength", int.class);
-       types.put("rolloutsEnabled", boolean.class);
-       types.put("epsilon", double.class);
-       types.put("rolloutType", String.class);
-    }
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -33,24 +25,14 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutType", "Random");
     }
 
-    /**
-     * Names all parameters for printing purposes.
-     *
-     * @return mapping from int ID of parameter to parameter name.
-     */
-    @Override
-    public Map<String, Class<?>> getParameterTypes() {
-        return types;
-    }
-
     @Override
     public void _reset() {
+        super._reset();
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
         rolloutsEnabled = (boolean) getParameterValue("rolloutsEnabled");
         epsilon = (double) getParameterValue("epsilon");
         rolloutType = (String) getParameterValue("rolloutType");
-        super._reset();
     }
 
     @Override

@@ -68,6 +68,8 @@ public class ParameterSearch {
                 // We import the file as a JSONObject
                 json = loadJSONFile(args[0]);
                 className = (String) json.get("class");
+                if (className == null)
+                    throw new AssertionError("No class property found in JSON file.");
             }
             // we pull in the ITP referred to in the JSON file, or directly as args[0]
             Class<ITunableParameters> itpClass = (Class<ITunableParameters>) Class.forName(className);

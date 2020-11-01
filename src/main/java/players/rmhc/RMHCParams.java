@@ -8,11 +8,6 @@ import java.util.*;
 public class RMHCParams extends PlayerParameters {
     public int horizon = 10;
     public double discountFactor = 0.9;
-    public final Map<String, Class<?>> types = new HashMap<>();
-    {
-        types.put("horizon", int.class);
-        types.put("discountFactor", double.class);
-    }
 
     public RMHCParams() {
         this(System.currentTimeMillis());
@@ -26,13 +21,9 @@ public class RMHCParams extends PlayerParameters {
 
     @Override
     public void _reset() {
+        super._reset();
         horizon = (int) getParameterValue("horizon");
         discountFactor = (double) getParameterValue("discountFactor");
-    }
-
-    @Override
-    public Map<String, Class<?>> getParameterTypes() {
-        return types;
     }
 
     @Override
