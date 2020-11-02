@@ -124,15 +124,10 @@ public class ParameterSearch {
             opponents.add(opponent);
         }
 
-        // Initialise the GameEvaluator that will do all the heavy lifting
-
-        // TODO: We need to add a constructor for Game to take AbstractParameters and nPlayers - and call that here!
-        // We then create the game instance within SolutionEvaluator, as we may be tuning the game, so will need to create
-        // it afresh for each iteration
-
         // TODO: At some later point we also need to allow different evaluation functions to be used. Win/Lose / Score / Ordinal position
         // and then for Game tuning other items that measure how close the result is, etc.
 
+        // Initialise the GameEvaluator that will do all the heavy lifting
         SolutionEvaluator evaluator = new GameEvaluator(
                 game,
                 searchSpace,
