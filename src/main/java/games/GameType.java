@@ -189,6 +189,7 @@ public enum GameType {
      *
      * @param nPlayers - number of players taking part in the game, used for initialisation.
      * @param seed     - seed for this game.
+     * @param params   - Parameters to use for the game. If not specified then we use the default.
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
@@ -200,52 +201,71 @@ public enum GameType {
             return null;
         }
 
-        AbstractForwardModel forwardModel = null;
-        AbstractGameState gameState = null;
+        params = (params == null) ? getDefaultParams(seed) : params;
+        AbstractForwardModel forwardModel;
+        AbstractGameState gameState;
 
         switch (this) {
             case Pandemic:
-                params = new PandemicParameters("data/pandemic/", seed);
                 forwardModel = new PandemicForwardModel(params, nPlayers);
                 gameState = new PandemicGameState(params, nPlayers);
                 break;
             case TicTacToe:
-                params = new TicTacToeGameParameters(seed);
                 forwardModel = new TicTacToeForwardModel();
                 gameState = new TicTacToeGameState(params, nPlayers);
                 break;
             case ExplodingKittens:
-                params = new ExplodingKittensParameters(seed);
                 forwardModel = new ExplodingKittensForwardModel();
                 gameState = new ExplodingKittensGameState(params, nPlayers);
                 break;
             case LoveLetter:
-                params = new LoveLetterParameters(seed);
                 forwardModel = new LoveLetterForwardModel();
                 gameState = new LoveLetterGameState(params, nPlayers);
                 break;
             case Uno:
-                params = new UnoGameParameters(seed);
                 forwardModel = new UnoForwardModel();
                 gameState = new UnoGameState(params, nPlayers);
                 break;
             case Virus:
-                params = new VirusGameParameters(seed);
                 forwardModel = new VirusForwardModel();
                 gameState = new VirusGameState(params, nPlayers);
                 break;
             case ColtExpress:
-                params = new ColtExpressParameters(seed);
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
                 break;
             case DotsAndBoxes:
-                params = new DBParameters(seed);
                 forwardModel = new DBForwardModel();
                 gameState = new DBGameState(params, nPlayers);
+                break;
+            default:
+                throw new AssertionError("Game not yet supported : " + this);
         }
 
         return new Game(this, forwardModel, gameState);
+    }
+
+    public AbstractParameters getDefaultParams(long seed) {
+        switch (this) {
+            case Pandemic:
+                return new PandemicParameters("data/pandemic/", seed);
+            case TicTacToe:
+                return new TicTacToeGameParameters(seed);
+            case ExplodingKittens:
+                return new ExplodingKittensParameters(seed);
+            case LoveLetter:
+                return new LoveLetterParameters(seed);
+            case Uno:
+                return new UnoGameParameters(seed);
+            case Virus:
+                return new VirusGameParameters(seed);
+            case ColtExpress:
+                return new ColtExpressParameters(seed);
+            case DotsAndBoxes:
+                return new DBParameters(seed);
+            default:
+                throw new AssertionError("No default Parameters specified for Game " + this);
+        }
     }
 
     /**
