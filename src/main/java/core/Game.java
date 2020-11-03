@@ -121,22 +121,7 @@ public class Game {
      */
     public final void reset(List<AbstractPlayer> players) {
         gameState.reset();
-        forwardModel.abstractSetup(gameState);
-        this.players = players;
-        int id = 0;
-        for (AbstractPlayer player : players) {
-            // Create a FM copy for this player (different random seed)
-            player.forwardModel = this.forwardModel.copy();
-            // Create initial state observation
-            AbstractGameState observation = gameState.copy(id);
-            // Give player their ID
-            player.setPlayerID(id++);
-            // Allow player to initialize
-
-            player.initializePlayer(observation);
-        }
-
-        resetStats();
+        coreReset(players);
     }
 
     /**
@@ -148,6 +133,10 @@ public class Game {
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
         gameState.reset(newRandomSeed);
+        coreReset(players);
+    }
+
+    private void coreReset(List<AbstractPlayer> players) {
         forwardModel.abstractSetup(gameState);
         this.players = players;
         int id = 0;
@@ -157,7 +146,7 @@ public class Game {
             // Create initial state observation
             AbstractGameState observation = gameState.copy(id);
             // Give player their ID
-            player.setPlayerID(id++);
+            player.playerID = id++;
             // Allow player to initialize
 
             player.initializePlayer(observation);

@@ -4,13 +4,9 @@ import core.*;
 import core.interfaces.*;
 import games.dominion.BigMoney;
 import games.dominion.PlayActionCards;
-import org.json.simple.*;
-import org.json.simple.parser.*;
-import players.PlayerConstants;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
-import java.io.*;
 import java.util.*;
 import static players.mcts.MCTSEnums.strategies.RANDOM;
 
@@ -54,7 +50,16 @@ public class MCTSParams extends PlayerParameters {
      *         This defaults to a Random player.
      */
     public AbstractPlayer getRolloutStrategy() {
-        return new RandomPlayer(new Random(getRandomSeed()));
+        switch (rolloutType) {
+            case RANDOM:
+                return new RandomPlayer(new Random(getRandomSeed()));
+            case Dominion_BigMoney:
+                return new BigMoney();
+            case Dominion_PlayActions:
+                return new PlayActionCards(new Random(getRandomSeed()));
+            default:
+                throw new AssertionError("Unknown rollout type : " + rolloutType);
+        }
     }
 
 

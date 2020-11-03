@@ -258,16 +258,11 @@ class SingleTreeNode {
 
             AbstractPlayer rolloutStrategy = player.rolloutStrategy;
             while (!finishRollout(rolloutState, thisDepth)) {
-      //          rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
                 // TODO: While the only possible rolloutStrategy is Random, this is fine
                 // TODO: But there is an open issue here around the need to set the playerId for more sophisticated strategies
-                AbstractAction next = rolloutStrategy.getAction(rolloutState);
-//                int nActions = rolloutState.getActions().size();
                 rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
                 AbstractAction next = rolloutStrategy.getAction(rolloutState);
-/*                if (nActions > 0) {
-                    next = rolloutState.getActions().get(player.rnd.nextInt(nActions));
-                }*/
+
                 advance(rolloutState, next);
                 thisDepth++;
             }
@@ -396,7 +391,7 @@ class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         retValue.append(String.format("%s, %d total visits, value %.2f, with %d children, depth %d, FMCalls %d: \n",
-                player.name, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
+                player.toString(), nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
         List<SingleTreeNode> sortedChildren = Arrays.stream(children).sorted(
                 Comparator.comparingInt(o -> -o.nVisits)
         ).collect(Collectors.toList());
@@ -445,28 +440,6 @@ class SingleTreeNode {
         retValue.append(String.format("\tNodes  by depth: %s\n", String.join(", ", nodeDist)));
         retValue.append(String.format("\tLeaves by depth: %s\n", String.join(", ", leafDist)));
 
-        return retValue.toString();
-    }
-
-    @Override
-    public String toString() {
-        // we return some interesting data on this node
-        // child actions
-        // visits and values for each
-        StringBuilder retValue = new StringBuilder();
-        retValue.append(String.format("%s, %d total visits, value %.2f, with %d children, depth %d, FMCalls %d: \n",
-                player, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
-        List<SingleTreeNode> sortedChildren = Arrays.stream(children).sorted(
-                Comparator.comparingInt(o -> -o.nVisits)
-        ).collect(Collectors.toList());
-        for (SingleTreeNode child : sortedChildren) {
-            int i = Arrays.asList(children).indexOf(child);
-            String actionName = state.getActions().get(i).toString();
-            if (actionName.length() > 30)
-                actionName = actionName.substring(0, 30);
-            retValue.append(String.format("\t%-30s  visits: %d\tvalue %.2f\n", actionName, children[i].nVisits, children[i].totValue / children[i].nVisits));
-        }
-        retValue.append(getTreeStatistics());
         return retValue.toString();
     }
 }

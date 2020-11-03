@@ -4,6 +4,7 @@ import core.*;
 import evaluation.AbstractTournament;
 import evaluation.RoundRobinTournament;
 import games.GameType;
+import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
@@ -20,19 +21,18 @@ public class DominionGame extends Game {
         super(GameType.Dominion, new DominionForwardModel(), new DominionGameState(params, nPlayers));
     }
 
-
     public static void main(String[] args) {
 
         // create list of players
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         MCTSParams bigMoneyRollout = new MCTSParams(8743);
-        bigMoneyRollout.rolloutType = "BigMoney";
+        bigMoneyRollout.rolloutType = MCTSEnums.strategies.Dominion_BigMoney;
         bigMoneyRollout.rolloutsEnabled = true;
         bigMoneyRollout.K = 5.0;
         bigMoneyRollout.rolloutLength = 100;
 
         MCTSParams actionRollout = new MCTSParams(8743);
-        actionRollout.rolloutType = "PlayActions";
+        actionRollout.rolloutType = MCTSEnums.strategies.Dominion_PlayActions;
         actionRollout.rolloutsEnabled = true;
         actionRollout.K = 5.0;
         actionRollout.rolloutLength = 100;

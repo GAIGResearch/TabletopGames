@@ -26,13 +26,13 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     public MCTSPlayer(long seed) {
-        this.params = new MCTSParams(seed);
-        rnd = new Random(seed);
+        this(new MCTSParams(seed));
     }
 
     public MCTSPlayer(MCTSParams params) {
         this(params, "MCTSPlayer");
     }
+
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
@@ -72,11 +72,5 @@ public class MCTSPlayer extends AbstractPlayer {
 
         // Return best action
         return allActions.get(root.mostVisitedAction());
-    }
-
-    public void setName(String name) {this.name = name;}
-    @Override
-    public String toString() {
-        return name;
     }
 }
