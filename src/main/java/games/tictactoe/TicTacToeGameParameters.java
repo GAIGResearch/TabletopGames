@@ -1,34 +1,34 @@
 package games.tictactoe;
 
 import core.AbstractParameters;
-import core.interfaces.ITunableParameters;
+import evaluation.TunableParameters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class TicTacToeGameParameters extends AbstractParameters implements ITunableParameters {
+public class TicTacToeGameParameters extends TunableParameters {
+
     public int gridSize = 3;
 
     public TicTacToeGameParameters(long seed) {
         super(seed);
+        addTunableParameter("gridSize", 3, Arrays.asList(3, 4, 5, 6));
+    }
+
+    @Override
+    public void _reset() {
+        gridSize = (int) getParameterValue("gridSize");
     }
 
     @Override
     protected AbstractParameters _copy() {
-        TicTacToeGameParameters tttgp = new TicTacToeGameParameters(System.currentTimeMillis());
-        tttgp.gridSize = gridSize;
-        return tttgp;
+        return new TicTacToeGameParameters(System.currentTimeMillis());
     }
 
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TicTacToeGameParameters)) return false;
-        if (!super.equals(o)) return false;
-        TicTacToeGameParameters that = (TicTacToeGameParameters) o;
-        return gridSize == that.gridSize;
+        return super.equals(o);
     }
 
     @Override
@@ -36,46 +36,16 @@ public class TicTacToeGameParameters extends AbstractParameters implements ITuna
         return Objects.hash(super.hashCode(), gridSize);
     }
 
-    @Override
-    public HashMap<Integer, ArrayList<?>> getSearchSpace() {
-        return new HashMap<Integer, ArrayList<?>>() {{
-            put(0, new ArrayList<Integer>() {{
-                add(3);
-                add(4);
-                add(5);
-            }});
-        }};
-    }
-
-    @Override
-    public List<Integer> getParameterIds() {
-        return new ArrayList<Integer>() {{
-            add(0);
-        }};
-    }
-
-    @Override
-    public Object getDefaultParameterValue(int parameterId) {
-        if (parameterId == 0) return 3;
-        return null;
-    }
-
-    @Override
-    public void setParameterValue(int parameterId, Object value) {
-        if (parameterId == 0) gridSize = (int) value;
-        else System.out.println("Unknown parameter " + parameterId);
-    }
-
-    @Override
-    public Object getParameterValue(int parameterId) {
-        if (parameterId == 0) return gridSize;
-        return null;
-    }
 
     @Override
     public String getParameterName(int parameterId) {
         if (parameterId == 0) return "Grid size";
         return null;
+    }
+
+    @Override
+    public TicTacToeGame instantiate() {
+        return new TicTacToeGame(this);
     }
 
 }

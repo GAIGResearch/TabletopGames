@@ -2,6 +2,12 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
+import players.PlayerConstants;
+import players.PlayerParameters;
+import utilities.ElapsedCpuTimer;
+
+import java.util.*;
+import java.util.stream.*;
 import utilities.*;
 
 import java.util.*;
@@ -57,9 +63,8 @@ class SingleTreeNode {
 
     /**
      * Initializes the root node
-     *
      * @param root - root node
-     * @param gs   - root game state
+     * @param gs - root game state
      */
     void setRootGameState(SingleTreeNode root, AbstractGameState gs) {
         this.state = gs;
@@ -75,9 +80,9 @@ class SingleTreeNode {
         double avgTimeTaken;
         double acumTimeTaken = 0;
         long remaining;
-        int remainingLimit = 5;
+        int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
-        if (player.params.budgetType == BUDGET_TIME) {
+        if(player.params.budgetType == BUDGET_TIME) {
             elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
         }
 
@@ -85,7 +90,7 @@ class SingleTreeNode {
         int numIters = 0;
 
         boolean stop = false;
-        while (!stop) {
+        while(!stop){
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
@@ -99,27 +104,27 @@ class SingleTreeNode {
             numIters++;
 
             // Check stopping condition
-            if (player.params.budgetType == BUDGET_TIME) {
+            PlayerConstants budgetType = player.params.budgetType;
+            if(budgetType == BUDGET_TIME) {
                 // Time budget
-                acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
-                avgTimeTaken = acumTimeTaken / numIters;
+                acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
+                avgTimeTaken  = acumTimeTaken/numIters;
                 remaining = elapsedTimer.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
-            } else if (player.params.budgetType == BUDGET_ITERATIONS) {
+            } else if(budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= player.params.iterationsBudget;
-            } else if (player.params.budgetType == BUDGET_FM_CALLS) {
+                stop = numIters >=  player.params.iterationsBudget;
+            } else if(budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = fmCallsCount > player.params.fmCallsBudget;
+                stop = fmCallsCount >  player.params.fmCallsBudget;
             }
         }
     }
 
     /**
      * Selection + expansion steps.
-     * - Tree is traversed until a node not fully expanded is found.
-     * - A new child of this node is added to the tree.
-     *
+     *  - Tree is traversed until a node not fully expanded is found.
+     *  - A new child of this node is added to the tree.
      * @return - new node added to the tree.
      */
     private SingleTreeNode treePolicy() {
@@ -127,7 +132,7 @@ class SingleTreeNode {
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.rolloutLength) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.rolloutLength && cur.children.length > 0) {
             if (cur.notFullyExpanded()) {
                 // Node found! Expand it and return new child
                 return cur.expand();
@@ -142,7 +147,6 @@ class SingleTreeNode {
 
     /**
      * Checks if a node is fully expanded.
-     *
      * @return true if node not fully expanded, false otherwise.
      */
     private boolean notFullyExpanded() {
@@ -156,7 +160,6 @@ class SingleTreeNode {
 
     /**
      * Expands the node by creating a new random child node and adding to the tree.
-     *
      * @return - new child node.
      */
     private SingleTreeNode expand() {
@@ -185,8 +188,7 @@ class SingleTreeNode {
 
     /**
      * Advance the current game state with the given action, count the FM call and compute the next available actions.
-     *
-     * @param gs  - current game state
+     * @param gs - current game state
      * @param act - action to apply
      * @return - list of actions available in the next state
      */
@@ -198,7 +200,6 @@ class SingleTreeNode {
 
     /**
      * Apply UCB1 equation to choose a child.
-     *
      * @return - child node with the highest UCB value.
      */
     private SingleTreeNode uct() {
@@ -247,7 +248,6 @@ class SingleTreeNode {
 
     /**
      * Perform a Monte Carlo rollout from this node.
-     *
      * @return - value of rollout.
      */
     private double rollOut() {
@@ -258,6 +258,10 @@ class SingleTreeNode {
 
             AbstractPlayer rolloutStrategy = player.rolloutStrategy;
             while (!finishRollout(rolloutState, thisDepth)) {
+      //          rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
+                // TODO: While the only possible rolloutStrategy is Random, this is fine
+                // TODO: But there is an open issue here around the need to set the playerId for more sophisticated strategies
+                AbstractAction next = rolloutStrategy.getAction(rolloutState);
 //                int nActions = rolloutState.getActions().size();
                 rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
                 AbstractAction next = rolloutStrategy.getAction(rolloutState);
@@ -267,19 +271,26 @@ class SingleTreeNode {
                 advance(rolloutState, next);
                 thisDepth++;
             }
+
             // Evaluate final state and return normalised score
-            return rolloutState.getScore(player.getPlayerID());
-//            return player.params.gameHeuristic.evaluateState(rolloutState, player.getPlayerID());
+            if (player.heuristic != null){
+                return player.heuristic.evaluateState(rolloutState, player.getPlayerID());
+            } else {
+                return rolloutState.getScore(player.getPlayerID());
+            }
+
         } else {
-            // Evaluate the state without doing a rollout of these are disabled, return normalised score
-            return state.getScore(player.getPlayerID());
-//           return player.params.gameHeuristic.evaluateState(state, player.getPlayerID());
+            // Evaluate the state without doing a rollout. If these are disabled, return normalised score
+            if (player.heuristic != null){
+                return player.heuristic.evaluateState(state, player.getPlayerID());
+            } else {
+                return state.getScore(player.getPlayerID());
+            }
         }
     }
 
     /**
      * Checks if rollout is finished. Rollouts end on maximum length, or if game ended.
-     *
      * @param rollerState - current state
      * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
@@ -294,7 +305,6 @@ class SingleTreeNode {
 
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
-     *
      * @param result - value of rollout to backup
      */
     private void backUp(double result) {
@@ -308,7 +318,6 @@ class SingleTreeNode {
 
     /**
      * Calculates the most visited child from the root.
-     *
      * @return - most visited child index.
      */
     int mostVisitedAction() {
@@ -351,7 +360,6 @@ class SingleTreeNode {
 
     /**
      * Finds the child from the root with the highest value.
-     *
      * @return - child with highest value.
      */
     int bestAction() {
@@ -381,8 +389,30 @@ class SingleTreeNode {
         return selected;
     }
 
+    @Override
+    public String toString() {
+        // we return some interesting data on this node
+        // child actions
+        // visits and values for each
+        StringBuilder retValue = new StringBuilder();
+        retValue.append(String.format("%s, %d total visits, value %.2f, with %d children, depth %d, FMCalls %d: \n",
+                player.name, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
+        List<SingleTreeNode> sortedChildren = Arrays.stream(children).sorted(
+                Comparator.comparingInt(o -> -o.nVisits)
+        ).collect(Collectors.toList());
+        for (SingleTreeNode child : sortedChildren) {
+            int i = Arrays.asList(children).indexOf(child);
+            String actionName = state.getActions().get(i).toString();
+            if (actionName.length() > 30)
+                actionName = actionName.substring(0, 30);
+            retValue.append(String.format("\t%-30s  visits: %d\tvalue %.2f\n", actionName, children[i].nVisits, children[i].totValue / children[i].nVisits));
+        }
+        retValue.append(getTreeStatistics());
+        return retValue.toString();
+    }
+
     public String getTreeStatistics() {
-        StringBuilder retValue = new StringBuilder(player.name + "\n");
+        StringBuilder retValue = new StringBuilder(player.toString() + "\n");
         // We recurse from the root node, tracking the number of nodes at each depth
         int maxDepth = 100;
         int depthReached = 0;
@@ -425,7 +455,7 @@ class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         retValue.append(String.format("%s, %d total visits, value %.2f, with %d children, depth %d, FMCalls %d: \n",
-                player.name, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
+                player, nVisits, totValue / nVisits, children.length, depth, fmCallsCount));
         List<SingleTreeNode> sortedChildren = Arrays.stream(children).sorted(
                 Comparator.comparingInt(o -> -o.nVisits)
         ).collect(Collectors.toList());

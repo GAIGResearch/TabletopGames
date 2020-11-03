@@ -5,6 +5,10 @@ import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
+import games.dotsboxes.DBForwardModel;
+import games.dotsboxes.DBGUI;
+import games.dotsboxes.DBGameState;
+import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
@@ -75,6 +79,15 @@ public enum GameType {
             new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
             add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+    DotsAndBoxes(2, 6,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+                add(TerritoryBuilding);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Enclosure);
+            }}),
     Dominion (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
             new ArrayList<Mechanic>() {{ add(DeckManagement); }});
@@ -104,6 +117,8 @@ public enum GameType {
                 return Virus;
             case "coltexpress":
                 return ColtExpress;
+            case "dotsandboxes":
+                return DotsAndBoxes;
             case "dominion":
                 return Dominion;
         }
@@ -114,11 +129,13 @@ public enum GameType {
     /**
      * Creates an instance of the given game type, with a specific number of players and game seed.
      * Add here all games implemented.
+     *
      * @param nPlayers - number of players taking part in the game, used for initialisation.
-     * @param seed - seed for this game.
+     * @param seed     - seed for this game.
+     * @param params   - Parameters to use for the game. If not specified then we use the default.
      * @return - instance of Game object; null if game not implemented.
      */
-    public Game createGameInstance(int nPlayers, long seed) {
+    public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
             if (VERBOSE) {
                 System.out.println("Unsupported number of players: " + nPlayers
@@ -127,59 +144,82 @@ public enum GameType {
             return null;
         }
 
-        AbstractParameters params;
-        AbstractForwardModel forwardModel = null;
-        AbstractGameState gameState = null;
+        params = (params == null) ? getDefaultParams(seed) : params;
+        AbstractForwardModel forwardModel;
+        AbstractGameState gameState;
 
-        switch(this) {
+        switch (this) {
             case Pandemic:
-                params = new PandemicParameters("data/pandemic/", seed);
                 forwardModel = new PandemicForwardModel(params, nPlayers);
                 gameState = new PandemicGameState(params, nPlayers);
                 break;
             case TicTacToe:
-                params = new TicTacToeGameParameters(seed);
                 forwardModel = new TicTacToeForwardModel();
                 gameState = new TicTacToeGameState(params, nPlayers);
                 break;
             case ExplodingKittens:
-                params = new ExplodingKittensParameters(seed);
                 forwardModel = new ExplodingKittensForwardModel();
                 gameState = new ExplodingKittensGameState(params, nPlayers);
                 break;
             case LoveLetter:
-                params = new LoveLetterParameters(seed);
                 forwardModel = new LoveLetterForwardModel();
                 gameState = new LoveLetterGameState(params, nPlayers);
                 break;
             case Uno:
-                params = new UnoGameParameters(seed);
                 forwardModel = new UnoForwardModel();
                 gameState = new UnoGameState(params, nPlayers);
                 break;
             case Virus:
-                params = new VirusGameParameters(seed);
                 forwardModel = new VirusForwardModel();
                 gameState = new VirusGameState(params, nPlayers);
                 break;
             case ColtExpress:
-                params = new ColtExpressParameters(seed);
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
+                break;
+            case DotsAndBoxes:
+                forwardModel = new DBForwardModel();
+                gameState = new DBGameState(params, nPlayers);
                 break;
             case Dominion:
                 params = DominionParameters.workingCards(seed);
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
+            default:
+                throw new AssertionError("Game not yet supported : " + this);
         }
 
         return new Game(this, forwardModel, gameState);
     }
 
+    public AbstractParameters getDefaultParams(long seed) {
+        switch (this) {
+            case Pandemic:
+                return new PandemicParameters("data/pandemic/", seed);
+            case TicTacToe:
+                return new TicTacToeGameParameters(seed);
+            case ExplodingKittens:
+                return new ExplodingKittensParameters(seed);
+            case LoveLetter:
+                return new LoveLetterParameters(seed);
+            case Uno:
+                return new UnoGameParameters(seed);
+            case Virus:
+                return new VirusGameParameters(seed);
+            case ColtExpress:
+                return new ColtExpressParameters(seed);
+            case DotsAndBoxes:
+                return new DBParameters(seed);
+            default:
+                throw new AssertionError("No default Parameters specified for Game " + this);
+        }
+    }
+
     /**
      * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
+     *
      * @param game - game to create a GUI for.
-     * @param ac - ActionController object allowing for user interaction with the GUI.
+     * @param ac   - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
     public AbstractGUI createGUI(Game game, ActionController ac) {
@@ -197,7 +237,7 @@ public enum GameType {
             }
         }
 
-        switch(this) {
+        switch (this) {
             case Pandemic:
                 gui = new PandemicGUI(game, ac);
                 break;
@@ -222,6 +262,12 @@ public enum GameType {
             case TicTacToe:
                 gui = new TicTacToeGUI(game, ac);
                 break;
+            case DotsAndBoxes:
+                if (game != null) {
+                    gui = new DBGUI(game.getGameState(), ac);
+                } else {
+                    gui = new PrototypeGUI(null, null, ac, 100);
+                }
         }
 
         return gui;
@@ -261,11 +307,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games within this category.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (gt.getCategories().contains(this)) {
                     games.add(gt);
                 }
@@ -275,11 +322,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games that are NOT within this category.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGamesExcluding() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (!gt.getCategories().contains(this)) {
                     games.add(gt);
                 }
@@ -318,15 +366,17 @@ public enum GameType {
         MovementPoints,
         MultipleMaps,
         Campaign,
+        Enclosure,
         DeckManagement;
 
         /**
          * Retrieves a list of all games using this mechanic.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (gt.getMechanics().contains(this)) {
                     games.add(gt);
                 }
@@ -336,11 +386,12 @@ public enum GameType {
 
         /**
          * Retrieves a list of all games that do NOT use this mechanic.
+         *
          * @return - list of game types.
          */
         public List<GameType> getAllGamesExcluding() {
             ArrayList<GameType> games = new ArrayList<>();
-            for (GameType gt: GameType.values()) {
+            for (GameType gt : GameType.values()) {
                 if (!gt.getMechanics().contains(this)) {
                     games.add(gt);
                 }
@@ -390,7 +441,38 @@ public enum GameType {
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis());
+        return createGameInstance(nPlayers, System.currentTimeMillis(), defaultParams(System.currentTimeMillis()));
+    }
+
+    public Game createGameInstance(int nPlayers, long seed) {
+        return createGameInstance(nPlayers, seed, defaultParams(seed));
+    }
+
+    public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
+        return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
+    }
+
+    public AbstractParameters defaultParams(long seed) {
+        switch (this) {
+            case Pandemic:
+                return new PandemicParameters("data/pandemic/", seed);
+            case TicTacToe:
+                return new TicTacToeGameParameters(seed);
+            case ExplodingKittens:
+                return new ExplodingKittensParameters(seed);
+            case LoveLetter:
+                return new LoveLetterParameters(seed);
+            case Uno:
+                return new UnoGameParameters(seed);
+            case Virus:
+                return new VirusGameParameters(seed);
+            case ColtExpress:
+                return new ColtExpressParameters(seed);
+            case DotsAndBoxes:
+                return new DBParameters(seed);
+            default:
+                throw new AssertionError("No default Parameters specified for GameType : " + this.name());
+        }
     }
 
     @Override
@@ -399,21 +481,21 @@ public enum GameType {
         AbstractGUI g = createGUI(null, null);
         boolean gui = g != null;
         boolean prototypeGUI = g instanceof PrototypeGUI;
-        return (gui? prototypeGUI? ANSI_CYAN : ANSI_BLUE : implemented? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
+        return (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : implemented ? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
                 "\n\tminPlayers = " + minPlayers +
                 "\n\tmaxPlayers = " + maxPlayers +
                 "\n\tcategories = " + categories +
                 "\n\tmechanics = " + mechanics +
-                (implemented? ANSI_GREEN: ANSI_RED) +
+                (implemented ? ANSI_GREEN : ANSI_RED) +
                 "\n\timplemented = " + implemented + ANSI_RESET +
-                (gui? prototypeGUI? ANSI_CYAN : ANSI_BLUE : ANSI_RED) +
+                (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : ANSI_RED) +
                 "\n\tGUI = " + gui + ANSI_RESET +
                 "\n}\n";
     }
 
     public static void main(String[] args) {
         System.out.println("Games available in the framework: \n");
-        for (GameType gt: GameType.values()) {
+        for (GameType gt : GameType.values()) {
             System.out.println(gt.toString());
         }
     }
