@@ -1,99 +1,58 @@
 package players.mcts;
 
-import core.AbstractParameters;
-import core.interfaces.ITunableParameters;
+import core.*;
 import players.PlayerParameters;
+import players.simple.RandomPlayer;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import static players.mcts.MCTSEnums.strategies.RANDOM;
 
-public class MCTSParams extends PlayerParameters implements ITunableParameters {
+public class MCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
     public int rolloutLength = 10;
     public boolean rolloutsEnabled = false;
     public double epsilon = 1e-6;
+    public MCTSEnums.strategies rolloutType = RANDOM;           ;
 
+    public MCTSParams() {
+        this(System.currentTimeMillis());
+    }
     public MCTSParams(long seed) {
         super(seed);
+        addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
+        addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
+        addTunableParameter("rolloutsEnabled", false, Arrays.asList(false, true));
+        addTunableParameter("epsilon", 1e-6);
+        addTunableParameter("rolloutType", RANDOM);
+    }
+
+    @Override
+    public void _reset() {
+        super._reset();
+        K = (double) getParameterValue("K");
+        rolloutLength = (int) getParameterValue("rolloutLength");
+        rolloutsEnabled = (boolean) getParameterValue("rolloutsEnabled");
+        epsilon = (double) getParameterValue("epsilon");
+        rolloutType = (MCTSEnums.strategies) getParameterValue("rolloutType");
     }
 
     @Override
     protected AbstractParameters _copy() {
-        MCTSParams params = new MCTSParams(System.currentTimeMillis());
-        params.K = K;
-        params.rolloutLength = rolloutLength;
-        params.rolloutsEnabled = rolloutsEnabled;
-        params.epsilon = epsilon;
-        return params;
+        return new MCTSParams(System.currentTimeMillis());
     }
 
-    @Override
-    public HashMap<Integer, ArrayList<?>> getSearchSpace() {
-        return new HashMap<Integer, ArrayList<?>>() {{
-            put(0, new ArrayList<Double>() {{ // K
-                add(1.0);
-                add(Math.sqrt(2));
-                add(2.0);
-            }});
-            put(1, new ArrayList<Integer>() {{ // Rollout length
-                add(6);
-                add(8);
-                add(10);
-                add(12);
-            }});
-            put(2, new ArrayList<Boolean>() {{ // Rollouts enabled
-                add(false);
-                add(true);
-            }});
-        }};
+    /**
+     * @return Returns the AbstractPlayer policy that will take actions during an MCTS rollout.
+     *         This defaults to a Random player.
+     */
+    public AbstractPlayer getRolloutStrategy() {
+        return new RandomPlayer(new Random(getRandomSeed()));
     }
 
-    @Override
-    public List<Integer> getParameterIds() {
-        return new ArrayList<Integer>() {{
-            add(0);
-            add(1);
-            add(2);
-        }};
-    }
 
     @Override
-    public Object getDefaultParameterValue(int parameterId) {
-        if (parameterId == 0) return Math.sqrt(2);
-        else if (parameterId == 1) return 10;
-        else if (parameterId == 2) return false;
-        return null;
-    }
-
-    @Override
-    public void setParameterValue(int parameterId, Object value) {
-        if (parameterId == 0) K = (double) value;
-        else if (parameterId == 1) rolloutLength = (int) value;
-        else if (parameterId == 2) rolloutsEnabled = (boolean) value;
-        else System.out.println("Unknown parameter " + parameterId);
-    }
-
-    @Override
-    public Object getParameterValue(int parameterId) {
-        if (parameterId == 0) return K;
-        else if (parameterId == 1) return rolloutLength;
-        else if (parameterId == 2) return rolloutsEnabled;
-        else {
-            System.out.println("Unknown parameter " + parameterId);
-            return null;
-        }
-    }
-
-    @Override
-    public String getParameterName(int parameterId) {
-        if (parameterId == 0) return "K";
-        else if (parameterId == 1) return "Rollout length";
-        else if (parameterId == 2) return "Rollouts enabled";
-        else {
-            System.out.println("Unknown parameter " + parameterId);
-            return null;
-        }
+    public MCTSPlayer instantiate() {
+        return new MCTSPlayer(this);
     }
 }
