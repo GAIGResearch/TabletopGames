@@ -6,4 +6,8 @@ public class MCTSEnums {
         RANDOM
     }
 
+    public enum SelectionPolicy {
+        ROBUST, SIMPLE
+    }
+
 }

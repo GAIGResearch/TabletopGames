@@ -126,7 +126,7 @@ public abstract class AbstractGameState {
      * @param playerId - player observing the state
      * @return - reduced copy of the game state.
      */
-    final AbstractGameState copy(int playerId) {
+    public final AbstractGameState copy(int playerId) {
         AbstractGameState s = _copy(playerId);
         // Copy super class things
         s.turnOrder = turnOrder.copy();
