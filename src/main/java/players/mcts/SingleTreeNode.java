@@ -2,7 +2,9 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
+import sun.reflect.generics.tree.Tree;
 import utilities.ElapsedCpuTimer;
 
 import java.util.*;
@@ -13,20 +15,21 @@ import static utilities.Utils.noise;
 
 class SingleTreeNode {
     // Root node of tree
-    private SingleTreeNode root;
+    SingleTreeNode root;
     // Parent of this node
-    private SingleTreeNode parent;
+    SingleTreeNode parent;
     // Children of this node
-    private Map<AbstractAction, SingleTreeNode> children = new HashMap<>();
+    Map<AbstractAction, SingleTreeNode> children = new HashMap<>();
     // Depth of this node
-    private int depth;
+    final int depth;
 
     // Total value of this node
     private double totValue;
     // Number of visits
     private int nVisits;
-    // Number of FM calls up until this node
+    // Number of FM calls and State copies up until this node
     private int fmCallsCount;
+    private int copyCount;
     // Parameters guiding the search
     private MCTSPlayer player;
 
@@ -70,7 +73,7 @@ class SingleTreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    void mctsSearch() {
+    void mctsSearch(IStatisticLogger statsLogger) {
 
         // Variables for tracking time budget
         double avgTimeTaken;
@@ -89,12 +92,14 @@ class SingleTreeNode {
         // We keep a copy of this, as if we are using an open loop approach, then we need to advance a state
         // through the tree on each iteration, while still keeping an unchanged master copy (rootState)
         AbstractGameState rootState = state.copy();
+        copyCount++;
         while (!stop) {
             // IS-MCTS...we need to redeterminise on each step otherwise we are actually doing PIMC with a single
             // determinisation! with a partially observable game, this could be rather dangerous
-            if (player.params.openLoop) // this assumes that copy(id) randomises the invisible components
+            if (player.params.openLoop) { // this assumes that copy(id) randomises the invisible components
                 state = player.params.redeterminise ? rootState.copy(player.getPlayerID()) : rootState.copy();
-            else
+                copyCount++;
+            } else
                 state = rootState;
             // TODO: Can we determinise in Closed Loop? Closed Loop currently means we do not advance the state though
             // the tree - so shuffling the cards at the root makes no difference.
@@ -128,6 +133,19 @@ class SingleTreeNode {
                 stop = fmCallsCount > player.params.fmCallsBudget;
             }
         }
+        Map<String, Number> stats = new HashMap<>();
+        TreeStatistics treeStats = new TreeStatistics(root);
+        stats.put("iterations", numIters);
+        stats.put("fmCalls", fmCallsCount);
+        stats.put("copyCalls", copyCount);
+        stats.put("time", elapsedTimer.elapsedMillis());
+        stats.put("expandedNodes", treeStats.totalNodes);
+        stats.put("leafNodes", treeStats.totalLeaves);
+        stats.put("maxDepth", treeStats.depthReached);
+        stats.put("children", children.size());
+        OptionalInt maxVisits = children.values().stream().filter(Objects::nonNull).mapToInt(n -> n.nVisits).max();
+        stats.put("maxChildVisits", maxVisits.isPresent() ? maxVisits.getAsInt() : 0);
+        statsLogger.record(stats);
     }
 
     /**
@@ -177,6 +195,7 @@ class SingleTreeNode {
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
         AbstractGameState nextState = state.copy();
+        copyCount++;
         List<AbstractAction> nextActions = advance(nextState, chosen.copy());
 
         // then instantiate a new node
@@ -274,7 +293,7 @@ class SingleTreeNode {
             root.fmCallsCount++;
         } else {
             // If closed loop, then I don't think we should increment the FM count here!
-            root.fmCallsCount++;
+            // root.fmCallsCount++;
         }
         return selected;
     }
@@ -309,7 +328,11 @@ class SingleTreeNode {
     private double rollOut() {
         if (player.params.rolloutsEnabled) {
             // If rollouts are enabled, select random actions for the rollout
-            AbstractGameState rolloutState = state.copy();
+            AbstractGameState rolloutState = state;
+            if (!player.params.openLoop) {
+                rolloutState = state.copy();
+                copyCount++;
+            }
             int thisDepth = this.depth;
 
             AbstractPlayer rolloutStrategy = player.rolloutStrategy;
@@ -382,7 +405,7 @@ class SingleTreeNode {
         // check to see if all nodes have the same number of visits
         // if they do, then we use average score instead
         if (player.params.selectionPolicy == MCTSEnums.SelectionPolicy.ROBUST &&
-                children.values().stream().map(n -> n.nVisits).collect(toSet()).size() == 1) {
+                children.values().stream().filter(Objects::nonNull).map(n -> n.nVisits).collect(toSet()).size() == 1) {
             policy = MCTSEnums.SelectionPolicy.SIMPLE;
         }
 
@@ -412,44 +435,6 @@ class SingleTreeNode {
         return bestAction;
     }
 
-
-    public String getTreeStatistics() {
-        StringBuilder retValue = new StringBuilder(player.toString() + "\n");
-        // We recurse from the root node, tracking the number of nodes at each depth
-        int maxDepth = 100;
-        int depthReached = 0;
-        int[] nodesAtDepth = new int[maxDepth];
-        int[] leavesAtDepth = new int[maxDepth];
-        Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
-        nodeQueue.add(root);
-        while (!nodeQueue.isEmpty()) {
-            SingleTreeNode node = nodeQueue.poll();
-            if (node.depth <= maxDepth) {
-                nodesAtDepth[node.depth]++;
-                for (SingleTreeNode child : node.children.values()) {
-                    if (child != null)
-                        nodeQueue.add(child);
-                }
-                if (node.children.values().stream().allMatch(Objects::isNull))
-                    leavesAtDepth[node.depth]++;
-            }
-            if (node.depth > depthReached)
-                depthReached = node.depth;
-        }
-
-        int totalNodes = Arrays.stream(nodesAtDepth).sum();
-        int totalLeaves = Arrays.stream(leavesAtDepth).sum();
-        double[] nodeDistribution = Arrays.stream(nodesAtDepth, 0, depthReached + 1).asDoubleStream().map(i -> i / totalNodes).toArray();
-        double[] leafDistribution = Arrays.stream(leavesAtDepth, 0, depthReached + 1).asDoubleStream().map(i -> i / totalLeaves).toArray();
-        retValue.append(String.format("%d nodes and %d leaves, with maximum depth %d\n", totalNodes, totalLeaves, depthReached));
-        List<String> nodeDist = Arrays.stream(nodeDistribution).mapToObj(n -> String.format("%2.0f%%", n * 100.0)).collect(toList());
-        List<String> leafDist = Arrays.stream(leafDistribution).mapToObj(n -> String.format("%2.0f%%", n * 100.0)).collect(toList());
-        retValue.append(String.format("\tNodes  by depth: %s\n", String.join(", ", nodeDist)));
-        retValue.append(String.format("\tLeaves by depth: %s\n", String.join(", ", leafDist)));
-
-        return retValue.toString();
-    }
-
     @Override
     public String toString() {
         // we return some interesting data on this node
@@ -469,7 +454,7 @@ class SingleTreeNode {
                 actionName = actionName.substring(0, 30);
             retValue.append(String.format("\t%-30s  visits: %d\tvalue %.2f\n", actionName, node.nVisits, node.totValue / node.nVisits));
         }
-        retValue.append(getTreeStatistics());
+        retValue.append(new TreeStatistics(root).toString());
         return retValue.toString();
     }
 }

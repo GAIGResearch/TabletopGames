@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import core.interfaces.IStatisticLogger;
+import utilities.SummaryLogger;
 
 import java.util.List;
 import java.util.Random;
@@ -65,7 +67,8 @@ public class MCTSPlayer extends AbstractPlayer {
         // Search for best action from the root
         SingleTreeNode root = new SingleTreeNode(this, allActions);
         root.setRootGameState(root, gameState);
-        root.mctsSearch();
+        root.mctsSearch(getStatsLogger());
+
         if (debug)
             System.out.println(root.toString());
 
