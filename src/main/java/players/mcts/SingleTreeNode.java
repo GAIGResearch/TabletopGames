@@ -210,14 +210,14 @@ class SingleTreeNode {
     private void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
         List<AbstractAction> actionsTaken = new ArrayList<>();
-        do {
+        while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
             AbstractAction action = oppModel.getAction(gs);
             actionsTaken.add(action);
             player.getForwardModel().next(gs, action);
             player.getForwardModel().computeAvailableActions(gs);
             root.fmCallsCount++;
-        } while (gs.getCurrentPlayer() != id && gs.isNotTerminal());
+        }
     }
 
     /**
