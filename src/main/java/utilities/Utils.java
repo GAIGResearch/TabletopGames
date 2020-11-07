@@ -172,6 +172,12 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
+    public static double entropyOf(double... data) {
+        double sum = Arrays.stream(data).sum();
+        double[] normalised = Arrays.stream(data).map(d -> d/sum).toArray();
+        return Arrays.stream(normalised).map(d -> -d * Math.log(d)).sum();
+    }
+
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
         if (raw.isPresent()) {

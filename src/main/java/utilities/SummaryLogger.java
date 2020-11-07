@@ -6,19 +6,31 @@ import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
+/**
+ * Statistics Logger that just takes in Numeric data and maintains summery statistics for each type:
+ * - mean, min, max, standard error, standard deviation, n
+ * A summary is printed out in alphabetic order once finished.
+ */
 public class SummaryLogger implements IStatisticLogger {
 
     Map<String, StatSummary> allData = new HashMap<>();
 
     @Override
-    public void record(String key, Number value) {
-        if (!allData.containsKey(key))
-            allData.put(key, new StatSummary());
-        allData.get(key).add(value);
+    public void record(String key, Object value) {
+        if (value instanceof Number) {
+            if (!allData.containsKey(key))
+                allData.put(key, new StatSummary());
+            allData.get(key).add((Number) value);
+        }
     }
 
+    /**
+     * Any data that is not numeric will be silently ignored
+     *
+     * @param data A map of name -> Number pairs
+     */
     @Override
-    public void record(Map<String, Number> data) {
+    public void record(Map<String, ?> data) {
         for (String key : data.keySet()) {
             record(key, data.get(key));
         }

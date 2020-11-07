@@ -11,6 +11,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
+import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
 class SingleTreeNode {
@@ -133,18 +134,28 @@ class SingleTreeNode {
                 stop = fmCallsCount > player.params.fmCallsBudget;
             }
         }
-        Map<String, Number> stats = new HashMap<>();
+        Map<String, Object> stats = new HashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
+        stats.put("round", state.getTurnOrder().getRoundCounter());
+        stats.put("turn", state.getTurnOrder().getTurnCounter());
+        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        AbstractAction chosen = bestAction();
+        stats.put("action", chosen.toString());
+        stats.put("actionValue", children.get(chosen).totValue / children.get(chosen).nVisits);
+        double[] visitProportions = children.values().stream()
+                .filter(Objects::nonNull)
+                .mapToDouble(node -> (double) node.nVisits / this.nVisits).toArray();
+        stats.put("visitEntropy", entropyOf(visitProportions));
         stats.put("iterations", numIters);
         stats.put("fmCalls", fmCallsCount);
         stats.put("copyCalls", copyCount);
         stats.put("time", elapsedTimer.elapsedMillis());
-        stats.put("expandedNodes", treeStats.totalNodes);
+        stats.put("totalNodes", treeStats.totalNodes);
         stats.put("leafNodes", treeStats.totalLeaves);
         stats.put("maxDepth", treeStats.depthReached);
-        stats.put("children", children.size());
+        stats.put("nActions", children.size());
         OptionalInt maxVisits = children.values().stream().filter(Objects::nonNull).mapToInt(n -> n.nVisits).max();
-        stats.put("maxChildVisits", maxVisits.isPresent() ? maxVisits.getAsInt() : 0);
+        stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
         statsLogger.record(stats);
     }
 

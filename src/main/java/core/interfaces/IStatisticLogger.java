@@ -11,14 +11,14 @@ public interface IStatisticLogger {
      *
      * @param data A map of name -> value pairs
      */
-    void record(Map<String, Number> data);
+    void record(Map<String, ?> data);
 
     /**
      * Use to record a single datum. For example
      * @param key
      * @param datum
      */
-    void record(String key, Number datum);
+    void record(String key, Object datum);
 
     /**
      * Trigger any specific batch processing of data by this Logger.

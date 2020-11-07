@@ -6,6 +6,7 @@ import core.interfaces.IStatisticLogger;
 import games.*;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
+import utilities.FileStatsLogger;
 import utilities.SummaryLogger;
 
 import java.lang.reflect.Constructor;
@@ -32,6 +33,7 @@ public class PlayerReport {
                         "\t               one of mcts|rmhc|random|osla|<className>.\n" +
                         "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
                         "\t               Defaults to SummaryLogger. \n" +
+                        "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
                         "\tnGames=        The number of games to run for each game type. Defaults to 1.\n" +
@@ -62,6 +64,7 @@ public class PlayerReport {
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
+        String logFile = getArg(args, "logFile", "PlayerReport.txt");
 
         // Then iterate over the Game Types
         for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {
@@ -69,7 +72,7 @@ public class PlayerReport {
             System.out.println("Game: " + gameType.name());
 
             // For each type, instantiate a new IStatisticsLogger
-            playerToTrack.setStatsLogger(createLogger(loggerClass));
+            playerToTrack.setStatsLogger(createLogger(loggerClass, gameType.name() + "_" + logFile));
 
             int playerCount = gameType.getMinPlayers();
             if (nPlayers.size() == 1) playerCount = nPlayers.get(0);
@@ -98,12 +101,17 @@ public class PlayerReport {
         }
     }
 
-    private static IStatisticLogger createLogger(String loggerClass) {
+    private static IStatisticLogger createLogger(String loggerClass, String logFile) {
         IStatisticLogger logger = new SummaryLogger();
         try {
             Class<?> clazz = Class.forName(loggerClass);
-            Constructor<?> constructor = clazz.getConstructor();
-            logger = (IStatisticLogger) constructor.newInstance();
+            if (clazz == FileStatsLogger.class) {
+                Constructor<?> constructor = clazz.getConstructor(String.class);
+                logger = (IStatisticLogger) constructor.newInstance(logFile);
+            } else {
+                Constructor<?> constructor = clazz.getConstructor();
+                logger = (IStatisticLogger) constructor.newInstance();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
