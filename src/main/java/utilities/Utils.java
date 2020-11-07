@@ -9,6 +9,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.toMap;
 
 public abstract class Utils {
 
@@ -176,6 +179,11 @@ public abstract class Utils {
         double sum = Arrays.stream(data).sum();
         double[] normalised = Arrays.stream(data).map(d -> d/sum).toArray();
         return Arrays.stream(normalised).map(d -> -d * Math.log(d)).sum();
+    }
+
+    public static <T> Map<T, Double> normaliseMap(Map<T, ? extends Number> input) {
+        double sum = input.values().stream().mapToDouble(Number::doubleValue).sum();
+        return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
     public static <T> T getArg(String[] args, String name, T defaultValue) {

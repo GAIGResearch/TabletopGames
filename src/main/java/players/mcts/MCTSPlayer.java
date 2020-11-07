@@ -65,7 +65,7 @@ public class MCTSPlayer extends AbstractPlayer {
         List<AbstractAction> allActions = gameState.getActions();
 
         // Search for best action from the root
-        SingleTreeNode root = new SingleTreeNode(this, allActions);
+        SingleTreeNode root = new SingleTreeNode(this, allActions, rnd);
         root.setRootGameState(root, gameState);
         root.mctsSearch(getStatsLogger());
 

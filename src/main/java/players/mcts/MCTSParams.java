@@ -8,6 +8,8 @@ import java.util.*;
 
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
 import static players.mcts.MCTSEnums.strategies.*;
+import static players.mcts.MCTSEnums.TreePolicy.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
@@ -18,8 +20,10 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.strategies rolloutType = RANDOM;
     public boolean openLoop = false;
     public boolean redeterminise = false;
-    public boolean selfOnlyInTree = false;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
+    public MCTSEnums.TreePolicy treePolicy = UCB;
+    public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
+    public double exploreEpsilon = 0.1;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -34,8 +38,10 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutType", RANDOM);
         addTunableParameter("openLoop", false, Arrays.asList(false, true));
         addTunableParameter("redeterminise", false, Arrays.asList(false, true));
-        addTunableParameter("selfOnlyInTree", false, Arrays.asList(false, true));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
+        addTunableParameter("treePolicy", UCB);
+        addTunableParameter("opponentTreePolicy", Paranoid);
+        addTunableParameter("exploreEpsilon", 0.1);
     }
 
     @Override
@@ -48,8 +54,10 @@ public class MCTSParams extends PlayerParameters {
         rolloutType = (MCTSEnums.strategies) getParameterValue("rolloutType");
         openLoop = (boolean) getParameterValue("openLoop");
         redeterminise = (boolean) getParameterValue("redeterminise");
-        selfOnlyInTree = (boolean) getParameterValue("selfOnlyInTree");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
+        treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
+        opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
+        exploreEpsilon = (double) getParameterValue("exploreEpsilon");
     }
 
     @Override
