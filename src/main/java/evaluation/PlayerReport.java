@@ -80,7 +80,6 @@ public class PlayerReport {
 
             Game game = gameType.createGameInstance(playerCount);
             for (int i = 0; i < nGames; i++) {
-
                 // Set up opponents and the tracked player
                 // We can reduce variance here by cycling the playerIndex on each iteration
                 int playerIndex = i % playerCount;
@@ -95,6 +94,8 @@ public class PlayerReport {
                 game.reset(allPlayers);
                 playerToTrack.initializePlayer(game.getGameState());
                 game.run();
+                playerToTrack.getStatsLogger().record("Win", game.getGameState().getPlayerResults()[playerIndex].value);
+                playerToTrack.getStatsLogger().record("Score", game.getGameState().getScore(playerIndex));
             }
             // Once all games are complete, call processDataAndFinish()
             playerToTrack.getStatsLogger().processDataAndFinish();

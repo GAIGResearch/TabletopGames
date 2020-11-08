@@ -3,7 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
-import org.apache.commons.math3.analysis.function.Abs;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Utils;
@@ -39,9 +38,6 @@ class SingleTreeNode {
     // Parameters guiding the search
     private MCTSPlayer player;
     private Random rnd;
-    // For RegretMatching and EXP3 we need to keep a record of the probability
-    private Map<AbstractAction, Double> probabilityOfSelection;
-    private AbstractAction lastActionChosen; // a pointer to be used in back-prop
 
     // State in this node (closed loop)
     private AbstractGameState state;
@@ -140,18 +136,14 @@ class SingleTreeNode {
                 stop = numIters >= player.params.iterationsBudget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = fmCallsCount > player.params.fmCallsBudget;
+                stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget;
             }
         }
-        // keep this as a pointer for back-prop
-
         Map<String, Object> stats = new HashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
         stats.put("round", state.getTurnOrder().getRoundCounter());
         stats.put("turn", state.getTurnOrder().getTurnCounter());
         stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
-        stats.put("action", lastActionChosen.toString());
-        stats.put("actionValue", children.get(lastActionChosen).totValue / children.get(lastActionChosen).nVisits);
         double[] visitProportions = children.values().stream()
                 .filter(Objects::nonNull)
                 .mapToDouble(node -> (double) node.nVisits / this.nVisits).toArray();
@@ -181,10 +173,10 @@ class SingleTreeNode {
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.rolloutLength && state.getActions().size() > 0) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && state.getActions().size() > 0) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
-                return cur.expand();
+                cur = cur.expand();
             } else {
                 // Move to next child given by UCT function
                 cur = cur.nextNodeInTree();
@@ -216,7 +208,7 @@ class SingleTreeNode {
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
         AbstractGameState nextState = state.copy();
-        copyCount++;
+        root.copyCount++;
         List<AbstractAction> nextActions = advance(nextState, chosen.copy());
 
         // then instantiate a new node
@@ -278,8 +270,8 @@ class SingleTreeNode {
             case EXP3:
             case RegretMatching:
                 // These construct a distribution over possible actions and then sample from it
-                lastActionChosen = sampleFromDistribution();
-                return children.get(lastActionChosen);
+                AbstractAction chosen = sampleFromDistribution();
+                return children.get(chosen);
         }
         throw new AssertionError("This code should be unreachable - possibly you've missed something it the switch statement");
     }
@@ -357,13 +349,20 @@ class SingleTreeNode {
 
     public double exp3Value(AbstractAction action) {
         SingleTreeNode child = children.get(action);
-        int nActions = state.getActions().size();
-        double gamma = player.params.exploreEpsilon;
-        return Math.exp(child.totValue * gamma / nActions);
+//        int nActions = state.getActions().size();
+//        double gamma = player.params.exploreEpsilon;
+        double meanAdvantageFromAction = (child.totValue / child.nVisits) - (totValue / nVisits);
+        return Math.exp(meanAdvantageFromAction);
     }
 
     public double rmValue(AbstractAction action) {
-        return Math.max(0.0, children.get(action).totValue);
+        // TODO: This is not quite correct for game in which not all actions are available for each visit
+        // TODO: (see comment in checkActions() - to be enhanced to keep track of this at some future point
+        SingleTreeNode child = children.get(action);
+        // potential value is our estimate of our accumulated reward if we had always taken this action
+        double potentialValue = child.totValue * nVisits / child.nVisits;
+        double regret = potentialValue - totValue;
+        return Math.max(0.0, regret);
     }
 
     private AbstractAction sampleFromDistribution() {
@@ -385,11 +384,11 @@ class SingleTreeNode {
 
         // then we normalise to a pdf
         actionToValueMap = Utils.normaliseMap(actionToValueMap);
-        // we then add on the exploration bonus, and renormalise
+        // we then add on the exploration bonus
         double exploreBonus = player.params.exploreEpsilon / actionToValueMap.size();
-        actionToValueMap = actionToValueMap.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, e -> e.getValue() + exploreBonus));
-        probabilityOfSelection = Utils.normaliseMap(actionToValueMap);
+        Map<AbstractAction, Double> probabilityOfSelection = actionToValueMap.entrySet().stream().collect(
+                toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - player.params.exploreEpsilon) + exploreBonus));
+        //      probabilityOfSelection = Utils.normaliseMap(actionToValueMap);
 
         // then we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
         double cdfSample = rnd.nextDouble();
@@ -430,39 +429,34 @@ class SingleTreeNode {
      * @return - value of rollout.
      */
     private double rollOut() {
-        if (player.params.rolloutsEnabled) {
-            // If rollouts are enabled, select actions for the rollout in line with the rollout policy
-            AbstractGameState rolloutState = state;
+        int rolloutDepth = 0; // counting from end of tree
+
+        // If rollouts are enabled, select actions for the rollout in line with the rollout policy
+        AbstractGameState rolloutState = state;
+        if (player.params.rolloutLength > 0) {
             if (!player.params.openLoop) {
+                // the thinking here is that in openLoop we copy the state right at the root, and then use the forward
+                // model at each action. Hence the current state on the node is the one we have been using up to now.
+                /// Hence we do not need to copy it.
                 rolloutState = state.copy();
-                copyCount++;
+                root.copyCount++;
             }
-            int thisDepth = this.depth;
 
             AbstractPlayer rolloutStrategy = player.rolloutStrategy;
-            while (!finishRollout(rolloutState, thisDepth)) {
+            while (!finishRollout(rolloutState, rolloutDepth)) {
                 // rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
                 // TODO: While the only possible rolloutStrategy is Random, this is fine
                 // TODO: But there is an open issue here around the need to set the playerId for more sophisticated strategies
                 AbstractAction next = rolloutStrategy.getAction(rolloutState);
                 advance(rolloutState, next);
-                thisDepth++;
+                rolloutDepth++;
             }
-
-            // Evaluate final state and return normalised score
-            if (player.heuristic != null) {
-                return player.heuristic.evaluateState(rolloutState, player.getPlayerID());
-            } else {
-                return rolloutState.getScore(player.getPlayerID());
-            }
-
+        }
+        // Evaluate final state and return normalised score
+        if (player.heuristic != null) {
+            return player.heuristic.evaluateState(rolloutState, player.getPlayerID());
         } else {
-            // Evaluate the state without doing a rollout. If these are disabled, return normalised score
-            if (player.heuristic != null) {
-                return player.heuristic.evaluateState(state, player.getPlayerID());
-            } else {
-                return state.getScore(player.getPlayerID());
-            }
+            return rolloutState.getScore(player.getPlayerID());
         }
     }
 
@@ -490,29 +484,7 @@ class SingleTreeNode {
         SingleTreeNode n = this;
         while (n != null) {
             n.nVisits++;
-            switch (player.params.treePolicy) {
-                case UCB:
-                case AlphaGo:
-                    n.totValue += result;
-                    break;
-                case RegretMatching:
-                    // We need to decrement the result for all actions
-                    // If the expected value of taking the other action was higher than achieved, then we increase
-                    // that actions regret
-                    children.values().forEach(node -> {
-                        if (node != null) {
-                            double regret = node.totValue / node.nVisits - result;
-                            node.totRegret += regret;
-                        }
-                    });
-                    // TODO: This is incorrect for game in which not all actions are available for each visit
-                    // TODO: (see comment in checkActions() - to be enhanced to keep track of this at some future point
-                    // Note that we proceed to the EXP3 update too! Both are needed.
-                case EXP3:
-                    double probabilityOfChoice = probabilityOfSelection.get(lastActionChosen);
-                    n.totValue += result / probabilityOfChoice;
-                    break;
-            }
+            n.totValue += result;
             n = n.parent;
         }
     }
@@ -571,6 +543,7 @@ class SingleTreeNode {
                 player, nVisits, totValue / nVisits, children.size(), depth, fmCallsCount));
         // sort all actions by visit count
         List<AbstractAction> sortedActions = children.entrySet().stream()
+                .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(entry -> -entry.getValue().nVisits))
                 .map(Map.Entry::getKey).collect(toList());
         for (AbstractAction action : sortedActions) {
