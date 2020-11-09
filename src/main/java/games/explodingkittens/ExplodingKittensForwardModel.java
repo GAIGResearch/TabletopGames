@@ -310,6 +310,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         for (int card = 0; card < playerDeck.getSize(); card++) {
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
         }
+        if (actions.isEmpty()) // the target has no cards.
+            actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), -1));
         return actions;
     }
 

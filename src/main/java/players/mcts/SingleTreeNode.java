@@ -227,6 +227,9 @@ class SingleTreeNode {
     private List<AbstractAction> advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
         player.getForwardModel().computeAvailableActions(gs);
+        if (gs.getActions().isEmpty()) {
+            throw new AssertionError("Should always have at least one action possible...");
+        }
         root.fmCallsCount++;
         if (player.params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != player.getPlayerID())
             advanceToTurnOfPlayer(gs, player.getPlayerID());
@@ -248,6 +251,8 @@ class SingleTreeNode {
             actionsTaken.add(action);
             player.getForwardModel().next(gs, action);
             player.getForwardModel().computeAvailableActions(gs);
+            if (gs.getActions().isEmpty())
+                throw new AssertionError("Should always have at least one action possible...");
             root.fmCallsCount++;
         }
     }

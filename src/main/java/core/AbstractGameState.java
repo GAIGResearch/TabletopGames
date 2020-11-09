@@ -28,6 +28,7 @@ public abstract class AbstractGameState {
     protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;
     private Area allComponents;
+    private List<AbstractAction> history = new ArrayList<>();
 
     // List of actions currently available for the player
     protected List<AbstractAction> availableActions;
@@ -140,6 +141,8 @@ public abstract class AbstractGameState {
         for (AbstractAction a: availableActions) {
             s.availableActions.add(a.copy());
         }
+        s.history = new ArrayList<>(history);
+            // we do not copy individual actions in history, as these are now dead and should not change
 
         // Update the list of components for ID matching in actions.
         s.addAllComponents();
