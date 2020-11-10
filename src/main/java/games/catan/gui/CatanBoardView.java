@@ -65,7 +65,7 @@ public class CatanBoardView extends JComponent {
                 // draw roads
                 Road[] roads = tile.getRoads();
                 for (int i = 0; i < roads.length; i++) {
-                    if (roads[i] != null)
+                    if (roads[i] != null && roads[i].getOwner() != -1)
                         drawRoad(g, tile.getEdgeCoords(i), CatanConstants.PlayerColors[roads[i].getOwner()]);
                 }
             }

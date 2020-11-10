@@ -10,4 +10,8 @@ public class Road {
     public int getOwner(){
         return owner;
     }
+
+    public void setOwner(int playerID){
+        this.owner = playerID;
+    }
 }

@@ -128,10 +128,19 @@ public class CatanTile {
         this.number = number;
     }
 
+    public boolean setRoad(int edge, Road road){
+        // if null -> uninitialized
+        if (this.roads[edge] == null || this.roads[edge].getOwner() == -1){
+            this.roads[edge] = road;
+            return true;
+        }
+        return false;
+    }
+
     public boolean addRoad(int edge, int playerID){
         // if null -> uninitialized
-        if (this.roads[edge] == null){
-            this.roads[edge] = new Road(playerID);
+        if (this.roads[edge].getOwner() == -1){
+            this.roads[edge].setOwner(playerID);
             return true;
         }
         return false;
@@ -142,8 +151,17 @@ public class CatanTile {
     }
 
     public boolean addSettlement(int vertex, int playerID){
-        if (this.settlements[vertex] == null){
-            this.settlements[vertex] = new Settlement(playerID);
+        if (this.settlements[vertex].getOwner() == -1){
+            this.settlements[vertex].setOwner(playerID);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setSettlement(int vertex, Settlement settlement){
+        // if null -> uninitialized
+        if (this.settlements[vertex] == null || this.settlements[vertex].getOwner() == -1){
+            this.settlements[vertex] = settlement;
             return true;
         }
         return false;

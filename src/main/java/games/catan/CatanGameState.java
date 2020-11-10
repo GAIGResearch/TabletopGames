@@ -5,6 +5,8 @@ import core.AbstractGameState;
 import core.components.Area;
 import core.components.Component;
 import core.interfaces.IGamePhase;
+import games.catan.components.Road;
+import games.catan.components.Settlement;
 
 import java.util.*;
 
@@ -103,6 +105,48 @@ public class CatanGameState extends AbstractGameState {
 
     void addComponents() {
         super.addAllComponents();
+    }
+
+    public ArrayList<Road> getRoads(){
+        // Function that returns all the roads from the the board
+        int counter = 0;
+        ArrayList<Road> roads = new ArrayList<>();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                for (int i = 0; i < 6; i++) {
+                    // Road has already been set
+                    Road road = tile.getRoads()[i];
+                    if (road.getOwner()!=-1) {
+                        roads.add(road);
+                        counter += 1;
+                    }
+                }
+            }
+        }
+        System.out.println("There are " + counter + " roads");
+        return roads;
+    }
+
+    public ArrayList<Settlement> getSettlements(){
+        // Function that returns all the settlements from the the board
+        int counter = 0;
+        ArrayList<Settlement> settlements = new ArrayList<>();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                for (int i = 0; i < 6; i++) {
+                    // Road has already been set
+                    Settlement settlement = tile.getSettlements()[i];
+                    if (settlement.getOwner()!=-1) {
+                        settlements.add(settlement);
+                        counter += 1;
+                    }
+                }
+            }
+        }
+        System.out.println("There are " + counter + " settlements");
+        return settlements;
     }
 
     // todo implement methods below

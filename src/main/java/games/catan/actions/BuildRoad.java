@@ -22,9 +22,8 @@ public class BuildRoad extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
-        if (board[row][col].getRoads()[edge] == null) {
-            board[this.row][this.col].addRoad(edge, playerID);
-            return true;
+        if (board[row][col].getRoads()[edge].getOwner() == -1) {
+            return board[this.row][this.col].addRoad(edge, playerID);
         }
 
         return false;

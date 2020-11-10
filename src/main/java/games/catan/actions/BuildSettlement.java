@@ -22,7 +22,7 @@ public class BuildSettlement extends AbstractAction {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
 
-        if (board[row][col].getSettlements()[vertex] == null) {
+        if (board[row][col].getSettlements()[vertex].getOwner() == -1) {
             board[row][col].addSettlement(vertex, playerID);
             return true;
         }

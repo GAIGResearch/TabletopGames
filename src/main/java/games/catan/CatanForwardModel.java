@@ -7,6 +7,8 @@ import core.actions.DoNothing;
 import core.components.*;
 import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
+import games.catan.components.Road;
+import games.catan.components.Settlement;
 
 import java.util.*;
 
@@ -85,13 +87,13 @@ public class CatanForwardModel extends AbstractForwardModel {
         Random rnd = new Random();
         int row = rnd.nextInt(7);
         int col = rnd.nextInt(7);
-        int edge = rnd.nextInt(6);
-        actions.add(new BuildSettlement(row, col, edge, gameState.getCurrentPlayer()));
+//        int vertex = rnd.nextInt(6);
+//        actions.add(new BuildSettlement(row, col, vertex, gameState.getCurrentPlayer()));
 
         // todo (mb) instead of random determine where the player can put roads
         row = rnd.nextInt(7);
         col = rnd.nextInt(7);
-        edge = rnd.nextInt(6);
+        int edge = rnd.nextInt(6);
         actions.add(new BuildRoad(row, col, edge, gameState.getCurrentPlayer()));
 
 
@@ -157,6 +159,37 @@ public class CatanForwardModel extends AbstractForwardModel {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
+                for (int i = 0; i < 6; i++){
+                    // --------- Road ------------
+                    // Road has already been set
+                    if (tile.getRoads()[i] != null){
+                        continue;
+                    }
+
+                    // set a new road without owner
+                    Road road = new Road(-1);
+                    tile.setRoad(i, road);
+
+                    int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, i);
+                    // need to check if neighbour is in range
+                    if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
+                            Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
+                        CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
+                        // if in range then set road references
+
+                        neighbour.setRoad((i + 3) % 6, road);
+                    }
+
+                    // ------ Settlement ------------
+                    if (tile.getSettlements()[i] != null){
+                        continue;
+                    }
+
+                    Settlement settlement = new Settlement(-1);
+                    tile.setSettlement(i, settlement);
+                    // todo need to get the other 2 settlements along that edge
+
+                }
                 System.out.println("tile " + tile);
             }
         }
@@ -175,12 +208,4 @@ public class CatanForwardModel extends AbstractForwardModel {
         return num1 + num2 + 2;
     }
 
-//    public void setVertices(CatanTile[][] board, int row, int column, int vertex, int value){
-//        // Sets the neighbours of a given vertex to a given value
-//        if (vertex == 0){
-//            board[row][column].settlements[vertex] = value;
-//            board[row][column-1].settlements[vertex] = value;
-//            board[row+1][column].settlements[vertex] = value;
-//        }
-//    }
 }

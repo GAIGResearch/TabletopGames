@@ -21,6 +21,10 @@ public class Settlement {
         return owner;
     }
 
+    public void setOwner(int playerID){
+        this.owner = playerID;
+    }
+
     public int getType(){
         return type;
     }
