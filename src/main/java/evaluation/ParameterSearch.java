@@ -148,8 +148,10 @@ public class ParameterSearch {
             Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace);
-            System.out.println("MCTS Statistics: ");
-            System.out.println(evaluator.statsLogger.toString());
+            if (verbose) {
+                System.out.println("MCTS Statistics: ");
+                System.out.println(evaluator.statsLogger.toString());
+            }
             evaluator.statsLogger = new SummaryLogger();
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
