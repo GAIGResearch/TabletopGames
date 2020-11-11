@@ -45,7 +45,7 @@ public class CatanParameters extends AbstractParameters {
         put(CatanParameters.TileType.MOUNTAINS, 3);
         put(CatanParameters.TileType.FIELDS, 4);
         put(CatanParameters.TileType.PASTURE, 4);
-//        put(CatanParameters.TileType.DESERT, 1);
+        put(CatanParameters.TileType.DESERT, 1);
     }};
 
 

@@ -27,13 +27,6 @@ public class BuildSettlement extends AbstractAction {
             return true;
         }
 
-//        if (vertex == 0){
-//            board[row][col].addSettlement(vertex, cgs.getCurrentPlayer());
-//            if (col-1 >= 0)
-//                    board[row][col-1].addSettlement(2, cgs.getCurrentPlayer());
-//            if (row+1 < board.length)
-//                board[row+1][col].addSettlement(4, cgs.getCurrentPlayer());
-//        }
         return false;
     }
 

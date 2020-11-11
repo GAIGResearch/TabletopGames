@@ -217,4 +217,25 @@ public class CatanTile {
         int[] direction = evenr_directions[parity][edge];
         return new int[]{tile.x + direction[0], tile.y + direction[1]};
     }
+
+    public static int[][] get_neighbours_on_vertex(CatanTile tile, int edge){
+        // returns coordinates to the 2 other tiles on a vertex in a clockwise direction
+        // Even-r offset mapping; Different layouts require different values
+        int[][][] evenr_directions = {
+                {{1, 0}, {1, -1}, {0, -1},
+                        {-1, 0}, {0, 1}, {1, 1}},
+                {{1, 0}, {0, -1}, {-1, -1},
+                        {-1, 0}, {-1, 1}, {0, 1}}
+        };
+        int parity = tile.x & 1;
+
+        // to get the previous element we go back to the previous index (-1) but to go around has to add 6 and check % 6
+        // i.e: in case of vertex 0 it should go to 5
+        int[] direction_first = evenr_directions[parity][(edge + 5) % 6];
+        int[] direction_second = evenr_directions[parity][edge];
+        // Add both coordinates to the tiles
+        int[][] coords = {{tile.x + direction_first[0], tile.y + direction_second[1]},
+                {tile.x + direction_first[0], tile.y + direction_second[1]}};
+        return coords;
+    }
 }

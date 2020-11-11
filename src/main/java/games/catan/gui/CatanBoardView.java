@@ -78,7 +78,7 @@ public class CatanBoardView extends JComponent {
                 // draw settlements
                 Settlement[] settlements = tile.getSettlements();
                 for (int i = 0; i < settlements.length; i++){
-                    if (settlements[i] != null)
+                    if (settlements[i] != null && settlements[i].getOwner() != -1)
                         drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
                 }
 

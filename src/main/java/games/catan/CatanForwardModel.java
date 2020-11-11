@@ -87,14 +87,14 @@ public class CatanForwardModel extends AbstractForwardModel {
         Random rnd = new Random();
         int row = rnd.nextInt(7);
         int col = rnd.nextInt(7);
-//        int vertex = rnd.nextInt(6);
-//        actions.add(new BuildSettlement(row, col, vertex, gameState.getCurrentPlayer()));
+        int vertex = rnd.nextInt(6);
+        actions.add(new BuildSettlement(row, col, vertex, gameState.getCurrentPlayer()));
 
         // todo (mb) instead of random determine where the player can put roads
         row = rnd.nextInt(7);
         col = rnd.nextInt(7);
         int edge = rnd.nextInt(6);
-        actions.add(new BuildRoad(row, col, edge, gameState.getCurrentPlayer()));
+//        actions.add(new BuildRoad(row, col, edge, gameState.getCurrentPlayer()));
 
 
         // todo (mb) some notes on rules
@@ -134,7 +134,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         int mid_y = board[0].length/2;
 
         CatanTile midTile = new CatanTile(mid_x, mid_y);
-        midTile.setTileType(CatanParameters.TileType.DESERT);
+//        midTile.setTileType(CatanParameters.TileType.DESERT);
 
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
@@ -143,13 +143,16 @@ public class CatanForwardModel extends AbstractForwardModel {
                 if (midTile.distance(tile) >= mid_x){
                     tile.setTileType(CatanParameters.TileType.SEA);
                 }
-                else if (x == mid_x && y == mid_y){
-                    tile = midTile;
-                    tile.placeRobber();
-                }
                 else if (tileList.size() > 0) {
                     tile.setTileType(tileList.remove(0));
-                    tile.setNumber(numberList.remove(0));
+                    // desert has no number and has to place the robber there
+                    if (tile.getType().equals(CatanParameters.TileType.DESERT)){
+                        tile.placeRobber();
+                    }
+                    else {
+                        tile.setNumber(numberList.remove(0));
+                    }
+
                 }
                 board[x][y] = tile;
             }
@@ -159,10 +162,10 @@ public class CatanForwardModel extends AbstractForwardModel {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                for (int i = 0; i < 6; i++){
+                for (int i = 0; i < 6; i++) {
                     // --------- Road ------------
                     // Road has already been set
-                    if (tile.getRoads()[i] != null){
+                    if (tile.getRoads()[i] != null) {
                         continue;
                     }
 
@@ -179,18 +182,27 @@ public class CatanForwardModel extends AbstractForwardModel {
 
                         neighbour.setRoad((i + 3) % 6, road);
                     }
+                }
+                for (int i = 0; i < 6; i++){
 
                     // ------ Settlement ------------
+                    // settlement has already been set so skip this loop
                     if (tile.getSettlements()[i] != null){
                         continue;
                     }
 
                     Settlement settlement = new Settlement(-1);
                     tile.setSettlement(i, settlement);
-                    // todo need to get the other 2 settlements along that edge
 
+                    // Get the other 2 settlements along that vertex
+                    int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, i);
+                    if (Arrays.stream(neighbourCoords).flatMapToInt(a -> Arrays.stream(a)).max().getAsInt() < board.length &&
+                            Arrays.stream(neighbourCoords).flatMapToInt(a -> Arrays.stream(a)).min().getAsInt() >= 0) {
+                        // set the
+                        board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((i + 2) % 6, settlement);
+                        board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((i + 4) % 6, settlement);
+                    }
                 }
-                System.out.println("tile " + tile);
             }
         }
 
