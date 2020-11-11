@@ -28,8 +28,6 @@ class SingleTreeNode {
 
     // Total value of this node
     private double totValue;
-    // Total regret of this node (only used for regret matching)
-    private double totRegret;
     // Number of visits
     private int nVisits;
     // Number of FM calls and State copies up until this node
@@ -100,8 +98,6 @@ class SingleTreeNode {
         AbstractGameState rootState = state.copy();
         copyCount++;
         while (!stop) {
-            // IS-MCTS...we need to redeterminise on each step otherwise we are actually doing PIMC with a single
-            // determinisation! with a partially observable game, this could be rather dangerous
             if (player.params.openLoop) { // this assumes that copy(id) randomises the invisible components
                 state = player.params.redeterminise ? rootState.copy(player.getPlayerID()) : rootState.copy();
                 copyCount++;
@@ -109,7 +105,6 @@ class SingleTreeNode {
                 state = rootState;
             // TODO: Can we determinise in Closed Loop? Closed Loop currently means we do not advance the state though
             // the tree - so shuffling the cards at the root makes no difference.
-            //
 
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
@@ -139,6 +134,12 @@ class SingleTreeNode {
                 stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget;
             }
         }
+
+        if (statsLogger != null)
+            logTreeStatistics(statsLogger, numIters, elapsedTimer.elapsedMillis());
+    }
+
+    private void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new HashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
         stats.put("round", state.getTurnOrder().getRoundCounter());
@@ -151,7 +152,7 @@ class SingleTreeNode {
         stats.put("iterations", numIters);
         stats.put("fmCalls", fmCallsCount);
         stats.put("copyCalls", copyCount);
-        stats.put("time", elapsedTimer.elapsedMillis());
+        stats.put("time", timeTaken);
         stats.put("totalNodes", treeStats.totalNodes);
         stats.put("leafNodes", treeStats.totalLeaves);
         stats.put("maxDepth", treeStats.depthReached);
