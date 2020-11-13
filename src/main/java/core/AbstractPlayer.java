@@ -1,6 +1,5 @@
 package core;
 
-
 import core.actions.AbstractAction;
 
 public abstract class AbstractPlayer {
@@ -9,6 +8,7 @@ public abstract class AbstractPlayer {
     int playerID;
     // Forward model for the game
     AbstractForwardModel forwardModel;
+    String name;
 
     /* Final methods */
 
@@ -59,4 +59,10 @@ public abstract class AbstractPlayer {
      */
     public void registerUpdatedObservation(AbstractGameState gameState) {}
 
+    public void setName(String name) {this.name = name;}
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -3,13 +3,9 @@ package games.tictactoe;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
-import core.AbstractGameState;
-import core.AbstractForwardModel;
+import core.*;
 import utilities.Utils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static core.CoreConstants.VERBOSE;
 
@@ -19,7 +15,8 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
-        ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(tttgp.gridSize, tttgp.gridSize, Character.class, ' ');
+        int gridSize = tttgp.gridSize;
+        ((TicTacToeGameState)firstState).gridBoard = new GridBoard<>(gridSize, gridSize, Character.class, ' ');
     }
 
     @Override
@@ -46,7 +43,8 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
-        if (currentState.getTurnOrder().getRoundCounter() == (tttgp.gridSize * tttgp.gridSize)) {
+        int gridSize = tttgp.gridSize;
+        if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
             currentState.setGameStatus(Utils.GameResult.GAME_END);
             return;
         }

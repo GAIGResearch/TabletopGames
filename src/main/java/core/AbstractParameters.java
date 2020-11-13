@@ -1,28 +1,33 @@
 package core;
 
 import core.interfaces.ITunableParameters;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import java.io.FileReader;
 import java.util.*;
+import java.util.stream.*;
+
+import static java.util.stream.Collectors.*;
 
 public abstract class AbstractParameters {
 
-    // Random seed for the game
-    protected long randomSeed;
+    long randomSeed;
 
     public AbstractParameters(long seed) {
-        this.randomSeed = seed;
+        randomSeed = seed;
     }
-
-    /* Methods to be implemented by subclass */
 
     /**
      * Return a copy of this game parameters object, with the same parameters as in the original.
+     *
      * @return - new game parameters object.
      */
     protected abstract AbstractParameters _copy();
 
     /**
      * Checks if the given object is the same as the current.
+     *
      * @param o - other object to test equals for.
      * @return true if the two objects are equal, false otherwise
      */
@@ -33,6 +38,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the random seed for this game.
+     *
      * @return - random seed.
      */
     public long getRandomSeed() {
@@ -41,6 +47,7 @@ public abstract class AbstractParameters {
 
     /**
      * Copy this game parameter object.
+     *
      * @return - new object with the same parameters, but a new random seed.
      */
     public AbstractParameters copy() {
@@ -55,12 +62,13 @@ public abstract class AbstractParameters {
     public void randomize() {
         if (this instanceof ITunableParameters) {
             Random rnd = new Random(randomSeed);
-            HashMap<Integer, ArrayList<?>> searchSpace = ((ITunableParameters)this).getSearchSpace();
-            for (Map.Entry<Integer, ArrayList<?>> parameter: searchSpace.entrySet()) {
-                int nValues = parameter.getValue().size();
-                int randomChoice = rnd.nextInt(nValues);
-                ((ITunableParameters)this).setParameterValue(parameter.getKey(), parameter.getValue().get(randomChoice));
-            }
+            ITunableParameters params = (ITunableParameters) this;
+            params.getParameterNames().forEach(name -> {
+                        int nValues = params.getPossibleValues(name).size();
+                        int randomChoice = rnd.nextInt(nValues);
+                        params.setParameterValue(name, params.getPossibleValues(name).get(randomChoice));
+                    }
+            );
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not randomizing");
         }
@@ -72,8 +80,8 @@ public abstract class AbstractParameters {
      */
     public void reset() {
         if (this instanceof ITunableParameters) {
-            HashMap<Integer, Object> defaultValues = ((ITunableParameters)this).getDefaultParameterValues();
-            ((ITunableParameters)this).setParameterValues(defaultValues);
+            Map<String, Object> defaultValues = ((ITunableParameters) this).getDefaultParameterValues();
+            ((ITunableParameters) this).setParameterValues(defaultValues);
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not resetting.");
         }
