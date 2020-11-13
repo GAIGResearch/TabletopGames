@@ -1,6 +1,10 @@
 package games;
 
 import core.*;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
+import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -148,7 +152,10 @@ public enum GameType {
             }},
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
-            }});
+            }}),
+    Catan (2, 5,
+            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
+            new ArrayList<Mechanic>() {{ add(Influence); }});
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
@@ -178,6 +185,8 @@ public enum GameType {
                 return ColtExpress;
             case "dotsandboxes":
                 return DotsAndBoxes;
+            case "catan":
+                return Catan;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -238,6 +247,10 @@ public enum GameType {
                 forwardModel = new DBForwardModel();
                 gameState = new DBGameState(params, nPlayers);
                 break;
+            case Catan:
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -263,6 +276,8 @@ public enum GameType {
                 return new ColtExpressParameters(seed);
             case DotsAndBoxes:
                 return new DBParameters(seed);
+            case Catan:
+                return new CatanParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -321,6 +336,8 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
+            case Catan:
+                gui = new CatanGUI(game, ac);
         }
 
         return gui;
