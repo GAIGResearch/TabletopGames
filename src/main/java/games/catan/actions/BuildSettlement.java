@@ -5,15 +5,17 @@ import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 import games.catan.CatanTile;
 
+import java.util.Arrays;
+
 public class BuildSettlement extends AbstractAction {
-    int row;
-    int col;
+    int x;
+    int y;
     int vertex;
     int playerID;
 
-    public BuildSettlement(int row, int col, int vertex, int playerID){
-        this.row = row;
-        this.col = col;
+    public BuildSettlement(int x, int y, int vertex, int playerID){
+        this.x = x;
+        this.y = y;
         this.vertex = vertex;
         this.playerID = playerID;
     }
@@ -22,8 +24,8 @@ public class BuildSettlement extends AbstractAction {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
 
-        if (board[row][col].getSettlements()[vertex].getOwner() == -1) {
-            board[row][col].addSettlement(vertex, playerID);
+        if (board[x][y].getSettlements()[vertex].getOwner() == -1) {
+            board[x][y].addSettlement(vertex, playerID);
             return true;
         }
 
@@ -40,7 +42,7 @@ public class BuildSettlement extends AbstractAction {
         if (this == other) return true;
         if (other instanceof BuildSettlement){
             BuildSettlement otherAction = (BuildSettlement)other;
-            return row == otherAction.row && col == otherAction.col && vertex == otherAction.vertex && playerID == otherAction.playerID;
+            return x == otherAction.x && y == otherAction.y && vertex == otherAction.vertex && playerID == otherAction.playerID;
         }
         return false;
     }
@@ -52,6 +54,6 @@ public class BuildSettlement extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return "BuildSettlement x= " + x + " y= " + y + " vertex=" + vertex;
     }
 }

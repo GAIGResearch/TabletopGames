@@ -6,6 +6,7 @@ import core.Game;
 import games.GameType;
 import games.catan.gui.CatanGUI;
 import players.human.ActionController;
+import players.human.HumanConsolePlayer;
 import players.simple.RandomPlayer;
 
 import java.util.ArrayList;

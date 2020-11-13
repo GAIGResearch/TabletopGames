@@ -78,8 +78,10 @@ public class CatanBoardView extends JComponent {
                 // draw settlements
                 Settlement[] settlements = tile.getSettlements();
                 for (int i = 0; i < settlements.length; i++){
-                    if (settlements[i] != null && settlements[i].getOwner() != -1)
+//                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
+                    if (settlements[i] != null && settlements[i].getOwner() != -1) {
                         drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
+                    }
                 }
 
                 // lines below render cube coordinates and distances from middle
@@ -132,7 +134,9 @@ public class CatanBoardView extends JComponent {
     }
 
     public void drawSettlement(Graphics2D g, Point point, Color color, int city){
-        /* / \  settl.  / \___  city
+
+        /* point is the centre of the hexagon
+        *  / \  settl.  / \___  city
         * |   |         |    |
         * -----         ------
         * */

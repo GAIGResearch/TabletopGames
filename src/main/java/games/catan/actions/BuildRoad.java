@@ -6,14 +6,14 @@ import games.catan.CatanGameState;
 import games.catan.CatanTile;
 
 public class BuildRoad extends AbstractAction {
-    int row;
-    int col;
+    int x;
+    int y;
     int edge;
     int playerID;
 
-    public BuildRoad(int row, int col, int edge, int playerID){
-        this.row = row;
-        this.col = col;
+    public BuildRoad(int x, int y, int edge, int playerID){
+        this.x = x;
+        this.y = y;
         this.edge = edge;
         this.playerID = playerID;
     }
@@ -22,8 +22,8 @@ public class BuildRoad extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
-        if (board[row][col].getRoads()[edge].getOwner() == -1) {
-            return board[this.row][this.col].addRoad(edge, playerID);
+        if (board[x][y].getRoads()[edge].getOwner() == -1) {
+            return board[this.x][this.y].addRoad(edge, playerID);
         }
 
         return false;
@@ -31,7 +31,7 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        BuildRoad copy = new BuildRoad(row, col, edge, playerID);
+        BuildRoad copy = new BuildRoad(x, y, edge, playerID);
         return copy;
     }
 
@@ -40,7 +40,7 @@ public class BuildRoad extends AbstractAction {
         if (this == other) return true;
         if (other instanceof BuildRoad){
             BuildRoad otherAction = (BuildRoad)other;
-            return row == otherAction.row && col == otherAction.col && edge == otherAction.edge && playerID == otherAction.playerID;
+            return x == otherAction.x && y == otherAction.y && edge == otherAction.edge && playerID == otherAction.playerID;
         }
         return false;
     }
@@ -52,7 +52,6 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        // todo put random roads on the board
-        return "Buildroad in row=" + row + " col=" + col + " edge=" + edge;
+        return "Buildroad in x=" + x + " y=" + y + " edge=" + edge;
     }
 }

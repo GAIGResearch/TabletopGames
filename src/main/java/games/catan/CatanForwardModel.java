@@ -13,6 +13,7 @@ import games.catan.components.Settlement;
 import java.util.*;
 
 import static core.CoreConstants.playerHandHash;
+import static games.catan.CatanConstants.HEX_SIDES;
 
 public class CatanForwardModel extends AbstractForwardModel {
     private int rollCounter;
@@ -85,16 +86,16 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         // todo (mb) instead of random determine where to build settlement
         Random rnd = new Random();
-        int row = rnd.nextInt(7);
-        int col = rnd.nextInt(7);
-        int vertex = rnd.nextInt(6);
-        actions.add(new BuildSettlement(row, col, vertex, gameState.getCurrentPlayer()));
+        int x = rnd.nextInt(7);
+        int y = rnd.nextInt(7);
+        int vertex = rnd.nextInt(HEX_SIDES);
+        actions.add(new BuildSettlement(x, y, vertex, gameState.getCurrentPlayer()));
 
         // todo (mb) instead of random determine where the player can put roads
-        row = rnd.nextInt(7);
-        col = rnd.nextInt(7);
-        int edge = rnd.nextInt(6);
-//        actions.add(new BuildRoad(row, col, edge, gameState.getCurrentPlayer()));
+        x = rnd.nextInt(7);
+        y = rnd.nextInt(7);
+        int edge = rnd.nextInt(HEX_SIDES);
+//        actions.add(new BuildRoad(x, y, edge, gameState.getCurrentPlayer()));
 
 
         // todo (mb) some notes on rules
@@ -162,45 +163,47 @@ public class CatanForwardModel extends AbstractForwardModel {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                for (int i = 0; i < 6; i++) {
+                for (int edge = 0; edge < HEX_SIDES; edge++) {
                     // --------- Road ------------
                     // Road has already been set
-                    if (tile.getRoads()[i] != null) {
+                    if (tile.getRoads()[edge] != null) {
                         continue;
                     }
 
                     // set a new road without owner
                     Road road = new Road(-1);
-                    tile.setRoad(i, road);
+                    tile.setRoad(edge, road);
 
-                    int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, i);
+                    int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
                     // need to check if neighbour is in range
                     if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
                             Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
                         CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
                         // if in range then set road references
 
-                        neighbour.setRoad((i + 3) % 6, road);
+                        neighbour.setRoad((edge + 3) % HEX_SIDES, road);
                     }
                 }
-                for (int i = 0; i < 6; i++){
+                for (int vertex = 0; vertex < HEX_SIDES; vertex++){
 
                     // ------ Settlement ------------
                     // settlement has already been set so skip this loop
-                    if (tile.getSettlements()[i] != null){
+                    if (tile.getSettlements()[vertex] != null){
                         continue;
                     }
 
                     Settlement settlement = new Settlement(-1);
-                    tile.setSettlement(i, settlement);
+                    tile.setSettlement(vertex, settlement);
 
                     // Get the other 2 settlements along that vertex
-                    int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, i);
-                    if (Arrays.stream(neighbourCoords).flatMapToInt(a -> Arrays.stream(a)).max().getAsInt() < board.length &&
-                            Arrays.stream(neighbourCoords).flatMapToInt(a -> Arrays.stream(a)).min().getAsInt() >= 0) {
-                        // set the
-                        board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((i + 2) % 6, settlement);
-                        board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((i + 4) % 6, settlement);
+                    int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, vertex);
+                    if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
+                            Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
+                        board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((vertex + 2) % HEX_SIDES, settlement);
+                    }
+                    if (Arrays.stream(neighbourCoords[1]).max().getAsInt() < board.length &&
+                            Arrays.stream(neighbourCoords[1]).min().getAsInt() >= 0) {
+                        board[neighbourCoords[1][0]][neighbourCoords[1][1]].setSettlement((vertex + 4) % HEX_SIDES, settlement);
                     }
                 }
             }

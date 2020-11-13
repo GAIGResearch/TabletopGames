@@ -5,6 +5,8 @@ import games.catan.components.Settlement;
 
 import java.awt.*;
 
+import static games.catan.CatanConstants.HEX_SIDES;
+
 public class CatanTile {
     /*
     Implementation of a Hexagon structure using "even-r" representation, meaning that the hexagons are oriented with
@@ -38,9 +40,9 @@ public class CatanTile {
         this.x = x;
         this.y = y;
         roads = new Road[6];
-        settlements = new Settlement[6];
-        verticesCoords = new Point[6];
-        edgeCoords = new Point[6][2];
+        settlements = new Settlement[HEX_SIDES];
+        verticesCoords = new Point[HEX_SIDES];
+        edgeCoords = new Point[HEX_SIDES][2];
         hexagon = createHexagon();
         robber = false;
     }
@@ -50,8 +52,8 @@ public class CatanTile {
         this.y = y;
         this.roads = edges;
         this.settlements = vertices;
-        verticesCoords = new Point[6];
-        edgeCoords = new Point[6][2];
+        verticesCoords = new Point[HEX_SIDES];
+        edgeCoords = new Point[HEX_SIDES][2];
         hexagon = createHexagon();
         robber = false;
     }
@@ -85,7 +87,7 @@ public class CatanTile {
         }
         x_coord = offset_x + x * width;
         y_coord = offset_y + y * height * 0.75;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < HEX_SIDES; i++) {
             double angle_deg = i * 60 - 30;
             double angle_rad = Math.PI / 180 * angle_deg;
             int xval = (int) (x_coord + radius * Math.cos(angle_rad));
@@ -95,7 +97,7 @@ public class CatanTile {
         }
         // set correct coordinates for edges
         for (int i = 0; i < verticesCoords.length; i++){
-            edgeCoords[i] = new Point[]{verticesCoords[i], verticesCoords[(i + 1) % 6]};
+            edgeCoords[i] = new Point[]{verticesCoords[i], verticesCoords[(i + 1) % HEX_SIDES]};
         }
         return polygon;
     }
@@ -208,34 +210,34 @@ public class CatanTile {
         // returns coordinates to the other tile in the given direction
         // Even-r offset mapping; Different layouts require different values
         int[][][] evenr_directions = {
-                {{1, 0}, {1, -1}, {0, -1},
-                        {-1, 0}, {0, 1}, {1, 1}},
-                {{1, 0}, {0, -1}, {-1, -1},
-                        {-1, 0}, {-1, 1}, {0, 1}}
+                {{1, 0}, {1, 1}, {0, 1},
+                        {-1, 0}, {0, -1}, {1, -1}},
+                {{1, 0}, {0, 1}, {-1, 1},
+                        {-1, 0}, {-1, -1}, {0, -1}}
         };
-        int parity = tile.x & 1;
+        int parity = tile.y  & 1;
         int[] direction = evenr_directions[parity][edge];
         return new int[]{tile.x + direction[0], tile.y + direction[1]};
     }
 
-    public static int[][] get_neighbours_on_vertex(CatanTile tile, int edge){
+    public static int[][] get_neighbours_on_vertex(CatanTile tile, int vertex){
         // returns coordinates to the 2 other tiles on a vertex in a clockwise direction
         // Even-r offset mapping; Different layouts require different values
         int[][][] evenr_directions = {
-                {{1, 0}, {1, -1}, {0, -1},
-                        {-1, 0}, {0, 1}, {1, 1}},
-                {{1, 0}, {0, -1}, {-1, -1},
-                        {-1, 0}, {-1, 1}, {0, 1}}
+                {{1, 0}, {1, 1}, {0, 1},
+                        {-1, 0}, {0, -1}, {1, -1}},
+                {{1, 0}, {0, 1}, {-1, 1},
+                        {-1, 0}, {-1, -1}, {0, -1}}
         };
-        int parity = tile.x & 1;
+        int parity = tile.y & 1;
 
         // to get the previous element we go back to the previous index (-1) but to go around has to add 6 and check % 6
         // i.e: in case of vertex 0 it should go to 5
-        int[] direction_first = evenr_directions[parity][(edge + 5) % 6];
-        int[] direction_second = evenr_directions[parity][edge];
+        int[] direction_first = evenr_directions[parity][(vertex + 5) % HEX_SIDES];
+        int[] direction_second = evenr_directions[parity][vertex];
         // Add both coordinates to the tiles
-        int[][] coords = {{tile.x + direction_first[0], tile.y + direction_second[1]},
-                {tile.x + direction_first[0], tile.y + direction_second[1]}};
+        int[][] coords = {{tile.x + direction_first[0], tile.y + direction_first[1]},
+                {tile.x + direction_second[0], tile.y + direction_second[1]}};
         return coords;
     }
 }
