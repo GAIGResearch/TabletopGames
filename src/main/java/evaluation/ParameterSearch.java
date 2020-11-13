@@ -13,6 +13,8 @@ import utilities.StatSummary;
 import utilities.SummaryLogger;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,7 +45,8 @@ public class ParameterSearch {
                         "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) \n" +
                         "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
                         "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
-                        "\tseed=          Random seed for Game use (not used for NTBEA). Defaults to System.currentTimeMillis()"
+                        "\tseed=          Random seed for Game use (not used by NTBEA itself). Defaults to System.currentTimeMillis()\n" +
+                        "\tlogFile=       Output file with results of each run for easier statistical analysis"
         );
 
         if (argsList.size() < 3)
@@ -57,6 +60,7 @@ public class ParameterSearch {
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
+        String logfile = getArg(args, "logFile", "");
 
         // Create the SearchSpace, and report some useful stuff to the console.
         ITPSearchSpace searchSpace;
@@ -138,7 +142,7 @@ public class ParameterSearch {
                 true
         );
 
-        // Get the results. And then print them out.
+        // Get the results. And then log them.
         // This loops once for each complete repetition of NTBEA specified.
         // runNTBEA runs a complete set of trials, and spits out the mean and std error on the mean of the best sampled result
         // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
@@ -147,7 +151,7 @@ public class ParameterSearch {
             landscapeModel.reset();
             Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            printDetailsOfRun(retValue, searchSpace);
+            printDetailsOfRun(retValue, searchSpace, logfile);
             if (verbose) {
                 System.out.println("MCTS Statistics: ");
                 System.out.println(evaluator.statsLogger.toString());
@@ -158,7 +162,7 @@ public class ParameterSearch {
 
         }
         System.out.println("\nFinal Recommendation: ");
-        printDetailsOfRun(bestResult, searchSpace);
+        printDetailsOfRun(bestResult, searchSpace, logfile);
     }
 
 
@@ -173,26 +177,52 @@ public class ParameterSearch {
      *                    a more accurate estimate of their utility).
      * @param searchSpace The relevant searchSpace
      */
-    private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace) {
-        System.out.println(String.format("Recommended settings have score %.3g +/- %.3g:\t%s\n %s",
+    private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile) {
+        System.out.printf("Recommended settings have score %.3g +/- %.3g:\t%s\n %s%n",
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(Collectors.joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                        .map(p -> {
-                                    int paramIndex = p.a;
-                                    double valueIndex = p.b;
-                                    Object value = searchSpace.value(paramIndex, (int) valueIndex);
-                                    String valueString = value.toString();
-                                    if (value instanceof Integer) {
-                                        valueString = String.format("%d", value);
-                                    } else if (value instanceof Double) {
-                                        valueString = String.format("%.3g", value);
-                                    }
-                                    return String.format("\t%s:\t%s\n", searchSpace.name(paramIndex), valueString);
-                                }
-                        ).collect(Collectors.joining(" "))));
+                        .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b.intValue(), searchSpace)))
+                        .collect(Collectors.joining(" ")));
+
+        if (!logFile.isEmpty()) {
+            try {
+                File log = new File(logFile);
+                boolean fileExists = log.exists();
+                FileWriter writer = new FileWriter(log, true);
+                // if logFile does not yet exist, write a header line first
+                if (!fileExists) {
+                    List<String> headers = new ArrayList<>();
+                    headers.addAll(Arrays.asList("estimated value", "standard error"));
+                    headers.addAll(searchSpace.getSearchKeys());
+                    writer.write(String.join("\t", headers) + "\n");
+                }
+                // then write the output
+                String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
+                String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
+                        .map(p -> valueToString(p.a, p.b.intValue(), searchSpace))
+                        .collect(Collectors.joining("\t"));
+                writer.write(firstPart + values + "\n");
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println(e.getMessage() + " : Error accessing file " + logFile);
+            }
+        }
+
     }
 
+    private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace ss) {
+        Object value = ss.value(paramIndex, valueIndex);
+        String valueString = value.toString();
+        if (value instanceof Integer) {
+            valueString = String.format("%d", value);
+        } else if (value instanceof Double) {
+            valueString = String.format("%.3g", value);
+        }
+        return valueString;
+    }
 
     /**
      * The workhorse.

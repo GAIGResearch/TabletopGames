@@ -39,6 +39,7 @@ class SingleTreeNode {
 
     // State in this node (closed loop)
     private AbstractGameState state;
+    public AbstractGameState getState() { return state;}
 
     // Called from MCTSPlayer
     SingleTreeNode(MCTSPlayer player, List<AbstractAction> actionsAvailable, Random rnd) {
@@ -155,6 +156,7 @@ class SingleTreeNode {
         stats.put("time", timeTaken);
         stats.put("totalNodes", treeStats.totalNodes);
         stats.put("leafNodes", treeStats.totalLeaves);
+        stats.put("terminalNodes", treeStats.totalTerminalNodes);
         stats.put("maxDepth", treeStats.depthReached);
         stats.put("nActions", children.size());
         OptionalInt maxVisits = children.values().stream().filter(Objects::nonNull).mapToInt(n -> n.nVisits).max();
@@ -332,8 +334,8 @@ class SingleTreeNode {
 
         // Only advance the state if this is open loop
         if (player.params.openLoop) {
-            // we do not need to copy the state, as we advance this as we descend the tree
-            // in open loop we never re-use the state...the only purpose of storing it on the Node is
+            // We do not need to copy the state, as we advance this as we descend the tree.
+            // In open loop we never re-use the state...the only purpose of storing it on the Node is
             // to pick it up in the next uct() call as we descend the tree
             List<AbstractAction> nextActions = advance(state, bestAction.copy());
             selected.state = state;
@@ -350,15 +352,13 @@ class SingleTreeNode {
 
     public double exp3Value(AbstractAction action) {
         SingleTreeNode child = children.get(action);
-//        int nActions = state.getActions().size();
-//        double gamma = player.params.exploreEpsilon;
         double meanAdvantageFromAction = (child.totValue / child.nVisits) - (totValue / nVisits);
         return Math.exp(meanAdvantageFromAction);
     }
 
     public double rmValue(AbstractAction action) {
         // TODO: This is not quite correct for game in which not all actions are available for each visit
-        // TODO: (see comment in checkActions() - to be enhanced to keep track of this at some future point
+        // TODO: (see comment in checkActions() - to be enhanced to keep track of this at some future point)
         SingleTreeNode child = children.get(action);
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = child.totValue * nVisits / child.nVisits;

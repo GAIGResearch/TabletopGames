@@ -10,8 +10,10 @@ public class TreeStatistics {
     int depthReached = 0;
     int[] nodesAtDepth = new int[maxDepth];
     int[] leavesAtDepth = new int[maxDepth];
+    int[] gameTerminalNodesAtDepth = new int[maxDepth];
     int totalNodes;
     int totalLeaves;
+    int totalTerminalNodes;
     double[] nodeDistribution;
     double[] leafDistribution;
 
@@ -22,6 +24,8 @@ public class TreeStatistics {
             SingleTreeNode node = nodeQueue.poll();
             if (node.depth < maxDepth) {
                 nodesAtDepth[node.depth]++;
+                if (!node.getState().isNotTerminal())
+                    gameTerminalNodesAtDepth[node.depth]++;
                 for (SingleTreeNode child : node.children.values()) {
                     if (child != null)
                         nodeQueue.add(child);
