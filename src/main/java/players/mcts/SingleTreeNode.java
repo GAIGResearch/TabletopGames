@@ -311,11 +311,6 @@ class SingleTreeNode {
                 case Paranoid:
                     uctValue = iAmMoving ? childValue + explorationTerm : -childValue + explorationTerm;
                     break;
-                case Paranoid2:
-                    // This is the old policy - I'm not sure I agree that the exploration term should be treated
-                    // in the same way as the exploitation term (childValue). Hence my two versions of Paranoid. James.
-                    uctValue = iAmMoving ? childValue + explorationTerm : -childValue - explorationTerm;
-                    break;
                 case SelfOnly:
                     uctValue = childValue + explorationTerm;
             }

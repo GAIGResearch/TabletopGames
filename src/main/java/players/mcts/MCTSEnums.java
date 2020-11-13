@@ -19,7 +19,7 @@ public class MCTSEnums {
     }
 
     public enum OpponentTreePolicy {
-        SelfOnly, Paranoid, Paranoid2
+        SelfOnly, Paranoid
         // TODO: MaxN to be added at some point - but that needs a vector reward to be back-propagated
     }
 

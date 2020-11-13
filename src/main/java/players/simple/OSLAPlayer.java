@@ -64,4 +64,9 @@ public class OSLAPlayer extends AbstractPlayer {
         return bestAction;
     }
 
+    @Override
+    public String toString() {
+        return "OSLA";
+    }
+
 }
