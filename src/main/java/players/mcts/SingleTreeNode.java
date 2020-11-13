@@ -174,7 +174,7 @@ class SingleTreeNode {
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && state.getActions().size() > 0) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.state.getActions().size() > 0) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
