@@ -159,12 +159,12 @@ public class CatanForwardModel extends AbstractForwardModel {
             }
         }
 
-        // todo traverse through the board and set vertices and edges
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
+
+                // --------- Road ------------
                 for (int edge = 0; edge < HEX_SIDES; edge++) {
-                    // --------- Road ------------
                     // Road has already been set
                     if (tile.getRoads()[edge] != null) {
                         continue;
@@ -175,18 +175,17 @@ public class CatanForwardModel extends AbstractForwardModel {
                     tile.setRoad(edge, road);
 
                     int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
-                    // need to check if neighbour is in range
+                    // need to check if neighbour is on the board
                     if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
                             Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
-                        CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
                         // if in range then set road references
-
+                        CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
                         neighbour.setRoad((edge + 3) % HEX_SIDES, road);
                     }
                 }
-                for (int vertex = 0; vertex < HEX_SIDES; vertex++){
 
-                    // ------ Settlement ------------
+                // ------ Settlement ------------
+                for (int vertex = 0; vertex < HEX_SIDES; vertex++){
                     // settlement has already been set so skip this loop
                     if (tile.getSettlements()[vertex] != null){
                         continue;
@@ -195,7 +194,8 @@ public class CatanForwardModel extends AbstractForwardModel {
                     Settlement settlement = new Settlement(-1);
                     tile.setSettlement(vertex, settlement);
 
-                    // Get the other 2 settlements along that vertex
+                    // Get the other 2 settlements along that vertex and set both of them separately
+                    // has to do it in 2 steps as there could cases with only 2 tiles on along a vertex
                     int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, vertex);
                     if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
                             Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
@@ -208,11 +208,11 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
             }
         }
-
         return board;
     }
 
     public int rollDice(long seed){
+        /* Rolls 2 random dices givesn a single random seed */
         Random r1 = new Random(seed + rollCounter);
         rollCounter += 1;
         Random r2 = new Random(seed + rollCounter);
