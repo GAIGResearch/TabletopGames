@@ -30,4 +30,9 @@ public class RandomPlayer extends AbstractPlayer {
         List<AbstractAction> actions = observation.getActions();
         return actions.get(randomAction);
     }
+
+    @Override
+    public String toString() {
+        return "Random";
+    }
 }

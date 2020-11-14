@@ -89,7 +89,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * @param <T>   The type of the parameter
      */
     public <T> void addTunableParameter(String name, T defaultValue, List<T> allSettings) {
-        parameterNames.add(name);
+        if (!parameterNames.contains(name)) parameterNames.add(name);
         defaultValues.put(name, defaultValue);
         parameterTypes.put(name, defaultValue.getClass());
         possibleValues.put(name, new ArrayList<>(allSettings));
@@ -259,7 +259,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     /**
-     * Instantiate paramaters from a JSONObject
+     * Instantiate parameters from a JSONObject
      */
     public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
@@ -275,20 +275,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
 
         }
-/*        int budget = getParam("budget", rawData, -1);
-        switch (retValue.budgetType) {
-            case PlayerConstants.BUDGET_TIME:
-                retValue.timeBudget = (budget == -1) ? retValue.timeBudget : budget;
-                break;
-            case PlayerConstants.BUDGET_ITERATIONS:
-                retValue.iterationsBudget = (budget == -1) ? retValue.iterationsBudget : budget;
-                break;
-            case PlayerConstants.BUDGET_FM_CALLS:
-                retValue.fmCallsBudget = (budget == -1) ? retValue.fmCallsBudget : budget;
-                break;
-            default:
-                throw new AssertionError("Unknown Budget Type " + retValue.budgetType);
-        }*/
+        params._reset();
 
         // We should also check that there are no other properties in there
         allParams.add("algorithm");
@@ -309,9 +296,17 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      */
     @SuppressWarnings("unchecked")
     private static <T> T getParam(String name, JSONObject json, T defaultValue) {
-        Object data = json.getOrDefault(name, defaultValue);
+        Object finalData = json.getOrDefault(name, defaultValue);
+        Object data = (finalData instanceof Long) ? new Integer(((Long) finalData).intValue()): finalData;
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
+        if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
+            Optional<?> matchingValue =  Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
+            if (matchingValue.isPresent()) {
+                return (T) matchingValue.get();
+            }
+            throw new AssertionError("No Enum match found for " + name + " in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
+        }
         return defaultValue;
     }
 
