@@ -71,7 +71,7 @@ public class DBGameState extends AbstractGameState {
 
     @Override
     protected double _getScore(int playerId) {
-        return 0;  // TODO
+        return nCellsPerPlayer[playerId];
     }
 
     @Override
