@@ -29,13 +29,14 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     public MCTSPlayer(long seed) {
-        this.params = new MCTSParams(seed);
+        this(new MCTSParams(seed));
         rnd = new Random(seed);
     }
 
     public MCTSPlayer(MCTSParams params) {
         this(params, "MCTSPlayer");
     }
+
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
@@ -44,18 +45,18 @@ public class MCTSPlayer extends AbstractPlayer {
         setName(name);
     }
 
-    public MCTSPlayer(IStateHeuristic heuristic){
+    public MCTSPlayer(IStateHeuristic heuristic) {
         this(System.currentTimeMillis());
         this.heuristic = heuristic;
     }
 
-    public MCTSPlayer(long seed, IStateHeuristic heuristic){
+    public MCTSPlayer(long seed, IStateHeuristic heuristic) {
         this.params = new MCTSParams(seed);
         rnd = new Random(seed);
         this.heuristic = heuristic;
     }
 
-    public MCTSPlayer( MCTSParams params, IStateHeuristic heuristic){
+    public MCTSPlayer(MCTSParams params, IStateHeuristic heuristic) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         this.heuristic = heuristic;

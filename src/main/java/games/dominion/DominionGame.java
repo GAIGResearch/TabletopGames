@@ -27,13 +27,11 @@ public class DominionGame extends Game {
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         MCTSParams bigMoneyRollout = new MCTSParams(8743);
         bigMoneyRollout.rolloutType = MCTSEnums.strategies.Dominion_BigMoney;
-        bigMoneyRollout.rolloutsEnabled = true;
         bigMoneyRollout.K = 5.0;
         bigMoneyRollout.rolloutLength = 100;
 
         MCTSParams actionRollout = new MCTSParams(8743);
         actionRollout.rolloutType = MCTSEnums.strategies.Dominion_PlayActions;
-        actionRollout.rolloutsEnabled = true;
         actionRollout.K = 5.0;
         actionRollout.rolloutLength = 100;
 

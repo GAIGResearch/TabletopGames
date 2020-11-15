@@ -30,7 +30,6 @@ public class LoveLetterGUI extends AbstractGUI {
     int width, height;
     // List of player hand + discard views
     LoveLetterPlayerView[] playerHands;
-    LoveLetterDeckView[] playerDiscards; // TODO
     // Draw pile view
     LoveLetterDeckView drawPile;
     LoveLetterDeckView reserve;  // TODO
@@ -129,7 +128,7 @@ public class LoveLetterGUI extends AbstractGUI {
             // TODO: pause after round finished, full display
             
             if (gameState.getCurrentPlayer() != activePlayer) {
-                playerHands[activePlayer].setCardHighlight(-1);
+                playerHands[activePlayer].handCards.setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
             }
 
@@ -140,10 +139,10 @@ public class LoveLetterGUI extends AbstractGUI {
                 if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
                         || i == humanID
                         || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-                    playerHands[i].setFront(true);
+                    playerHands[i].handCards.setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
-                    playerHands[i].setFront(false);
+                    playerHands[i].handCards.setFront(false);
                 }
 
                 // Highlight active player

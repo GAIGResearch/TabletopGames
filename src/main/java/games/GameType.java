@@ -5,6 +5,7 @@ import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
+import games.dominion.gui.DominionGUI;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUI;
 import games.dotsboxes.DBGameState;
@@ -268,6 +269,10 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
+                break;
+            case Dominion:
+                gui = new DominionGUI(game, ac, human);
+                break;
         }
 
         return gui;

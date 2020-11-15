@@ -22,7 +22,7 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 public class ExplodingKittensGUI extends AbstractGUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 100;
+    final static int playerAreaHeight = 135;
     final static int ekCardWidth = 90;
     final static int ekCardHeight = 110;
 
@@ -78,7 +78,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length-1];
+                    String agentName = split[split.length - 1];
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -131,7 +131,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
             }
 
             // Update decks and visibility
-            ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gameState;
+            ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
                 if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER

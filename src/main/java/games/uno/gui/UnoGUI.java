@@ -100,8 +100,8 @@ public class UnoGUI extends AbstractGUI {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                discardPile = new UnoDeckView(ugs.getDiscardDeck(), true, ugp.getDataPath());
-                drawPile = new UnoDeckView(ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath());
+                discardPile = new UnoDeckView(ugs.getDiscardDeck(), true, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
+                drawPile = new UnoDeckView(ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 JPanel jp = new JPanel();
@@ -128,7 +128,7 @@ public class UnoGUI extends AbstractGUI {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
-                playerHands[activePlayer].setCardHighlight(-1);
+                playerHands[activePlayer].playerHandView.setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
             }
 
@@ -139,10 +139,10 @@ public class UnoGUI extends AbstractGUI {
                 if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
                         || i == humanID
                         || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-                    playerHands[i].setFront(true);
+                    playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
-                    playerHands[i].setFront(false);
+                    playerHands[i].playerHandView.setFront(false);
                 }
 
                 // Highlight active player
