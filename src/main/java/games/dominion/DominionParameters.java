@@ -8,6 +8,7 @@ import java.util.*;
 public class DominionParameters extends AbstractParameters {
 
     Map<CardType, Integer> cardsUsed = new HashMap<>();
+    String dataPath = "data/dominion/";
 
     public DominionParameters(long seed) {
         super(seed);
@@ -78,5 +79,9 @@ public class DominionParameters extends AbstractParameters {
             return dp.cardsUsed.equals(cardsUsed);
         }
         return false;
+    }
+
+    public String getDataPath() {
+        return dataPath;
     }
 }

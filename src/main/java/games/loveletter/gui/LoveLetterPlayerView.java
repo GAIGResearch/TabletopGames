@@ -27,9 +27,9 @@ public class LoveLetterPlayerView extends JComponent {
     LoveLetterDeckView discardCards;
 
     public LoveLetterPlayerView(Deck<LoveLetterCard> hand, Deck<LoveLetterCard> discard, int playerId, String dataPath) {
-        handCards = new LoveLetterDeckView(hand, false, dataPath,
+        handCards = new LoveLetterDeckView(playerId, hand, false, dataPath,
                 new Rectangle(border, border, llCardWidth*2, llCardHeight));
-        discardCards = new LoveLetterDeckView(discard, true, dataPath,
+        discardCards = new LoveLetterDeckView(playerId, discard, true, dataPath,
                 new Rectangle(border + llCardWidth*2 + buffer, border, playerAreaWidth-llCardWidth*2, llCardHeight));
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;

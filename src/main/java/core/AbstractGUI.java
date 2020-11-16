@@ -26,6 +26,8 @@ public abstract class AbstractGUI extends JFrame {
     protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase;
     private WindowInput wi;
 
+    protected int width, height;
+
     public AbstractGUI(ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
@@ -233,5 +235,10 @@ public abstract class AbstractGUI extends JFrame {
                 actionButton.setButtonAction(null, "");
             }
         }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
     }
 }

@@ -25,7 +25,7 @@ public class UnoPlayerView extends JComponent {
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
-        this.playerHandView = new UnoDeckView(d, true, dataPath, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
+        this.playerHandView = new UnoDeckView(playerId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
     }
 
     /**

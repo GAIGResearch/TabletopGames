@@ -40,8 +40,8 @@ public class ExplodingKittensDeckView extends DeckView<ExplodingKittensCard> {
      * @param visible - true if whole deck visible
      * @param dataPath - path to assets
      */
-    public ExplodingKittensDeckView(Deck<ExplodingKittensCard> d, boolean visible, String dataPath) {
-        super(d, visible, ekCardWidth, ekCardHeight, new Rectangle(5, 5, playerAreaWidth, playerAreaHeight));
+    public ExplodingKittensDeckView(int player, Deck<ExplodingKittensCard> d, boolean visible, String dataPath) {
+        super(player, d, visible, ekCardWidth, ekCardHeight, new Rectangle(5, 5, playerAreaWidth, playerAreaHeight));
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
         this.dataPath = dataPath;
         cardCatImageMapping = new HashMap<>();

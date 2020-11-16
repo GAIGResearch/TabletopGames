@@ -2,8 +2,6 @@ package gui.views;
 
 import core.components.*;
 import core.components.Component;
-import games.explodingkittens.cards.ExplodingKittensCard;
-
 import java.awt.*;
 import java.awt.event.*;
 
@@ -22,17 +20,18 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     // If currently highlighting (ALT)
     protected boolean highlighting;
     // ID of player showing
-    int activePlayer;
+    int playerID = -1;
 
     // card and display sizes
     protected int itemWidth, itemHeight;
 
-    public DeckView(Deck<T> d, boolean visible, int componentWidth, int componentHeight) {
-        this(d, visible, componentWidth, componentHeight, new Rectangle(0, 0, componentWidth, componentHeight));
+    public DeckView(int player, Deck<T> d, boolean visible, int componentWidth, int componentHeight) {
+        this(player, d, visible, componentWidth, componentHeight, new Rectangle(0, 0, componentWidth, componentHeight));
     }
 
-    public DeckView(Deck<T> d, boolean visible, int componentWidth, int componentHeight, Rectangle display) {
-        super(d, display.width, componentHeight);
+    public DeckView(int player, Deck<T> d, boolean visible, int componentWidth, int componentHeight, Rectangle display) {
+        super(d, display.width, display.height);
+        this.playerID = player;
         this.itemHeight = componentHeight;
         this.itemWidth = componentWidth;
         this.rect = display;
@@ -123,10 +122,10 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     }
 
     private boolean componentVisibility(Deck<T> deck, int index) {
-        if (deck instanceof PartialObservableDeck && activePlayer != -1) {
-            return ((PartialObservableDeck<T>) deck).isComponentVisible(index, activePlayer);
+        if (deck instanceof PartialObservableDeck && playerID != -1) {
+            return ((PartialObservableDeck<T>) deck).isComponentVisible(index, playerID);
         }
-        return true;
+        return false; //
     }
 
     /**
@@ -203,9 +202,5 @@ public abstract class DeckView<T extends Component> extends ComponentView {
 
     public void setCardHighlight(int cardHighlight) {
         this.cardHighlight = cardHighlight;
-    }
-
-    public void informActivePlayer(int player) {
-        this.activePlayer = player;
     }
 }

@@ -26,8 +26,6 @@ public class UnoGUI extends AbstractGUI {
     final static int unoCardWidth = 90;
     final static int unoCardHeight = 115;
 
-    // Width and height of total window
-    int width, height;
     // List of player hand views
     UnoPlayerView[] playerHands;
     // Discard pile view
@@ -100,8 +98,8 @@ public class UnoGUI extends AbstractGUI {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                discardPile = new UnoDeckView(ugs.getDiscardDeck(), true, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
-                drawPile = new UnoDeckView(ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
+                discardPile = new UnoDeckView(-1, ugs.getDiscardDeck(), true, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
+                drawPile = new UnoDeckView(-1, ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 JPanel jp = new JPanel();
@@ -169,8 +167,4 @@ public class UnoGUI extends AbstractGUI {
         repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
-    }
 }

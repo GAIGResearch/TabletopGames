@@ -18,7 +18,6 @@ import java.util.Collection;
 
 public class DBGUI extends AbstractGUI {
     DBGridBoardView view;
-    int width, height;
 
     public DBGUI(AbstractGameState gameState, ActionController ac) {
         this(gameState, ac, defaultDisplayWidth, defaultDisplayHeight);
@@ -53,8 +52,4 @@ public class DBGUI extends AbstractGUI {
         repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
-    }
 }

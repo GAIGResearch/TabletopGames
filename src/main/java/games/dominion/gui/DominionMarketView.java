@@ -1,4 +1,16 @@
 package games.dominion.gui;
 
-public class DominionMarketView {
+import games.dominion.DominionGameState;
+
+import javax.swing.*;
+
+public class DominionMarketView extends JComponent {
+
+    public DominionMarketView(DominionGameState state) {
+
+    }
+
+    public void update(DominionGameState state) {
+
+    }
 }

@@ -100,7 +100,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                drawPile = new LoveLetterDeckView(llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath());
+                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath());
                 centerArea.add(drawPile);
                 JPanel jp = new JPanel();
                 jp.setLayout(new GridBagLayout());

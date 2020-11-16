@@ -36,8 +36,6 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int playerSize = 40;
     final static int lootSize = 20;
 
-    // Width and height of frame display
-    int width, height;
     // Player views
     ColtExpressPlayerView[] playerHands;
     // Planned actions deck view
@@ -173,8 +171,4 @@ public class ColtExpressGUI extends AbstractGUI {
         repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
-    }
 }

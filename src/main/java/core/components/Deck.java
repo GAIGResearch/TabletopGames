@@ -154,11 +154,7 @@ public class Deck<T extends Component> extends Component {
      * @return true if not over capacity, false otherwise.
      */
     public boolean add(Deck<T> d){
-        components.addAll(d.components);
-        for (T comp: d.components) {
-            comp.setOwnerId(ownerId);
-        }
-        return capacity == -1 || components.size() <= capacity;
+        return this.add(d, 0);
     }
 
     /**

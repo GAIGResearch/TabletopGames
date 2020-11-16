@@ -26,7 +26,7 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
      * @param dataPath - path to assets
      */
     public ExplodingKittensDiscardView(Deck<ExplodingKittensCard> d, Stack<AbstractAction> actionStack, boolean visible, String dataPath) {
-        super(d, visible, dataPath);
+        super(-1, d, visible, dataPath);
         this.actionStack = actionStack;
         catImagesBkup = new ArrayList<>();
         catImagesBkup.addAll(catImages);
