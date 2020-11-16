@@ -73,7 +73,7 @@ public class UnoGUI extends AbstractGUI {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    UnoPlayerView playerHand = new UnoPlayerView(ugs.getPlayerDecks().get(i), i, ugp.getDataPath());
+                    UnoPlayerView playerHand = new UnoPlayerView(ugs.getPlayerDecks().get(i), i, humanID, ugp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");

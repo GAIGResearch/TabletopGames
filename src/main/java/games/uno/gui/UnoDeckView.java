@@ -22,8 +22,8 @@ public class UnoDeckView extends DeckView<UnoCard> {
      * @param visible - true if whole deck visible
      * @param dataPath - path to assets
      */
-    public UnoDeckView(int player, Deck<UnoCard> d, boolean visible, String dataPath, Rectangle rect) {
-        super(player, d, visible, unoCardWidth, unoCardHeight, rect);
+    public UnoDeckView(int human, Deck<UnoCard> d, boolean visible, String dataPath, Rectangle rect) {
+        super(human, d, visible, unoCardWidth, unoCardHeight, rect);
         this.dataPath = dataPath;
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
     }

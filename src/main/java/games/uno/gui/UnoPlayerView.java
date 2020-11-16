@@ -21,11 +21,11 @@ public class UnoPlayerView extends JComponent {
     int borderBottom = 20;
     int width, height;
 
-    public UnoPlayerView(Deck<UnoCard> d, int playerId, String dataPath) {
+    public UnoPlayerView(Deck<UnoCard> d, int playerId, int humanId, String dataPath) {
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
-        this.playerHandView = new UnoDeckView(playerId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
+        this.playerHandView = new UnoDeckView(humanId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
     }
 
     /**

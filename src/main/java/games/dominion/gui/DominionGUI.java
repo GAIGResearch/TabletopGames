@@ -62,7 +62,7 @@ public class DominionGUI extends AbstractGUI {
             JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
             int next = 0;
             for (int i = 0; i < nPlayers; i++) {
-                DominionPlayerView playerView = new DominionPlayerView(i, params.getDataPath(), state);
+                DominionPlayerView playerView = new DominionPlayerView(i, humanId, params.getDataPath(), state);
 
                 // Get agent name
                 String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");

@@ -20,7 +20,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     // If currently highlighting (ALT)
     protected boolean highlighting;
     // ID of player showing
-    int playerID = -1;
+    int humanId = -1;
 
     // card and display sizes
     protected int itemWidth, itemHeight;
@@ -31,7 +31,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
 
     public DeckView(int player, Deck<T> d, boolean visible, int componentWidth, int componentHeight, Rectangle display) {
         super(d, display.width, display.height);
-        this.playerID = player;
+        this.humanId = player;
         this.itemHeight = componentHeight;
         this.itemWidth = componentWidth;
         this.rect = display;
@@ -122,8 +122,8 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     }
 
     private boolean componentVisibility(Deck<T> deck, int index) {
-        if (deck instanceof PartialObservableDeck && playerID != -1) {
-            return ((PartialObservableDeck<T>) deck).isComponentVisible(index, playerID);
+        if (deck instanceof PartialObservableDeck && humanId != -1) {
+            return ((PartialObservableDeck<T>) deck).isComponentVisible(index, humanId);
         }
         return false; //
     }

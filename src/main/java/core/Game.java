@@ -674,7 +674,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(LoveLetter, players, seed, ac, false);
+        runOne(Dominion, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();

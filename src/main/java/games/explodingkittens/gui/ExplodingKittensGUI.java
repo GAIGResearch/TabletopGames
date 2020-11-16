@@ -72,7 +72,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(i, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
+                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(humanID, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");

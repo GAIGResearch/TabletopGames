@@ -1,6 +1,7 @@
 package games.dominion.gui;
 
 import games.dominion.*;
+import org.intellij.lang.annotations.Flow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +18,9 @@ public class DominionPlayerView extends JComponent {
 
     // Width and height of display area
     int width, height;
-    // ID of player this is showing
+    // ID of player who may click
+    int humanId;
+    //ID of the player
     int playerId;
 
     int actions;
@@ -29,20 +32,27 @@ public class DominionPlayerView extends JComponent {
     int textHeight = 20;
     int handWidth = playerAreaWidth - cardWidth - border * 2;
 
-    public DominionPlayerView(int playerId, String dataPath, DominionGameState state) {
+    public DominionPlayerView(int playerId, int humanId, String dataPath, DominionGameState state) {
+        this.humanId = humanId;
         this.playerId = playerId;
         this.width = playerAreaWidth + border * 2;
         this.height = playerAreaHeight + textHeight + border;
-        playerHand = new DominionDeckView(playerId, state.getDeck(DeckType.HAND, playerId), false, dataPath,
-                new Rectangle(border, border * 2 + cardHeight + textHeight * 2, handWidth, cardHeight));
-        playerDiscard = new DominionDeckView(playerId, state.getDeck(DeckType.DISCARD, playerId), true, dataPath,
-                new Rectangle(border * 2 + handWidth, border + textHeight, cardWidth, cardHeight));
+        playerHand = new DominionDeckView(humanId, state.getDeck(DeckType.HAND, playerId), false, dataPath,
+                new Rectangle(0, 0, handWidth, cardHeight));
+        playerDiscard = new DominionDeckView(humanId, state.getDeck(DeckType.DISCARD, playerId), true, dataPath,
+                new Rectangle(0, 0, cardWidth, cardHeight));
         playerDiscard.minCardOffset = 0;
-        playerDraw = new DominionDeckView(playerId, state.getDeck(DeckType.DRAW, playerId), false, dataPath,
-                new Rectangle(border * 2 + handWidth, border * 2 + cardHeight + textHeight * 2, cardWidth, cardHeight));
+        playerDraw = new DominionDeckView(humanId, state.getDeck(DeckType.DRAW, playerId), false, dataPath,
+                new Rectangle(0, 0, cardWidth, cardHeight));
         playerDraw.minCardOffset = 0;
-        playerTableau = new DominionDeckView(playerId, state.getDeck(DeckType.TABLE, playerId), true, dataPath,
-                new Rectangle(border, border + textHeight, handWidth, cardHeight));
+        playerTableau = new DominionDeckView(humanId, state.getDeck(DeckType.TABLE, playerId), true, dataPath,
+                new Rectangle(0, 0, handWidth, cardHeight));
+
+        this.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 20));
+        this.add(playerTableau);
+        this.add(playerDiscard);
+        this.add(playerHand);
+        this.add(playerDraw);
     }
 
     /**
@@ -52,10 +62,10 @@ public class DominionPlayerView extends JComponent {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        playerHand.drawDeck((Graphics2D) g);
-        playerDiscard.drawDeck((Graphics2D) g);
-        playerDraw.drawDeck((Graphics2D) g);
-        playerTableau.drawDeck((Graphics2D) g);
+   //     playerHand.drawDeck((Graphics2D) g);
+   //     playerDiscard.drawDeck((Graphics2D) g);
+   //     playerDraw.drawDeck((Graphics2D) g);
+   //     playerTableau.drawDeck((Graphics2D) g);
 
         g.setFont(Font.getFont(Font.SANS_SERIF));
         g.setColor(Color.gray);

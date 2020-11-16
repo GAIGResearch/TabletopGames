@@ -31,8 +31,8 @@ public class LoveLetterDeckView extends DeckView<LoveLetterCard> {
      * @param dataPath - path to assets
      * @param rect - the location of the Deck
      */
-    public LoveLetterDeckView(int player, Deck<LoveLetterCard> d, boolean visible, String dataPath, Rectangle rect) {
-        super(player, d, visible, llCardWidth, llCardHeight, rect);
+    public LoveLetterDeckView(int human, Deck<LoveLetterCard> d, boolean visible, String dataPath, Rectangle rect) {
+        super(human, d, visible, llCardWidth, llCardHeight, rect);
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
         this.dataPath = dataPath;
     }

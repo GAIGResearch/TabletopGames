@@ -22,7 +22,7 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 public class LoveLetterGUI extends AbstractGUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 130;
+    final static int playerAreaHeight = 135;
     final static int llCardWidth = 90;
     final static int llCardHeight = 115;
 
@@ -75,7 +75,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
                     LoveLetterPlayerView playerHand = new LoveLetterPlayerView(llgs.getPlayerHandCards().get(i),
-                            llgs.getPlayerDiscardCards().get(i), i, llp.getDataPath());
+                            llgs.getPlayerDiscardCards().get(i), i, humanID, llp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -100,7 +100,8 @@ public class LoveLetterGUI extends AbstractGUI {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath());
+                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
+                        new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                 centerArea.add(drawPile);
                 JPanel jp = new JPanel();
                 jp.setLayout(new GridBagLayout());
