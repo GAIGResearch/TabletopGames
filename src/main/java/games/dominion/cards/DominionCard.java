@@ -39,6 +39,7 @@ public class DominionCard extends Card {
             case WOODCUTTER:
             case MARKET:
             case FESTIVAL:
+            case CELLAR:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -71,6 +72,8 @@ public class DominionCard extends Card {
                 return new Festival(playerId);
             case MARKET:
                 return new Market(playerId);
+            case CELLAR:
+                return new Cellar(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

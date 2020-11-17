@@ -1,19 +1,15 @@
 package games.dominion;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.dominion.actions.BuyCard;
+import core.*;
+import core.actions.*;
+import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 import utilities.Utils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+
+import static java.util.stream.Collectors.*;
 
 public class DominionForwardModel extends AbstractForwardModel {
     /**
@@ -47,18 +43,26 @@ public class DominionForwardModel extends AbstractForwardModel {
         DominionGameState state = (DominionGameState) currentState;
 
         action.execute(state);
+
+        // we may be in an extended action, so update that
+        if (state.actionInProgress != null) {
+            state.actionInProgress.registerActionTaken(state, action);
+            if (state.actionInProgress.executionComplete())
+                state.setActionInProgress(null);
+        }
         int playerID = state.getCurrentPlayer();
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                if (state.actionsLeftForCurrentPlayer < 1 || action instanceof DoNothing) {
+                if (!state.isActionInProgress() &&
+                        (state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase)) {
                     // change phase
                     state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
                     // no change to current player
                 }
                 break;
             case "Buy":
-                if (state.buysLeftForCurrentPlayer < 1 || action instanceof DoNothing) {
+                if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                     // change phase
                     if (state.gameOver()) {
                         endOfGameProcessing(state);
@@ -98,23 +102,25 @@ public class DominionForwardModel extends AbstractForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
+                if (state.isActionInProgress()) {
+                    return state.actionInProgress.followOnActions(state);
+                }
                 if (state.actionsLeft() > 0) {
                     Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
-                            .filter(DominionCard::isActionCard).collect(Collectors.toSet());
-                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID)).collect(Collectors.toList());
-                    availableActions.add(new DoNothing());
+                            .filter(DominionCard::isActionCard).collect(toSet());
+                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID)).collect(toList());
+                    availableActions.add(new EndPhase());
                     return availableActions;
                 }
-                return Arrays.asList(new DoNothing());
-            // No Action cards are yet implemented
+                return Arrays.asList(new EndPhase());
             case "Buy":
                 // we return every available card for purchase within our price range
                 int budget = state.availableSpend(playerID);
                 List<AbstractAction> options = state.cardsAvailable.keySet().stream()
                         .filter(ct -> state.cardsAvailable.get(ct) > 0 && ct.getCost() <= budget)
                         .map(ct -> new BuyCard(ct, playerID))
-                        .collect(Collectors.toList());
-                options.add(new DoNothing());
+                        .collect(toList());
+                options.add(new EndPhase());
                 return options;
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());

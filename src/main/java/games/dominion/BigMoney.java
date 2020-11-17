@@ -3,8 +3,8 @@ package games.dominion;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import games.dominion.actions.BuyCard;
+import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
 
 import java.util.*;
@@ -25,16 +25,16 @@ public class BigMoney extends AbstractPlayer {
         int provinces = state.cardsAvailable.getOrDefault(CardType.PROVINCE, 0);
 
         if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
-            return new DoNothing();
+            return new EndPhase();
 
         switch (cash) {
             case 0:
             case 1:
-                return new DoNothing();
+                return new EndPhase();
             case 2:
                 if (provinces < 4 && actions.contains(new BuyCard(CardType.ESTATE, getPlayerID())))
                     return new BuyCard(CardType.ESTATE, getPlayerID());
-                return new DoNothing();
+                return new EndPhase();
             case 3:
             case 4:
                 return new BuyCard(CardType.SILVER, getPlayerID());

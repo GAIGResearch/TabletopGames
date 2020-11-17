@@ -1,7 +1,6 @@
 package games.dominion.test;
 
 import core.AbstractPlayer;
-import core.actions.DoNothing;
 import core.components.*;
 import games.dominion.*;
 import games.dominion.DominionGameState.*;
@@ -72,7 +71,7 @@ public class CoreGameLoop {
                 case 1:
                 case 0:
                     assertTrue(availableCards.contains(CardType.COPPER));
-                    assertTrue(state.getActions().contains(new DoNothing()));
+                    assertTrue(state.getActions().contains(new EndPhase()));
             }
         }
     }
@@ -124,7 +123,7 @@ public class CoreGameLoop {
             assertEquals(4-i, state.buysLeft());
             assertEquals(i, state.cardsOfType(CardType.COPPER, 0, DeckType.DISCARD));
             fm.computeAvailableActions(state);
-            assertTrue(state.getActions().contains(new DoNothing()));
+            assertTrue(state.getActions().contains(new EndPhase()));
             assertTrue(state.getActions().contains(newBuy));
             fm.computeAvailableActions(state);
             fm.next(state, newBuy);
@@ -163,16 +162,16 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         fm.computeAvailableActions(state);
         assertEquals(1, state.getActions().size());
-        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new EndPhase()));
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         fm.computeAvailableActions(state);
         assertEquals(2, state.getActions().size());
-        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new EndPhase()));
         assertTrue(state.getActions().contains(new Village(0)));
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         fm.computeAvailableActions(state);
         assertEquals(3, state.getActions().size());
-        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new EndPhase()));
         assertTrue(state.getActions().contains(new Village(0)));
         assertTrue(state.getActions().contains(new Smithy(0)));
     }
@@ -183,7 +182,7 @@ public class CoreGameLoop {
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
         fm.computeAvailableActions(state);
-        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new EndPhase()));
         assertFalse(state.getActions().contains(new Village(0)));
     }
 
@@ -196,7 +195,7 @@ public class CoreGameLoop {
         assertEquals(0, state.actionsLeft());
         fm.computeAvailableActions(state);
         assertEquals(1, state.getActions().size());
-        assertTrue(state.getActions().contains(new DoNothing()));
+        assertTrue(state.getActions().contains(new EndPhase()));
     }
 
     @Test

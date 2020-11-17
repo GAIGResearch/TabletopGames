@@ -3,6 +3,8 @@ package games.dominion;
 import core.*;
 import core.components.*;
 import core.interfaces.IGamePhase;
+import games.dominion.actions.DominionAction;
+import games.dominion.actions.ExtendedDominionAction;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
@@ -22,8 +24,7 @@ public class DominionGameState extends AbstractGameState {
     Map<CardType, Integer> cardsAvailable;
 
     // Then Decks for each player - Hand, Discard and Draw
-    // TODO: Convert these to use PartialObservableDecks
-    Deck<DominionCard>[] playerHands;
+    PartialObservableDeck<DominionCard>[] playerHands;
     Deck<DominionCard>[] playerDrawPiles;
     Deck<DominionCard>[] playerDiscards;
     Deck<DominionCard>[] playerTableaux;
@@ -34,6 +35,8 @@ public class DominionGameState extends AbstractGameState {
 
     // Trash pile and other global decks
     Deck<DominionCard> trashPile;
+
+    ExtendedDominionAction actionInProgress = null;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -63,6 +66,8 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public void endOfTurn(int playerID) {
+        if (actionInProgress != null)
+            throw new AssertionError("Should not have an action in progress beyond the Play phase (yet)");
         if (playerID != getCurrentPlayer())
             throw new AssertionError("Not yet supported");
         // 1) put hand and cards played into discard
@@ -161,6 +166,18 @@ public class DominionGameState extends AbstractGameState {
         return totalTreasureInHand - spentSoFar;
     }
 
+    public ExtendedDominionAction currentActionInProgress() {
+        return actionInProgress;
+    }
+    public boolean isActionInProgress() {
+        return actionInProgress != null;
+    }
+    public void setActionInProgress(ExtendedDominionAction action) {
+        if (gamePhase != DominionGamePhase.Play)
+            throw new AssertionError("ExtendedActions are currently only supported during the Play action phase");
+        actionInProgress = action;
+    }
+
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
      * This method is called after initialising the game state.
@@ -237,8 +254,26 @@ public class DominionGameState extends AbstractGameState {
             retValue.cardsAvailable.put(ct, cardsAvailable.get(ct));
         }
         for (int p = 0; p < playerCount; p++) {
-            retValue.playerHands[p] = playerHands[p].copy();
-            retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
+            if (playerId == -1) {
+                retValue.playerHands[p] = playerHands[p].copy();
+                retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
+            } else if (playerId == p) {
+                // need to shuffle drawpile separately
+                retValue.playerHands[p] = playerHands[p].copy();
+                retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
+                retValue.playerDrawPiles[p].shuffle(rnd);
+            } else {
+                // need to combine and shuffle hands and drawpiles
+                retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
+                retValue.playerHands[p] = playerHands[p].copy();
+                retValue.playerDrawPiles[p].add(retValue.playerHands[p]);
+                retValue.playerHands[p].clear();
+                retValue.playerDrawPiles[p].shuffle(rnd);
+                for (int i = 0; i < playerHands[p].getSize(); i++) {
+                    retValue.playerHands[p].add(retValue.playerDrawPiles[p].draw());
+                }
+
+            }
             retValue.playerDiscards[p] = playerDiscards[p].copy();
             retValue.playerTableaux[p] = playerTableaux[p].copy();
         }
@@ -247,6 +282,7 @@ public class DominionGameState extends AbstractGameState {
         retValue.actionsLeftForCurrentPlayer = actionsLeftForCurrentPlayer;
         retValue.spentSoFar = spentSoFar;
 
+        retValue.actionInProgress = actionInProgress == null ? null : (ExtendedDominionAction) actionInProgress.copy();
         return retValue;
     }
 
@@ -284,13 +320,15 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected void _reset() {
-        playerHands = new Deck[playerCount];
+        playerHands = new PartialObservableDeck[playerCount];
         playerDrawPiles = new Deck[playerCount];
         playerDiscards = new Deck[playerCount];
         playerTableaux = new Deck[playerCount];
-        trashPile = new Deck("Trash");
+        trashPile = new Deck<>("Trash");
         for (int i = 0; i < playerCount; i++) {
-            playerHands[i] = new Deck<>("Hand of Player " + i + 1);
+            boolean[] deckVisibility = new boolean[playerCount];
+            deckVisibility[i] = true;
+            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, deckVisibility);
             playerDrawPiles[i] = new Deck<>("Drawpile of Player " + i + 1);
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1);
             playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1);

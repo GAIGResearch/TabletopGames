@@ -6,12 +6,14 @@ import games.dominion.DominionGameState;
 import games.dominion.DominionGameState.*;
 import games.dominion.cards.CardType;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public abstract class DominionAction extends AbstractAction {
 
-    protected CardType type;
-    protected int player;
+    protected final CardType type;
+    protected final int player;
 
     protected DominionAction(CardType type, int playerId) {
         this.type = type;
@@ -35,7 +37,6 @@ public abstract class DominionAction extends AbstractAction {
     }
 
     abstract boolean _execute(DominionGameState state);
-
 
     @Override
     public boolean equals(Object obj) {
