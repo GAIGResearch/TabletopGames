@@ -220,6 +220,10 @@ public class DominionGameState extends AbstractGameState {
         return (int) allCards.stream().filter(c -> c.cardType() == type).count();
     }
 
+    public Set<CardType> cardsAvailable() {
+        return cardsAvailable.keySet();
+    }
+
     /**
      * Create a copy of the game state containing only those components the given player can observe (if partial
      * observable).

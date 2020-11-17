@@ -62,11 +62,6 @@ public class DominionPlayerView extends JComponent {
      */
     @Override
     protected void paintComponent(Graphics g) {
-   //     playerHand.drawDeck((Graphics2D) g);
-   //     playerDiscard.drawDeck((Graphics2D) g);
-   //     playerDraw.drawDeck((Graphics2D) g);
-   //     playerTableau.drawDeck((Graphics2D) g);
-
         g.setFont(Font.getFont(Font.SANS_SERIF));
         g.setColor(Color.gray);
 

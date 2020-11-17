@@ -86,16 +86,14 @@ public class DominionGUI extends AbstractGUI {
 
             // Discard and draw piles go in the center
             JPanel centerArea = new JPanel();
-            centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
+            centerArea.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
             trashPile = new DominionDeckView(-1, state.getDeck(DominionConstants.DeckType.TRASH, -1),
                     true, params.getDataPath(), new Rectangle(0, 0, cardWidth, cardHeight));
             centerArea.add(trashPile);
             marketView = new DominionMarketView(state);
             centerArea.add(marketView);
-            JPanel jp = new JPanel();
-            jp.setLayout(new GridBagLayout());
-            jp.add(centerArea);
-            mainGameArea.add(jp, BorderLayout.CENTER);
+      //      centerArea.add(marketView.dataDisplay);
+            mainGameArea.add(centerArea, BorderLayout.CENTER);
 
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dominion", gameState, width, defaultInfoPanelHeight);
