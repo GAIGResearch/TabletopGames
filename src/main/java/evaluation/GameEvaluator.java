@@ -1,8 +1,11 @@
 package evaluation;
 
 import core.*;
+import core.interfaces.IStatisticLogger;
 import evodef.*;
 import games.GameType;
+import players.mcts.MCTSPlayer;
+import utilities.SummaryLogger;
 
 import java.util.*;
 import java.util.stream.*;
@@ -23,6 +26,8 @@ public class GameEvaluator implements SolutionEvaluator {
     int nEvals = 0;
     Random rnd;
     boolean avoidOppDupes;
+    public boolean reportStatistics;
+    public IStatisticLogger statsLogger = new SummaryLogger();
 
     /**
      * GameEvaluator
@@ -97,7 +102,9 @@ public class GameEvaluator implements SolutionEvaluator {
                     throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
                 allPlayers.add(opponents.get(oppIndex));
             } else {
-                allPlayers.add((AbstractPlayer) configuredThing);
+                AbstractPlayer tunedPlayer = (AbstractPlayer) configuredThing;
+                if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
+                allPlayers.add(tunedPlayer);
             }
         }
 

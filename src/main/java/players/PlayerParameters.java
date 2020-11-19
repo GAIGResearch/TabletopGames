@@ -9,7 +9,7 @@ public abstract class PlayerParameters extends TunableParameters {
 
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;
-    public int iterationsBudget = 200;
+    public int iterationsBudget = 1000;
     public int fmCallsBudget = 4000;
     public int timeBudget = 100; //milliseconds
     public int breakMS = 10;
@@ -20,7 +20,7 @@ public abstract class PlayerParameters extends TunableParameters {
     public PlayerParameters(long seed) {
         super(seed);
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS);
-        addTunableParameter("iterationsBudget", 200);
+        addTunableParameter("iterationsBudget", 1000);
         addTunableParameter("fmCallsBudget", 4000);
         addTunableParameter("timeBudget", 100);
         addTunableParameter("breakMS", 10);

@@ -9,9 +9,8 @@ import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.VERBOSE;
 import static games.virus.cards.VirusCard.OrganType.Treatment;
@@ -163,8 +162,9 @@ public class VirusForwardModel extends AbstractForwardModel {
         }
 
         // Playable cards actions
-        for (int i = 0; i < playerHand.getSize(); i++)
-            addActionsForCard(vgs, playerHand.peek(i), actions, playerHand);
+        Set<VirusCard> uniqueCards = new HashSet<>(playerHand.getComponents());
+        for (VirusCard card : uniqueCards)
+            addActionsForCard(vgs, card, actions, playerHand);
 
         // Create DiscardCard actions. The player can always discard 1, 2 or 3 cards TODO: variable player hand card size
         // Discard one card

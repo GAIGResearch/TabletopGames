@@ -2,6 +2,7 @@ package evaluation;
 
 import core.AbstractPlayer;
 import games.GameType;
+import players.mcts.BasicMCTSPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import players.mcts.MCTSPlayer;
@@ -26,18 +27,18 @@ public class RoundRobinTournament extends AbstractTournament {
     @SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
     public static void main(String[] args){
         /* 1. Settings for the tournament */
-        GameType gameToPlay = TicTacToe;
+        GameType gameToPlay = Uno;
         int nPlayersTotal = 4;
-        int nPlayersPerGame = 2;
-        int nGamesPerMatchUp = 100;
+        int nPlayersPerGame = 3;
+        int nGamesPerMatchUp = 10;
         boolean selfPlay = false;
 
         /* 2. Set up players */
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         agents.add(new RandomPlayer());
+        agents.add(new BasicMCTSPlayer());
         agents.add(new RMHCPlayer());
         agents.add(new OSLAPlayer());
-        agents.add(new MCTSPlayer());
 
         // Run!
         AbstractTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay);

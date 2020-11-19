@@ -3,28 +3,45 @@ package players.mcts;
 import core.*;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
+
 import java.util.*;
 
-import static players.mcts.MCTSEnums.strategies.RANDOM;
+import static players.mcts.MCTSEnums.SelectionPolicy.*;
+import static players.mcts.MCTSEnums.strategies.*;
+import static players.mcts.MCTSEnums.TreePolicy.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
     public int rolloutLength = 10;
-    public boolean rolloutsEnabled = false;
+    public int maxTreeDepth = 10;
     public double epsilon = 1e-6;
-    public MCTSEnums.strategies rolloutType = RANDOM;           ;
+    public MCTSEnums.strategies rolloutType = RANDOM;
+    public boolean openLoop = false;
+    public boolean redeterminise = false;
+    public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
+    public MCTSEnums.TreePolicy treePolicy = UCB;
+    public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
+    public double exploreEpsilon = 0.1;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
     }
+
     public MCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
-        addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
-        addTunableParameter("rolloutsEnabled", false, Arrays.asList(false, true));
+        addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 6, 8, 10, 12, 20));
+        addTunableParameter("maxTreeDepth", 10);
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", RANDOM);
+        addTunableParameter("openLoop", false, Arrays.asList(false, true));
+        addTunableParameter("redeterminise", false, Arrays.asList(false, true));
+        addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
+        addTunableParameter("treePolicy", UCB);
+        addTunableParameter("opponentTreePolicy", Paranoid);
+        addTunableParameter("exploreEpsilon", 0.1);
     }
 
     @Override
@@ -32,9 +49,15 @@ public class MCTSParams extends PlayerParameters {
         super._reset();
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
-        rolloutsEnabled = (boolean) getParameterValue("rolloutsEnabled");
+        maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.strategies) getParameterValue("rolloutType");
+        openLoop = (boolean) getParameterValue("openLoop");
+        redeterminise = (boolean) getParameterValue("redeterminise");
+        selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
+        treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
+        opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
+        exploreEpsilon = (double) getParameterValue("exploreEpsilon");
     }
 
     @Override
@@ -44,9 +67,13 @@ public class MCTSParams extends PlayerParameters {
 
     /**
      * @return Returns the AbstractPlayer policy that will take actions during an MCTS rollout.
-     *         This defaults to a Random player.
+     * This defaults to a Random player.
      */
     public AbstractPlayer getRolloutStrategy() {
+        return new RandomPlayer(new Random(getRandomSeed()));
+    }
+
+    public AbstractPlayer getOpponentModel() {
         return new RandomPlayer(new Random(getRandomSeed()));
     }
 

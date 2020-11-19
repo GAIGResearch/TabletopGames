@@ -151,6 +151,9 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
             // Some planned actions may be hidden, put them back in owner player's deck, shuffle decks and replace with
             // random options
+
+            // First we add in the actions that are visible at the right index position
+            // cardReplacements stores the cards that we have used so far, to avoid inserting the same card twice
             HashMap<Integer, ArrayList<Integer>> cardReplacements = new HashMap<>();
             for (int i = 0; i < plannedActions.getSize(); i++) {
                 if (!plannedActions.isComponentVisible(i, playerId)) {
@@ -162,12 +165,25 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                     copy.playerDecks.get(p).add(plannedActions.get(i));
                 }
             }
+
+            // Then we randomise the invisible ones
             for (Map.Entry<Integer, ArrayList<Integer>> e: cardReplacements.entrySet()) {
+                // loop over each player, and shuffle their decks (which now includes all cards we can't see)
                 copy.playerDecks.get(e.getKey()).shuffle(r);
+                Deck<ColtExpressCard> bulletCards = new Deck<>("tempDeck");
                 for (int i: e.getValue()) {
                     // This might be a bullet card...
-                    copy.plannedActions.setComponent(i, copy.playerDecks.get(e.getKey()).draw());
+                    ColtExpressCard topCard = copy.playerDecks.get(e.getKey()).draw();
+                    if (topCard.cardType == ColtExpressCard.CardType.Bullet) {
+                        // invalid to be a plannedAction
+                        bulletCards.add(topCard);
+                    } else {
+                        copy.plannedActions.setComponent(i, topCard);
+                    }
                 }
+                // then we put the bullet cards back into the player deck and reshuffle
+                copy.playerDecks.get(e.getKey()).add(bulletCards);
+                copy.playerDecks.get(e.getKey()).shuffle(r);
             }
 
             // Round cards are hidden for subsequent rounds, randomize those

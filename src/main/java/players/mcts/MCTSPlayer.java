@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import core.interfaces.IStatisticLogger;
+import utilities.SummaryLogger;
 
 import java.util.List;
 import java.util.Random;
@@ -17,6 +19,7 @@ public class MCTSPlayer extends AbstractPlayer {
     // Heuristics used for the agent
     IStateHeuristic heuristic;
     AbstractPlayer rolloutStrategy;
+    AbstractPlayer opponentModel;
     private boolean debug = false;
 
     public MCTSPlayer() {
@@ -35,6 +38,7 @@ public class MCTSPlayer extends AbstractPlayer {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
+        opponentModel = params.getOpponentModel();
         setName(name);
     }
 
@@ -61,15 +65,19 @@ public class MCTSPlayer extends AbstractPlayer {
         List<AbstractAction> allActions = gameState.getActions();
 
         // Search for best action from the root
-        SingleTreeNode root = new SingleTreeNode(this, allActions.size());
+        SingleTreeNode root = new SingleTreeNode(this, allActions, rnd);
         root.setRootGameState(root, gameState);
-        root.mctsSearch();
+        root.mctsSearch(getStatsLogger());
+
         if (debug)
             System.out.println(root.toString());
 
 
         // Return best action
-        return allActions.get(root.mostVisitedAction());
+        return root.bestAction();
     }
 
+    public AbstractPlayer getOpponentModel(int playerID) {
+        return opponentModel;
+    }
 }
