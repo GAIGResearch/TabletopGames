@@ -41,7 +41,8 @@ public class ParameterSearch {
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
                         "\t               with a no-argument constructor\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
-                        "\tkExplore=      The k to use in NTBEA - defaults to 100.0 \n" +
+                        "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
+                        "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
                         "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) \n" +
                         "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
                         "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
@@ -55,7 +56,7 @@ public class ParameterSearch {
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
-        double kExplore = getArg(args, "kExplore", 100.0);
+        double kExplore = getArg(args, "kExplore", 1.0);
         String opponentDescriptor = getArg(args, "opponent", "");
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());

@@ -36,7 +36,7 @@ public class MCTSParams extends PlayerParameters {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
-        addTunableParameter("rolloutsEnabled", false, Arrays.asList(false, true));
+        addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", RANDOM);
         addTunableParameter("openLoop", false, Arrays.asList(false, true));
