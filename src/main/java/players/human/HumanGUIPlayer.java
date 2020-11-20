@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 
+import java.util.List;
+
 
 public class HumanGUIPlayer extends AbstractPlayer {
     ActionController ac;
@@ -13,7 +15,7 @@ public class HumanGUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState observation) {
+    public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
         return ac.getAction();
     }
 }

@@ -39,23 +39,20 @@ class SingleTreeNode {
 
     // State in this node (closed loop)
     private AbstractGameState state;
-    public AbstractGameState getState() { return state;}
+    private List<AbstractAction> actionsFromState;
 
-    // Called from MCTSPlayer
-    SingleTreeNode(MCTSPlayer player, List<AbstractAction> actionsAvailable, Random rnd) {
-        this(player, actionsAvailable, null, null, null, rnd);
+    public AbstractGameState getState() {
+        return state;
     }
 
     // Called in tree expansion
-    private SingleTreeNode(MCTSPlayer player, List<AbstractAction> actionsAvailable, SingleTreeNode parent,
-                           SingleTreeNode root, AbstractGameState state, Random rnd) {
+    protected SingleTreeNode(MCTSPlayer player, SingleTreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
-        this.root = root;
-        actionsAvailable.forEach(a -> children.put(a, null));
+        this.root = parent == null ? this : parent.root;
         totValue = 0.0;
-        this.state = state;
+        setState(state); // this also initialises actions and children
         if (parent != null) {
             depth = parent.depth + 1;
         } else {
@@ -64,15 +61,26 @@ class SingleTreeNode {
         this.rnd = rnd;
     }
 
-    /**
-     * Initializes the root node
-     *
-     * @param root - root node
-     * @param gs   - root game state
-     */
-    void setRootGameState(SingleTreeNode root, AbstractGameState gs) {
-        this.state = gs;
-        this.root = root;
+    private void setState(AbstractGameState newState) {
+        state = newState;
+        actionsFromState = player.getForwardModel().computeAvailableActions(state);
+        /*
+         * we run through the actions, and add any new ones not currently in the list
+         * When in open loop, it is entirely possible that on a transition to a new state we have actions that were
+         * not previously possible. (Especially in stochastic games, where different iterations may have different
+         * random draws; but this can also happen in deterministic games if we model the opponent moves in their own trees
+         * for example.)
+         */
+        for (AbstractAction action : actionsFromState) {
+            if (!children.containsKey(action)) {
+                children.put(action, null); // mark a new node to be expanded
+                // This *does* rely on a good equals method being implemented for Actions
+            }
+        }
+        // TODO: This does not yet take account of cases where we have rarely possible actions. Where the
+        // action frequency can be very variable we should take this into account (see Cowling et al. 2012 I think)
+        // This boils down to keeping track of how many times the action was available out of the total visits to the
+        // node.
     }
 
     /**
@@ -100,10 +108,10 @@ class SingleTreeNode {
         copyCount++;
         while (!stop) {
             if (player.params.openLoop) { // this assumes that copy(id) randomises the invisible components
-                state = player.params.redeterminise ? rootState.copy(player.getPlayerID()) : rootState.copy();
+                setState(player.params.redeterminise ? rootState.copy(player.getPlayerID()) : rootState.copy());
                 copyCount++;
             } else
-                state = rootState;
+                setState(rootState);
             // TODO: Can we determinise in Closed Loop? Closed Loop currently means we do not advance the state though
             // the tree - so shuffling the cards at the root makes no difference.
 
@@ -176,7 +184,7 @@ class SingleTreeNode {
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.state.getActions().size() > 0) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromState.size() > 0) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
@@ -193,7 +201,7 @@ class SingleTreeNode {
      * @return A list of the unexpanded Actions from this State
      */
     private List<AbstractAction> unexpandedActions() {
-        return state.getActions().stream().filter(a -> children.get(a) == null).collect(toList());
+        return actionsFromState.stream().filter(a -> children.get(a) == null).collect(toList());
     }
 
     /**
@@ -212,10 +220,10 @@ class SingleTreeNode {
         // we first copy the action so that the one stored in the node will not have any state changes
         AbstractGameState nextState = state.copy();
         root.copyCount++;
-        List<AbstractAction> nextActions = advance(nextState, chosen.copy());
+        advance(nextState, chosen.copy());
 
         // then instantiate a new node
-        SingleTreeNode tn = new SingleTreeNode(player, nextActions, this, depth == 0 ? this : root, nextState, rnd);
+        SingleTreeNode tn = new SingleTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
         return tn;
     }
@@ -225,18 +233,12 @@ class SingleTreeNode {
      *
      * @param gs  - current game state
      * @param act - action to apply
-     * @return - list of actions available in the next state
      */
-    private List<AbstractAction> advance(AbstractGameState gs, AbstractAction act) {
+    private void advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
-        player.getForwardModel().computeAvailableActions(gs);
-        if (gs.isNotTerminal() && gs.getActions().isEmpty()) {
-            throw new AssertionError("Should always have at least one action possible...");
-        }
         root.fmCallsCount++;
         if (player.params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != player.getPlayerID())
             advanceToTurnOfPlayer(gs, player.getPlayerID());
-        return gs.getActions();
     }
 
     /**
@@ -250,12 +252,12 @@ class SingleTreeNode {
         List<AbstractAction> actionsTaken = new ArrayList<>();
         while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
-            AbstractAction action = oppModel.getAction(gs);
+            List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(gs);
+            if (availableActions.isEmpty())
+                throw new AssertionError("Should always have at least one action possible...");
+            AbstractAction action = oppModel.getAction(gs, availableActions);
             actionsTaken.add(action);
             player.getForwardModel().next(gs, action);
-            player.getForwardModel().computeAvailableActions(gs);
-            if (gs.isNotTerminal() && gs.getActions().isEmpty())
-                throw new AssertionError("Should always have at least one action possible...");
             root.fmCallsCount++;
         }
     }
@@ -291,7 +293,7 @@ class SingleTreeNode {
         double bestValue = -Double.MAX_VALUE;
         // TODO: Need to distinguish between paranoid and Max^N MCTS. But that needs a vector reward to be back-propagated
 
-        for (AbstractAction action : state.getActions()) {
+        for (AbstractAction action : actionsFromState) {
             SingleTreeNode child = children.get(action);
             if (child == null)
                 throw new AssertionError("Should not be here");
@@ -337,10 +339,9 @@ class SingleTreeNode {
             // We do not need to copy the state, as we advance this as we descend the tree.
             // In open loop we never re-use the state...the only purpose of storing it on the Node is
             // to pick it up in the next uct() call as we descend the tree
-            List<AbstractAction> nextActions = advance(state, bestAction.copy());
-            selected.state = state;
+            advance(state, bestAction.copy());
+            selected.setState(state);
             // we also need to check to see if there are any new actions on this transition
-            selected.checkActions(nextActions);
             root.fmCallsCount++;
         } else {
             // If closed loop, then I don't think we should increment the FM count here!
@@ -367,8 +368,6 @@ class SingleTreeNode {
     }
 
     private AbstractAction sampleFromDistribution() {
-        List<AbstractAction> availableActions = state.getActions();
-
         // first we get a value for each of them
         Function<AbstractAction, Double> valueFn;
         switch (player.params.treePolicy) {
@@ -381,7 +380,7 @@ class SingleTreeNode {
             default:
                 throw new AssertionError("Should not be any other options!");
         }
-        Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
+        Map<AbstractAction, Double> actionToValueMap = actionsFromState.stream().collect(toMap(Function.identity(), valueFn));
 
         // then we normalise to a pdf
         actionToValueMap = Utils.normaliseMap(actionToValueMap);
@@ -448,7 +447,8 @@ class SingleTreeNode {
                 // rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
                 // TODO: While the only possible rolloutStrategy is Random, this is fine
                 // TODO: But there is an open issue here around the need to set the playerId for more sophisticated strategies
-                AbstractAction next = rolloutStrategy.getAction(rolloutState);
+                List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
+                AbstractAction next = rolloutStrategy.getAction(rolloutState, availableActions);
                 advance(rolloutState, next);
                 rolloutDepth++;
             }

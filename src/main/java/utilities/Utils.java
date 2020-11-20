@@ -211,6 +211,7 @@ public abstract class Utils {
         return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
         if (raw.isPresent()) {

@@ -251,13 +251,13 @@ public class Game {
                     } else {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
                             while (action == null && gui.isWindowOpen()) {
-                                action = currentPlayer.getAction(observation);
+                                action = currentPlayer.getAction(observation, observedActions);
                                 updateGUI(gui);
                             }
                         } else {
                             // Get action from player, and time it
                             s = System.nanoTime();
-                            action = currentPlayer.getAction(observation);
+                            action = currentPlayer.getAction(observation, observedActions);
                             agentTime += (System.nanoTime() - s);
                             nDecisions++;
                         }
@@ -676,6 +676,7 @@ public class Game {
 
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+
         players.add(new RandomPlayer());
         players.add(new RMHCPlayer());
         players.add(new MCTSPlayer());
@@ -696,7 +697,7 @@ public class Game {
         ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
         games.remove(Pandemic);
-//        games.remove(TicTacToe);
+        games.remove(TicTacToe);
         runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }

@@ -27,8 +27,7 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     public MCTSPlayer(long seed) {
-        this.params = new MCTSParams(seed);
-        rnd = new Random(seed);
+        this(new MCTSParams(seed), "MCTSPlayer");
     }
 
     public MCTSPlayer(MCTSParams params) {
@@ -60,13 +59,9 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState) {
-        // Gather all available actions:
-        List<AbstractAction> allActions = gameState.getActions();
-
+    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        SingleTreeNode root = new SingleTreeNode(this, allActions, rnd);
-        root.setRootGameState(root, gameState);
+        SingleTreeNode root = new SingleTreeNode(this, null, gameState, rnd);
         root.mctsSearch(getStatsLogger());
 
         if (debug)

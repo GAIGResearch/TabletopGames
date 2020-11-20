@@ -311,7 +311,7 @@ public class PandemicGUI extends AbstractGUI {
 
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         int id = player.getPlayerID();
-        List<AbstractAction> actions = gameState.getActions();
+        List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
         int k = 0;
 
         Set<String> highlights = boardView.getHighlights().keySet();

@@ -19,7 +19,6 @@ public abstract class AbstractForwardModel {
      * @param firstState - initial state.
      */
     protected void abstractSetup(AbstractGameState firstState) {
-        firstState.availableActions = new ArrayList<>();
         firstState.gameStatus = Utils.GameResult.GAME_ONGOING;
         firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
         Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
@@ -83,8 +82,9 @@ public abstract class AbstractForwardModel {
             gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             gameState.turnOrder.endPlayerTurn(gameState);
         } else {
-            int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(gameState.getActions().size());
-            next(gameState, gameState.getActions().get(randomAction));
+            List<AbstractAction> possibleActions = computeAvailableActions(gameState);
+            int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
+            next(gameState, possibleActions.get(randomAction));
         }
     }
 
@@ -104,7 +104,7 @@ public abstract class AbstractForwardModel {
      * @param action - action requested to be played by a player.
      */
     public final void next(AbstractGameState currentState, AbstractAction action) {
-        if (action != null && currentState.getActions().contains(action)) {
+        if (action != null) {
             _next(currentState, action);
         } else {
             if (VERBOSE) {
@@ -120,9 +120,7 @@ public abstract class AbstractForwardModel {
      * @return - the list of actions available.
      */
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
-        List<AbstractAction> actions = _computeAvailableActions(gameState);
-        gameState.setAvailableActions(actions);
-        return actions;
+        return _computeAvailableActions(gameState);
     }
 
     /**

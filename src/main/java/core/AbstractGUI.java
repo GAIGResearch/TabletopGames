@@ -66,7 +66,7 @@ public abstract class AbstractGUI extends JFrame {
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.gameStatus == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = gameState.getActions();
+            List<AbstractAction> actions = player.forwardModel.computeAvailableActions(gameState);
             for (int i = 0; i < actions.size(); i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
