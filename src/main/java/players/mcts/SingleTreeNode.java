@@ -445,9 +445,6 @@ class SingleTreeNode {
 
             AbstractPlayer rolloutStrategy = player.rolloutStrategy;
             while (!finishRollout(rolloutState, rolloutDepth)) {
-                // rolloutStrategy.setPlayerID(rolloutState.getCurrentPlayer());
-                // TODO: While the only possible rolloutStrategy is Random, this is fine
-                // TODO: But there is an open issue here around the need to set the playerId for more sophisticated strategies
                 AbstractAction next = rolloutStrategy.getAction(rolloutState);
                 advance(rolloutState, next);
                 rolloutDepth++;

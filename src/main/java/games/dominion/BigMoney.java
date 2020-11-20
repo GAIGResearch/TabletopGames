@@ -21,7 +21,8 @@ public class BigMoney extends AbstractPlayer {
     public AbstractAction getAction(AbstractGameState gameState) {
         DominionGameState state = (DominionGameState) gameState;
         List<AbstractAction> actions = state.getActions();
-        int cash = state.availableSpend(getPlayerID());
+        int player = gameState.getCurrentPlayer();
+        int cash = state.availableSpend(player);
         int provinces = state.cardsAvailable.getOrDefault(CardType.PROVINCE, 0);
 
         if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
@@ -32,22 +33,22 @@ public class BigMoney extends AbstractPlayer {
             case 1:
                 return new EndPhase();
             case 2:
-                if (provinces < 4 && actions.contains(new BuyCard(CardType.ESTATE, getPlayerID())))
-                    return new BuyCard(CardType.ESTATE, getPlayerID());
+                if (provinces < 4 && actions.contains(new BuyCard(CardType.ESTATE, player)))
+                    return new BuyCard(CardType.ESTATE, player);
                 return new EndPhase();
             case 3:
             case 4:
-                return new BuyCard(CardType.SILVER, getPlayerID());
+                return new BuyCard(CardType.SILVER, player);
             case 5:
-                if (provinces < 6 && actions.contains(new BuyCard(CardType.DUCHY, getPlayerID())))
-                    return new BuyCard(CardType.DUCHY, getPlayerID());
+                if (provinces < 6 && actions.contains(new BuyCard(CardType.DUCHY, player)))
+                    return new BuyCard(CardType.DUCHY, player);
                 else
-                    return new BuyCard(CardType.SILVER, getPlayerID());
+                    return new BuyCard(CardType.SILVER, player);
             case 6:
             case 7:
-                return new BuyCard(CardType.GOLD, getPlayerID());
+                return new BuyCard(CardType.GOLD, player);
             default:
-                return new BuyCard(CardType.PROVINCE, getPlayerID());
+                return new BuyCard(CardType.PROVINCE, player);
 
 
         }
