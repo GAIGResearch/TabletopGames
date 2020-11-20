@@ -105,6 +105,7 @@ public abstract class AbstractForwardModel {
      */
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
+            currentState.recordAction(action);
             _next(currentState, action);
         } else {
             if (VERBOSE) {

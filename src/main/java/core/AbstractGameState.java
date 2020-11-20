@@ -31,6 +31,7 @@ public abstract class AbstractGameState {
 
     // A record of all actions taken to reach this game state
     private List<AbstractAction> history = new ArrayList<>();
+    private List<String> historyText = new ArrayList<>();
 
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected Utils.GameResult gameStatus;
@@ -62,6 +63,8 @@ public abstract class AbstractGameState {
         playerResults = new Utils.GameResult[getNPlayers()];
         Arrays.fill(playerResults, GAME_ONGOING);
         gamePhase = DefaultGamePhase.Main;
+        history = new ArrayList<>();
+        historyText = new ArrayList<>();
         _reset();
     }
 
@@ -130,6 +133,7 @@ public abstract class AbstractGameState {
         s.data = data;  // Should never be modified
 
         s.history = new ArrayList<>(history);
+        s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
 
         // Update the list of components for ID matching in actions.
@@ -209,6 +213,26 @@ public abstract class AbstractGameState {
      */
     public final ArrayList<Integer> getUnknownComponentsIds(int playerId) {
         return _getUnknownComponentsIds(playerId);
+    }
+
+    /**
+     * Used by ForwardModel.next() to log history (very useful for debugging)
+     *
+     * @param action The action that has just been applied (or is about to be applied) to the game state
+     */
+    protected void recordAction(AbstractAction action) {
+        history.add(action);
+        historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
+    }
+
+    /**
+     * @return All actions that have been executed on this state since reset()/initialisation
+     */
+    public List<AbstractAction> getHistory() {
+        return new ArrayList<>(history);
+    }
+    public List<String> getHistoryAsText() {
+        return new ArrayList<>(historyText);
     }
 
     @Override
