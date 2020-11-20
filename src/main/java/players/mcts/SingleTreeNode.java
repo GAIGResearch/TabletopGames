@@ -402,28 +402,6 @@ class SingleTreeNode {
     }
 
     /**
-     * When in open loop, it is entirely possible that on a transition to a new state we have actions that were
-     * not previously possible. (Especially in stochastic games, where different iterations may have different
-     * random draws; but this can also happen in deterministic games if we model the opponent moves in their own trees
-     * for example.)
-     *
-     * @param actions The new set of actions that are valid on a new transition to this node
-     */
-    private void checkActions(List<AbstractAction> actions) {
-        // we run through the actions, and add any new ones not currently in the list
-        for (AbstractAction action : actions) {
-            if (!children.containsKey(action)) {
-                children.put(action, null); // mark a new node to be expanded
-                // This *does* rely on a good equals method being implemented for Actions
-            }
-        }
-        // TODO: This does not yet take account of cases where we have rarely possible actions. Where the
-        // action frequency can be very variable we should take this into account (see Cowling et al. 2012 I think)
-        // This boils down to keeping track of how many times the action was available out of the total visits to the
-        // node.
-    }
-
-    /**
      * Perform a Monte Carlo rollout from this node.
      *
      * @return - value of rollout.
