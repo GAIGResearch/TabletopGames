@@ -26,7 +26,11 @@ public class TreeStatistics {
                 nodesAtDepth[node.depth]++;
                 if (!node.getState().isNotTerminal())
                     gameTerminalNodesAtDepth[node.depth]++;
-                for (SingleTreeNode child : node.children.values()) {
+                for (SingleTreeNode child : node.children.values().stream()
+                        .filter(Objects::nonNull)
+                        .flatMap(Arrays::stream)
+                        .filter(Objects::nonNull)
+                        .collect(toList())) {
                     if (child != null)
                         nodeQueue.add(child);
                 }
@@ -39,6 +43,7 @@ public class TreeStatistics {
 
         totalNodes = Arrays.stream(nodesAtDepth).sum();
         totalLeaves = Arrays.stream(leavesAtDepth).sum();
+        totalTerminalNodes = Arrays.stream(gameTerminalNodesAtDepth).sum();
         nodeDistribution = Arrays.stream(nodesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalNodes).toArray();
         leafDistribution = Arrays.stream(leavesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalLeaves).toArray();
     }

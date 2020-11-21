@@ -237,7 +237,7 @@ public abstract class Utils {
             JSONParser parser = new JSONParser();
             return (JSONObject) parser.parse(reader);
         } catch (IOException | ParseException e) {
-            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage());
+            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " +e.toString());
         }
     }
 }

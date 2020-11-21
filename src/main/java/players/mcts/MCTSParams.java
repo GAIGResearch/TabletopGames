@@ -40,7 +40,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("redeterminise", false, Arrays.asList(false, true));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB);
-        addTunableParameter("opponentTreePolicy", Paranoid);
+        addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
     }
 
