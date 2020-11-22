@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
-import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
@@ -18,7 +17,7 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 import static utilities.Utils.*;
 
-class SingleTreeNode {
+public class SingleTreeNode {
     // Root node of tree
     SingleTreeNode root;
     // Parent of this node
@@ -52,7 +51,7 @@ class SingleTreeNode {
     }
 
     // Called in tree expansion
-    protected SingleTreeNode(MCTSPlayer player, SingleTreeNode parent, AbstractGameState state, Random rnd) {
+    public SingleTreeNode(MCTSPlayer player, SingleTreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
@@ -95,7 +94,7 @@ class SingleTreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    void mctsSearch(IStatisticLogger statsLogger) {
+    public void mctsSearch(IStatisticLogger statsLogger) {
 
         // Variables for tracking time budget
         double avgTimeTaken;
@@ -215,13 +214,12 @@ class SingleTreeNode {
         while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromState.size() > 0) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
-                cur = cur.expand();
+                return cur.expand();
             } else {
                 // Move to next child given by UCT function
                 cur = cur.nextNodeInTree();
             }
         }
-
         return cur;
     }
 
@@ -535,7 +533,7 @@ class SingleTreeNode {
      *
      * @return - the best AbstractAction
      */
-    AbstractAction bestAction() {
+    public AbstractAction bestAction() {
 
         double bestValue = -Double.MAX_VALUE;
         AbstractAction bestAction = null;
@@ -573,6 +571,10 @@ class SingleTreeNode {
         return bestAction;
     }
 
+    public int getVisits() {return nVisits;}
+    public double[] getTotValue() {return totValue;}
+    public Map<AbstractAction, SingleTreeNode[]> getChildren() {return children;}
+
     @Override
     public String toString() {
         // we return some interesting data on this node
@@ -595,15 +597,15 @@ class SingleTreeNode {
         for (AbstractAction action : sortedActions) {
             String actionName = action.toString();
             int actionVisits = actionVisits(action);
-            if (actionName.length() > 30)
-                actionName = actionName.substring(0, 30);
+            if (actionName.length() > 50)
+                actionName = actionName.substring(0, 50);
             valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
             if (player.params.opponentTreePolicy == MaxN) {
                 valueString = IntStream.range(0, state.getNPlayers())
                         .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
                         .collect(joining(", "));
             }
-            retValue.append(String.format("\t%-30s  visits: %d\tvalue %s\n", actionName, actionVisits, valueString));
+            retValue.append(String.format("\t%-50s  visits: %d\tvalue %s\n", actionName, actionVisits, valueString));
         }
         retValue.append(new TreeStatistics(root).toString());
         return retValue.toString();

@@ -6,20 +6,21 @@ import static java.util.stream.Collectors.toList;
 
 public class TreeStatistics {
 
-    int maxDepth = 100;
-    int depthReached = 0;
-    int[] nodesAtDepth = new int[maxDepth];
-    int[] leavesAtDepth = new int[maxDepth];
-    int[] gameTerminalNodesAtDepth = new int[maxDepth];
-    int totalNodes;
-    int totalLeaves;
-    int totalTerminalNodes;
-    double[] nodeDistribution;
-    double[] leafDistribution;
+    final public int maxDepth = 100;
+    final public int depthReached;
+    final public int[] nodesAtDepth = new int[maxDepth];
+    final public int[] leavesAtDepth = new int[maxDepth];
+    final public int[] gameTerminalNodesAtDepth = new int[maxDepth];
+    final public int totalNodes;
+    final public int totalLeaves;
+    final public int totalTerminalNodes;
+    final public double[] nodeDistribution;
+    final public double[] leafDistribution;
 
     public TreeStatistics(SingleTreeNode root) {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
         nodeQueue.add(root);
+        int greatestDepth = 0;
         while (!nodeQueue.isEmpty()) {
             SingleTreeNode node = nodeQueue.poll();
             if (node.depth < maxDepth) {
@@ -37,10 +38,11 @@ public class TreeStatistics {
                 if (node.children.values().stream().allMatch(Objects::isNull))
                     leavesAtDepth[node.depth]++;
             }
-            if (node.depth > depthReached)
-                depthReached = node.depth;
+            if (node.depth > greatestDepth)
+                greatestDepth = node.depth;
         }
 
+        depthReached = greatestDepth;
         totalNodes = Arrays.stream(nodesAtDepth).sum();
         totalLeaves = Arrays.stream(leavesAtDepth).sum();
         totalTerminalNodes = Arrays.stream(gameTerminalNodesAtDepth).sum();
