@@ -277,14 +277,12 @@ public class SingleTreeNode {
      */
     private void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
-        List<AbstractAction> actionsTaken = new ArrayList<>();
         while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
             List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(gs);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
             AbstractAction action = oppModel.getAction(gs, availableActions);
-            actionsTaken.add(action);
             player.getForwardModel().next(gs, action);
             root.fmCallsCount++;
         }
@@ -474,9 +472,9 @@ public class SingleTreeNode {
         double[] retValue = new double[state.getNPlayers()];
         for (int i = 0; i < retValue.length; i++) {
             if (player.heuristic != null) {
-                retValue[i] = player.heuristic.evaluateState(rolloutState, player.getPlayerID());
+                retValue[i] = player.heuristic.evaluateState(rolloutState, i);
             } else {
-                retValue[i] = rolloutState.getScore(player.getPlayerID());
+                retValue[i] = rolloutState.getScore(i);
             }
         }
         return retValue;

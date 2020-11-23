@@ -9,6 +9,7 @@ import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
 import utilities.SummaryLogger;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -72,7 +73,13 @@ public class PlayerReport {
             System.out.println("Game: " + gameType.name());
 
             // For each type, instantiate a new IStatisticsLogger
-            playerToTrack.setStatsLogger(createLogger(loggerClass, gameType.name() + "_" + logFile));
+            String fullFileName = gameType.name() + "_" + logFile;
+            if (loggerClass.contains("Summary"))
+                fullFileName = logFile;
+            IStatisticLogger logger = createLogger(loggerClass, fullFileName);
+            if (!(logger instanceof FileStatsLogger))
+                logger.record("Game", games.get(gameIndex));
+            playerToTrack.setStatsLogger(logger);
 
             int playerCount = gameType.getMinPlayers();
             if (nPlayers.size() == 1) playerCount = nPlayers.get(0);
@@ -106,11 +113,13 @@ public class PlayerReport {
         IStatisticLogger logger = new SummaryLogger();
         try {
             Class<?> clazz = Class.forName(loggerClass);
-            if (clazz == FileStatsLogger.class) {
-                Constructor<?> constructor = clazz.getConstructor(String.class);
+
+            Constructor<?> constructor;
+            try {
+                constructor = clazz.getConstructor(String.class);
                 logger = (IStatisticLogger) constructor.newInstance(logFile);
-            } else {
-                Constructor<?> constructor = clazz.getConstructor();
+            } catch (NoSuchMethodException e) {
+                constructor = clazz.getConstructor();
                 logger = (IStatisticLogger) constructor.newInstance();
             }
         } catch (Exception e) {
