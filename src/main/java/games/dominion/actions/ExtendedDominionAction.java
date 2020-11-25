@@ -22,6 +22,8 @@ public abstract class ExtendedDominionAction extends DominionAction {
 
     public abstract List<AbstractAction> followOnActions(DominionGameState state);
 
+    public abstract int getCurrentPlayer(DominionGameState state);
+
     public abstract void registerActionTaken(DominionGameState state, AbstractAction action);
 
     public abstract boolean executionComplete();

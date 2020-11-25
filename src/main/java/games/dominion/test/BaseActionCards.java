@@ -12,12 +12,13 @@ import org.junit.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
 public class BaseActionCards {
 
-
+    Random rnd = new Random(373);
     List<AbstractPlayer> players = Arrays.asList(new TestPlayer(),
             new TestPlayer(),
             new TestPlayer(),
@@ -170,4 +171,40 @@ public class BaseActionCards {
         assertEquals(1, nextActions.size());
         assertEquals(new EndPhase(), nextActions.get(0));
     }
+
+    @Test
+    public void militiaCausesAllOtherPlayersToDiscardDownToFive() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.endOfTurn(0);
+        state.endOfTurn(1);
+        assertEquals(2, state.getCurrentPlayer());
+        DominionAction militia = new Militia(2);
+        state.addCard(CardType.MILITIA, 2, DeckType.HAND);
+        for (int i = 0; i < 4; i++) {
+            if (i != 2) assertEquals(5, state.getDeck(DeckType.HAND, i).getSize());
+        }
+        int start = state.availableSpend(2);
+   //     fm.computeAvailableActions(state);
+        fm.next(state, militia);
+        assertEquals(start+2, state.availableSpend(2));
+        do {
+            List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
+            assertTrue(actionsAvailable.stream().allMatch(a -> a instanceof DiscardCard));
+            fm.next(state, actionsAvailable.get(rnd.nextInt(actionsAvailable.size())));
+        } while (state.getCurrentPlayer() != 2);
+        for (int i = 0; i < 4; i++) {
+            if (i != 2) assertEquals(3, state.getDeck(DeckType.HAND, i).getSize());
+        }
+    }
+
+    @Test
+    public void militiaSkipsPlayersWithThreeOrFewerCards() {
+
+    }
+
+    @Test
+    public void militiaDoesNothingIfAllPlayersHaveThreeOrFewerCards() {
+
+    }
+
 }

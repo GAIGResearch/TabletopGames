@@ -71,4 +71,11 @@ public class Cellar extends ExtendedDominionAction {
     public boolean executionComplete() {
         return executed;
     }
+
+    @Override
+    public int getCurrentPlayer(DominionGameState state) {
+        // Cellar is a purely personal sequence of actions - no reactions are needed
+        return player;
+    }
+
 }
