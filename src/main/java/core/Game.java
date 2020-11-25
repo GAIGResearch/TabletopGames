@@ -4,7 +4,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
-import games.explodingkittens.gui.ExplodingKittensDeckView;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
@@ -122,7 +121,22 @@ public class Game {
      */
     public final void reset(List<AbstractPlayer> players) {
         gameState.reset();
-        coreReset(players);
+        forwardModel.abstractSetup(gameState);
+        this.players = players;
+        int id = 0;
+        for (AbstractPlayer player : players) {
+            // Create a FM copy for this player (different random seed)
+            player.forwardModel = this.forwardModel.copy();
+            // Create initial state observation
+            AbstractGameState observation = gameState.copy(id);
+            // Give player their ID
+            player.playerID = id++;
+            // Allow player to initialize
+
+            player.initializePlayer(observation);
+        }
+
+        resetStats();
     }
 
     /**
@@ -134,10 +148,6 @@ public class Game {
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
         gameState.reset(newRandomSeed);
-        coreReset(players);
-    }
-
-    private void coreReset(List<AbstractPlayer> players) {
         forwardModel.abstractSetup(gameState);
         this.players = players;
         int id = 0;
@@ -241,13 +251,13 @@ public class Game {
                     } else {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
                             while (action == null && gui.isWindowOpen()) {
-                                action = currentPlayer.getAction(observation);
+                                action = currentPlayer.getAction(observation, observedActions);
                                 updateGUI(gui);
                             }
                         } else {
                             // Get action from player, and time it
                             s = System.nanoTime();
-                            action = currentPlayer.getAction(observation);
+                            action = currentPlayer.getAction(observation, observedActions);
                             agentTime += (System.nanoTime() - s);
                             nDecisions++;
                         }
@@ -666,7 +676,8 @@ public class Game {
 
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-  //      players.add(new RandomPlayer());
+
+//        players.add(new RandomPlayer());
         players.add(new RMHCPlayer());
         players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
@@ -674,7 +685,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Dominion, players, seed, ac, false);
+        runOne(LoveLetter, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();

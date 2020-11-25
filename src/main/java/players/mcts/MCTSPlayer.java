@@ -7,8 +7,6 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import utilities.SummaryLogger;
 
-import players.simple.RandomPlayer;
-
 import java.util.List;
 import java.util.Random;
 
@@ -29,14 +27,12 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     public MCTSPlayer(long seed) {
-        this(new MCTSParams(seed));
-        rnd = new Random(seed);
+        this(new MCTSParams(seed), "MCTSPlayer");
     }
 
     public MCTSPlayer(MCTSParams params) {
         this(params, "MCTSPlayer");
     }
-
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
@@ -45,31 +41,27 @@ public class MCTSPlayer extends AbstractPlayer {
         setName(name);
     }
 
-    public MCTSPlayer(IStateHeuristic heuristic) {
+    public MCTSPlayer(IStateHeuristic heuristic){
         this(System.currentTimeMillis());
         this.heuristic = heuristic;
     }
 
-    public MCTSPlayer(long seed, IStateHeuristic heuristic) {
+    public MCTSPlayer(long seed, IStateHeuristic heuristic){
         this.params = new MCTSParams(seed);
         rnd = new Random(seed);
         this.heuristic = heuristic;
     }
 
-    public MCTSPlayer(MCTSParams params, IStateHeuristic heuristic) {
+    public MCTSPlayer( MCTSParams params, IStateHeuristic heuristic){
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         this.heuristic = heuristic;
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState) {
-        // Gather all available actions:
-        List<AbstractAction> allActions = gameState.getActions();
-
+    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        SingleTreeNode root = new SingleTreeNode(this, allActions, rnd);
-        root.setRootGameState(root, gameState);
+        SingleTreeNode root = new SingleTreeNode(this, null, gameState, rnd);
         root.mctsSearch(getStatsLogger());
 
         if (debug)

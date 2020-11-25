@@ -4,6 +4,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import utilities.SummaryLogger;
 
+import java.util.List;
+
 public abstract class AbstractPlayer {
 
     protected IStatisticLogger statsLogger = new SummaryLogger();
@@ -31,6 +33,7 @@ public abstract class AbstractPlayer {
     public final AbstractForwardModel getForwardModel() {
         return forwardModel;
     }
+    public final void setForwardModel(AbstractForwardModel fm) {forwardModel = fm;}
 
     /* Methods that should be implemented in subclass */
 
@@ -39,7 +42,7 @@ public abstract class AbstractPlayer {
      * AbstractGameState.getActions()
      * @param gameState observation of the current game state
      */
-    public abstract AbstractAction getAction(AbstractGameState gameState);
+    public abstract AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
 
     /* Methods that can be implemented in subclass */
 

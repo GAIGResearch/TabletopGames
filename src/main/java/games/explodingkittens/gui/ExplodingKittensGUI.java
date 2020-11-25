@@ -42,7 +42,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
     Border[] playerViewBorders;
 
     public ExplodingKittensGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 15);
+        super(ac, 25);
         this.humanID = humanID;
 
         if (game != null) {
@@ -56,7 +56,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
                 int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
                 double nVertAreas = 5;
                 this.width = playerAreaWidth * nHorizAreas;
-                this.height = (int) (playerAreaHeight * nVertAreas);
+                this.height = (int) (playerAreaHeight * nVertAreas) + 20;
 
                 ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
                 ExplodingKittensParameters ekgp = (ExplodingKittensParameters) gameState.getGameParameters();

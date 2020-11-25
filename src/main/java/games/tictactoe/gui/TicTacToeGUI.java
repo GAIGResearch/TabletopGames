@@ -51,7 +51,7 @@ public class TicTacToeGUI extends AbstractGUI {
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = gameState.getActions();
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
 
             int start = actions.size();

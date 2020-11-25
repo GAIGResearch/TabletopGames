@@ -43,38 +43,19 @@ class BasicTreeNode {
     // State in this node (closed loop)
     private AbstractGameState state;
 
-    // Called from MCTSPlayer
-    BasicTreeNode(BasicMCTSPlayer player, List<AbstractAction> actionsAvailable, Random rnd) {
-        this(player, actionsAvailable, null, null, null, rnd);
-    }
-
-    // Called in tree expansion
-    private BasicTreeNode(BasicMCTSPlayer player, List<AbstractAction> actionsAvailable, BasicTreeNode parent,
-                          BasicTreeNode root, AbstractGameState state, Random rnd) {
+    protected BasicTreeNode(BasicMCTSPlayer player, BasicTreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
-        this.root = root;
-        actionsAvailable.forEach(a -> children.put(a, null));
+        this.root = parent == null ? this : parent.root;
         totValue = 0.0;
-        this.state = state;
+        setState(state);
         if (parent != null) {
             depth = parent.depth + 1;
         } else {
             depth = 0;
         }
         this.rnd = rnd;
-    }
-
-    /**
-     * Initializes the root node
-     *
-     * @param root - root node
-     * @param gs   - root game state
-     */
-    void setRootGameState(BasicTreeNode root, AbstractGameState gs) {
-        this.state = gs;
-        this.root = root;
     }
 
     /**
@@ -140,7 +121,7 @@ class BasicTreeNode {
         BasicTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.state.getActions().size() > 0) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
@@ -154,11 +135,19 @@ class BasicTreeNode {
         return cur;
     }
 
+
+    private void setState(AbstractGameState newState) {
+        state = newState;
+        for (AbstractAction action : player.getForwardModel().computeAvailableActions(state)) {
+            children.put(action, null); // mark a new node to be expanded
+        }
+    }
+
     /**
      * @return A list of the unexpanded Actions from this State
      */
     private List<AbstractAction> unexpandedActions() {
-        return state.getActions().stream().filter(a -> children.get(a) == null).collect(toList());
+        return children.keySet().stream().filter(a -> children.get(a) == null).collect(toList());
     }
 
     /**
@@ -176,10 +165,10 @@ class BasicTreeNode {
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
         AbstractGameState nextState = state.copy();
-        List<AbstractAction> nextActions = advance(nextState, chosen.copy());
+        advance(nextState, chosen.copy());
 
         // then instantiate a new node
-        BasicTreeNode tn = new BasicTreeNode(player, nextActions, this, depth == 0 ? this : root, nextState, rnd);
+        BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
         return tn;
     }
@@ -189,16 +178,10 @@ class BasicTreeNode {
      *
      * @param gs  - current game state
      * @param act - action to apply
-     * @return - list of actions available in the next state
      */
-    private List<AbstractAction> advance(AbstractGameState gs, AbstractAction act) {
+    private void advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
-        player.getForwardModel().computeAvailableActions(gs);
-        if (gs.isNotTerminal() && gs.getActions().isEmpty()) {
-            throw new AssertionError("Should always have at least one action possible...");
-        }
         root.fmCallsCount++;
-        return gs.getActions();
     }
 
     private AbstractAction ucb() {
@@ -206,7 +189,7 @@ class BasicTreeNode {
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
 
-        for (AbstractAction action : state.getActions()) {
+        for (AbstractAction action : children.keySet()) {
             BasicTreeNode child = children.get(action);
             if (child == null)
                 throw new AssertionError("Should not be here");
@@ -255,7 +238,8 @@ class BasicTreeNode {
         AbstractGameState rolloutState = state;
         if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
-                AbstractAction next = randomPlayer.getAction(rolloutState);
+                List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
+                AbstractAction next = randomPlayer.getAction(rolloutState, availableActions);
                 advance(rolloutState, next);
                 rolloutDepth++;
             }
