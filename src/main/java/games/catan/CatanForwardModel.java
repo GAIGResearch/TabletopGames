@@ -5,6 +5,7 @@ import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
+import core.interfaces.IGamePhase;
 import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
 import games.catan.components.Road;
@@ -12,6 +13,7 @@ import games.catan.components.Settlement;
 
 import java.util.*;
 
+import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.HEX_SIDES;
 
@@ -54,55 +56,64 @@ public class CatanForwardModel extends AbstractForwardModel {
         state.areas.put(-1, gameArea);
 
         state.addComponents();
+        state.setGamePhase(CatanGameState.CatanGamePhase.Setup);
 
     }
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         CatanGameState gs = (CatanGameState) currentState;
-        // todo (mb) make sure that reactions are handled correctly (trading)
-//        if (((CatanTurnOrder)gs.getTurnOrder()).reactionsFinished()){
-//            gs.setMainGamePhase();
-//        }
-        gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
-        action.execute(gs);
+        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
+        if (action != null){
+            action.execute(gs);
+        } else {
+            if (VERBOSE)
+                System.out.println("Player cannot do anything since he has drawn cards or " +
+                        " doesn't have any targets available");
+        }
+        IGamePhase gamePhase = gs.getGamePhase();
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
+            // give player the resources
+            if (cto.turnStep >= 1){
+                cto.endPlayerTurn(gs);
+                if (cto.getRoundCounter() >= 2){
+                    // After 2 rounds of setup the main game phase starts
+                    gs.setMainGamePhase();
+                }
+            } else {
+                cto.turnStep++;
+            }
+        }
+        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
+            gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
 
-        // end player's turn
-        gs.getTurnOrder().endPlayerTurn(gs);
+            // todo (mb) check to only execute one of each types of actions
+
+            // end player's turn
+            gs.getTurnOrder().endPlayerTurn(gs);
+        }
+
 
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        CatanGameState gs = (CatanGameState)gameState;
-        if (gs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
-            System.out.println("setting settlements with roads");
-            // TODO (mb) in initial phase each player places 2 roads and 2 settlements on the board
-        }
-        if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
-//            actions.add(new DoNothing());
-        }
-
-        // todo (mb) instead of random determine where to build settlement
-        Random rnd = new Random();
-        int x = rnd.nextInt(7);
-        int y = rnd.nextInt(7);
-        int vertex = rnd.nextInt(HEX_SIDES);
-        actions.add(new BuildSettlement(x, y, vertex, gameState.getCurrentPlayer()));
-
-        // todo (mb) instead of random determine where the player can put roads
-        x = rnd.nextInt(7);
-        y = rnd.nextInt(7);
-        int edge = rnd.nextInt(HEX_SIDES);
-//        actions.add(new BuildRoad(x, y, edge, gameState.getCurrentPlayer()));
-
-
         // todo (mb) some notes on rules
         // 1, victory cards may only be played when player has 10+ points, can be in the same turn when drawn
         // 2, other dev cards cannot be played on the same turn when they are drawn and only 1 card per turn is playable
         // 3, distance rule - each settlement requires 2 edge distance from other settlements
         // 4, trade is a negotiation in the game - should player send an offer to all other players?
+
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        CatanGameState gs = (CatanGameState)gameState;
+
+        if (gs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
+            return CatanActionFactory.getSetupActions(gs);
+        }
+        else if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
+            return CatanActionFactory.getPlayerActions(gs);
+        }
+
         return actions;
     }
 
