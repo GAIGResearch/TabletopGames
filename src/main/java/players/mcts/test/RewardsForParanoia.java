@@ -1,5 +1,6 @@
 package players.mcts.test;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
@@ -11,12 +12,15 @@ import players.PlayerConstants;
 import players.mcts.*;
 import players.simple.RandomPlayer;
 import utilities.SummaryLogger;
+import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 
@@ -35,7 +39,7 @@ public class RewardsForParanoia {
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.iterationsBudget = 500;
+        params.iterationsBudget = 1000;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.K = 1.0;
     }
@@ -52,7 +56,10 @@ public class RewardsForParanoia {
         return game;
     }
 
-    private void runGame(Game game, int moves, Predicate<SingleTreeNode> allMatch, Predicate<SingleTreeNode> anyMatch) {
+    private void runGame(Game game, int moves,
+                         Predicate<SingleTreeNode> allMatch,
+                         Predicate<SingleTreeNode> anyMatch,
+                         Predicate<List<SingleTreeNode>> aggregateCheck) {
         int counter = 0;
         boolean anyMatchTriggered = false;
         AbstractGameState state = game.getGameState();
@@ -69,8 +76,9 @@ public class RewardsForParanoia {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.root);
                 List<SingleTreeNode> allNodes = mctsPlayer.allNodesInTree();
                 assertTrue(allNodes.stream().allMatch(allMatch));
-                 if (allNodes.stream().anyMatch(anyMatch))
-                     anyMatchTriggered = true;
+                if (allNodes.stream().anyMatch(anyMatch))
+                    anyMatchTriggered = true;
+                assertTrue(aggregateCheck.test(allNodes));
                 counter++;
             }
             forwardModel.next(state, actionChosen);
@@ -78,86 +86,107 @@ public class RewardsForParanoia {
         assertTrue(anyMatchTriggered);
     }
 
+    Predicate<List<SingleTreeNode>> checkNodesDistributedAcrossAllPlayers = list -> {
+        Map<Integer, Long> nodeCountByDecisionMaker = list.stream()
+                .map(SingleTreeNode::getActor)
+                .collect(groupingBy(Function.identity(), counting()));
+        // we then check that all players have som nodes in the tree
+        Utils.GameResult[] results = mctsPlayer.root.getState().getPlayerResults();
+        System.out.println("Nodes by player: " + nodeCountByDecisionMaker);
+        if (results[0] == Utils.GameResult.GAME_ONGOING)
+            assertTrue(nodeCountByDecisionMaker.get(0) > 10);
+        if (results[1] == Utils.GameResult.GAME_ONGOING)
+            assertTrue(nodeCountByDecisionMaker.get(1) > 10);
+        if (results[2] == Utils.GameResult.GAME_ONGOING)
+            assertTrue(nodeCountByDecisionMaker.get(2) > 10);
+        return true;
+    };
+    Predicate<SingleTreeNode> paranoidNodeValues = node -> {
+        assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
+        assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
+        assertTrue(node.getChildren().size() < 60);
+        return true;
+    };
+    Predicate<SingleTreeNode> maxNNodeValues = node -> {
+        // if we have just one, everyone else must have just lost
+        if (node.getVisits() == 1 && node.getTotValue()[0] == 1.0) {
+            assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
+            assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
+        }
+        assertTrue(node.getChildren().size() < 60);
+        return true;
+    };
+    Predicate<SingleTreeNode> selfOnlyNodes = node -> {
+        node.getChildren().values().forEach(nodeArray ->
+                assertTrue(nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null)));
+        assertTrue(node.getChildren().size() < 60);
+        return true;
+    };
+    Predicate<SingleTreeNode> atLeastOneSplitNode = node -> node.getChildren().values().stream()
+            .filter(Objects::nonNull)
+            .anyMatch(array -> Arrays.stream(array).filter(Objects::nonNull).count() > 1);
+
     @Test
     public void loveLetterSelfOnly() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
         Game game = createGame(params, GameType.LoveLetter);
-        Predicate<SingleTreeNode> allMatch = node -> {
-            node.getChildren().values().forEach( nodeArray ->
-                    assertTrue(nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null)));
-            return true;
-        };
-        runGame(game, 4, allMatch, n -> true);
+        runGame(game, 4, selfOnlyNodes, n -> true, n -> true);
     }
 
     @Test
     public void loveLetterParanoid() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
         Game game = createGame(params, GameType.LoveLetter);
-        Predicate<SingleTreeNode> allMatch = node -> {
-            assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
-            assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
-            return true;
-        };
-        Predicate<SingleTreeNode> anyMatch = node -> node.getChildren().values().stream()
-                .filter(Objects::nonNull)
-                .anyMatch(array -> Arrays.stream(array).filter(Objects::nonNull).count() > 1);
-        runGame(game, 4, allMatch, anyMatch);
+        runGame(game, 4, paranoidNodeValues, atLeastOneSplitNode, checkNodesDistributedAcrossAllPlayers);
     }
+
     @Test
     public void loveLetterMaxN() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         Game game = createGame(params, GameType.LoveLetter);
-        Predicate<SingleTreeNode> allMatch = node -> {
-            // if we have just one, everyone else must have just lost
-            if (node.getVisits() == 1 && node.getTotValue()[0] == 1.0) {
-                assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
-                assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
-            }
-            return true;
-        };
-        Predicate<SingleTreeNode> anyMatch = node -> node.getChildren().values().stream()
-                .filter(Objects::nonNull)
-                .anyMatch(array -> Arrays.stream(array).filter(Objects::nonNull).count() > 1);
-        runGame(game, 4, allMatch, anyMatch);
+        runGame(game, 4, maxNNodeValues, atLeastOneSplitNode, checkNodesDistributedAcrossAllPlayers);
     }
 
     @Test
     public void virusSelfOnly() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
         Game game = createGame(params, GameType.Virus);
-        Predicate<SingleTreeNode> allMatch = node -> {
-            node.getChildren().values().forEach( nodeArray ->
-                    assertTrue(nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null)));
-            return true;
-        };
-        runGame(game, 4, allMatch, n -> true);
+        runGame(game, 4, selfOnlyNodes, n -> true, n -> true);
     }
 
     @Test
     public void virusParanoid() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
         Game game = createGame(params, GameType.Virus);
-        Predicate<SingleTreeNode> allMatch = node -> {
-            assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
-            assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
-            return true;
-        };
-        runGame(game, 4, allMatch, n -> true);
+        runGame(game, 4, paranoidNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
+
     @Test
     public void virusMaxN() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         Game game = createGame(params, GameType.Virus);
-        Predicate<SingleTreeNode> allMatch = node -> {
-            // if we have just one, everyone else must have just lost
-            if (node.getVisits() == 1 && node.getTotValue()[0] == 1.0) {
-                assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
-                assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
-            }
-            return true;
-        };
-        runGame(game, 4, allMatch, n -> true);
+        runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
+    }
+
+    @Test
+    public void coltExpressMaxN() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        Game game = createGame(params, GameType.ColtExpress);
+        runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
+    }
+
+    @Test
+    public void explodingKittensMaxN() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        Game game = createGame(params, GameType.ExplodingKittens);
+        runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
+    }
+
+    @Test
+    public void unoMaxN() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        Game game = createGame(params, GameType.Uno);
+        runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
 
 }
