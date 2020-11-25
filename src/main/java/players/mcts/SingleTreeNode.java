@@ -174,7 +174,9 @@ public class SingleTreeNode {
         stats.put("leafNodes", treeStats.totalLeaves);
         stats.put("terminalNodes", treeStats.totalTerminalNodes);
         stats.put("maxDepth", treeStats.depthReached);
-        stats.put("nActions", children.size());
+        stats.put("nActionsRoot", children.size());
+        stats.put("nActionsTree", treeStats.meanActionsAtNode);
+        stats.put("maxActionsAtNode", treeStats.maxActionsAtNode);
         OptionalInt maxVisits = Arrays.stream(actionVisits()).max();
         stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
         statsLogger.record(stats);

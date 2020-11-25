@@ -16,17 +16,24 @@ public class TreeStatistics {
     final public int totalTerminalNodes;
     final public double[] nodeDistribution;
     final public double[] leafDistribution;
+    final public int maxActionsAtNode;
+    final public double meanActionsAtNode;
 
     public TreeStatistics(SingleTreeNode root) {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
         nodeQueue.add(root);
         int greatestDepth = 0;
+        int maxActions = 0;
+        int totalActions = 0;
         while (!nodeQueue.isEmpty()) {
             SingleTreeNode node = nodeQueue.poll();
             if (node.depth < maxDepth) {
                 nodesAtDepth[node.depth]++;
                 if (!node.getState().isNotTerminal())
                     gameTerminalNodesAtDepth[node.depth]++;
+                totalActions += node.children.size();
+                if (node.children.size() > maxActions)
+                    maxActions = node.children.size();
                 for (SingleTreeNode child : node.children.values().stream()
                         .filter(Objects::nonNull)
                         .flatMap(Arrays::stream)
@@ -42,14 +49,15 @@ public class TreeStatistics {
                 greatestDepth = node.depth;
         }
 
+        maxActionsAtNode = maxActions;
         depthReached = greatestDepth;
         totalNodes = Arrays.stream(nodesAtDepth).sum();
+        meanActionsAtNode = (double) totalActions / totalNodes;
         totalLeaves = Arrays.stream(leavesAtDepth).sum();
         totalTerminalNodes = Arrays.stream(gameTerminalNodesAtDepth).sum();
         nodeDistribution = Arrays.stream(nodesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalNodes).toArray();
         leafDistribution = Arrays.stream(leavesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalLeaves).toArray();
     }
-
 
 
     @Override
