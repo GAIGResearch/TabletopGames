@@ -34,7 +34,6 @@ public class BaseActionCards {
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
-        fm.computeAvailableActions(state);
         fm.next(state, village);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
@@ -48,7 +47,6 @@ public class BaseActionCards {
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
-        fm.computeAvailableActions(state);
         fm.next(state, smithy);
         assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
@@ -62,7 +60,6 @@ public class BaseActionCards {
         state.addCard(CardType.LABORATORY, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
-        fm.computeAvailableActions(state);
         fm.next(state, laboratory);
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
@@ -78,7 +75,6 @@ public class BaseActionCards {
         assertEquals(1, state.actionsLeft());
         assertEquals(1, state.buysLeft());
         int money = state.availableSpend(0);
-        fm.computeAvailableActions(state);
         fm.next(state, woodcutter);
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
@@ -95,7 +91,6 @@ public class BaseActionCards {
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
         assertEquals(1, state.buysLeft());
-        fm.computeAvailableActions(state);
         fm.next(state, market);
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
@@ -114,7 +109,6 @@ public class BaseActionCards {
         assertEquals(1, state.actionsLeft());
         assertEquals(1, state.buysLeft());
         int money = state.availableSpend(0);
-        fm.computeAvailableActions(state);
         fm.next(state, festival);
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
@@ -129,7 +123,6 @@ public class BaseActionCards {
         DominionAction cellar = new Cellar(0);
         state.addCard(CardType.CELLAR, 0, DeckType.HAND);
         state.addCard(CardType.ESTATE, 0, DeckType.HAND); // to ensure we have at least one ESTATE and one COPPER
-        fm.computeAvailableActions(state);
         fm.next(state, cellar);
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
         assertEquals(state.currentActionInProgress(), cellar);
@@ -150,10 +143,8 @@ public class BaseActionCards {
         DominionAction cellar = new Cellar(0);
         state.addCard(CardType.CELLAR, 0, DeckType.HAND);
         state.addCard(CardType.ESTATE, 0, DeckType.HAND); // to ensure we have at least one ESTATE and one COPPER
-        fm.computeAvailableActions(state);
         fm.next(state, cellar);
 
-        fm.computeAvailableActions(state);
         fm.next(state, new DiscardCard(CardType.ESTATE, 0));
         fm.next(state, new DiscardCard(CardType.COPPER, 0));
         fm.next(state, new DiscardCard(CardType.COPPER, 0));
@@ -184,9 +175,9 @@ public class BaseActionCards {
             if (i != 2) assertEquals(5, state.getDeck(DeckType.HAND, i).getSize());
         }
         int start = state.availableSpend(2);
-   //     fm.computeAvailableActions(state);
         fm.next(state, militia);
-        assertEquals(start+2, state.availableSpend(2));
+        assertEquals(3, state.getCurrentPlayer());
+        assertEquals(start + 2, state.availableSpend(2));
         do {
             List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
             assertTrue(actionsAvailable.stream().allMatch(a -> a instanceof DiscardCard));
@@ -199,11 +190,51 @@ public class BaseActionCards {
 
     @Test
     public void militiaSkipsPlayersWithThreeOrFewerCards() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.endOfTurn(0);
+        state.endOfTurn(1);
+        state.endOfTurn(2);
+        assertEquals(3, state.getCurrentPlayer());
+        DominionAction militia = new Militia(3);
+        state.addCard(CardType.MILITIA, 3, DeckType.HAND);
+        state.drawCard(0, DeckType.HAND, 0, DeckType.DISCARD);
+        state.drawCard(0, DeckType.HAND, 0, DeckType.DISCARD);
+        state.drawCard(0, DeckType.HAND, 0, DeckType.DISCARD);
+        state.drawCard(2, DeckType.HAND, 0, DeckType.DISCARD);
+        state.drawCard(2, DeckType.HAND, 0, DeckType.DISCARD);
+        assertEquals(2, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 2).getSize());
 
+        fm.next(state, militia);
+        assertEquals(1, state.getCurrentPlayer());
+        do {
+            List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
+            assertTrue(actionsAvailable.stream().allMatch(a -> a instanceof DiscardCard));
+            fm.next(state, actionsAvailable.get(rnd.nextInt(actionsAvailable.size())));
+        } while (state.getCurrentPlayer() != 3);
+        assertEquals(2, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 2).getSize());
     }
 
     @Test
     public void militiaDoesNothingIfAllPlayersHaveThreeOrFewerCards() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        assertEquals(0, state.getCurrentPlayer());
+        DominionAction militia = new Militia(0);
+        state.addCard(CardType.MILITIA, 0, DeckType.HAND);
+        for (int i = 1; i < 4; i++) {
+            state.drawCard(i, DeckType.HAND, i, DeckType.DISCARD);
+            state.drawCard(i, DeckType.HAND, i, DeckType.DISCARD);
+        }
+        assertEquals(3, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 2).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 3).getSize());
+
+        fm.next(state, militia);
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(0, state.getCurrentPlayer());
 
     }
 

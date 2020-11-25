@@ -160,7 +160,7 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public int availableSpend(int playerID) {
-        if (playerID != getCurrentPlayer())
+        if (playerID != turnOrder.getTurnOwner())
             throw new AssertionError("Not yet supported");
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar;

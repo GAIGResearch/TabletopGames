@@ -14,12 +14,13 @@ public class Militia extends ExtendedDominionAction {
         super(CardType.MILITIA, playerId);
     }
 
-    int nextPlayerToDiscard = -1;
+    int nextPlayerToDiscard;
     boolean executed = false;
 
     @Override
     boolean _execute(DominionGameState state) {
         state.spend(-2); // player gets +2 to spend
+        state.setActionInProgress(this);
         nextPlayerToDiscard = (player + 1) % state.getNPlayers();
         nextPlayerToDiscard = nextPlayerToDiscard(state);
         return true;
@@ -34,7 +35,7 @@ public class Militia extends ExtendedDominionAction {
             prospectiveDiscardPlayer = (prospectiveDiscardPlayer + 1) % state.getNPlayers();
         } while (prospectiveDiscardPlayer != player);
         executed = true;
-        return -1;
+        return prospectiveDiscardPlayer;
     }
 
     @Override

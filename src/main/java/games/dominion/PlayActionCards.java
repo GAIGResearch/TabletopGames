@@ -24,13 +24,12 @@ public class PlayActionCards extends BigMoney {
      * @param gameState observation of the current game state
      */
     @Override
-    public AbstractAction getAction(AbstractGameState gameState) {
+    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         DominionGameState state = (DominionGameState) gameState;
         if (state.getGamePhase() == DominionGameState.DominionGamePhase.Play) {
-            List<AbstractAction> actions = state.getActions();
             return actions.get(rnd.nextInt(actions.size()));
         } else {
-            return super.getAction(gameState);
+            return super.getAction(gameState, actions);
         }
     }
 

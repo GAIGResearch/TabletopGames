@@ -31,6 +31,8 @@ public class PartialObservability {
         state.addCard(CardType.WOODCUTTER, 2, DeckType.HAND);
         state.addCard(CardType.PROVINCE, 3, DeckType.HAND);
         state.addCard(CardType.MARKET, 0, DeckType.DISCARD);
+        state.addCard(CardType.MARKET, 0, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 0, DeckType.DRAW);
         state.addCard(CardType.FESTIVAL, 1, DeckType.DISCARD);
         state.addCard(CardType.COPPER, 1, DeckType.DISCARD);
         state.addCard(CardType.ESTATE, 1, DeckType.DISCARD);
