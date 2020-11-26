@@ -28,10 +28,10 @@ public abstract class AbstractGameState {
     protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;
     private Area allComponents;
-    private List<AbstractAction> history = new ArrayList<>();
 
-    // List of actions currently available for the player
-    protected List<AbstractAction> availableActions;
+    // A record of all actions taken to reach this game state
+    private List<AbstractAction> history = new ArrayList<>();
+    private List<String> historyText = new ArrayList<>();
 
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected Utils.GameResult gameStatus;
@@ -59,11 +59,12 @@ public abstract class AbstractGameState {
     void reset() {
         turnOrder.reset();
         allComponents = new Area(-1, "All Components");
-        availableActions = new ArrayList<>();
         gameStatus = GAME_ONGOING;
         playerResults = new Utils.GameResult[getNPlayers()];
         Arrays.fill(playerResults, GAME_ONGOING);
         gamePhase = DefaultGamePhase.Main;
+        history = new ArrayList<>();
+        historyText = new ArrayList<>();
         _reset();
     }
 
@@ -87,9 +88,6 @@ public abstract class AbstractGameState {
     public final void setMainGamePhase() {
         this.gamePhase = DefaultGamePhase.Main;
     }
-    public final void setAvailableActions(List<AbstractAction> availableActions) {
-        this.availableActions = availableActions;
-    }
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
@@ -99,9 +97,6 @@ public abstract class AbstractGameState {
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
-    public final List<AbstractAction> getActions() {
-        return Collections.unmodifiableList(availableActions);
-    }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
@@ -137,11 +132,8 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.data = data;  // Should never be modified
 
-        s.availableActions = new ArrayList<>();
-        for (AbstractAction a: availableActions) {
-            s.availableActions.add(a.copy());
-        }
         s.history = new ArrayList<>(history);
+        s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
 
         // Update the list of components for ID matching in actions.
@@ -223,6 +215,26 @@ public abstract class AbstractGameState {
         return _getUnknownComponentsIds(playerId);
     }
 
+    /**
+     * Used by ForwardModel.next() to log history (very useful for debugging)
+     *
+     * @param action The action that has just been applied (or is about to be applied) to the game state
+     */
+    protected void recordAction(AbstractAction action) {
+        history.add(action);
+        historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
+    }
+
+    /**
+     * @return All actions that have been executed on this state since reset()/initialisation
+     */
+    public List<AbstractAction> getHistory() {
+        return new ArrayList<>(history);
+    }
+    public List<String> getHistoryAsText() {
+        return new ArrayList<>(historyText);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -231,16 +243,16 @@ public abstract class AbstractGameState {
         return Objects.equals(gameParameters, gameState.gameParameters) &&
                 Objects.equals(turnOrder, gameState.turnOrder) &&
                 Objects.equals(allComponents, gameState.allComponents) &&
-                Objects.equals(availableActions, gameState.availableActions) &&
                 gameStatus == gameState.gameStatus &&
                 Arrays.equals(playerResults, gameState.playerResults) &&
                 Objects.equals(gamePhase, gameState.gamePhase) &&
                 _equals(o);
+        // we deliberately exclude history from this equality check
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, allComponents, availableActions, gameStatus, gamePhase, data);
+        int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase, data);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }

@@ -251,13 +251,13 @@ public class Game {
                     } else {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
                             while (action == null && gui.isWindowOpen()) {
-                                action = currentPlayer.getAction(observation);
+                                action = currentPlayer.getAction(observation, observedActions);
                                 updateGUI(gui);
                             }
                         } else {
                             // Get action from player, and time it
                             s = System.nanoTime();
-                            action = currentPlayer.getAction(observation);
+                            action = currentPlayer.getAction(observation, observedActions);
                             agentTime += (System.nanoTime() - s);
                             nDecisions++;
                         }
@@ -669,22 +669,23 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = null;//new ActionController(); //null;
+        ActionController ac = new ActionController(); //null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
 
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer());
+
+//        players.add(new RandomPlayer());
         players.add(new RMHCPlayer());
         players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-//        runOne(ExplodingKittens, players, seed, ac, false);
+        runOne(LoveLetter, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();
@@ -693,11 +694,11 @@ public class Game {
 //        games.add(LoveLetter);
 //        runMany(games, players, null, 50, null, false, false);
 
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
-        games.remove(Pandemic);
+//        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-        runMany(games, players, null, 100, ac, false, true);
+//        runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }

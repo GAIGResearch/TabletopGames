@@ -107,7 +107,7 @@ public class UnoDeckView extends ComponentView {
      */
     public void drawDeck(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
-        Deck<UnoCard> deck = (Deck<UnoCard>) component;
+        @SuppressWarnings("unchecked") Deck<UnoCard> deck = (Deck<UnoCard>) component;
 
         if (deck != null) {
             // Draw cards, 0 index on top

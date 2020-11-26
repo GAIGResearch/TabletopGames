@@ -4,6 +4,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import utilities.SummaryLogger;
 
+import java.util.List;
+
 public abstract class AbstractPlayer {
 
     protected IStatisticLogger statsLogger = new SummaryLogger();
@@ -38,7 +40,7 @@ public abstract class AbstractPlayer {
      * AbstractGameState.getActions()
      * @param gameState observation of the current game state
      */
-    public abstract AbstractAction getAction(AbstractGameState gameState);
+    public abstract AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
 
     /* Methods that can be implemented in subclass */
 
