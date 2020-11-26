@@ -16,6 +16,8 @@ import java.util.List;
  */
 public abstract class ExtendedDominionAction extends DominionAction {
 
+    boolean executed = false;
+
     protected ExtendedDominionAction(CardType type, int playerId) {
         super(type, playerId);
     }
@@ -26,5 +28,15 @@ public abstract class ExtendedDominionAction extends DominionAction {
 
     public abstract void registerActionTaken(DominionGameState state, AbstractAction action);
 
-    public abstract boolean executionComplete();
+    public boolean executionComplete() {
+        return executed;
+    }
+
+    /**
+     * Reminder that you need to override copy on any sub-class
+     * And include the executed flag!
+     */
+    @Override
+    public abstract ExtendedDominionAction copy();
+
 }

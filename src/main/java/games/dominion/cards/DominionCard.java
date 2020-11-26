@@ -1,5 +1,6 @@
 package games.dominion.cards;
 
+import core.actions.AbstractAction;
 import core.components.*;
 import games.dominion.actions.*;
 
@@ -77,8 +78,21 @@ public class DominionCard extends Card {
                 return new Cellar(playerId);
             case MILITIA:
                 return new Militia(playerId);
+            case MOAT:
+                return new Moat(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
+        }
+    }
+
+    public boolean hasAttackReaction() {return type.hasAttackReaction();}
+
+    public AbstractAction getAttackReaction(int playerId) {
+        switch (type) {
+            case MOAT:
+                return new MoatReaction(playerId);
+            default:
+                throw new AssertionError("Nope - no Attack Reaction for " + type);
         }
     }
 
@@ -100,7 +114,7 @@ public class DominionCard extends Card {
 
     @Override
     public Card copy() {
-        // Currently all cards are immutable - so we can save resources when copying
+        // Currently all cardTypes are immutable - so we can save resources when copying
         return this;
     }
 }

@@ -17,7 +17,6 @@ public class Cellar extends ExtendedDominionAction {
     }
 
     int cardsDiscarded = 0;
-    boolean executed = false;
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -33,7 +32,7 @@ public class Cellar extends ExtendedDominionAction {
      * @return - new AbstractAction object with the same properties.
      */
     @Override
-    public AbstractAction copy() {
+    public Cellar copy() {
         Cellar retValue = new Cellar(player);
         retValue.cardsDiscarded = cardsDiscarded;
         retValue.executed = executed;
@@ -68,14 +67,22 @@ public class Cellar extends ExtendedDominionAction {
     }
 
     @Override
-    public boolean executionComplete() {
-        return executed;
-    }
-
-    @Override
     public int getCurrentPlayer(DominionGameState state) {
         // Cellar is a purely personal sequence of actions - no reactions are needed
         return player;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Cellar) {
+            Cellar other = (Cellar) obj;
+            return other.player == player && other.cardsDiscarded == cardsDiscarded && other.executed == executed;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(executed, player, cardsDiscarded);
+    }
 }

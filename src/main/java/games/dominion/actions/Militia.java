@@ -2,6 +2,7 @@ package games.dominion.actions;
 
 import core.actions.AbstractAction;
 import games.dominion.*;
+import games.dominion.DominionConstants.*;
 import games.dominion.cards.*;
 
 import java.util.*;
@@ -15,7 +16,6 @@ public class Militia extends ExtendedDominionAction {
     }
 
     int nextPlayerToDiscard;
-    boolean executed = false;
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -41,10 +41,18 @@ public class Militia extends ExtendedDominionAction {
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         // we can discard any card in hand, so create a DiscardCard action for each
-        Set<DominionCard> uniqueCardsInHand = state.getDeck(DominionConstants.DeckType.HAND, nextPlayerToDiscard).stream().collect(toSet());
-        return uniqueCardsInHand.stream()
-                .map(card -> new DiscardCard(card.cardType(), nextPlayerToDiscard))
+        List<AbstractAction> reactions = state.getDeck(DeckType.HAND, nextPlayerToDiscard).stream()
+                .filter(DominionCard::hasAttackReaction)
+                .map(c -> c.getAttackReaction(nextPlayerToDiscard))
                 .collect(toList());
+        if (reactions.isEmpty()) {
+            Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, nextPlayerToDiscard).stream().collect(toSet());
+            return uniqueCardsInHand.stream()
+                    .map(card -> new DiscardCard(card.cardType(), nextPlayerToDiscard))
+                    .collect(toList());
+        } else {
+
+        }
     }
 
     @Override
@@ -59,11 +67,6 @@ public class Militia extends ExtendedDominionAction {
         nextPlayerToDiscard = nextPlayerToDiscard(state);
     }
 
-    @Override
-    public boolean executionComplete() {
-        return executed;
-    }
-
     /**
      * Create a copy of this action, with all of its variables.
      * NO REFERENCES TO COMPONENTS TO BE KEPT IN ACTIONS, PRIMITIVE TYPES ONLY.
@@ -71,10 +74,19 @@ public class Militia extends ExtendedDominionAction {
      * @return - new AbstractAction object with the same properties.
      */
     @Override
-    public AbstractAction copy() {
+    public Militia copy() {
         Militia retValue = new Militia(player);
         retValue.nextPlayerToDiscard = nextPlayerToDiscard;
         retValue.executed = executed;
         return retValue;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Militia) {
+            Militia other = (Militia) obj;
+            return other.executed == executed && other.player == player && other.nextPlayerToDiscard == nextPlayerToDiscard;
+        }
+        return false;
     }
 }

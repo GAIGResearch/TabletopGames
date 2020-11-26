@@ -1,5 +1,7 @@
 package games.dominion.cards;
 
+import core.actions.*;
+
 import java.util.*;
 
 public enum CardType {
@@ -65,5 +67,15 @@ public enum CardType {
     public int getTreasure(){return treasure;}
     public int getVictory(){return victory;}
     public boolean isActionCard(){return action;}
+
+    public boolean hasAttackReaction() {
+        switch (this) {
+            case MOAT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
 
 }
