@@ -32,7 +32,6 @@ public abstract class AbstractPlayer {
     public final AbstractForwardModel getForwardModel() {
         return forwardModel;
     }
-    public final void setForwardModel(AbstractForwardModel fm) {forwardModel = fm;}
 
     /* Methods that should be implemented in subclass */
 
