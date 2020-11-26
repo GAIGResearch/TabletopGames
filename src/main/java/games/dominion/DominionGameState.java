@@ -3,8 +3,8 @@ package games.dominion;
 import core.*;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import games.dominion.actions.DominionAction;
-import games.dominion.actions.ExtendedDominionAction;
+import games.dominion.actions.*;
+import games.dominion.actions.IExtendedSequence;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
@@ -36,7 +36,7 @@ public class DominionGameState extends AbstractGameState {
     // Trash pile and other global decks
     Deck<DominionCard> trashPile;
 
-    ExtendedDominionAction actionInProgress = null;
+    Stack<IExtendedSequence> actionsInProgress = new Stack<>();
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -66,7 +66,7 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public void endOfTurn(int playerID) {
-        if (actionInProgress != null)
+        if (!actionsInProgress.empty())
             throw new AssertionError("Should not have an action in progress beyond the Play phase (yet)");
         if (playerID != getCurrentPlayer())
             throw new AssertionError("Not yet supported");
@@ -130,6 +130,7 @@ public class DominionGameState extends AbstractGameState {
 
         return moveCard(cardToMove, fromPlayer, fromDeck, toPlayer, toDeck);
     }
+
     public boolean moveCard(DominionCard cardToMove, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
         boolean cardFound = getDeck(fromDeck, fromPlayer).remove(cardToMove);
         if (cardFound) {
@@ -166,16 +167,18 @@ public class DominionGameState extends AbstractGameState {
         return totalTreasureInHand - spentSoFar;
     }
 
-    public ExtendedDominionAction currentActionInProgress() {
-        return actionInProgress;
+    public IExtendedSequence currentActionInProgress() {
+        return actionsInProgress.peek();
     }
+
     public boolean isActionInProgress() {
-        return actionInProgress != null;
+        return !actionsInProgress.empty();
     }
-    public void setActionInProgress(ExtendedDominionAction action) {
+
+    public void setActionInProgress(IExtendedSequence action) {
         if (gamePhase != DominionGamePhase.Play)
             throw new AssertionError("ExtendedActions are currently only supported during the Play action phase");
-        actionInProgress = action;
+        actionsInProgress.push(action);
     }
 
     /**
@@ -282,7 +285,10 @@ public class DominionGameState extends AbstractGameState {
         retValue.actionsLeftForCurrentPlayer = actionsLeftForCurrentPlayer;
         retValue.spentSoFar = spentSoFar;
 
-        retValue.actionInProgress = actionInProgress == null ? null : (ExtendedDominionAction) actionInProgress.copy();
+        retValue.actionsInProgress = new Stack<>();
+        actionsInProgress.forEach(
+                a -> retValue.actionsInProgress.push(a.copy())
+        );
         return retValue;
     }
 

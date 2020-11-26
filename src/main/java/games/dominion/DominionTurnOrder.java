@@ -15,7 +15,7 @@ public class DominionTurnOrder extends TurnOrder {
         DominionGameState dgs = (DominionGameState) state;
         if (dgs.isActionInProgress()) {
             // this is when things might differ from the default
-            return dgs.actionInProgress.getCurrentPlayer(dgs);
+            return dgs.actionsInProgress.peek().getCurrentPlayer(dgs);
         }
         return super.getCurrentPlayer(state);
     }

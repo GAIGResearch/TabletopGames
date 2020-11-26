@@ -11,12 +11,13 @@ import java.util.*;
 import static games.dominion.DominionConstants.*;
 import static java.util.stream.Collectors.*;
 
-public class Cellar extends ExtendedDominionAction {
+public class Cellar extends DominionAction implements IExtendedSequence{
     public Cellar(int playerId) {
         super(CardType.CELLAR, playerId);
     }
 
     int cardsDiscarded = 0;
+    boolean executed = false;
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -64,6 +65,11 @@ public class Cellar extends ExtendedDominionAction {
         }
         if (action instanceof DiscardCard)
             cardsDiscarded++;
+    }
+
+    @Override
+    public boolean executionComplete() {
+        return executed;
     }
 
     @Override

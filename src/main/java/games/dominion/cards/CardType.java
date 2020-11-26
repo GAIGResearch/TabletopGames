@@ -1,6 +1,7 @@
 package games.dominion.cards;
 
 import core.actions.*;
+import games.dominion.actions.MoatReaction;
 
 import java.util.*;
 
@@ -74,6 +75,15 @@ public enum CardType {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    public AbstractAction getAttackReaction(int playerId) {
+        switch (this) {
+            case MOAT:
+                return new MoatReaction(playerId);
+            default:
+                throw new AssertionError("Nope - no Attack Reaction for " + this);
         }
     }
 

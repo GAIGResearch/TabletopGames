@@ -45,10 +45,10 @@ public class DominionForwardModel extends AbstractForwardModel {
         action.execute(state);
 
         // we may be in an extended action, so update that
-        if (state.actionInProgress != null) {
-            state.actionInProgress.registerActionTaken(state, action);
-            if (state.actionInProgress.executionComplete())
-                state.setActionInProgress(null);
+        if (!state.actionsInProgress.isEmpty()) {
+            state.actionsInProgress.peek().registerActionTaken(state, action);
+            if (state.actionsInProgress.peek().executionComplete())
+                state.actionsInProgress.pop();
         }
         int playerID = state.getCurrentPlayer();
 
@@ -103,7 +103,7 @@ public class DominionForwardModel extends AbstractForwardModel {
         switch (state.getGamePhase().toString()) {
             case "Play":
                 if (state.isActionInProgress()) {
-                    return state.actionInProgress.followOnActions(state);
+                    return state.actionsInProgress.peek().followOnActions(state);
                 }
                 if (state.actionsLeft() > 0) {
                     Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()

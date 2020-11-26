@@ -87,15 +87,6 @@ public class DominionCard extends Card {
 
     public boolean hasAttackReaction() {return type.hasAttackReaction();}
 
-    public AbstractAction getAttackReaction(int playerId) {
-        switch (type) {
-            case MOAT:
-                return new MoatReaction(playerId);
-            default:
-                throw new AssertionError("Nope - no Attack Reaction for " + type);
-        }
-    }
-
     public int victoryPoints() {
         return type.getVictory();
     }

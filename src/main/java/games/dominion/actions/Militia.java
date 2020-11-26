@@ -9,62 +9,60 @@ import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
-public class Militia extends ExtendedDominionAction {
+public class Militia extends DominionAction implements IExtendedSequence {
 
     public Militia(int playerId) {
         super(CardType.MILITIA, playerId);
     }
 
-    int nextPlayerToDiscard;
+    int currentTarget;
+    boolean executed;
 
     @Override
     boolean _execute(DominionGameState state) {
         state.spend(-2); // player gets +2 to spend
         state.setActionInProgress(this);
-        nextPlayerToDiscard = (player + 1) % state.getNPlayers();
-        nextPlayerToDiscard = nextPlayerToDiscard(state);
+        currentTarget = (player + 1) % state.getNPlayers();
+        checkCurrentTarget(state);
         return true;
     }
 
-    private int nextPlayerToDiscard(DominionGameState state) {
-        int prospectiveDiscardPlayer = nextPlayerToDiscard;
+    private void checkCurrentTarget(DominionGameState state) {
+        int prospectiveDiscardPlayer = currentTarget;
         do {
             if (state.getDeck(DominionConstants.DeckType.HAND, prospectiveDiscardPlayer).getSize() > 3) {
-                return prospectiveDiscardPlayer;
+                currentTarget = prospectiveDiscardPlayer;
+                return;
             }
             prospectiveDiscardPlayer = (prospectiveDiscardPlayer + 1) % state.getNPlayers();
         } while (prospectiveDiscardPlayer != player);
         executed = true;
-        return prospectiveDiscardPlayer;
     }
 
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         // we can discard any card in hand, so create a DiscardCard action for each
-        List<AbstractAction> reactions = state.getDeck(DeckType.HAND, nextPlayerToDiscard).stream()
-                .filter(DominionCard::hasAttackReaction)
-                .map(c -> c.getAttackReaction(nextPlayerToDiscard))
+        Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, currentTarget).stream().collect(toSet());
+        return uniqueCardsInHand.stream()
+                .map(card -> new DiscardCard(card.cardType(), currentTarget))
                 .collect(toList());
-        if (reactions.isEmpty()) {
-            Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, nextPlayerToDiscard).stream().collect(toSet());
-            return uniqueCardsInHand.stream()
-                    .map(card -> new DiscardCard(card.cardType(), nextPlayerToDiscard))
-                    .collect(toList());
-        } else {
-
-        }
     }
 
     @Override
     public int getCurrentPlayer(DominionGameState state) {
-        return nextPlayerToDiscard;
+        return currentTarget;
     }
 
     @Override
     public void registerActionTaken(DominionGameState state, AbstractAction action) {
         // the action does not matter here - we just check to see if cards need to be discarded
-        // TODO: Once Moat is implemented, this will change
-        nextPlayerToDiscard = nextPlayerToDiscard(state);
+        // TODO: Once Moat is implemented, this will change to consider AttackReactions
+        checkCurrentTarget(state);
+    }
+
+    @Override
+    public boolean executionComplete() {
+        return executed;
     }
 
     /**
@@ -76,7 +74,7 @@ public class Militia extends ExtendedDominionAction {
     @Override
     public Militia copy() {
         Militia retValue = new Militia(player);
-        retValue.nextPlayerToDiscard = nextPlayerToDiscard;
+        retValue.currentTarget = currentTarget;
         retValue.executed = executed;
         return retValue;
     }
@@ -85,7 +83,7 @@ public class Militia extends ExtendedDominionAction {
     public boolean equals(Object obj) {
         if (obj instanceof Militia) {
             Militia other = (Militia) obj;
-            return other.executed == executed && other.player == player && other.nextPlayerToDiscard == nextPlayerToDiscard;
+            return other.executed == executed && other.player == player && other.currentTarget == currentTarget;
         }
         return false;
     }
