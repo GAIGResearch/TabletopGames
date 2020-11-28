@@ -3,6 +3,7 @@ package games.explodingkittens.actions.reactions;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
+import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensTurnOrder;
@@ -33,13 +34,14 @@ public class GiveCard extends DrawCard implements IPrintable {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Player gives card for a favor";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Give " + getCard(gameState).getComponentName() + " for a favor";
+        Card card = getCard(gameState);
+        return card == null ? "No Card to give" : "Give " + card.getComponentName() + " for a favor";
     }
 
     @Override
