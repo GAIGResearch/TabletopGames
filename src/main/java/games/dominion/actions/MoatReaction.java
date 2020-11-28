@@ -10,7 +10,7 @@ import games.dominion.cards.DominionCard;
 
 import java.util.Arrays;
 
-public class MoatReaction extends AbstractAction {
+public class MoatReaction extends AbstractAction implements IDominionReaction {
 
     final int player;
 
@@ -27,6 +27,7 @@ public class MoatReaction extends AbstractAction {
                 boolean[] allTrue = new boolean[state.getNPlayers()];
                 Arrays.fill(allTrue, true);
                 hand.setVisibilityOfComponent(pos, allTrue);
+                state.setDefended(player);
                 return true;
             }
         }
@@ -41,7 +42,7 @@ public class MoatReaction extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof MoatReaction && ((MoatReaction)obj).player == player;
+        return obj instanceof MoatReaction && ((MoatReaction) obj).player == player;
     }
 
     @Override
@@ -56,6 +57,17 @@ public class MoatReaction extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Player " + player + "Reveals a MOAT";
+        return "Player " + player + " reveals a MOAT";
+    }
+
+    @Override
+    public CardType getCardType() {
+        return CardType.MOAT;
+    }
+
+    @Override
+    public int getPlayer() {
+        return player;
     }
 }
+

@@ -68,7 +68,7 @@ public class Cellar extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public boolean executionComplete() {
+    public boolean executionComplete(DominionGameState state) {
         return executed;
     }
 

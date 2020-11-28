@@ -29,6 +29,8 @@ public class DominionGameState extends AbstractGameState {
     Deck<DominionCard>[] playerDiscards;
     Deck<DominionCard>[] playerTableaux;
 
+    boolean[] defenceStatus;
+
     int buysLeftForCurrentPlayer = 1;
     int actionsLeftForCurrentPlayer = 1;
     int spentSoFar = 0;
@@ -48,6 +50,7 @@ public class DominionGameState extends AbstractGameState {
         super(gameParameters, new DominionTurnOrder(nPlayers));
         rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
+        defenceStatus = new boolean[nPlayers];  // defaults to false
         this._reset();
     }
 
@@ -83,6 +86,8 @@ public class DominionGameState extends AbstractGameState {
         hand.clear();
         for (int i = 0; i < 5; i++)
             drawCard(playerID);
+
+        defenceStatus = new boolean[playerCount];  // resets to false
 
         actionsLeftForCurrentPlayer = 1;
         spentSoFar = 0;
@@ -168,7 +173,7 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public IExtendedSequence currentActionInProgress() {
-        return actionsInProgress.peek();
+        return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
     }
 
     public boolean isActionInProgress() {
@@ -178,7 +183,10 @@ public class DominionGameState extends AbstractGameState {
     public void setActionInProgress(IExtendedSequence action) {
         if (gamePhase != DominionGamePhase.Play)
             throw new AssertionError("ExtendedActions are currently only supported during the Play action phase");
-        actionsInProgress.push(action);
+        if (action == null && !actionsInProgress.isEmpty())
+            actionsInProgress.pop();
+        else
+            actionsInProgress.push(action);
     }
 
     /**
@@ -244,6 +252,14 @@ public class DominionGameState extends AbstractGameState {
         return cardsAvailable.keySet();
     }
 
+    public void setDefended(int playerId) {
+        defenceStatus[playerId] = true;
+    }
+
+    public boolean isDefended(int playerId) {
+        return defenceStatus[playerId];
+    }
+
     /**
      * Create a copy of the game state containing only those components the given player can observe (if partial
      * observable).
@@ -284,6 +300,8 @@ public class DominionGameState extends AbstractGameState {
         retValue.buysLeftForCurrentPlayer = buysLeftForCurrentPlayer;
         retValue.actionsLeftForCurrentPlayer = actionsLeftForCurrentPlayer;
         retValue.spentSoFar = spentSoFar;
+
+        retValue.defenceStatus = defenceStatus.clone();
 
         retValue.actionsInProgress = new Stack<>();
         actionsInProgress.forEach(

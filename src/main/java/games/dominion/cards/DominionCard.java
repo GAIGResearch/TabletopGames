@@ -42,6 +42,7 @@ public class DominionCard extends Card {
             case FESTIVAL:
             case CELLAR:
             case MILITIA:
+            case MOAT:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);

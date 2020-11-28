@@ -223,7 +223,7 @@ public class Game {
             copyTime += (System.nanoTime() - s);
 
             // Get actions for the player
-            forwardModel.computeAvailableActions(gameState);  // Compute true actions
+       //     forwardModel.computeAvailableActions(gameState);  // Compute true actions
             s = System.nanoTime();
             List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
             actionComputeTime += (System.nanoTime() - s);
@@ -677,15 +677,15 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-//        players.add(new RandomPlayer());
-        players.add(new RMHCPlayer());
+        players.add(new RandomPlayer());
+//        players.add(new RMHCPlayer());
         players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(LoveLetter, players, seed, ac, false);
+        runOne(Dominion, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();

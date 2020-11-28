@@ -15,8 +15,13 @@ public class AttackReaction implements IExtendedSequence {
 
     int attacker;
     int defender;
-    boolean executed = false;
     List<CardType> cardsToPlay;
+
+    private AttackReaction(int attacker, int defender, List<CardType> cardsToPlay) {
+        this.attacker = attacker;
+        this.defender = defender;
+        this.cardsToPlay = new ArrayList<>(cardsToPlay);
+    }
 
     public AttackReaction(DominionGameState state, int attacker, int defender) {
         this.attacker = attacker;
@@ -44,16 +49,37 @@ public class AttackReaction implements IExtendedSequence {
 
     @Override
     public void registerActionTaken(DominionGameState state, AbstractAction action) {
-
+        if (action instanceof DoNothing)
+            cardsToPlay.clear();
+        if (action instanceof IDominionReaction) {
+            IDominionReaction actionTaken = (IDominionReaction) action;
+            if (actionTaken.getPlayer() == defender) {
+                cardsToPlay.remove(actionTaken.getCardType());
+            }
+        }
     }
 
     @Override
-    public boolean executionComplete() {
-        return executed;
+    public boolean executionComplete(DominionGameState state) {
+        return cardsToPlay.isEmpty();
     }
 
     @Override
-    public IExtendedSequence copy() {
-        return null;
+    public AttackReaction copy() {
+        return new AttackReaction(attacker, defender, cardsToPlay);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof AttackReaction) {
+            AttackReaction ar = (AttackReaction) other;
+            return ar.defender == defender && ar.attacker == attacker && ar.cardsToPlay.equals(cardsToPlay);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(attacker, defender, cardsToPlay);
     }
 }

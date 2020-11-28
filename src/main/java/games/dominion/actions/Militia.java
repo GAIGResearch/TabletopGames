@@ -16,13 +16,14 @@ public class Militia extends DominionAction implements IExtendedSequence {
     }
 
     int currentTarget;
-    boolean executed;
+    boolean[] reactionComplete;
 
     @Override
     boolean _execute(DominionGameState state) {
         state.spend(-2); // player gets +2 to spend
         state.setActionInProgress(this);
         currentTarget = (player + 1) % state.getNPlayers();
+        reactionComplete = new boolean[state.getNPlayers()];
         checkCurrentTarget(state);
         return true;
     }
@@ -30,18 +31,24 @@ public class Militia extends DominionAction implements IExtendedSequence {
     private void checkCurrentTarget(DominionGameState state) {
         int prospectiveDiscardPlayer = currentTarget;
         do {
-            if (state.getDeck(DominionConstants.DeckType.HAND, prospectiveDiscardPlayer).getSize() > 3) {
+            if (!state.isDefended(prospectiveDiscardPlayer) &&
+                    state.getDeck(DominionConstants.DeckType.HAND, prospectiveDiscardPlayer).getSize() > 3) {
                 currentTarget = prospectiveDiscardPlayer;
+                if (!reactionComplete[currentTarget])
+                    state.setActionInProgress(new AttackReaction(state, player, currentTarget));
+                reactionComplete[currentTarget] = true;
                 return;
             }
             prospectiveDiscardPlayer = (prospectiveDiscardPlayer + 1) % state.getNPlayers();
         } while (prospectiveDiscardPlayer != player);
-        executed = true;
+        currentTarget = player; // we're done
     }
 
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         // we can discard any card in hand, so create a DiscardCard action for each
+        if (state.getDeck(DeckType.HAND, currentTarget).getSize() < 4 || state.isDefended(currentTarget))
+            throw new AssertionError("Should not be here - there are no actions to be taken");
         Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, currentTarget).stream().collect(toSet());
         return uniqueCardsInHand.stream()
                 .map(card -> new DiscardCard(card.cardType(), currentTarget))
@@ -50,19 +57,18 @@ public class Militia extends DominionAction implements IExtendedSequence {
 
     @Override
     public int getCurrentPlayer(DominionGameState state) {
+        checkCurrentTarget(state);
         return currentTarget;
     }
 
     @Override
     public void registerActionTaken(DominionGameState state, AbstractAction action) {
-        // the action does not matter here - we just check to see if cards need to be discarded
-        // TODO: Once Moat is implemented, this will change to consider AttackReactions
         checkCurrentTarget(state);
     }
 
     @Override
-    public boolean executionComplete() {
-        return executed;
+    public boolean executionComplete(DominionGameState state) {
+        return currentTarget == player;
     }
 
     /**
@@ -75,7 +81,7 @@ public class Militia extends DominionAction implements IExtendedSequence {
     public Militia copy() {
         Militia retValue = new Militia(player);
         retValue.currentTarget = currentTarget;
-        retValue.executed = executed;
+        retValue.reactionComplete = reactionComplete.clone();
         return retValue;
     }
 
@@ -83,7 +89,8 @@ public class Militia extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Militia) {
             Militia other = (Militia) obj;
-            return other.executed == executed && other.player == player && other.currentTarget == currentTarget;
+            return other.player == player && other.currentTarget == currentTarget
+                    && Arrays.equals(reactionComplete, other.reactionComplete);
         }
         return false;
     }

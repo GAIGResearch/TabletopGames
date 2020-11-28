@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 import java.util.*;
 import static java.util.stream.Collectors.*;
 
-public class PartialObservability {
+public class PartialObservabilityCopy {
 
     List<AbstractPlayer> players = Arrays.asList(new TestPlayer(),
             new TestPlayer(),

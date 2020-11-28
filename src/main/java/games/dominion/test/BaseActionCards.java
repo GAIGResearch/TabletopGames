@@ -3,6 +3,7 @@ package games.dominion.test;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.PartialObservableDeck;
 import games.dominion.*;
 import games.dominion.DominionConstants.*;
 import games.dominion.actions.*;
@@ -12,6 +13,7 @@ import org.junit.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -208,6 +210,7 @@ public class BaseActionCards {
 
         fm.next(state, militia);
         assertEquals(1, state.getCurrentPlayer());
+        assertEquals(militia, state.currentActionInProgress());
         do {
             List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
             assertTrue(actionsAvailable.stream().allMatch(a -> a instanceof DiscardCard));
@@ -236,6 +239,117 @@ public class BaseActionCards {
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
         assertEquals(0, state.getCurrentPlayer());
 
+    }
+
+    @Test
+    public void moat() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        DominionAction moat = new Moat(0);
+        state.addCard(CardType.MOAT, 0, DeckType.HAND);
+        fm.next(state, moat);
+        assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
+        assertEquals(0, state.actionsLeft());
+        assertFalse(state.isDefended(0));
+    }
+
+    @Test
+    public void moatDefendsAgainstMilitia() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.endOfTurn(0);
+        state.endOfTurn(1);
+        state.endOfTurn(2);
+        state.addCard(CardType.MOAT, 0, DeckType.HAND);
+        state.addCard(CardType.MILITIA, 3, DeckType.HAND);
+        DominionAction militia = new Militia(3);
+
+        fm.next(state, militia);
+
+        assertEquals(0, state.getCurrentPlayer());
+        List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
+        assertEquals(2, actionsAvailable.size());
+        assertTrue(actionsAvailable.contains(new DoNothing()));
+        assertTrue(actionsAvailable.contains(new MoatReaction(0)));
+
+        assertFalse(state.isDefended(0));
+        fm.next(state, new MoatReaction(0));
+        assertTrue(state.isDefended(0));
+        PartialObservableDeck<DominionCard> hand = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, 0);
+        assertEquals(CardType.MOAT, hand.get(0).cardType());
+        for (int i = 1; i < 3; i++) {
+            assertFalse(state.isDefended(i));
+            assertTrue(hand.getVisibilityForPlayer(0, i));
+        }
+
+        assertEquals(1, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void notRevealingMoatDoesNotDefendAgainstMilitia() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.endOfTurn(0);
+        state.endOfTurn(1);
+        state.endOfTurn(2);
+        state.addCard(CardType.MOAT, 0, DeckType.HAND);
+        state.addCard(CardType.MILITIA, 3, DeckType.HAND);
+        DominionAction militia = new Militia(3);
+
+        fm.next(state, militia);
+
+        assertEquals(0, state.getCurrentPlayer());
+        List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
+        assertEquals(2, actionsAvailable.size());
+        assertTrue(actionsAvailable.contains(new DoNothing()));
+        assertTrue(actionsAvailable.contains(new MoatReaction(0)));
+
+        assertFalse(state.isDefended(0));
+        fm.next(state, new DoNothing());
+        PartialObservableDeck<DominionCard> hand = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, 0);
+        assertEquals(CardType.MOAT, hand.get(0).cardType());
+        for (int i = 0; i < 3; i++) {
+            assertFalse(state.isDefended(i));
+            if (i != 0)
+                assertFalse(hand.getVisibilityForPlayer(0, i));
+        }
+        assertEquals(0, state.getCurrentPlayer());
+        actionsAvailable = fm.computeAvailableActions(state);
+        assertTrue(actionsAvailable.stream().allMatch(a -> a instanceof DiscardCard));
+        // and now we have to discard cards
+    }
+
+    @Test
+    public void moatDefendsAgainstMilitiaII() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.endOfTurn(0);
+        state.endOfTurn(1);
+        assertEquals(2, state.getCurrentPlayer());
+        DominionAction militia = new Militia(2);
+        state.addCard(CardType.MILITIA, 2, DeckType.HAND);
+        state.addCard(CardType.MOAT, 1, DeckType.HAND);
+
+        fm.next(state, militia);
+        assertEquals(3, state.getCurrentPlayer());
+        do {
+            List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
+            Optional<AbstractAction> moatReaction = actionsAvailable.stream().filter(a -> a instanceof MoatReaction).findFirst();
+            AbstractAction chosen = moatReaction.orElseGet(() -> actionsAvailable.get(rnd.nextInt(actionsAvailable.size())));
+            fm.next(state, chosen);
+        } while (state.getCurrentPlayer() != 2);
+        assertEquals(3, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(6, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(5, state.getDeck(DeckType.HAND, 2).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 3).getSize());
+    }
+
+    @Test
+    public void moatDefenceStatusEndsWithTurn() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.setDefended(3);
+        assertTrue(state.isDefended(3));
+        state.endOfTurn(0);
+        for (int i = 0; i < 4; i++) {
+            assertFalse(state.isDefended(i));
+        }
     }
 
 }

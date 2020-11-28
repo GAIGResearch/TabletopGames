@@ -13,7 +13,7 @@ public interface IExtendedSequence {
 
     void registerActionTaken(DominionGameState state, AbstractAction action);
 
-    boolean executionComplete();
+    boolean executionComplete(DominionGameState state);
 
     IExtendedSequence copy();
 }
