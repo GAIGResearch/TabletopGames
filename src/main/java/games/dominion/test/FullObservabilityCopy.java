@@ -22,9 +22,24 @@ public class FullObservabilityCopy {
     public void gameStateCopyVanilla() {
         DominionGame game = new DominionGame(new DominionParameters(36), 4);
         DominionGameState startState = (DominionGameState) game.getGameState();
-        DominionGameState fullCopy = (DominionGameState) startState.copy();
+        startState.setDefended(2);
 
+        DominionGameState fullCopy = (DominionGameState) startState.copy();
+        assertTrue(startState.isDefended(2));
+        assertTrue(fullCopy.isDefended(2));
         // TODO: Add checks
+        fullCopy.endOfTurn(0);
+        assertEquals(0, startState.getCurrentPlayer());
+        assertEquals(1, fullCopy.getCurrentPlayer());
+
+        startState.setDefended(0);
+        fullCopy.setDefended(1);
+        assertTrue(startState.isDefended(0));
+        assertFalse(startState.isDefended(1));
+        assertFalse(fullCopy.isDefended(0));
+        assertTrue(fullCopy.isDefended(1));
+        assertTrue(startState.isDefended(2));
+        assertFalse(fullCopy.isDefended(2));
 
     }
 
@@ -55,5 +70,6 @@ public class FullObservabilityCopy {
         assertNotSame(startState.currentActionInProgress(), fullCopy.currentActionInProgress());
         assertEquals(startState.currentActionInProgress(), fullCopy.currentActionInProgress());
     }
+
 
 }

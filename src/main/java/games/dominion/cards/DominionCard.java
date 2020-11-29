@@ -2,7 +2,11 @@ package games.dominion.cards;
 
 import core.actions.AbstractAction;
 import core.components.*;
+import games.dominion.DominionConstants;
+import games.dominion.DominionGame;
 import games.dominion.actions.*;
+
+import java.util.Objects;
 
 public class DominionCard extends Card {
 
@@ -105,9 +109,18 @@ public class DominionCard extends Card {
     }
 
     @Override
-    public Card copy() {
+    public DominionCard copy() {
         // Currently all cardTypes are immutable - so we can save resources when copying
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DominionCard) {
+            DominionCard other = (DominionCard) obj;
+            return other.type == type;
+        }
+        return false;
     }
 }
 

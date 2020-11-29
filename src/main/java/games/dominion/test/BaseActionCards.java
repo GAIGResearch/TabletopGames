@@ -352,4 +352,23 @@ public class BaseActionCards {
         }
     }
 
+    @Test
+    public void allPlayersDefendingAgainstMilitiaMovesProgressOn() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MOAT, 1, DeckType.HAND);
+        state.addCard(CardType.MOAT, 2, DeckType.HAND);
+        state.addCard(CardType.MOAT, 3, DeckType.HAND);
+        state.addCard(CardType.MILITIA, 0, DeckType.HAND);
+        DominionAction militia = new Militia(0);
+
+        fm.next(state, militia);
+        for (int i = 0; i < 3; i++) {
+            List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
+            AbstractAction moatReaction = actionsAvailable.stream().filter(a -> a instanceof MoatReaction).findFirst().get();
+            fm.next(state, moatReaction);
+        }
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
 }

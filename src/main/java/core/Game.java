@@ -677,8 +677,8 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
+  //      players.add(new RandomPlayer());
+        players.add(new RMHCPlayer());
         players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
         players.add(new HumanGUIPlayer(ac));

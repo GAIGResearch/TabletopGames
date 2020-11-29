@@ -229,7 +229,7 @@ public abstract class Component {
         if (this == o) return true;
         if (!(o instanceof Component)) return false;
         Component component = (Component) o;
-        return componentID == ((Component) o).componentID;
+        return componentID == component.componentID;
     }
 
     @Override

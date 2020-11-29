@@ -111,7 +111,8 @@ public class DominionForwardModel extends AbstractForwardModel {
                 if (state.actionsLeft() > 0) {
                     Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
                             .filter(DominionCard::isActionCard).collect(toSet());
-                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID)).collect(toList());
+                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID))
+                            .distinct().collect(toList());
                     availableActions.add(new EndPhase());
                     return availableActions;
                 }

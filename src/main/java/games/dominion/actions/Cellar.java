@@ -46,6 +46,7 @@ public class Cellar extends DominionAction implements IExtendedSequence{
         Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, player).stream().collect(toSet());
         List<AbstractAction> discardActions = uniqueCardsInHand.stream()
                 .map(card -> new DiscardCard(card.cardType(), player))
+                .distinct()
                 .collect(toList());
         // and then we can always choose to stop discarding
         discardActions.add(new DoNothing());

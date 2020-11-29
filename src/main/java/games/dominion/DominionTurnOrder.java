@@ -38,8 +38,7 @@ public class DominionTurnOrder extends TurnOrder {
      */
     @Override
     protected TurnOrder _copy() {
-        // no state
-        return this;
+        return new DominionTurnOrder(nPlayers);
     }
 
 

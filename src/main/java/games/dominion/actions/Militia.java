@@ -52,6 +52,7 @@ public class Militia extends DominionAction implements IExtendedSequence {
         Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, currentTarget).stream().collect(toSet());
         return uniqueCardsInHand.stream()
                 .map(card -> new DiscardCard(card.cardType(), currentTarget))
+                .distinct()
                 .collect(toList());
     }
 
@@ -68,6 +69,7 @@ public class Militia extends DominionAction implements IExtendedSequence {
 
     @Override
     public boolean executionComplete(DominionGameState state) {
+        checkCurrentTarget(state);
         return currentTarget == player;
     }
 
@@ -81,7 +83,7 @@ public class Militia extends DominionAction implements IExtendedSequence {
     public Militia copy() {
         Militia retValue = new Militia(player);
         retValue.currentTarget = currentTarget;
-        retValue.reactionComplete = reactionComplete.clone();
+        retValue.reactionComplete = reactionComplete != null ? reactionComplete.clone() : null;
         return retValue;
     }
 

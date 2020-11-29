@@ -52,6 +52,8 @@ public class DominionParameters extends AbstractParameters {
         retValue.cardsUsed.put(CardType.MARKET, 10);
         retValue.cardsUsed.put(CardType.FESTIVAL, 10);
         retValue.cardsUsed.put(CardType.CELLAR, 10);
+        retValue.cardsUsed.put(CardType.MOAT, 10);
+        retValue.cardsUsed.put(CardType.MILITIA, 10);
         // Note that the three Victory cards and three Treasure cards are always included
         return retValue;
     }

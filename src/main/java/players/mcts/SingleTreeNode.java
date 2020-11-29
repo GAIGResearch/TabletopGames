@@ -3,8 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
-import games.loveletter.LoveLetterGame;
-import games.loveletter.LoveLetterGameState;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Utils;
@@ -282,7 +280,7 @@ public class SingleTreeNode {
     private void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
         while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
-            AbstractGameState preGS = gs.copy();
+     //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
             List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(gs);
             if (availableActions.isEmpty())

@@ -285,11 +285,22 @@ public class DominionGameState extends AbstractGameState {
                 // need to combine and shuffle hands and drawpiles
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
                 retValue.playerHands[p] = playerHands[p].copy();
-                retValue.playerDrawPiles[p].add(retValue.playerHands[p]);
-                retValue.playerHands[p].clear();
+                for (int i = 0; i < retValue.playerHands[p].getSize(); i++) {
+                    // if we (the perspective player) can see the card, then we need to keep it in place
+                    if (!retValue.playerHands[p].getVisibilityForPlayer(i, playerId)) {
+                        retValue.playerDrawPiles[p].add(retValue.playerHands[p].get(i));
+                    }
+                }
+                retValue.playerHands[p].clear(); // we will need to reconstruct this, including visibility status in a sec
+                // TODO: Currently this assumes playerDrawPile is non-observable. this will change once certain action cards introduced
                 retValue.playerDrawPiles[p].shuffle(rnd);
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
-                    retValue.playerHands[p].add(retValue.playerDrawPiles[p].draw());
+                    if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {
+                        retValue.playerHands[p].add(retValue.playerDrawPiles[p].draw(), i);
+                    } else {
+                        // we know what this card is, so copy over visibility status
+                        retValue.playerHands[p].add(playerHands[p].get(i).copy(), playerHands[p].getVisibilityOfComponent(i).clone());
+                    }
                 }
 
             }

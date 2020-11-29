@@ -5,12 +5,16 @@ import core.AbstractPlayer;
 import core.components.*;
 import games.dominion.*;
 import games.dominion.DominionConstants.*;
+import games.dominion.actions.Moat;
+import games.dominion.actions.MoatReaction;
 import games.dominion.cards.*;
 import org.junit.*;
 
+import static games.dominion.cards.CardType.MOAT;
 import static org.junit.Assert.*;
 
 import java.util.*;
+
 import static java.util.stream.Collectors.*;
 
 public class PartialObservabilityCopy {
@@ -22,7 +26,7 @@ public class PartialObservabilityCopy {
 
     DominionGame game = new DominionGame(players, DominionParameters.firstGame(System.currentTimeMillis()));
     DominionGameState state = (DominionGameState) game.getGameState();
-
+    DominionForwardModel fm = new DominionForwardModel();
 
     @Before
     public void setup() {
@@ -51,7 +55,7 @@ public class PartialObservabilityCopy {
     }
 
     @Test
-    public void handsOfOtherPlayersAreChanged(){
+    public void handsOfOtherPlayersAreChanged() {
         DominionGameState myCopy = (DominionGameState) state.copy(0);
         DominionGameState fullCopy = (DominionGameState) state.copy();
         assertFalse(myCopy.getDeck(DeckType.HAND, 1).equals(state.getDeck(DeckType.HAND, 1)));
@@ -101,6 +105,7 @@ public class PartialObservabilityCopy {
             assertFalse(myCopy.getDeck(DeckType.DRAW, playerId).equals(state.getDeck(DeckType.DRAW, playerId)));
             assertEquals(fullCopy.getDeck(DeckType.DRAW, playerId), state.getDeck(DeckType.DRAW, playerId));
             assertEquals(myCopy.getDeck(DeckType.DRAW, playerId).getSize(), state.getDeck(DeckType.DRAW, playerId).getSize());
+            assertEquals(state.getDeck(DeckType.HAND, playerId).getSize(), myCopy.getDeck(DeckType.HAND, playerId).getSize());
 
             // but the drawpile and hand together should have exactly the same cards in them
             Deck<DominionCard> allCards = state.getDeck(DeckType.HAND, playerId).copy();
@@ -120,5 +125,33 @@ public class PartialObservabilityCopy {
         DominionGameState fullCopy = (DominionGameState) state.copy();
         assertEquals(myCopy.getDeck(DeckType.TABLE, 2), state.getDeck(DeckType.TABLE, 2));
         assertEquals(fullCopy.getDeck(DeckType.TABLE, 2), state.getDeck(DeckType.TABLE, 2));
+    }
+
+    @Test
+    public void revealedCardInHandDoesNotChange() {
+        state.addCard(MOAT, 0, DeckType.HAND);
+        MoatReaction moatReaction = new MoatReaction(0);
+        fm.next(state, moatReaction);
+
+        PartialObservableDeck<DominionCard> playerHand = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, 0);
+        checkVisibilityExpectations(playerHand);
+
+        DominionGameState myCopy = (DominionGameState) state.copy(0);
+        DominionGameState theirCopy = (DominionGameState) state.copy(1);
+        DominionGameState fullCopy = (DominionGameState) state.copy();
+
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.HAND, 0));
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.HAND, 0));
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.HAND, 0));
+    }
+
+    private void checkVisibilityExpectations(PartialObservableDeck<DominionCard> playerHand) {
+        for (int p = 0; p < 4; p++) {
+            assertTrue(playerHand.getVisibilityForPlayer(0, p));
+            for (int j = 1; j < 4; j++)
+                if (p != 0)
+                    assertFalse(playerHand.getVisibilityForPlayer(j, p));
+        }
+        assertEquals(MOAT, playerHand.get(0).cardType());
     }
 }
