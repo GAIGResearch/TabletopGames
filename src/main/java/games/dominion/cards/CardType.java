@@ -32,7 +32,7 @@ public enum CardType {
     MILITIA(4, 0, 0),
     MONEYLENDER(4, 0, 0),
     POACHER(4, 0, 0),
-    REMODEL(5, 0, 0),
+    REMODEL(4, 0, 0),
     SMITHY(4, 0, 0),
     THRONE_ROOM(5, 0, 0),
     BANDIT(5, 0, 0),

@@ -2,6 +2,7 @@ package gui.views;
 
 import core.components.*;
 import core.components.Component;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -108,9 +109,13 @@ public abstract class DeckView<T extends Component> extends ComponentView {
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
-                T card = deck.get(cardHighlight);
-                Rectangle r = rects[cardHighlight];
-                drawComponent(g, r, card, front || componentVisibility(deck, cardHighlight));
+                if (deck.getSize() > cardHighlight) {
+                    T card = deck.get(cardHighlight);
+                    Rectangle r = rects[cardHighlight];
+                    drawComponent(g, r, card, front || componentVisibility(deck, cardHighlight));
+                } else {
+                    cardHighlight = -1;
+                }
             }
             int size = g.getFont().getSize();
 //            String name = deck.getComponentName();

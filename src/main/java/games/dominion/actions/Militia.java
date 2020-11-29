@@ -96,4 +96,9 @@ public class Militia extends DominionAction implements IExtendedSequence {
         }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player, CardType.MILITIA, currentTarget, reactionComplete);
+    }
 }

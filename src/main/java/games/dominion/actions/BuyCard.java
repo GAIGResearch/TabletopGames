@@ -9,14 +9,13 @@ import games.dominion.cards.*;
 
 import java.util.Objects;
 
-public class BuyCard extends AbstractAction {
-
-    public final CardType cardType;
-    public final int buyingPlayer;
+/**
+ * An extension of GainCard that implements control over Buys and AvailableSpend
+ */
+public class BuyCard extends GainCard {
 
     public BuyCard(CardType cardToBuy, int playerID) {
-        buyingPlayer = playerID;
-        cardType = cardToBuy;
+        super(cardToBuy, playerID);
     }
 
     /**
@@ -34,45 +33,14 @@ public class BuyCard extends AbstractAction {
         // iii) Updating the available money and buy actions
         DominionGameState state = (DominionGameState) gs;
         if (state.buysLeft() > 0 && state.availableSpend(buyingPlayer) >= cardType.getCost()) {
-            if (state.removeCardFromTable(cardType)) {
+            boolean success = super.execute(state);
+            if (success) {
                 state.changeBuys(-1);
                 state.spend(cardType.getCost());
-                state.addCard(cardType, buyingPlayer, DominionConstants.DeckType.DISCARD);
-                return true;
             }
+            return success;
         }
         return false;
-    }
-
-    /**
-     * Create a copy of this action, with all of its variables.
-     * NO REFERENCES TO COMPONENTS TO BE KEPT IN ACTIONS, PRIMITIVE TYPES ONLY.
-     *
-     * @return - new AbstractAction object with the same properties.
-     */
-    @Override
-    public AbstractAction copy() {
-        // all state is immutable, so no need
-        return this;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BuyCard) {
-            BuyCard other = (BuyCard) obj;
-            return other.cardType == cardType && other.buyingPlayer == buyingPlayer;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(buyingPlayer, cardType);
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return this.toString();
     }
 
     @Override

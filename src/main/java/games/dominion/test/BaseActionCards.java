@@ -11,11 +11,10 @@ import games.dominion.cards.*;
 import games.dominion.DominionGameState.*;
 import org.junit.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
 
 public class BaseActionCards {
@@ -369,6 +368,73 @@ public class BaseActionCards {
         }
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void remodelForcesATrash() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.REMODEL, 0, DeckType.HAND);
+        state.addCard(CardType.GOLD, 0, DeckType.HAND);
+        state.addCard(CardType.ESTATE, 0, DeckType.HAND);
+        Remodel remodel = new Remodel(0);
+        fm.next(state, remodel);
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertTrue(actions.stream().allMatch(a -> a instanceof TrashCard));
+        assertEquals(3, actions.size()); // COPPER, GOLD, ESTATE
+
+        fm.next(state, new TrashCard(CardType.ESTATE, 0));
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(1, state.getDeck(DeckType.TRASH, -1).getSize());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+    }
+
+
+    @Test
+    public void remodelWithNoCardsInHand() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.getDeck(DeckType.HAND, 0).clear();
+        state.addCard(CardType.REMODEL, 0, DeckType.HAND);
+        Remodel remodel = new Remodel(0);
+        fm.next(state, remodel);
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(1, actions.size());
+        assertEquals(new DoNothing(), actions.get(0));
+
+        fm.next(state, actions.get(0));
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void remodelBuyOptionsCorrectGivenTrashedCard() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.REMODEL, 0, DeckType.HAND);
+        state.addCard(CardType.GOLD, 0, DeckType.HAND);
+        state.addCard(CardType.ESTATE, 0, DeckType.HAND);
+        Remodel remodel = new Remodel(0);
+        fm.next(state, remodel);
+        int availableSpend = state.availableSpend(0);
+        fm.next(state, new TrashCard(CardType.ESTATE, 0));
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof GainCard));
+        assertTrue(actions.stream().allMatch(a -> ((GainCard)a).cardType.getCost() <= 4));
+        Set<CardType> allCards = state.cardsToBuy();
+        Set<CardType> allGainable = actions.stream().map( a -> ((GainCard)a).cardType).collect(toSet());
+        allCards.removeAll(allGainable);
+        assertTrue(allCards.stream().allMatch(c -> c.getCost() >= 5));
+
+        fm.next(state, new GainCard(CardType.SILVER, 0));
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(availableSpend, state.availableSpend(0));
     }
 
 }

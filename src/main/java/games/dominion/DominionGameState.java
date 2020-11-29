@@ -9,6 +9,9 @@ import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 public class DominionGameState extends AbstractGameState {
 
@@ -246,6 +249,10 @@ public class DominionGameState extends AbstractGameState {
         }
 
         return (int) allCards.stream().filter(c -> c.cardType() == type).count();
+    }
+
+    public Set<CardType> cardsToBuy() {
+        return cardsAvailable.keySet().stream().filter(c -> cardsAvailable.get(c) > 0).collect(toSet());
     }
 
     public Set<CardType> cardsAvailable() {
