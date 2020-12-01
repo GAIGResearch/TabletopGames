@@ -10,36 +10,13 @@ The tiles are represented as individual Hexagons using the "r-even" representati
 
 Each tile contains its x (row) and y (column) coordinates in the "r-even" representation. "x_coord" and "y_coord" are their coordinates on the rendered screen. 
 
-Currently working on setting references to all edges and vertices, so adding a new settlement to a hex would also show up on the neightbouring tiles and same with the roads (edges).
+Currently, working on setting references to all edges and vertices, so adding a new settlement to a hex would also show up on the neighbouring tiles and same with the roads (edges).
 
-Easier tasks:
-- Setup scoring system ```(gameState.score[playerID])``` - longest road, most knights + other calculations and related events
-- Distribute and handle cards
-- Actions related to buying - check if player has resources, return card to game and purchase item - if card keep it hand, if settlement, road then place it on the map
-- Robber rules
-- Play development cards
-- Assign Harbors
-- Harbor actions
 
-Harder tasks:
-- Edge, vertex referencing correctly + distance rule (+ longest road calculation)
-- TurnOrder
-- Event Reaction system
-- Trading - how to handle negotiation?
+# Graph
+To facilitate working with a graph structure along with the tile representation we keep a graph representation as well. All of them uses the same references to Settlements and roads. 
+In this case the Settlements are the vertices and Roads are the edges connecting them.
 
-## Catan Actions
-
-### Progress
-- [x] build Settlement
-- [x] build roads
-- [ ] play cards
-- [ ] trading (Reaction system)
-
-## Forward Model
-
-Keeps track of the rules of the game.
-### Progress
-- [x] board setup
-- [ ] initial phase for placing settlements with roads
-- [ ] turns
-- [ ] game logic
+# Helper functions
+- Find reference to roads from a settlement - ```Graph.getNeighbourNodes``` and ```Graph.getEdges``` functions
+- Find the longest road: [solution](https://stackoverflow.com/questions/3191460/finding-the-longest-road-in-a-settlers-of-catan-game-algorithmically)

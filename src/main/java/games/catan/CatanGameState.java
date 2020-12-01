@@ -5,14 +5,19 @@ import core.AbstractGameState;
 import core.components.Area;
 import core.components.Component;
 import core.interfaces.IGamePhase;
+import games.catan.actions.BuildRoad;
+import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
 
 import java.util.*;
 
+import static games.catan.CatanConstants.HEX_SIDES;
+
 public class CatanGameState extends AbstractGameState {
     private CatanData data;
     protected CatanTile[][] board;
+    protected Graph<Settlement, Road> catanGraph;
     protected int scores[]; // score for each player - 10 required to win
     protected int knights[]; // knight count for each player
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
@@ -95,6 +100,14 @@ public class CatanGameState extends AbstractGameState {
         return board;
     }
 
+    public void setGraph(Graph graph){
+        this.catanGraph = graph;
+    }
+
+    public Graph getGraph(){
+        return catanGraph;
+    }
+
     public int getRollValue(){
         return rollValue;
     }
@@ -148,7 +161,6 @@ public class CatanGameState extends AbstractGameState {
         System.out.println("There are " + counter + " settlements");
         return settlements;
     }
-
     // todo implement methods below
 
     @Override

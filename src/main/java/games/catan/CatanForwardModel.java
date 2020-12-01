@@ -8,6 +8,7 @@ import core.components.*;
 import core.interfaces.IGamePhase;
 import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
+import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
 
@@ -40,6 +41,9 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanData data = state.getData();
 
         state.setBoard(generateBoard(params));
+        state.setGraph(extractGraphFromBoard(state.getBoard()));
+        state.getRoads();
+        state.getSettlements();
         state.areas = new HashMap<>();
 
         // Setup areas
@@ -73,16 +77,17 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
         IGamePhase gamePhase = gs.getGamePhase();
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
+            cto.endPlayerTurn(gs);
             // give player the resources
-            if (cto.turnStep >= 1){
-                cto.endPlayerTurn(gs);
-                if (cto.getRoundCounter() >= 2){
-                    // After 2 rounds of setup the main game phase starts
-                    gs.setMainGamePhase();
-                }
-            } else {
-                cto.turnStep++;
+//            if (cto.turnStep >= 1){
+//                cto.endPlayerTurn(gs);
+            if (cto.getRoundCounter() >= 2){
+                // After 2 rounds of setup the main game phase starts
+                gs.setMainGamePhase();
             }
+//            } else {
+//                cto.turnStep++;
+//            }
         }
         if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
             gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
@@ -177,49 +182,78 @@ public class CatanForwardModel extends AbstractForwardModel {
                 // --------- Road ------------
                 for (int edge = 0; edge < HEX_SIDES; edge++) {
                     // Road has already been set
-                    if (tile.getRoads()[edge] != null) {
-                        continue;
+                    if (tile.getRoads()[edge] == null) {
+                        // set a new road without owner
+                        Road road = new Road(-1);
+                        tile.setRoad(edge, road);
+
+                        int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
+                        // need to check if neighbour is on the board
+                        if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
+                                Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
+                            // if in range then set road references
+                            CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
+                            neighbour.setRoad((edge + 3) % HEX_SIDES, road);
+                        }
                     }
 
-                    // set a new road without owner
-                    Road road = new Road(-1);
-                    tile.setRoad(edge, road);
-
-                    int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
-                    // need to check if neighbour is on the board
-                    if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
-                            Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
-                        // if in range then set road references
-                        CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
-                        neighbour.setRoad((edge + 3) % HEX_SIDES, road);
-                    }
                 }
 
                 // ------ Settlement ------------
                 for (int vertex = 0; vertex < HEX_SIDES; vertex++){
                     // settlement has already been set so skip this loop
-                    if (tile.getSettlements()[vertex] != null){
-                        continue;
-                    }
+                    if (tile.getSettlements()[vertex] == null){
+                        Settlement settlement = new Settlement(-1);
+                        tile.setSettlement(vertex, settlement);
 
-                    Settlement settlement = new Settlement(-1);
-                    tile.setSettlement(vertex, settlement);
-
-                    // Get the other 2 settlements along that vertex and set both of them separately
-                    // has to do it in 2 steps as there could cases with only 2 tiles on along a vertex
-                    int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, vertex);
-                    if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
-                            Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
-                        board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((vertex + 2) % HEX_SIDES, settlement);
-                    }
-                    if (Arrays.stream(neighbourCoords[1]).max().getAsInt() < board.length &&
-                            Arrays.stream(neighbourCoords[1]).min().getAsInt() >= 0) {
-                        board[neighbourCoords[1][0]][neighbourCoords[1][1]].setSettlement((vertex + 4) % HEX_SIDES, settlement);
+                        // Get the other 2 settlements along that vertex and set both of them separately
+                        // has to do it in 2 steps as there could cases with only 2 tiles on along a vertex
+                        int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, vertex);
+                        // check neighbour #1
+                        if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
+                                Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
+                            board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((vertex + 2) % HEX_SIDES, settlement);
+                        }
+                        // check neighbour #2
+                        if (Arrays.stream(neighbourCoords[1]).max().getAsInt() < board.length &&
+                                Arrays.stream(neighbourCoords[1]).min().getAsInt() >= 0) {
+                            board[neighbourCoords[1][0]][neighbourCoords[1][1]].setSettlement((vertex + 4) % HEX_SIDES, settlement);
+                        }
                     }
                 }
             }
         }
         return board;
+    }
+
+    private Graph extractGraphFromBoard(CatanTile[][] board){
+        Graph<Settlement, Road> graph = new Graph<>();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                // logic to generate the graph from the board representation
+                // We are not interested in references to DESERT or SEA tiles
+                if (tile.getType() != CatanParameters.TileType.DESERT || tile.getType() != CatanParameters.TileType.SEA){
+                    Settlement[] settlements = tile.getSettlements();
+                    Road[] roads = tile.getRoads();
+                    for (int i = 0; i < settlements.length; i++){
+                        //  2 roads are along the same HEX
+                        graph.addEdge(tile.settlements[i], tile.settlements[(i+5)%HEX_SIDES], roads[i]);
+                        graph.addEdge(tile.settlements[i], tile.settlements[(i+1)%HEX_SIDES], roads[i]);
+
+                        // last one requires a road and a settlement from a neighbour
+                        int[] otherCoords = CatanTile.get_neighbour_on_edge(tile, i);
+                        if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
+                                Arrays.stream(otherCoords).min().getAsInt() >= 0) {
+                            CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
+                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], roads[(i+4)%HEX_SIDES]);
+                        }
+                    }
+                }
+            }
+        }
+        return graph;
+
     }
 
     public int rollDice(long seed){
