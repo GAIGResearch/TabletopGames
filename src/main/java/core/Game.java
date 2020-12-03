@@ -4,8 +4,11 @@ import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSEnums;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
@@ -678,9 +681,27 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
   //      players.add(new RandomPlayer());
-        players.add(new RMHCPlayer());
-        players.add(new MCTSPlayer());
-        players.add(new OSLAPlayer());
+        MCTSParams params1 = new MCTSParams();
+        MCTSParams params2 = new MCTSParams();
+        params2.redeterminise =true;
+        params2.openLoop = true;
+        params2.rolloutLength = 100;
+        params2.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
+        params2.K = 10.0;
+        params2.maxTreeDepth = 3;
+        params2.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        params2.budgetType = PlayerConstants.BUDGET_TIME;
+        params2.timeBudget = 50;
+
+        MCTSParams params3 = (MCTSParams) params2.copy();
+        params3.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
+        params3.maxTreeDepth = 10;
+        params2.K = 3.0;
+
+        //     players.add(new RMHCPlayer());
+        players.add(new MCTSPlayer(params1));
+        players.add(new MCTSPlayer(params2));
+        players.add(new MCTSPlayer(params3));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 

@@ -3,13 +3,11 @@ package games.dominion;
 import core.*;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import games.dominion.actions.*;
 import games.dominion.actions.IExtendedSequence;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -37,6 +35,7 @@ public class DominionGameState extends AbstractGameState {
     int buysLeftForCurrentPlayer = 1;
     int actionsLeftForCurrentPlayer = 1;
     int spentSoFar = 0;
+    int additionalSpendAvailable = 0;
 
     // Trash pile and other global decks
     Deck<DominionCard> trashPile;
@@ -94,6 +93,7 @@ public class DominionGameState extends AbstractGameState {
 
         actionsLeftForCurrentPlayer = 1;
         spentSoFar = 0;
+        additionalSpendAvailable = 0;
         buysLeftForCurrentPlayer = 1;
         setGamePhase(DominionGameState.DominionGamePhase.Play);
         getTurnOrder().endPlayerTurn(this);
@@ -167,12 +167,15 @@ public class DominionGameState extends AbstractGameState {
     public void spend(int delta) {
         spentSoFar += delta;
     }
+    public void changeAdditionalSpend(int delta)  {
+        additionalSpendAvailable += delta;
+    }
 
     public int availableSpend(int playerID) {
         if (playerID != turnOrder.getTurnOwner())
             throw new AssertionError("Not yet supported");
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
-        return totalTreasureInHand - spentSoFar;
+        return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
     }
 
     public IExtendedSequence currentActionInProgress() {
@@ -318,6 +321,7 @@ public class DominionGameState extends AbstractGameState {
         retValue.buysLeftForCurrentPlayer = buysLeftForCurrentPlayer;
         retValue.actionsLeftForCurrentPlayer = actionsLeftForCurrentPlayer;
         retValue.spentSoFar = spentSoFar;
+        retValue.additionalSpendAvailable = additionalSpendAvailable;
 
         retValue.defenceStatus = defenceStatus.clone();
 
@@ -417,6 +421,6 @@ public class DominionGameState extends AbstractGameState {
                 trashPile.equals(other.trashPile) &&
                 buysLeftForCurrentPlayer == other.buysLeftForCurrentPlayer &&
                 actionsLeftForCurrentPlayer == other.actionsLeftForCurrentPlayer &&
-                spentSoFar == other.spentSoFar;
+                spentSoFar == other.spentSoFar && additionalSpendAvailable == other.additionalSpendAvailable;
     }
 }

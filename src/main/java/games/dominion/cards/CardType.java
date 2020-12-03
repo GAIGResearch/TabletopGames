@@ -1,6 +1,8 @@
 package games.dominion.cards;
 
 import core.actions.*;
+import games.dominion.actions.IBuyPhaseEffect;
+import games.dominion.actions.MerchantBuyEffect;
 import games.dominion.actions.MoatReaction;
 
 import java.util.*;
@@ -23,7 +25,7 @@ public enum CardType {
     CHAPEL(2, 0, 0),
     MOAT(2, 0, 0),
     HARBINGER(4, 0, 0),
-    MERCHANT(5, 0, 0),
+    MERCHANT(3, 0, 0),
     VASSAL(5, 0, 0),
     VILLAGE(3, 0, 0),
     WORKSHOP(4, 0, 0),
@@ -78,12 +80,30 @@ public enum CardType {
         }
     }
 
+    public boolean hasBuyEffect() {
+        switch (this) {
+            case MERCHANT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public AbstractAction getAttackReaction(int playerId) {
         switch (this) {
             case MOAT:
                 return new MoatReaction(playerId);
             default:
                 throw new AssertionError("Nope - no Attack Reaction for " + this);
+        }
+    }
+
+    public IBuyPhaseEffect getBuyEffect() {
+        switch (this) {
+            case MERCHANT:
+                return new MerchantBuyEffect();
+            default:
+                throw new AssertionError("Nope - no Buy Effect for " + this);
         }
     }
 

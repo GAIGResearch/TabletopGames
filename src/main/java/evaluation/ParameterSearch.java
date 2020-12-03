@@ -163,7 +163,8 @@ public class ParameterSearch {
 
         }
         System.out.println("\nFinal Recommendation: ");
-        printDetailsOfRun(bestResult, searchSpace, logfile);
+        // we don't log the final run to file to avoid duplication
+        printDetailsOfRun(bestResult, searchSpace, "");
     }
 
 

@@ -48,6 +48,7 @@ public class DominionCard extends Card {
             case MILITIA:
             case MOAT:
             case REMODEL:
+            case MERCHANT:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -88,6 +89,8 @@ public class DominionCard extends Card {
                 return new Moat(playerId);
             case REMODEL:
                 return new Remodel(playerId);
+            case MERCHANT:
+                return new Merchant(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }
