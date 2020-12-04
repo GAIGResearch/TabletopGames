@@ -20,9 +20,9 @@ public class AddGridCellEdge extends AbstractAction {
         HashSet<DBCell> cells = dbgs.edgeToCellMap.get(edge);
 
         // For each cell, mark this edge as complete by current player and check if whole cell is complete to set owner
-        for (DBCell c: cells) {
+        for (DBCell c : cells) {
             c.nEdgesComplete++;
-            for (DBEdge e: c.edges) {
+            for (DBEdge e : c.edges) {
                 if (e.equals(edge)) {
                     e.owner = gs.getCurrentPlayer();
                     break;  // Only 1 edge would match
@@ -59,6 +59,11 @@ public class AddGridCellEdge extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return edge.from.toString() + " -> " + edge.to.toString();
     }
 }

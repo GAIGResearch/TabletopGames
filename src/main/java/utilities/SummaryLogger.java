@@ -2,6 +2,7 @@ package utilities;
 
 import core.interfaces.IStatisticLogger;
 
+import java.io.*;
 import java.util.*;
 
 import static java.util.stream.Collectors.*;
@@ -13,7 +14,17 @@ import static java.util.stream.Collectors.*;
  */
 public class SummaryLogger implements IStatisticLogger {
 
+    File logFile;
+    public boolean printToConsole = true;
     Map<String, StatSummary> allData = new HashMap<>();
+    Map<String, String> otherData = new HashMap<>();
+
+    public SummaryLogger() {
+    }
+
+    public SummaryLogger(String logFile) {
+        this.logFile = new File(logFile);
+    }
 
     @Override
     public void record(String key, Object value) {
@@ -21,6 +32,8 @@ public class SummaryLogger implements IStatisticLogger {
             if (!allData.containsKey(key))
                 allData.put(key, new StatSummary());
             allData.get(key).add((Number) value);
+        } else {
+            otherData.put(key, value.toString());
         }
     }
 
@@ -43,8 +56,38 @@ public class SummaryLogger implements IStatisticLogger {
 
     @Override
     public void processDataAndFinish() {
-        System.out.println(toString());
+        if (printToConsole)
+            System.out.println(toString());
+
+        if (logFile != null) {
+            // We now write this to the file
+            boolean exists = logFile.exists();
+            StringBuilder header = new StringBuilder();
+            StringBuilder data = new StringBuilder();
+            for (String key : otherData.keySet()) {
+                header.append(key).append("\t");
+                data.append(otherData.get(key)).append("\t");
+            }
+            for (String key : allData.keySet()) {
+                header.append(key).append("\t").append(key).append("_se\t");
+                data.append(String.format("%.3g\t%.2g\t", allData.get(key).mean(), allData.get(key).stdErr()));
+            }
+            header.append("\n");
+            data.append("\n");
+
+            try {
+                FileWriter writer = new FileWriter(logFile, true);
+                if (!exists)
+                    writer.write(header.toString());
+                writer.write(data.toString());
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
     @Override
     public String toString() {

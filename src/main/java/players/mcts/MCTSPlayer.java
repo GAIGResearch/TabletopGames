@@ -13,14 +13,14 @@ import java.util.Random;
 public class MCTSPlayer extends AbstractPlayer {
 
     // Random object for this player
-    Random rnd;
+    protected Random rnd;
     // Parameters for this player
-    MCTSParams params;
+    protected MCTSParams params;
     // Heuristics used for the agent
     IStateHeuristic heuristic;
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
-    private boolean debug = false;
+    protected boolean debug = false;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -66,7 +66,6 @@ public class MCTSPlayer extends AbstractPlayer {
 
         if (debug)
             System.out.println(root.toString());
-
 
         // Return best action
         return root.bestAction();
