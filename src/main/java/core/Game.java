@@ -5,6 +5,7 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.human.ActionController;
+import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
@@ -677,15 +678,20 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
-        players.add(new RMHCPlayer());
-        players.add(new MCTSPlayer());
-        players.add(new OSLAPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new HumanConsolePlayer());
+
+
+        //players.add(new RMHCPlayer());
+        //players.add(new MCTSPlayer());
+        //players.add(new OSLAPlayer());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-//        runOne(ExplodingKittens, players, seed, ac, false);
-//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
+       runOne(Diamant, players, seed, ac, false);
+       // runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
 
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
@@ -693,11 +699,11 @@ public class Game {
 //        games.add(LoveLetter);
 //        runMany(games, players, null, 50, null, false, false);
 
-        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
-        games.remove(Pandemic);
+//        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-        runMany(games, players, null, 100, ac, false, true);
+//        runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
     }
 }
