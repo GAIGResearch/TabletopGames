@@ -24,7 +24,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     List<DiamantTreasureChest> treasureChests;
     List<DiamantHand>          hands;
-    List<Boolean>              playerOnCave;
+    List<Boolean>              playerInCave;
 
     int nGemsOnPath             = 0;
     int nHazardPoissonGasOnPath = 0;
@@ -75,6 +75,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.nCave          = nCave;
         dgs.hands          = new ArrayList<>();
         dgs.treasureChests = new ArrayList<>();
+        dgs.playerInCave   = new ArrayList<>();
 
         for (DiamantHand dh : hands)
             dgs.hands.add((DiamantHand) dh.copy());
@@ -82,7 +83,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         for (DiamantTreasureChest dc : treasureChests)
             dgs.treasureChests.add((DiamantTreasureChest) dc.copy());
 
-        dgs.playerOnCave.addAll(playerOnCave);
+        dgs.playerInCave.addAll(playerInCave);
 
         // mainDeck is hidden. Shuffle it.
         if (PARTIAL_OBSERVABLE && playerId != -1)
@@ -112,7 +113,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         path           = null;
         treasureChests = new ArrayList<>();
         hands          = new ArrayList<>();
-        playerOnCave   = new ArrayList<>();
+        playerInCave   = new ArrayList<>();
 
         nGemsOnPath             = 0;
         nHazardPoissonGasOnPath = 0;
@@ -145,13 +146,13 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(hands,          that.hands)              &&
                Objects.equals(treasureChests, that.treasureChests)     &&
                Objects.equals(path,           that.path)               &&
-               Objects.equals(playerOnCave,   that.playerOnCave);
+               Objects.equals(playerInCave,   that.playerInCave);
     }
 
     public int GetNPlayersOnCave()
     {
         int n = 0;
-        for (Boolean b: playerOnCave)
+        for (Boolean b: playerInCave)
         {
             if (b) n++;
         }
@@ -169,7 +170,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         for (DiamantHand h:hands)                   { str_gemsOnHand.append(h.toString()).append(" ");          }
         for (DiamantTreasureChest c:treasureChests) { str_gemsOnTreasureChest.append(c.toString()).append(" "); }
-        for (Boolean b : playerOnCave)
+        for (Boolean b : playerInCave)
         {
             if (b) str_playersOnCave.append("T");
             else   str_playersOnCave.append("F");

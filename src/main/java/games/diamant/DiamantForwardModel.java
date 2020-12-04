@@ -2,6 +2,7 @@ package games.diamant;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.diamant.actions.ContinueInCave;
@@ -10,6 +11,7 @@ import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.DiamantHand;
 import games.diamant.components.DiamantTreasureChest;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         {
             dgs.hands.add(new DiamantHand());
             dgs.treasureChests.add(new DiamantTreasureChest());
-            dgs.playerOnCave.add(true);
+            dgs.playerInCave.add(true);
         }
 
         dgs.mainDeck    = new Deck("MainDeck");
@@ -81,56 +83,53 @@ public class DiamantForwardModel extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         DiamantGameState dgs = (DiamantGameState) currentState;
+        actionsPlayed.add(action);
 
+        // Actions are executed after playing the last player
         if (dgs.getCurrentPlayer() == dgs.getNPlayers() - 1)
         {
+            // How many players play ExitFromCave?
             int nPlayersExit = 0;
             for (AbstractAction a : actionsPlayed)
                 if (a instanceof ExitFromCave)
                     nPlayersExit += 1;
 
-            if (nPlayersExit == 0)
+
+            if (nPlayersExit == dgs.GetNPlayersOnCave())
             {
-                // All active players continue
-                // Draw new card
+                // All active players left the cave
+                DistributeGemsAmongPlayers(dgs, nPlayersExit);
+                PrepareNewCave(dgs);
+            }
+            else {
+                if (nPlayersExit > 0) {
+                    // Not all Continue
+                    DistributeGemsAmongPlayers(dgs, nPlayersExit);
+                }
                 DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
                 dgs.path.add(card);
                 PlayCard(card, dgs);
             }
-            else if (nPlayersExit == dgs.getNPlayers())
-            {
-                // All active players left the cave
-                DistributeGemsAmongPlayers(dgs);
-                PrepareNewCave(dgs);
-            }
-            else
-            {
-                // Only some players left the cave
-                DistributeGemsAmongPlayers(dgs);
-            }
             actionsPlayed.clear();
         }
-        else {
-            actionsPlayed.add(action);
-            dgs.getTurnOrder().endPlayerTurn(dgs);
-        }
+
+        dgs.getTurnOrder().endPlayerTurn(dgs);
     }
 
-    private void DistributeGemsAmongPlayers(DiamantGameState dgs)
+    private void DistributeGemsAmongPlayers(DiamantGameState dgs, int nPlayersExit)
     {
-        int gems_to_players = (int) Math.floor(dgs.nGemsOnPath / dgs.GetNPlayersOnCave());
-        dgs.nGemsOnPath = dgs.nGemsOnPath % dgs.GetNPlayersOnCave();
+        int gems_to_players = (int) Math.floor(dgs.nGemsOnPath / nPlayersExit);
+        dgs.nGemsOnPath = dgs.nGemsOnPath % nPlayersExit;
 
 
         for (int p = 0; p < dgs.getNPlayers(); p++)
         {
             if (actionsPlayed.get(p) instanceof ExitFromCave)
             {
-                dgs.hands.get(p).AddGems(gems_to_players);
-                dgs.treasureChests.get(p).AddGems(dgs.hands.get(p).GetNumberGems());
-                dgs.hands.get(p).SetNumberGems(0);
-
-                dgs.playerOnCave.get(p) = Boolean.FALSE;
+                dgs.hands.get(p).AddGems(gems_to_players);                             // increment hand gems
+                dgs.treasureChests.get(p).AddGems(dgs.hands.get(p).GetNumberGems());   // hand gems to chest
+                dgs.hands.get(p).SetNumberGems(0);                                 // hand gems <- 0
+                dgs.playerInCave.set(p, false);                                       // Set to not in Cave
             }
         }
     }
@@ -143,7 +142,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
 
         // No more caves ?
         if (dgs.nCave == dp.nCaves)
-            EndGame();
+            EndGame(dgs);
 
         else {
             Random r = new Random(dgs.getGameParameters().getRandomSeed());
@@ -154,10 +153,47 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.mainDeck.shuffle(r);
 
             // All the player will participate in next cave
-            for (Boolean b : dgs.playerOnCave)
+            for (Boolean b : dgs.playerInCave)
                 b = Boolean.TRUE;
 
         }
+    }
+
+    private void EndGame(DiamantGameState dgs)
+    {
+        int maxGems = 0;
+        List<Integer> bestPlayers = new ArrayList<>();
+
+        for (int p=0; p < dgs.getNPlayers(); p++)
+        {
+            int nGems = dgs.treasureChests.get(p).GetNumberGems();
+            if (nGems > maxGems)
+            {
+                bestPlayers.clear();
+                bestPlayers.add(p);
+                maxGems = nGems;
+            }
+            else if (nGems == maxGems)
+            {
+                bestPlayers.add(p);
+            }
+        }
+
+        boolean moreThanOneWinner = bestPlayers.size() > 1;
+
+        for (int p=0; p < dgs.getNPlayers(); p++)
+        {
+            if (bestPlayers.contains(p)) {
+                if (moreThanOneWinner)
+                    dgs.setPlayerResult(Utils.GameResult.DRAW, p);
+                else
+                    dgs.setPlayerResult(Utils.GameResult.WIN, p);
+            }
+            else
+                dgs.setPlayerResult(Utils.GameResult.LOSE, p);
+        }
+
+        dgs.setGameStatus(Utils.GameResult.GAME_END);
     }
 
 
@@ -169,7 +205,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         // If the player is still in the cave
-        if (dgs.playerOnCave.get(gameState.getCurrentPlayer()))
+        if (dgs.playerInCave.get(gameState.getCurrentPlayer()))
         {
             actions.add(new ContinueInCave());
             actions.add(new ExitFromCave());
