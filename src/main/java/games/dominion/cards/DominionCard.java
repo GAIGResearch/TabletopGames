@@ -62,7 +62,7 @@ public class DominionCard extends Card {
     }
 
     public boolean isTreasureCard() {
-        return type.getTreasure() > 0;
+        return type.isTreasure();
     }
 
     public boolean isActionCard() {

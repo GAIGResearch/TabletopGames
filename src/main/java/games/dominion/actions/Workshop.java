@@ -1,8 +1,7 @@
 package games.dominion.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
+import core.actions.*;
 import games.dominion.DominionGameState;
 import games.dominion.cards.*;
 
@@ -62,19 +61,14 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Workshop) {
-           Workshop other = (Workshop) obj;
-           return executed == other.executed && player == other.player;
+            Workshop other = (Workshop) obj;
+            return executed == other.executed && player == other.player;
         }
         return true;
     }
 
     @Override
-    public String getString(AbstractGameState state) {
-        return toString();
-    }
-
-    @Override
-    public String toString() {
-        return "Workshop";
+    public int hashCode() {
+        return Objects.hash(player, executed, CardType.WORKSHOP);
     }
 }

@@ -1,11 +1,9 @@
 package games.dominion.actions;
 
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.dominion.DominionConstants;
-import games.dominion.DominionGameState;
-import games.dominion.cards.CardType;
-import games.dominion.cards.DominionCard;
+import core.AbstractGameState;
+import core.actions.*;
+import games.dominion.*;
+import games.dominion.cards.*;
 
 import java.util.*;
 
@@ -23,8 +21,13 @@ public class Mine extends DominionAction implements IExtendedSequence {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.setActionInProgress(this);
-        return true;
+        if (state.getDeck(DominionConstants.DeckType.HAND, player).stream().anyMatch(DominionCard::isTreasureCard)) {
+            state.setActionInProgress(this);
+            return true;
+        }
+        trashedCard = true;
+        gainedCard = true;
+        return false;
     }
 
     @Override
@@ -45,8 +48,6 @@ public class Mine extends DominionAction implements IExtendedSequence {
         }
         if (retValue.isEmpty()) {
             retValue.add(new DoNothing());
-            trashedCard = true;
-            gainedCard = true;
         }
         return retValue;
     }
@@ -91,5 +92,10 @@ public class Mine extends DominionAction implements IExtendedSequence {
                     && other.gainedCard == gainedCard;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player, trashedCard, trashValue, gainedCard, CardType.MINE);
     }
 }

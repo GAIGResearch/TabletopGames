@@ -36,7 +36,7 @@ public class GainCard extends AbstractAction {
         // i) Removing the card from the table and adding it to the player's discard pile
         DominionGameState state = (DominionGameState) gs;
         if (state.removeCardFromTable(cardType)) {
-            state.addCard(cardType, buyingPlayer, DominionConstants.DeckType.DISCARD);
+            state.addCard(cardType, buyingPlayer, destinationDeck);
             return true;
         }
         return false;

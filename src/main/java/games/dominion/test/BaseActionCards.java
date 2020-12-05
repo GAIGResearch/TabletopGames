@@ -521,4 +521,85 @@ public class BaseActionCards {
         assertEquals(1, state.buysLeft());
     }
 
+    @Test
+    public void workshop() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.WORKSHOP, 0, DeckType.HAND);
+        Workshop workshop = new Workshop(0);
+
+        int startSpend = state.availableSpend(0);
+        fm.next(state, workshop);
+        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getCurrentPlayer());
+        assertFalse(workshop.executionComplete(state));
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+        assertTrue(availableActions.stream().allMatch(a -> a instanceof GainCard));
+        assertEquals(11, availableActions.size()); // COPPER, SILVER, ESTATE, CELLAR, MOAT, MERCHANT, VILLAGE, WORKSHOP, MILITIA, REMODEL, SMITHY
+        availableActions.forEach(a -> {
+                    GainCard gc = (GainCard) a;
+                    assertTrue(gc.cardType.getCost() <= 4);
+                    assertEquals(DeckType.DISCARD, gc.destinationDeck);
+                }
+        );
+        fm.next(state, availableActions.get(3));
+        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getCurrentPlayer());
+        assertTrue(workshop.executionComplete(state));
+        assertEquals(startSpend, state.availableSpend(0));
+        assertEquals(1, state.buysLeft());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void mine() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MINE, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        Mine mine = new Mine(0);
+
+        int startSpend = state.availableSpend(0);
+        fm.next(state, mine);
+        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getCurrentPlayer());
+        assertFalse(mine.executionComplete(state));
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+        assertEquals(2, availableActions.size());
+        assertTrue(availableActions.contains(new TrashCard(CardType.COPPER, 0)));
+        assertTrue(availableActions.contains(new TrashCard(CardType.SILVER, 0)));
+
+        fm.next(state, new TrashCard(CardType.SILVER, 0));
+        assertFalse(mine.executionComplete(state));
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        availableActions = fm.computeAvailableActions(state);
+        assertEquals(3, availableActions.size());
+        assertTrue(availableActions.contains(new GainCard(CardType.COPPER, 0, DeckType.HAND)));
+        assertTrue(availableActions.contains(new GainCard(CardType.SILVER, 0, DeckType.HAND)));
+        assertTrue(availableActions.contains(new GainCard(CardType.GOLD, 0, DeckType.HAND)));
+
+        fm.next(state, new GainCard(CardType.GOLD, 0, DeckType.HAND));
+        assertEquals(startSpend + 1, state.availableSpend(0));
+        assertTrue(mine.executionComplete(state));
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void mineWithNoTreasure() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MINE, 0, DeckType.HAND);
+        do { // remove all COPPER
+            state.getDeck(DeckType.HAND, 0).remove(DominionCard.create(CardType.COPPER));
+        } while (state.getDeck(DeckType.HAND,0).stream().anyMatch(c -> c.cardType() == CardType.COPPER));
+
+        Mine mine = new Mine(0);
+
+        fm.next(state, mine);
+        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getCurrentPlayer());
+        assertTrue(mine.executionComplete(state));
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(0, state.availableSpend(0));
+    }
 }

@@ -68,6 +68,9 @@ public enum CardType {
 
     public int getCost(){return cost;}
     public int getTreasure(){return treasure;}
+    public boolean isTreasure() {
+        return treasure > 0;
+    }
     public int getVictory(){return victory;}
     public boolean isActionCard(){return action;}
 

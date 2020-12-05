@@ -24,4 +24,5 @@ public class Merchant extends DominionAction {
         // immutable class
         return this;
     }
+
 }
