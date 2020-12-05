@@ -211,9 +211,9 @@ public class CoreGameLoop {
     @Test
     public void playingLastActionMovesToBuyPhase() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.addCard(CardType.WOODCUTTER, 0, DeckType.HAND);
+        state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         fm.computeAvailableActions(state);
-        fm.next(state, new Woodcutter(0));
+        fm.next(state, new Smithy(0));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 

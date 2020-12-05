@@ -21,7 +21,7 @@ public class DominionMarketView extends JComponent {
     List<CardType> cards;
 
     public DominionMarketView(DominionGameState state) {
-        cards = state.cardsAvailable().stream().sorted(( c1,  c2) -> c2.getCost() - c1.getCost()).collect(toList());
+        cards = state.cardsAvailable().stream().sorted(( c1,  c2) -> c2.cost - c1.cost).collect(toList());
         cardData = new Object[cards.size()][2];
         update(state);
 

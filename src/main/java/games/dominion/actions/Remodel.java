@@ -45,9 +45,9 @@ public class Remodel extends DominionAction implements IExtendedSequence {
             return retValue;
         } else {
             //Phase 2 - gain a card costing up to 2 more
-            int budget = cardTrashed.getCost() + 2;
+            int budget = cardTrashed.cost + 2;
             return state.cardsToBuy().stream()
-                    .filter(ct -> ct.getCost() <= budget)
+                    .filter(ct -> ct.cost <= budget)
                     .map(ct -> new GainCard(ct, player))
                     .collect(toList());
         }

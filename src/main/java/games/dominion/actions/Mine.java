@@ -40,7 +40,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
                     .distinct().collect(toList());
         } else if (!gainedCard) {
             retValue = state.cardsAvailable().stream()
-                    .filter(c -> c.getTreasure() > 0 && c.getCost() <= trashValue + 3)
+                    .filter(c -> c.isTreasure && c.cost <= trashValue + 3)
                     .map(c -> new GainCard(c, player, DominionConstants.DeckType.HAND))
                     .collect(toList());
         } else {
@@ -61,7 +61,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
     public void registerActionTaken(DominionGameState state, AbstractAction action) {
         if (!trashedCard && action instanceof TrashCard && ((TrashCard) action).player == player) {
             trashedCard = true;
-            trashValue = ((TrashCard) action).trashedCard.getCost();
+            trashValue = ((TrashCard) action).trashedCard.cost;
         }
         if (!gainedCard && action instanceof GainCard && ((GainCard) action).buyingPlayer == player) {
             gainedCard = true;

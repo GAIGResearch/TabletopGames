@@ -26,7 +26,7 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         List<AbstractAction> retValue = state.cardsAvailable().stream()
-                .filter(c -> c.getCost() <= 4)
+                .filter(c -> c.cost <= 4)
                 .map(c -> new GainCard(c, state.getCurrentPlayer()))
                 .collect(toList());
         if (retValue.isEmpty()) {

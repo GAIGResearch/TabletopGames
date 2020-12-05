@@ -32,8 +32,7 @@ public class GainCard extends AbstractAction {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
-        // We execute by:
-        // i) Removing the card from the table and adding it to the player's discard pile
+        // We execute by removing the card from the table and adding it to the relevant deck
         DominionGameState state = (DominionGameState) gs;
         if (state.removeCardFromTable(cardType)) {
             state.addCard(cardType, buyingPlayer, destinationDeck);

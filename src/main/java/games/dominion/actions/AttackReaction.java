@@ -15,7 +15,7 @@ public class AttackReaction implements IExtendedSequence {
 
     int attacker;
     int defender;
-    List<CardType> cardsToPlay;
+    List<CardType> cardsToPlay; // we need to store either the cardType or the card component id for copying
 
     private AttackReaction(int attacker, int defender, List<CardType> cardsToPlay) {
         this.attacker = attacker;
@@ -36,7 +36,7 @@ public class AttackReaction implements IExtendedSequence {
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         List<AbstractAction> reactions = cardsToPlay.stream().distinct()
-                .map(c -> c.getAttackReaction(defender))
+                .map(c -> DominionCard.create(c).getAttackReaction(defender))
                 .collect(toList());
         reactions.add(new DoNothing());
         return reactions;

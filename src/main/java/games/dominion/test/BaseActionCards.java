@@ -68,23 +68,6 @@ public class BaseActionCards {
     }
 
     @Test
-    public void woodcutter() {
-        DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction woodcutter = new Woodcutter(0);
-        state.addCard(CardType.WOODCUTTER, 0, DeckType.HAND);
-        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(1, state.buysLeft());
-        int money = state.availableSpend(0);
-        fm.next(state, woodcutter);
-        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(0, state.actionsLeft());
-        assertEquals(money + 2, state.availableSpend(0));
-    }
-
-    @Test
     public void market() {
         DominionGameState state = (DominionGameState) game.getGameState();
         DominionAction market = new Market(0);
@@ -425,11 +408,11 @@ public class BaseActionCards {
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.stream().allMatch(a -> a instanceof GainCard));
-        assertTrue(actions.stream().allMatch(a -> ((GainCard)a).cardType.getCost() <= 4));
+        assertTrue(actions.stream().allMatch(a -> ((GainCard)a).cardType.cost <= 4));
         Set<CardType> allCards = state.cardsToBuy();
         Set<CardType> allGainable = actions.stream().map( a -> ((GainCard)a).cardType).collect(toSet());
         allCards.removeAll(allGainable);
-        assertTrue(allCards.stream().allMatch(c -> c.getCost() >= 5));
+        assertTrue(allCards.stream().allMatch(c -> c.cost >= 5));
 
         fm.next(state, new GainCard(CardType.SILVER, 0));
         assertEquals(0, state.getCurrentPlayer());
@@ -537,7 +520,7 @@ public class BaseActionCards {
         assertEquals(11, availableActions.size()); // COPPER, SILVER, ESTATE, CELLAR, MOAT, MERCHANT, VILLAGE, WORKSHOP, MILITIA, REMODEL, SMITHY
         availableActions.forEach(a -> {
                     GainCard gc = (GainCard) a;
-                    assertTrue(gc.cardType.getCost() <= 4);
+                    assertTrue(gc.cardType.cost <= 4);
                     assertEquals(DeckType.DISCARD, gc.destinationDeck);
                 }
         );

@@ -32,7 +32,7 @@ public class PartialObservabilityCopy {
     public void setup() {
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         state.addCard(CardType.GOLD, 1, DeckType.HAND);
-        state.addCard(CardType.WOODCUTTER, 2, DeckType.HAND);
+        state.addCard(CardType.WORKSHOP, 2, DeckType.HAND);
         state.addCard(CardType.PROVINCE, 3, DeckType.HAND);
         state.addCard(CardType.MARKET, 0, DeckType.DISCARD);
         state.addCard(CardType.MARKET, 0, DeckType.DRAW);

@@ -41,7 +41,6 @@ public class DominionCard extends Card {
             case VILLAGE:
             case SMITHY:
             case LABORATORY:
-            case WOODCUTTER:
             case MARKET:
             case FESTIVAL:
             case CELLAR:
@@ -57,16 +56,16 @@ public class DominionCard extends Card {
         }
     }
 
-    public boolean isVictoryCard() {
-        return type.getVictory() > 0;
-    }
-
     public boolean isTreasureCard() {
-        return type.isTreasure();
+        return type.isTreasure;
     }
 
     public boolean isActionCard() {
-        return type.isActionCard();
+        return type.isAction;
+    }
+
+    public boolean isVictoryCard() {
+        return type.isVictory;
     }
 
     public DominionAction getAction(int playerId) {
@@ -77,8 +76,6 @@ public class DominionCard extends Card {
                 return new Smithy(playerId);
             case LABORATORY:
                 return new Laboratory(playerId);
-            case WOODCUTTER:
-                return new Woodcutter(playerId);
             case FESTIVAL:
                 return new Festival(playerId);
             case MARKET:
@@ -102,18 +99,48 @@ public class DominionCard extends Card {
         }
     }
 
-    public boolean hasAttackReaction() {return type.hasAttackReaction();}
+    public boolean hasAttackReaction() {
+        return type.isReaction;
+    }
+
+    public boolean hasBuyEffect() {
+        switch (type) {
+            case MERCHANT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public AbstractAction getAttackReaction(int playerId) {
+        switch (type) {
+            case MOAT:
+                return new MoatReaction(playerId);
+            default:
+                throw new AssertionError("Nope - no Attack Reaction for " + this);
+        }
+    }
+
+    public IBuyPhaseEffect getBuyEffect() {
+        switch (type) {
+            case MERCHANT:
+                return new MerchantBuyEffect();
+            default:
+                throw new AssertionError("Nope - no Buy Effect for " + this);
+        }
+    }
+
 
     public int victoryPoints() {
-        return type.getVictory();
+        return type.victory;
     }
 
     public int treasureValue() {
-        return type.getTreasure();
+        return type.treasure;
     }
 
     public int getCost() {
-        return type.getCost();
+        return type.cost;
     }
 
     public CardType cardType() {
