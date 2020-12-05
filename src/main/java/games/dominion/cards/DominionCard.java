@@ -49,6 +49,8 @@ public class DominionCard extends Card {
             case MOAT:
             case REMODEL:
             case MERCHANT:
+            case MINE:
+            case WORKSHOP:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -91,6 +93,10 @@ public class DominionCard extends Card {
                 return new Remodel(playerId);
             case MERCHANT:
                 return new Merchant(playerId);
+            case MINE:
+                return new Mine(playerId);
+            case WORKSHOP:
+                return new Workshop(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

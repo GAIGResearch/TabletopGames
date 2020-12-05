@@ -28,7 +28,7 @@ public enum CardType {
     MERCHANT(3, 0, 0),
     VASSAL(5, 0, 0),
     VILLAGE(3, 0, 0),
-    WORKSHOP(4, 0, 0),
+    WORKSHOP(3, 0, 0),
     BUREAUCRAT(4, 0, 0),
     GARDENS(4, 0, 0),
     MILITIA(4, 0, 0),

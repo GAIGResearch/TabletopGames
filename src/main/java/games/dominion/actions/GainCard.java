@@ -12,10 +12,15 @@ public class GainCard extends AbstractAction {
 
     public final CardType cardType;
     public final int buyingPlayer;
+    public final DominionConstants.DeckType destinationDeck;
 
-    public GainCard(CardType cardToBuy, int playerID) {
+    public GainCard(CardType cardToBuy, int playerID, DominionConstants.DeckType deck) {
         buyingPlayer = playerID;
         cardType = cardToBuy;
+        destinationDeck = deck;
+    }
+    public GainCard(CardType cardToBuy, int playerID) {
+        this(cardToBuy, playerID, DominionConstants.DeckType.DISCARD);
     }
 
     /**

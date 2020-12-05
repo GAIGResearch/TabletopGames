@@ -15,7 +15,7 @@ public abstract class DominionAction extends AbstractAction {
     protected final CardType type;
     protected final int player;
 
-    protected DominionAction(CardType type, int playerId) {
+    public DominionAction(CardType type, int playerId) {
         this.type = type;
         this.player = playerId;
     }
