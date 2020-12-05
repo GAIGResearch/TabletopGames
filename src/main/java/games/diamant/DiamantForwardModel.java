@@ -2,7 +2,6 @@ package games.diamant;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
-import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.diamant.actions.ContinueInCave;
@@ -46,8 +45,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         // Draw first card
         DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
         dgs.path.add(card);
-
-        PlayCard(card, dgs);
+        playCard(card, dgs);
 
         dgs.getTurnOrder().setStartingPlayer(0);
         actionsPlayed = new ArrayList<>();
@@ -95,20 +93,20 @@ public class DiamantForwardModel extends AbstractForwardModel {
                     nPlayersExit += 1;
 
 
-            if (nPlayersExit == dgs.GetNPlayersOnCave())
+            if (nPlayersExit == dgs.getNPlayersInCave())
             {
                 // All active players left the cave
-                DistributeGemsAmongPlayers(dgs, nPlayersExit);
-                PrepareNewCave(dgs);
+                distributeGemsAmongPlayers(dgs, nPlayersExit);
+                prepareNewCave(dgs);
             }
             else {
                 if (nPlayersExit > 0) {
                     // Not all Continue
-                    DistributeGemsAmongPlayers(dgs, nPlayersExit);
+                    distributeGemsAmongPlayers(dgs, nPlayersExit);
                 }
                 DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
                 dgs.path.add(card);
-                PlayCard(card, dgs);
+                playCard(card, dgs);
             }
             actionsPlayed.clear();
         }
@@ -116,11 +114,17 @@ public class DiamantForwardModel extends AbstractForwardModel {
         dgs.getTurnOrder().endPlayerTurn(dgs);
     }
 
-    private void DistributeGemsAmongPlayers(DiamantGameState dgs, int nPlayersExit)
+    private void distributeGemsAmongPlayers(DiamantGameState dgs, int nPlayersExit)
     {
-        int gems_to_players = (int) Math.floor(dgs.nGemsOnPath / nPlayersExit);
-        dgs.nGemsOnPath = dgs.nGemsOnPath % nPlayersExit;
-
+        int gems_to_players;
+        if (nPlayersExit == 1) {
+            gems_to_players = dgs.nGemsOnPath;
+            dgs.nGemsOnPath = 0;
+        }
+        else {
+            gems_to_players = (int) Math.floor(dgs.nGemsOnPath / nPlayersExit);
+            dgs.nGemsOnPath = dgs.nGemsOnPath % nPlayersExit;
+        }
 
         for (int p = 0; p < dgs.getNPlayers(); p++)
         {
@@ -134,7 +138,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         }
     }
 
-    private void PrepareNewCave(DiamantGameState dgs)
+    private void prepareNewCave(DiamantGameState dgs)
     {
         DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
 
@@ -143,7 +147,6 @@ public class DiamantForwardModel extends AbstractForwardModel {
         // No more caves ?
         if (dgs.nCave == dp.nCaves)
             EndGame(dgs);
-
         else {
             Random r = new Random(dgs.getGameParameters().getRandomSeed());
 
@@ -152,10 +155,19 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.path.clear();
             dgs.mainDeck.shuffle(r);
 
-            // All the player will participate in next cave
-            for (Boolean b : dgs.playerInCave)
-                b = Boolean.TRUE;
+            dgs.nHazardExplosionsOnPath = 0;
+            dgs.nHazardPoissonGasOnPath = 0;
+            dgs.nHazardRockfallsOnPath  = 0;
+            dgs.nHazardScorpionsOnPath  = 0;
+            dgs.nHazardSnakesOnPath     = 0;
 
+            // All the player will participate in next cave
+            for (int p=0; p < dgs.getNPlayers(); p++)
+                dgs.playerInCave.set(p, true);
+
+            DiamantCard card = dgs.mainDeck.draw();
+            dgs.path.add(card);
+            playCard(card, dgs);
         }
     }
 
@@ -228,16 +240,17 @@ public class DiamantForwardModel extends AbstractForwardModel {
         return dfm;
     }
 
-    private void PlayCard(DiamantCard card, DiamantGameState dgs)
+    private void playCard(DiamantCard card, DiamantGameState dgs)
     {
         if (card.getCardType() == DiamantCard.DiamantCardType.Treasure) {
-            int gems_to_players = (int) Math.floor(card.getNumberOfGems() / dgs.getNPlayers());
-            int gems_to_path    = card.getNumberOfGems() % dgs.getNPlayers();
+            int gems_to_players = (int) Math.floor(card.getNumberOfGems() / dgs.getNPlayersInCave());
+            int gems_to_path    = card.getNumberOfGems() % dgs.getNPlayersInCave();
 
             for (int p=0; p<dgs.getNPlayers(); p++)
-                dgs.hands.get(p).AddGems(gems_to_players);
+                if (dgs.playerInCave.get(p))
+                    dgs.hands.get(p).AddGems(gems_to_players);
 
-            dgs.nGemsOnPath = gems_to_path;
+            dgs.nGemsOnPath += gems_to_path;
         }
         else if (card.getCardType() == DiamantCard.DiamantCardType.Hazard)
         {
@@ -251,6 +264,30 @@ public class DiamantForwardModel extends AbstractForwardModel {
                 dgs.nHazardScorpionsOnPath += 1;
             else if (card.getHazardType() == DiamantCard.HazardType.Snakes)
                 dgs.nHazardSnakesOnPath += 1;
+
+            // If there are two hazards cards of the same type
+            if (dgs.nHazardSnakesOnPath == 2 ||
+                    dgs.nHazardScorpionsOnPath == 2 ||
+                    dgs.nHazardRockfallsOnPath == 2 ||
+                    dgs.nHazardPoissonGasOnPath == 2 ||
+                    dgs.nHazardExplosionsOnPath == 2)
+            {
+                // All active players loose all gems on hand.
+                for (int p=0; p<dgs.getNPlayers(); p++)
+                {
+                    if (dgs.playerInCave.get(p))
+                        dgs.hands.get(p).SetNumberGems(0);
+                }
+                // Gems on Path are also loosed
+                dgs.nGemsOnPath = 0;
+
+                // Remove last card (it is the hazard one) from path and add to discardDeck
+                dgs.path.draw();
+                dgs.discardDeck.add(card);
+
+                // Start new cave
+                prepareNewCave(dgs);
+            }
         }
     }
 }

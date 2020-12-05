@@ -18,8 +18,8 @@ public class DiamantGame extends Game {
     public static void main(String[] args) {
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new HumanConsolePlayer());
-        agents.add(new HumanConsolePlayer());
-        agents.add(new HumanConsolePlayer());
+        agents.add(new OSLAPlayer());
+        agents.add(new RandomPlayer());
 
         // Play n games and return the pct of wins of each player
         double [] playerWins = new double[4];

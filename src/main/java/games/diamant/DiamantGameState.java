@@ -149,14 +149,11 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(playerInCave,   that.playerInCave);
     }
 
-    public int GetNPlayersOnCave()
+    public int getNPlayersInCave()
     {
         int n = 0;
         for (Boolean b: playerInCave)
-        {
             if (b) n++;
-        }
-
         return n;
     }
 
