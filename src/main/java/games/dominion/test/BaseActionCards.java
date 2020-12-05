@@ -437,4 +437,88 @@ public class BaseActionCards {
         assertEquals(availableSpend, state.availableSpend(0));
     }
 
+    @Test
+    public void merchantWithNoSilverInHand() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.DISCARD);
+        Merchant merchant = new Merchant(0);
+
+        fm.next(state, merchant);
+        int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(1, state.actionsLeft());
+        assertEquals(treasureValue, state.availableSpend(0));
+
+        fm.next(state, new EndPhase());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(treasureValue, state.availableSpend(0));
+        assertEquals(1, state.buysLeft());
+    }
+
+    @Test
+    public void merchantWithOneSilver() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        Merchant merchant = new Merchant(0);
+
+        fm.next(state, merchant);
+        int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(1, state.actionsLeft());
+        assertEquals(treasureValue, state.availableSpend(0));
+
+        fm.next(state, new EndPhase());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(treasureValue + 1, state.availableSpend(0));
+        assertEquals(1, state.buysLeft());
+    }
+
+    @Test
+    public void merchantWithTwoSilver() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        Merchant merchant = new Merchant(0);
+
+        fm.next(state, merchant);
+        int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(1, state.actionsLeft());
+        assertEquals(treasureValue, state.availableSpend(0));
+
+        fm.next(state, new EndPhase());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(treasureValue + 1, state.availableSpend(0));
+        assertEquals(1, state.buysLeft());
+    }
+
+    @Test
+    public void merchantsWithTwoSilver() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        Merchant merchant = new Merchant(0);
+
+        fm.next(state, merchant);
+        fm.next(state, merchant);
+        int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(9, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(1, state.actionsLeft());
+        assertEquals(treasureValue, state.availableSpend(0));
+
+        fm.next(state, new EndPhase());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(treasureValue + 2, state.availableSpend(0));
+        assertEquals(1, state.buysLeft());
+    }
+
 }

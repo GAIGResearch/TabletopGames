@@ -226,7 +226,6 @@ public class Game {
             copyTime += (System.nanoTime() - s);
 
             // Get actions for the player
-       //     forwardModel.computeAvailableActions(gameState);  // Compute true actions
             s = System.nanoTime();
             List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
             actionComputeTime += (System.nanoTime() - s);

@@ -62,6 +62,11 @@ public class DominionForwardModel extends AbstractForwardModel {
                     // change phase
                     state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
                     // no change to current player
+                    // then we apply any BuyEffects from Played Cards
+                    state.playerTableaux[playerID].stream()
+                            .filter(c -> c.cardType().hasBuyEffect())
+                            .map(c -> c.cardType().getBuyEffect())
+                            .forEach(effect -> effect.apply(state));
                 }
                 break;
             case "Buy":
@@ -118,11 +123,6 @@ public class DominionForwardModel extends AbstractForwardModel {
                 }
                 return Arrays.asList(new EndPhase());
             case "Buy":
-                // first we apply any BuyEffects from Played Cards
-                state.playerTableaux[playerID].stream()
-                        .filter(c -> c.cardType().hasBuyEffect())
-                        .map(c -> c.cardType().getBuyEffect())
-                        .forEach(effect -> effect.apply(state));
                 // we return every available card for purchase within our price range
                 int budget = state.availableSpend(playerID);
                 List<AbstractAction> options = state.cardsToBuy().stream()
