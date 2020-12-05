@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.interfaces.IGameAttribute;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
@@ -13,13 +14,10 @@ import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import utilities.Pair;
-import utilities.StatSummary;
-import utilities.Utils;
+import utilities.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
@@ -51,6 +49,9 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
+
+    private static final AtomicInteger idFountain = new AtomicInteger(0);
+    public final int gameID = idFountain.addAndGet(1);
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
