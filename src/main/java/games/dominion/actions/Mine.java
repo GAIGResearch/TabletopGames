@@ -39,7 +39,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
                     .map(c -> new TrashCard(c.cardType(), player))
                     .distinct().collect(toList());
         } else if (!gainedCard) {
-            retValue = state.cardsAvailable().stream()
+            retValue = state.cardsToBuy().stream()
                     .filter(c -> c.isTreasure && c.cost <= trashValue + 3)
                     .map(c -> new GainCard(c, player, DominionConstants.DeckType.HAND))
                     .collect(toList());

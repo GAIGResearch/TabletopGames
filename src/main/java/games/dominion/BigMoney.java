@@ -22,7 +22,7 @@ public class BigMoney extends AbstractPlayer {
         DominionGameState state = (DominionGameState) gameState;
         int player = gameState.getCurrentPlayer();
         int cash = state.availableSpend(player);
-        int provinces = state.cardsAvailable.getOrDefault(CardType.PROVINCE, 0);
+        int provinces = state.cardsIncludedInGame.getOrDefault(CardType.PROVINCE, 0);
 
         if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
             return new EndPhase();

@@ -22,7 +22,7 @@ public class DominionGameState extends AbstractGameState {
     int playerCount;
 
     // Counts of cards on the table should be fine
-    Map<CardType, Integer> cardsAvailable;
+    Map<CardType, Integer> cardsIncludedInGame;
 
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
@@ -57,8 +57,8 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public boolean removeCardFromTable(CardType type) {
-        if (cardsAvailable.getOrDefault(type, 0) > 0) {
-            cardsAvailable.put(type, cardsAvailable.get(type) - 1);
+        if (cardsIncludedInGame.getOrDefault(type, 0) > 0) {
+            cardsIncludedInGame.put(type, cardsIncludedInGame.get(type) - 1);
             return true;
         }
         return false;
@@ -100,8 +100,8 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public boolean gameOver() {
-        return cardsAvailable.get(CardType.PROVINCE) == 0 ||
-                cardsAvailable.values().stream().filter(i -> i == 0).count() >= 3;
+        return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
+                cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= 3;
     }
 
     public boolean drawCard(int playerId) {
@@ -232,7 +232,7 @@ public class DominionGameState extends AbstractGameState {
         Deck<DominionCard> allCards;
         switch (deck) {
             case SUPPLY:
-                return cardsAvailable.getOrDefault(type, 0);
+                return cardsIncludedInGame.getOrDefault(type, 0);
             case HAND:
             case TABLE:
             case DRAW:
@@ -255,11 +255,11 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public Set<CardType> cardsToBuy() {
-        return cardsAvailable.keySet().stream().filter(c -> cardsAvailable.get(c) > 0).collect(toSet());
+        return cardsIncludedInGame.keySet().stream().filter(c -> cardsIncludedInGame.get(c) > 0).collect(toSet());
     }
 
-    public Set<CardType> cardsAvailable() {
-        return cardsAvailable.keySet();
+    public Set<CardType> cardsIncludedInGame() {
+        return cardsIncludedInGame.keySet();
     }
 
     public void setDefended(int playerId) {
@@ -279,8 +279,8 @@ public class DominionGameState extends AbstractGameState {
     @Override
     protected AbstractGameState _copy(int playerId) {
         DominionGameState retValue = new DominionGameState(gameParameters.copy(), playerCount);
-        for (CardType ct : cardsAvailable.keySet()) {
-            retValue.cardsAvailable.put(ct, cardsAvailable.get(ct));
+        for (CardType ct : cardsIncludedInGame.keySet()) {
+            retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));
         }
         for (int p = 0; p < playerCount; p++) {
             if (playerId == -1) {
@@ -389,16 +389,16 @@ public class DominionGameState extends AbstractGameState {
         buysLeftForCurrentPlayer = 1;
         spentSoFar = 0;
 
-        cardsAvailable = new HashMap<>(16);
-        cardsAvailable.put(CardType.PROVINCE, 12);
-        cardsAvailable.put(CardType.DUCHY, 12);
-        cardsAvailable.put(CardType.ESTATE, 12);
-        cardsAvailable.put(CardType.GOLD, 1000);
-        cardsAvailable.put(CardType.SILVER, 1000);
-        cardsAvailable.put(CardType.COPPER, 1000);
+        cardsIncludedInGame = new HashMap<>(16);
+        cardsIncludedInGame.put(CardType.PROVINCE, 12);
+        cardsIncludedInGame.put(CardType.DUCHY, 12);
+        cardsIncludedInGame.put(CardType.ESTATE, 12);
+        cardsIncludedInGame.put(CardType.GOLD, 1000);
+        cardsIncludedInGame.put(CardType.SILVER, 1000);
+        cardsIncludedInGame.put(CardType.COPPER, 1000);
         DominionParameters params = (DominionParameters) gameParameters;
         for (CardType ct : params.cardsUsed.keySet()) {
-            cardsAvailable.put(ct, params.cardsUsed.get(ct));
+            cardsIncludedInGame.put(ct, params.cardsUsed.get(ct));
         }
     }
 
@@ -413,7 +413,7 @@ public class DominionGameState extends AbstractGameState {
         if (this == o) return true;
         if (!(o instanceof DominionGameState)) return false;
         DominionGameState other = (DominionGameState) o;
-        return cardsAvailable.equals(other.cardsAvailable) &&
+        return cardsIncludedInGame.equals(other.cardsIncludedInGame) &&
                 Arrays.equals(playerHands, other.playerHands) &&
                 Arrays.equals(playerDiscards, other.playerDiscards) &&
                 Arrays.equals(playerTableaux, other.playerTableaux) &&

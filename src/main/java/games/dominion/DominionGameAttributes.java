@@ -16,7 +16,7 @@ public enum DominionGameAttributes {
     PROVINCES_LEFT((s, a) -> s.cardsOfType(CardType.PROVINCE, -1, DominionConstants.DeckType.SUPPLY)),
     DUCHIES_LEFT((s, a) -> s.cardsOfType(CardType.DUCHY, -1, DominionConstants.DeckType.SUPPLY)),
     ESTATES_LEFT((s, a) -> s.cardsOfType(CardType.ESTATE, -1, DominionConstants.DeckType.SUPPLY)),
-    EMPTY_SUPPLY_SLOTS((s, a) -> s.cardsAvailable().stream()
+    EMPTY_SUPPLY_SLOTS((s, a) -> s.cardsIncludedInGame().stream()
             .filter(c -> s.cardsOfType(c, -1, DominionConstants.DeckType.SUPPLY) == 0)
             .count());
 
