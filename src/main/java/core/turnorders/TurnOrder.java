@@ -121,7 +121,7 @@ public abstract class TurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ACTION_CHOSEN, gameState, null));
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
 
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
@@ -138,7 +138,7 @@ public abstract class TurnOrder {
      * @param gameState - current game state.
      */
     public void endRound(AbstractGameState gameState) {
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ACTION_CHOSEN, gameState, null));
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {

@@ -1,54 +1,64 @@
 package evaluation;
 
 import core.AbstractGameState;
-import core.interfaces.IGameAttribute;
+import core.actions.AbstractAction;
+import core.interfaces.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class GameLogger {
+import static core.CoreConstants.*;
+import static java.util.stream.Collectors.*;
 
-    public GameLogger(String logFile, boolean append) {
+public class GameLogger implements IGameListener {
+
+    public GameLogger(List<GameEvents> eventFilter, String logFile, boolean append) {
         this.logFile = logFile;
         this.append = append;
+        this.filter = new ArrayList<>(eventFilter);
     }
 
-    private List<IGameAttribute<?>> gameAttributes = new ArrayList<>();
+    private List<IGameAttribute> gameAttributes = new ArrayList<>();
     private boolean append;
     private String logFile;
+    private List<GameEvents> filter;
+    private FileWriter writer;
 
-    public void addAttribute(IGameAttribute<?> attribute) {
+    public void addAttribute(IGameAttribute attribute) {
         gameAttributes.add(attribute);
     }
-    public void addAttributes(List<IGameAttribute<?>> attributes) {
+
+    public void addAttributes(List<IGameAttribute> attributes) {
         gameAttributes.addAll(attributes);
     }
+
     public void clearAttributes() {
         gameAttributes = new ArrayList<>();
     }
 
-    public void processState(AbstractGameState state) {
-        String allData = gameAttributes.stream()
-                .map(att -> att.getAsString(state))
-                .collect(Collectors.joining("\t"));;
-        writeData(allData + "\n");
+    @Override
+    public void onEvent(GameEvents event, AbstractGameState state, AbstractAction action) {
+        if (filter.contains(event)) {
+            String allData = gameAttributes.stream()
+                    .map(att -> att.getAsString(state, action))
+                    .collect(joining("\t"));
+            ;
+            writeData(allData + "\n");
+        }
     }
 
     private void writeData(String data) {
         // first we open the file, and th
         try {
-            boolean fileExists = new File(logFile).exists();
-            FileWriter writer = new FileWriter(logFile, append);
-            if (!fileExists) {
-                writer.write(getHeader());
+            if (writer == null) {
+                boolean fileExists = new File(logFile).exists();
+                writer = new FileWriter(logFile, append);
+                if (!append || !fileExists) {
+                    writer.write(getHeader());
+                }
             }
             writer.write(data);
-            writer.flush();
-            writer.close();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new AssertionError("Problem with file " + logFile + " : " + e.getMessage());
         }
@@ -57,8 +67,20 @@ public class GameLogger {
     private String getHeader() {
         String headerData = gameAttributes.stream()
                 .map(IGameAttribute::name)
-                .collect(Collectors.joining("\t"));
+                .collect(joining("\t"));
         return headerData + "\n";
     }
 
+    public void close() {
+        try {
+            if (writer != null) {
+                writer.flush();
+                writer.close();
+                writer = null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem closing file " + logFile + " : " + e.getMessage());
+        }
+    }
 }

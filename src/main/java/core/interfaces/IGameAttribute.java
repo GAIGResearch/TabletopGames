@@ -1,9 +1,9 @@
 package core.interfaces;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 
-public interface IGameAttribute<T> {
+public interface IGameAttribute {
 
     /**
      * A simple interface to gather data on game-specific attributes
@@ -12,10 +12,10 @@ public interface IGameAttribute<T> {
      * @param state The game state
      * @return The value of whatever the attribute is in this state
      */
-    T get(AbstractGameState state);
+    Object get(AbstractGameState state, AbstractAction action);
 
-    default String getAsString(AbstractGameState state) {
-        T value = get(state);
+    default String getAsString(AbstractGameState state, AbstractAction action) {
+        Object value = get(state, action);
         if (value instanceof Double) {
             return String.format("%.4g", value);
         }

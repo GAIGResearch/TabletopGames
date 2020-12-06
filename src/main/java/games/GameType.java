@@ -1,6 +1,7 @@
 package games;
 
 import core.*;
+import core.interfaces.IGameAttribute;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -39,7 +40,9 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.*;
 import static games.GameType.Category.*;

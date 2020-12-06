@@ -4,13 +4,16 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
+import evaluation.GameLogger;
 import games.GameType;
+import games.dominion.DominionGameAttributes;
 import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.simple.RandomPlayer;
 import utilities.*;
 
 import java.util.*;
@@ -18,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
+import static games.dominion.DominionGameAttributes.*;
+import static java.util.stream.Collectors.*;
 
 public class Game {
 
@@ -96,25 +101,6 @@ public class Game {
     }
 
     /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules,
-     * and initialises all players.
-     *
-     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
-     */
-    public final void reset(long newRandomSeed) {
-        gameState.reset(newRandomSeed);
-        forwardModel.abstractSetup(gameState);
-        if (players != null) {
-            for (AbstractPlayer player : players) {
-                AbstractGameState observation = gameState.copy(player.getPlayerID());
-                player.initializePlayer(observation);
-            }
-        }
-
-        resetStats();
-    }
-
-    /**
      * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
      * and their IDs, and initialises all players.
      *
@@ -136,6 +122,8 @@ public class Game {
 
             player.initializePlayer(observation);
         }
+        gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
 
         resetStats();
     }
@@ -163,7 +151,8 @@ public class Game {
 
             player.initializePlayer(observation);
         }
-
+        gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
         resetStats();
     }
 
@@ -171,8 +160,6 @@ public class Game {
      * All timers and game tick set to 0.
      */
     public void resetStats() {
-        gameID = idFountain.addAndGet(1);
-        gameState.setGameID(gameID);
         nextTime = 0;
         copyTime = 0;
         agentTime = 0;
@@ -497,10 +484,11 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed, ActionController ac,
-                              boolean randomizeParameters) {
+                              boolean randomizeParameters, List<IGameListener> listeners) {
         // Creating game instance (null if not implemented)
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
+            listeners.forEach(game::addListener);
 
             // Randomize parameters
             if (randomizeParameters) {
@@ -539,7 +527,7 @@ public class Game {
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
                                int nRepetitions, ActionController ac, boolean randomizeParameters,
-                               boolean detailedStatistics) {
+                               boolean detailedStatistics, List<IGameListener> listeners) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -568,7 +556,7 @@ public class Game {
                 Long s = seed;
                 if (s == null) s = System.currentTimeMillis();
                 s += offset;
-                game = runOne(gt, players, s, ac, randomizeParameters);
+                game = runOne(gt, players, s, ac, randomizeParameters, listeners);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                     offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
@@ -616,7 +604,7 @@ public class Game {
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters) {
+                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -636,7 +624,7 @@ public class Game {
 
             // Play n repetitions of this game and record player results
             for (int i = 0; i < nRepetitions; i++) {
-                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters);
+                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters, listeners);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                 }
@@ -694,7 +682,7 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        //      players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         MCTSParams params1 = new MCTSParams();
         MCTSParams params2 = new MCTSParams();
         params2.redeterminise = true;
@@ -712,16 +700,29 @@ public class Game {
         params3.maxTreeDepth = 10;
         params2.K = 3.0;
 
+        List<IGameListener> listeners = new ArrayList<>();
+        List<DominionGameAttributes> perGame = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, PROVINCES_LEFT, DUCHIES_LEFT, ESTATES_LEFT, EMPTY_SUPPLY_SLOTS);
+        List<DominionGameAttributes> perAction = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, ACTION_TYPE, ACTION_DESCRIPTION);
+        GameLogger gameOverLogger = new GameLogger(Arrays.asList(GameEvents.GAME_OVER), "DominionGames.txt", false);
+        gameOverLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
+        listeners.add(gameOverLogger);
+        GameLogger actionLogger = new GameLogger(Arrays.asList(GameEvents.ACTION_CHOSEN), "DominionActions.txt", false);
+        actionLogger.addAttributes(perAction.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
+        listeners.add(actionLogger);
+        GameLogger roundLogger = new GameLogger(Arrays.asList(GameEvents.ROUND_OVER), "DominionRounds.txt", false);
+        roundLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
+        listeners.add(roundLogger);
+
         //     players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
         players.add(new MCTSPlayer(params2));
         players.add(new MCTSPlayer(params3));
-        players.add(new HumanGUIPlayer(ac));
+ //       players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Dominion, players, seed, ac, false);
-//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
+ //       runOne(Dominion, players, seed,null, false, listeners);
+        runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
@@ -735,5 +736,8 @@ public class Game {
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
+
+        listeners.forEach(l -> ((GameLogger) l).close());
+
     }
 }
