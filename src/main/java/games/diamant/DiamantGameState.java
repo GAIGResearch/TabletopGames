@@ -174,22 +174,33 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         }
 
         strings[0]  = "----------------------------------------------------";
-        strings[1]  = "Cave:                   " + nCave;
-        strings[2]  = "Players on Cave:        " + str_playersOnCave.toString();
-        strings[3]  = "Path:                   " + path.toString();
-        strings[4]  = "Gems on Path:           " + nGemsOnPath;
-        strings[5]  = "Gems on hand:           " + str_gemsOnHand.toString();
-        strings[6]  = "Gems on treasure chest: " + str_gemsOnTreasureChest.toString();
-        strings[7]  = "Hazard scorpions:       " + nHazardScorpionsOnPath;
-        strings[8]  = "Hazard snakes:          " + nHazardSnakesOnPath;
-        strings[9]  = "Hazard rockfalls:       " + nHazardRockfallsOnPath;
-        strings[10] = "Hazard poisson gas:     " + nHazardPoissonGasOnPath;
-        strings[11] = "Hazard explosions:      " + nHazardExplosionsOnPath;
+        strings[1]  = "Cave:                       " + nCave;
+        strings[2]  = "Players on Cave:            " + str_playersOnCave.toString();
+        strings[3]  = "Path:                       " + path.toString();
+        strings[4]  = "Gems on Path:               " + nGemsOnPath;
+        strings[5]  = "Gems on hand:               " + str_gemsOnHand.toString();
+        strings[6]  = "Gems on treasure chest:     " + str_gemsOnTreasureChest.toString();
+        strings[7]  = "Hazard scorpions in Path:   " + nHazardScorpionsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Scorpions);
+        strings[8]  = "Hazard snakes in Path:      " + nHazardSnakesOnPath     + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Snakes);
+        strings[9]  = "Hazard rockfalls in Path:   " + nHazardRockfallsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Rockfalls);
+        strings[10] = "Hazard poisson gas in Path: " + nHazardPoissonGasOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.PoissonGas);
+        strings[11] = "Hazard explosions in Path:  " + nHazardExplosionsOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Explosions);
         strings[12] = "----------------------------------------------------";
 
         for (String s : strings){
             System.out.println(s);
         }
+    }
+
+    private int getNHazardCardsInMainDeck(DiamantCard.HazardType ht)
+    {
+        int n = 0;
+        for (int i=0; i<mainDeck.getSize(); i++)
+        {
+            if (mainDeck.get(i).getHazardType() == ht)
+                n ++;
+        }
+        return n;
     }
 
     public Deck<DiamantCard>          getMainDeck()       { return mainDeck;       }

@@ -97,6 +97,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
             {
                 // All active players left the cave
                 distributeGemsAmongPlayers(dgs, nPlayersExit);
+                dgs.nGemsOnPath = 0;
                 prepareNewCave(dgs);
             }
             else {
