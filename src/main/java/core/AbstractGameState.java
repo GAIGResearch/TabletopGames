@@ -43,6 +43,8 @@ public abstract class AbstractGameState {
     // Data for this game
     protected AbstractGameData data;
 
+    private int gameID;
+
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
@@ -234,6 +236,8 @@ public abstract class AbstractGameState {
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
+    void setGameID(int id) {gameID = id;} // package level deliberately
+    public int getGameID() {return gameID;}
 
     @Override
     public boolean equals(Object o) {

@@ -1,7 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
+import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
@@ -11,9 +11,6 @@ import players.human.HumanGUIPlayer;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.*;
 
 import java.util.*;
@@ -35,7 +32,7 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     /* Game Statistics */
 
@@ -51,7 +48,7 @@ public class Game {
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
 
     private static final AtomicInteger idFountain = new AtomicInteger(0);
-    public final int gameID = idFountain.addAndGet(1);
+    private int gameID;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -174,6 +171,8 @@ public class Game {
      * All timers and game tick set to 0.
      */
     public void resetStats() {
+        gameID = idFountain.addAndGet(1);
+        gameState.setGameID(gameID);
         nextTime = 0;
         copyTime = 0;
         agentTime = 0;
@@ -265,6 +264,8 @@ public class Game {
                             nDecisions++;
                         }
                     }
+                    AbstractAction finalAction = action;
+                    listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
                 } else {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
@@ -333,6 +334,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
+        listeners.forEach(l -> l.onEvent(GameEvents.GAME_OVER, gameState, null));
         if (VERBOSE) {
             System.out.println("Game Over");
         }
@@ -455,6 +457,18 @@ public class Game {
      */
     public GameType getGameType() {
         return gameType;
+    }
+
+    public void addListener(IGameListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+            gameState.turnOrder.addListener(listener);
+        }
+    }
+
+    public void clearListeners() {
+        listeners.clear();
+        getGameState().turnOrder.clearListeners();
     }
 
     /**
@@ -680,10 +694,10 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-  //      players.add(new RandomPlayer());
+        //      players.add(new RandomPlayer());
         MCTSParams params1 = new MCTSParams();
         MCTSParams params2 = new MCTSParams();
-        params2.redeterminise =true;
+        params2.redeterminise = true;
         params2.openLoop = true;
         params2.rolloutLength = 100;
         params2.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;

@@ -1,7 +1,11 @@
 package core.turnorders;
 
 import core.AbstractGameState;
+import core.CoreConstants;
+import core.interfaces.IGameListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static utilities.Utils.GameResult.GAME_END;
@@ -18,6 +22,8 @@ public abstract class TurnOrder {
     protected int turnOwner;  // Owner of current turn
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
+
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
@@ -76,6 +82,7 @@ public abstract class TurnOrder {
         turnOrder.roundCounter = roundCounter;
         turnOrder.firstPlayer = firstPlayer;
         turnOrder.nMaxRounds = nMaxRounds;
+        // we deliberately do not copy the listeners, as they only apply to the master turnorder
         return turnOrder;
     }
 
@@ -114,6 +121,8 @@ public abstract class TurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ACTION_CHOSEN, gameState, null));
+
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
@@ -129,6 +138,8 @@ public abstract class TurnOrder {
      * @param gameState - current game state.
      */
     public void endRound(AbstractGameState gameState) {
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ACTION_CHOSEN, gameState, null));
+
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
             gameState.setGameStatus(GAME_END);
@@ -201,5 +212,15 @@ public abstract class TurnOrder {
     public int hashCode() {
         return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
+
+    public void addListener(IGameListener listener) {
+        if (!listeners.contains(listener))
+            listeners.add(listener);
+    }
+
+    public void clearListeners() {
+        listeners.clear();
+    }
+
 
 }
