@@ -26,7 +26,7 @@ public class DominionGameState extends AbstractGameState {
 
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
-    Deck<DominionCard>[] playerDrawPiles;
+    PartialObservableDeck<DominionCard>[] playerDrawPiles;
     Deck<DominionCard>[] playerDiscards;
     Deck<DominionCard>[] playerTableaux;
 
@@ -290,7 +290,7 @@ public class DominionGameState extends AbstractGameState {
                 // need to shuffle drawpile separately
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
-                retValue.playerDrawPiles[p].shuffle(rnd);
+                retValue.playerDrawPiles[p].shuffleVisible(rnd, p, false);
             } else {
                 // need to combine and shuffle hands and drawpiles
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -367,15 +367,15 @@ public class DominionGameState extends AbstractGameState {
     @Override
     protected void _reset() {
         playerHands = new PartialObservableDeck[playerCount];
-        playerDrawPiles = new Deck[playerCount];
+        playerDrawPiles = new PartialObservableDeck[playerCount];
         playerDiscards = new Deck[playerCount];
         playerTableaux = new Deck[playerCount];
         trashPile = new Deck<>("Trash");
         for (int i = 0; i < playerCount; i++) {
-            boolean[] deckVisibility = new boolean[playerCount];
-            deckVisibility[i] = true;
-            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, deckVisibility);
-            playerDrawPiles[i] = new Deck<>("Drawpile of Player " + i + 1);
+            boolean[] handVisibility = new boolean[playerCount];
+            handVisibility[i] = true;
+            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
+            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[playerCount]);
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1);
             playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1);
             for (int j = 0; j < 7; j++)

@@ -50,6 +50,7 @@ public class DominionCard extends Card {
             case MERCHANT:
             case MINE:
             case WORKSHOP:
+            case ARTISAN:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -94,6 +95,8 @@ public class DominionCard extends Card {
                 return new Mine(playerId);
             case WORKSHOP:
                 return new Workshop(playerId);
+            case ARTISAN:
+                return new Artisan(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

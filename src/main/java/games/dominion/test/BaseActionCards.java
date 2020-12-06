@@ -408,9 +408,9 @@ public class BaseActionCards {
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.stream().allMatch(a -> a instanceof GainCard));
-        assertTrue(actions.stream().allMatch(a -> ((GainCard)a).cardType.cost <= 4));
+        assertTrue(actions.stream().allMatch(a -> ((GainCard) a).cardType.cost <= 4));
         Set<CardType> allCards = state.cardsToBuy();
-        Set<CardType> allGainable = actions.stream().map( a -> ((GainCard)a).cardType).collect(toSet());
+        Set<CardType> allGainable = actions.stream().map(a -> ((GainCard) a).cardType).collect(toSet());
         allCards.removeAll(allGainable);
         assertTrue(allCards.stream().allMatch(c -> c.cost >= 5));
 
@@ -573,7 +573,7 @@ public class BaseActionCards {
         state.addCard(CardType.MINE, 0, DeckType.HAND);
         do { // remove all COPPER
             state.getDeck(DeckType.HAND, 0).remove(DominionCard.create(CardType.COPPER));
-        } while (state.getDeck(DeckType.HAND,0).stream().anyMatch(c -> c.cardType() == CardType.COPPER));
+        } while (state.getDeck(DeckType.HAND, 0).stream().anyMatch(c -> c.cardType() == CardType.COPPER));
 
         Mine mine = new Mine(0);
 
@@ -584,5 +584,53 @@ public class BaseActionCards {
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(0, state.availableSpend(0));
+    }
+
+    @Test
+    public void artisan() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.ARTISAN, 0, DeckType.HAND);
+        state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
+        state.addCard(CardType.ESTATE, 0, DeckType.HAND); // to make sure there is one
+        Artisan artisan = new Artisan(0);
+
+        fm.next(state, artisan);
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+
+        assertTrue(availableActions.stream().allMatch(a -> a instanceof GainCard));
+        assertTrue(availableActions.stream().allMatch(a -> ((GainCard) a).cardType.cost <= 5));
+        assertTrue(availableActions.contains(new GainCard(CardType.MINE, 0, DeckType.HAND)));
+        assertFalse(artisan.executionComplete(state));
+
+        fm.next(state, new GainCard(CardType.MINE, 0, DeckType.HAND));
+        availableActions = fm.computeAvailableActions(state);
+
+        assertTrue(availableActions.stream().allMatch(a -> a instanceof PlaceOnDeck));
+        assertEquals(4, availableActions.size());
+        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.MINE, 0)));
+        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.COPPER, 0)));
+        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.ESTATE, 0)));
+        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.VILLAGE, 0)));
+        assertFalse(artisan.executionComplete(state));
+
+        fm.next(state, new PlaceOnDeck(CardType.MINE, 0));
+        assertTrue(artisan.executionComplete(state));
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+
+        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, 0);
+        assertTrue(drawDeck.getVisibilityOfComponent(0)[0]); // player 0 can see the card; no-one else can
+        for (int i = 1; i < 4; i++) assertFalse(drawDeck.getVisibilityOfComponent(0)[i]);
+        for (int i = 0; i < 4; i++) assertFalse(drawDeck.getVisibilityOfComponent(1)[i]);
+
+        DominionGameState copyState = (DominionGameState) state.copy(0);
+        PartialObservableDeck<DominionCard> copyDrawDeck = (PartialObservableDeck<DominionCard>) copyState.getDeck(DeckType.DRAW, 0);
+        assertTrue(copyDrawDeck.getVisibilityOfComponent(0)[0]); // player 0 can see the card; no-one else can
+        for (int i = 1; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(0)[i]);
+        for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(1)[i]);
+
+        copyState = (DominionGameState) state.copy(1);
+        copyDrawDeck = (PartialObservableDeck<DominionCard>) copyState.getDeck(DeckType.DRAW, 0);
+        for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(0)[i]);
+        for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(1)[i]);
     }
 }

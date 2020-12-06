@@ -57,14 +57,16 @@ public class GainCard extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof GainCard) {
             GainCard other = (GainCard) obj;
-            return other.cardType == cardType && other.buyingPlayer == buyingPlayer;
+            return other.cardType == cardType
+                    && other.buyingPlayer == buyingPlayer
+                    && other.destinationDeck == destinationDeck;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(buyingPlayer, cardType);
+        return Objects.hash(buyingPlayer, cardType, destinationDeck);
     }
 
     @Override
