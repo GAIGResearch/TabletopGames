@@ -23,6 +23,7 @@ public class DominionCard extends Card {
     private static DominionCard province = new DominionCard(CardType.PROVINCE);
     private static DominionCard duchy = new DominionCard(CardType.DUCHY);
     private static DominionCard estate = new DominionCard(CardType.ESTATE);
+    private static DominionCard curse = new DominionCard(CardType.CURSE);
 
     public static DominionCard create(CardType type) {
         switch (type) {
@@ -38,6 +39,8 @@ public class DominionCard extends Card {
                 return duchy;
             case PROVINCE:
                 return province;
+            case CURSE:
+                return curse;
             case VILLAGE:
             case SMITHY:
             case LABORATORY:
@@ -51,6 +54,8 @@ public class DominionCard extends Card {
             case MINE:
             case WORKSHOP:
             case ARTISAN:
+            case MONEYLENDER:
+            case POACHER:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -97,6 +102,10 @@ public class DominionCard extends Card {
                 return new Workshop(playerId);
             case ARTISAN:
                 return new Artisan(playerId);
+            case MONEYLENDER:
+                return new Moneylender(playerId);
+            case POACHER:
+                return new Poacher(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

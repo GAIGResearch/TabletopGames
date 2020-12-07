@@ -12,7 +12,7 @@ public class Market extends DominionAction {
     @Override
     boolean _execute(DominionGameState state) {
         state.changeBuys(1);
-        state.spend(-1);
+        state.changeAdditionalSpend(1);
         state.drawCard(player);
         state.changeActions(1);
         return true;

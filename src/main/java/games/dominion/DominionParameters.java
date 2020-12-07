@@ -43,6 +43,24 @@ public class DominionParameters extends AbstractParameters {
         return retValue;
     }
 
+    public static DominionParameters improvements(long seed) {
+        DominionParameters retValue = new DominionParameters(seed);
+        retValue.cardsUsed.put(CardType.ARTISAN, 10);
+        retValue.cardsUsed.put(CardType.CELLAR, 10);
+        retValue.cardsUsed.put(CardType.MARKET, 10);
+        retValue.cardsUsed.put(CardType.MERCHANT, 10);
+        retValue.cardsUsed.put(CardType.MINE, 10);
+        retValue.cardsUsed.put(CardType.MOAT, 10);
+        retValue.cardsUsed.put(CardType.MONEYLENDER, 10);
+        retValue.cardsUsed.put(CardType.POACHER, 10);
+        retValue.cardsUsed.put(CardType.REMODEL, 10);
+        //      retValue.cardsUsed.put(CardType.WITCH, 10);
+        //    retValue.cardsUsed.put(CardType.CURSE, 30);
+        // Note that the three Victory cards and three Treasure cards are always included
+        return retValue;
+    }
+
+
     /**
      * Return a copy of this game parameters object, with the same parameters as in the original.
      *

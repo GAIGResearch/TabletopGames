@@ -633,4 +633,92 @@ public class BaseActionCards {
         for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(0)[i]);
         for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(1)[i]);
     }
+
+    @Test
+    public void moneylender() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MONEYLENDER, 0, DeckType.HAND);
+        Moneylender moneylender = new Moneylender(0);
+        int startSpend = state.availableSpend(0);
+        long copperInHand = state.getDeck(DeckType.HAND, 0).stream()
+                .filter(c -> c.cardType() == CardType.COPPER).count();
+        fm.next(state, moneylender);
+        assertEquals(startSpend + 2, state.availableSpend(0));
+        assertEquals(copperInHand - 1L, state.getDeck(DeckType.HAND, 0).stream()
+                .filter(c -> c.cardType() == CardType.COPPER).count());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(1, state.buysLeft());
+        assertEquals(CardType.COPPER, state.getDeck(DeckType.TRASH, -1).get(0).cardType());
+    }
+
+    @Test
+    public void moneylenderWithoutCopper() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MONEYLENDER, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        do { // remove all COPPER
+            state.getDeck(DeckType.HAND, 0).remove(DominionCard.create(CardType.COPPER));
+        } while (state.getDeck(DeckType.HAND, 0).stream().anyMatch(c -> c.cardType() == CardType.COPPER));
+        Moneylender moneylender = new Moneylender(0);
+
+        fm.next(state, moneylender);
+        assertEquals(2, state.availableSpend(0));
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertEquals(1, state.buysLeft());
+    }
+
+    @Test
+    public void poacherWithNoEmptyPiles() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.POACHER, 0, DeckType.HAND);
+        state.addCard(CardType.ESTATE, 0, DeckType.DRAW);
+        Poacher poacher = new Poacher(0);
+        int startSpend = state.availableSpend(0);
+        fm.next(state, poacher);
+
+        assertEquals(startSpend + 1, state.availableSpend(0));
+        assertEquals(1, state.actionsLeft());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(1, state.buysLeft());
+        assertFalse(state.isActionInProgress());
+    }
+
+    @Test
+    public void poacherWithTwoEmptyPiles() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        for (int i = 0; i < 10; i++) {
+            state.removeCardFromTable(CardType.VILLAGE);
+            state.removeCardFromTable(CardType.MILITIA);
+        }
+        state.addCard(CardType.POACHER, 0, DeckType.HAND);
+        state.addCard(CardType.ESTATE, 0, DeckType.HAND); // to guarantee one
+        Poacher poacher = new Poacher(0);
+
+        fm.next(state, poacher);
+        int startSpend = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+        assertEquals(startSpend + 1, state.availableSpend(0));
+        assertEquals(1, state.actionsLeft());
+        assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(4, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(1, state.buysLeft());
+        assertTrue(state.isActionInProgress());
+
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+        assertEquals(2, availableActions.size());
+        assertTrue(availableActions.contains(new DiscardCard(CardType.COPPER, 0)));
+        assertTrue(availableActions.contains(new DiscardCard(CardType.ESTATE, 0)));
+
+        fm.next(state, new DiscardCard(CardType.COPPER, 0));
+        assertFalse(poacher.executionComplete(state));
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        fm.next(state, new DiscardCard(CardType.ESTATE, 0));
+        int finalSpend = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+        assertTrue(poacher.executionComplete(state));
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(finalSpend + 1, state.availableSpend(0));
+        assertEquals(1, state.actionsLeft());
+    }
 }

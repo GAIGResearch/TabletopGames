@@ -14,7 +14,7 @@ public class Festival extends DominionAction {
     boolean _execute(DominionGameState state) {
         state.changeActions(2);
         state.changeBuys(1);
-        state.spend(-2);
+        state.changeAdditionalSpend(2);
         return true;
     }
 

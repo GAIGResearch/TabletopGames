@@ -488,7 +488,8 @@ public class Game {
         // Creating game instance (null if not implemented)
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
-            listeners.forEach(game::addListener);
+            if (listeners != null)
+                listeners.forEach(game::addListener);
 
             // Randomize parameters
             if (randomizeParameters) {
@@ -682,7 +683,6 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        players.add(new RandomPlayer());
         MCTSParams params1 = new MCTSParams();
         MCTSParams params2 = new MCTSParams();
         params2.redeterminise = true;
@@ -713,16 +713,17 @@ public class Game {
         roundLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
         listeners.add(roundLogger);
 
+        // players.add(new RandomPlayer());
         //     players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
         players.add(new MCTSPlayer(params2));
         players.add(new MCTSPlayer(params3));
- //       players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
- //       runOne(Dominion, players, seed,null, false, listeners);
-        runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
+        runOne(Dominion, players, seed, ac, false, null);
+        //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

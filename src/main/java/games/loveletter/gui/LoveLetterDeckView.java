@@ -1,6 +1,5 @@
 package games.loveletter.gui;
 
-import com.sun.org.apache.regexp.internal.RECompiler;
 import core.components.Deck;
 import games.loveletter.cards.LoveLetterCard;
 import gui.views.CardView;
