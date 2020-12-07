@@ -14,8 +14,8 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
     }
 
     int currentTarget;
-    Boolean[] reactionsInitiated;
-    Boolean[] attacksComplete;
+    boolean[] reactionsInitiated;
+    boolean[] attacksComplete;
 
     @Override
     public boolean execute(AbstractGameState ags) {
@@ -28,7 +28,10 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
         DominionGameState state = (DominionGameState) ags;
         state.setActionInProgress(this);
         currentTarget = (player + 1) % state.getNPlayers();
-        reactionsInitiated = new Boolean[state.getNPlayers()];
+        reactionsInitiated = new boolean[state.getNPlayers()];
+        attacksComplete = new boolean[state.getNPlayers()];
+        reactionsInitiated[player] = true;
+        attacksComplete[player] = true;
         nextPhaseOfReactionAttackCycle(state);
         return true;
     }
@@ -38,32 +41,23 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
         // Then, after they have played their Reactions, we execute the actual attack code (in the sub-class)
         // if they are undefended
         do {
-            if (reactionsInitiated[currentTarget] && attacksComplete[currentTarget]) {
-                throw new AssertionError("Should not be here");
-            }
-            if (reactionsInitiated[currentTarget] && !attacksComplete[currentTarget]) {
-                // we need to finish off attack via followOnActions
-                if (isAttackComplete(currentTarget)) {
-                    attacksComplete[currentTarget] = true;
-                    currentTarget = (currentTarget + 1) % state.getNPlayers();
-                    continue;
-                } else {
-                    return;
+            if (!(reactionsInitiated[currentTarget] && attacksComplete[currentTarget])) {
+                // at least one of these two booleans must therefore be false
+                if (!reactionsInitiated[currentTarget]) { // we are in AttackReaction phase
+                    AttackReaction reaction = new AttackReaction(state, player, currentTarget);
+                    reactionsInitiated[currentTarget] = true;
+                    if (!reaction.executionComplete(state)) {
+                        // there is some reaction to process - so put that on the stack
+                        state.setActionInProgress(reaction);
+                        return;
+                    }
                 }
-            }
-
-            // if we are here, then we need to initiate the AttackReaction for the currentTarget
-            AttackReaction reaction = new AttackReaction(state, player, currentTarget);
-            reactionsInitiated[currentTarget] = true;
-            if (!reaction.executionComplete(state)) {
-                state.setActionInProgress(reaction);
-                return;
-            } else {
+                // we are in now Attack phase phase
                 if (state.isDefended(currentTarget)) {
                     attacksComplete[currentTarget] = true;
                 } else {
                     executeAttack(currentTarget, state);
-                    if (isAttackComplete(currentTarget)) {
+                    if (isAttackComplete(currentTarget, state)) {
                         attacksComplete[currentTarget] = true;
                     } else {
                         return;
@@ -71,13 +65,19 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
                 }
             }
             currentTarget = (currentTarget + 1) % state.getNPlayers();
-        } while (!(state.currentActionInProgress() == this) && currentTarget != player);
+        } while (state.currentActionInProgress() == this && currentTarget != player);
     }
 
     @Override
     public boolean executionComplete(DominionGameState state) {
         // this will only be called if this is top of the Reaction Stack (i.e. if the last reaction has completed)
-        return Arrays.stream(attacksComplete).allMatch(c -> c);
+        nextPhaseOfReactionAttackCycle(state);
+        for (int i = 0; i < attacksComplete.length; i++) {
+            if (!attacksComplete[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -99,7 +99,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
 
     public abstract void executeAttack(int victim, DominionGameState state);
 
-    public abstract boolean isAttackComplete(int currentTarget);
+    public abstract boolean isAttackComplete(int currentTarget, DominionGameState state);
 
     @Override
     public boolean equals(Object obj) {

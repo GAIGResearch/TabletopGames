@@ -348,6 +348,7 @@ public class BaseActionCards {
             List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
             AbstractAction moatReaction = actionsAvailable.stream().filter(a -> a instanceof MoatReaction).findFirst().get();
             fm.next(state, moatReaction);
+            assertTrue(state.isDefended(i+1));
         }
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
