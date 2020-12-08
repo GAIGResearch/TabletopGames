@@ -693,10 +693,10 @@ public class Game {
         params2.maxTreeDepth = 3;
         params2.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
         params2.budgetType = PlayerConstants.BUDGET_TIME;
-        params2.timeBudget = 50;
+        params2.timeBudget = 2000;
 
         MCTSParams params3 = (MCTSParams) params2.copy();
-        params3.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
+        params3.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         params3.maxTreeDepth = 10;
         params2.K = 3.0;
 

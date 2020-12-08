@@ -14,6 +14,7 @@ import static games.dominion.cards.CardType.MOAT;
 import static org.junit.Assert.*;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 
@@ -65,6 +66,14 @@ public class PartialObservabilityCopy {
         assertEquals(fullCopy.getDeck(DeckType.HAND, 1), state.getDeck(DeckType.HAND, 1));
         assertEquals(fullCopy.getDeck(DeckType.HAND, 2), state.getDeck(DeckType.HAND, 2));
         assertEquals(fullCopy.getDeck(DeckType.HAND, 3), state.getDeck(DeckType.HAND, 3));
+
+        PartialObservableDeck<DominionCard> fullCopyHand = (PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.HAND, 1);
+        assertTrue(fullCopyHand.getDeckVisibility()[1]);
+        IntStream.of(0, 2, 3).forEach(i -> assertFalse(fullCopyHand.getDeckVisibility()[i]));
+
+        PartialObservableDeck<DominionCard> partCopyHand = (PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.HAND, 1);
+        assertTrue(partCopyHand.getDeckVisibility()[1]);
+        IntStream.of(0, 2, 3).forEach(i -> assertFalse(partCopyHand.getDeckVisibility()[i]));
     }
 
     @Test

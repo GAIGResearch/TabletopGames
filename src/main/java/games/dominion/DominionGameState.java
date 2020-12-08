@@ -8,11 +8,9 @@ import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
-import static java.util.stream.Collectors.toSet;
 
 public class DominionGameState extends AbstractGameState {
 

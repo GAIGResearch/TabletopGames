@@ -11,6 +11,7 @@ import games.dominion.DominionGameState.*;
 import org.junit.*;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +28,17 @@ public class FullObservabilityCopy {
         DominionGameState fullCopy = (DominionGameState) startState.copy();
         assertTrue(startState.isDefended(2));
         assertTrue(fullCopy.isDefended(2));
-        // TODO: Add checks
+
+        PartialObservableDeck<DominionCard> startHand = (PartialObservableDeck<DominionCard>) startState.getDeck(DeckType.HAND, 1);
+        assertTrue(startHand.getDeckVisibility()[1]);
+        IntStream.of(0, 2, 3).forEach(i -> assertFalse(startHand.getDeckVisibility()[i]));
+
+        PartialObservableDeck<DominionCard> fullCopyHand = (PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.HAND, 1);
+        assertTrue(fullCopyHand.getDeckVisibility()[1]);
+        IntStream.of(0, 2, 3).forEach(i -> assertFalse(fullCopyHand.getDeckVisibility()[i]));
+
+
+
         fullCopy.endOfTurn(0);
         assertEquals(0, startState.getCurrentPlayer());
         assertEquals(1, fullCopy.getCurrentPlayer());
