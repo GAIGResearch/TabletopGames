@@ -17,9 +17,9 @@ public class DiamantGame extends Game {
 
     public static void main(String[] args) {
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomPlayer());
-        agents.add(new RandomPlayer());
         agents.add(new OSLAPlayer());
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
         //agents.add(new HumanConsolePlayer());
 
         // Play n games and return the pct of wins of each player
@@ -27,9 +27,9 @@ public class DiamantGame extends Game {
         for (int i=0; i<agents.size(); i++)
             playerWins[i] = 0.0;
 
-        int n = 1000;
+        int n = 100;
         for (int i=0; i<n; i++) {
-            System.out.println("GAME : " + i);
+            System.out.print("GAME: " + i + " ");
             AbstractParameters gameParameters = new DiamantParameters(System.currentTimeMillis());
 
             Game game = new DiamantGame(agents, gameParameters);
@@ -40,16 +40,18 @@ public class DiamantGame extends Game {
                 if (results[j] == Utils.GameResult.WIN)
                 {
                     playerWins[j] += 1;
-                    break;
+                    System.out.print("W");
                 }
-                else if (results[j] == Utils.GameResult.DRAW)
-                {
-                    playerWins[j] += 0.5;
-                }
+                else if (results[j] == Utils.GameResult.LOSE)
+                    System.out.print("L");
+                else
+                    System.out.print("D");
+
+            System.out.println("");
         }
 
         for (int i=0; i<agents.size(); i++)
-            System.out.println("Player " + i + " [ " + agents.get(i).toString() +"] won: " + (playerWins[i] / n)*100.0 + "% of games.");
+            System.out.println("Player " + i + " [ " + agents.get(i).toString() +"] won: " + (playerWins[i]/n)*100.0 + "%.");
     }
 
     @Override

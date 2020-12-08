@@ -6,12 +6,10 @@ import utilities.Utils;
 
 public class DiamantHeuristic implements IStateHeuristic {
 
-    // TODO
+
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         DiamantGameState dgs = (DiamantGameState) gs;
-
-        Utils.GameResult playerResult = dgs.getPlayerResults()[playerId];
 
         int min_ngens = 1000;  // big number
         int max_ngens= 0;      // small number

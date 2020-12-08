@@ -2,10 +2,14 @@ package games.diamant;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import games.diamant.actions.ContinueInCave;
+import games.diamant.actions.ExitFromCave;
+import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.DiamantTreasureChest;
 import games.diamant.components.DiamantHand;
@@ -34,6 +38,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     int nHazardExplosionsOnPath = 0;
 
     int nCave = 0;
+
+    List<AbstractAction> actionsPlayed;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -76,6 +82,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.hands          = new ArrayList<>();
         dgs.treasureChests = new ArrayList<>();
         dgs.playerInCave   = new ArrayList<>();
+        dgs.actionsPlayed = new ArrayList<>();
 
         for (DiamantHand dh : hands)
             dgs.hands.add((DiamantHand) dh.copy());
@@ -83,13 +90,39 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         for (DiamantTreasureChest dc : treasureChests)
             dgs.treasureChests.add((DiamantTreasureChest) dc.copy());
 
+        for (AbstractAction a : actionsPlayed)
+            dgs.actionsPlayed.add(a.copy());
+
         dgs.playerInCave.addAll(playerInCave);
 
         // mainDeck is hidden. Shuffle it.
-        if (PARTIAL_OBSERVABLE && playerId != -1)
+        // actionsPlayed is hidden
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
             dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
+            dgs.actionsPlayed = randomizeActionsPlayed();
+        }
 
         return dgs;
+    }
+
+    private List<AbstractAction> randomizeActionsPlayed()
+    {
+        Random r = new Random(getGameParameters().getRandomSeed());
+        List<AbstractAction> actions = new ArrayList<>();
+        for (AbstractAction a : actionsPlayed)
+        {
+            if (a instanceof OutOfCave)
+                actions.add(new OutOfCave());
+            else
+            {
+                int n = r.nextInt(1); // 0 or 1
+                if (n==0)
+                    actions.add(new ContinueInCave());
+                else
+                    actions.add(new ExitFromCave());
+            }
+        }
+        return actions;
     }
 
     @Override
@@ -123,6 +156,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         nHazardExplosionsOnPath = 0;
 
         nCave = 0;
+
+        actionsPlayed = new ArrayList<>();
     }
 
     @Override
@@ -146,7 +181,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(hands,          that.hands)              &&
                Objects.equals(treasureChests, that.treasureChests)     &&
                Objects.equals(path,           that.path)               &&
-               Objects.equals(playerInCave,   that.playerInCave);
+               Objects.equals(playerInCave,   that.playerInCave)       &&
+               Objects.equals(actionsPlayed, that.actionsPlayed);
     }
 
     public int getNPlayersInCave()

@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Random;
 
 public class DiamantForwardModel extends AbstractForwardModel {
-
-    private List<AbstractAction> actionsPlayed;
-
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
@@ -48,7 +45,6 @@ public class DiamantForwardModel extends AbstractForwardModel {
         playCard(card, dgs);
 
         dgs.getTurnOrder().setStartingPlayer(0);
-        actionsPlayed = new ArrayList<>();
     }
 
     /**
@@ -78,41 +74,51 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.mainDeck.add(new DiamantCard(DiamantCard.DiamantCardType.Treasure, DiamantCard.HazardType.None, t));
     }
 
+    // In this game, all players play the action at the same time.
+    // when playing an agent, the action is just stored in the gameState
+    // If the player is the last one, then all the actions are executed at the same time.
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _next(AbstractGameState currentState, AbstractAction action)
+    {
         DiamantGameState dgs = (DiamantGameState) currentState;
-        actionsPlayed.add(action);
+        dgs.actionsPlayed.add(action);
 
         // Actions are executed after playing the last player
         if (dgs.getCurrentPlayer() == dgs.getNPlayers() - 1)
         {
-            // How many players play ExitFromCave?
-            int nPlayersExit = 0;
-            for (AbstractAction a : actionsPlayed)
-                if (a instanceof ExitFromCave)
-                    nPlayersExit += 1;
-
-
-            if (nPlayersExit == dgs.getNPlayersInCave())
-            {
-                // All active players left the cave
-                distributeGemsAmongPlayers(dgs, nPlayersExit);
-                dgs.nGemsOnPath = 0;
-                prepareNewCave(dgs);
-            }
-            else {
-                if (nPlayersExit > 0) {
-                    // Not all Continue
-                    distributeGemsAmongPlayers(dgs, nPlayersExit);
-                }
-                DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
-                dgs.path.add(card);
-                playCard(card, dgs);
-            }
-            actionsPlayed.clear();
+            playActions(dgs);
+            dgs.actionsPlayed.clear();
         }
 
         dgs.getTurnOrder().endPlayerTurn(dgs);
+    }
+
+    private void playActions(DiamantGameState dgs)
+    {
+        // How many players play ExitFromCave?
+        int nPlayersExit = 0;
+        for (AbstractAction a : dgs.actionsPlayed)
+            if (a instanceof ExitFromCave)
+                nPlayersExit += 1;
+
+
+        if (nPlayersExit == dgs.getNPlayersInCave())
+        {
+            // All active players left the cave
+            distributeGemsAmongPlayers(dgs, nPlayersExit);
+            dgs.nGemsOnPath = 0;
+            prepareNewCave(dgs);
+        }
+        else {
+            if (nPlayersExit > 0) {
+                // Not all Continue
+                distributeGemsAmongPlayers(dgs, nPlayersExit);
+            }
+            DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
+            dgs.path.add(card);
+            playCard(card, dgs);
+        }
+
     }
 
     private void distributeGemsAmongPlayers(DiamantGameState dgs, int nPlayersExit)
@@ -129,7 +135,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
 
         for (int p = 0; p < dgs.getNPlayers(); p++)
         {
-            if (actionsPlayed.get(p) instanceof ExitFromCave)
+            if (dgs.actionsPlayed.get(p) instanceof ExitFromCave)
             {
                 dgs.hands.get(p).AddGems(gems_to_players);                             // increment hand gems
                 dgs.treasureChests.get(p).AddGems(dgs.hands.get(p).GetNumberGems());   // hand gems to chest
@@ -232,13 +238,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
     @Override
     protected AbstractForwardModel _copy()
     {
-        DiamantForwardModel dfm = new DiamantForwardModel();
-        dfm.actionsPlayed = new ArrayList<>();
-
-        for (AbstractAction a : actionsPlayed)
-            dfm.actionsPlayed.add(a.copy());
-
-        return dfm;
+        return new DiamantForwardModel();
     }
 
     private void playCard(DiamantCard card, DiamantGameState dgs)
