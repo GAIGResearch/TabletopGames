@@ -8,7 +8,10 @@ import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.Comparator.*;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.toSet;
 
 public class DominionGameState extends AbstractGameState {
@@ -254,12 +257,18 @@ public class DominionGameState extends AbstractGameState {
         return (int) allCards.stream().filter(c -> c.cardType() == type).count();
     }
 
-    public Set<CardType> cardsToBuy() {
-        return cardsIncludedInGame.keySet().stream().filter(c -> cardsIncludedInGame.get(c) > 0).collect(toSet());
+    public List<CardType> cardsToBuy() {
+        return cardsIncludedInGame.keySet().stream()
+                .filter(c -> cardsIncludedInGame.get(c) > 0)
+                .sorted(comparingInt(c -> -c.cost))
+                .distinct()
+                .collect(toList());
     }
 
-    public Set<CardType> cardsIncludedInGame() {
-        return cardsIncludedInGame.keySet();
+    public List<CardType> cardsIncludedInGame() {
+        return cardsIncludedInGame.keySet().stream()
+                .sorted(comparingInt(c -> -c.cost))
+                .collect(toList());
     }
 
     public void setDefended(int playerId) {

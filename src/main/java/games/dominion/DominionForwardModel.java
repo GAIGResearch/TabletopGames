@@ -127,6 +127,7 @@ public class DominionForwardModel extends AbstractForwardModel {
                 int budget = state.availableSpend(playerID);
                 List<AbstractAction> options = state.cardsToBuy().stream()
                         .filter(ct -> ct.cost <= budget)
+                        .sorted(Comparator.comparingInt(c -> -c.cost))
                         .map(ct -> new BuyCard(ct, playerID))
                         .collect(toList());
                 options.add(new EndPhase());

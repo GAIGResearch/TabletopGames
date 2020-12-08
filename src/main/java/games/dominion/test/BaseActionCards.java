@@ -12,6 +12,7 @@ import org.junit.*;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
 
@@ -409,8 +410,8 @@ public class BaseActionCards {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.stream().allMatch(a -> a instanceof GainCard));
         assertTrue(actions.stream().allMatch(a -> ((GainCard) a).cardType.cost <= 4));
-        Set<CardType> allCards = state.cardsToBuy();
-        Set<CardType> allGainable = actions.stream().map(a -> ((GainCard) a).cardType).collect(toSet());
+        List<CardType> allCards = state.cardsToBuy();
+        List<CardType> allGainable = actions.stream().map(a -> ((GainCard) a).cardType).collect(toList());
         allCards.removeAll(allGainable);
         assertTrue(allCards.stream().allMatch(c -> c.cost >= 5));
 
