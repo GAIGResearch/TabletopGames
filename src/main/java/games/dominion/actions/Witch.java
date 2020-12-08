@@ -7,6 +7,8 @@ import games.dominion.cards.CardType;
 
 import java.util.*;
 
+import static games.dominion.DominionConstants.*;
+
 public class Witch extends DominionAttackAction {
 
     public Witch( int playerId) {
@@ -33,8 +35,9 @@ public class Witch extends DominionAttackAction {
 
     @Override
     public void executeAttack(int victim, DominionGameState state) {
-        if (state.cardsOfType(CardType.CURSE, -1, DominionConstants.DeckType.SUPPLY) > 0) {
-            state.drawCard(-1, DominionConstants.DeckType.SUPPLY, victim, DominionConstants.DeckType.DISCARD);
+        if (state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY) > 0) {
+            state.removeCardFromTable(CardType.CURSE);
+            state.addCard(CardType.CURSE, victim, DeckType.DISCARD);
         }
     }
 

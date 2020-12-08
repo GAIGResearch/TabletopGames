@@ -56,6 +56,7 @@ public class DominionCard extends Card {
             case ARTISAN:
             case MONEYLENDER:
             case POACHER:
+            case WITCH:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -106,6 +107,8 @@ public class DominionCard extends Card {
                 return new Moneylender(playerId);
             case POACHER:
                 return new Poacher(playerId);
+            case WITCH:
+                return new Witch(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

@@ -15,6 +15,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
 
     int currentTarget;
     boolean[] reactionsInitiated;
+    boolean[] attacksInitiated;
     boolean[] attacksComplete;
 
     @Override
@@ -30,6 +31,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
         currentTarget = (player + 1) % state.getNPlayers();
         reactionsInitiated = new boolean[state.getNPlayers()];
         attacksComplete = new boolean[state.getNPlayers()];
+        attacksInitiated = new boolean[state.getNPlayers()];
         reactionsInitiated[player] = true;
         attacksComplete[player] = true;
         nextPhaseOfReactionAttackCycle(state);
@@ -54,9 +56,12 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
                 }
                 // we are in now Attack phase phase
                 if (state.isDefended(currentTarget)) {
+                    attacksInitiated[currentTarget] = true;
                     attacksComplete[currentTarget] = true;
                 } else {
-                    executeAttack(currentTarget, state);
+                    if (!attacksInitiated[currentTarget])
+                        executeAttack(currentTarget, state);
+                    attacksInitiated[currentTarget] = true;
                     if (isAttackComplete(currentTarget, state)) {
                         attacksComplete[currentTarget] = true;
                     } else {
@@ -86,6 +91,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
         retValue.currentTarget = currentTarget;
         retValue.reactionsInitiated = reactionsInitiated != null ? reactionsInitiated.clone() : null;
         retValue.attacksComplete = attacksComplete != null ? attacksComplete.clone() : null;
+        retValue.attacksInitiated = attacksInitiated != null ? attacksInitiated.clone() : null;
         return retValue;
     }
 
@@ -108,6 +114,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
             return other.type == type && other.player == player
                     && other.currentTarget == currentTarget
                     && Arrays.equals(reactionsInitiated, other.reactionsInitiated)
+                    && Arrays.equals(attacksInitiated, other.attacksInitiated)
                     && Arrays.equals(attacksComplete, other.attacksComplete);
         }
         return false;
@@ -115,6 +122,6 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, type, currentTarget, reactionsInitiated, attacksComplete);
+        return Objects.hash(player, type, currentTarget, reactionsInitiated, attacksInitiated, attacksComplete);
     }
 }

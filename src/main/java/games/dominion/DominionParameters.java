@@ -54,8 +54,8 @@ public class DominionParameters extends AbstractParameters {
         retValue.cardsUsed.put(CardType.MONEYLENDER, 10);
         retValue.cardsUsed.put(CardType.POACHER, 10);
         retValue.cardsUsed.put(CardType.REMODEL, 10);
-        //      retValue.cardsUsed.put(CardType.WITCH, 10);
-        //    retValue.cardsUsed.put(CardType.CURSE, 30);
+        retValue.cardsUsed.put(CardType.WITCH, 10);
+        retValue.cardsUsed.put(CardType.CURSE, 30);
         // Note that the three Victory cards and three Treasure cards are always included
         return retValue;
     }

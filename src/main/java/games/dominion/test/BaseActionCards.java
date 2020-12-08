@@ -1,8 +1,7 @@
 package games.dominion.test;
 
 import core.AbstractPlayer;
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
+import core.actions.*;
 import core.components.PartialObservableDeck;
 import games.dominion.*;
 import games.dominion.DominionConstants.*;
@@ -12,7 +11,6 @@ import games.dominion.DominionGameState.*;
 import org.junit.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
@@ -26,6 +24,7 @@ public class BaseActionCards {
             new TestPlayer());
 
     DominionGame game = new DominionGame(players, DominionParameters.firstGame(System.currentTimeMillis()));
+    DominionGame gameImprovements = new DominionGame(players, DominionParameters.improvements(System.currentTimeMillis()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
@@ -348,7 +347,7 @@ public class BaseActionCards {
             List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
             AbstractAction moatReaction = actionsAvailable.stream().filter(a -> a instanceof MoatReaction).findFirst().get();
             fm.next(state, moatReaction);
-            assertTrue(state.isDefended(i+1));
+            assertTrue(state.isDefended(i + 1));
         }
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
@@ -670,7 +669,7 @@ public class BaseActionCards {
 
     @Test
     public void poacherWithNoEmptyPiles() {
-        DominionGameState state = (DominionGameState) game.getGameState();
+        DominionGameState state = (DominionGameState) gameImprovements.getGameState();
         state.addCard(CardType.POACHER, 0, DeckType.HAND);
         state.addCard(CardType.ESTATE, 0, DeckType.DRAW);
         Poacher poacher = new Poacher(0);
@@ -721,5 +720,47 @@ public class BaseActionCards {
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
         assertEquals(finalSpend + 1, state.availableSpend(0));
         assertEquals(1, state.actionsLeft());
+    }
+
+    @Test
+    public void witch() {
+        DominionGameState state = (DominionGameState) gameImprovements.getGameState();
+        state.addCard(CardType.WITCH, 0, DeckType.HAND);
+        Witch witch = new Witch(0);
+        assertEquals(30, state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY));
+        assertTrue(fm.computeAvailableActions(state).contains(witch));
+
+        fm.next(state, witch);
+
+        assertEquals(27, state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY));
+        for (int i = 1; i < 4; i++)
+            assertEquals(1, state.cardsOfType(CardType.CURSE, i, DeckType.DISCARD));
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void witchWithAMoatAndOneCurse() {
+        DominionGameState state = (DominionGameState) gameImprovements.getGameState();
+        state.addCard(CardType.WITCH, 0, DeckType.HAND);
+        state.addCard(CardType.MOAT, 1, DeckType.HAND);
+
+        Witch witch = new Witch(0);
+        assertEquals(30, state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY));
+        for (int i = 0; i < 29; i++)
+            state.removeCardFromTable(CardType.CURSE);
+        assertEquals(1, state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY));
+
+        fm.next(state, witch);
+        assertEquals(1, state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY));
+        assertTrue(fm.computeAvailableActions(state).contains(new MoatReaction(1)));
+        fm.next(state, new MoatReaction(1));
+        assertEquals(0, state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY));
+        assertEquals(1, state.cardsOfType(CardType.CURSE, 2, DeckType.DISCARD));
+        assertEquals(0, state.cardsOfType(CardType.CURSE, 1, DeckType.DISCARD));
+        assertEquals(0, state.cardsOfType(CardType.CURSE, 3, DeckType.DISCARD));
+
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 }
