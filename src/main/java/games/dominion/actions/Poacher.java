@@ -1,13 +1,10 @@
 package games.dominion.actions;
 
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.dominion.DominionConstants;
-import games.dominion.DominionGameState;
+import games.dominion.*;
 import games.dominion.cards.CardType;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
@@ -39,12 +36,6 @@ public class Poacher extends DominionAction implements IExtendedSequence {
         List<AbstractAction> retValue = state.getDeck(DominionConstants.DeckType.HAND, player).stream()
                 .map(c -> new DiscardCard(c.cardType(), player))
                 .distinct().collect(toList());
-        if (retValue.isEmpty()) {
-            // highly unusual event - but could occur as an edge case with 2 empty supply decks, and
-            // Poacher as the last card in hand
-            retValue.add(new DoNothing());
-            cardsDiscarded = cardsToDiscard;
-        }
         return retValue;
     }
 
@@ -62,6 +53,11 @@ public class Poacher extends DominionAction implements IExtendedSequence {
 
     @Override
     public boolean executionComplete(DominionGameState state) {
+        if (state.getDeck(DominionConstants.DeckType.HAND, player).getSize() == 0) {
+            // highly unusual event - but could occur as an edge case with 2 empty supply decks, and
+            // Poacher as the last card in hand
+            cardsDiscarded = cardsToDiscard;
+        }
         return cardsToDiscard == cardsDiscarded;
     }
 

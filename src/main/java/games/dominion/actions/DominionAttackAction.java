@@ -42,6 +42,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
         // we cycle through each other player in turn to give them the opportunity to play Reactions
         // Then, after they have played their Reactions, we execute the actual attack code (in the sub-class)
         // if they are undefended
+        int loopCount = 0;
         do {
             if (!(reactionsInitiated[currentTarget] && attacksComplete[currentTarget])) {
                 // at least one of these two booleans must therefore be false
@@ -70,6 +71,10 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
                 }
             }
             currentTarget = (currentTarget + 1) % state.getNPlayers();
+            loopCount++;
+            if (loopCount > 100) {
+                throw new AssertionError("WTF?");
+            }
         } while (state.currentActionInProgress() == this && currentTarget != player);
     }
 

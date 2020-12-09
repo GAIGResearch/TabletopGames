@@ -376,7 +376,6 @@ public class BaseActionCards {
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
     }
 
-
     @Test
     public void remodelWithNoCardsInHand() {
         DominionGameState state = (DominionGameState) game.getGameState();
@@ -385,15 +384,9 @@ public class BaseActionCards {
         Remodel remodel = new Remodel(0);
         fm.next(state, remodel);
 
-        List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(0, state.getCurrentPlayer());
-        assertEquals(DominionGamePhase.Play, state.getGamePhase());
-        assertEquals(1, actions.size());
-        assertEquals(new DoNothing(), actions.get(0));
-
-        fm.next(state, actions.get(0));
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        assertFalse(state.isActionInProgress());
     }
 
     @Test
@@ -722,6 +715,37 @@ public class BaseActionCards {
         assertEquals(finalSpend + 1, state.availableSpend(0));
         assertEquals(1, state.actionsLeft());
     }
+
+
+    @Test
+    public void poacherWithTwoEmptyPilesAndOneCardInHand() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        for (int i = 0; i < 10; i++) {
+            state.removeCardFromTable(CardType.VILLAGE);
+            state.removeCardFromTable(CardType.MILITIA);
+        }
+        for (int i = 0; i < 5; i++)
+            state.drawCard(0, DeckType.HAND, 0, DeckType.DISCARD);
+        state.addCard(CardType.POACHER, 0, DeckType.HAND);
+        assertEquals(1, state.getDeck(DeckType.HAND, 0).getSize());
+        Poacher poacher = new Poacher(0);
+
+        fm.next(state, poacher);
+        assertEquals(1, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(4, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertTrue(state.isActionInProgress());
+
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+        assertEquals(1, availableActions.size());
+
+        fm.next(state, availableActions.get(0));
+        assertTrue(poacher.executionComplete(state));
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        availableActions = fm.computeAvailableActions(state);
+        assertEquals(1, availableActions.size());
+        assertEquals(new EndPhase(), availableActions.get(0));
+    }
+
 
     @Test
     public void witch() {

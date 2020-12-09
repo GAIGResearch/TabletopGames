@@ -213,8 +213,8 @@ public enum GameType {
             case DotsAndBoxes:
                 return new DBParameters(seed);
             case Dominion:
-             //   return DominionParameters.firstGame(seed);
-                return DominionParameters.improvements(seed);
+                return DominionParameters.firstGame(seed);
+          //      return DominionParameters.improvements(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }

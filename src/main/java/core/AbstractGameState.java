@@ -45,6 +45,10 @@ public abstract class AbstractGameState {
 
     private int gameID;
 
+    // this will add some extra sanity/fragility checks to help detect errors with GameStates behaving in
+    // unusual - and probably wrong - ways.
+    private boolean extraChecks = true;
+
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
@@ -136,6 +140,9 @@ public abstract class AbstractGameState {
 
         s.history = new ArrayList<>(history);
         s.historyText = new ArrayList<>(historyText);
+        if (extraChecks && historyText.size() > 1000) {
+            throw new AssertionError("History really shouldn;t be this long");
+        }
             // we do not copy individual actions in history, as these are now dead and should not change
 
         // Update the list of components for ID matching in actions.
@@ -225,6 +232,9 @@ public abstract class AbstractGameState {
     protected void recordAction(AbstractAction action) {
         history.add(action);
         historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
+        if (extraChecks && history.size() > 1000) {
+            throw new AssertionError("History is probably a bit too long...");
+        }
     }
 
     /**

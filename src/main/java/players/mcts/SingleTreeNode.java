@@ -148,7 +148,7 @@ public class SingleTreeNode {
                 stop = numIters >= player.params.iterationsBudget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget;
+                stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget || numIters > player.params.fmCallsBudget;
             }
         }
 

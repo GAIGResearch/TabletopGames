@@ -4,7 +4,6 @@ import core.*;
 import core.interfaces.IStatisticLogger;
 import evodef.*;
 import games.GameType;
-import players.mcts.MCTSPlayer;
 import utilities.SummaryLogger;
 
 import java.util.*;
@@ -80,6 +79,8 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     @Override
     public double evaluate(int[] settings) {
+//        System.out.println(String.format("Starting evaluation of %s at %tT",
+//                Arrays.toString(settings), System.currentTimeMillis()));
         Object configuredThing = searchSpace.getAgent(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;

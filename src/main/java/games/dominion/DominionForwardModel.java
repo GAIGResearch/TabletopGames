@@ -49,8 +49,13 @@ public class DominionForwardModel extends AbstractForwardModel {
             // we just register the action taken with the currently active action
             state.actionsInProgress.peek().registerActionTaken(state, action);
             // and then remove anything which is now complete
+            int loopCount = 0;
             while (!state.actionsInProgress.isEmpty() && state.actionsInProgress.peek().executionComplete(state)) {
                 state.actionsInProgress.pop();
+                loopCount++;
+                if (loopCount > 100) {
+                    throw new AssertionError("WTF?");
+                }
             }
         }
         int playerID = state.getCurrentPlayer();

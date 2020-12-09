@@ -22,7 +22,11 @@ public class Remodel extends DominionAction implements IExtendedSequence {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.setActionInProgress(this);
+        if (state.getDeck(DominionConstants.DeckType.HAND, player).getSize() == 0) {
+            // this is to indicate we are finished...if we do not trash anything, we cannot buy anything
+        } else {
+            state.setActionInProgress(this);
+        }
         return true;
     }
 
@@ -36,12 +40,6 @@ public class Remodel extends DominionAction implements IExtendedSequence {
                     .map(card -> new TrashCard(card.cardType(), player))
                     .distinct()
                     .collect(toList());
-            if (retValue.isEmpty()) {
-                retValue.add(new DoNothing());
-                cardTrashed = CardType.COPPER;
-                cardGained = CardType.COPPER;
-                // this is to indicate we are finished...if we do not trash anything, we cannot buy anything
-            }
             return retValue;
         } else {
             //Phase 2 - gain a card costing up to 2 more
