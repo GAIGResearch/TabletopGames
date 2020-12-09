@@ -81,15 +81,11 @@ public class DiamantForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action)
     {
         DiamantGameState dgs = (DiamantGameState) currentState;
-        dgs.actionsPlayed.add(action);
-
-        // Actions are executed after playing the last player
-        if (dgs.getCurrentPlayer() == dgs.getNPlayers() - 1)
-        {
+        dgs.actionsPlayed.put(dgs.getCurrentPlayer(), action);  // TODO Replace just the action played for this player !!!!!!!!!!!!
+        if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
-
         dgs.getTurnOrder().endPlayerTurn(dgs);
     }
 
@@ -97,8 +93,8 @@ public class DiamantForwardModel extends AbstractForwardModel {
     {
         // How many players play ExitFromCave?
         int nPlayersExit = 0;
-        for (AbstractAction a : dgs.actionsPlayed)
-            if (a instanceof ExitFromCave)
+        for (int p : dgs.actionsPlayed.keySet())
+            if (dgs.actionsPlayed.get(p) instanceof ExitFromCave)
                 nPlayersExit += 1;
 
 

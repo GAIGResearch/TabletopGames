@@ -21,6 +21,8 @@ public class DiamantHeuristic implements IStateHeuristic {
             if (nGems < min_ngens)
                 min_ngens = nGems;
         }
+        if ((max_ngens - min_ngens) == 0)
+            return 0.0;
 
         return (dgs.treasureChests.get(playerId).GetNumberGems() - min_ngens) / (float) (max_ngens - min_ngens);
     }

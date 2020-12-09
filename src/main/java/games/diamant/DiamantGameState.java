@@ -14,10 +14,7 @@ import games.diamant.cards.DiamantCard;
 import games.diamant.components.DiamantTreasureChest;
 import games.diamant.components.DiamantHand;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
@@ -39,7 +36,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     int nCave = 0;
 
-    List<AbstractAction> actionsPlayed;
+    Map<Integer, AbstractAction> actionsPlayed;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -65,6 +62,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     @Override
     protected AbstractGameState _copy(int playerId)
     {
+        Random r = new Random(getGameParameters().getRandomSeed());
+
         DiamantGameState dgs = new DiamantGameState(gameParameters.copy(), getNPlayers());
 
         dgs.mainDeck    = mainDeck.copy();
@@ -82,7 +81,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.hands          = new ArrayList<>();
         dgs.treasureChests = new ArrayList<>();
         dgs.playerInCave   = new ArrayList<>();
-        dgs.actionsPlayed = new ArrayList<>();
+        dgs.actionsPlayed  = new HashMap<>();
 
         for (DiamantHand dh : hands)
             dgs.hands.add((DiamantHand) dh.copy());
@@ -90,40 +89,41 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         for (DiamantTreasureChest dc : treasureChests)
             dgs.treasureChests.add((DiamantTreasureChest) dc.copy());
 
-        for (AbstractAction a : actionsPlayed)
-            dgs.actionsPlayed.add(a.copy());
+        for (int i=0; i<getNPlayers(); i++)
+        {
+            if (actionsPlayed.containsKey(i))
+                dgs.actionsPlayed.put(i, actionsPlayed.get(i).copy());
+        }
+
 
         dgs.playerInCave.addAll(playerInCave);
 
         // mainDeck is hidden. Shuffle it.
         // actionsPlayed is hidden
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (PARTIAL_OBSERVABLE && playerId != -1)
+        {
             dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
-            dgs.actionsPlayed = randomizeActionsPlayed();
-        }
 
+            // Randomize actions for other players
+            for (int i=0; i<getNPlayers(); i++)
+            {
+                if (playerInCave.get(i)) {
+                    if (i != playerId) {
+                        int n = r.nextInt(2); // 0 or 1
+                        if (n == 0)
+                            dgs.actionsPlayed.put(i, new ContinueInCave());
+                        else
+                            dgs.actionsPlayed.put(i, new ExitFromCave());
+                    }
+                } else
+                    dgs.actionsPlayed.put(i, new OutOfCave());
+            }
+
+        }
         return dgs;
     }
 
-    private List<AbstractAction> randomizeActionsPlayed()
-    {
-        Random r = new Random(getGameParameters().getRandomSeed());
-        List<AbstractAction> actions = new ArrayList<>();
-        for (AbstractAction a : actionsPlayed)
-        {
-            if (a instanceof OutOfCave)
-                actions.add(new OutOfCave());
-            else
-            {
-                int n = r.nextInt(1); // 0 or 1
-                if (n==0)
-                    actions.add(new ContinueInCave());
-                else
-                    actions.add(new ExitFromCave());
-            }
-        }
-        return actions;
-    }
+
 
     @Override
     protected double _getScore(int playerId)
@@ -157,7 +157,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         nCave = 0;
 
-        actionsPlayed = new ArrayList<>();
+        actionsPlayed = new HashMap<>();
     }
 
     @Override
