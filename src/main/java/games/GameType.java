@@ -192,6 +192,8 @@ public enum GameType {
                 return ColtExpress;
             case "dotsandboxes":
                 return DotsAndBoxes;
+            case "diamant":
+                return Diamant;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -253,6 +255,7 @@ public enum GameType {
             case Diamant:
                 forwardModel = new DiamantForwardModel();
                 gameState = new DiamantGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -278,6 +281,8 @@ public enum GameType {
                 return new ColtExpressParameters(seed);
             case DotsAndBoxes:
                 return new DBParameters(seed);
+            case Diamant:
+                return new DiamantParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -336,6 +341,7 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
+            // TODO: Diamant GUI
         }
 
         return gui;
