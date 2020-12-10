@@ -8,6 +8,7 @@ import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
+import games.diamant.components.ActionsPlayed;
 import games.diamant.components.DiamantHand;
 import games.diamant.components.DiamantTreasureChest;
 import utilities.Utils;
@@ -35,6 +36,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         dgs.mainDeck    = new Deck("MainDeck");
         dgs.discardDeck = new Deck("DiscardDeck");
         dgs.path        = new Deck("Path");
+        dgs.actionsPlayed = new ActionsPlayed();
 
         createCards(dgs);
         dgs.mainDeck.shuffle(r);

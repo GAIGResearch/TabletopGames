@@ -23,8 +23,6 @@ public class ContinueInCave extends AbstractAction implements IPrintable {
         return obj instanceof ContinueInCave;
     }
 
-
-    // TODO: ???
     @Override
     public int hashCode() {
         return 0;

@@ -23,7 +23,6 @@ public class OutOfCave extends AbstractAction implements IPrintable {
         return obj instanceof OutOfCave;
     }
 
-    // TODO: ???
     @Override
     public int hashCode() {
         return 0;

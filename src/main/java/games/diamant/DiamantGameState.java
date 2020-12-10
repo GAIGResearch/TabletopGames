@@ -2,7 +2,6 @@ package games.diamant;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
@@ -11,6 +10,7 @@ import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
+import games.diamant.components.ActionsPlayed;
 import games.diamant.components.DiamantTreasureChest;
 import games.diamant.components.DiamantHand;
 
@@ -36,9 +36,9 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     int nCave = 0;
 
-    // This variable store the actions played for the rest of players.
+    // This component store the actions played for the rest of players.
     // It is needed since in this game, actions are simultaneously played
-    Map<Integer, AbstractAction> actionsPlayed;
+    ActionsPlayed actionsPlayed;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -58,6 +58,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             add(path);
             addAll(treasureChests);
             addAll(hands);
+            add(actionsPlayed);
         }};
     }
 
@@ -71,6 +72,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.mainDeck    = mainDeck.copy();
         dgs.discardDeck = discardDeck.copy();
         dgs.path        = path.copy();
+        dgs.actionsPlayed  = (ActionsPlayed) actionsPlayed.copy();
 
         dgs.nGemsOnPath             = nGemsOnPath;
         dgs.nHazardPoissonGasOnPath = nHazardPoissonGasOnPath;
@@ -83,7 +85,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.hands          = new ArrayList<>();
         dgs.treasureChests = new ArrayList<>();
         dgs.playerInCave   = new ArrayList<>();
-        dgs.actionsPlayed  = new HashMap<>();
+
 
         for (DiamantHand dh : hands)
             dgs.hands.add((DiamantHand) dh.copy());
@@ -130,10 +132,13 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         return new DiamantHeuristic().evaluateState(this, playerId);
     }
 
-    // TODO: what it this?
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return null;
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId)
+    {
+        ArrayList<Integer> ids = new ArrayList<>();
+        ids.add(mainDeck.getComponentID());
+        ids.add(actionsPlayed.getComponentID());
+        return ids;
     }
 
     @Override
@@ -141,6 +146,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         mainDeck       = null;
         discardDeck    = null;
         path           = null;
+        actionsPlayed  = null;
         treasureChests = new ArrayList<>();
         hands          = new ArrayList<>();
         playerInCave   = new ArrayList<>();
@@ -154,7 +160,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         nCave = 0;
 
-        actionsPlayed = new HashMap<>();
     }
 
     @Override
@@ -179,7 +184,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(treasureChests, that.treasureChests)     &&
                Objects.equals(path,           that.path)               &&
                Objects.equals(playerInCave,   that.playerInCave)       &&
-               Objects.equals(actionsPlayed, that.actionsPlayed);
+               Objects.equals(actionsPlayed,  that.actionsPlayed);
     }
 
     /**

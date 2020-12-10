@@ -23,10 +23,10 @@ public class ExitFromCave extends AbstractAction implements IPrintable {
         return obj instanceof ExitFromCave;
     }
 
-    // TODO: ???
+
     @Override
     public int hashCode() {
-        return 0;
+        return 1;
     }
 
     @Override
