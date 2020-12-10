@@ -7,7 +7,7 @@ import core.interfaces.IPrintable;
 public class ContinueInCave extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
-        // Nothing to be executed. The actions are executed at the end of the turn in the ForwardModel
+        // Nothing to be executed. The actions are executed in the ForwardModel
         return true;
     }
 

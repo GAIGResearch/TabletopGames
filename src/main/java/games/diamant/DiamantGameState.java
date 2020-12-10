@@ -36,6 +36,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     int nCave = 0;
 
+    // This variable store the actions played for the rest of players.
+    // It is needed since in this game, actions are simultaneously played
     Map<Integer, AbstractAction> actionsPlayed;
 
     /**
@@ -57,7 +59,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             addAll(treasureChests);
             addAll(hands);
         }};
-    };
+    }
 
     @Override
     protected AbstractGameState _copy(int playerId)
@@ -89,17 +91,17 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         for (DiamantTreasureChest dc : treasureChests)
             dgs.treasureChests.add((DiamantTreasureChest) dc.copy());
 
+        // If there is an action played for a player, then copy it
         for (int i=0; i<getNPlayers(); i++)
         {
             if (actionsPlayed.containsKey(i))
                 dgs.actionsPlayed.put(i, actionsPlayed.get(i).copy());
         }
 
-
         dgs.playerInCave.addAll(playerInCave);
 
-        // mainDeck is hidden. Shuffle it.
-        // actionsPlayed is hidden
+        // mainDeck and is actionsPlayed are hidden.
+        // For each player in the cave not being the actual player, a random action is obtained
         if (PARTIAL_OBSERVABLE && playerId != -1)
         {
             dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
@@ -109,8 +111,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             {
                 if (playerInCave.get(i)) {
                     if (i != playerId) {
-                        int n = r.nextInt(2); // 0 or 1
-                        if (n == 0)
+                        if (r.nextDouble() <= 0.5)
                             dgs.actionsPlayed.put(i, new ContinueInCave());
                         else
                             dgs.actionsPlayed.put(i, new ExitFromCave());
@@ -123,8 +124,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         return dgs;
     }
 
-
-
     @Override
     protected double _getScore(int playerId)
     {
@@ -136,8 +135,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return null;
     }
-
-    // TODO: what about hash?
 
     @Override
     protected void _reset() {
@@ -184,6 +181,10 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(playerInCave,   that.playerInCave)       &&
                Objects.equals(actionsPlayed, that.actionsPlayed);
     }
+
+    /**
+     * Returns the number of player already in the cave
+    */
 
     public int getNPlayersInCave()
     {

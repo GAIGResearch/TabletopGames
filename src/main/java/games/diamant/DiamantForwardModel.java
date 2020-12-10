@@ -39,8 +39,8 @@ public class DiamantForwardModel extends AbstractForwardModel {
         createCards(dgs);
         dgs.mainDeck.shuffle(r);
 
-        // Draw first card
-        DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
+        // Draw first card and play it
+        DiamantCard card = dgs.mainDeck.draw();
         dgs.path.add(card);
         playCard(card, dgs);
 
@@ -74,14 +74,19 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.mainDeck.add(new DiamantCard(DiamantCard.DiamantCardType.Treasure, DiamantCard.HazardType.None, t));
     }
 
-    // In this game, all players play the action at the same time.
-    // when playing an agent, the action is just stored in the gameState
-    // If the player is the last one, then all the actions are executed at the same time.
+    /**
+     * In this game, all players play the action at the same time.
+     * When an agent call next, the action is just stored in the gameState.
+     * @param currentState: current state of the game
+     * @param action: action to be executed
+    */
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action)
     {
         DiamantGameState dgs = (DiamantGameState) currentState;
-        dgs.actionsPlayed.put(dgs.getCurrentPlayer(), action);  // TODO Replace just the action played for this player !!!!!!!!!!!!
+        dgs.actionsPlayed.put(dgs.getCurrentPlayer(), action);
+
+        // If all players has an action, execute them
         if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
             playActions(dgs);
             dgs.actionsPlayed.clear();
@@ -110,7 +115,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
                 // Not all Continue
                 distributeGemsAmongPlayers(dgs, nPlayersExit);
             }
-            DiamantCard card = (DiamantCard) dgs.mainDeck.draw();
+            DiamantCard card = dgs.mainDeck.draw();
             dgs.path.add(card);
             playCard(card, dgs);
         }
@@ -125,7 +130,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.nGemsOnPath = 0;
         }
         else {
-            gems_to_players = (int) Math.floor(dgs.nGemsOnPath / nPlayersExit);
+            gems_to_players = (int) Math.floor(dgs.nGemsOnPath / (double) nPlayersExit);
             dgs.nGemsOnPath = dgs.nGemsOnPath % nPlayersExit;
         }
 
@@ -141,6 +146,10 @@ public class DiamantForwardModel extends AbstractForwardModel {
         }
     }
 
+    /**
+     * Prepare the game for playing a new Cave
+      * @param dgs: current game state
+     */
     private void prepareNewCave(DiamantGameState dgs)
     {
         DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
@@ -158,6 +167,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.path.clear();
             dgs.mainDeck.shuffle(r);
 
+            // Initialize game state
             dgs.nHazardExplosionsOnPath = 0;
             dgs.nHazardPoissonGasOnPath = 0;
             dgs.nHazardRockfallsOnPath  = 0;
@@ -168,12 +178,17 @@ public class DiamantForwardModel extends AbstractForwardModel {
             for (int p=0; p < dgs.getNPlayers(); p++)
                 dgs.playerInCave.set(p, true);
 
+            // Draw a card and play it
             DiamantCard card = dgs.mainDeck.draw();
             dgs.path.add(card);
             playCard(card, dgs);
         }
     }
 
+    /**
+     * Finishes the game and obtains who is the winner
+     * @param dgs: current game state
+     */
     private void EndGame(DiamantGameState dgs)
     {
         int maxGems = 0;
@@ -212,7 +227,12 @@ public class DiamantForwardModel extends AbstractForwardModel {
     }
 
 
-    // There are always two actions: Continue or Exit
+    /**
+     * Gets the possible actions to be played
+     * If the player is not in the cave, only OutOfCave action can be played
+     * If the player is in the cave, there are only two actions: ExitFromCave, ContinueInCave
+     * @param gameState: current game state
+     */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState)
     {
@@ -237,10 +257,15 @@ public class DiamantForwardModel extends AbstractForwardModel {
         return new DiamantForwardModel();
     }
 
+    /**
+     * Play the card
+     * @param card: card to be played
+     * @param dgs: current game state
+     */
     private void playCard(DiamantCard card, DiamantGameState dgs)
     {
         if (card.getCardType() == DiamantCard.DiamantCardType.Treasure) {
-            int gems_to_players = (int) Math.floor(card.getNumberOfGems() / dgs.getNPlayersInCave());
+            int gems_to_players = (int) Math.floor(card.getNumberOfGems() / (double) dgs.getNPlayersInCave());
             int gems_to_path    = card.getNumberOfGems() % dgs.getNPlayersInCave();
 
             for (int p=0; p<dgs.getNPlayers(); p++)
@@ -251,23 +276,19 @@ public class DiamantForwardModel extends AbstractForwardModel {
         }
         else if (card.getCardType() == DiamantCard.DiamantCardType.Hazard)
         {
-            if (card.getHazardType() == DiamantCard.HazardType.Explosions)
-                dgs.nHazardExplosionsOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.PoissonGas)
-                dgs.nHazardPoissonGasOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.Rockfalls)
-                dgs.nHazardRockfallsOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.Scorpions)
-                dgs.nHazardScorpionsOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.Snakes)
-                dgs.nHazardSnakesOnPath += 1;
+            if      (card.getHazardType() == DiamantCard.HazardType.Explosions) dgs.nHazardExplosionsOnPath += 1;
+            else if (card.getHazardType() == DiamantCard.HazardType.PoissonGas) dgs.nHazardPoissonGasOnPath += 1;
+            else if (card.getHazardType() == DiamantCard.HazardType.Rockfalls)  dgs.nHazardRockfallsOnPath += 1;
+            else if (card.getHazardType() == DiamantCard.HazardType.Scorpions)  dgs.nHazardScorpionsOnPath += 1;
+            else if (card.getHazardType() == DiamantCard.HazardType.Snakes)     dgs.nHazardSnakesOnPath += 1;
 
-            // If there are two hazards cards of the same type
-            if (dgs.nHazardSnakesOnPath == 2 ||
-                    dgs.nHazardScorpionsOnPath == 2 ||
-                    dgs.nHazardRockfallsOnPath == 2 ||
-                    dgs.nHazardPoissonGasOnPath == 2 ||
-                    dgs.nHazardExplosionsOnPath == 2)
+            DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
+            // If there are two hazards cards of the same type -> finish the cave
+            if (dgs.nHazardSnakesOnPath     == dp.nHazardsToDead ||
+                dgs.nHazardScorpionsOnPath  == dp.nHazardsToDead ||
+                dgs.nHazardRockfallsOnPath  == dp.nHazardsToDead ||
+                dgs.nHazardPoissonGasOnPath == dp.nHazardsToDead ||
+                dgs.nHazardExplosionsOnPath == dp.nHazardsToDead)
             {
                 // All active players loose all gems on hand.
                 for (int p=0; p<dgs.getNPlayers(); p++)

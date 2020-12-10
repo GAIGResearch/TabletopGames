@@ -3,6 +3,7 @@ package games.diamant.components;
 import core.components.Component;
 import utilities.Utils;
 
+// Gems on the hand of the player
 public class DiamantHand extends Component {
     private int nGems;
 

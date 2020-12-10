@@ -3,6 +3,7 @@ package games.diamant.components;
 import core.components.Component;
 import utilities.Utils;
 
+// Gems on the treasure test of the player
 public class DiamantTreasureChest extends Component {
     private int nGems;
 

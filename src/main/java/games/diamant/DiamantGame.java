@@ -17,9 +17,9 @@ public class DiamantGame extends Game {
 
     public static void main(String[] args) {
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
+        agents.add(new RandomPlayer());
         agents.add(new OSLAPlayer());
-        agents.add(new OSLAPlayer());
-        agents.add(new OSLAPlayer());
+        agents.add(new RandomPlayer());
         //agents.add(new HumanConsolePlayer());
 
         // Play n games and return the pct of wins of each player
@@ -27,7 +27,7 @@ public class DiamantGame extends Game {
         for (int i=0; i<agents.size(); i++)
             playerWins[i] = 0.0;
 
-        int n = 100;
+        int n = 1000;
         for (int i=0; i<n; i++) {
             System.out.print("GAME: " + i + " ");
             AbstractParameters gameParameters = new DiamantParameters(System.currentTimeMillis());
@@ -47,7 +47,7 @@ public class DiamantGame extends Game {
                 else
                     System.out.print("D");
 
-            System.out.println("");
+            System.out.println();
         }
 
         for (int i=0; i<agents.size(); i++)
