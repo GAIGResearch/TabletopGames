@@ -4,11 +4,14 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
+import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
 
 import java.util.*;
 
 public class DBGameState extends AbstractGameState {
+
+    IStateHeuristic heuristic = new DBScoreHeuristic();
 
     // Only component needed
     GridBoard<DBCell> grid;
@@ -71,7 +74,7 @@ public class DBGameState extends AbstractGameState {
 
     @Override
     protected double _getScore(int playerId) {
-        return nCellsPerPlayer[playerId];
+        return heuristic.evaluateState(this, playerId);
     }
 
     @Override
