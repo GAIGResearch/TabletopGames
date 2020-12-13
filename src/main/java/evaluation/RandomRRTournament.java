@@ -7,12 +7,9 @@ import java.util.*;
 import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toList;
-
 public class RandomRRTournament extends RoundRobinTournament {
 
     private int totalMatchups;
-    private Random rnd;
     private IntSupplier idStream;
 
     /**
@@ -28,7 +25,6 @@ public class RandomRRTournament extends RoundRobinTournament {
                               int gamesPerMatchUp, boolean selfPlay, int totalMatchUps, long seed) {
         super(agents, gameToPlay, playersPerGame, gamesPerMatchUp, selfPlay);
         this.totalMatchups = totalMatchUps;
-        this.rnd = new Random(seed);
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
     }
 
@@ -96,7 +92,6 @@ public class RandomRRTournament extends RoundRobinTournament {
             if (i1 >= nPlayers) return false;
             for (int i = nPlayers - 1; i >= i1; i--) {
                 if (lastValues[i] == currentPermutation[i2]) {
-                    System.out.println("Overlap Risk detected");
                     return true;
                 }
             }
