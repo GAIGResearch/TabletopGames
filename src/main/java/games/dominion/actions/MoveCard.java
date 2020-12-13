@@ -10,31 +10,36 @@ import java.util.*;
 
 import static games.dominion.DominionConstants.*;
 
-public class PlaceOnDeck extends AbstractAction {
+public class MoveCard extends AbstractAction {
 
-    final int player;
+    final int playerFrom;
+    final int playerTo;
     final CardType type;
+    final DeckType fromDeck, toDeck;
 
-    public PlaceOnDeck(CardType type, int playerId) {
+    public MoveCard(CardType type, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
         this.type = type;
-        player = playerId;
+        playerFrom = fromPlayer;
+        playerTo = toPlayer;
+        this.fromDeck = fromDeck;
+        this.toDeck = toDeck;
     }
 
     @Override
     public boolean execute(AbstractGameState ags) {
         DominionGameState state = (DominionGameState) ags;
-        Optional<DominionCard> cardToMove = state.getDeck(DeckType.HAND, player).stream()
+        Optional<DominionCard> cardToMove = state.getDeck(fromDeck, playerFrom).stream()
                 .filter(card -> card.cardType() == this.type).findFirst();
 
         if (cardToMove.isPresent()) {
             DominionCard card = cardToMove.get();
-            state.moveCard(card, player, DeckType.HAND, player, DeckType.DRAW);
-            PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, player);
+            state.moveCard(card, playerFrom, fromDeck, playerTo, toDeck);
+            PartialObservableDeck<DominionCard> destination = (PartialObservableDeck<DominionCard>) state.getDeck(toDeck, playerTo);
             boolean[] cardVisibility = new boolean[state.getNPlayers()];
-            cardVisibility[player] = true;
-            drawDeck.setVisibilityOfComponent(0, cardVisibility);
+            cardVisibility[playerFrom] = true;
+            destination.setVisibilityOfComponent(0, cardVisibility);
         } else {
-            throw new AssertionError("Cannot move card that is not in hand : " + type);
+            throw new AssertionError("Cannot move card that is not in deck : " + type);
         }
         return true;
     }
@@ -59,20 +64,21 @@ public class PlaceOnDeck extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Player %d moves %s to top of Draw deck", player, type);
+        return String.format("Player %d moves %s from %s to %s of player %d", playerFrom, type, fromDeck, toDeck, playerTo);
     }
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof PlaceOnDeck) {
-            PlaceOnDeck dc = (PlaceOnDeck) other;
-            return dc.player == player && dc.type == type;
+        if (other instanceof MoveCard) {
+            MoveCard dc = (MoveCard) other;
+            return dc.playerFrom == playerFrom && dc.type == type && dc.playerTo == playerFrom
+                    && dc.toDeck == toDeck && dc.fromDeck == fromDeck;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, type, DeckType.DRAW);
+        return Objects.hash(type, playerFrom, fromDeck, playerTo, toDeck);
     }
 }

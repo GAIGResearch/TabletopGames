@@ -13,7 +13,6 @@ import org.junit.*;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
 
 public class BaseActionCards {
@@ -599,15 +598,15 @@ public class BaseActionCards {
         fm.next(state, new GainCard(CardType.MINE, 0, DeckType.HAND));
         availableActions = fm.computeAvailableActions(state);
 
-        assertTrue(availableActions.stream().allMatch(a -> a instanceof PlaceOnDeck));
+        assertTrue(availableActions.stream().allMatch(a -> a instanceof MoveCard));
         assertEquals(4, availableActions.size());
-        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.MINE, 0)));
-        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.COPPER, 0)));
-        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.ESTATE, 0)));
-        assertTrue(availableActions.contains(new PlaceOnDeck(CardType.VILLAGE, 0)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.COPPER, 0, DeckType.HAND, 0, DeckType.DRAW)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.ESTATE, 0, DeckType.HAND, 0, DeckType.DRAW)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.VILLAGE, 0, DeckType.HAND, 0, DeckType.DRAW)));
         assertFalse(artisan.executionComplete(state));
 
-        fm.next(state, new PlaceOnDeck(CardType.MINE, 0));
+        fm.next(state, new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW));
         assertTrue(artisan.executionComplete(state));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
 
@@ -813,5 +812,66 @@ public class BaseActionCards {
         assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
         assertNull(state.currentActionInProgress());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void harbingerWithNoDiscard() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.HARBINGER, 0, DeckType.HAND);
+        Harbinger harbinger = new Harbinger(0);
+
+        fm.next(state, harbinger);
+
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(1, state.actionsLeft());
+        assertNull(state.currentActionInProgress());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+        assertEquals(1, availableActions.size());
+        assertEquals(new EndPhase(), availableActions.get(0));
+    }
+
+    @Test
+    public void harbingerWithDiscard() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.HARBINGER, 0, DeckType.HAND);
+        state.addCard(CardType.HARBINGER, 0, DeckType.DISCARD);
+        state.addCard(CardType.SILVER, 0, DeckType.DISCARD);
+
+        Harbinger harbinger = new Harbinger(0);
+
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(2, state.getDeck(DeckType.DISCARD, 0).getSize());
+        fm.next(state, harbinger);
+
+        assertFalse(harbinger.executionComplete(state));
+        assertEquals(4, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(harbinger, state.currentActionInProgress());
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+
+        assertEquals(3, availableActions.size());
+        assertTrue(availableActions.contains(new DoNothing()));
+        assertTrue(availableActions.contains(new MoveCard(CardType.HARBINGER, 0, DeckType.DISCARD, 0, DeckType.DRAW)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.SILVER, 0, DeckType.DISCARD, 0, DeckType.DRAW)));
+
+        fm.next(state, new MoveCard(CardType.SILVER, 0, DeckType.DISCARD, 0, DeckType.DRAW));
+        assertTrue(harbinger.executionComplete(state));
+        assertNull(state.currentActionInProgress());
+
+        assertEquals(1, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(CardType.SILVER, state.getDeck(DeckType.DRAW, 0).peek().cardType());
+        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, 0);
+        assertTrue(drawDeck.getVisibilityForPlayer(0, 0));
+        for (int i = 1; i < 4; i++)
+            assertFalse(drawDeck.getVisibilityForPlayer(0, i));
+
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+
+        availableActions = fm.computeAvailableActions(state);
+        assertEquals(1, availableActions.size());
+        assertEquals(new EndPhase(), availableActions.get(0));
+
     }
 }

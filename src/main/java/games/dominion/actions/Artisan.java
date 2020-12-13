@@ -32,7 +32,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
                     .collect(toList());
         } else {
             return state.getDeck(DeckType.HAND, player).stream()
-                    .map(c -> new PlaceOnDeck(c.cardType(), player))
+                    .map(c -> new MoveCard(c.cardType(), player, DeckType.HAND, player, DeckType.DRAW))
                     .distinct()
                     .collect(toList());
         }
@@ -47,7 +47,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     public void registerActionTaken(DominionGameState state, AbstractAction action) {
         if (action instanceof GainCard && ((GainCard) action).buyingPlayer == player)
             gainedCard = true;
-        if (action instanceof PlaceOnDeck && ((PlaceOnDeck) action).player == player)
+        if (action instanceof MoveCard && ((MoveCard) action).playerFrom == player)
             putCardOnDeck = true;
     }
 
