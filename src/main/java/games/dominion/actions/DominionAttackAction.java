@@ -127,6 +127,8 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, type, currentTarget, reactionsInitiated, attacksInitiated, attacksComplete);
+        int retValue = Objects.hash(player, type, currentTarget);
+        return retValue + 11 * Arrays.hashCode(reactionsInitiated) + 53 * Arrays.hashCode(attacksInitiated) +
+        997 * Arrays.hashCode(attacksComplete);
     }
 }

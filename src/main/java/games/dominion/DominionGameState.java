@@ -168,7 +168,8 @@ public class DominionGameState extends AbstractGameState {
     public void spend(int delta) {
         spentSoFar += delta;
     }
-    public void changeAdditionalSpend(int delta)  {
+
+    public void changeAdditionalSpend(int delta) {
         additionalSpendAvailable += delta;
     }
 
@@ -422,12 +423,25 @@ public class DominionGameState extends AbstractGameState {
         DominionGameState other = (DominionGameState) o;
         return cardsIncludedInGame.equals(other.cardsIncludedInGame) &&
                 Arrays.equals(playerHands, other.playerHands) &&
+                Arrays.equals(playerResults, other.playerResults) &&
                 Arrays.equals(playerDiscards, other.playerDiscards) &&
                 Arrays.equals(playerTableaux, other.playerTableaux) &&
                 Arrays.equals(playerDrawPiles, other.playerDrawPiles) &&
+                actionsInProgress.equals(other.actionsInProgress) &&
                 trashPile.equals(other.trashPile) &&
                 buysLeftForCurrentPlayer == other.buysLeftForCurrentPlayer &&
                 actionsLeftForCurrentPlayer == other.actionsLeftForCurrentPlayer &&
-                spentSoFar == other.spentSoFar && additionalSpendAvailable == other.additionalSpendAvailable;
+                spentSoFar == other.spentSoFar && additionalSpendAvailable == other.additionalSpendAvailable &&
+                Arrays.equals(defenceStatus, other.defenceStatus) &&
+                gamePhase == other.gamePhase && gameStatus == other.gameStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer, gamePhase, gameStatus,
+                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, actionsInProgress);
+        result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
+        11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
+        return result;
     }
 }

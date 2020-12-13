@@ -412,4 +412,9 @@ public class Deck<T extends Component> extends Component {
                 Objects.equals(components, deck.components);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(capacity, ownerId, componentID, components);
+    }
+
 }

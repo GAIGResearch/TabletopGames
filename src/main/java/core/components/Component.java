@@ -233,7 +233,7 @@ public abstract class Component {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return componentID;
     }
 
