@@ -788,4 +788,30 @@ public class BaseActionCards {
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
+
+    @Test
+    public void chapel() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.CHAPEL, 0, DeckType.HAND);
+        Chapel chapel = new Chapel(0);
+
+        fm.next(state, chapel);
+
+        fm.next(state, new TrashCard(CardType.COPPER, 0));
+        fm.next(state, new TrashCard(CardType.COPPER, 0));
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(2, state.getDeck(DeckType.TRASH, -1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertFalse(chapel.executionComplete(state));
+        assertEquals(chapel, state.currentActionInProgress());
+
+        fm.next(state, new DoNothing());
+        assertTrue(chapel.executionComplete(state));
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertNull(state.currentActionInProgress());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
 }

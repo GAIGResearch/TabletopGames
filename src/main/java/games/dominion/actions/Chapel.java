@@ -2,26 +2,27 @@ package games.dominion.actions;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import games.dominion.*;
+import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-import static games.dominion.DominionConstants.*;
-import static java.util.stream.Collectors.*;
+import static games.dominion.DominionConstants.DeckType;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
-public class Cellar extends DominionAction implements IExtendedSequence{
-    public Cellar(int playerId) {
-        super(CardType.CELLAR, playerId);
+public class Chapel extends DominionAction implements IExtendedSequence{
+    public Chapel(int playerId) {
+        super(CardType.CHAPEL, playerId);
     }
 
-    int cardsDiscarded = 0;
     boolean executed = false;
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.changeActions(1);
         state.setActionInProgress(this);
         return true;
     }
@@ -33,24 +34,23 @@ public class Cellar extends DominionAction implements IExtendedSequence{
      * @return - new AbstractAction object with the same properties.
      */
     @Override
-    public Cellar copy() {
-        Cellar retValue = new Cellar(player);
-        retValue.cardsDiscarded = cardsDiscarded;
+    public Chapel copy() {
+        Chapel retValue = new Chapel(player);
         retValue.executed = executed;
         return retValue;
     }
 
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
-        // we can discard any card in hand, so create a DiscardCard action for each
-        Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, player).stream().collect(toSet());
-        List<AbstractAction> discardActions = uniqueCardsInHand.stream()
-                .map(card -> new DiscardCard(card.cardType(), player))
+        // we can trash any card in hand, so create a TrashCard action for each
+        List<DominionCard> cardsInHand = state.getDeck(DeckType.HAND, player).stream().collect(toList());
+        List<AbstractAction> trashActions = cardsInHand.stream()
+                .map(card -> new TrashCard(card.cardType(), player))
                 .distinct()
                 .collect(toList());
         // and then we can always choose to stop discarding
-        discardActions.add(new DoNothing());
-        return discardActions;
+        trashActions.add(new DoNothing());
+        return trashActions;
     }
 
     @Override
@@ -58,14 +58,8 @@ public class Cellar extends DominionAction implements IExtendedSequence{
         // if the action is DoNothing, then we have stopped
         // else we continue discarding
         if (action instanceof DoNothing) {
-            for (int i = 0; i < cardsDiscarded; i++) {
-                state.drawCard(player);
-            }
-            cardsDiscarded = 0;
             executed = true;
         }
-        if (action instanceof DiscardCard)
-            cardsDiscarded++;
     }
 
     @Override
@@ -75,21 +69,21 @@ public class Cellar extends DominionAction implements IExtendedSequence{
 
     @Override
     public int getCurrentPlayer(DominionGameState state) {
-        // Cellar is a purely personal sequence of actions - no reactions are needed
+        // Chapel is a purely personal sequence of actions - no reactions are needed
         return player;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Cellar) {
-            Cellar other = (Cellar) obj;
-            return other.player == player && other.cardsDiscarded == cardsDiscarded && other.executed == executed;
+        if (obj instanceof Chapel) {
+            Chapel other = (Chapel) obj;
+            return other.player == player && other.executed == executed;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(executed, player, cardsDiscarded, CardType.CELLAR);
+        return Objects.hash(executed, player, CardType.CHAPEL);
     }
 }
