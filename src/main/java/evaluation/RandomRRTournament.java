@@ -52,7 +52,7 @@ public class RandomRRTournament extends RoundRobinTournament {
      * It shuffles the list of agent indices, and runs through this.
      * Once it reaches the end it reshuffles the list and starts again.
      */
-    class PermutationCycler implements IntSupplier {
+    static class PermutationCycler implements IntSupplier {
 
         int[] currentPermutation;
         int currentPosition;

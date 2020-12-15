@@ -41,14 +41,15 @@ public class RoundRobinTournament extends AbstractTournament {
         String mode = getArg(args, "mode", "exhaustive");
         int totalMatchups = getArg(args, "matchups", 1000);
         String playerDirectory = getArg(args, "dir", "");
+        String logFile = getArg(args, "logFile", "");
 
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
-        if (playerDirectory != "") {
+        if (!playerDirectory.equals("")) {
             File dir = new File(playerDirectory);
             if (dir.exists() && dir.isDirectory()) {
                 for (String fileName : dir.list()) {
                     System.out.println(fileName);
-                    AbstractPlayer player = PlayerFactory.createPlayer(dir.getAbsolutePath() + "\\" + fileName);
+                    AbstractPlayer player = PlayerFactory.createPlayer(dir.getAbsolutePath() + File.separator + fileName);
                     agents.add(player);
                     player.setName(fileName.substring(0, fileName.indexOf(".")));
                 }
@@ -64,10 +65,11 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
         // Run!
-        AbstractTournament tournament = mode.equals("exhaustive") ?
+        RoundRobinTournament tournament = mode.equals("exhaustive") ?
                 new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay) :
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, totalMatchups,
                         System.currentTimeMillis());
+        tournament.dataLogger = logFile.equals("") ? null : new FileStatsLogger(logFile, "\t");
         tournament.runTournament();
     }
 
@@ -102,7 +104,6 @@ public class RoundRobinTournament extends AbstractTournament {
      */
     @Override
     public void runTournament() {
-        dataLogger = new FileStatsLogger("RoundRobinResults.log", "\t");
         for (int g = 0; g < games.size(); g++) {
             System.out.println("Playing " + games.get(g).getGameType().name());
 
@@ -114,7 +115,8 @@ public class RoundRobinTournament extends AbstractTournament {
                 System.out.println(String.format("%s won %.1f%% of the games ", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun)));
             }
         }
-        dataLogger.processDataAndFinish();
+        if (dataLogger != null)
+            dataLogger.processDataAndFinish();
     }
 
     /**

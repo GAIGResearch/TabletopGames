@@ -106,10 +106,6 @@ public class RMHCPlayer extends AbstractPlayer {
         avgTimeTaken = acumTimeTaken / numIters;
     }
 
-    @Override
-    public String toString() {
-        return "RMHC";
-    }
 
 //    public static void main(String[] args){
 //        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
