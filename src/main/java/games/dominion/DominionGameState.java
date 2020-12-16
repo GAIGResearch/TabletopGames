@@ -6,6 +6,7 @@ import core.interfaces.IGamePhase;
 import games.dominion.actions.IExtendedSequence;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -21,6 +22,7 @@ public class DominionGameState extends AbstractGameState {
 
     Random rnd;
     int playerCount;
+    boolean winLose = false;
 
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame;
@@ -349,11 +351,18 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected double _getScore(int playerId) {
+        double divisor = winLose ? 100.0 : 1.0;
+        if (winLose) {
+            if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+                return -1.0;
+            if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+                return 1.0;
+        }
         int score = playerHands[playerId].sumInt(DominionCard::victoryPoints);
         score += playerDiscards[playerId].sumInt(DominionCard::victoryPoints);
         score += playerTableaux[playerId].sumInt(DominionCard::victoryPoints);
         score += playerDrawPiles[playerId].sumInt(DominionCard::victoryPoints);
-        return score;
+        return score / divisor;
     }
 
 
