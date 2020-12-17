@@ -2,10 +2,13 @@ package players.mcts;
 
 import core.*;
 import core.interfaces.*;
+import evaluation.TunableParameters;
 import games.dominion.BigMoney;
 import games.dominion.PlayActionCards;
+import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
+import utilities.Hash;
 
 import java.util.*;
 
@@ -28,7 +31,6 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getScore;
-    public String heuristicClass = "";
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -47,7 +49,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristicClass", "");
+        addTunableParameter("heuristic", new JSONObject());
     }
 
     @Override
@@ -64,7 +66,19 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
-        heuristicClass = (String) getParameterValue("heuristicClass");
+        JSONObject heuristicJSON = (JSONObject) getParameterValue("heuristic");
+        if (!heuristicJSON.isEmpty()) {
+            try {
+                Class<?> heuristicClass = Class.forName((String) heuristicJSON.get("class"));
+                heuristic = (IStateHeuristic) heuristicClass.getConstructor().newInstance();
+                if (heuristic instanceof TunableParameters) {
+                    TunableParameters.loadFromJSON((TunableParameters) heuristic, heuristicJSON);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new AssertionError(e.getMessage() + " when trying to instantiate MCTS Heuristic : " + heuristicJSON.get("class"));
+            }
+        }
     }
 
     @Override
@@ -74,7 +88,7 @@ public class MCTSParams extends PlayerParameters {
 
     /**
      * @return Returns the AbstractPlayer policy that will take actions during an MCTS rollout.
-     *         This defaults to a Random player.
+     * This defaults to a Random player.
      */
     public AbstractPlayer getRolloutStrategy() {
         switch (rolloutType) {
@@ -92,7 +106,10 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer getOpponentModel() {
         return new RandomPlayer(new Random(getRandomSeed()));
     }
-    public IStateHeuristic getHeuristic() {return heuristic;}
+
+    public IStateHeuristic getHeuristic() {
+        return heuristic;
+    }
 
     @Override
     public MCTSPlayer instantiate() {

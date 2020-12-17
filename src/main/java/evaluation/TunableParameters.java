@@ -264,7 +264,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
         for (String pName : allParams) {
-            //       Class<?> clazz = params.parameterTypes.get(pName);
             if (isParamSingular(pName, rawData)) {
                 Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName));
                 params.addTunableParameter(pName, pValue);
@@ -279,7 +278,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
 
         // We should also check that there are no other properties in there
         allParams.add("algorithm");
-        allParams.add("parametersType");
+        allParams.add("class");
         for (Object key : rawData.keySet()) {
             if (key instanceof String && !allParams.contains(key)) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
