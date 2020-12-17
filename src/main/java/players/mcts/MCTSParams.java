@@ -27,6 +27,8 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
     public double exploreEpsilon = 0.1;
+    private IStateHeuristic heuristic = AbstractGameState::getScore;
+    public String heuristicClass = "";
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -45,6 +47,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
+        addTunableParameter("heuristicClass", "");
     }
 
     @Override
@@ -61,6 +64,7 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
+        heuristicClass = (String) getParameterValue("heuristicClass");
     }
 
     @Override
@@ -88,7 +92,7 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer getOpponentModel() {
         return new RandomPlayer(new Random(getRandomSeed()));
     }
-
+    public IStateHeuristic getHeuristic() {return heuristic;}
 
     @Override
     public MCTSPlayer instantiate() {
