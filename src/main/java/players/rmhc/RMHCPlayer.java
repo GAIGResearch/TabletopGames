@@ -21,6 +21,7 @@ public class RMHCPlayer extends AbstractPlayer {
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
     private int fmCalls = 0;
+    private int copyCalls =0;
 
     public RMHCPlayer() {
         this(System.currentTimeMillis());
@@ -60,6 +61,7 @@ public class RMHCPlayer extends AbstractPlayer {
         acumTimeTaken = 0;
         numIters = 0;
         fmCalls = 0;
+        copyCalls = 0;
 
         // Initialise individual
         bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic);
@@ -75,7 +77,7 @@ public class RMHCPlayer extends AbstractPlayer {
                 long remaining = timer.remainingTimeMillis();
                 keepIterating = remaining > avgTimeTaken && remaining > params.breakMS;
             } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
-                keepIterating = fmCalls < params.fmCallsBudget;
+                keepIterating = (fmCalls + copyCalls) < params.fmCallsBudget;
             } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
                 keepIterating = numIters < params.iterationsBudget;
             }
@@ -94,7 +96,10 @@ public class RMHCPlayer extends AbstractPlayer {
 
         // Create new individual through mutation
         Individual newIndividual = new Individual(bestIndividual);
-        fmCalls += newIndividual.mutate(getForwardModel(), getPlayerID());
+        copyCalls += newIndividual.length;
+        int statesUpdated = newIndividual.mutate(getForwardModel(), getPlayerID());
+        fmCalls += statesUpdated;
+        copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
 
         // Keep new individual if better than current
         if (newIndividual.value > bestIndividual.value)
