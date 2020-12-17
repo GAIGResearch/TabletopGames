@@ -22,7 +22,7 @@ public class DominionGameState extends AbstractGameState {
 
     Random rnd;
     int playerCount;
-    boolean winLose = false;
+    boolean winLose = true;
 
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame;

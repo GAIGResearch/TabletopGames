@@ -47,7 +47,7 @@ public abstract class AbstractGameState {
 
     // this will add some extra sanity/fragility checks to help detect errors with GameStates behaving in
     // unusual - and probably wrong - ways.
-    private boolean extraChecks = true;
+    private boolean extraChecks = false;
 
     /**
      * Constructor. Initialises some generic game state variables.
