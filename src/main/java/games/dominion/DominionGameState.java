@@ -6,9 +6,11 @@ import core.interfaces.IGamePhase;
 import games.dominion.actions.IExtendedSequence;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
+import games.pandemic.PandemicHeuristic;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
@@ -358,13 +360,20 @@ public class DominionGameState extends AbstractGameState {
             if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
                 return 1.0;
         }
-        int score = playerHands[playerId].sumInt(DominionCard::victoryPoints);
-        score += playerDiscards[playerId].sumInt(DominionCard::victoryPoints);
-        score += playerTableaux[playerId].sumInt(DominionCard::victoryPoints);
-        score += playerDrawPiles[playerId].sumInt(DominionCard::victoryPoints);
+        int score = getTotal(playerId, DominionCard::victoryPoints);
         return score / divisor;
     }
 
+    public int getTotal(int playerId, DeckType deck, Function<DominionCard, Integer> cardValuer) {
+        return getDeck(deck, playerId).sumInt(cardValuer);
+    }
+    public int getTotal(int playerId, Function<DominionCard, Integer> cardValuer) {
+        int score = playerHands[playerId].sumInt(cardValuer);
+        score += playerDiscards[playerId].sumInt(cardValuer);
+        score += playerTableaux[playerId].sumInt(cardValuer);
+        score += playerDrawPiles[playerId].sumInt(cardValuer);
+        return score;
+    }
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.

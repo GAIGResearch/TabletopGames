@@ -11,7 +11,7 @@ import java.util.*;
 
 public class DBGameState extends AbstractGameState {
 
-    IStateHeuristic heuristic = new DBAdvantageHeuristic();
+    IStateHeuristic heuristic = new DotsAndBoxesHeuristic();
 
     // Only component needed
     GridBoard<DBCell> grid;
