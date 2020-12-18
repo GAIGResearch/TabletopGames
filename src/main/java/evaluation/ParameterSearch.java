@@ -114,7 +114,7 @@ public class ParameterSearch {
                     .mapToObj(j -> searchSpace.value(finalI, j))
                     .map(Object::toString)
                     .collect(Collectors.joining(", "));
-            System.out.printf("%20s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
+            System.out.printf("%30s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
         }
 
         // Now initialise the other bits and pieces needed for the NTBEA package

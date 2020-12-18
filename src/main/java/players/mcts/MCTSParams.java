@@ -32,6 +32,7 @@ public class MCTSParams extends PlayerParameters {
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getScore;
 
+
     public MCTSParams() {
         this(System.currentTimeMillis());
     }
@@ -66,25 +67,36 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
-        JSONObject heuristicJSON = (JSONObject) getParameterValue("heuristic");
-        if (!heuristicJSON.isEmpty()) {
-            try {
-                Class<?> heuristicClass = Class.forName((String) heuristicJSON.get("class"));
-                heuristic = (IStateHeuristic) heuristicClass.getConstructor().newInstance();
-                if (heuristic instanceof TunableParameters) {
-                    TunableParameters.loadFromJSON((TunableParameters) heuristic, heuristicJSON);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new AssertionError(e.getMessage() + " when trying to instantiate MCTS Heuristic : " + heuristicJSON.get("class"));
+        if (heuristic instanceof TunableParameters) {
+            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+            for (String name : tunableHeuristic.getParameterNames()) {
+                tunableHeuristic.setParameterValue(name, this.getParameterValue(  "heuristic." + name));
             }
         }
+    }
+
+    /**
+     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
+     * If it is, then we set this as the heuristic after the parent code in TunableParameters
+     * has done the work to merge the search spaces together.
+     *
+     * @param json  The raw JSON
+     * @return The instantiated object
+     */
+    @Override
+    public ITunableParameters registerChild(String nameSpace, JSONObject json) {
+        ITunableParameters child = super.registerChild(nameSpace, json);
+        if (child instanceof IStateHeuristic) {
+            heuristic = (IStateHeuristic) child;
+        }
+        return child;
     }
 
     @Override
     protected AbstractParameters _copy() {
         return new MCTSParams(System.currentTimeMillis());
     }
+
 
     /**
      * @return Returns the AbstractPlayer policy that will take actions during an MCTS rollout.
@@ -115,4 +127,5 @@ public class MCTSParams extends PlayerParameters {
     public MCTSPlayer instantiate() {
         return new MCTSPlayer(this);
     }
+
 }
