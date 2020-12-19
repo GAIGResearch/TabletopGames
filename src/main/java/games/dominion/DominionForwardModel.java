@@ -94,7 +94,7 @@ public class DominionForwardModel extends AbstractForwardModel {
         state.setGameStatus(Utils.GameResult.GAME_END);
         int[] finalScores = new int[state.playerCount];
         for (int p = 0; p < state.playerCount; p++) {
-            finalScores[p] = (int) state.getScore(p);
+            finalScores[p] = state.getTotal(p, DominionCard::victoryPoints);
         }
         int winningScore = Arrays.stream(finalScores).max().getAsInt();
         for (int p = 0; p < state.playerCount; p++) {

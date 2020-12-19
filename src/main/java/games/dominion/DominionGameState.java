@@ -24,7 +24,6 @@ public class DominionGameState extends AbstractGameState {
 
     Random rnd;
     int playerCount;
-    boolean winLose = true;
 
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame;
@@ -353,20 +352,19 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     protected double _getScore(int playerId) {
-        double divisor = winLose ? 100.0 : 1.0;
-        if (winLose) {
-            if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
-                return -1.0;
-            if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
-                return 1.0;
-        }
+        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+            return -1.0;
+        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+            return 1.0;
+
         int score = getTotal(playerId, DominionCard::victoryPoints);
-        return score / divisor;
+        return score / 100.0;
     }
 
     public int getTotal(int playerId, DeckType deck, Function<DominionCard, Integer> cardValuer) {
         return getDeck(deck, playerId).sumInt(cardValuer);
     }
+
     public int getTotal(int playerId, Function<DominionCard, Integer> cardValuer) {
         int score = playerHands[playerId].sumInt(cardValuer);
         score += playerDiscards[playerId].sumInt(cardValuer);
@@ -459,7 +457,7 @@ public class DominionGameState extends AbstractGameState {
         int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer, gamePhase, gameStatus,
                 actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, actionsInProgress);
         result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
-        11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
+                11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
         return result;
     }
 }

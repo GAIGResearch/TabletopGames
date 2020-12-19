@@ -5,6 +5,7 @@ import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import utilities.Utils;
 
 import static games.dominion.DominionConstants.*;
 
@@ -60,16 +61,23 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         DominionGameState state = (DominionGameState) gs;
-        // We have 7 factors to consider (all maxed to 1.0)
+        Utils.GameResult playerResult = state.getPlayerResults()[playerId];
+
+        if (playerResult == Utils.GameResult.LOSE)
+            return -1;
+        if (playerResult == Utils.GameResult.WIN)
+            return 1;
+
+        // We have several factors to consider (all maxed to 1.0)
         double retValue = 0.0;
 
         // victoryPoints - simply the current score divided by 100 and number of players
         if (victoryPoints != 0.0)
-            retValue += victoryPoints * Math.max(state.getScore(playerId) / 100.0, 1.0);
+            retValue += victoryPoints * Math.min(state.getScore(playerId) / 100.0, 1.0);
 
         // treasureValue - total treasure in hand divided by 200
         if (treasureValue != 0.0)
-            retValue += treasureValue * Math.max(state.getTotal(playerId, DominionCard::treasureValue) / 200.0, 1.0);
+            retValue += treasureValue * Math.min(state.getTotal(playerId, DominionCard::treasureValue) / 200.0, 1.0);
 
         // actionCards - percentage of deck made of action cards
         if (actionCards != 0.0)
@@ -78,21 +86,21 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
 
         // treasureInHand - total treasure in hand divided by 20
         if (treasureInHand != 0.0)
-            retValue += treasureInHand * Math.max(state.getTotal(playerId, DeckType.HAND, DominionCard::treasureValue) / 20.0, 1.0);
+            retValue += treasureInHand * Math.min(state.getTotal(playerId, DeckType.HAND, DominionCard::treasureValue) / 20.0, 1.0);
 
         // actionCardsInHand - number / 5 of actionCards In Hand
         if (actionCardsInHand != 0.0)
-            retValue += actionCardsInHand * Math.max(state.getTotal(playerId, DeckType.HAND, c -> c.isActionCard() ? 1 : 0) / 5.0, 1.0);
+            retValue += actionCardsInHand * Math.min(state.getTotal(playerId, DeckType.HAND, c -> c.isActionCard() ? 1 : 0) / 5.0, 1.0);
 
         // actionsLeft / 5.
         if (actionsLeft != 0.0)
             if (state.getCurrentPlayer() == playerId)
-                retValue += actionsLeft * Math.max(state.actionsLeft() / 5.0, 1.0);
+                retValue += actionsLeft * Math.min(state.actionsLeft() / 5.0, 1.0);
 
         // buysLeft / 5
         if (buysLeft != 0.0)
             if (state.getCurrentPlayer() == playerId)
-                retValue += buysLeft * Math.max(state.buysLeft() / 5.0, 1.0);
+                retValue += buysLeft * Math.min(state.buysLeft() / 5.0, 1.0);
 
         if (provinceCount != 0.0)
             retValue += provinceCount * state.getTotal(playerId, c -> c.cardType() == CardType.PROVINCE ? 1 : 0) / 12.0;
