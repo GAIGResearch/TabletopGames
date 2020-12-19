@@ -59,6 +59,7 @@ public class DominionCard extends Card {
             case WITCH:
             case CHAPEL:
             case HARBINGER:
+            case THRONE_ROOM:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -115,6 +116,8 @@ public class DominionCard extends Card {
                 return new Chapel(playerId);
             case HARBINGER:
                 return new Harbinger(playerId);
+            case THRONE_ROOM:
+                return new ThroneRoom(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

@@ -872,6 +872,68 @@ public class BaseActionCards {
         availableActions = fm.computeAvailableActions(state);
         assertEquals(1, availableActions.size());
         assertEquals(new EndPhase(), availableActions.get(0));
+    }
+
+    @Test
+    public void throneRoomWithMarket() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MARKET, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        throneRoom.execute(state);
+
+        assertEquals(0, state.actionsLeft());
+        assertEquals(throneRoom, state.currentActionInProgress());
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertEquals(new EnthroneCard(CardType.MARKET, 0, 0), nextActions.get(0));
+
+        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 0));
+        assertEquals(1, state.actionsLeft());
+        assertEquals(2, state.buysLeft());
+        assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(2, nextActions.size());
+        assertEquals(new EnthroneCard(CardType.MARKET, 0, 1), nextActions.get(0));
+        assertEquals(new EnthroneCard(null, 0, 1), nextActions.get(1));
+
+        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 1));
+        assertEquals(2, state.actionsLeft());
+        assertEquals(3, state.buysLeft());
+        assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
+        assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
+        assertFalse(state.isActionInProgress());
+    }
+
+    @Test
+    public void throneRoomWithNoActions() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+        assertEquals(0, state.actionsLeft());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
+    public void throneRoomWithWorkshop() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void throneRoomWithBandit() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void throneRoomWithMerchant() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void throneRoomWithThroneRoomWithSingleMarket() {
 
     }
 }
