@@ -42,12 +42,16 @@ public class DominionForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
 
+        if (!state.actionsInProgress.isEmpty()) {
+            // we just register the action with the currently active action
+            state.actionsInProgress.peek().registerActionTaken(state, action);
+        }
+
         action.execute(state);
 
         // we may be in an extended action, so update that
         if (!state.actionsInProgress.isEmpty()) {
             // we just register the action taken with the currently active action
-            state.actionsInProgress.peek().registerActionTaken(state, action);
             // and then remove anything which is now complete
             int loopCount = 0;
             while (!state.actionsInProgress.isEmpty() && state.actionsInProgress.peek().executionComplete(state)) {
@@ -65,13 +69,11 @@ public class DominionForwardModel extends AbstractForwardModel {
                 if (!state.isActionInProgress() &&
                         (state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase)) {
                     // change phase
-                    state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
                     // no change to current player
-                    // then we apply any BuyEffects from Played Cards
-                    state.playerTableaux[playerID].stream()
-                            .filter(DominionCard::hasBuyEffect)
-                            .map(DominionCard::getBuyEffect)
-                            .forEach(effect -> effect.apply(state));
+                    state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+                    processDelayedActions(TriggerType.StartBuy, state);
+                    // it would be possible to do this within setGamePhase, but we choose to keep this triggering code
+                    // in the forward model for the moment.
                 }
                 break;
             case "Buy":
@@ -100,6 +102,14 @@ public class DominionForwardModel extends AbstractForwardModel {
         for (int p = 0; p < state.playerCount; p++) {
             state.setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
         }
+    }
+
+    private void processDelayedActions(TriggerType trigger, DominionGameState state) {
+        Map<Boolean, List<IDelayedAction>> partition = state.delayedActions.stream()
+                .collect(partitioningBy(a -> a.getTrigger() == trigger));
+
+        state.delayedActions = partition.get(false); // the ones we are not executing...put them back
+        partition.get(true).forEach(a -> a.execute(state));
     }
 
     /**

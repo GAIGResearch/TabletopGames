@@ -3,10 +3,9 @@ package games.dominion;
 import core.*;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import games.dominion.actions.IExtendedSequence;
+import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
-import games.pandemic.PandemicHeuristic;
 import utilities.Utils;
 
 import java.util.*;
@@ -45,6 +44,7 @@ public class DominionGameState extends AbstractGameState {
     Deck<DominionCard> trashPile;
 
     Stack<IExtendedSequence> actionsInProgress = new Stack<>();
+    List<IDelayedAction> delayedActions = new ArrayList<>();
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -200,6 +200,10 @@ public class DominionGameState extends AbstractGameState {
             actionsInProgress.push(action);
     }
 
+    public void addDelayedAction(IDelayedAction action) {
+        delayedActions.add(action);
+    }
+
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
      * This method is called after initialising the game state.
@@ -340,6 +344,7 @@ public class DominionGameState extends AbstractGameState {
         actionsInProgress.forEach(
                 a -> retValue.actionsInProgress.push(a.copy())
         );
+        retValue.delayedActions = delayedActions.stream().map(IDelayedAction::copy).collect(toList());
         return retValue;
     }
 
@@ -449,13 +454,14 @@ public class DominionGameState extends AbstractGameState {
                 actionsLeftForCurrentPlayer == other.actionsLeftForCurrentPlayer &&
                 spentSoFar == other.spentSoFar && additionalSpendAvailable == other.additionalSpendAvailable &&
                 Arrays.equals(defenceStatus, other.defenceStatus) &&
-                gamePhase == other.gamePhase && gameStatus == other.gameStatus;
+                gamePhase == other.gamePhase && gameStatus == other.gameStatus &&
+                delayedActions.equals(other.delayedActions);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer, gamePhase, gameStatus,
-                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, actionsInProgress);
+                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, actionsInProgress, delayedActions);
         result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
                 11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
         return result;

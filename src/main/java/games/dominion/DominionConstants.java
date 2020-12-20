@@ -6,4 +6,8 @@ public class DominionConstants {
         HAND, DRAW, DISCARD, TABLE, TRASH, SUPPLY, ALL
     }
 
+    public enum TriggerType {
+        StartBuy
+    }
+
 }

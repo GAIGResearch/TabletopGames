@@ -725,4 +725,124 @@ public class BaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
     }
+
+    @Test
+    public void throneRoomWithMarket() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MARKET, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, throneRoom);
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+
+    }
+
+    @Test
+    public void throneRoomWithWorkshop() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        state.addCard(CardType.WORKSHOP, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+
+        fm.next(state, new EnthroneCard(CardType.WORKSHOP, 0, 0));
+        fm.next(state, new GainCard(CardType.SILVER, 0));
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, new EnthroneCard(CardType.WORKSHOP, 0, 1));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new GainCard(CardType.SILVER, 0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void throneRoomWithMerchant() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, new EnthroneCard(CardType.MERCHANT, 0, 0));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new EnthroneCard(CardType.MERCHANT, 0, 1));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void throneRoomWithThroneRoomWithSingleMarket() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MARKET, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+
+        fm.next(state, new EnthroneCard(CardType.THRONE_ROOM, 0, 0));
+
+        // we now have the second throne room controlling the action flow
+
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // EnthroneMarket - I
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // EnthroneMarket - II
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // ThroneRoom for a second time
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
 }

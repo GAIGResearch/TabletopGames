@@ -145,16 +145,6 @@ public class DominionCard extends Card {
         }
     }
 
-    public IBuyPhaseEffect getBuyEffect() {
-        switch (type) {
-            case MERCHANT:
-                return new MerchantBuyEffect();
-            default:
-                throw new AssertionError("Nope - no Buy Effect for " + this);
-        }
-    }
-
-
     public int victoryPoints() {
         return type.victory;
     }
