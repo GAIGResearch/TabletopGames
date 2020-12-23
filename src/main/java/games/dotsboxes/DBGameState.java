@@ -73,8 +73,21 @@ public class DBGameState extends AbstractGameState {
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return heuristic.evaluateState(this, playerId);
+    }
+
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
+    @Override
+    public double getGameScore(int playerId) {
+        return nCellsPerPlayer[playerId];
     }
 
     @Override

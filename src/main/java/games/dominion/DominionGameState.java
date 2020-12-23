@@ -356,7 +356,7 @@ public class DominionGameState extends AbstractGameState {
      * @return - double, score of current state.
      */
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
             return -1.0;
         if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
@@ -364,6 +364,19 @@ public class DominionGameState extends AbstractGameState {
 
         int score = getTotal(playerId, DominionCard::victoryPoints);
         return score / 100.0;
+    }
+
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
+    @Override
+    public double getGameScore(int playerId) {
+        return getTotal(playerId, DominionCard::victoryPoints);
     }
 
     public int getTotal(int playerId, DeckType deck, Function<DominionCard, Integer> cardValuer) {

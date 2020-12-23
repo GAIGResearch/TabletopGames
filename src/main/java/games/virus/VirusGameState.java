@@ -8,6 +8,7 @@ import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
+import games.virus.components.VirusOrgan;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +69,13 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new VirusHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    public double getGameScore(int playerId) {
+        return playerBodies.get(playerId).organs.values().stream().filter(VirusOrgan::isHealthy).count();
     }
 
     @Override

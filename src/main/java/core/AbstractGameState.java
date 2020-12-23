@@ -172,7 +172,17 @@ public abstract class AbstractGameState {
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
-    protected abstract double _getScore(int playerId);
+    protected abstract double _getHeuristicScore(int playerId);
+
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
+    public abstract double getGameScore(int playerId);
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
@@ -211,7 +221,7 @@ public abstract class AbstractGameState {
      * @return - double, score of current state.
      */
     public final double getScore(int playerId) {
-        return _getScore(playerId);
+        return _getHeuristicScore(playerId);
     }
 
     /**

@@ -102,7 +102,7 @@ public class PlayerReport {
                 playerToTrack.initializePlayer(game.getGameState());
                 game.run();
                 playerToTrack.getStatsLogger().record("Win", game.getGameState().getPlayerResults()[playerIndex].value);
-                playerToTrack.getStatsLogger().record("Score", game.getGameState().getScore(playerIndex));
+                playerToTrack.getStatsLogger().record("Score", game.getGameState().getGameScore(playerIndex));
             }
             // Once all games are complete, call processDataAndFinish()
             playerToTrack.getStatsLogger().processDataAndFinish();
