@@ -1,11 +1,14 @@
 package evaluation;
 
 import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.FileReader;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.*;
 
@@ -267,7 +270,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         List<String> allParams = params.getParameterNames();
         for (String pName : allParams) {
             if (isParamSingular(pName, rawData)) {
-                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName));
+                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
                 params.addTunableParameter(pName, pValue);
             } else {
                 Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
@@ -296,11 +299,31 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * @return The value of the parameter found.
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getParam(String name, JSONObject json, T defaultValue) {
+    private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
         Object finalData = json.getOrDefault(name, defaultValue);
         Object data = (finalData instanceof Long) ? new Integer(((Long) finalData).intValue()) : finalData;
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
+        if (finalData instanceof JSONObject) {
+            JSONObject subJson = (JSONObject) finalData;
+            String className = (String) subJson.get("class");
+            if (className == null)
+                throw new AssertionError("No class name specified for " + name);
+            try {
+                Class<?> clazz = Class.forName(className);
+                Constructor<?> constructor = clazz.getConstructor();
+                T retValue = (T) constructor.newInstance();
+                if (retValue instanceof TunableParameters) {
+                    TunableParameters subParams = (TunableParameters) retValue;
+                    TunableParameters.loadFromJSON(subParams, subJson);
+                    params.registerChild(name, subJson);
+                }
+                return retValue;
+            } catch (Exception e) {
+                System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
+                throw new AssertionError("Error loading Class");
+            }
+        }
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
             Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {

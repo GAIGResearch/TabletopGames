@@ -32,7 +32,6 @@ public class MCTSParams extends PlayerParameters {
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getScore;
 
-
     public MCTSParams() {
         this(System.currentTimeMillis());
     }
@@ -50,7 +49,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", new JSONObject());
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getScore);
     }
 
     @Override
@@ -67,10 +66,11 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
+        heuristic = (IStateHeuristic) getParameterValue("heuristic");
         if (heuristic instanceof TunableParameters) {
             TunableParameters tunableHeuristic = (TunableParameters) heuristic;
             for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue(  "heuristic." + name));
+                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
             }
         }
     }
@@ -80,7 +80,7 @@ public class MCTSParams extends PlayerParameters {
      * If it is, then we set this as the heuristic after the parent code in TunableParameters
      * has done the work to merge the search spaces together.
      *
-     * @param json  The raw JSON
+     * @param json The raw JSON
      * @return The instantiated object
      */
     @Override
