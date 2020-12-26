@@ -32,7 +32,9 @@ public class Harbinger extends DominionAction implements IExtendedSequence {
     public List<AbstractAction> followOnActions(DominionGameState state) {
         List<CardType> discardTypes = state.getDeck(DeckType.DISCARD, player).stream()
                 .map(DominionCard::cardType).distinct().collect(toList());
-        List<AbstractAction> retValue = discardTypes.stream().map(ct -> new MoveCard(ct, player, DeckType.DISCARD, player, DeckType.DRAW)).collect(toList());
+        List<AbstractAction> retValue = discardTypes.stream()
+                .map(ct -> new MoveCard(ct, player, DeckType.DISCARD, player, DeckType.DRAW, false))
+                .collect(toList());
         retValue.add(new DoNothing());
         return retValue;
     }

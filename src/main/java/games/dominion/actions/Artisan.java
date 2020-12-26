@@ -32,7 +32,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
                     .collect(toList());
         } else {
             return state.getDeck(DeckType.HAND, player).stream()
-                    .map(c -> new MoveCard(c.cardType(), player, DeckType.HAND, player, DeckType.DRAW))
+                    .map(c -> new MoveCard(c.cardType(), player, DeckType.HAND, player, DeckType.DRAW, false))
                     .distinct()
                     .collect(toList());
         }

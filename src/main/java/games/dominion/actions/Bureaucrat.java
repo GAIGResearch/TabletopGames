@@ -1,6 +1,7 @@
 package games.dominion.actions;
 
 import core.actions.AbstractAction;
+import core.components.PartialObservableDeck;
 import games.dominion.*;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
@@ -22,6 +23,11 @@ public class Bureaucrat extends DominionAttackAction {
     boolean _execute(DominionGameState state) {
         // first gain a silver onto drawpile
         (new GainCard(CardType.SILVER, player, DeckType.DRAW)).execute(state);
+        // and now everyone knows this
+        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, player);
+        for (int i = 0; i< state.getNPlayers(); i++)
+        drawDeck.setVisibilityOfComponent(0, i, true);
+
         // the rest is an attack, with decisions made by the victims
         initiateAttack(state);
         return true;
@@ -55,7 +61,7 @@ public class Bureaucrat extends DominionAttackAction {
         // we do have at least one victory card, so provide options as to which to move
         return state.getDeck(DeckType.HAND, currentTarget).stream()
                 .filter(DominionCard::isVictoryCard)
-                .map(c -> new MoveCard(c.cardType(), currentTarget, DeckType.HAND, currentTarget, DeckType.DRAW))
+                .map(c -> new MoveCard(c.cardType(), currentTarget, DeckType.HAND, currentTarget, DeckType.DRAW, true))
                 .distinct()
                 .collect(toList());
     }

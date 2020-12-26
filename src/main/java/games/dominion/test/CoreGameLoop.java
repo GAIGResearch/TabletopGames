@@ -217,4 +217,17 @@ public class CoreGameLoop {
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 
+    @Test
+    public void drawingAVisibleCardLeavesInvisibleCardOnDeck() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, 2);
+        drawDeck.setVisibilityOfComponent(0, 1, true);
+        drawDeck.setVisibilityOfComponent(0, 2, true);
+
+        drawDeck.draw();
+        for (int i = 0; i < 4; i++) {
+            assertFalse(drawDeck.getVisibilityForPlayer(0, i));
+        }
+
+    }
 }

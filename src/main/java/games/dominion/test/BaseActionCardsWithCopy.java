@@ -3,6 +3,7 @@ package games.dominion.test;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.PartialObservableDeck;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGame;
@@ -566,7 +567,7 @@ public class BaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
 
-        fm.next(state, new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW));
+        fm.next(state, new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW, false));
         assertEquals(startHash, copy.hashCode());
         assertEquals(midHash, midCopy.hashCode());
     }
@@ -913,6 +914,85 @@ public class BaseActionCardsWithCopy {
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
+    }
 
+    @Test
+    public void bureaucratI() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BUREAUCRAT, 0, DeckType.HAND);
+        // in the default set up most players will have at least one ESTATE
+        // we ensure that player 2 has no Estates, and that player 3 has an ESTATE and a DUCHY
+        state.addCard(CardType.ESTATE, 1, DeckType.HAND);
+        while (state.getDeck(DeckType.HAND, 2).stream().anyMatch(DominionCard::isVictoryCard)) {
+            state.getDeck(DeckType.HAND, 2).remove(DominionCard.create(CardType.ESTATE));
+        }
+        state.addCard(CardType.ESTATE, 3, DeckType.HAND);
+        state.addCard(CardType.DUCHY, 3, DeckType.HAND);
+
+        Bureaucrat bureaucrat = new Bureaucrat(0);
+        fm.next(state, bureaucrat);
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, nextActions.get(0));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+        nextActions = fm.computeAvailableActions(state);
+
+        fm.next(state, nextActions.get(0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+
+        nextActions = fm.computeAvailableActions(state);
+        fm.next(state, nextActions.get(0));
+    }
+
+    @Test
+    public void bureaucratII() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BUREAUCRAT, 0, DeckType.HAND);
+        // in the default set up most players will have at least one ESTATE
+        // we ensure that player 2 has no Estates, and that player 3 has an ESTATE and a DUCHY
+        state.addCard(CardType.ESTATE, 1, DeckType.HAND);
+        while (state.getDeck(DeckType.HAND, 2).stream().anyMatch(DominionCard::isVictoryCard)) {
+            state.getDeck(DeckType.HAND, 2).remove(DominionCard.create(CardType.ESTATE));
+        }
+        state.addCard(CardType.ESTATE, 3, DeckType.HAND);
+        state.addCard(CardType.DUCHY, 3, DeckType.HAND);
+
+        Bureaucrat bureaucrat = new Bureaucrat(0);
+        fm.next(state, bureaucrat);
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        fm.next(state, nextActions.get(0));
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        nextActions = fm.computeAvailableActions(state);
+
+        fm.next(state, nextActions.get(0));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        nextActions = fm.computeAvailableActions(state);
+        fm.next(state, nextActions.get(0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
     }
 }

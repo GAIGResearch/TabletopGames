@@ -601,13 +601,13 @@ public class BaseActionCards {
 
         assertTrue(availableActions.stream().allMatch(a -> a instanceof MoveCard));
         assertEquals(4, availableActions.size());
-        assertTrue(availableActions.contains(new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW)));
-        assertTrue(availableActions.contains(new MoveCard(CardType.COPPER, 0, DeckType.HAND, 0, DeckType.DRAW)));
-        assertTrue(availableActions.contains(new MoveCard(CardType.ESTATE, 0, DeckType.HAND, 0, DeckType.DRAW)));
-        assertTrue(availableActions.contains(new MoveCard(CardType.VILLAGE, 0, DeckType.HAND, 0, DeckType.DRAW)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW, false)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.COPPER, 0, DeckType.HAND, 0, DeckType.DRAW, false)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.ESTATE, 0, DeckType.HAND, 0, DeckType.DRAW, false)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.VILLAGE, 0, DeckType.HAND, 0, DeckType.DRAW, false)));
         assertFalse(artisan.executionComplete(state));
 
-        fm.next(state, new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW));
+        fm.next(state, new MoveCard(CardType.MINE, 0, DeckType.HAND, 0, DeckType.DRAW, false));
         assertTrue(artisan.executionComplete(state));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
 
@@ -853,10 +853,10 @@ public class BaseActionCards {
 
         assertEquals(3, availableActions.size());
         assertTrue(availableActions.contains(new DoNothing()));
-        assertTrue(availableActions.contains(new MoveCard(CardType.HARBINGER, 0, DeckType.DISCARD, 0, DeckType.DRAW)));
-        assertTrue(availableActions.contains(new MoveCard(CardType.SILVER, 0, DeckType.DISCARD, 0, DeckType.DRAW)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.HARBINGER, 0, DeckType.DISCARD, 0, DeckType.DRAW, false)));
+        assertTrue(availableActions.contains(new MoveCard(CardType.SILVER, 0, DeckType.DISCARD, 0, DeckType.DRAW, false)));
 
-        fm.next(state, new MoveCard(CardType.SILVER, 0, DeckType.DISCARD, 0, DeckType.DRAW));
+        fm.next(state, new MoveCard(CardType.SILVER, 0, DeckType.DISCARD, 0, DeckType.DRAW, false));
         assertTrue(harbinger.executionComplete(state));
         assertNull(state.currentActionInProgress());
 
@@ -1125,5 +1125,76 @@ public class BaseActionCards {
         assertEquals(4, state.getDeck(DeckType.DRAW, 2).getSize());
         assertEquals(0, state.getDeck(DeckType.DISCARD, 3).getSize());
         assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
+    }
+
+    @Test
+    public void bureaucrat() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BUREAUCRAT, 0, DeckType.HAND);
+        // in the default set up most players will have at least one ESTATE
+        // we ensure that player 2 has no Estates, and that player 3 has an ESTATE and a DUCHY
+        state.addCard(CardType.ESTATE, 1, DeckType.HAND);
+        while (state.getDeck(DeckType.HAND, 2).stream().anyMatch(DominionCard::isVictoryCard)) {
+            state.getDeck(DeckType.HAND, 2).remove(DominionCard.create(CardType.ESTATE));
+        }
+        int p2HandSize = state.getDeck(DeckType.HAND, 2).getSize();
+        state.addCard(CardType.ESTATE, 3, DeckType.HAND);
+        state.addCard(CardType.DUCHY, 3, DeckType.HAND);
+
+        Bureaucrat bureaucrat = new Bureaucrat(0);
+        fm.next(state, bureaucrat);
+        assertEquals(bureaucrat, state.currentActionInProgress());
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(CardType.SILVER, state.getDeck(DeckType.DRAW, 0).peek().cardType());
+
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertEquals(new MoveCard(CardType.ESTATE, 1, DeckType.HAND, 1, DeckType.DRAW, true), nextActions.get(0));
+        fm.next(state, nextActions.get(0));
+
+        assertEquals(2, state.getCurrentPlayer());
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertEquals(new RevealHand(2), nextActions.get(0));
+        fm.next(state, nextActions.get(0));
+
+        assertEquals(3, state.getCurrentPlayer());
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(2, nextActions.size());
+        assertTrue(nextActions.contains(new MoveCard(CardType.ESTATE, 3, DeckType.HAND, 3, DeckType.DRAW, true)));
+        assertTrue(nextActions.contains(new MoveCard(CardType.DUCHY, 3, DeckType.HAND, 3, DeckType.DRAW, true)));
+        fm.next(state, nextActions.get(0));
+
+        assertEquals(0, state.getCurrentPlayer());
+        assertFalse(state.isActionInProgress());
+
+        // also need to check that card put on Draw pile is visible (either by attacker or victims)
+        for (int pDeck = 0; pDeck < 4; pDeck++) {
+            for (int pObs = 0; pObs < 4; pObs++) {
+                boolean visibility = ((PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, pDeck))
+                        .getVisibilityForPlayer(0, pObs);
+                //            System.out.printf("Deck=%d, Obs=%d : %s%n", pDeck, pObs, visibility);
+                if (pDeck != 2)
+                    assertTrue(visibility);
+                else
+                    assertFalse(visibility);
+            }
+        }
+        // and that player 2's hand is fully visible
+        for (int i = 0; i < state.getDeck(DeckType.HAND, 2).getSize(); i++)
+            for (int j = 0; j < state.getNPlayers(); j++)
+                assertTrue(((PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, 2)).getVisibilityForPlayer(i, j));
+
+        // then check that we have correct card counts
+        assertEquals(5, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 1).getSize());
+        assertEquals(p2HandSize, state.getDeck(DeckType.HAND, 2).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 2).getSize());
+        assertEquals(6, state.getDeck(DeckType.HAND, 3).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
+        assertEquals(CardType.ESTATE, state.getDeck(DeckType.DRAW, 1).peek().cardType());
+        assertEquals(CardType.DUCHY, state.getDeck(DeckType.DRAW, 3).peek().cardType());
     }
 }

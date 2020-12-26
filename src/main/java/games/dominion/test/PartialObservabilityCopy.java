@@ -163,4 +163,10 @@ public class PartialObservabilityCopy {
         }
         assertEquals(MOAT, playerHand.get(0).cardType());
     }
+
+    @Test
+    public void movingACardPubliclyRetainsVisibilityForAnyObserver() {
+        fail("Not yet implemented");
+    }
+
 }
