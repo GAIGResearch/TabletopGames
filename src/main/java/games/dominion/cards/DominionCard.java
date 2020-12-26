@@ -60,6 +60,7 @@ public class DominionCard extends Card {
             case CHAPEL:
             case HARBINGER:
             case THRONE_ROOM:
+            case BANDIT:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -118,6 +119,8 @@ public class DominionCard extends Card {
                 return new Harbinger(playerId);
             case THRONE_ROOM:
                 return new ThroneRoom(playerId);
+            case BANDIT:
+                return new Bandit(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }
@@ -125,15 +128,6 @@ public class DominionCard extends Card {
 
     public boolean hasAttackReaction() {
         return type.isReaction;
-    }
-
-    public boolean hasBuyEffect() {
-        switch (type) {
-            case MERCHANT:
-                return true;
-            default:
-                return false;
-        }
     }
 
     public AbstractAction getAttackReaction(int playerId) {

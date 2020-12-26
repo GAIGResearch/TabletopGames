@@ -15,11 +15,18 @@ public class TrashCard extends AbstractAction {
 
     final int player;
     final CardType trashedCard;
+    final DeckType fromDeck;
 
     public TrashCard(CardType trash, int playerId) {
+        this(trash, playerId, DeckType.HAND);
+    }
+
+    public TrashCard(CardType trash, int playerId, DeckType from) {
         trashedCard = trash;
         player = playerId;
+        fromDeck = from;
     }
+
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the AbstractGameState.getComponentById(int id) method.
@@ -30,12 +37,12 @@ public class TrashCard extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
-        List<DominionCard> matchingCards = state.getDeck(DeckType.HAND, player).stream()
+        List<DominionCard> matchingCards = state.getDeck(fromDeck, player).stream()
                 .filter(c -> c.cardType() == trashedCard).collect(toList());
         if (matchingCards.isEmpty()) {
-            throw new AssertionError("Cannot trash a card you do not have in hand : " + trashedCard);
+            throw new AssertionError("Cannot trash a card you do not have: " + trashedCard + " from " + fromDeck);
         }
-        state.moveCard(matchingCards.get(0), player, DeckType.HAND, -1, DeckType.TRASH);
+        state.moveCard(matchingCards.get(0), player, fromDeck, -1, DeckType.TRASH);
         return true;
     }
 
@@ -55,14 +62,14 @@ public class TrashCard extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof TrashCard) {
             TrashCard other = (TrashCard) obj;
-            return other.player == player && other.trashedCard == trashedCard;
+            return other.player == player && other.trashedCard == trashedCard && other.fromDeck == fromDeck;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trashedCard, player);
+        return Objects.hash(trashedCard, player, fromDeck);
     }
 
     @Override
@@ -72,6 +79,6 @@ public class TrashCard extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Player %d trashes a %s", player, trashedCard);
+        return String.format("Player %d trashes a %s from %s", player, trashedCard, fromDeck);
     }
 }

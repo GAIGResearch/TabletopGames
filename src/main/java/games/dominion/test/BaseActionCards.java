@@ -1035,8 +1035,6 @@ public class BaseActionCards {
 
 
     @Test
-    public void throneRoomWithBandit() {
-        fail("Bandit not yet implemented");
-    }
+    public void throneRoomWithBandit() { fail("Bandit not yet implemented"); }
 
 }
