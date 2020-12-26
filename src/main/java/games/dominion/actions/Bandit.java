@@ -30,12 +30,12 @@ public class Bandit extends DominionAttackAction {
 
 
     @Override
-    public void executeAttack(int victim, DominionGameState state) {
+    public void executeAttack(DominionGameState state) {
         // put top two cards of deck into discard (and record what they are)
         // later we will trash them directly from the discard
         for (int i = 0; i < 2; i++) {
-            state.drawCard(victim, DeckType.DRAW, victim, DeckType.DISCARD);
-            topTwo[i] = state.getDeck(DeckType.DISCARD, victim).peek();
+            state.drawCard(currentTarget, DeckType.DRAW, currentTarget, DeckType.DISCARD);
+            topTwo[i] = state.getDeck(DeckType.DISCARD, currentTarget).peek();
         }
         cardTrashed = false;
     }

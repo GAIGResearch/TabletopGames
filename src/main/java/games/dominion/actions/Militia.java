@@ -56,7 +56,7 @@ public class Militia extends DominionAttackAction {
     }
 
     @Override
-    public void executeAttack(int victim, DominionGameState state) {
+    public void executeAttack(DominionGameState state) {
         // Does nothing directly
     }
 

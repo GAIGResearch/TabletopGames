@@ -35,10 +35,10 @@ public class Witch extends DominionAttackAction {
     }
 
     @Override
-    public void executeAttack(int victim, DominionGameState state) {
+    public void executeAttack(DominionGameState state) {
         if (state.cardsOfType(CardType.CURSE, -1, DeckType.SUPPLY) > 0) {
             state.removeCardFromTable(CardType.CURSE);
-            state.addCard(CardType.CURSE, victim, DeckType.DISCARD);
+            state.addCard(CardType.CURSE, currentTarget, DeckType.DISCARD);
         }
     }
 

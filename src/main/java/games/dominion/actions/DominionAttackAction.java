@@ -61,7 +61,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
                     attacksComplete[currentTarget] = true;
                 } else {
                     if (!attacksInitiated[currentTarget])
-                        executeAttack(currentTarget, state);
+                        executeAttack(state);
                     attacksInitiated[currentTarget] = true;
                     if (isAttackComplete(currentTarget, state)) {
                         attacksComplete[currentTarget] = true;
@@ -108,7 +108,11 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
      */
     public abstract DominionAttackAction _copy();
 
-    public abstract void executeAttack(int victim, DominionGameState state);
+    /**
+     * The victim id is stored in currentTarget - so we do not include in parameterisation
+     * @param state current game state
+     */
+    public abstract void executeAttack(DominionGameState state);
 
     public abstract boolean isAttackComplete(int currentTarget, DominionGameState state);
 

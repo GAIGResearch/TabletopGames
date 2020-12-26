@@ -61,6 +61,7 @@ public class DominionCard extends Card {
             case HARBINGER:
             case THRONE_ROOM:
             case BANDIT:
+            case BUREAUCRAT:
                 return new DominionCard(type);
             default:
                 throw new AssertionError("Not yet implemented : " + type);
@@ -121,6 +122,8 @@ public class DominionCard extends Card {
                 return new ThroneRoom(playerId);
             case BANDIT:
                 return new Bandit(playerId);
+            case BUREAUCRAT:
+                return new Bureaucrat(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }
