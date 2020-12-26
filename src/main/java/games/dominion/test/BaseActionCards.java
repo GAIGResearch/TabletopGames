@@ -12,6 +12,7 @@ import org.junit.*;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.groupingByConcurrent;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -1033,8 +1034,96 @@ public class BaseActionCards {
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
     }
 
+    @Test
+    public void bandit() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BANDIT, 0, DeckType.HAND);
+        // we then put a Silver and Gold on one player, nothing on another, a Copper and Silver on a third and a Moat on the fourth
+        state.addCard(CardType.SILVER, 1, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 1, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 2, DeckType.DRAW);
+        state.addCard(CardType.COPPER, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 3, DeckType.DRAW);
+        state.addCard(CardType.MOAT, 3, DeckType.HAND);
+
+        Bandit bandit = new Bandit(0);
+        fm.next(state, bandit);
+        assertEquals(bandit, state.currentActionInProgress());
+        assertEquals(CardType.GOLD, state.getDeck(DeckType.DISCARD, 0).peek().cardType());
+        assertEquals(1, state.getTotal(0, c -> c.cardType().equals(CardType.GOLD) ? 1 : 0));
+        assertEquals(1, state.getTotal(1, c -> c.cardType().equals(CardType.GOLD) ? 1 : 0));
+
+        assertEquals(1, state.getCurrentPlayer());
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(2, nextActions.size());
+        assertTrue(nextActions.contains(new TrashCard(CardType.SILVER, 1, DeckType.DISCARD)));
+        assertTrue(nextActions.contains(new TrashCard(CardType.GOLD, 1, DeckType.DISCARD)));
+        fm.next(state, new TrashCard(CardType.GOLD, 1, DeckType.DISCARD));
+
+        assertEquals(1, state.getTotal(0, c -> c.cardType().equals(CardType.GOLD) ? 1 : 0));
+        assertEquals(0, state.getTotal(1, c -> c.cardType().equals(CardType.GOLD) ? 1 : 0));
+        assertEquals(2, state.getCurrentPlayer());
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertEquals(new TrashCard(CardType.SILVER, 2, DeckType.DISCARD), nextActions.get(0));
+        fm.next(state, new TrashCard(CardType.SILVER, 2, DeckType.DISCARD));
+
+        assertEquals(3, state.getCurrentPlayer());
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(2, nextActions.size());
+        assertTrue(nextActions.contains(new DoNothing()));
+        assertTrue(nextActions.contains(new MoatReaction(3)));
+
+        fm.next(state, new MoatReaction(3));
+        assertEquals(0, state.getCurrentPlayer());
+        assertFalse(state.isActionInProgress());
+
+        assertEquals(1, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(1, state.getDeck(DeckType.DISCARD, 1).getSize());
+        assertEquals(1, state.getDeck(DeckType.DISCARD, 2).getSize());
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 3).getSize());
+        assertEquals(2, state.getDeck(DeckType.TRASH, -1).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 1).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 2).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
+    }
+
 
     @Test
-    public void throneRoomWithBandit() { fail("Bandit not yet implemented"); }
+    public void throneRoomWithBandit() {
+        // for this we'll give everyone a SILVER or two. Then check that these have all been trashed, and the right
+        // number of cards are in DRAW and DISCARD decks
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BANDIT, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        // we then put a Silver and Gold on one player, nothing on another, a Copper and Silver on a third and a Moat on the fourth
+        state.addCard(CardType.SILVER, 1, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 2, DeckType.DRAW);
+        state.addCard(CardType.COPPER, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 3, DeckType.DRAW);
+        state.addCard(CardType.MOAT, 3, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
 
+        do {
+            AbstractAction next = fm.computeAvailableActions(state).get(0);
+            fm.next(state, next);
+        } while (state.isActionInProgress());
+
+        assertEquals(2, state.getTotal(0, DeckType.DISCARD, c -> c.cardType() == CardType.GOLD ? 1 : 0));
+        assertEquals(0, state.getTotal(1, c -> c.cardType() == CardType.SILVER ? 1 : 0));
+        assertEquals(0, state.getTotal(2, c -> c.cardType() == CardType.SILVER ? 1 : 0));
+        assertEquals(1, state.getTotal(3, c -> c.cardType() == CardType.SILVER ? 1 : 0));
+        assertEquals(2, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(3, state.getDeck(DeckType.DISCARD, 1).getSize());
+        assertEquals(2, state.getDeck(DeckType.DRAW, 1).getSize());
+        assertEquals(2, state.getDeck(DeckType.DISCARD, 2).getSize());
+        assertEquals(4, state.getDeck(DeckType.DRAW, 2).getSize());
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 3).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
+    }
 }

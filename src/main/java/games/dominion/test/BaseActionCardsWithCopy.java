@@ -845,4 +845,74 @@ public class BaseActionCardsWithCopy {
         assertFalse(midHash == state.hashCode());
     }
 
+    @Test
+    public void banditI() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BANDIT, 0, DeckType.HAND);
+        // we then put a Silver and Gold on one player, nothing on another, a Copper and Silver on a third and a Moat on the fourth
+        state.addCard(CardType.SILVER, 1, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 1, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 2, DeckType.DRAW);
+        state.addCard(CardType.COPPER, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 3, DeckType.DRAW);
+        state.addCard(CardType.MOAT, 3, DeckType.HAND);
+
+        Bandit bandit = new Bandit(0);
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, bandit);
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new TrashCard(CardType.GOLD, 1, DeckType.DISCARD));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void banditII() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BANDIT, 0, DeckType.HAND);
+        // we then put a Silver and Gold on one player, nothing on another, a Copper and Silver on a third and a Moat on the fourth
+        state.addCard(CardType.SILVER, 1, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 1, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 2, DeckType.DRAW);
+        state.addCard(CardType.COPPER, 2, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 3, DeckType.DRAW);
+        state.addCard(CardType.MOAT, 3, DeckType.HAND);
+
+        Bandit bandit = new Bandit(0);
+        fm.next(state, bandit);
+        fm.next(state, new TrashCard(CardType.GOLD, 1, DeckType.DISCARD));
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, new TrashCard(CardType.SILVER, 2, DeckType.DISCARD));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new MoatReaction(3));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+
+    }
 }

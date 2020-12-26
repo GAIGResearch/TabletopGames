@@ -24,6 +24,7 @@ public class Bandit extends DominionAttackAction {
         // first gain a gold
         (new GainCard(CardType.GOLD, player)).execute(state);
         // the rest is an attack, with decisions made by the victims
+        initiateAttack(state);
         return true;
     }
 
@@ -33,8 +34,8 @@ public class Bandit extends DominionAttackAction {
         // put top two cards of deck into discard (and record what they are)
         // later we will trash them directly from the discard
         for (int i = 0; i < 2; i++) {
-            topTwo[i] = state.getDeck(DeckType.DRAW, victim).peek();
-            state.drawCard(player, DeckType.DRAW, player, DeckType.DISCARD);
+            state.drawCard(victim, DeckType.DRAW, victim, DeckType.DISCARD);
+            topTwo[i] = state.getDeck(DeckType.DISCARD, victim).peek();
         }
         cardTrashed = false;
     }
@@ -53,7 +54,7 @@ public class Bandit extends DominionAttackAction {
         return Arrays.stream(topTwo)
                 .filter(DominionCard::isTreasureCard)
                 .filter(c -> c.cardType() != CardType.COPPER)
-                .map(c -> new TrashCard(c.cardType(), currentTarget))
+                .map(c -> new TrashCard(c.cardType(), currentTarget, DeckType.DISCARD))
                 .distinct()
                 .collect(toList());
     }

@@ -18,6 +18,7 @@ public class Militia extends DominionAttackAction {
     @Override
     boolean _execute(DominionGameState state) {
         state.changeAdditionalSpend(2); // player gets +2 to spend as direct effects of card
+        initiateAttack(state);
         return true;
     }
 

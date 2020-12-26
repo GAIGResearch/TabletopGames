@@ -18,15 +18,16 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
     boolean[] attacksInitiated;
     boolean[] attacksComplete;
 
-    @Override
-    public boolean execute(AbstractGameState ags) {
-        // first we do the housekeeping from DominionAction.
-        // This will include calling _execute on the concrete Attack implementation to account
+    /**
+     * This must be called by the implementing sub-class at the correct point in the card logic
+     *
+     * @param state
+     * @return
+     */
+    void initiateAttack(DominionGameState state) {
         // for any state changes due to the immediate effects of the card on the player.
-        super.execute(ags);
         // then what we need to do is the cycling through each of the other players to allow them
         // to play Reaction cards, and then suffer the direct attack effects of the card.
-        DominionGameState state = (DominionGameState) ags;
         state.setActionInProgress(this);
         currentTarget = (player + 1) % state.getNPlayers();
         reactionsInitiated = new boolean[state.getNPlayers()];
@@ -35,7 +36,6 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
         reactionsInitiated[player] = true;
         attacksComplete[player] = true;
         nextPhaseOfReactionAttackCycle(state);
-        return true;
     }
 
     private void nextPhaseOfReactionAttackCycle(DominionGameState state) {
