@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.components.*;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGame;
+import games.dominion.DominionGameState;
 import games.dominion.actions.*;
 
 import java.util.Objects;
@@ -63,6 +64,8 @@ public class DominionCard extends Card {
             case BANDIT:
             case BUREAUCRAT:
                 return new DominionCard(type);
+            case GARDENS:
+                return new Gardens();
             default:
                 throw new AssertionError("Not yet implemented : " + type);
         }
@@ -142,7 +145,7 @@ public class DominionCard extends Card {
         }
     }
 
-    public int victoryPoints() {
+    public int victoryPoints(int player, DominionGameState context) {
         return type.victory;
     }
 

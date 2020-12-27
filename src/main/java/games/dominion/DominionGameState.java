@@ -312,16 +312,21 @@ public class DominionGameState extends AbstractGameState {
                 retValue.playerHands[p] = playerHands[p].copy();
                 for (int i = 0; i < retValue.playerHands[p].getSize(); i++) {
                     // if we (the perspective player) can see the card, then we need to keep it in place
+                    // if not then we move it to the *bottom* of the drawpile (this is the end of an ArrayList...so more efficient?)
                     if (!retValue.playerHands[p].getVisibilityForPlayer(i, playerId)) {
-                        retValue.playerDrawPiles[p].add(retValue.playerHands[p].get(i));
+                        retValue.playerDrawPiles[p].add(retValue.playerHands[p].get(i), retValue.playerDrawPiles[p].getSize());
                     }
                 }
+                // we have now moved all the non-visible Hand cards into the Draw pile to reshuffle
                 retValue.playerHands[p].clear(); // we will need to reconstruct this, including visibility status in a sec
-                // TODO: Currently this assumes playerDrawPile is non-observable. this will change once certain action cards introduced
-                retValue.playerDrawPiles[p].shuffle(rnd);
+                // we then reshuffle all the non-visible cards
+                retValue.playerDrawPiles[p].shuffleVisible(rnd, playerId, false);
+                // we then remove cards from the top of the shuffled draw pile (in the region we know is not visible)
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
                     if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {
-                        retValue.playerHands[p].add(retValue.playerDrawPiles[p].draw(), i);
+                        // we then pick cards from the end of the drawpile List and add them to the Hand
+                        // possibly more efficient picking from the end of an ArrayList?
+                        retValue.playerHands[p].add(retValue.playerDrawPiles[p].pick(retValue.playerDrawPiles[p].getSize() - 1), i);
                     } else {
                         // we know what this card is, so copy over visibility status
                         retValue.playerHands[p].add(playerHands[p].get(i).copy(), playerHands[p].getVisibilityOfComponent(i).clone());
@@ -362,7 +367,7 @@ public class DominionGameState extends AbstractGameState {
         if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
             return 1.0;
 
-        int score = getTotal(playerId, DominionCard::victoryPoints);
+        int score = getTotal(playerId, c -> c.victoryPoints(playerId, this));
         return score / 100.0;
     }
 
@@ -376,7 +381,7 @@ public class DominionGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        return getTotal(playerId, DominionCard::victoryPoints);
+        return getTotal(playerId, c -> c.victoryPoints(playerId, this));
     }
 
     public int getTotal(int playerId, DeckType deck, Function<DominionCard, Integer> cardValuer) {
@@ -389,6 +394,11 @@ public class DominionGameState extends AbstractGameState {
         score += playerTableaux[playerId].sumInt(cardValuer);
         score += playerDrawPiles[playerId].sumInt(cardValuer);
         return score;
+    }
+
+    public int getTotalCards(int playerId) {
+        return playerDrawPiles[playerId].getSize() + playerDiscards[playerId].getSize()
+                + playerHands[playerId].getSize() + playerTableaux[playerId].getSize();
     }
 
     /**

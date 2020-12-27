@@ -82,7 +82,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         // actionCards - percentage of deck made of action cards
         if (actionCards != 0.0)
             retValue += actionCards * state.getTotal(playerId, c -> c.isActionCard() ? 1 : 0) /
-                    (double) state.getTotal(playerId, c -> 1);
+                    (double) state.getTotalCards(playerId);
 
         // treasureInHand - total treasure in hand divided by 20
         if (treasureInHand != 0.0)

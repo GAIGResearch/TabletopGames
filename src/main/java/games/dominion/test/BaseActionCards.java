@@ -12,8 +12,7 @@ import org.junit.*;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.groupingByConcurrent;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 public class BaseActionCards {
@@ -624,7 +623,9 @@ public class BaseActionCards {
 
         copyState = (DominionGameState) state.copy(1);
         copyDrawDeck = (PartialObservableDeck<DominionCard>) copyState.getDeck(DeckType.DRAW, 0);
-        for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(0)[i]);
+        assertTrue(copyDrawDeck.getVisibilityOfComponent(0)[0]); // player 0 can see the card; no-one else can
+                                                // we know they know what it is, even though we don't
+        for (int i = 1; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(0)[i]);
         for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(1)[i]);
     }
 

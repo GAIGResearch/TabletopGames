@@ -7,10 +7,11 @@ import games.dominion.*;
 import games.dominion.DominionConstants.*;
 import games.dominion.actions.Moat;
 import games.dominion.actions.MoatReaction;
+import games.dominion.actions.MoveCard;
 import games.dominion.cards.*;
 import org.junit.*;
 
-import static games.dominion.cards.CardType.MOAT;
+import static games.dominion.cards.CardType.*;
 import static org.junit.Assert.*;
 
 import java.util.*;
@@ -161,12 +162,82 @@ public class PartialObservabilityCopy {
                 if (p != 0)
                     assertFalse(playerHand.getVisibilityForPlayer(j, p));
         }
-        assertEquals(MOAT, playerHand.get(0).cardType());
+        assertEquals(MOAT, playerHand.peek(0).cardType());
+    }
+
+    private void checkVisibilityExpectations(PartialObservableDeck<DominionCard> deck, int cardIndex, boolean[] visibility, CardType card) {
+        for (int p = 0; p < 4; p++) {
+          //  System.out.printf("Player: %d, index: %d\n", p, cardIndex);
+            assertEquals(visibility[p], deck.getVisibilityForPlayer(cardIndex, p));
+            if (visibility[p] && card!= null)
+                assertEquals(card, deck.peek(cardIndex).cardType());
+        }
     }
 
     @Test
     public void movingACardPubliclyRetainsVisibilityForAnyObserver() {
-        fail("Not yet implemented");
+        state.addCard(CardType.SILVER, 2, DeckType.HAND);
+        MoveCard move = new MoveCard(SILVER, 2, DeckType.HAND, 2, DeckType.DRAW, true);
+        fm.next(state, move);
+
+        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, 2);
+        checkVisibilityExpectations(drawDeck, 0, new boolean[]{true, true, true, true}, SILVER);
+        checkVisibilityExpectations(drawDeck, 1, new boolean[]{false, false, false, false}, null);
+
+        DominionGameState myCopy = (DominionGameState) state.copy(2);
+        DominionGameState theirCopy = (DominionGameState) state.copy(1);
+        DominionGameState fullCopy = (DominionGameState) state.copy();
+
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 0, new boolean[]{true, true, true, true}, SILVER);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 0, new boolean[]{true, true, true, true}, SILVER);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 0, new boolean[]{true, true, true, true}, SILVER);
+
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 1, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 1, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 1, new boolean[]{false, false, false, false}, null);
+    }
+
+    @Test
+    public void reshufflingUnknownCardsInADeckOnlyShufflesVisibilitiesThatWeDoNotShare() {
+        state.addCard(CardType.SILVER, 2, DeckType.DRAW);
+        state.addCard(CardType.MARKET, 2, DeckType.DRAW);
+        state.addCard(CardType.GOLD, 2, DeckType.DRAW);
+        state.addCard(CardType.SMITHY, 2, DeckType.DRAW);
+        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, 2);
+        drawDeck.setVisibilityOfComponent(1, new boolean[]{false, true, true, false});
+        drawDeck.setVisibilityOfComponent(3, new boolean[]{true, true, true, true});
+        drawDeck.setVisibilityOfComponent(4, new boolean[]{true, false, true, false});
+        drawDeck.setVisibilityOfComponent(6, new boolean[]{false, false, true, false});
+
+        DominionGameState myCopy = (DominionGameState) state.copy(2);
+        DominionGameState theirCopy = (DominionGameState) state.copy(1);
+        DominionGameState fullCopy = (DominionGameState) state.copy();
+
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 0, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 1, new boolean[]{false, true, true, false}, GOLD);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 2, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 3, new boolean[]{true, true, true, true}, SILVER);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 4, new boolean[]{true, false, true, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 5, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) myCopy.getDeck(DeckType.DRAW, 2), 6, new boolean[]{false, false, true, false}, null);
+
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 0, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 1, new boolean[]{false, true, true, false}, GOLD);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 2, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 3, new boolean[]{true, true, true, true}, SILVER);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 4, new boolean[]{true, false, true, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 5, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) fullCopy.getDeck(DeckType.DRAW, 2), 6, new boolean[]{false, false, true, false}, null);
+
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 0, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 1, new boolean[]{false, true, true, false}, GOLD);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 2, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 3, new boolean[]{true, true, true, true}, SILVER);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 4, new boolean[]{true, false, true, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 5, new boolean[]{false, false, false, false}, null);
+        checkVisibilityExpectations((PartialObservableDeck<DominionCard>) theirCopy.getDeck(DeckType.DRAW, 2), 6, new boolean[]{false, false, true, false}, null);
+
+
     }
 
 }
