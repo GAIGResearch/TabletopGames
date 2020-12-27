@@ -995,4 +995,85 @@ public class BaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
     }
+
+    @Test
+    public void sentryWithNoneKept() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.SENTRY, 0, DeckType.HAND);
+        Sentry sentry = new Sentry(0);
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, sentry);
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void sentryWithOneKept() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.SENTRY, 0, DeckType.HAND);
+        Sentry sentry = new Sentry(0);
+        fm.next(state, sentry);
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, fm.computeAvailableActions(state).get(2));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void sentryWithBothKept() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.SENTRY, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 0, DeckType.DRAW);
+        Sentry sentry = new Sentry(0);
+        fm.next(state, sentry);
+
+        fm.next(state, fm.computeAvailableActions(state).get(2));
+
+        int startHash = state.hashCode();
+        DominionGameState copy = (DominionGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, fm.computeAvailableActions(state).get(2));
+
+        int midHash = state.hashCode();
+        DominionGameState midCopy = (DominionGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
 }

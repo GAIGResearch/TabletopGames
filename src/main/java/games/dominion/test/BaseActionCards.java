@@ -8,6 +8,7 @@ import games.dominion.DominionConstants.*;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionGameState.*;
+import org.apache.commons.math3.analysis.function.Abs;
 import org.junit.*;
 
 import java.util.*;
@@ -624,7 +625,7 @@ public class BaseActionCards {
         copyState = (DominionGameState) state.copy(1);
         copyDrawDeck = (PartialObservableDeck<DominionCard>) copyState.getDeck(DeckType.DRAW, 0);
         assertTrue(copyDrawDeck.getVisibilityOfComponent(0)[0]); // player 0 can see the card; no-one else can
-                                                // we know they know what it is, even though we don't
+        // we know they know what it is, even though we don't
         for (int i = 1; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(0)[i]);
         for (int i = 0; i < 4; i++) assertFalse(copyDrawDeck.getVisibilityOfComponent(1)[i]);
     }
@@ -910,6 +911,31 @@ public class BaseActionCards {
     }
 
     @Test
+    public void throneRoomNotUsingSecondAction() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MARKET, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(new EnthroneCard(CardType.MARKET, 0, 0), nextActions.get(0));
+        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 0));
+
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(2, nextActions.size());
+        assertEquals(new EnthroneCard(CardType.MARKET, 0, 1), nextActions.get(0));
+        assertEquals(new EnthroneCard(null, 0, 1), nextActions.get(1));
+
+        fm.next(state, nextActions.get(1));
+        assertEquals(1, state.actionsLeft());
+        assertEquals(2, state.buysLeft());
+        assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertFalse(state.isActionInProgress());
+    }
+
+    @Test
     public void throneRoomWithNoActions() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
@@ -1091,6 +1117,31 @@ public class BaseActionCards {
         assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
     }
 
+    @Test
+    public void banditWithOneCardInDrawDeck() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.BANDIT, 0, DeckType.HAND);
+        for (int i = 0; i < 5; i++)
+            state.drawCard(1, DeckType.DRAW, 1, DeckType.DISCARD);
+        state.addCard(CardType.SILVER, 1, DeckType.DRAW);
+        // p1 now has just one (unique) card in their Draw pile.
+        assertEquals(1, state.getDeck(DeckType.DRAW, 1).getSize());
+        assertEquals(5, state.getDeck(DeckType.DISCARD, 1).getSize());
+
+        Bandit bandit = new Bandit(0);
+        fm.next(state, bandit);
+
+        assertEquals(1, state.getCurrentPlayer());
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertTrue(nextActions.contains(new TrashCard(CardType.SILVER, 1, DeckType.DISCARD)));
+        fm.next(state, new TrashCard(CardType.SILVER, 1, DeckType.DISCARD));
+
+        assertEquals(1, state.getDeck(DeckType.DISCARD, 1).getSize());
+        assertEquals(1, state.getDeck(DeckType.TRASH, 1).getSize());
+        assertEquals(4, state.getDeck(DeckType.DRAW, 1).getSize());
+    }
+
 
     @Test
     public void throneRoomWithBandit() {
@@ -1197,5 +1248,103 @@ public class BaseActionCards {
         assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
         assertEquals(CardType.ESTATE, state.getDeck(DeckType.DRAW, 1).peek().cardType());
         assertEquals(CardType.DUCHY, state.getDeck(DeckType.DRAW, 3).peek().cardType());
+    }
+
+    @Test
+    public void sentryWithNoneKept() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.SENTRY, 0, DeckType.HAND);
+        Sentry sentry = new Sentry(0);
+        fm.next(state, sentry);
+
+        assertEquals(sentry, state.currentActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(1, state.actionsLeft());
+        assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(2, state.getDeck(DeckType.DRAW, 0).getSize());
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(3, nextActions.size());
+        CardType firstCard = state.getDeck(DeckType.HAND, 0).get(1).cardType();
+        CardType secondCard = state.getDeck(DeckType.HAND, 0).get(0).cardType();
+        assertEquals(new TrashCard(firstCard, 0), nextActions.get(0));
+        assertEquals(new DiscardCard(firstCard, 0), nextActions.get(1));
+        assertEquals(new DoNothing(), nextActions.get(2));
+
+        fm.next(state, nextActions.get(0));
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(new TrashCard(secondCard, 0), nextActions.get(0));
+        assertEquals(new DiscardCard(secondCard, 0), nextActions.get(1));
+        assertEquals(new DoNothing(), nextActions.get(2));
+        fm.next(state, nextActions.get(1));
+
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(2, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(1, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(1, state.getDeck(DeckType.TRASH, 0).getSize());
+        assertEquals(1, fm.computeAvailableActions(state).size());
+    }
+
+    @Test
+    public void sentryWithOneKept() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.SENTRY, 0, DeckType.HAND);
+        Sentry sentry = new Sentry(0);
+        fm.next(state, sentry);
+
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        CardType secondCard = state.getDeck(DeckType.HAND, 0).get(0).cardType();
+        fm.next(state, nextActions.get(0));
+        nextActions = fm.computeAvailableActions(state);
+        fm.next(state, nextActions.get(2));
+
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(3, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(1, state.getDeck(DeckType.TRASH, 0).getSize());
+        assertEquals(secondCard, state.getDeck(DeckType.DRAW, 0).peek().cardType());
+        assertEquals(1, fm.computeAvailableActions(state).size());
+    }
+
+    @Test
+    public void sentryWithBothKept() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.SENTRY, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.DRAW);
+        state.addCard(CardType.SILVER, 0, DeckType.DRAW);
+        Sentry sentry = new Sentry(0);
+        fm.next(state, sentry);
+
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        CardType firstCard = state.getDeck(DeckType.HAND, 0).get(1).cardType();
+        CardType secondCard = state.getDeck(DeckType.HAND, 0).get(0).cardType();
+        assertEquals(CardType.SILVER, firstCard);
+        assertNotSame(CardType.SILVER, secondCard);
+        fm.next(state, nextActions.get(2));
+        nextActions = fm.computeAvailableActions(state);
+        fm.next(state, nextActions.get(2));
+
+        assertTrue(state.isActionInProgress());
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(2, nextActions.size());
+        assertEquals(new CompositeAction(new MoveCard(firstCard, 0, DeckType.HAND, 0, DeckType.DRAW, false),
+                        new MoveCard(secondCard, 0, DeckType.HAND, 0, DeckType.DRAW, false)),
+                nextActions.get(0));
+        assertEquals(new CompositeAction(new MoveCard(secondCard, 0, DeckType.HAND, 0, DeckType.DRAW, false),
+                        new MoveCard(firstCard, 0, DeckType.HAND, 0, DeckType.DRAW, false)),
+                nextActions.get(1));
+        fm.next(state, nextActions.get(0));
+
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
+        assertEquals(0, state.getDeck(DeckType.TRASH, 0).getSize());
+        assertEquals(secondCard, state.getDeck(DeckType.DRAW, 0).peek().cardType());
+        assertEquals(firstCard, state.getDeck(DeckType.DRAW, 0).peek(1).cardType());
+        assertEquals(1, fm.computeAvailableActions(state).size());
     }
 }

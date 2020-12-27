@@ -698,7 +698,7 @@ public class Game {
         MCTSParams params3 = (MCTSParams) params2.copy();
         params3.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         params3.maxTreeDepth = 10;
-        params2.K = 3.0;
+        params3.K = 3.0;
 
         List<IGameListener> listeners = new ArrayList<>();
         List<DominionGameAttributes> perGame = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, PROVINCES_LEFT, DUCHIES_LEFT, ESTATES_LEFT, EMPTY_SUPPLY_SLOTS);
@@ -722,7 +722,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Dominion, players, seed, ac, false, null);
+        runOne(DominionSizeDistortion, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 
 //        ArrayList<GameType> games = new ArrayList<>();

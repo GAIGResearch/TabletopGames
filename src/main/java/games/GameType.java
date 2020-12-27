@@ -94,7 +94,15 @@ public enum GameType {
             }}),
     Dominion (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }});
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    DominionSizeDistortion (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    DominionImprovements (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
+    ;
+
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
@@ -125,6 +133,10 @@ public enum GameType {
                 return DotsAndBoxes;
             case "dominion":
                 return Dominion;
+            case "dominionsizedistortion":
+                return DominionSizeDistortion;
+            case "dominionimprovements" :
+                return DominionImprovements;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -184,6 +196,8 @@ public enum GameType {
                 gameState = new DBGameState(params, nPlayers);
                 break;
             case Dominion:
+            case DominionImprovements:
+            case DominionSizeDistortion:
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
@@ -214,7 +228,10 @@ public enum GameType {
                 return new DBParameters(seed);
             case Dominion:
                 return DominionParameters.firstGame(seed);
-          //      return DominionParameters.improvements(seed);
+            case DominionSizeDistortion:
+                return DominionParameters.sizeDistortion(seed);
+            case DominionImprovements:
+                return DominionParameters.improvements(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -246,12 +263,6 @@ public enum GameType {
             case Pandemic:
                 gui = new PandemicGUI(game, ac);
                 break;
-//            case ExplodingKittens:
-//                if (gameState != null) {
-//                    gui = new PrototypeGUI(this, gameState, ac, 500);
-//                } else {
-//                    gui = new PrototypeGUI(this,null, ac, 0);
-//                }
             case Uno:
                 gui = new UnoGUI(game, ac, human);
                 break;
@@ -275,6 +286,8 @@ public enum GameType {
                 }
                 break;
             case Dominion:
+            case DominionImprovements:
+            case DominionSizeDistortion:
                 gui = new DominionGUI(game, ac, human);
                 break;
         }

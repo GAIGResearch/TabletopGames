@@ -63,6 +63,7 @@ public class DominionCard extends Card {
             case THRONE_ROOM:
             case BANDIT:
             case BUREAUCRAT:
+            case SENTRY:
                 return new DominionCard(type);
             case GARDENS:
                 return new Gardens();
@@ -127,6 +128,8 @@ public class DominionCard extends Card {
                 return new Bandit(playerId);
             case BUREAUCRAT:
                 return new Bureaucrat(playerId);
+            case SENTRY:
+                return new Sentry(playerId);
             default:
                 throw new AssertionError("No action for : " + type);
         }

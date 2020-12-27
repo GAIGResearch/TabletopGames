@@ -33,9 +33,14 @@ public class Bandit extends DominionAttackAction {
     public void executeAttack(DominionGameState state) {
         // put top two cards of deck into discard (and record what they are)
         // later we will trash them directly from the discard
+
+        // We move to TABLE temporarily in case we shuffle the DISCARD into the DRAW
         for (int i = 0; i < 2; i++) {
-            state.drawCard(currentTarget, DeckType.DRAW, currentTarget, DeckType.DISCARD);
-            topTwo[i] = state.getDeck(DeckType.DISCARD, currentTarget).peek();
+            state.drawCard(currentTarget, DeckType.DRAW, currentTarget, DeckType.TABLE);
+            topTwo[i] = state.getDeck(DeckType.TABLE, currentTarget).peek();
+        }
+        for (int i = 0; i < 2; i++) {
+            state.drawCard(currentTarget, DeckType.TABLE, currentTarget, DeckType.DISCARD);
         }
         cardTrashed = false;
     }
@@ -43,7 +48,7 @@ public class Bandit extends DominionAttackAction {
     @Override
     public boolean isAttackComplete(int currentTarget, DominionGameState state) {
         // we are done if there are no non-Copper treasure cards in the topTwo
-        if (Arrays.stream(topTwo).noneMatch(c -> c.isTreasureCard() && c.cardType() != CardType.COPPER))
+        if (Arrays.stream(topTwo).noneMatch(c -> c != null && c.isTreasureCard() && c.cardType() != CardType.COPPER))
             return true;
         // otherwise we are completed only once we have trashed a card
         return cardTrashed;
@@ -52,6 +57,7 @@ public class Bandit extends DominionAttackAction {
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         return Arrays.stream(topTwo)
+                .filter(Objects::nonNull)
                 .filter(DominionCard::isTreasureCard)
                 .filter(c -> c.cardType() != CardType.COPPER)
                 .map(c -> new TrashCard(c.cardType(), currentTarget, DeckType.DISCARD))
@@ -85,8 +91,8 @@ public class Bandit extends DominionAttackAction {
         if (obj instanceof Bandit) {
             Bandit other = (Bandit) obj;
             return other.cardTrashed == cardTrashed &&
-                    other.topTwo[0].equals(topTwo[0]) &&
-                    other.topTwo[1].equals(topTwo[1]) &&
+                    other.topTwo[0] == topTwo[0] &&
+                    other.topTwo[1] == topTwo[1] &&
                     super.equals(other);
         }
         return false;

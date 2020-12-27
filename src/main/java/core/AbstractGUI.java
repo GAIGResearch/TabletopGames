@@ -174,7 +174,7 @@ public abstract class AbstractGUI extends JFrame {
         gameStatus.setText("Game status: " + gameState.getGameStatus());
         playerStatus.setText(Arrays.toString(gameState.getPlayerResults()));
         playerScores.setText("Player Scores: " + IntStream.range(0, gameState.getNPlayers())
-                .mapToObj(p -> String.format("%.0f", gameState.getScore(p)))
+                .mapToObj(p -> String.format("%.0f", gameState.getGameScore(p)))
                 .collect(joining(", ")));
         gamePhase.setText("Game phase: " + gameState.getGamePhase());
         turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());

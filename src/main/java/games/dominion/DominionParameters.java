@@ -46,10 +46,15 @@ public class DominionParameters extends AbstractParameters {
     public static DominionParameters sizeDistortion(long seed) {
         DominionParameters retValue = new DominionParameters(seed);
         retValue.cardsUsed.put(CardType.ARTISAN, 10);
+        retValue.cardsUsed.put(CardType.BANDIT, 10);
+        retValue.cardsUsed.put(CardType.BUREAUCRAT, 10);
         retValue.cardsUsed.put(CardType.CHAPEL, 10);
         retValue.cardsUsed.put(CardType.FESTIVAL, 10);
+        retValue.cardsUsed.put(CardType.GARDENS, 10);
+        retValue.cardsUsed.put(CardType.SENTRY, 10);
         retValue.cardsUsed.put(CardType.THRONE_ROOM, 10);
         retValue.cardsUsed.put(CardType.WITCH, 10);
+        retValue.cardsUsed.put(CardType.CURSE, 30);
         retValue.cardsUsed.put(CardType.WORKSHOP, 10);
         return retValue;
     }

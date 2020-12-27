@@ -300,9 +300,6 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
             }
         }
         Pair<ArrayList<T>, ArrayList<boolean[]>> shuffled = shuffleLists(visibleComponents, visibility, rnd);
-        // this has shuffled so that each actual card lines up with its original visibility
-        // this is correct if the observing player can see the card. If they can not see the card, but no that other
-        // can see the card, then we need to shuffle these specific visibility components
 
         int n = 0;
         for (int i = 0; i < components.size(); i++) {
