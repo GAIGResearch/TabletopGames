@@ -23,7 +23,6 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        firstState.setGamePhase(DominionGameState.DominionGamePhase.Play);
         // Nothing to do yet - this is all done by firstState._reset() which is always called immediately before this
     }
 

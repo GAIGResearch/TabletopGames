@@ -332,7 +332,6 @@ public class DominionGameState extends AbstractGameState {
                         retValue.playerHands[p].add(playerHands[p].get(i).copy(), playerHands[p].getVisibilityOfComponent(i).clone());
                     }
                 }
-
             }
             retValue.playerDiscards[p] = playerDiscards[p].copy();
             retValue.playerTableaux[p] = playerTableaux[p].copy();
@@ -452,6 +451,7 @@ public class DominionGameState extends AbstractGameState {
         for (CardType ct : params.cardsUsed.keySet()) {
             cardsIncludedInGame.put(ct, params.cardsUsed.get(ct));
         }
+        setGamePhase(DominionGameState.DominionGamePhase.Play);
     }
 
     /**
