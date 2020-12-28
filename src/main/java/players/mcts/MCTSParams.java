@@ -3,8 +3,6 @@ package players.mcts;
 import core.*;
 import core.interfaces.*;
 import evaluation.TunableParameters;
-import games.dominion.BigMoney;
-import games.dominion.PlayActionCards;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
@@ -106,10 +104,6 @@ public class MCTSParams extends PlayerParameters {
         switch (rolloutType) {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
-            case Dominion_BigMoney:
-                return new BigMoney();
-            case Dominion_PlayActions:
-                return new PlayActionCards(new Random(getRandomSeed()));
             default:
                 throw new AssertionError("Unknown rollout type : " + rolloutType);
         }

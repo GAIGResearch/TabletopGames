@@ -6,7 +6,6 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.GameLogger;
 import games.GameType;
-import games.dominion.DominionGameAttributes;
 import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -21,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
-import static games.dominion.DominionGameAttributes.*;
 import static java.util.stream.Collectors.*;
 
 public class Game {
@@ -700,19 +698,6 @@ public class Game {
         params3.maxTreeDepth = 10;
         params3.K = 3.0;
 
-        List<IGameListener> listeners = new ArrayList<>();
-        List<DominionGameAttributes> perGame = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, PROVINCES_LEFT, DUCHIES_LEFT, ESTATES_LEFT, EMPTY_SUPPLY_SLOTS);
-        List<DominionGameAttributes> perAction = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, ACTION_TYPE, ACTION_DESCRIPTION);
-        GameLogger gameOverLogger = new GameLogger(Arrays.asList(GameEvents.GAME_OVER), "DominionGames.txt", false);
-        gameOverLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
-        listeners.add(gameOverLogger);
-        GameLogger actionLogger = new GameLogger(Arrays.asList(GameEvents.ACTION_CHOSEN), "DominionActions.txt", false);
-        actionLogger.addAttributes(perAction.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
-        listeners.add(actionLogger);
-        GameLogger roundLogger = new GameLogger(Arrays.asList(GameEvents.ROUND_OVER), "DominionRounds.txt", false);
-        roundLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
-        listeners.add(roundLogger);
-
         // players.add(new RandomPlayer());
         //     players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
@@ -722,7 +707,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DominionSizeDistortion, players, seed, ac, false, null);
+        runOne(LoveLetter, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 
 //        ArrayList<GameType> games = new ArrayList<>();
@@ -737,8 +722,6 @@ public class Game {
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
-
-        listeners.forEach(l -> ((GameLogger) l).close());
 
     }
 }
