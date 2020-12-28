@@ -2,6 +2,7 @@ package games.diamant;
 
 import core.*;
 import games.GameType;
+import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
@@ -16,11 +17,13 @@ public class DiamantGame extends Game {
     }
 
     public static void main(String[] args) {
+        ActionController ac = new ActionController();
+
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer());
-        agents.add(new OSLAPlayer());
         agents.add(new RandomPlayer());
-        //agents.add(new HumanConsolePlayer());
+        agents.add(new OSLAPlayer());
+        agents.add(new HumanConsolePlayer());
 
         // Play n games and return the pct of wins of each player
         double [] playerWins = new double[agents.size()];

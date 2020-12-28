@@ -3,6 +3,7 @@ package games.diamant;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
+import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
@@ -23,9 +24,9 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
 
-    List<DiamantTreasureChest> treasureChests;
-    List<DiamantHand>          hands;
-    List<Boolean>              playerInCave;
+    List<Counter> treasureChests;
+    List<Counter> hands;
+    List<Boolean> playerInCave;
 
     int nGemsOnPath             = 0;
     int nHazardPoissonGasOnPath = 0;
@@ -87,11 +88,11 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.playerInCave   = new ArrayList<>();
 
 
-        for (DiamantHand dh : hands)
-            dgs.hands.add((DiamantHand) dh.copy());
+        for (Counter c : hands)
+            dgs.hands.add(c.copy());
 
-        for (DiamantTreasureChest dc : treasureChests)
-            dgs.treasureChests.add((DiamantTreasureChest) dc.copy());
+        for (Counter c : treasureChests)
+            dgs.treasureChests.add(c.copy());
 
         // If there is an action played for a player, then copy it
         for (int i=0; i<getNPlayers(); i++)
@@ -207,8 +208,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         StringBuilder str_gemsOnTreasureChest = new StringBuilder();
         StringBuilder str_playersOnCave       = new StringBuilder();
 
-        for (DiamantHand h:hands)                   { str_gemsOnHand.append(h.toString()).append(" ");          }
-        for (DiamantTreasureChest c:treasureChests) { str_gemsOnTreasureChest.append(c.toString()).append(" "); }
+        for (Counter c:hands)          { str_gemsOnHand.         append(c.getValue()).append(" "); }
+        for (Counter c:treasureChests) { str_gemsOnTreasureChest.append(c.getValue()).append(" "); }
         for (Boolean b : playerInCave)
         {
             if (b) str_playersOnCave.append("T");
@@ -245,9 +246,9 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         return n;
     }
 
-    public Deck<DiamantCard>          getMainDeck()       { return mainDeck;       }
-    public Deck<DiamantCard>          getDiscardDeck()    { return discardDeck;    }
-    public List<DiamantHand>          getHands()          { return hands;          }
-    public List<DiamantTreasureChest> getTreasureChests() { return treasureChests; }
-    public Deck<DiamantCard>          getPath()           { return path;           }
+    public Deck<DiamantCard> getMainDeck()       { return mainDeck;       }
+    public Deck<DiamantCard> getDiscardDeck()    { return discardDeck;    }
+    public List<Counter>     getHands()          { return hands;          }
+    public List<Counter>     getTreasureChests() { return treasureChests; }
+    public Deck<DiamantCard> getPath()           { return path;           }
 }

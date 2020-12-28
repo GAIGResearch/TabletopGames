@@ -14,7 +14,7 @@ public class OutOfCave extends AbstractAction implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new OutOfCave();
+        return this;
     }
 
     @Override

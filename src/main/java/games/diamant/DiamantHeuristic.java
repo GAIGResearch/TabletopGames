@@ -2,6 +2,7 @@ package games.diamant;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
+import utilities.Utils;
 
 public class DiamantHeuristic implements IStateHeuristic {
 
@@ -25,18 +26,22 @@ public class DiamantHeuristic implements IStateHeuristic {
         {
             if (i != playerId)
             {
-                int nGems = dgs.treasureChests.get(i).GetNumberGems();
+                int nGems = dgs.treasureChests.get(i).getValue();
                 if (nGems > max_ngens)
                     max_ngens = nGems;
-
             }
         }
 
-        int player_gems = dgs.treasureChests.get(playerId).GetNumberGems();
+        int player_gems = dgs.treasureChests.get(playerId).getValue();
         double score;
-        if      (player_gems > max_ngens) score = 1.0;
-        else if (player_gems < max_ngens) score = -1.0;
-        else                              score = 0.0;
+
+        if      (player_gems == max_ngens) score = 1.0;
+        else if (player_gems <  max_ngens) score = -1.0;
+        else                               score = 0.0;
+
+        if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING)
+            score = score / 2;
+
         return score;
     }
 }

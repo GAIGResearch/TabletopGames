@@ -51,6 +51,6 @@ public class DiamantCard extends Card {
 
     @Override
     public Card copy() {
-        return new DiamantCard(cardType, hazardType, NumberOfGems, componentID);
+        return this;
     }
 }

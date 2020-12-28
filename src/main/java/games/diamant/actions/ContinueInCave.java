@@ -13,7 +13,7 @@ public class ContinueInCave extends AbstractAction implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new ContinueInCave();
+        return this;
     }
 
     @Override
