@@ -413,7 +413,7 @@ public class Deck<T extends Component> extends Component {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Objects.hash(capacity, ownerId, componentID, components);
     }
 

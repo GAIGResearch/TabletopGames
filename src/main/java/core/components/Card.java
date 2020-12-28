@@ -30,4 +30,9 @@ public class Card extends Component {
         PropertyString hashName =  (PropertyString)getProperty(nameHash);
         return hashName != null ? hashName.value : componentName;
     }
+
+    @Override
+    public final int hashCode() {
+        return super.hashCode();
+    }
 }

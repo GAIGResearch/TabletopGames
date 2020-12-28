@@ -31,21 +31,21 @@ public class GridBoard<T> extends Component {
         typeParameterClass = (Class<T>) String.class;
     }
 
-    public GridBoard(int width, int height, Class<T> typeParameterClass){
+    public GridBoard(int width, int height, Class<T> typeParameterClass) {
         super(Utils.ComponentType.BOARD);
         this.width = width;
         this.height = height;
         this.typeParameterClass = typeParameterClass;
-        this.grid = (T[][])Array.newInstance(typeParameterClass, height, width);
+        this.grid = (T[][]) Array.newInstance(typeParameterClass, height, width);
     }
 
-    public GridBoard(int width, int height, Class<T> typeParameterClass, T defaultValue){
+    public GridBoard(int width, int height, Class<T> typeParameterClass, T defaultValue) {
         this(width, height, typeParameterClass);
         for (int y = 0; y < height; y++)
             Arrays.fill(grid[y], defaultValue);
     }
 
-    public GridBoard(T[][] grid, Class<T> typeParameterClass){
+    public GridBoard(T[][] grid, Class<T> typeParameterClass) {
         super(Utils.ComponentType.BOARD);
         this.width = grid[0].length;
         this.height = grid.length;
@@ -53,7 +53,7 @@ public class GridBoard<T> extends Component {
         this.typeParameterClass = typeParameterClass;
     }
 
-    protected GridBoard(T[][] grid, Class<T> typeParameterClass, int ID){
+    protected GridBoard(T[][] grid, Class<T> typeParameterClass, int ID) {
         super(Utils.ComponentType.BOARD, ID);
         this.width = grid[0].length;
         this.height = grid.length;
@@ -61,7 +61,7 @@ public class GridBoard<T> extends Component {
         this.typeParameterClass = typeParameterClass;
     }
 
-    public GridBoard(GridBoard<T> orig){
+    public GridBoard(GridBoard<T> orig) {
         super(Utils.ComponentType.BOARD);
         this.width = orig.getWidth();
         this.height = orig.getHeight();
@@ -72,8 +72,13 @@ public class GridBoard<T> extends Component {
     /**
      * Get the width and height of this grid.
      */
-    public int getWidth(){return width; }
-    public int getHeight(){return height; }
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 
     /**
      * Set the width or height of the grid. Creates a new grid with the new dimensions, and copies elements from the
@@ -83,18 +88,23 @@ public class GridBoard<T> extends Component {
     public void setWidth(int width) {
         setWidthHeight(width, height, 0, 0);
     }
+
     public void setHeight(int height) {
         setWidthHeight(width, height, 0, 0);
     }
+
     public void setWidth(int width, int offset) {
         setWidthHeight(width, height, offset, 0);
     }
+
     public void setHeight(int height, int offset) {
         setWidthHeight(width, height, 0, offset);
     }
+
     public void setWidthHeight(int width, int height) {
         setWidthHeight(width, height, 0, 0);
     }
+
     public void setWidthHeight(int width, int height, int offsetX, int offsetY) {
         if (offsetX + this.width > width) offsetX = 0;
         if (offsetY + this.height > height) offsetY = 0;
@@ -105,7 +115,7 @@ public class GridBoard<T> extends Component {
         this.width = width;
         this.height = height;
 
-        T[][] grid = (T[][])Array.newInstance(typeParameterClass, height, width);
+        T[][] grid = (T[][]) Array.newInstance(typeParameterClass, height, width);
         for (int i = 0; i < h; i++) {
             if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i + offsetY], offsetX, w);
         }
@@ -114,28 +124,28 @@ public class GridBoard<T> extends Component {
 
     /**
      * Sets the element at position (x, y).
-     * @param x - x coordinate in the grid.
-     * @param y - y coordinate in the grid.
+     *
+     * @param x     - x coordinate in the grid.
+     * @param y     - y coordinate in the grid.
      * @param value - new value for this element.
      * @return - true if coordinates in bounds, false otherwise (and function fails).
      */
-    public boolean setElement(int x, int y, T value){
+    public boolean setElement(int x, int y, T value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             grid[y][x] = value;
             return true;
-        }
-        else
+        } else
             return false;
     }
 
     /**
      * Retrieves the element at position (x, y).
+     *
      * @param x - x coordinate in the grid.
      * @param y - y coordinate in the grid.
      * @return - element at (x,y) in the grid.
      */
-    public T getElement(int x, int y)
-    {
+    public T getElement(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height)
             return grid[y][x];
         return null;
@@ -143,9 +153,10 @@ public class GridBoard<T> extends Component {
 
     /**
      * Retrieves the grid.
+     *
      * @return - 2D grid.
      */
-    public T[][] getGridValues(){
+    public T[][] getGridValues() {
         return grid;
     }
 
@@ -163,6 +174,7 @@ public class GridBoard<T> extends Component {
 
     /**
      * Returns a new grid, copy of this one, with given orientation.
+     *
      * @param orientation - int orientation, how many times it should be rotated clockwise
      * @return - new grid with the same elements and correct orientation.
      */
@@ -177,16 +189,17 @@ public class GridBoard<T> extends Component {
 
     /**
      * Rotates a given grid clockwise, returning new one
+     *
      * @param original - original grid to rotate
      * @return rotated grid
      */
     private T[][] rotateClockWise(T[][] original) {
         final int M = original.length;
         final int N = original[0].length;
-        T[][] grid = (T[][])Array.newInstance(typeParameterClass, N, M);
+        T[][] grid = (T[][]) Array.newInstance(typeParameterClass, N, M);
         for (int r = 0; r < M; r++) {
             for (int c = 0; c < N; c++) {
-                grid[c][M-1-r] = original[r][c];
+                grid[c][M - 1 - r] = original[r][c];
             }
         }
         return grid;
@@ -194,11 +207,12 @@ public class GridBoard<T> extends Component {
 
     /**
      * Returns a 1D representation of this grid, one row after another
+     *
      * @return 1D flattened grid
      */
     public T[] flattenGrid() {
         int length = getHeight() * getWidth();
-        T[] array = (T[])Array.newInstance(typeParameterClass, length);
+        T[] array = (T[]) Array.newInstance(typeParameterClass, length);
         for (int i = 0; i < getHeight(); i++) {
             System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
         }
@@ -207,7 +221,7 @@ public class GridBoard<T> extends Component {
 
     @Override
     public GridBoard<T> copy() {
-        T[][] gridCopy = (T[][])Array.newInstance(typeParameterClass, getHeight(), getWidth());
+        T[][] gridCopy = (T[][]) Array.newInstance(typeParameterClass, getHeight(), getWidth());
         for (int i = 0; i < height; i++) {
             if (width >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
         }
@@ -232,24 +246,24 @@ public class GridBoard<T> extends Component {
 
     /**
      * Loads all boards from a JSON file.
+     *
      * @param filename - path to file.
      * @return - List of Board objects.
      */
-    public static List<GridBoard> loadBoards(String filename)
-    {
+    public static List<GridBoard> loadBoards(String filename) {
         JSONParser jsonParser = new JSONParser();
         ArrayList<GridBoard> gridBoards = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for(Object o : data) {
+            for (Object o : data) {
                 GridBoard newGridBoard = new GridBoard();
                 newGridBoard.loadBoard((JSONObject) o);
                 gridBoards.add(newGridBoard);
             }
 
-        }catch (IOException | ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
@@ -258,14 +272,15 @@ public class GridBoard<T> extends Component {
 
     /**
      * Loads board info from a JSON file.
+     *
      * @param board - board to load in JSON format
      */
     public void loadBoard(JSONObject board) {
         componentName = (String) board.get("id");
 
         JSONArray size = (JSONArray) board.get("size");
-        this.width = (int)(long)size.get(0);
-        this.height = (int)(long)size.get(1);
+        this.width = (int) (long) size.get(0);
+        this.height = (int) (long) size.get(1);
 
         if (board.get("img") != null) {
             properties.put(imgHash, new PropertyString((String) board.get("img")));
@@ -278,12 +293,12 @@ public class GridBoard<T> extends Component {
             typeParameterClass = (Class<T>) Character.class;
         }  // TODO: others
 
-        this.grid = (T[][])Array.newInstance(typeParameterClass, height, width);
+        this.grid = (T[][]) Array.newInstance(typeParameterClass, height, width);
 
         JSONArray grids = (JSONArray) board.get("grid");
         int y = 0;
         for (Object g : grids) {
-            if (((JSONArray)g).get(0) instanceof JSONArray) {
+            if (((JSONArray) g).get(0) instanceof JSONArray) {
                 y = 0;
                 for (Object o : (JSONArray) g) {
                     JSONArray row = (JSONArray) o;
@@ -308,6 +323,7 @@ public class GridBoard<T> extends Component {
 
     /**
      * Generates a graph from this grid, with 4-way or 8-way connectivity.
+     *
      * @param way8 - if true, the board has 8-way connectivity, otherwise 4-way.
      * @return - GraphBoard, board with board nodes connected. All board nodes have information about their location
      * in the original grid, via the "coordinates" property.
@@ -332,7 +348,7 @@ public class GridBoard<T> extends Component {
 
                 // Add neighbours
                 List<Vector2D> neighbours = getNeighbourhood(j, i, width, height, way8);
-                for (Vector2D neighbour: neighbours) {
+                for (Vector2D neighbour : neighbours) {
                     BoardNode bn2 = bnMapping.get(neighbour);
                     gb.addConnection(bn, bn2);
                 }
@@ -344,11 +360,12 @@ public class GridBoard<T> extends Component {
     /**
      * Generates a graph from this grid, with 4-way or 8-way connectivity and pre-set neighbouring cells.
      * Used to restrict grid connectivity further.
+     *
      * @param neighbours - list of neighbouring cells, where each Vector2D is coordinates to a cell in the grid.
      * @return - GraphBoard, board with board nodes connected. All board nodes have information about their location
      * in the original grid, via the "coordinates" property.
      */
-    public GraphBoard toGraphBoard(List<Pair<Vector2D,Vector2D>> neighbours) {
+    public GraphBoard toGraphBoard(List<Pair<Vector2D, Vector2D>> neighbours) {
         GraphBoard gb = new GraphBoard(componentName, componentID);
         HashMap<Vector2D, BoardNode> bnMapping = new HashMap<>();
         // Add all cells as board nodes connected to each other
@@ -363,11 +380,25 @@ public class GridBoard<T> extends Component {
                 }
             }
         }
-        for (Pair<Vector2D, Vector2D> p: neighbours) {
+        for (Pair<Vector2D, Vector2D> p : neighbours) {
             if (bnMapping.get(p.a) != null && bnMapping.get(p.b) != null) {
                 gb.addConnection(bnMapping.get(p.a), bnMapping.get(p.b));
             }
         }
         return gb;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GridBoard) {
+            GridBoard<?> other = (GridBoard<?>) o;
+            return componentID == other.componentID && Arrays.equals(flattenGrid(), other.flattenGrid());
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(componentID) + 5 * Arrays.hashCode(flattenGrid());
     }
 }

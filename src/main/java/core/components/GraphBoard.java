@@ -10,10 +10,7 @@ import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static core.CoreConstants.imgHash;
 import static core.CoreConstants.nameHash;
@@ -248,5 +245,19 @@ public class GraphBoard extends Component {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GraphBoard) {
+            GraphBoard other = (GraphBoard) o;
+            return componentID == other.componentID && other.boardNodes.equals(boardNodes);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(componentID, boardNodes);
     }
 }

@@ -83,4 +83,9 @@ public class Token extends Component {
         this.componentName = (String) token.get("id");
         parseComponent(this, token);
     }
+
+    @Override
+    public final int hashCode() {
+        return componentID;
+    }
 }
