@@ -282,7 +282,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         params._reset();
 
         // We should also check that there are no other properties in there
-        allParams.add("algorithm");
         allParams.add("class");
         for (Object key : rawData.keySet()) {
             if (key instanceof String && !allParams.contains(key)) {

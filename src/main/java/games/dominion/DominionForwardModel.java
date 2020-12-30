@@ -2,6 +2,8 @@ package games.dominion;
 
 import core.*;
 import core.actions.*;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
@@ -23,7 +25,32 @@ public class DominionForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        // Nothing to do yet - this is all done by firstState._reset() which is always called immediately before this
+        DominionGameState state = (DominionGameState) firstState;
+
+        for (int i = 0; i < state.playerCount; i++) {
+            for (int j = 0; j < 7; j++)
+                state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
+            for (int j = 0; j < 3; j++)
+                state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
+            state.playerDrawPiles[i].shuffle(state.rnd);
+            for (int k = 0; k < 5; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
+        }
+        state.actionsLeftForCurrentPlayer = 1;
+        state.buysLeftForCurrentPlayer = 1;
+        state.spentSoFar = 0;
+
+        state.cardsIncludedInGame = new HashMap<>(16);
+        state.cardsIncludedInGame.put(CardType.PROVINCE, 12);
+        state.cardsIncludedInGame.put(CardType.DUCHY, 12);
+        state.cardsIncludedInGame.put(CardType.ESTATE, 12);
+        state.cardsIncludedInGame.put(CardType.GOLD, 1000);
+        state.cardsIncludedInGame.put(CardType.SILVER, 1000);
+        state.cardsIncludedInGame.put(CardType.COPPER, 1000);
+        DominionParameters params = (DominionParameters) state.getGameParameters();
+        for (CardType ct : params.cardsUsed.keySet()) {
+            state.cardsIncludedInGame.put(ct, params.cardsUsed.get(ct));
+        }
+        state.setGamePhase(DominionGameState.DominionGamePhase.Play);
     }
 
     /**

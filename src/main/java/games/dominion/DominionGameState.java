@@ -25,13 +25,16 @@ public class DominionGameState extends AbstractGameState {
     int playerCount;
 
     // Counts of cards on the table should be fine
-    Map<CardType, Integer> cardsIncludedInGame;
+    Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
 
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
     PartialObservableDeck<DominionCard>[] playerDrawPiles;
     Deck<DominionCard>[] playerDiscards;
     Deck<DominionCard>[] playerTableaux;
+
+    // Trash pile and other global decks
+    Deck<DominionCard> trashPile;
 
     boolean[] defenceStatus;
 
@@ -40,8 +43,6 @@ public class DominionGameState extends AbstractGameState {
     int spentSoFar = 0;
     int additionalSpendAvailable = 0;
 
-    // Trash pile and other global decks
-    Deck<DominionCard> trashPile;
 
     Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     List<IDelayedAction> delayedActions = new ArrayList<>();
@@ -421,6 +422,7 @@ public class DominionGameState extends AbstractGameState {
         playerDrawPiles = new PartialObservableDeck[playerCount];
         playerDiscards = new Deck[playerCount];
         playerTableaux = new Deck[playerCount];
+
         trashPile = new Deck<>("Trash");
         for (int i = 0; i < playerCount; i++) {
             boolean[] handVisibility = new boolean[playerCount];
@@ -429,29 +431,7 @@ public class DominionGameState extends AbstractGameState {
             playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[playerCount]);
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1);
             playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1);
-            for (int j = 0; j < 7; j++)
-                playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
-            for (int j = 0; j < 3; j++)
-                playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
-            playerDrawPiles[i].shuffle(rnd);
-            for (int k = 0; k < 5; k++) playerHands[i].add(playerDrawPiles[i].draw());
         }
-        actionsLeftForCurrentPlayer = 1;
-        buysLeftForCurrentPlayer = 1;
-        spentSoFar = 0;
-
-        cardsIncludedInGame = new HashMap<>(16);
-        cardsIncludedInGame.put(CardType.PROVINCE, 12);
-        cardsIncludedInGame.put(CardType.DUCHY, 12);
-        cardsIncludedInGame.put(CardType.ESTATE, 12);
-        cardsIncludedInGame.put(CardType.GOLD, 1000);
-        cardsIncludedInGame.put(CardType.SILVER, 1000);
-        cardsIncludedInGame.put(CardType.COPPER, 1000);
-        DominionParameters params = (DominionParameters) gameParameters;
-        for (CardType ct : params.cardsUsed.keySet()) {
-            cardsIncludedInGame.put(ct, params.cardsUsed.get(ct));
-        }
-        setGamePhase(DominionGameState.DominionGamePhase.Play);
     }
 
     /**
