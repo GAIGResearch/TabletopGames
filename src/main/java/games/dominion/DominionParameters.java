@@ -7,19 +7,18 @@ import java.util.*;
 
 public class DominionParameters extends AbstractParameters {
 
-    Map<CardType, Integer> cardsUsed = new HashMap<>();
+    List<CardType> cardsUsed = new ArrayList<>();
     String dataPath = "data/dominion/";
 
     public DominionParameters(long seed) {
         super(seed);
     }
 
-    public DominionParameters(long seed, String[] cards, Map<String, Integer> overrideCount) {
+    public DominionParameters(long seed, String[] cards) {
         super(seed);
         for (String cardName : cards) {
             try {
-                int number = overrideCount.getOrDefault(cardName, 10);
-                cardsUsed.put(CardType.valueOf(cardName), number);
+                cardsUsed.add(CardType.valueOf(cardName));
             } catch (Exception e) {
                 System.out.println("Error initialising Parameters with " + cardName);
                 System.out.println(e.getMessage());
@@ -29,49 +28,49 @@ public class DominionParameters extends AbstractParameters {
 
     public static DominionParameters firstGame(long seed) {
         DominionParameters retValue = new DominionParameters(seed);
-        retValue.cardsUsed.put(CardType.CELLAR, 10);
-        retValue.cardsUsed.put(CardType.MARKET, 10);
-        retValue.cardsUsed.put(CardType.MERCHANT, 10);
-        retValue.cardsUsed.put(CardType.MILITIA, 10);
-        retValue.cardsUsed.put(CardType.MINE, 10);
-        retValue.cardsUsed.put(CardType.MOAT, 10);
-        retValue.cardsUsed.put(CardType.REMODEL, 10);
-        retValue.cardsUsed.put(CardType.SMITHY, 10);
-        retValue.cardsUsed.put(CardType.VILLAGE, 10);
-        retValue.cardsUsed.put(CardType.WORKSHOP, 10);
+        retValue.cardsUsed.add(CardType.CELLAR);
+        retValue.cardsUsed.add(CardType.MARKET);
+        retValue.cardsUsed.add(CardType.MERCHANT);
+        retValue.cardsUsed.add(CardType.MILITIA);
+        retValue.cardsUsed.add(CardType.MINE);
+        retValue.cardsUsed.add(CardType.MOAT);
+        retValue.cardsUsed.add(CardType.REMODEL);
+        retValue.cardsUsed.add(CardType.SMITHY);
+        retValue.cardsUsed.add(CardType.VILLAGE);
+        retValue.cardsUsed.add(CardType.WORKSHOP);
         // Note that the three Victory cards and three Treasure cards are always included
         return retValue;
     }
 
     public static DominionParameters sizeDistortion(long seed) {
         DominionParameters retValue = new DominionParameters(seed);
-        retValue.cardsUsed.put(CardType.ARTISAN, 10);
-        retValue.cardsUsed.put(CardType.BANDIT, 10);
-        retValue.cardsUsed.put(CardType.BUREAUCRAT, 10);
-        retValue.cardsUsed.put(CardType.CHAPEL, 10);
-        retValue.cardsUsed.put(CardType.FESTIVAL, 10);
-        retValue.cardsUsed.put(CardType.GARDENS, 10);
-        retValue.cardsUsed.put(CardType.SENTRY, 10);
-        retValue.cardsUsed.put(CardType.THRONE_ROOM, 10);
-        retValue.cardsUsed.put(CardType.WITCH, 10);
-        retValue.cardsUsed.put(CardType.CURSE, 30);
-        retValue.cardsUsed.put(CardType.WORKSHOP, 10);
+        retValue.cardsUsed.add(CardType.ARTISAN);
+        retValue.cardsUsed.add(CardType.BANDIT);
+        retValue.cardsUsed.add(CardType.BUREAUCRAT);
+        retValue.cardsUsed.add(CardType.CHAPEL);
+        retValue.cardsUsed.add(CardType.FESTIVAL);
+        retValue.cardsUsed.add(CardType.GARDENS);
+        retValue.cardsUsed.add(CardType.SENTRY);
+        retValue.cardsUsed.add(CardType.THRONE_ROOM);
+        retValue.cardsUsed.add(CardType.WITCH);
+        retValue.cardsUsed.add(CardType.CURSE);
+        retValue.cardsUsed.add(CardType.WORKSHOP);
         return retValue;
     }
 
     public static DominionParameters improvements(long seed) {
         DominionParameters retValue = new DominionParameters(seed);
-        retValue.cardsUsed.put(CardType.ARTISAN, 10);
-        retValue.cardsUsed.put(CardType.CELLAR, 10);
-        retValue.cardsUsed.put(CardType.MARKET, 10);
-        retValue.cardsUsed.put(CardType.MERCHANT, 10);
-        retValue.cardsUsed.put(CardType.MINE, 10);
-        retValue.cardsUsed.put(CardType.MOAT, 10);
-        retValue.cardsUsed.put(CardType.MONEYLENDER, 10);
-        retValue.cardsUsed.put(CardType.POACHER, 10);
-        retValue.cardsUsed.put(CardType.REMODEL, 10);
-        retValue.cardsUsed.put(CardType.WITCH, 10);
-        retValue.cardsUsed.put(CardType.CURSE, 30);
+        retValue.cardsUsed.add(CardType.ARTISAN);
+        retValue.cardsUsed.add(CardType.CELLAR);
+        retValue.cardsUsed.add(CardType.MARKET);
+        retValue.cardsUsed.add(CardType.MERCHANT);
+        retValue.cardsUsed.add(CardType.MINE);
+        retValue.cardsUsed.add(CardType.MOAT);
+        retValue.cardsUsed.add(CardType.MONEYLENDER);
+        retValue.cardsUsed.add(CardType.POACHER);
+        retValue.cardsUsed.add(CardType.REMODEL);
+        retValue.cardsUsed.add(CardType.WITCH);
+        retValue.cardsUsed.add(CardType.CURSE);
         // Note that the three Victory cards and three Treasure cards are always included
         return retValue;
     }

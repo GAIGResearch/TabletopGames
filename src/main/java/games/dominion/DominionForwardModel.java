@@ -39,16 +39,20 @@ public class DominionForwardModel extends AbstractForwardModel {
         state.buysLeftForCurrentPlayer = 1;
         state.spentSoFar = 0;
 
+        int victoryCards = state.playerCount == 2 ? 8 : 12;
         state.cardsIncludedInGame = new HashMap<>(16);
-        state.cardsIncludedInGame.put(CardType.PROVINCE, 12);
-        state.cardsIncludedInGame.put(CardType.DUCHY, 12);
-        state.cardsIncludedInGame.put(CardType.ESTATE, 12);
-        state.cardsIncludedInGame.put(CardType.GOLD, 1000);
-        state.cardsIncludedInGame.put(CardType.SILVER, 1000);
-        state.cardsIncludedInGame.put(CardType.COPPER, 1000);
+        state.cardsIncludedInGame.put(CardType.PROVINCE, victoryCards);
+        state.cardsIncludedInGame.put(CardType.DUCHY, victoryCards);
+        state.cardsIncludedInGame.put(CardType.ESTATE, victoryCards);
+        state.cardsIncludedInGame.put(CardType.GOLD, 30);
+        state.cardsIncludedInGame.put(CardType.SILVER, 40);
+        state.cardsIncludedInGame.put(CardType.COPPER, 32);
         DominionParameters params = (DominionParameters) state.getGameParameters();
-        for (CardType ct : params.cardsUsed.keySet()) {
-            state.cardsIncludedInGame.put(ct, params.cardsUsed.get(ct));
+        for (CardType ct : params.cardsUsed) {
+            int cardsToUse = ct.isVictory ? victoryCards : 10;
+            if (ct == CardType.CURSE)
+                cardsToUse = (state.playerCount - 1) * 10;
+            state.cardsIncludedInGame.put(ct, cardsToUse);
         }
         state.setGamePhase(DominionGameState.DominionGamePhase.Play);
     }
