@@ -76,7 +76,7 @@ public class PlayerReport {
             String fullFileName = gameType.name() + "_" + logFile;
             if (loggerClass.contains("Summary"))
                 fullFileName = logFile;
-            IStatisticLogger logger = createLogger(loggerClass, fullFileName);
+            IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, fullFileName);
             if (!(logger instanceof FileStatsLogger))
                 logger.record("Game", games.get(gameIndex));
             playerToTrack.setStatsLogger(logger);
@@ -107,25 +107,6 @@ public class PlayerReport {
             // Once all games are complete, call processDataAndFinish()
             playerToTrack.getStatsLogger().processDataAndFinish();
         }
-    }
-
-    private static IStatisticLogger createLogger(String loggerClass, String logFile) {
-        IStatisticLogger logger = new SummaryLogger();
-        try {
-            Class<?> clazz = Class.forName(loggerClass);
-
-            Constructor<?> constructor;
-            try {
-                constructor = clazz.getConstructor(String.class);
-                logger = (IStatisticLogger) constructor.newInstance(logFile);
-            } catch (NoSuchMethodException e) {
-                constructor = clazz.getConstructor();
-                logger = (IStatisticLogger) constructor.newInstance();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return logger;
     }
 
 }

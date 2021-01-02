@@ -2,21 +2,19 @@ package core;
 
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
+import core.interfaces.IStatisticLogger;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
+import players.simple.*;
 import utilities.Pair;
 import utilities.StatSummary;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
@@ -34,7 +32,6 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-
 
     /* Game Statistics */
 

@@ -567,7 +567,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     }
                 }
 
-                // Add player below if your are tuco
+                // Add player above if your are tuco
                 if (cegs.playerCharacters.get(player) == CharacterType.Tuco) {
                     for (Integer target : cegs.trainCompartments.get(playerCompartmentIndex).playersOnTopOfCompartment)
                         targets.put(target, playerCompartment);

@@ -195,6 +195,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                 }
             }
         }
+
         return copy;
     }
 
