@@ -96,8 +96,8 @@ public class SummaryLogger implements IStatisticLogger {
         StringBuilder sb = new StringBuilder();
         for (String key : alphabeticOrder) {
             StatSummary stats = allData.get(key);
-            sb.append(String.format("%30s  Mean: %.3g +/- %.2g,\t[%d, %d], pop sd %.3g,\tn=%d\n", key,
-                    stats.mean(), stats.stdErr(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.n()));
+            sb.append(String.format("%30s  Mean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tRange: [%3d, %3d],\tpop sd %8.3g,\tskew %8.3g,\tkurtosis %8.3g,\tn=%d\n", key,
+                    stats.mean(), stats.stdErr(), stats.median(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
         }
         return sb.toString();
     }

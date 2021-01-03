@@ -30,4 +30,8 @@ public class CoreConstants {
     public final static int playersHash = Hash.GetInstance().hash("players");
     public final static int imgHash = Hash.GetInstance().hash("img");
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
+
+    public enum GameEvents {
+        GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
+    }
 }

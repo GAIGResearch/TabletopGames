@@ -1,17 +1,18 @@
 package evaluation;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.Game;
+import core.*;
+import core.actions.AbstractAction;
+import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.*;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.summarizingInt;
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
 
@@ -48,7 +49,9 @@ public class GameReportII {
         int nGames = getArg(args, "nGames", 1000);
         List<String> games = Arrays.asList(getArg(args, "games", "").split("\\|"));
         if (games.isEmpty())
-            throw new IllegalArgumentException("Must specify at least one game");
+            throw new IllegalArgumentException("Must specify at least one game, or 'all'");
+        if (games.get(0).equals("all"))
+            games = Arrays.stream(GameType.values()).map(String::valueOf).collect(toList());
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
         // TODO: Implement recognition for 'all' to apply min/max for each game
@@ -90,14 +93,76 @@ public class GameReportII {
                     // Run games, resetting the player each time
                     game.reset(allPlayers);
                     preGameProcessing(game, collectedData);
+                    GameReportListener gameTracker = new GameReportListener(game.getForwardModel());
+                    game.addListener(gameTracker);
                     game.run();
                     postGameProcessing(game, collectedData);
+                    collectedData.putAll(gameTracker.extractData());
                     logger.record(collectedData);
+                    collectedData.clear();
                 }
                 // Once all games are complete, call processDataAndFinish()
                 logger.processDataAndFinish();
             }
         }
+    }
+
+    private static class GameReportListener implements IGameListener {
+
+        List<Double> scores = new ArrayList<>();
+//        List<Integer> branchingByStates = new ArrayList<>();
+        List<Double> visibilityOnTurn = new ArrayList<>();
+        List<Integer> components = new ArrayList<>();
+        AbstractForwardModel fm;
+
+        public GameReportListener(AbstractForwardModel forwardModel) {
+            fm = forwardModel;
+        }
+
+        @Override
+        public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction actionChosen) {
+            if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
+                // each action taken, we record branching factor and states (this is triggered when the decision is made,
+                // so before it is executed
+                int player = state.getCurrentPlayer();
+
+                List<AbstractAction> allActions = fm.computeAvailableActions(state);
+                if (allActions.size() < 2) return;
+//                HashSet<Integer> forwardStates = new HashSet<>();
+//                for (AbstractAction action : allActions) {
+//                    AbstractGameState gsCopy = state.copy();
+//                    fm.next(gsCopy, action);
+//                    forwardStates.add(gsCopy.hashCode());
+//                }
+//                branchingByStates.add(forwardStates.size());
+                scores.add(state.getScore(player));
+                int componentCount = state.getAllComponents().size();
+                components.add(componentCount);
+                visibilityOnTurn.add(state.getUnknownComponentsIds(player).size() / (double) componentCount);
+
+            }
+        }
+
+        public Map<String, Object> extractData() {
+            Map<String, Object> data = new HashMap<>();
+//            IntSummaryStatistics bf = branchingByStates.stream().mapToInt(i -> i).summaryStatistics();
+//            data.put("BranchingFactor", bf.getAverage());
+//            data.put("MaxBranchingFactor", bf.getMax());
+            DoubleSummaryStatistics sc = scores.stream().mapToDouble(i -> i).summaryStatistics();
+            data.put("ScoreMean", sc.getAverage());
+            data.put("ScoreMax", sc.getMax());
+            data.put("ScoreMin", sc.getMin());
+            IntSummaryStatistics stateSize = components.stream().mapToInt(i -> i).summaryStatistics();
+            data.put("StateSizeMean", stateSize.getAverage());
+            data.put("StateSizeMax", stateSize.getMax());
+            data.put("StateSizeMin", stateSize.getMin());
+            DoubleSummaryStatistics visibility = visibilityOnTurn.stream().mapToDouble(i -> i).summaryStatistics();
+            data.put("HiddenInfoMean", visibility.getAverage());
+            data.put("HiddenInfoMax", visibility.getMax());
+            data.put("HiddenInfoMin", visibility.getMin());
+            return data;
+        }
+
     }
 
     private static void preGameProcessing(Game game, Map<String, Object> data) {
@@ -106,14 +171,14 @@ public class GameReportII {
         AbstractForwardModel fm = game.getForwardModel();
         long s = System.nanoTime();
         fm.setup(gs);
-        data.put("SetupTime", (System.nanoTime() - s) / 10e3);
+        data.put("TimeSetup", (System.nanoTime() - s) / 10e3);
 
         int totalComponents = gs.getAllComponents().size();
-        data.put("StateSize", totalComponents);
+        data.put("StateSizeStart", totalComponents);
 
         IntStream.range(0, game.getPlayers().size()).forEach(p -> {
             int unseen = gs.getUnknownComponentsIds(p).size();
-            data.put("Hidden_P" + p, unseen / (double) totalComponents);
+            data.put("HiddenInfoStart", unseen / (double) totalComponents);
         });
     }
 
@@ -121,33 +186,38 @@ public class GameReportII {
 
         //    Retrieves a list with one entry per game tick, each a pair (active player ID, # actions)
         List<Pair<Integer, Integer>> actionSpaceRecord = game.getActionSpaceSize();
-        IntSummaryStatistics stats = actionSpaceRecord.stream()
-                .mapToInt(r -> r.b)
-                .summaryStatistics();
-        data.put("MeanActionSpace", stats.getAverage());
-        data.put("MinActionSpace", stats.getMin());
-        data.put("MaxActionSpace", stats.getMax());
-        data.put("Actions", stats.getCount());
-        data.put("NextTime",  game.getNextTime() / 10e3);
-        data.put("CopyTime",  game.getCopyTime() / 10e3);
-        data.put("ActionComputeTime", game.getActionComputeTime() / 10e3);
-        data.put("AgentTime", game.getAgentTime() / 10e3);
+        StatSummary stats = actionSpaceRecord.stream()
+                .map(r -> r.b)
+                .filter(size -> size > 1)
+                .collect(new TAGSummariser());
+        data.put("ActionSpaceMean", stats.mean());
+        data.put("ActionSpaceMin", stats.min());
+        data.put("ActionSpaceMax", stats.max());
+        data.put("ActionSpaceSkew", stats.skew());
+        data.put("ActionSpaceKurtosis", stats.kurtosis());
+        data.put("Decisions", stats.n());
+        data.put("TimeNext", game.getNextTime() / 10e3);
+        data.put("TimeCopy", game.getCopyTime() / 10e3);
+        data.put("TimeActionCompute", game.getActionComputeTime() / 10e3);
+        data.put("TimeAgent", game.getAgentTime() / 10e3);
 
-        data.put("Decisions", game.getNDecisions());
         data.put("Ticks", game.getTick());
         data.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
         data.put("ActionsPerTurn", game.getNActionsPerTurn());
 
         IntStream.range(0, game.getPlayers().size()).forEach(p -> {
-            IntSummaryStatistics playerStats = actionSpaceRecord.stream()
+            StatSummary playerStats = actionSpaceRecord.stream()
                     .filter(r -> r.a == p)
-                    .mapToInt(r -> r.b)
-                    .summaryStatistics();
-            data.put("MeanActionSpace_P" + p, playerStats.getAverage());
-            data.put("MinActionSpace_P" + p, playerStats.getMin());
-            data.put("MaxActionSpace_P" + p, playerStats.getMax());
-            data.put("Decisions_P" + p, playerStats.getCount());
+                    .map(r -> r.b)
+                    .filter(size -> size > 1)
+                    .collect(new TAGSummariser());
+            data.put("ActionSpaceMean_P" + p, playerStats.mean());
+            data.put("ActionSpaceMin_P" + p, playerStats.min());
+            data.put("ActionSpaceMax_P" + p, playerStats.max());
+            data.put("Decisions_P" + p, playerStats.n());
         });
 
     }
 }
+
+
