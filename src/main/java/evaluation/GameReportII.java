@@ -83,6 +83,7 @@ public class GameReportII {
                 Map<String, Object> collectedData = new HashMap<>();
                 collectedData.put("Game", games.get(gameIndex));
                 collectedData.put("Players", String.valueOf(playerCount));
+                collectedData.put("PlayerType", playerDescriptor);
 
                 Game game = gameType.createGameInstance(playerCount);
                 for (int i = 0; i < nGames; i++) {
@@ -205,17 +206,17 @@ public class GameReportII {
         data.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
         data.put("ActionsPerTurn", game.getNActionsPerTurn());
 
-        IntStream.range(0, game.getPlayers().size()).forEach(p -> {
-            StatSummary playerStats = actionSpaceRecord.stream()
-                    .filter(r -> r.a == p)
-                    .map(r -> r.b)
-                    .filter(size -> size > 1)
-                    .collect(new TAGSummariser());
-            data.put("ActionSpaceMean_P" + p, playerStats.mean());
-            data.put("ActionSpaceMin_P" + p, playerStats.min());
-            data.put("ActionSpaceMax_P" + p, playerStats.max());
-            data.put("Decisions_P" + p, playerStats.n());
-        });
+//        IntStream.range(0, game.getPlayers().size()).forEach(p -> {
+//            StatSummary playerStats = actionSpaceRecord.stream()
+//                    .filter(r -> r.a == p)
+//                    .map(r -> r.b)
+//                    .filter(size -> size > 1)
+//                    .collect(new TAGSummariser());
+//            data.put("ActionSpaceMean_P" + p, playerStats.mean());
+//            data.put("ActionSpaceMin_P" + p, playerStats.min());
+//            data.put("ActionSpaceMax_P" + p, playerStats.max());
+//            data.put("Decisions_P" + p, playerStats.n());
+//        });
 
     }
 }

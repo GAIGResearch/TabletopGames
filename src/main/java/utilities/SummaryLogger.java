@@ -69,8 +69,20 @@ public class SummaryLogger implements IStatisticLogger {
                 data.append(otherData.get(key)).append("\t");
             }
             for (String key : allData.keySet()) {
-                header.append(key).append("\t").append(key).append("_se\t");
+                header.append(key).append("\t").append(key).append("_se");
                 data.append(String.format("%.3g\t%.2g\t", allData.get(key).mean(), allData.get(key).stdErr()));
+                data.append(String.format("%.3g\t", allData.get(key).max()));
+                header.append(key).append("_sd\t");
+                header.append(key).append("_median\t");
+                data.append(String.format("%.3g\t", allData.get(key).median()));
+                header.append(key).append("_min\t");
+                data.append(String.format("%.3g\t", allData.get(key).min()));
+                header.append(key).append("_max\t");
+                data.append(String.format("%.3g\t", allData.get(key).sd()));
+                header.append(key).append("_skew\t");
+                data.append(String.format("%.3g\t", allData.get(key).skew()));
+                header.append(key).append("_kurtosis");
+                data.append(String.format("%.3g", allData.get(key).kurtosis()));
             }
             header.append("\n");
             data.append("\n");
