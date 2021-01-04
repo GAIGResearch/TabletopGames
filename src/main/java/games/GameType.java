@@ -5,6 +5,9 @@ import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
+import games.diamant.DiamantForwardModel;
+import games.diamant.DiamantGameState;
+import games.diamant.DiamantParameters;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUI;
 import games.dotsboxes.DBGameState;
@@ -148,6 +151,17 @@ public enum GameType {
             }},
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
+            }}),
+    Diamant( 2, 6,
+            new ArrayList<Category>() {{
+                add(Adventure);
+                add(Bluffing);
+                add(Exploration);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(MoveThroughDeck);
+                add(PushYourLuck);
+                add(SimultaneousActionSelection);
             }});
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
@@ -178,6 +192,8 @@ public enum GameType {
                 return ColtExpress;
             case "dotsandboxes":
                 return DotsAndBoxes;
+            case "diamant":
+                return Diamant;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -236,6 +252,10 @@ public enum GameType {
                 forwardModel = new DBForwardModel();
                 gameState = new DBGameState(params, nPlayers);
                 break;
+            case Diamant:
+                forwardModel = new DiamantForwardModel();
+                gameState = new DiamantGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -261,6 +281,8 @@ public enum GameType {
                 return new ColtExpressParameters(seed);
             case DotsAndBoxes:
                 return new DBParameters(seed);
+            case Diamant:
+                return new DiamantParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -319,6 +341,7 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
+            // TODO: Diamant GUI
         }
 
         return gui;
@@ -354,7 +377,8 @@ public enum GameType {
         Adventure,
         Exploration,
         Fantasy,
-        Miniatures;
+        Miniatures,
+        Bluffing;
 
         /**
          * Retrieves a list of all games within this category.
@@ -417,7 +441,8 @@ public enum GameType {
         MovementPoints,
         MultipleMaps,
         Campaign,
-        Enclosure;
+        Enclosure,
+        MoveThroughDeck;
 
         /**
          * Retrieves a list of all games using this mechanic.
@@ -526,6 +551,8 @@ public enum GameType {
                 return new ColtExpressParameters(seed);
             case DotsAndBoxes:
                 return new DBParameters(seed);
+            case Diamant:
+                return new DiamantParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for GameType : " + this.name());
         }
