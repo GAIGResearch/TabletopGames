@@ -2,9 +2,16 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.components.*;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
+import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.components.Compartment;
+import games.diamant.DiamantGameState;
+import games.uno.UnoGameState;
+import games.virus.VirusGameState;
+import games.virus.components.VirusOrgan;
 import players.PlayerFactory;
 import utilities.*;
 
@@ -111,7 +118,7 @@ public class GameReportII {
     private static class GameReportListener implements IGameListener {
 
         List<Double> scores = new ArrayList<>();
-//        List<Integer> branchingByStates = new ArrayList<>();
+        //        List<Integer> branchingByStates = new ArrayList<>();
         List<Double> visibilityOnTurn = new ArrayList<>();
         List<Integer> components = new ArrayList<>();
         AbstractForwardModel fm;
@@ -137,10 +144,9 @@ public class GameReportII {
 //                }
 //                branchingByStates.add(forwardStates.size());
                 scores.add(state.getScore(player));
-                int componentCount = state.getAllComponents().size();
-                components.add(componentCount);
-                visibilityOnTurn.add(state.getUnknownComponentsIds(player).size() / (double) componentCount);
-
+                Pair<Integer, int[]> allComp = countComponents(state);
+                components.add(allComp.a);
+                visibilityOnTurn.add(allComp.b[player] / (double) allComp.a);
             }
         }
 
@@ -174,14 +180,71 @@ public class GameReportII {
         fm.setup(gs);
         data.put("TimeSetup", (System.nanoTime() - s) / 10e3);
 
-        int totalComponents = gs.getAllComponents().size();
-        data.put("StateSizeStart", totalComponents);
+        Pair<Integer, int[]> components = countComponents(gs);
+        data.put("StateSizeStart", components.a);
 
         IntStream.range(0, game.getPlayers().size()).forEach(p -> {
-            int unseen = gs.getUnknownComponentsIds(p).size();
-            data.put("HiddenInfoStart", unseen / (double) totalComponents);
+            int unseen = components.b[p];
+            data.put("HiddenInfoStart", unseen / (double) components.a);
         });
     }
+
+    /**
+     * Returns the total number of components in the state as the first element of the returned value
+     * and an array of the counts that are hidden to each player
+     * <p>
+     *
+     * @param state
+     * @return The total number of components
+     */
+    private static Pair<Integer, int[]> countComponents(AbstractGameState state) {
+        int[] hiddenByPlayer = new int[state.getNPlayers()];
+        int total = componentSize(state.getAllComponents(), hiddenByPlayer);
+        if (state instanceof VirusGameState || state instanceof ColtExpressGameState ||
+                state instanceof DiamantGameState || state instanceof UnoGameState) {
+            // a hack for the moment - ultimately I want to rely purely on the counts back from GameStates
+            for (int p = 0; p < hiddenByPlayer.length; p++)
+                hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
+        }
+        return new Pair<>(total, hiddenByPlayer);
+    }
+
+    private static int componentSize(Component c, int[] hiddenByPlayer) {
+        if (c instanceof PartialObservableDeck) {
+            PartialObservableDeck<?> deck = (PartialObservableDeck<?>) c;
+            for (int i = 0; i < deck.getSize(); i++) {
+                for (int p = 0; p < hiddenByPlayer.length; p++) {
+                    if (!deck.getVisibilityForPlayer(i, p))
+                        hiddenByPlayer[p]++;
+                }
+            }
+            return deck.getSize();
+        } else if (c instanceof Deck) {
+            Deck<?> deck = (Deck<?>) c;
+            for (int i = 0; i < hiddenByPlayer.length; i++)
+                hiddenByPlayer[i] += deck.getSize();
+            return deck.getSize();
+        } else if (c instanceof GraphBoard) {
+            return ((GraphBoard) c).getBoardNodes().size();
+        } else if (c instanceof GridBoard) {
+            return ((GridBoard<?>) c).flattenGrid().length;
+        } else if (c instanceof Area) {
+            int count = 0;
+            for (Component sub : ((Area) c).getComponents().values()) {
+                count += componentSize(sub, hiddenByPlayer);
+            }
+            return count;
+        } else if (c instanceof Compartment) {
+            Compartment comp = (Compartment) c;
+            return comp.lootInside.getSize() + comp.lootOnTop.getSize();
+        } else if (c instanceof VirusOrgan) {
+            VirusOrgan organ = (VirusOrgan) c;
+            return organ.cards.getSize();
+        } else {
+            return 1;
+        }
+    }
+
 
     private static void postGameProcessing(Game game, Map<String, Object> data) {
 
