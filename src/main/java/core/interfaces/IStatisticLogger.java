@@ -1,7 +1,9 @@
 package core.interfaces;
 
 import utilities.StatSummary;
+import utilities.SummaryLogger;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 public interface IStatisticLogger {
@@ -15,6 +17,7 @@ public interface IStatisticLogger {
 
     /**
      * Use to record a single datum. For example
+     *
      * @param key
      * @param datum
      */
@@ -34,4 +37,23 @@ public interface IStatisticLogger {
      */
     Map<String, StatSummary> summary();
 
+
+    static IStatisticLogger createLogger(String loggerClass, String logFile) {
+        IStatisticLogger logger = new SummaryLogger();
+        try {
+            Class<?> clazz = Class.forName(loggerClass);
+
+            Constructor<?> constructor;
+            try {
+                constructor = clazz.getConstructor(String.class);
+                logger = (IStatisticLogger) constructor.newInstance(logFile);
+            } catch (NoSuchMethodException e) {
+                constructor = clazz.getConstructor();
+                logger = (IStatisticLogger) constructor.newInstance();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return logger;
+    }
 }

@@ -95,6 +95,7 @@ public abstract class AbstractForwardModel {
      * @param gameState - game state to be modified.
      */
     public final void setup(AbstractGameState gameState) {
+        gameState.reset();
         abstractSetup(gameState);
     }
 

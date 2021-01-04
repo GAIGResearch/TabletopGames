@@ -69,8 +69,20 @@ public class SummaryLogger implements IStatisticLogger {
                 data.append(otherData.get(key)).append("\t");
             }
             for (String key : allData.keySet()) {
-                header.append(key).append("\t").append(key).append("_se\t");
+                header.append(key).append("\t").append(key).append("_se");
                 data.append(String.format("%.3g\t%.2g\t", allData.get(key).mean(), allData.get(key).stdErr()));
+                data.append(String.format("%.3g\t", allData.get(key).max()));
+                header.append(key).append("_sd\t");
+                header.append(key).append("_median\t");
+                data.append(String.format("%.3g\t", allData.get(key).median()));
+                header.append(key).append("_min\t");
+                data.append(String.format("%.3g\t", allData.get(key).min()));
+                header.append(key).append("_max\t");
+                data.append(String.format("%.3g\t", allData.get(key).sd()));
+                header.append(key).append("_skew\t");
+                data.append(String.format("%.3g\t", allData.get(key).skew()));
+                header.append(key).append("_kurtosis");
+                data.append(String.format("%.3g", allData.get(key).kurtosis()));
             }
             header.append("\n");
             data.append("\n");
@@ -96,8 +108,8 @@ public class SummaryLogger implements IStatisticLogger {
         StringBuilder sb = new StringBuilder();
         for (String key : alphabeticOrder) {
             StatSummary stats = allData.get(key);
-            sb.append(String.format("%30s  Mean: %.3g +/- %.2g,\t[%d, %d], pop sd %.3g,\tn=%d\n", key,
-                    stats.mean(), stats.stdErr(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.n()));
+            sb.append(String.format("%30s  Mean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tRange: [%3d, %3d],\tpop sd %8.3g,\tskew %8.3g,\tkurtosis %8.3g,\tn=%d\n", key,
+                    stats.mean(), stats.stdErr(), stats.median(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
         }
         return sb.toString();
     }
