@@ -24,6 +24,9 @@ import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUI;
+import games.santorini.SantoriniForwardModel;
+import games.santorini.SantoriniGameState;
+import games.santorini.SantoriniParameters;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -162,6 +165,18 @@ public enum GameType {
                 add(MoveThroughDeck);
                 add(PushYourLuck);
                 add(SimultaneousActionSelection);
+            }}),
+    Santorini(2, 4,
+            new ArrayList<Category>(){{
+                add(AbstractStrategy);
+                add(Ancient);
+                add(Mythology);
+            }},
+            new ArrayList<Mechanic>(){{
+                add(SquareGrid);
+                add(TeamBasedGame);
+                add(ThreeDimensionalMovement);
+                add(VariablePlayerPowers);
             }});
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
@@ -194,6 +209,8 @@ public enum GameType {
                 return DotsAndBoxes;
             case "diamant":
                 return Diamant;
+            case "santorini":
+                return Santorini;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -256,6 +273,10 @@ public enum GameType {
                 forwardModel = new DiamantForwardModel();
                 gameState = new DiamantGameState(params, nPlayers);
                 break;
+            case Santorini:
+                forwardModel = new SantoriniForwardModel();
+                gameState = new SantoriniGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -283,6 +304,8 @@ public enum GameType {
                 return new DBParameters(seed);
             case Diamant:
                 return new DiamantParameters(seed);
+            case Santorini:
+                return new SantoriniParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -342,6 +365,7 @@ public enum GameType {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
             // TODO: Diamant GUI
+            // TODO: Santorini GUI
         }
 
         return gui;
@@ -378,7 +402,10 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        AbstractStrategy,
+        Ancient,
+        Mythology;
 
         /**
          * Retrieves a list of all games within this category.
@@ -442,7 +469,10 @@ public enum GameType {
         MultipleMaps,
         Campaign,
         Enclosure,
-        MoveThroughDeck;
+        MoveThroughDeck,
+        SquareGrid,
+        TeamBasedGame,
+        ThreeDimensionalMovement;
 
         /**
          * Retrieves a list of all games using this mechanic.
@@ -553,6 +583,8 @@ public enum GameType {
                 return new DBParameters(seed);
             case Diamant:
                 return new DiamantParameters(seed);
+            case Santorini:
+                return new SantoriniParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for GameType : " + this.name());
         }
