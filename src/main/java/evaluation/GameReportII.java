@@ -155,18 +155,24 @@ public class GameReportII {
 //            IntSummaryStatistics bf = branchingByStates.stream().mapToInt(i -> i).summaryStatistics();
 //            data.put("BranchingFactor", bf.getAverage());
 //            data.put("MaxBranchingFactor", bf.getMax());
-            DoubleSummaryStatistics sc = scores.stream().mapToDouble(i -> i).summaryStatistics();
-            data.put("ScoreMean", sc.getAverage());
-            data.put("ScoreMax", sc.getMax());
-            data.put("ScoreMin", sc.getMin());
-            IntSummaryStatistics stateSize = components.stream().mapToInt(i -> i).summaryStatistics();
-            data.put("StateSizeMean", stateSize.getAverage());
-            data.put("StateSizeMax", stateSize.getMax());
-            data.put("StateSizeMin", stateSize.getMin());
-            DoubleSummaryStatistics visibility = visibilityOnTurn.stream().mapToDouble(i -> i).summaryStatistics();
-            data.put("HiddenInfoMean", visibility.getAverage());
-            data.put("HiddenInfoMax", visibility.getMax());
-            data.put("HiddenInfoMin", visibility.getMin());
+            StatSummary sc = scores.stream().collect(new TAGSummariser());
+            data.put("ScoreMedian", sc.median());
+            data.put("ScoreMean", sc.mean());
+            data.put("ScoreMax", sc.max());
+            data.put("ScoreMin", sc.min());
+            data.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
+            StatSummary stateSize = scores.stream().collect(new TAGSummariser());
+            data.put("StateSizeMedian", stateSize.median());
+            data.put("StateSizeMean", stateSize.mean());
+            data.put("StateSizeMax", stateSize.max());
+            data.put("StateSizeMin", stateSize.min());
+            data.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
+            StatSummary visibility = scores.stream().collect(new TAGSummariser());
+            data.put("HiddenInfoMedian", visibility.median());
+            data.put("HiddenInfoMean", visibility.mean());
+            data.put("HiddenInfoMax", visibility.max());
+            data.put("HiddenInfoMin", visibility.min());
+            data.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
             return data;
         }
 
@@ -256,9 +262,11 @@ public class GameReportII {
                 .collect(new TAGSummariser());
         data.put("ActionSpaceMean", stats.mean());
         data.put("ActionSpaceMin", stats.min());
+        data.put("ActionSpaceMedian", stats.median());
         data.put("ActionSpaceMax", stats.max());
         data.put("ActionSpaceSkew", stats.skew());
         data.put("ActionSpaceKurtosis", stats.kurtosis());
+        data.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
         data.put("Decisions", stats.n());
         data.put("TimeNext", game.getNextTime() / 10e3);
         data.put("TimeCopy", game.getCopyTime() / 10e3);
