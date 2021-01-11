@@ -169,6 +169,7 @@ public abstract class AbstractGameState {
     /**
      * Provide a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
+     * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
@@ -178,7 +179,7 @@ public abstract class AbstractGameState {
      * This provides the current score in game turns. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
-     *
+     * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
      * @param playerId
      * @return - double, score of current state
      */
@@ -217,10 +218,12 @@ public abstract class AbstractGameState {
     /**
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
+     * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
+     * The default implementation calls the same-specific heuristic
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
-    public final double getScore(int playerId) {
+    public final double getHeuristicScore(int playerId) {
         return _getHeuristicScore(playerId);
     }
 

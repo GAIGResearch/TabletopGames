@@ -1,22 +1,15 @@
 package players.mcts;
 
 import core.AbstractGameState;
-import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
-import utilities.Utils;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
-import static players.mcts.MCTSEnums.TreePolicy.AlphaGo;
-import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
 class BasicTreeNode {
@@ -245,7 +238,7 @@ class BasicTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        return rolloutState.getScore(player.getPlayerID());
+        return rolloutState.getHeuristicScore(player.getPlayerID());
     }
 
     /**

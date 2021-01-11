@@ -116,7 +116,7 @@ public class GameEvaluator implements SolutionEvaluator {
         AbstractGameState finalState = newGame.getGameState();
 
         nEvals++;
-        return finalState.getScore(playerIndex);
+        return finalState.getHeuristicScore(playerIndex);
     }
 
     /**

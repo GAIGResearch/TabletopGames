@@ -6,7 +6,6 @@ import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
 import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import utilities.*;
@@ -14,7 +13,6 @@ import utilities.*;
 import java.io.File;
 import java.util.*;
 
-import static games.GameType.*;
 import static utilities.Utils.*;
 
 
@@ -168,7 +166,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     data.put("Game", g.getGameType().name());
                     data.put("PlayerNumber", p);
                     data.put("PlayerType", g.getPlayers().get(p).toString());
-                    data.put("Score", g.getGameState().getScore(p));
+                    data.put("Score", g.getGameState().getHeuristicScore(p));
                     data.put("Result", g.getGameState().getPlayerResults()[p].toString());
                     dataLogger.record(data);
                 }

@@ -92,7 +92,7 @@ public class Individual implements Comparable {
             if (this.heuristic != null){
                 score = heuristic.evaluateState(gameStates[i+1], playerID);
             } else {
-                score = gameStates[i+1].getScore(playerID);
+                score = gameStates[i+1].getHeuristicScore(playerID);
             }
 
             delta += Math.pow(discountFactor, i) * score;
@@ -127,7 +127,7 @@ public class Individual implements Comparable {
                     if (this.heuristic != null){
                         score = heuristic.evaluateState(gameStates[i+1], playerID);
                     } else {
-                        score = gameStates[i+1].getScore(playerID);
+                        score = gameStates[i+1].getHeuristicScore(playerID);
                     }
                     delta += Math.pow(discountFactor, i) * score;
                 } else {

@@ -27,7 +27,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
     public double exploreEpsilon = 0.1;
-    private IStateHeuristic heuristic = AbstractGameState::getScore;
+    private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -46,7 +46,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getScore);
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
     }
 
     @Override
