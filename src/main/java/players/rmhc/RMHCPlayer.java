@@ -30,6 +30,7 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer(RMHCParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
+        setName("RMHC");
     }
 
     public RMHCPlayer(long seed) {
@@ -77,9 +78,13 @@ public class RMHCPlayer extends AbstractPlayer {
                 long remaining = timer.remainingTimeMillis();
                 keepIterating = remaining > avgTimeTaken && remaining > params.breakMS;
             } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
-                keepIterating = (fmCalls + copyCalls) < params.fmCallsBudget;
+                keepIterating = fmCalls < params.budget;
+            } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
+                keepIterating = copyCalls < params.budget && numIters < params.budget;
+            } else if (params.budgetType == PlayerConstants.BUDGET_FMANDCOPY_CALLS) {
+                keepIterating = (fmCalls + copyCalls) < params.budget;
             } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
-                keepIterating = numIters < params.iterationsBudget;
+                keepIterating = numIters < params.budget;
             }
         }
 
