@@ -30,11 +30,11 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer(RMHCParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
+        setName("RMHC");
     }
 
     public RMHCPlayer(long seed) {
-        randomGenerator = new Random(seed);
-        params = new RMHCParams(seed);
+        this(new RMHCParams(seed));
     }
 
     public RMHCPlayer(IStateHeuristic heuristic) {
@@ -43,14 +43,12 @@ public class RMHCPlayer extends AbstractPlayer {
     }
 
     public RMHCPlayer(RMHCParams params, IStateHeuristic heuristic) {
-        randomGenerator = new Random(params.getRandomSeed());
-        this.params = params;
+        this(params);
         this.heuristic = heuristic;
     }
 
     public RMHCPlayer(long seed, IStateHeuristic heuristic) {
-        randomGenerator = new Random(seed);
-        params = new RMHCParams(seed);
+        this(new RMHCParams(seed));
         this.heuristic = heuristic;
     }
 
@@ -111,7 +109,6 @@ public class RMHCPlayer extends AbstractPlayer {
         avgTimeTaken = acumTimeTaken / numIters;
     }
 
-
 //    public static void main(String[] args){
 //        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
 //        ActionController ac = new ActionController(); //null;
@@ -134,4 +131,5 @@ public class RMHCPlayer extends AbstractPlayer {
 //        }
 //        System.out.println(wonGames);
 //    }
+
 }

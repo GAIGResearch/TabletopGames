@@ -161,13 +161,13 @@ public class GameReportII {
             data.put("ScoreMax", sc.max());
             data.put("ScoreMin", sc.min());
             data.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
-            StatSummary stateSize = scores.stream().collect(new TAGSummariser());
+            StatSummary stateSize = components.stream().collect(new TAGSummariser());
             data.put("StateSizeMedian", stateSize.median());
             data.put("StateSizeMean", stateSize.mean());
             data.put("StateSizeMax", stateSize.max());
             data.put("StateSizeMin", stateSize.min());
             data.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
-            StatSummary visibility = scores.stream().collect(new TAGSummariser());
+            StatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
             data.put("HiddenInfoMedian", visibility.median());
             data.put("HiddenInfoMean", visibility.mean());
             data.put("HiddenInfoMax", visibility.max());

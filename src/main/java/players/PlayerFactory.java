@@ -41,7 +41,9 @@ public class PlayerFactory {
     private static AbstractPlayer fromJSONFile(FileReader reader, String fileName) {
         try {
             JSONObject json = (JSONObject) parser.parse(reader);
-            return fromJSONObject(json);
+            AbstractPlayer retValue = fromJSONObject(json);
+            retValue.setName(fileName.substring(0, fileName.indexOf(".")));
+            return retValue;
         } catch (IOException | ParseException e) {
             throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage());
         }

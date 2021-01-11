@@ -50,7 +50,7 @@ public class Game {
     // Number of times an agent is asked for decisions
     private int nDecisions;
     // Number of actions taken in a turn by a player
-    private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount = 1;
+    private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
 
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     private int gameID;
@@ -343,7 +343,8 @@ public class Game {
         copyTime /= tick;
         actionComputeTime /= tick;
         agentTime /= nDecisions;
-        nActionsPerTurnSum /= nActionsPerTurnCount;
+        if (nActionsPerTurnCount > 0)
+            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**
