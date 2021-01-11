@@ -24,7 +24,6 @@ public abstract class AbstractPlayer {
     public final int getPlayerID() {
         return playerID;
     }
-    public void setPlayerID(int id) {playerID = id;}
 
     /**
      * Retrieves the forward model for current game being played.
