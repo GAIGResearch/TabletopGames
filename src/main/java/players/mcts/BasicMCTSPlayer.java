@@ -3,7 +3,6 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 
 import java.util.List;
 import java.util.Random;
@@ -11,7 +10,7 @@ import java.util.Random;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.TreePolicy.UCB;
-import static players.mcts.MCTSEnums.strategies.RANDOM;
+import static players.mcts.MCTSEnums.Strategies.RANDOM;
 
 /**
  * This is a simple version of MCTS that may be useful for newcomers to TAG and MCTS-like algorithms

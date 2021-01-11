@@ -6,12 +6,11 @@ import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
-import utilities.Hash;
 
 import java.util.*;
 
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.strategies.*;
+import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 
@@ -21,7 +20,7 @@ public class MCTSParams extends PlayerParameters {
     public int rolloutLength = 10;
     public int maxTreeDepth = 10;
     public double epsilon = 1e-6;
-    public MCTSEnums.strategies rolloutType = RANDOM;
+    public MCTSEnums.Strategies rolloutType = RANDOM;
     public boolean openLoop = false;
     public boolean redeterminise = false;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
@@ -57,7 +56,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutLength = (int) getParameterValue("rolloutLength");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
-        rolloutType = (MCTSEnums.strategies) getParameterValue("rolloutType");
+        rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         openLoop = (boolean) getParameterValue("openLoop");
         redeterminise = (boolean) getParameterValue("redeterminise");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
