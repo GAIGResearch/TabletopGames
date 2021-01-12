@@ -1,6 +1,5 @@
 package players.simple;
 
-import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
@@ -48,7 +47,7 @@ public class OSLAPlayer extends AbstractPlayer {
             if (heuristic != null){
                 valState = heuristic.evaluateState(gsCopy, this.getPlayerID());
             } else {
-                valState = gsCopy.getScore(this.getPlayerID());
+                valState = gsCopy.getHeuristicScore(this.getPlayerID());
             }
 
             double Q = noise(valState, this.epsilon, this.random.nextDouble());

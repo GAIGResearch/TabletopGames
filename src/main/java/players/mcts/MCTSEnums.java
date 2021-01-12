@@ -6,8 +6,8 @@ import java.util.function.Function;
 
 public class MCTSEnums {
 
-    public enum strategies {
-        RANDOM, Dominion_BigMoney, Dominion_PlayActions
+    public enum Strategies {
+        RANDOM
     }
 
     public enum SelectionPolicy {

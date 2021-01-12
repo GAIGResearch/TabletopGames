@@ -35,7 +35,7 @@ public class RewardsForParanoia {
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.iterationsBudget = 1000;
+        params.budget = 1000;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.K = 1.0;
     }

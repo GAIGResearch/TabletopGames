@@ -6,13 +6,13 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.GameLogger;
 import games.GameType;
-import games.dominion.DominionGameAttributes;
 import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
 import players.simple.RandomPlayer;
 import utilities.*;
 
@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
-import static games.dominion.DominionGameAttributes.*;
 import static java.util.stream.Collectors.*;
 
 public class Game {
@@ -685,47 +684,16 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
         MCTSParams params1 = new MCTSParams();
-        MCTSParams params2 = new MCTSParams();
-        params2.redeterminise = true;
-        params2.openLoop = true;
-        params2.rolloutLength = 100;
-        params2.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        params2.K = 10.0;
-        params2.maxTreeDepth = 3;
-        params2.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
-        params2.budgetType = PlayerConstants.BUDGET_TIME;
-        params2.timeBudget = 2000;
 
-        MCTSParams params3 = (MCTSParams) params2.copy();
-        params3.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
-        params3.maxTreeDepth = 10;
-        params3.K = 3.0;
-
-        List<IGameListener> listeners = new ArrayList<>();
-        List<DominionGameAttributes> perGame = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, PROVINCES_LEFT, DUCHIES_LEFT, ESTATES_LEFT, EMPTY_SUPPLY_SLOTS);
-        List<DominionGameAttributes> perAction = Arrays.asList(GAME_ID, GAME_ROUND, PLAYER, ACTION_TYPE, ACTION_DESCRIPTION);
-        GameLogger gameOverLogger = new GameLogger(Arrays.asList(GameEvents.GAME_OVER), "DominionGames.txt", false);
-        gameOverLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
-        listeners.add(gameOverLogger);
-        GameLogger actionLogger = new GameLogger(Arrays.asList(GameEvents.ACTION_CHOSEN), "DominionActions.txt", false);
-        actionLogger.addAttributes(perAction.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
-        listeners.add(actionLogger);
-        GameLogger roundLogger = new GameLogger(Arrays.asList(GameEvents.ROUND_OVER), "DominionRounds.txt", false);
-        roundLogger.addAttributes(perGame.stream().map(DominionGameAttributes::getAttribute).collect(toList()));
-        listeners.add(roundLogger);
-
-        // players.add(new RandomPlayer());
-        //     players.add(new RMHCPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
-        players.add(new MCTSPlayer(params2));
-        players.add(new MCTSPlayer(params3));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DominionSizeDistortion, players, seed, ac, false, null);
+        runOne(LoveLetter, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
-
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
@@ -738,8 +706,6 @@ public class Game {
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
-
-        listeners.forEach(l -> ((GameLogger) l).close());
 
     }
 }

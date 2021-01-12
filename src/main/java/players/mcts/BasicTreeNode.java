@@ -1,22 +1,15 @@
 package players.mcts;
 
 import core.AbstractGameState;
-import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
-import utilities.Utils;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
-import static players.mcts.MCTSEnums.TreePolicy.AlphaGo;
-import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
 class BasicTreeNode {
@@ -70,7 +63,7 @@ class BasicTreeNode {
         int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if (player.params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
+            elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
         // Tracking number of iterations for iteration budget
@@ -101,10 +94,10 @@ class BasicTreeNode {
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= player.params.iterationsBudget;
+                stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = fmCallsCount > player.params.fmCallsBudget;
+                stop = fmCallsCount > player.params.budget;
             }
         }
     }
@@ -245,7 +238,7 @@ class BasicTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        return rolloutState.getScore(player.getPlayerID());
+        return rolloutState.getHeuristicScore(player.getPlayerID());
     }
 
     /**

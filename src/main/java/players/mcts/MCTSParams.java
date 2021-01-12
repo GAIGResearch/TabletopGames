@@ -3,17 +3,14 @@ package players.mcts;
 import core.*;
 import core.interfaces.*;
 import evaluation.TunableParameters;
-import games.dominion.BigMoney;
-import games.dominion.PlayActionCards;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
-import utilities.Hash;
 
 import java.util.*;
 
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.strategies.*;
+import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 
@@ -23,14 +20,14 @@ public class MCTSParams extends PlayerParameters {
     public int rolloutLength = 10;
     public int maxTreeDepth = 10;
     public double epsilon = 1e-6;
-    public MCTSEnums.strategies rolloutType = RANDOM;
+    public MCTSEnums.Strategies rolloutType = RANDOM;
     public boolean openLoop = false;
     public boolean redeterminise = false;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
     public double exploreEpsilon = 0.1;
-    private IStateHeuristic heuristic = AbstractGameState::getScore;
+    private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -49,7 +46,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getScore);
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
     }
 
     @Override
@@ -59,7 +56,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutLength = (int) getParameterValue("rolloutLength");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
-        rolloutType = (MCTSEnums.strategies) getParameterValue("rolloutType");
+        rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         openLoop = (boolean) getParameterValue("openLoop");
         redeterminise = (boolean) getParameterValue("redeterminise");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
@@ -106,10 +103,6 @@ public class MCTSParams extends PlayerParameters {
         switch (rolloutType) {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
-            case Dominion_BigMoney:
-                return new BigMoney();
-            case Dominion_PlayActions:
-                return new PlayActionCards(new Random(getRandomSeed()));
             default:
                 throw new AssertionError("Unknown rollout type : " + rolloutType);
         }

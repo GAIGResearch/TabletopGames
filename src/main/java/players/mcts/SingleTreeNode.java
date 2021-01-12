@@ -103,7 +103,7 @@ public class SingleTreeNode {
         int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if (player.params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
+            elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
         // Tracking number of iterations for iteration budget
@@ -145,10 +145,15 @@ public class SingleTreeNode {
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= player.params.iterationsBudget;
+                stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget || numIters > player.params.fmCallsBudget;
+                stop =  fmCallsCount > player.params.budget || numIters > player.params.budget;
+            } else if (budgetType == BUDGET_COPY_CALLS) {
+                stop = copyCount > player.params.budget || numIters > player.params.budget;
+            } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
+                stop = (copyCount + fmCallsCount) > player.params.budget || numIters > player.params.budget;
+
             }
         }
 
