@@ -6,6 +6,7 @@ import core.interfaces.IStatisticLogger;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.human.ActionController;
+import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
@@ -684,7 +685,6 @@ public class Game {
         /* 4. Run! */
         runOne(LoveLetter, players, seed, ac, false);
 //        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
-
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
