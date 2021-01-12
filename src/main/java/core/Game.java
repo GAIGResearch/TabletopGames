@@ -8,6 +8,7 @@ import evaluation.GameLogger;
 import games.GameType;
 import players.PlayerConstants;
 import players.human.ActionController;
+import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
@@ -693,7 +694,6 @@ public class Game {
         /* 4. Run! */
         runOne(LoveLetter, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
-
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
