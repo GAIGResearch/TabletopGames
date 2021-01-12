@@ -54,7 +54,7 @@ public abstract class AbstractForwardModel {
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of IAction objects.
+     * @return - List of AbstractAction objects.
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
 

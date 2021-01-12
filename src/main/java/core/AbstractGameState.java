@@ -43,6 +43,12 @@ public abstract class AbstractGameState {
     // Data for this game
     protected AbstractGameData data;
 
+    private int gameID;
+
+    // this will add some extra sanity/fragility checks to help detect errors with GameStates behaving in
+    // unusual - and probably wrong - ways.
+    private boolean extraChecks = false;
+
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
@@ -134,6 +140,9 @@ public abstract class AbstractGameState {
 
         s.history = new ArrayList<>(history);
         s.historyText = new ArrayList<>(historyText);
+        if (extraChecks && historyText.size() > 1000) {
+            throw new AssertionError("History really shouldn;t be this long");
+        }
             // we do not copy individual actions in history, as these are now dead and should not change
 
         // Update the list of components for ID matching in actions.
@@ -160,10 +169,21 @@ public abstract class AbstractGameState {
     /**
      * Provide a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
+     * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
-    protected abstract double _getScore(int playerId);
+    protected abstract double _getHeuristicScore(int playerId);
+
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
+     * @param playerId
+     * @return - double, score of current state
+     */
+    public abstract double getGameScore(int playerId);
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
@@ -198,11 +218,13 @@ public abstract class AbstractGameState {
     /**
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
+     * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
+     * The default implementation calls the same-specific heuristic
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
-    public final double getScore(int playerId) {
-        return _getScore(playerId);
+    public final double getHeuristicScore(int playerId) {
+        return _getHeuristicScore(playerId);
     }
 
     /**
@@ -223,6 +245,9 @@ public abstract class AbstractGameState {
     protected void recordAction(AbstractAction action) {
         history.add(action);
         historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
+        if (extraChecks && history.size() > 1000) {
+            throw new AssertionError("History is probably a bit too long...");
+        }
     }
 
     /**
@@ -234,6 +259,8 @@ public abstract class AbstractGameState {
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
+    void setGameID(int id) {gameID = id;} // package level deliberately
+    public int getGameID() {return gameID;}
 
     @Override
     public boolean equals(Object o) {

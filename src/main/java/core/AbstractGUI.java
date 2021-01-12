@@ -11,6 +11,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.*;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractGUI extends JFrame {
@@ -24,17 +27,20 @@ public abstract class AbstractGUI extends JFrame {
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
-    protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase;
+    protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase, playerScores;
     protected JTextPane historyInfo;
     protected JScrollPane historyContainer;
     private int actionsAtLastUpdate;
     private WindowInput wi;
+
+    protected int width, height;
 
     public AbstractGUI(ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
         gameStatus = new JLabel();
         playerStatus = new JLabel();
+        playerScores = new JLabel();
         gamePhase = new JLabel();
         turnOwner = new JLabel();
         turn = new JLabel();
@@ -134,6 +140,7 @@ public abstract class AbstractGUI extends JFrame {
 
         gameInfo.add(gameStatus);
         gameInfo.add(playerStatus);
+        gameInfo.add(playerScores);
         gameInfo.add(gamePhase);
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
@@ -166,6 +173,9 @@ public abstract class AbstractGUI extends JFrame {
         }
         gameStatus.setText("Game status: " + gameState.getGameStatus());
         playerStatus.setText(Arrays.toString(gameState.getPlayerResults()));
+        playerScores.setText("Player Scores: " + IntStream.range(0, gameState.getNPlayers())
+                .mapToObj(p -> String.format("%.0f", gameState.getGameScore(p)))
+                .collect(joining(", ")));
         gamePhase.setText("Game phase: " + gameState.getGamePhase());
         turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
         turn.setText("Turn: " + gameState.getTurnOrder().getTurnCounter() +
@@ -250,5 +260,10 @@ public abstract class AbstractGUI extends JFrame {
                 actionButton.setButtonAction(null, "");
             }
         }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
     }
 }

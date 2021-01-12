@@ -25,6 +25,10 @@ public class CardView extends ComponentView {
         drawCard(g, r.x, r.y, r.width, r.height, card, null, null, true);
     }
 
+    public static void drawCard(Graphics2D g, Rectangle r, Card card, Image front, Image back, boolean visible) {
+        drawCard(g, r.x, r.y, r.width, r.height, card, front, back, visible);
+    }
+
     public static void drawCard(Graphics2D g, int x, int y, int width, int height, Card card, Image front, Image back, boolean visible) {
         if (visible && front != null) {
             g.drawImage(front, x, y, width, height, null, null);

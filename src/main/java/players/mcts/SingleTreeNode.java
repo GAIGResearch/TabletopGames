@@ -3,8 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
-import games.loveletter.LoveLetterGame;
-import games.loveletter.LoveLetterGameState;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Utils;
@@ -105,7 +103,7 @@ public class SingleTreeNode {
         int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if (player.params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
+            elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
         // Tracking number of iterations for iteration budget
@@ -147,10 +145,15 @@ public class SingleTreeNode {
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= player.params.iterationsBudget;
+                stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget;
+                stop =  fmCallsCount > player.params.budget || numIters > player.params.budget;
+            } else if (budgetType == BUDGET_COPY_CALLS) {
+                stop = copyCount > player.params.budget || numIters > player.params.budget;
+            } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
+                stop = (copyCount + fmCallsCount) > player.params.budget || numIters > player.params.budget;
+
             }
         }
 
@@ -282,7 +285,7 @@ public class SingleTreeNode {
     private void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
         while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
-            AbstractGameState preGS = gs.copy();
+            //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
             List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(gs);
             if (availableActions.isEmpty())
@@ -476,11 +479,7 @@ public class SingleTreeNode {
         // Evaluate final state and return normalised score
         double[] retValue = new double[state.getNPlayers()];
         for (int i = 0; i < retValue.length; i++) {
-            if (player.heuristic != null) {
-                retValue[i] = player.heuristic.evaluateState(rolloutState, i);
-            } else {
-                retValue[i] = rolloutState.getScore(i);
-            }
+            retValue[i] = player.heuristic.evaluateState(rolloutState, i);
         }
         return retValue;
     }
@@ -574,10 +573,21 @@ public class SingleTreeNode {
         return bestAction;
     }
 
-    public int getVisits() {return nVisits;}
-    public double[] getTotValue() {return totValue;}
-    public Map<AbstractAction, SingleTreeNode[]> getChildren() {return children;}
-    public int getActor() {return decisionPlayer;}
+    public int getVisits() {
+        return nVisits;
+    }
+
+    public double[] getTotValue() {
+        return totValue;
+    }
+
+    public Map<AbstractAction, SingleTreeNode[]> getChildren() {
+        return children;
+    }
+
+    public int getActor() {
+        return decisionPlayer;
+    }
 
     @Override
     public String toString() {

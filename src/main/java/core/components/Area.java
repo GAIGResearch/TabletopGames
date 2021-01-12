@@ -2,9 +2,7 @@ package core.components;
 
 import utilities.Utils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An Area is a collection of components such as Decks, Token, Dices, Cards and Boards, mapping to their IDs.
@@ -117,5 +115,19 @@ public class Area extends Component {
      */
     public int size() {
         return components.size();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Area) {
+            Area other = (Area) o;
+            return componentID == other.componentID && other.components.equals(components);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(componentID, components);
     }
 }

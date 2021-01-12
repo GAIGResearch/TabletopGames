@@ -1,13 +1,25 @@
 package games.tictactoe;
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.interfaces.IStateHeuristic;
+import evaluation.TunableParameters;
 import utilities.Pair;
 import utilities.Utils;
 
-public class TicTacToeHeuristic implements IStateHeuristic {
+public class TicTacToeHeuristic extends TunableParameters implements IStateHeuristic {
 
     double FACTOR_PLAYER = 0.8;
     double FACTOR_OPPONENT = 0.5;
+
+    public TicTacToeHeuristic() {
+        addTunableParameter("FACTOR_PLAYER", 0.8);
+        addTunableParameter("FACTOR_OPPONENT", 0.5);
+    }
+    @Override
+    public void _reset() {
+        FACTOR_OPPONENT = (double) getParameterValue("FACTOR_OPPONENT");
+        FACTOR_PLAYER = (double) getParameterValue("FACTOR_PLAYER");
+    }
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
@@ -102,4 +114,42 @@ public class TicTacToeHeuristic implements IStateHeuristic {
             nOpponent[count.b-1] ++;
         }
     }
+
+    /**
+     * Return a copy of this game parameters object, with the same parameters as in the original.
+     *
+     * @return - new game parameters object.
+     */
+    @Override
+    protected TicTacToeHeuristic _copy() {
+        TicTacToeHeuristic retValue = new TicTacToeHeuristic();
+        retValue.FACTOR_PLAYER = FACTOR_PLAYER;
+        retValue.FACTOR_OPPONENT = FACTOR_OPPONENT;
+        return retValue;
+    }
+
+    /**
+     * Checks if the given object is the same as the current.
+     *
+     * @param o - other object to test equals for.
+     * @return true if the two objects are equal, false otherwise
+     */
+    @Override
+    protected boolean _equals(Object o) {
+        if (o instanceof TicTacToeHeuristic) {
+            TicTacToeHeuristic other = (TicTacToeHeuristic) o;
+            return other.FACTOR_OPPONENT == FACTOR_OPPONENT && other.FACTOR_PLAYER == FACTOR_PLAYER;
+        }
+        return false;
+    }
+
+    /**
+     * @return Returns Tuned Parameters corresponding to the current settings
+     * (will use all defaults if setParameterValue has not been called at all)
+     */
+    @Override
+    public TicTacToeHeuristic instantiate() {
+        return this._copy();
+    }
+
 }

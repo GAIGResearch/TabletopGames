@@ -20,7 +20,6 @@ import java.util.List;
 public class TicTacToeGUI extends AbstractGUI {
 
     TTTBoardView view;
-    int width, height;
 
     public TicTacToeGUI(Game game, ActionController ac) {
         super(ac, 1);

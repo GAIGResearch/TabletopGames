@@ -38,24 +38,8 @@ public class MCTSPlayer extends AbstractPlayer {
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
+        heuristic = params.getHeuristic();
         setName(name);
-    }
-
-    public MCTSPlayer(IStateHeuristic heuristic){
-        this(System.currentTimeMillis());
-        this.heuristic = heuristic;
-    }
-
-    public MCTSPlayer(long seed, IStateHeuristic heuristic){
-        this.params = new MCTSParams(seed);
-        rnd = new Random(seed);
-        this.heuristic = heuristic;
-    }
-
-    public MCTSPlayer( MCTSParams params, IStateHeuristic heuristic){
-        this.params = params;
-        rnd = new Random(this.params.getRandomSeed());
-        this.heuristic = heuristic;
     }
 
     @Override
@@ -74,4 +58,5 @@ public class MCTSPlayer extends AbstractPlayer {
     public AbstractPlayer getOpponentModel(int playerID) {
         return opponentModel;
     }
+
 }

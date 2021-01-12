@@ -3,6 +3,8 @@ package core.components;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -152,11 +154,7 @@ public class Deck<T extends Component> extends Component {
      * @return true if not over capacity, false otherwise.
      */
     public boolean add(Deck<T> d){
-        components.addAll(d.components);
-        for (T comp: d.components) {
-            comp.setOwnerId(ownerId);
-        }
-        return capacity == -1 || components.size() <= capacity;
+        return this.add(d, 0);
     }
 
     /**
@@ -242,6 +240,25 @@ public class Deck<T extends Component> extends Component {
     public List<T> getComponents() {
         return components;
     }
+
+    public Stream<T> stream() {
+        return components.stream();
+    }
+    public double sumDouble(Function<T, Double> lambda) {
+        double retValue = 0.0;
+        for (T c : components) {
+            retValue += lambda.apply(c);
+        }
+        return retValue;
+    }
+    public int sumInt(Function<T, Integer> lambda) {
+        int retValue = 0;
+        for (T c : components) {
+            retValue += lambda.apply(c);
+        }
+        return retValue;
+    }
+
 
     /**
      * @return the size of this deck (number of components in it).
@@ -393,6 +410,11 @@ public class Deck<T extends Component> extends Component {
         Deck<?> deck = (Deck<?>) o;
         return capacity == deck.capacity &&
                 Objects.equals(components, deck.components);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(capacity, ownerId, componentID, components);
     }
 
 }

@@ -42,10 +42,10 @@ public class RandomTestPlayer extends AbstractPlayer {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);
             states.add(gsCopy);
-            scores.add(gsCopy.getScore(getPlayerID()));
+            scores.add(gsCopy.getHeuristicScore(getPlayerID()));
         }
         bf.add(states.size());
-        scores.add(gs.getScore(getPlayerID()));
+        scores.add(gs.getHeuristicScore(getPlayerID()));
 
         return actions.get(random.nextInt(actions.size()));
     }

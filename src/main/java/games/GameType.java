@@ -39,8 +39,7 @@ import gui.PrototypeGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static core.CoreConstants.*;
 import static games.GameType.Category.*;
@@ -58,91 +57,29 @@ public enum GameType {
      * Add here all games, planned or implemented.
      */
     Pandemic(2, 4,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Medical);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(ActionPoints);
-                add(Cooperative);
-                add(HandManagement);
-                add(PointToPointMovement);
-                add(SetCollection);
-                add(Trading);
-                add(VariablePlayerPowers);
-            }}),
-    TicTacToe(2, 2,
-            new ArrayList<Category>() {{
-                add(Simple);
-                add(Abstract);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(PatternBuilding);
-            }}),
-    ExplodingKittens(2, 5,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Animals);
-                add(Cards);
-                add(ComicBook);
-                add(Humour);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(HotPotato);
-                add(PlayerElimination);
-                add(PushYourLuck);
-                add(SetCollection);
-                add(TakeThat);
-            }}),
-    LoveLetter(2, 4,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Deduction);
-                add(Renaissance);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(PlayerElimination);
-            }}),
-    Uno(2, 10,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(ComicBook);
-                add(Number);
-                add(MoviesTVRadio);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(LoseATurn);
-                add(TakeThat);
-            }}),
-    Virus(2, 6,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Medical);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(CardDrafting);
-                add(SetCollection);
-                add(TakeThat);
-            }}),
-    ColtExpress(2, 6,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(AmericanWest);
-                add(Fighting);
-                add(Trains);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(ActionQueue);
-                add(HandManagement);
-                add(Memory);
-                add(ProgrammedEvent);
-                add(SimultaneousActionSelection);
-                add(TakeThat);
-                add(VariablePlayerPowers);
-            }}),
+            new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
+            new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
+            add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }}),
+    TicTacToe (2, 2,
+            new ArrayList<Category>() {{ add(Simple); add(Abstract); }},
+            new ArrayList<Mechanic>() {{ add(PatternBuilding); }}),
+    ExplodingKittens (2, 5,
+            new ArrayList<Category>() {{ add(Strategy); add(Animals); add(Cards); add(ComicBook); add(Humour); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(HotPotato); add(PlayerElimination); add(PushYourLuck);
+            add(SetCollection); add(TakeThat); }}),
+    LoveLetter (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Deduction); add(Renaissance); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(PlayerElimination); }}),
+    Uno (2, 10,
+            new ArrayList<Category>() {{ add(Cards); add(ComicBook); add(Number); add(MoviesTVRadio); }},
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(LoseATurn); add(TakeThat); }}),
+    Virus (2, 6,
+            new ArrayList<Category>() {{ add(Cards); add(Medical); }},
+            new ArrayList<Mechanic>() {{ add(CardDrafting); add(SetCollection); add(TakeThat); }}),
+    ColtExpress (2, 6,
+            new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
+            new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
     DotsAndBoxes(2, 6,
             new ArrayList<Category>() {{
                 add(Simple);
@@ -170,7 +107,6 @@ public enum GameType {
     /**
      * Converts a given string to the enum type corresponding to the game.
      * Add here all games, planned or implemented.
-     *
      * @param game - string of a game type
      * @return - GameType corresponding to String
      */
@@ -314,12 +250,6 @@ public enum GameType {
             case Pandemic:
                 gui = new PandemicGUI(game, ac);
                 break;
-//            case ExplodingKittens:
-//                if (gameState != null) {
-//                    gui = new PrototypeGUI(this, gameState, ac, 500);
-//                } else {
-//                    gui = new PrototypeGUI(this,null, ac, 0);
-//                }
             case Uno:
                 gui = new UnoGUI(game, ac, human);
                 break;
@@ -341,6 +271,7 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
+                break;
             // TODO: Diamant GUI
         }
 
@@ -442,6 +373,7 @@ public enum GameType {
         MultipleMaps,
         Campaign,
         Enclosure,
+        DeckManagement,
         MoveThroughDeck;
 
         /**
@@ -486,30 +418,25 @@ public enum GameType {
     public int getMinPlayers() {
         return minPlayers;
     }
-
     public int getMaxPlayers() {
         return maxPlayers;
     }
-
     public ArrayList<Category> getCategories() {
         return categories;
     }
-
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
-
     public static int getMinPlayersAllGames() {
         int min = Integer.MAX_VALUE;
-        for (GameType gt : GameType.values()) {
+        for (GameType gt: GameType.values()) {
             if (gt.minPlayers < min) min = gt.minPlayers;
         }
         return min;
     }
-
     public static int getMaxPlayersAllGames() {
         int max = Integer.MIN_VALUE;
-        for (GameType gt : GameType.values()) {
+        for (GameType gt: GameType.values()) {
             if (gt.minPlayers > max) max = gt.minPlayers;
         }
         return max;
@@ -517,45 +444,19 @@ public enum GameType {
 
     /**
      * Creates an instance of the given game type with nPlayers number of players and a new random seed.
-     *
      * @param nPlayers - number of players for the game.
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), defaultParams(System.currentTimeMillis()));
+        return createGameInstance(nPlayers, System.currentTimeMillis(), getDefaultParams(System.currentTimeMillis()));
     }
 
     public Game createGameInstance(int nPlayers, long seed) {
-        return createGameInstance(nPlayers, seed, defaultParams(seed));
+        return createGameInstance(nPlayers, seed, getDefaultParams(seed));
     }
 
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
         return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
-    }
-
-    public AbstractParameters defaultParams(long seed) {
-        switch (this) {
-            case Pandemic:
-                return new PandemicParameters("data/pandemic/", seed);
-            case TicTacToe:
-                return new TicTacToeGameParameters(seed);
-            case ExplodingKittens:
-                return new ExplodingKittensParameters(seed);
-            case LoveLetter:
-                return new LoveLetterParameters(seed);
-            case Uno:
-                return new UnoGameParameters(seed);
-            case Virus:
-                return new VirusGameParameters(seed);
-            case ColtExpress:
-                return new ColtExpressParameters(seed);
-            case DotsAndBoxes:
-                return new DBParameters(seed);
-            case Diamant:
-                return new DiamantParameters(seed);
-            default:
-                throw new AssertionError("No default Parameters specified for GameType : " + this.name());
-        }
     }
 
     @Override

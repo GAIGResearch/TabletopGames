@@ -67,11 +67,13 @@ public class PlayerFactory {
             case "osla":
                 return new OSLAPlayer();
             case "mcts":
-                MCTSParams params = new MCTSParams(System.currentTimeMillis());
-                TunableParameters.loadFromJSON(params, json);
-                return new MCTSPlayer(params);
+                MCTSParams mctsParams = new MCTSParams(System.currentTimeMillis());
+                TunableParameters.loadFromJSON(mctsParams, json);
+                return new MCTSPlayer(mctsParams);
             case "rmhc":
-                throw new AssertionError("RMHC from JSON Not yet implemented");
+                RMHCParams rmhcParams = new RMHCParams(System.currentTimeMillis());
+                TunableParameters.loadFromJSON(rmhcParams, json);
+                return new RMHCPlayer(rmhcParams);
             case "heuristic":
                 String className = (String) json.get("class");
                 if (className == null)

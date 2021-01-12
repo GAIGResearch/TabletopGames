@@ -199,8 +199,13 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new ColtExpressHeuristic().evaluateState(this, playerId);
+    }
+
+    @Override
+    public double getGameScore(int playerId) {
+        return getLoot(playerId).sumInt(Loot::getValue);
     }
 
     @Override
