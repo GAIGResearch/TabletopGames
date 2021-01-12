@@ -143,7 +143,7 @@ public class GameReportII {
 //                    forwardStates.add(gsCopy.hashCode());
 //                }
 //                branchingByStates.add(forwardStates.size());
-                scores.add(state.getScore(player));
+                scores.add(state.getGameScore(player));
                 Pair<Integer, int[]> allComp = countComponents(state);
                 components.add(allComp.a);
                 visibilityOnTurn.add(allComp.b[player] / (double) allComp.a);
@@ -208,7 +208,7 @@ public class GameReportII {
         int total = componentSize(state.getAllComponents(), hiddenByPlayer);
         if (state instanceof VirusGameState || state instanceof ColtExpressGameState ||
                 state instanceof DiamantGameState || state instanceof UnoGameState) {
-            // a hack for the moment - ultimately I want to rely purely on the counts back from GameStates
+            // TODO: a hack for the moment - ultimately I want to rely purely on the counts back from GameStates
             for (int p = 0; p < hiddenByPlayer.length; p++)
                 hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
         }
@@ -216,6 +216,7 @@ public class GameReportII {
     }
 
     private static int componentSize(Component c, int[] hiddenByPlayer) {
+        // TODO: Move the game-specific logic in the if...else... block into the relevant Games where it belongs
         if (c instanceof PartialObservableDeck) {
             PartialObservableDeck<?> deck = (PartialObservableDeck<?>) c;
             for (int i = 0; i < deck.getSize(); i++) {

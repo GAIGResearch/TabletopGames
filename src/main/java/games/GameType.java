@@ -8,6 +8,7 @@ import games.coltexpress.gui.ColtExpressGUI;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
+import games.dominion.gui.DominionGUI;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUI;
 import games.dotsboxes.DBGameState;
