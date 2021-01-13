@@ -16,6 +16,7 @@ public abstract class AbstractForwardModel {
 
     /**
      * Combines both super class and sub class setup methods. Called from the game loop.
+     *
      * @param firstState - initial state.
      */
     protected void abstractSetup(AbstractGameState firstState) {
@@ -32,34 +33,38 @@ public abstract class AbstractForwardModel {
 
     /**
      * Performs initial game setup according to game rules
-     *  - sets up decks and shuffles
-     *  - gives player cards
-     *  - places tokens on boards
-     *  etc.
+     * - sets up decks and shuffles
+     * - gives player cards
+     * - places tokens on boards
+     * etc.
+     *
      * @param firstState - the state to be modified to the initial game state.
      */
     protected abstract void _setup(AbstractGameState firstState);
 
     /**
      * Applies the given action to the game state and executes any other game rules. Steps to follow:
-     *      - execute player action
-     *      - execute any game rules applicable
-     *      - check game over conditions, and if any trigger, set the gameStatus and playerResults variables
-     *      appropriately (and return)
-     *      - move to the next player where applicable
+     * - execute player action
+     * - execute any game rules applicable
+     * - check game over conditions, and if any trigger, set the gameStatus and playerResults variables
+     * appropriately (and return)
+     * - move to the next player where applicable
+     *
      * @param currentState - current game state, to be modified by the action.
-     * @param action - action requested to be played by a player.
+     * @param action       - action requested to be played by a player.
      */
     protected abstract void _next(AbstractGameState currentState, AbstractAction action);
 
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
+     *
      * @return - List of AbstractAction objects.
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
 
     /**
      * Gets a copy of the FM with a new random number generator.
+     *
      * @return - new forward model with different random seed (keeping logic).
      */
     protected abstract AbstractForwardModel _copy();
@@ -68,14 +73,16 @@ public abstract class AbstractForwardModel {
      * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
      * The last thing to be called in the game loop, after the game is finished.
      */
-    protected void endGame(AbstractGameState gameState) {}
+    protected void endGame(AbstractGameState gameState) {
+    }
 
     /**
      * Current player tried to play an illegal action. Either disqualify (Automatic loss and no more playing),
      * or play a random action for them instead.
      * Subclasses can overwrite for their own behaviour.
+     *
      * @param gameState - game state in which illegal action was attempted.
-     * @param action - action played
+     * @param action    - action played
      */
     protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
         if (DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED) {
@@ -92,6 +99,7 @@ public abstract class AbstractForwardModel {
 
     /**
      * Sets up the given game state for game start according to game rules, with a new random seed.
+     *
      * @param gameState - game state to be modified.
      */
     public final void setup(AbstractGameState gameState) {
@@ -101,8 +109,9 @@ public abstract class AbstractForwardModel {
 
     /**
      * Applies the given action to the game state and executes any other game rules.
+     *
      * @param currentState - current game state, to be modified by the action.
-     * @param action - action requested to be played by a player.
+     * @param action       - action requested to be played by a player.
      */
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
@@ -117,7 +126,20 @@ public abstract class AbstractForwardModel {
     }
 
     /**
+     * The use case for this method is Simultaneous Move games
+     *
+     * @param currentState  - current game state, to be modified by the actions
+     * @param actionPerPlayer  - a list of actions, which will be executed in order
+     */
+    public final void next(AbstractGameState currentState, List<AbstractAction> actionPerPlayer) {
+        if (actionPerPlayer.size() != currentState.getNPlayers())
+            throw new AssertionError("We should have one provided action per player");
+        actionPerPlayer.forEach(a -> next(currentState, a));
+    }
+
+    /**
      * Computes the available actions and updates the game state accordingly.
+     *
      * @param gameState - game state to update with the available actions.
      * @return - the list of actions available.
      */
@@ -127,6 +149,7 @@ public abstract class AbstractForwardModel {
 
     /**
      * Returns a copy of this forward model with a new random seed.
+     *
      * @return a new Forward Model instance with a different random object.
      */
     public final AbstractForwardModel copy() {

@@ -5,13 +5,9 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
-import games.diamant.actions.ContinueInCave;
-import games.diamant.actions.ExitFromCave;
-import games.diamant.actions.OutOfCave;
+import games.diamant.actions.*;
 import games.diamant.cards.DiamantCard;
-import games.diamant.components.ActionsPlayed;
-import games.diamant.components.DiamantHand;
-import games.diamant.components.DiamantTreasureChest;
+import games.diamant.components.*;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -96,6 +92,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         }
         dgs.getTurnOrder().endPlayerTurn(dgs);
     }
+
 
     private void playActions(DiamantGameState dgs)
     {
