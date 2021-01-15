@@ -5,13 +5,15 @@ import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 import games.catan.CatanTile;
 
-public class BuildRoad_v2 extends AbstractAction {
+// Builds the Road by reference
+// todo: not fully implemented: have a look at "BuildSettlementByRef"
+public class BuildRoadByRef extends AbstractAction {
     int x;
     int y;
     int edge;
     int playerID;
 
-    public BuildRoad_v2(int x, int y, int edge, int playerID){
+    public BuildRoadByRef(int x, int y, int edge, int playerID){
         this.x = x;
         this.y = y;
         this.edge = edge;
@@ -31,15 +33,15 @@ public class BuildRoad_v2 extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        BuildRoad_v2 copy = new BuildRoad_v2(x, y, edge, playerID);
+        BuildRoadByRef copy = new BuildRoadByRef(x, y, edge, playerID);
         return copy;
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
-        if (other instanceof BuildRoad_v2){
-            BuildRoad_v2 otherAction = (BuildRoad_v2)other;
+        if (other instanceof BuildRoadByRef){
+            BuildRoadByRef otherAction = (BuildRoadByRef)other;
             return x == otherAction.x && y == otherAction.y && edge == otherAction.edge && playerID == otherAction.playerID;
         }
         return false;

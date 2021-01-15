@@ -6,11 +6,12 @@ import games.catan.CatanGameState;
 import games.catan.CatanTile;
 import games.catan.components.Settlement;
 
-public class BuildSettlement_v2 extends AbstractAction {
+// Builds a Settlement by reference
+public class BuildSettlementByRef extends AbstractAction {
     Settlement settlement;
     int owner;
 
-    public BuildSettlement_v2(Settlement settlement, int owner){
+    public BuildSettlementByRef(Settlement settlement, int owner){
         this.settlement = settlement;
         this.owner = owner;
     }
@@ -38,8 +39,8 @@ public class BuildSettlement_v2 extends AbstractAction {
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
-        if (other instanceof BuildSettlement_v2){
-            BuildSettlement_v2 otherAction = (BuildSettlement_v2)other;
+        if (other instanceof BuildSettlementByRef){
+            BuildSettlementByRef otherAction = (BuildSettlementByRef)other;
             return owner == otherAction.owner && settlement.equals(otherAction.settlement);
         }
         return false;
