@@ -102,17 +102,17 @@ public class CatanBoardView extends JComponent {
         if (tile.getType() == CatanParameters.TileType.DESERT){
             return Color.YELLOW;
         } else if (tile.getType() == CatanParameters.TileType.SEA){
-            return Color.BLUE;
+            return new Color(51, 204, 255);//Color.BLUE;
         }else if (tile.getType() == CatanParameters.TileType.FIELDS){
-            return Color.LIGHT_GRAY;
+            return new Color(255, 255, 153); //Color.LIGHT_GRAY;
         }else if (tile.getType() == CatanParameters.TileType.FOREST){
-            return Color.RED;
+            return new Color(0, 102, 0); //Color.RED;
         }else if (tile.getType() == CatanParameters.TileType.MOUNTAINS){
             return Color.DARK_GRAY;
         }else if (tile.getType() == CatanParameters.TileType.PASTURE){
-            return Color.GREEN;
+            return new Color(102, 255, 102); //Color.GREEN;
         } else if (tile.getType() == CatanParameters.TileType.HILLS){
-            return Color.ORANGE;
+            return new Color(102, 102, 102); //Color.ORANGE;
         } else{
             return Color.WHITE;
         }
