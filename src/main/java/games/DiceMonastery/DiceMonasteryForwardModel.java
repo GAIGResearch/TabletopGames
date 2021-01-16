@@ -48,7 +48,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
             case AUTUMN:
                 // we place monks
                 List<Monk> availableMonks = state.actionAreas.get(DORMITORY)
-                        .getComponents().values().stream().map( c -> (Monk) c)
+                        .getComponents().values().stream().map(c -> (Monk) c)
                         .filter(m -> m.getOwnerId() == currentPlayer)
                         .collect(toList());
                 if (availableMonks.isEmpty()) {
@@ -56,11 +56,12 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                 }
                 int mostPiousMonk = availableMonks.stream().mapToInt(Monk::getPiety).max().getAsInt();
                 return Arrays.stream(DiceMonasteryGameState.actionArea.values())
-                        .filter( a -> a != DORMITORY && a.dieMinimum <= mostPiousMonk)
-                        .map(a -> new PlaceMonk())
+                        .filter(a -> a != DORMITORY && a.dieMinimum <= mostPiousMonk)
+                        .map(PlaceMonk::new).collect(toList());
             case SUMMER:
             case WINTER:
         }
+        throw new AssertionError("Not yet implemented");
     }
 
     @Override
