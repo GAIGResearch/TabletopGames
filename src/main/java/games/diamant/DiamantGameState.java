@@ -128,9 +128,14 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected double _getScore(int playerId)
+    protected double _getHeuristicScore(int playerId)
     {
         return new DiamantHeuristic().evaluateState(this, playerId);
+    }
+    @Override
+    public double getGameScore(int playerId)
+    {
+        return treasureChests.get(playerId).getValue();
     }
 
     @Override
