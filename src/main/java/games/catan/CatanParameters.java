@@ -16,6 +16,13 @@ public class CatanParameters extends AbstractParameters {
     int n_resource_cards = 19;
     int n_tiles_per_row = 7;
 
+    int settlement_value = 1;
+    int city_value = 2;
+    int longest_road_value = 2;
+    int largest_army_value = 2;
+    int victory_point_value = 1;
+    int points_to_win = 10;
+
     public CatanParameters(long seed){
         super(seed);
     }

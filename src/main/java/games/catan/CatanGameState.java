@@ -85,10 +85,6 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getScore(int playerID) {
-        if (playerID < scores.length) {
-            System.out.println("Invalid playerID was used to getPlayerScore");
-            return -1;
-        }
         return scores[playerID];
     }
 
@@ -118,6 +114,16 @@ public class CatanGameState extends AbstractGameState {
 
     void addComponents() {
         super.addAllComponents();
+    }
+
+    public void addScore(int playerID, int score){
+        if (playerID < scores.length) {
+            scores[playerID] += score;
+        }
+    }
+
+    public int[] getScores(){
+        return scores;
     }
 
     public ArrayList<Road> getRoads(){

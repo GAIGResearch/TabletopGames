@@ -2,6 +2,7 @@ package games.catan;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import games.catan.actions.BuildCity;
 import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
 import games.catan.actions.PlaceSettlementWithRoad;
@@ -171,6 +172,10 @@ public class CatanActionFactory {
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
                             && checkRoadPlacement(i, tile, gs)){
                         actions.add(new BuildRoad(x, y, i, activePlayer));
+                    }
+
+                    if (settlement.getOwner() == activePlayer && settlement.getType() == 1){
+                        actions.add(new BuildCity(x, y, i, activePlayer));
                     }
                 }
             }

@@ -11,6 +11,7 @@ import games.catan.actions.BuildSettlement;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -94,8 +95,14 @@ public class CatanForwardModel extends AbstractForwardModel {
 
             // todo (mb) check to only execute one of each types of actions
 
+            if (gs.getScore(gs.getCurrentPlayer()) >= 10){
+                gs.setGameStatus(Utils.GameResult.GAME_END);
+                System.out.println("Game over winner = " + gs.getCurrentPlayer());
+            }
+
             // end player's turn
             gs.getTurnOrder().endPlayerTurn(gs);
+
         }
 
 

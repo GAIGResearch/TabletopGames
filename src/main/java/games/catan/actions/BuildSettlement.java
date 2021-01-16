@@ -26,6 +26,7 @@ public class BuildSettlement extends AbstractAction {
 
         if (board[x][y].getSettlements()[vertex].getOwner() == -1) {
             board[x][y].addSettlement(vertex, playerID);
+            cgs.addScore(playerID, 1);
             return true;
         }
 

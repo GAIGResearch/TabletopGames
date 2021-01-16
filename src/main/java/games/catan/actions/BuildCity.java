@@ -3,6 +3,7 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.CatanTile;
 import games.catan.components.Settlement;
 
@@ -28,6 +29,7 @@ public class BuildCity extends AbstractAction {
         if (settlement != null) {
             if (settlement.getOwner() == playerID) {
                 settlement.upgrade();
+                cgs.addScore(playerID, 1);
                 return true;
             } else{
                 System.out.println("Trying to upgrade a city for another player");
