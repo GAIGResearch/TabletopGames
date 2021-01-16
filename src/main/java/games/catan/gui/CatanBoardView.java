@@ -53,7 +53,9 @@ public class CatanBoardView extends JComponent {
                 String number = "" + tile.getNumber();
                 g.drawString(type, (int) tile.x_coord - 20, (int) tile.y_coord);
                 if (!number.equals("0"))
-                    g.drawString(number, (int) tile.x_coord, (int) tile.y_coord + 20);
+                    // todo set number back, but this is useful for debugging
+                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
+//                    g.drawString(number, (int) tile.x_coord, (int) tile.y_coord + 20);
             }
         }
 

@@ -233,12 +233,12 @@ public class CatanForwardModel extends AbstractForwardModel {
                 CatanTile tile = board[x][y];
                 // logic to generate the graph from the board representation
                 // We are not interested in references to DESERT or SEA tiles
-                if (tile.getType() != CatanParameters.TileType.DESERT || tile.getType() != CatanParameters.TileType.SEA){
+                if (!(tile.getType() == CatanParameters.TileType.DESERT || tile.getType() == CatanParameters.TileType.SEA)){
                     Settlement[] settlements = tile.getSettlements();
                     Road[] roads = tile.getRoads();
                     for (int i = 0; i < settlements.length; i++){
                         //  2 roads are along the same HEX
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i+5)%HEX_SIDES], roads[i]);
+                        graph.addEdge(tile.settlements[i], tile.settlements[(i+5)%HEX_SIDES], roads[(i+5)%HEX_SIDES]);
                         graph.addEdge(tile.settlements[i], tile.settlements[(i+1)%HEX_SIDES], roads[i]);
 
                         // last one requires a road and a settlement from a neighbour
@@ -246,7 +246,9 @@ public class CatanForwardModel extends AbstractForwardModel {
                         if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
-                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], roads[(i+4)%HEX_SIDES]);
+                            Road[] neighbour_roads = neighbour.getRoads();
+                            // todo the rule below is not general
+                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbour_roads[(i+4)%HEX_SIDES]);
                         }
                     }
                 }

@@ -37,7 +37,7 @@ public class CatanActionFactory {
                                 !(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))) {
 //                            actions.add(new BuildSettlement_v2(settlement, activePlayer));
 //                            actions.add(new BuildSettlement(x, y, i, activePlayer));
-                            if (checkSettlementPlacement(settlement, gs, true)){
+                            if (checkSettlementPlacement(settlement, gs)){
                                 actions.add(new PlaceSettlementWithRoad(new BuildSettlement(x, y, i, activePlayer), new BuildRoad(x, y, i, activePlayer)));
 
                             }
@@ -78,38 +78,48 @@ public class CatanActionFactory {
         return actions;
     }
 
-    static boolean checkSettlementPlacement(Settlement settlement, CatanGameState gs, boolean setup){
+    static boolean checkSettlementPlacement(Settlement settlement, CatanGameState gs){
         // checks if any of the neighbouring settlements are already taken (distance rule)
         // if yes returns false otherwise true
-        Graph<Settlement, Road> graph = gs.getGraph();
-        List<Road> roads = graph.getEdges(settlement);
-        // check first if we have a road next to the settlement owned by the player
-        if (!setup) {
-            boolean hasRoadNeighbour = false;
-            for (Road road : roads) {
-                if (road.getOwner() == gs.getCurrentPlayer()) {
-                    hasRoadNeighbour = true;
-                }
-            }
-            if (!hasRoadNeighbour) {
-                return false;
-            }
+
+        // if settlement is taken then cannot replace it
+        if (settlement.getOwner() != -1){
+            return false;
         }
 
+        // check if there is a settlement one distance away
+        Graph<Settlement, Road> graph = gs.getGraph();
         List<Settlement> settlements = graph.getNeighbourNodes(settlement);
         for (Settlement settl: settlements){
             if (settl.getOwner() != -1){
                 return false;
             }
         }
+
+        List<Road> roads = graph.getEdges(settlement);
+        // check first if we have a road next to the settlement owned by the player
+        // Doesn't apply in the setup phase
+        if (!gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Setup)){
+            for (Road road : roads) {
+                if (road.getOwner() == gs.getCurrentPlayer()) {
+                    return true;
+                }
+            }
+            return false;
+        }
         return true;
     }
 
     static boolean checkRoadPlacement(int roadId, CatanTile tile, CatanGameState gs){
-        // todo get neighbours of a road
-        // rule is : , check if there is our settlement along edge,
+        /*
+        * @args:
+        * roadId - Id of the road on tile
+        * tile - tile on which we would like to build a road
+        * gs - Game state */
+
         Graph<Settlement, Road> graph = gs.getGraph();
         Road road = tile.getRoads()[roadId];
+
         // check if road is already taken
         if (road.getOwner() != -1){
             return false;
@@ -153,16 +163,12 @@ public class CatanActionFactory {
                     Road road = tile.getRoads()[i];
 
                     // where it is legal to place tile then it can be placed from there
-                    if (settlement.getOwner() == -1 &&
-                            !(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))) {
-//                            actions.add(new BuildSettlement_v2(settlement, activePlayer));
-//                            actions.add(new BuildSettlement(x, y, i, activePlayer));
-                        if (checkSettlementPlacement(settlement, gs, false)){
-                            actions.add(new BuildSettlement(x, y, i, activePlayer));
-                        }
+                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
+                            && checkSettlementPlacement(settlement, gs)) {
+                        actions.add(new BuildSettlement(x, y, i, activePlayer));
                     }
 
-                    if (road.getOwner() == -1 && !(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
+                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
                             && checkRoadPlacement(i, tile, gs)){
                         actions.add(new BuildRoad(x, y, i, activePlayer));
                     }
