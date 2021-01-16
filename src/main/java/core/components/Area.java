@@ -77,6 +77,16 @@ public class Area extends Component {
         else this.components.put(component.getComponentID(), component);
     }
 
+    public void removeComponent(Component component) {
+        if (component instanceof Deck || component instanceof Area)
+            throw new IllegalArgumentException("Not yet implemented for Decks or Areas");
+        if (components.containsKey(component.componentID)) {
+            this.components.remove(component.componentID);
+        } else {
+            throw new IllegalArgumentException("Cannot remove Component as it is not here : " + component.componentID);
+        }
+    }
+
     /**
      * Adds all components in a list to the collection, using their own component IDs as the keys in the map.
      * @param components - list of components to add to the collection.

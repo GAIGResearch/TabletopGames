@@ -1,6 +1,11 @@
 package games;
 
 import core.*;
+import core.components.Dice;
+import games.DiceMonastery.DiceMonasteryForwardModel;
+import games.DiceMonastery.DiceMonasteryGUI;
+import games.DiceMonastery.DiceMonasteryGameState;
+import games.DiceMonastery.DiceMonasteryParams;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -81,25 +86,15 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
             add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
     DotsAndBoxes(2, 6,
-            new ArrayList<Category>() {{
-                add(Simple);
-                add(Abstract);
-                add(TerritoryBuilding);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(Enclosure);
-            }}),
+            new ArrayList<Category>() {{ add(Simple);add(Abstract);add(TerritoryBuilding); }},
+            new ArrayList<Mechanic>() {{ add(Enclosure); }}),
     Diamant( 2, 6,
-            new ArrayList<Category>() {{
-                add(Adventure);
-                add(Bluffing);
-                add(Exploration);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(MoveThroughDeck);
-                add(PushYourLuck);
-                add(SimultaneousActionSelection);
-            }});
+            new ArrayList<Category>() {{ add(Adventure);add(Bluffing);add(Exploration); }},
+            new ArrayList<Mechanic>() {{ add(MoveThroughDeck);add(PushYourLuck);add(SimultaneousActionSelection); }}),
+    DiceMonastery(2, 4,
+            new ArrayList<Category>() {{ add(Strategy);add(Medieval);}},
+            new ArrayList<Mechanic>() {{ add(SetCollection);add(WorkerPlacement);add(EngineBuilding); }})
+    ;
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
@@ -130,6 +125,8 @@ public enum GameType {
                 return DotsAndBoxes;
             case "diamant":
                 return Diamant;
+            case "dicemonastery" :
+                return DiceMonastery;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -192,6 +189,10 @@ public enum GameType {
                 forwardModel = new DiamantForwardModel();
                 gameState = new DiamantGameState(params, nPlayers);
                 break;
+            case DiceMonastery:
+                forwardModel = new DiceMonasteryForwardModel();
+                gameState = new DiceMonasteryGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -219,6 +220,8 @@ public enum GameType {
                 return new DBParameters(seed);
             case Diamant:
                 return new DiamantParameters(seed);
+            case DiceMonastery:
+                return new DiceMonasteryParams(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -273,6 +276,9 @@ public enum GameType {
                 }
                 break;
             // TODO: Diamant GUI
+            case DiceMonastery:
+                gui = new DiceMonasteryGUI(game, ac);
+                break;
         }
 
         return gui;
@@ -367,6 +373,8 @@ public enum GameType {
         GameMaster,
         DiceRolling,
         GridMovement,
+        WorkerPlacement,
+        EngineBuilding,
         LineOfSight,
         ModularBoard,
         MovementPoints,
