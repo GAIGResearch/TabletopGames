@@ -2,51 +2,76 @@ package games.DiceMonastery;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import org.apache.commons.math3.analysis.function.Abs;
 
 import java.util.*;
 
-import static games.DiceMonastery.DiceMonasteryGameState.*;
+import static games.DiceMonastery.DiceMonasteryConstants.*;
+import static java.util.stream.Collectors.*;
 
 public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
-    public final actionArea destination;
-    public int monkId = 0;
+    public final ActionArea destination;
+    int monkPiety = 0;
+    public final int playerId;
 
-    public PlaceMonk(actionArea area) {
+    public PlaceMonk(int playerId, ActionArea area) {
+        this.playerId = playerId;
         destination = area;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // just a placeholder as a Move Group
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
+        state.setActionInProgress(this);
         return true;
+    }
+
+    void updateMonk(int piety, DiceMonasteryGameState state) {
+        monkPiety = piety;
+        List<Monk> matchingMonks = availableMonks(state);
+
+        if (!matchingMonks.isEmpty()) {
+            state.moveMonk(matchingMonks.get(0).getComponentID(), ActionArea.DORMITORY, destination);
+        } else {
+            throw new AssertionError(String.format("No monk found in Dormitory for player %d with piety of %d", playerId, monkPiety));
+        }
+    }
+
+    private List<Monk> availableMonks(DiceMonasteryGameState state) {
+        return state.allMonks.values().stream()
+                .filter(m -> (monkPiety == 0 || m.piety == monkPiety)
+                        && m.getOwnerId() == playerId
+                        && state.monkLocations.get(m.getComponentID()) == ActionArea.DORMITORY)
+                .collect(toList());
     }
 
     @Override
     public List<AbstractAction> followOnActions(DiceMonasteryGameState state) {
-        return new ArrayList<>();
+        // we can pick any of our monks...but we can ignore duplicate values
+        Set<Integer> pietyValues = availableMonks(state).stream().map(Monk::getPiety).collect(toSet());
+        return pietyValues.stream().map(ChooseMonk::new).collect(toList());
     }
 
     @Override
     public int getCurrentPlayer(DiceMonasteryGameState state) {
-        return state.allMonks.get(monkId).getOwnerId();
+        return playerId;
     }
 
     @Override
     public void registerActionTaken(DiceMonasteryGameState state, AbstractAction action) {
-
+        // not used
     }
 
     @Override
     public boolean executionComplete(DiceMonasteryGameState state) {
-        return monkId != 0;
+        return monkPiety != 0;
     }
 
     @Override
     public PlaceMonk copy() {
-        // no mutable state
-        return null;
+        PlaceMonk retValue = new PlaceMonk(playerId, destination);
+        retValue.monkPiety = monkPiety;
+        return retValue;
     }
 
     @Override
@@ -54,25 +79,69 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
         if (!(obj instanceof PlaceMonk))
             return false;
         PlaceMonk other = (PlaceMonk) obj;
-        return other.monkId == monkId && other.destination == destination;
+        return other.monkPiety == monkPiety && other.destination == destination;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(monkId, destination);
+        return Objects.hash(monkPiety, destination, playerId);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Monk monk = ((DiceMonasteryGameState) gameState).allMonks.get(monkId);
-        return String.format("Move monk %d (piety: %d, player: %d) to %s", monkId, monk.piety, monk.getOwnerId(), destination);
+        return toString();
     }
 
     @Override
     public String toString() {
-        return String.format("Move monk %d to %s", monkId, destination);
+        return String.format("Move monk (piety: %d, player: %d) to %s", monkPiety, playerId, destination);
     }
-
 }
 
+class ChooseMonk extends AbstractAction {
 
+    final int piety;
+
+    ChooseMonk(int id) {
+        piety = id;
+    }
+
+    @Override
+    public boolean execute(AbstractGameState gs) {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
+        PlaceMonk parent = (PlaceMonk) state.currentActionInProgress();
+        // this will (correctly) throw an exception if not a PlaceMonk on the stack
+        parent.updateMonk(piety, state);
+        return true;
+    }
+
+    @Override
+    public AbstractAction copy() {
+        // no mutable state
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ChooseMonk) {
+            ChooseMonk other = (ChooseMonk) obj;
+            return piety == other.piety;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return piety * 567;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Choose Monk of Piety " + piety;
+    }
+}

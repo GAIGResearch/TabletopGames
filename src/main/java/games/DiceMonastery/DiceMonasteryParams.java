@@ -9,7 +9,7 @@ public class DiceMonasteryParams extends AbstractParameters {
 
     @Override
     protected DiceMonasteryParams _copy() {
-        return null;
+        return new DiceMonasteryParams(System.currentTimeMillis());
     }
 
     @Override

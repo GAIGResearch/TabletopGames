@@ -2,35 +2,23 @@ package games.DiceMonastery;
 
 import core.*;
 import core.components.*;
-
 import java.util.*;
-import java.util.stream.Collectors.*;
 
-import static games.DiceMonastery.DiceMonasteryGameState.actionArea.*;
+import static games.DiceMonastery.DiceMonasteryConstants.*;
+import static games.DiceMonastery.DiceMonasteryConstants.ActionArea.*;
+import static java.util.stream.Collectors.*;
 
 
 public class DiceMonasteryGameState extends AbstractGameState {
 
-    enum actionArea {
-        MEADOW(1), KITCHEN(2), WORKSHOP(3),
-        GATEHOUSE(1), LIBRARY(4), CHAPEL(1),
-        DORMITORY(1);
 
-        public final int dieMinimum;
-
-        actionArea(int dieMinimum) {
-            this.dieMinimum = dieMinimum;
-        }
-    }
-
-    enum resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD
-    }
-
-    Map<actionArea, Area> actionAreas = new HashMap<>();
+    Map<ActionArea, Area> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
-    Map<Integer, actionArea> monkLocations = new HashMap<>();
-    List<Map<resource, Integer>> playerTreasuries = new ArrayList<>();
+    Map<Integer, ActionArea> monkLocations = new HashMap<>();
+    List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
+
+    Stack<IExtendedSequence> actionsInProgress = new Stack<>();
+
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new DiceMonasteryTurnOrder(nPlayers));
@@ -38,8 +26,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     protected void _reset() {
+        actionsInProgress = new Stack<>();
         actionAreas = new HashMap<>();
-        Arrays.stream(actionArea.values()).forEach(a ->
+        Arrays.stream(ActionArea.values()).forEach(a ->
                 actionAreas.put(a, new Area(-1, a.name()))
         );
 
@@ -55,9 +44,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
         int id = monk.getComponentID();
         allMonks.put(id, monk);
         monkLocations.put(id, DORMITORY);
+        actionAreas.get(DORMITORY).putComponent(monk);
     }
 
-    public void moveMonk(int id, actionArea from, actionArea to) {
+    public void moveMonk(int id, ActionArea from, ActionArea to) {
         Monk movingMonk = allMonks.get(id);
         if (movingMonk == null)
             throw new IllegalArgumentException("Monk does not exist : " + id);
@@ -68,11 +58,37 @@ public class DiceMonasteryGameState extends AbstractGameState {
         actionAreas.get(to).putComponent(movingMonk);
     }
 
-    public void gain(int player, resource resource, int amount) {
-        int currentLevel = playerTreasuries.get(player).getOrDefault(resource,0);
+    public void addResource(int player, Resource resource, int amount) {
+        int currentLevel = getResource(player, resource);
         if (currentLevel + amount < 0)
             throw new IllegalArgumentException(String.format("Only have %d %s in stock; cannot remove %d", currentLevel, resource, -amount));
         playerTreasuries.get(player).put(resource, currentLevel + amount);
+    }
+
+    public int getResource(int player, Resource resource) {
+        return playerTreasuries.get(player).getOrDefault(resource,0);
+    }
+
+    public IExtendedSequence currentActionInProgress() {
+        return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
+    }
+
+    public boolean isActionInProgress() {
+        return !actionsInProgress.empty();
+    }
+
+    public void setActionInProgress(IExtendedSequence action) {
+        if (action == null && !actionsInProgress.isEmpty())
+            actionsInProgress.pop();
+        else
+            actionsInProgress.push(action);
+    }
+
+    public List<Monk> monksIn(ActionArea region, int player) {
+        return allMonks.values().stream()
+                .filter( m -> (region == null || monkLocations.get(m.getComponentID()) == region) &&
+                        (player == -1 || m.getOwnerId() == player))
+                .collect(toList());
     }
 
     @Override
@@ -80,9 +96,33 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return new ArrayList<>(allMonks.values());
     }
 
+/*
+    List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
+*/
     @Override
     protected DiceMonasteryGameState _copy(int playerId) {
-        return null;
+        DiceMonasteryGameState retValue = new DiceMonasteryGameState(gameParameters.copy(), getNPlayers());
+        for (ActionArea a : actionAreas.keySet()) {
+            retValue.actionAreas.put(a, actionAreas.get(a).copy());
+        }
+        retValue.allMonks.clear();
+        retValue.monkLocations.clear();
+        for (int monkId : allMonks.keySet()) {
+            retValue.allMonks.put(monkId, allMonks.get(monkId).copy());
+        }
+        // monkLocations contains immutable things, so we just create a new mapping
+        retValue.monkLocations = new HashMap<>(monkLocations);
+
+        retValue.actionsInProgress = new Stack<>();
+        actionsInProgress.forEach(
+                a -> retValue.actionsInProgress.push(a.copy())
+        );
+
+        retValue.playerTreasuries = new ArrayList<>();
+        for (int p = 0; p < getNPlayers(); p++) {
+            retValue.playerTreasuries.add(new HashMap<>(playerTreasuries.get(p)));
+        }
+        return retValue;
     }
 
     @Override
@@ -109,6 +149,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
             return false;
         DiceMonasteryGameState other = (DiceMonasteryGameState) o;
         return other.allMonks.equals(allMonks) && other.monkLocations.equals(monkLocations) &&
-                other.playerTreasuries.equals(playerTreasuries);
+                other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase);
     }
 }

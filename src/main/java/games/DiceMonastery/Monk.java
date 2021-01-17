@@ -15,9 +15,15 @@ public class Monk extends Component {
         piety = value;
     }
 
+    private Monk(int value, int ownerId, int componentId) {
+        super(Utils.ComponentType.TOKEN, "Monk", componentId);
+        this.ownerId = ownerId;
+        piety = value;
+    }
+
     @Override
     public Monk copy() {
-        return new Monk(piety, getOwnerId());
+        return new Monk(piety, getOwnerId(), getComponentID());
     }
 
     @Override
