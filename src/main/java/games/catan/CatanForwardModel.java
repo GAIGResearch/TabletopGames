@@ -81,16 +81,11 @@ public class CatanForwardModel extends AbstractForwardModel {
         IGamePhase gamePhase = gs.getGamePhase();
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
             cto.endPlayerTurn(gs);
-            // give player the resources
-//            if (cto.turnStep >= 1){
-//                cto.endPlayerTurn(gs);
+            // todo give player the resources
             if (cto.getRoundCounter() >= 2){
                 // After 2 rounds of setup the main game phase starts
                 gs.setMainGamePhase();
             }
-//            } else {
-//                cto.turnStep++;
-//            }
         }
         if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
             gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
@@ -99,20 +94,22 @@ public class CatanForwardModel extends AbstractForwardModel {
             if (action instanceof BuildRoad){
                 // add points for longest road
                 BuildRoad br = (BuildRoad)action;
+                // todo remove branches and cycles from road length
                 int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
                 System.out.println("Calculate the road length: " + new_length);
-                // todo calculate road length
             } else if (action instanceof BuildSettlement){
                 gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
             } else if (action instanceof BuildCity){
                 gs.addScore(gs.getCurrentPlayer(), params.city_value);
             } else if (action instanceof PlayDevelopmentCard){
-                // todo only cards with vicotry point or knight card if gets the largest army
+                // todo only cards with victory point or knight card if gets the largest army
                 gs.addScore(gs.getCurrentPlayer(), params.victory_point_value);
             }
-            if (gs.getScore(gs.getCurrentPlayer()) >= 10){
+
+            // win condition
+            if (gs.getScore(gs.getCurrentPlayer()) >= params.points_to_win){
                 gs.setGameStatus(Utils.GameResult.GAME_END);
-                System.out.println("Game over winner = " + gs.getCurrentPlayer());
+                System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
 
             // end player's turn

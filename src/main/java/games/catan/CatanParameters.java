@@ -16,6 +16,9 @@ public class CatanParameters extends AbstractParameters {
     int n_resource_cards = 19;
     int n_tiles_per_row = 7;
 
+    // the minimum number of knights required to take the largest army
+    int min_army_size = 3;
+
     int settlement_value = 1;
     int city_value = 2;
     int longest_road_value = 2;

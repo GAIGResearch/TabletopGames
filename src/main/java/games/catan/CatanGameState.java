@@ -123,6 +123,40 @@ public class CatanGameState extends AbstractGameState {
         }
     }
 
+    public void addKnight(int playerID){
+        if (playerID < knights.length){
+            knights[playerID] += 1;
+            updateLargestArmy((CatanParameters)getGameParameters());
+        }
+    }
+
+    public int updateLargestArmy(CatanParameters params){
+        /* Checks the army sizes and updates the scores accordingly */
+        if (largestArmy == -1){
+            // check if any of them meets the minimum required army size
+            for (int i = 0; i < knights.length; i++){
+                if (knights[i] >= params.min_army_size) {
+                    largestArmy = i;
+                    scores[i] += params.largest_army_value;
+                }
+            }
+        } else{
+            int max = knights[largestArmy];
+            for (int i = 0; i < knights.length; i++){
+                if (knights[i] > max){
+                    // update scores
+                    scores[largestArmy] -= params.largest_army_value;
+                    scores[i] += params.largest_army_value;
+
+                    max = knights[i];
+                    largestArmy = i;
+                }
+            }
+        }
+        return largestArmy;
+    }
+
+
     public int[] getScores(){
         return scores;
     }
