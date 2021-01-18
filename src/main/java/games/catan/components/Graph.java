@@ -38,13 +38,19 @@ public class Graph<N, E> {
 
     /* Returns the edges starting from the current node
      *  */
-    public List<E> getEdges(N src){
+    public List<E> getConnections(N src){
         List<Edge<N, E>> edges = map.get(src);
         ArrayList<E> nodes = new ArrayList<>();
         for (Edge<N, E> edge: edges){
             nodes.add(edge.value);
         }
         return nodes;
+    }
+
+    /* Returns the the edges [src, dest, edge]
+    *  */
+    public List<Edge<N, E>> getEdges(N src){
+        return map.get(src);
     }
 
     /* Iterates over all entries and prints the result */
@@ -62,45 +68,3 @@ public class Graph<N, E> {
 
 }
 
-/*
-* Generic implementation of an edge between 2 nodes of the same type
-* Edge encapsulates another object
-* */
-class Edge<N, E>{
-    N src;
-    N dest;
-    E value;
-
-    public Edge(N srcNode, N destNode, E edgeValue){
-        this.src = srcNode;
-        this.dest = destNode;
-        this.value = edgeValue;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        // todo (mb) probably road setting is wrong - should look into it -> they never have the same refs
-        // compare by reference
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Edge<?, ?> edge = (Edge<?, ?>) o;
-        return src == (edge.src) &&
-                dest == (edge.dest); // &&
-//                value == (edge.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(src, dest, value);
-    }
-
-    @Override
-    public String toString() {
-        // prints references
-        return "Edge{" +
-                "src=" + src +
-                ", dest=" + dest +
-                ", value=" + value +
-                '}';
-    }
-}

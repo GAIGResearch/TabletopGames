@@ -97,7 +97,7 @@ public class CatanActionFactory {
             }
         }
 
-        List<Road> roads = graph.getEdges(settlement);
+        List<Road> roads = graph.getConnections(settlement);
         // check first if we have a road next to the settlement owned by the player
         // Doesn't apply in the setup phase
         if (!gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Setup)){
@@ -134,8 +134,8 @@ public class CatanActionFactory {
         }
 
         // check if there is a road on a neighbouring edge
-        List<Road> roads = graph.getEdges(settl1);
-        roads.addAll(graph.getEdges(settl2));
+        List<Road> roads = graph.getConnections(settl1);
+        roads.addAll(graph.getConnections(settl2));
         for (Road rd :roads){
             if (rd.getOwner() == playerId){
                 return true;

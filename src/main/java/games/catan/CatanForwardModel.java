@@ -6,8 +6,10 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
 import core.interfaces.IGamePhase;
+import games.catan.actions.BuildCity;
 import games.catan.actions.BuildRoad;
 import games.catan.actions.BuildSettlement;
+import games.catan.actions.PlayDevelopmentCard;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
@@ -94,7 +96,20 @@ public class CatanForwardModel extends AbstractForwardModel {
             gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
 
             // todo (mb) check to only execute one of each types of actions
-
+            if (action instanceof BuildRoad){
+                // add points for longest road
+                BuildRoad br = (BuildRoad)action;
+                int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
+                System.out.println("Calculate the road length: " + new_length);
+                // todo calculate road length
+            } else if (action instanceof BuildSettlement){
+                gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
+            } else if (action instanceof BuildCity){
+                gs.addScore(gs.getCurrentPlayer(), params.city_value);
+            } else if (action instanceof PlayDevelopmentCard){
+                // todo only cards with vicotry point or knight card if gets the largest army
+                gs.addScore(gs.getCurrentPlayer(), params.victory_point_value);
+            }
             if (gs.getScore(gs.getCurrentPlayer()) >= 10){
                 gs.setGameStatus(Utils.GameResult.GAME_END);
                 System.out.println("Game over winner = " + gs.getCurrentPlayer());

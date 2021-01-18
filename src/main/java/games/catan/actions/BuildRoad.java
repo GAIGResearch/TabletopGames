@@ -54,4 +54,21 @@ public class BuildRoad extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         return "Buildroad in x=" + x + " y=" + y + " edge=" + edge;
     }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getEdge() {
+        return edge;
+    }
+
+    public int getPlayerID() {
+        return playerID;
+    }
+
 }

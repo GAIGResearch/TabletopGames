@@ -6,6 +6,7 @@ import core.components.Area;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import games.catan.actions.BuildRoad;
+import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
@@ -124,6 +125,44 @@ public class CatanGameState extends AbstractGameState {
 
     public int[] getScores(){
         return scores;
+    }
+
+    public int getRoadDistance(int x, int y, int edge){
+        // calculates the distance length of the road
+        int length = 0;
+        HashSet<Road> roadSet = new HashSet<>();
+        ArrayList<Settlement> unvisited = new ArrayList<>();
+        Settlement settl1 = board[x][y].getSettlements()[edge];
+        Settlement settl2 = board[x][y].getSettlements()[(edge+1)%6];
+
+        unvisited.addAll(catanGraph.getNeighbourNodes(settl1));
+        unvisited.addAll(catanGraph.getNeighbourNodes(settl2));
+
+        while (unvisited.size() > 0){
+            // Expand a new vertex
+            Settlement settlement = unvisited.remove(0);
+            List<Edge<Settlement, Road>> edges = catanGraph.getEdges(settlement);
+            // todo check in what case it is null
+            if (edges != null){
+                for (Edge<Settlement, Road> e: edges){
+                    // todo probably creates cycles - adds up everything
+                    Road road = e.getValue();
+
+                    if (!roadSet.contains(e.getValue())){
+                        if (road.getOwner() == getCurrentPlayer()){
+                            // only add it if it's the players and unvisited
+                            roadSet.add(road);
+                            unvisited.add(e.getDest());
+                        }
+                    }
+                }
+            }
+        }
+
+        roadSet.add(board[x][y].getRoads()[edge]);
+
+        return roadSet.size();
+
     }
 
     public ArrayList<Road> getRoads(){

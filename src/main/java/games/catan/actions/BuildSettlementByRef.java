@@ -23,7 +23,6 @@ public class BuildSettlementByRef extends AbstractAction {
             if (settl.equals(settlement)){
                 if (settl.getOwner() == -1){
                     settl.setOwner(owner);
-                    cgs.addScore(owner, 1);
                     return true;
                 }
             }
