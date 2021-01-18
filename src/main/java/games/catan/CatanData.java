@@ -79,30 +79,35 @@ public class CatanData extends AbstractGameData {
             put(CatanParameters.CardTypes.KNIGHT_CARD, 10);
         }};
 
-        List<Deck<Card>> developmentDeck = Deck.loadDecksOfCards(dataPath + "catan/decks.json");
-        Deck tmpDeck = new Deck("tmpDeck");
-        for (Deck<Card> devDeck: developmentDeck){
+        List<Deck<Card>> developmentTypes = Deck.loadDecksOfCards(dataPath + "catan/decks.json");
+        Deck<Card> developmentDeck = new Deck("developmentDeck");
+        for (Deck<Card> devDeck: developmentTypes){
             // first pass is the devDeck and second is the resource deck
             for (Card c: devDeck.getComponents()){
                 PropertyInt count = (PropertyInt)c.getProperty(CatanConstants.countHash);
                 if (count != null){
                     for (int i = 0; i < count.value-1; i++){
                         Card cardCopy = c.copy();
-                        tmpDeck.add(cardCopy);
+                        developmentDeck.add(cardCopy);
                     }
                 }
             }
         }
-        // todo also contains the resource deck
-        developmentDeck.add(tmpDeck);
 
 
         // merge decks
         decks.add(resourceDeck);
-        decks.addAll(developmentDeck);
+        decks.add(developmentDeck);
+    }
 
-
-
+    @Override
+    public Deck<Card> findDeck(String name) {
+        for (Deck<Card> d: decks) {
+            if (name.equalsIgnoreCase(d.getComponentName())) {
+                return d.copy();
+            }
+        }
+        return null;
     }
 
 }

@@ -19,7 +19,7 @@ import java.util.*;
 
 import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.CatanConstants.*;
 
 public class CatanForwardModel extends AbstractForwardModel {
     private int rollCounter;
@@ -61,6 +61,8 @@ public class CatanForwardModel extends AbstractForwardModel {
         // Initialize the game area
         Area gameArea = new Area(-1, "Game Area");
         state.areas.put(-1, gameArea);
+        gameArea.putComponent(resourceDeckHash, data.findDeck("resourceDeck"));
+        gameArea.putComponent(developmentDeckHash, data.findDeck("developmentDeck"));
 
         state.addComponents();
         state.setGamePhase(CatanGameState.CatanGamePhase.Setup);
@@ -81,15 +83,13 @@ public class CatanForwardModel extends AbstractForwardModel {
         IGamePhase gamePhase = gs.getGamePhase();
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
             cto.endPlayerTurn(gs);
-            // todo give player the resources
+            // todo give player the resources in the second round
             if (cto.getRoundCounter() >= 2){
                 // After 2 rounds of setup the main game phase starts
                 gs.setMainGamePhase();
             }
         }
         if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
-            gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
-
             // todo (mb) check to only execute one of each types of actions
             if (action instanceof BuildRoad){
                 // add points for longest road
@@ -112,12 +112,48 @@ public class CatanForwardModel extends AbstractForwardModel {
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
 
-            // end player's turn
+            // end player's turn; roll dice and allocate resources
             gs.getTurnOrder().endPlayerTurn(gs);
-
+            rollDiceAndallocateResources(gs);
         }
 
 
+    }
+
+    private void rollDiceAndallocateResources(CatanGameState gs){
+        /* Gives players the resources depending on the current rollValue stored in the game state */
+        // roll dice
+        gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
+
+        int value = gs.getRollValue();
+        CatanTile[][] board = gs.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                if (tile.getNumber() == value){
+                    // allocate resource for each settlement/city
+                    for (Settlement settl: tile.getSettlements()) {
+                        if (settl.getOwner() != -1) {
+                            int counter = 0;
+                            while (counter < settl.getType()) {
+                                // Move the card from the resource deck and give it to the player
+                                for (Card card: ((Deck<Card>)gs.getComponent(resourceDeckHash)).getComponents()){
+                                    if (card.getType().equals(settl.getType())){
+                                        // remove from deck and give it to player
+                                        ((Deck<Card>)gs.getComponent(resourceDeckHash)).remove(card);
+                                        ((Deck) gs.getComponentActingPlayer(playerHandHash)).add(card);
+                                        counter++;
+                                    }
+                                    // no cards left
+                                    counter++;
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -278,7 +314,7 @@ public class CatanForwardModel extends AbstractForwardModel {
     }
 
     public int rollDice(long seed){
-        /* Rolls 2 random dices givesn a single random seed */
+        /* Rolls 2 random dices given a single random seed */
         Random r1 = new Random(seed + rollCounter);
         rollCounter += 1;
         Random r2 = new Random(seed + rollCounter);

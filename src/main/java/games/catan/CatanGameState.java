@@ -19,7 +19,7 @@ public class CatanGameState extends AbstractGameState {
     private CatanData data;
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
-    protected int scores[]; // score for each player - 10 required to win
+    protected int scores[]; // score for each player
     protected int knights[]; // knight count for each player
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
     protected int longestRoad = -1; // playerID of the player currently holding the longest road
@@ -39,7 +39,6 @@ public class CatanGameState extends AbstractGameState {
     // Collection of areas, mapped to player ID, -1 is the general game area containing the board, counters and several decks.
     HashMap<Integer, Area> areas;
 
-    // todo get turnorder right
     public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
         data = new CatanData((CatanParameters)pp);
@@ -49,7 +48,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        List<Component> components = new ArrayList<>(); // areas.values()
+        List<Component> components = new ArrayList<>(areas.values());
 //        components.add(tempDeck);
 //        components.add(world);
         return components;

@@ -17,6 +17,9 @@ public class CatanConstants {
     public final static int cityCounterHash = Hash.GetInstance().hash("cityCounter");
     public final static int roadCounterHash = Hash.GetInstance().hash("roadCounter");
 
+    public final static int resourceDeckHash = Hash.GetInstance().hash("resourceDeck");
+    public final static int developmentDeckHash = Hash.GetInstance().hash("developmentDeck");
+
     public final static int cardType = Hash.GetInstance().hash("cardType");
 
     public final static int countHash = Hash.GetInstance().hash("count");
