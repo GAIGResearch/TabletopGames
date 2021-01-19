@@ -1,17 +1,20 @@
 package games.catan;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import games.catan.actions.BuildCity;
-import games.catan.actions.BuildRoad;
-import games.catan.actions.BuildSettlement;
-import games.catan.actions.PlaceSettlementWithRoad;
+import core.components.Card;
+import core.components.Deck;
+import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static games.catan.CatanConstants.cardType;
 
 public class CatanActionFactory {
     /**
@@ -61,7 +64,7 @@ public class CatanActionFactory {
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList();
         actions.add(new DoNothing());
-        actions.addAll(getBuildActions(gs));
+        actions.addAll(getBuyActions(gs));
 
         return actions;
     }
@@ -146,12 +149,21 @@ public class CatanActionFactory {
 
     // ############## Helper functions to keep main functions simpler
 
-    public static List<AbstractAction> getBuildActions(CatanGameState gs){
+    /* Function that lists all buy actions to the player; building road, settlement or city or buying a development card */
+    public static List<AbstractAction> getBuyActions(CatanGameState gs){
         // todo check if player has enough resources
 
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
+        Deck<Card> playerHand = (Deck<Card>)gs.getComponentActingPlayer(CoreConstants.playerHandHash);
+        int[] resources = new int[CatanParameters.Resources.values().length];
+
+        for (Card card: playerHand.getComponents()){
+//            System.out.println(card.getProperty(cardType).toString());
+            resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
+        }
+        System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
         ArrayList<AbstractAction> actions = new ArrayList();
 
         // find possible roads, settlements and city upgrades and propose them as actions
@@ -180,6 +192,22 @@ public class CatanActionFactory {
                 }
             }
         }
+        // todo add buying dev card
+//        actions.add(new BuyDevelopmentCard());
     return actions;
+    }
+
+    public static List<AbstractAction> getCardActions(CatanGameState gs){
+        // Player can buy dev card and play one
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
+        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
+        ArrayList<AbstractAction> actions = new ArrayList();
+
+        // todo get playerHand; for each card add a new action
+
+        actions.add(new PlayDevelopmentCard());
+
+        return actions;
     }
 }

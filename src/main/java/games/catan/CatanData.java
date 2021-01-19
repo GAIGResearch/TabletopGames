@@ -1,6 +1,7 @@
 package games.catan;
 
 import core.AbstractGameData;
+import core.CoreConstants;
 import core.components.*;
 import core.properties.Property;
 import core.properties.PropertyBoolean;
@@ -60,6 +61,7 @@ public class CatanData extends AbstractGameData {
             area.putComponent(CatanConstants.cityCounterHash, cityCounter);
             area.putComponent(CatanConstants.settlementCounterHash, settlementCounter);
             area.putComponent(CatanConstants.roadCounterHash, roadCounter);
+            area.putComponent(CoreConstants.playerHandHash, new Deck("playerHand"));
 
             areas.add(area);
         }

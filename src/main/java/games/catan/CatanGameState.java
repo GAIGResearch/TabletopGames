@@ -162,7 +162,6 @@ public class CatanGameState extends AbstractGameState {
 
     public int getRoadDistance(int x, int y, int edge){
         // calculates the distance length of the road
-        int length = 0;
         HashSet<Road> roadSet = new HashSet<>();
         ArrayList<Settlement> unvisited = new ArrayList<>();
         Settlement settl1 = board[x][y].getSettlements()[edge];

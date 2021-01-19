@@ -98,4 +98,15 @@ public class CatanParameters extends AbstractParameters {
         PROGRESS_CARD,
         VICTORY_POINT_CARD
     }
+
+    /* Mapping of which field produces what*/
+    public static HashMap<TileType, Resources> productMapping = new HashMap<TileType, Resources>(){{
+        put(TileType.HILLS, Resources.BRICK);
+        put(TileType.FOREST, Resources.LUMBER);
+        put(TileType.MOUNTAINS, Resources.ORE);
+        put(TileType.FIELDS, Resources.GRAIN);
+        put(TileType.PASTURE, Resources.WOOL);
+        put(TileType.DESERT, null);
+        put(TileType.SEA, null);
+    }};
 }

@@ -83,7 +83,6 @@ public class CatanForwardModel extends AbstractForwardModel {
         IGamePhase gamePhase = gs.getGamePhase();
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
             cto.endPlayerTurn(gs);
-            // todo give player the resources in the second round
             if (cto.getRoundCounter() >= 2){
                 // After 2 rounds of setup the main game phase starts
                 gs.setMainGamePhase();
@@ -134,18 +133,21 @@ public class CatanForwardModel extends AbstractForwardModel {
                     // allocate resource for each settlement/city
                     for (Settlement settl: tile.getSettlements()) {
                         if (settl.getOwner() != -1) {
+                            // Move the card from the resource deck and give it to the player
+                            List<Card> resourceDeck = ((Deck<Card>)gs.getComponent(resourceDeckHash)).getComponents();
                             int counter = 0;
-                            while (counter < settl.getType()) {
-                                // Move the card from the resource deck and give it to the player
-                                for (Card card: ((Deck<Card>)gs.getComponent(resourceDeckHash)).getComponents()){
-                                    if (card.getType().equals(settl.getType())){
-                                        // remove from deck and give it to player
-                                        ((Deck<Card>)gs.getComponent(resourceDeckHash)).remove(card);
-                                        ((Deck) gs.getComponentActingPlayer(playerHandHash)).add(card);
-                                        counter++;
-                                    }
-                                    // no cards left
+                            for (int i = 0; i < resourceDeck.size(); i++){
+                                Card card = resourceDeck.get(i);
+                                if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())){
+                                    // remove from deck and give it to player
+                                    System.out.println("With Roll value " + gs.rollValue + " Player" + gs.getCurrentPlayer() + " got " + card.getProperty(cardType));
+                                    ((Deck<Card>)gs.getComponent(resourceDeckHash)).remove(card);
+                                    ((Deck) gs.getComponentActingPlayer(playerHandHash)).add(card);
                                     counter++;
+                                }
+                                // getType is 1 for settlement; 2 for city
+                                if (counter >= settl.getType()){
+                                    break;
                                 }
                             }
 
