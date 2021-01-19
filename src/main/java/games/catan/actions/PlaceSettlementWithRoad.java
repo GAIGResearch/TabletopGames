@@ -40,6 +40,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
                 CatanTile tile = cgs.getBoard()[bs.x][bs.y];
                 // next step is to find the tiles around the settlement
                 int[][] neighbourCoords =  CatanTile.get_neighbours_on_vertex(tile, bs.vertex);
+                tiles.add(tile);
                 tiles.add(board[neighbourCoords[0][0]][neighbourCoords[0][1]]);
                 tiles.add(board[neighbourCoords[1][0]][neighbourCoords[1][1]]);
 

@@ -123,6 +123,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
         gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
+        System.out.println("New role value = "+ gs.rollValue);
 
         int value = gs.getRollValue();
         CatanTile[][] board = gs.getBoard();
@@ -140,9 +141,10 @@ public class CatanForwardModel extends AbstractForwardModel {
                                 Card card = resourceDeck.get(i);
                                 if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())){
                                     // remove from deck and give it to player
-                                    System.out.println("With Roll value " + gs.rollValue + " Player" + gs.getCurrentPlayer() + " got " + card.getProperty(cardType));
+                                    System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
                                     ((Deck<Card>)gs.getComponent(resourceDeckHash)).remove(card);
-                                    ((Deck) gs.getComponentActingPlayer(playerHandHash)).add(card);
+                                    ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
+//                                    ((Deck) gs.getComponentActingPlayer(playerHandHash)).add(card);
                                     counter++;
                                 }
                                 // getType is 1 for settlement; 2 for city
