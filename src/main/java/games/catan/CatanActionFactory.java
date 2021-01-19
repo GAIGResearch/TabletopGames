@@ -151,8 +151,6 @@ public class CatanActionFactory {
 
     /* Function that lists all buy actions to the player; building road, settlement or city or buying a development card */
     public static List<AbstractAction> getBuyActions(CatanGameState gs){
-        // todo check if player has enough resources
-
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
@@ -166,6 +164,7 @@ public class CatanActionFactory {
         System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
         ArrayList<AbstractAction> actions = new ArrayList();
 
+
         // find possible roads, settlements and city upgrades and propose them as actions
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
@@ -173,27 +172,33 @@ public class CatanActionFactory {
                 CatanTile tile = board[x][y];
                 for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
                     Settlement settlement = tile.getSettlements()[i];
-                    Road road = tile.getRoads()[i];
 
                     // where it is legal to place tile then it can be placed from there
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
                             && checkSettlementPlacement(settlement, gs)) {
-                        actions.add(new BuildSettlement(x, y, i, activePlayer));
+                        if (checkCost(resources, CatanParameters.costMapping.get("settlement"))) {
+                            actions.add(new BuildSettlement(x, y, i, activePlayer));
+                        }
                     }
 
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
                             && checkRoadPlacement(i, tile, gs)){
-                        actions.add(new BuildRoad(x, y, i, activePlayer));
+                        if (checkCost(resources, CatanParameters.costMapping.get("road"))) {
+                            actions.add(new BuildRoad(x, y, i, activePlayer));
+                        }
                     }
 
                     if (settlement.getOwner() == activePlayer && settlement.getType() == 1){
-                        actions.add(new BuildCity(x, y, i, activePlayer));
+                        if (checkCost(resources, CatanParameters.costMapping.get("city"))) {
+                            actions.add(new BuildCity(x, y, i, activePlayer));
+                        }
                     }
                 }
             }
         }
-        // todo add buying dev card
-//        actions.add(new BuyDevelopmentCard());
+        // todo buying a development card is not fully implemented
+//        if (checkCost(resources, CatanParameters.costMapping.get("developmentCard")))
+//            actions.add(new BuyDevelopmentCard());
     return actions;
     }
 
@@ -204,10 +209,21 @@ public class CatanActionFactory {
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList();
 
-        // todo get playerHand; for each card add a new action
-
-        actions.add(new PlayDevelopmentCard());
+        // todo action is unfinished
+        // get playerHand; for each card add a new action
+//        Deck<Card> playerHand = (Deck<Card>)gs.getComponentActingPlayer(CoreConstants.playerHandHash);
+//        for (Card c: playerHand.getComponents()){
+//            actions.add(new PlayDevelopmentCard(c));
+//        }
 
         return actions;
+    }
+
+    /* checks if given resources cover the price or not */
+    public static boolean checkCost(int[] resources, int[] price){
+        for (int i = 0; i < resources.length; i++){
+            if (resources[i] - price[i] < 0) return false;
+        }
+        return true;
     }
 }

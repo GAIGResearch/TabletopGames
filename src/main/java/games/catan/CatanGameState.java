@@ -23,6 +23,7 @@ public class CatanGameState extends AbstractGameState {
     protected int knights[]; // knight count for each player
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
     protected int longestRoad = -1; // playerID of the player currently holding the longest road
+    protected int longestRoadLength = 0;
     int rollValue;
 
     // In Catan the "setup" phase is when each player can place a road with a settlement twice. The robber phase is when
@@ -44,6 +45,7 @@ public class CatanGameState extends AbstractGameState {
         data = new CatanData((CatanParameters)pp);
         data.load(((CatanParameters)gameParameters).getDataPath());
         scores = new int[((CatanParameters) pp).n_players];
+        longestRoadLength = ((CatanParameters) pp).min_longest_road;
     }
 
     @Override

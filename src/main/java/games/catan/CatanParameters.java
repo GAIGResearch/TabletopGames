@@ -18,6 +18,7 @@ public class CatanParameters extends AbstractParameters {
 
     // the minimum number of knights required to take the largest army
     int min_army_size = 3;
+    public final int min_longest_road = 5;
 
     int settlement_value = 1;
     int city_value = 2;
@@ -108,5 +109,20 @@ public class CatanParameters extends AbstractParameters {
         put(TileType.PASTURE, Resources.WOOL);
         put(TileType.DESERT, null);
         put(TileType.SEA, null);
+    }};
+
+    /* Mapping from name to price of item (cost is in the same order as Resources) */
+    public static HashMap<String, int[]> costMapping = new HashMap<String, int[]>(){{
+        // cost order: Brick, lumber, ore, grain, wool
+        put("settlement", new int[]{1, 1, 0, 1, 1});
+        put("city", new int[]{0, 0, 3, 0, 2});
+        put("road", new int[]{1, 1, 0, 0, 0});
+        put("developmentCard", new int[]{0, 0, 1, 1, 1});
+    }};
+
+    HashMap<String, Integer> tokenCounts = new HashMap<String, Integer>() {{
+        put("settlement", 5);
+        put("city", 4);
+        put("road", 15);
     }};
 }

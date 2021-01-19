@@ -32,6 +32,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         if (this.bs.execute(gs) && this.br.execute(gs)){
+            // players get the resources in the second round after the settlements they placed
             if (gs.getTurnOrder().getRoundCounter() == 1){
                 CatanGameState cgs = ((CatanGameState)gs);
                 CatanTile[][] board = cgs.getBoard();
@@ -54,7 +55,6 @@ public class PlaceSettlementWithRoad extends AbstractAction {
                         resources[CatanParameters.Resources.valueOf(res.toString()).ordinal()] += 1;
                         List<Card> cards = resourceDeck.getComponents();
 
-                        // todo does not give all the resources
                         for (int i = 0; i < cards.size(); i++){
                             Card c = cards.get(i);
                             if (c.getProperty(cardType).toString().equals(res.toString())){

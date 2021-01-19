@@ -6,10 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import games.catan.actions.BuildCity;
-import games.catan.actions.BuildRoad;
-import games.catan.actions.BuildSettlement;
-import games.catan.actions.PlayDevelopmentCard;
+import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
@@ -82,23 +79,39 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
         IGamePhase gamePhase = gs.getGamePhase();
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
+            // As player always places a settlement in the setup phase it is awarded the score for it
+            gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
             cto.endPlayerTurn(gs);
             if (cto.getRoundCounter() >= 2){
                 // After 2 rounds of setup the main game phase starts
                 gs.setMainGamePhase();
             }
         }
+        // todo (mb) check to only execute one of each types of actions
         if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
-            // todo (mb) check to only execute one of each types of actions
             if (action instanceof BuildRoad){
-                // add points for longest road
                 BuildRoad br = (BuildRoad)action;
                 // todo remove branches and cycles from road length
                 int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
-                System.out.println("Calculate the road length: " + new_length);
+                if (new_length > gs.longestRoadLength){
+                    gs.longestRoadLength = new_length;
+                    // add points for longest road and set the new road in gamestate
+                    if (gs.longestRoad >= 0) {
+                        // in this case the longest road was not claimed yet
+                        gs.addScore(gs.longestRoad, -params.longest_road_value);
+                    }
+                    gs.addScore(gs.getCurrentPlayer(), params.longest_road_value);
+                    gs.longestRoad = gs.getCurrentPlayer();
+                    if (VERBOSE){
+                        System.out.println("Player " + gs.getCurrentPlayer() + " has the longest road with length " + gs.longestRoad);
+                    }
+                }
+                if (VERBOSE) {
+                    System.out.println("Calculated road length: " + new_length);
+                }
             } else if (action instanceof BuildSettlement){
                 gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
-            } else if (action instanceof BuildCity){
+            } else if (action instanceof BuildCity) {
                 gs.addScore(gs.getCurrentPlayer(), params.city_value);
             } else if (action instanceof PlayDevelopmentCard){
                 // todo only cards with victory point or knight card if gets the largest army
@@ -123,7 +136,9 @@ public class CatanForwardModel extends AbstractForwardModel {
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
         gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
-        System.out.println("New role value = "+ gs.rollValue);
+        if (VERBOSE) {
+            System.out.println("New role value = " + gs.rollValue);
+        }
 
         int value = gs.getRollValue();
         CatanTile[][] board = gs.getBoard();
