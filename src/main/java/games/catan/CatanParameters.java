@@ -125,4 +125,12 @@ public class CatanParameters extends AbstractParameters {
         put("city", 4);
         put("road", 15);
     }};
+
+    HashMap<String, Integer> developmentCardCount = new HashMap<String, Integer>() {{
+        put("Knight", 14);
+        put("Monopoly", 2);
+        put("Year of Plenty", 2);
+        put("Road Building", 2);
+        put("Victory Point", 5);
+    }};
 }

@@ -49,10 +49,16 @@ public class CatanForwardModel extends AbstractForwardModel {
         // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = new Area(i, "Player Area");
-            Deck<Card> playerHand = new Deck<>("Player Hand");
+            Deck<Card> playerHand = new Deck<>("Player Resource Deck");
             playerHand.setOwnerId(i);
             playerArea.putComponent(playerHandHash, playerHand);
+
+            Deck<Card> playerDevDeck = new Deck<>("Player Development Deck");
+            playerDevDeck.setOwnerId(i);
+            playerArea.putComponent(developmentDeckHash, playerDevDeck);
+
             state.areas.put(i, playerArea);
+
         }
 
         // Initialize the game area
@@ -60,6 +66,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         state.areas.put(-1, gameArea);
         gameArea.putComponent(resourceDeckHash, data.findDeck("resourceDeck"));
         gameArea.putComponent(developmentDeckHash, data.findDeck("developmentDeck"));
+        gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck"));
 
         state.addComponents();
         state.setGamePhase(CatanGameState.CatanGamePhase.Setup);

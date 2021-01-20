@@ -59,12 +59,10 @@ public class CatanActionFactory {
      * @return - ArrayList, various action types (unique).
      */
     static List<AbstractAction> getPlayerActions(CatanGameState gs) {
-        // todo
-        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList();
         actions.add(new DoNothing());
         actions.addAll(getBuyActions(gs));
+        actions.addAll(getCardActions(gs));
 
         return actions;
     }
@@ -197,8 +195,8 @@ public class CatanActionFactory {
             }
         }
         // todo buying a development card is not fully implemented
-//        if (checkCost(resources, CatanParameters.costMapping.get("developmentCard")))
-//            actions.add(new BuyDevelopmentCard());
+        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("developmentCard")))
+            actions.add(new BuyDevelopmentCard());
     return actions;
     }
 
@@ -209,12 +207,11 @@ public class CatanActionFactory {
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList();
 
-        // todo action is unfinished
         // get playerHand; for each card add a new action
-//        Deck<Card> playerHand = (Deck<Card>)gs.getComponentActingPlayer(CoreConstants.playerHandHash);
-//        for (Card c: playerHand.getComponents()){
-//            actions.add(new PlayDevelopmentCard(c));
-//        }
+        Deck<Card> playerDevDeck = (Deck<Card>)gs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
+        for (Card c: playerDevDeck.getComponents()){
+            actions.add(new PlayDevelopmentCard(c));
+        }
 
         return actions;
     }

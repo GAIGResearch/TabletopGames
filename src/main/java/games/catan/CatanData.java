@@ -9,10 +9,7 @@ import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import utilities.Hash;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class CatanData extends AbstractGameData {
@@ -32,23 +29,7 @@ public class CatanData extends AbstractGameData {
 
     @Override
     public void load(String dataPath) {
-        // load all components, tiles, decks, counters....
-
-        // 126 cards - resources, bonus
-        // 37 tiles
-        // 90 tokens
-        // 18 number tiles
-        // 2 dice
-        // 1 wooden tile - thief
-        HashMap<CatanParameters.TileType, Integer> tileCounts = new HashMap<CatanParameters.TileType, Integer>() {{
-            put(CatanParameters.TileType.HILLS, 3);
-            put(CatanParameters.TileType.FOREST, 4);
-            put(CatanParameters.TileType.MOUNTAINS, 3);
-            put(CatanParameters.TileType.FIELDS, 4);
-            put(CatanParameters.TileType.PASTURE, 4);
-            put(CatanParameters.TileType.DESERT, 1);
-            put(CatanParameters.TileType.SEA, 18);
-        }};
+        // Create all components, tiles, decks, counters....
 
         // add player tokens (counters)
         for (int i = 0; i < params.n_players; i++){
@@ -81,20 +62,28 @@ public class CatanData extends AbstractGameData {
             put(CatanParameters.CardTypes.KNIGHT_CARD, 10);
         }};
 
-        List<Deck<Card>> developmentTypes = Deck.loadDecksOfCards(dataPath + "catan/decks.json");
         Deck<Card> developmentDeck = new Deck("developmentDeck");
-        for (Deck<Card> devDeck: developmentTypes){
-            // first pass is the devDeck and second is the resource deck
-            for (Card c: devDeck.getComponents()){
-                PropertyInt count = (PropertyInt)c.getProperty(CatanConstants.countHash);
-                if (count != null){
-                    for (int i = 0; i < count.value-1; i++){
-                        Card cardCopy = c.copy();
-                        developmentDeck.add(cardCopy);
-                    }
-                }
+        for (Map.Entry<String, Integer> entry: params.developmentCardCount.entrySet()){
+            for (int i = 0; i < entry.getValue(); i++){
+                Card card = new Card();
+                card.setProperty(new PropertyString("cardType", entry.getKey()));
+                developmentDeck.add(card);
             }
         }
+        developmentDeck.shuffle(new Random(params.getRandomSeed()));
+//        List<Deck<Card>> developmentTypes = Deck.loadDecksOfCards(dataPath + "catan/decks.json");
+//        for (Deck<Card> devDeck: developmentTypes){
+//            // first pass is the devDeck and second is the resource deck
+//            for (Card c: devDeck.getComponents()){
+//                PropertyInt count = (PropertyInt)c.getProperty(CatanConstants.countHash);
+//                if (count != null){
+//                    for (int i = 0; i < count.value-1; i++){
+//                        Card cardCopy = c.copy();
+//                        developmentDeck.add(cardCopy);
+//                    }
+//                }
+//            }
+//        }
 
 
         // merge decks

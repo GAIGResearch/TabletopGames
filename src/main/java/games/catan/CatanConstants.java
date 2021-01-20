@@ -19,6 +19,7 @@ public class CatanConstants {
 
     public final static int resourceDeckHash = Hash.GetInstance().hash("resourceDeck");
     public final static int developmentDeckHash = Hash.GetInstance().hash("developmentDeck");
+    public final static int developmentDiscardDeck = Hash.GetInstance().hash("developmentDiscardDeck");
 
     public final static int cardType = Hash.GetInstance().hash("cardType");
 
