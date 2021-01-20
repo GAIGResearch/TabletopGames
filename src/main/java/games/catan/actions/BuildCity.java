@@ -28,10 +28,9 @@ public class BuildCity extends AbstractAction {
         Settlement settlement = board[row][col].getSettlements()[vertex];
         if (settlement != null) {
             if (settlement.getOwner() == playerID) {
+                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("city"))) return false;
                 settlement.upgrade();
                 return true;
-            } else{
-                System.out.println("Trying to upgrade a city for another player");
             }
         }
         return false;

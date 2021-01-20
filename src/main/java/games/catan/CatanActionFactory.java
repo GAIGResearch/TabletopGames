@@ -176,20 +176,20 @@ public class CatanActionFactory {
                     // where it is legal to place tile then it can be placed from there
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
                             && checkSettlementPlacement(settlement, gs)) {
-                        if (checkCost(resources, CatanParameters.costMapping.get("settlement"))) {
+                        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("settlement"))) {
                             actions.add(new BuildSettlement(x, y, i, activePlayer));
                         }
                     }
 
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
                             && checkRoadPlacement(i, tile, gs)){
-                        if (checkCost(resources, CatanParameters.costMapping.get("road"))) {
+                        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("road"))) {
                             actions.add(new BuildRoad(x, y, i, activePlayer));
                         }
                     }
 
                     if (settlement.getOwner() == activePlayer && settlement.getType() == 1){
-                        if (checkCost(resources, CatanParameters.costMapping.get("city"))) {
+                        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("city"))) {
                             actions.add(new BuildCity(x, y, i, activePlayer));
                         }
                     }
@@ -217,13 +217,5 @@ public class CatanActionFactory {
 //        }
 
         return actions;
-    }
-
-    /* checks if given resources cover the price or not */
-    public static boolean checkCost(int[] resources, int[] price){
-        for (int i = 0; i < resources.length; i++){
-            if (resources[i] - price[i] < 0) return false;
-        }
-        return true;
     }
 }

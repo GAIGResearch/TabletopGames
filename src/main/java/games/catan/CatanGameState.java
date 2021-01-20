@@ -3,7 +3,9 @@ package games.catan;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Area;
+import core.components.Card;
 import core.components.Component;
+import core.components.Deck;
 import core.interfaces.IGamePhase;
 import games.catan.actions.BuildRoad;
 import games.catan.components.Edge;
@@ -13,7 +15,10 @@ import games.catan.components.Settlement;
 
 import java.util.*;
 
+import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.CatanConstants.resourceDeckHash;
 
 public class CatanGameState extends AbstractGameState {
     private CatanData data;
@@ -239,6 +244,45 @@ public class CatanGameState extends AbstractGameState {
         }
         System.out.println("There are " + counter + " settlements");
         return settlements;
+    }
+
+    /* checks if given resources cover the price or not */
+    public static boolean checkCost(int[] resources, int[] price){
+        for (int i = 0; i < resources.length; i++){
+            if (resources[i] - price[i] < 0) return false;
+        }
+        return true;
+    }
+
+    /* Takes the resource cards specified in the cost array from the current player, returns true if successful */
+    public static boolean spendResources(CatanGameState gs, int[] cost){
+        int[] costCopy = cost.clone();
+        List<Card> playerHand = ((Deck<Card>)gs.getComponentActingPlayer(playerHandHash)).getComponents();
+        ArrayList<Card> cardsToReturn = new ArrayList<>();
+        // reduce entries in cost until all of them are 0
+        for (int i = 0; i < playerHand.size(); i++){
+            Card card = playerHand.get(i);
+            int index = CatanParameters.Resources.valueOf(card.getProperty(CatanConstants.cardType).toString()).ordinal();
+            if (costCopy[index] > 0){
+                cardsToReturn.add(card);
+                costCopy[index] -= 1;
+            }
+        }
+        // if we got all 0s -> return true; remove them from player and put them back to resourceDeck
+        for (int i = 0; i < costCopy.length; i++){
+            if (costCopy[i] > 0){
+                if (VERBOSE)
+                    System.out.println("Player does not have enough resources in hand");
+                return false;
+            }
+        }
+
+        for (int i = 0; i < cardsToReturn.size(); i++){
+            Card card = cardsToReturn.get(i);
+            ((Deck<Card>)gs.getComponentActingPlayer(playerHandHash)).remove(card);
+            ((Deck<Card>)gs.getComponent(resourceDeckHash)).add(card);
+        }
+        return true;
     }
     // todo implement methods below
 

@@ -3,6 +3,7 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.CatanTile;
 
 public class BuildRoad extends AbstractAction {
@@ -23,6 +24,10 @@ public class BuildRoad extends AbstractAction {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
         if (board[x][y].getRoads()[edge].getOwner() == -1) {
+            // take resources after second round
+            if (cgs.getTurnOrder().getRoundCounter() > 1) {
+                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("road"))) return false;
+            }
             return board[this.x][this.y].addRoad(edge, playerID);
         }
 

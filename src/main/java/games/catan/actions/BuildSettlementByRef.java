@@ -3,6 +3,7 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.CatanTile;
 import games.catan.components.Settlement;
 
@@ -22,6 +23,11 @@ public class BuildSettlementByRef extends AbstractAction {
         for (Settlement settl: cgs.getSettlements()){
             if (settl.equals(settlement)){
                 if (settl.getOwner() == -1){
+                    // take resources after second round
+                    if (cgs.getTurnOrder().getRoundCounter() > 1) {
+                        if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("settlement")))
+                            return false;
+                    }
                     settl.setOwner(owner);
                     return true;
                 }
