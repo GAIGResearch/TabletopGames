@@ -26,7 +26,7 @@ public class PlayerReport {
      */
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        if (argsList.isEmpty() || argsList.contains("--help") || argsList.contains("-h")) System.out.println(
+        if (argsList.isEmpty() || argsList.contains("--help" ) || argsList.contains("-h" )) System.out.println(
                 "There are a number of possible arguments:\n" +
                         "\tgames=         A list of the games to be played. If there is more than one, then use a \n" +
                         "\t               pipe-delimited list, for example games=Uno|ColtExpress|Pandemic. No default.\n" +
@@ -42,48 +42,56 @@ public class PlayerReport {
                         "\t               This can either be a json-format file detailing the parameters, or\n" +
                         "\t               one of mcts|rmhc|random|osla|<className>  \n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
-                        "\t               with a no-argument constructor\n"
+                        "\t               with a no-argument constructor\n" +
+                        "\tfullData=      Default of false just reports win rate and score. True will also report any\n" +
+                        "\t               Player-specific statistics."
         );
 
         // Now I get the Player and Opponent to be used
-        String opponentDescriptor = getArg(args, "opponent", "");
-        String playerDescriptor = getArg(args, "player", "");
-        if (playerDescriptor.equals(""))
-            throw new IllegalArgumentException("Must specify a player file or type");
+        String opponentDescriptor = getArg(args, "opponent", "" );
+        String playerDescriptor = getArg(args, "player", "" );
+        boolean fullData = getArg(args, "fullData", false);
+        if (playerDescriptor.equals("" ))
+            throw new IllegalArgumentException("Must specify a player file or type" );
         AbstractPlayer playerToTrack = PlayerFactory.createPlayer(playerDescriptor);
 
-        String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
+        String loggerClass = getArg(args, "logger", "utilities.SummaryLogger" );
 
         int nGames = getArg(args, "nGames", 1);
-        List<String> games = Arrays.asList(getArg(args, "games", "").split("\\|"));
+        List<String> games = Arrays.asList(getArg(args, "games", "" ).split("\\|" ));
         if (games.isEmpty())
-            throw new IllegalArgumentException("Must specify at least one game");
+            throw new IllegalArgumentException("Must specify at least one game" );
 
-        List<Integer> nPlayers = Arrays.stream(getArg(args, "nPlayers", "").split("\\|"))
+        List<Integer> nPlayers = Arrays.stream(getArg(args, "nPlayers", "" ).split("\\|" ))
                 .mapToInt(Integer::valueOf).boxed().collect(toList());
 
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
-            throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
+            throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list" );
 
-        String logFile = getArg(args, "logFile", "PlayerReport.txt");
+        String logFile = getArg(args, "logFile", "PlayerReport.txt" );
 
         // Then iterate over the Game Types
         for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {
             GameType gameType = GameType.valueOf(games.get(gameIndex));
-            System.out.println("Game: " + gameType.name());
-
-            // For each type, instantiate a new IStatisticsLogger
-            String fullFileName = gameType.name() + "_" + logFile;
-            if (loggerClass.contains("Summary"))
-                fullFileName = logFile;
-            IStatisticLogger logger = createLogger(loggerClass, fullFileName);
-            if (!(logger instanceof FileStatsLogger))
-                logger.record("Game", games.get(gameIndex));
-            playerToTrack.setStatsLogger(logger);
+            System.out.printf("Game: %s, Player: %s\n", gameType.name(), playerToTrack.toString());
 
             int playerCount = gameType.getMinPlayers();
             if (nPlayers.size() == 1) playerCount = nPlayers.get(0);
             if (nPlayers.size() > 1) playerCount = nPlayers.get(gameIndex);
+
+            // For each type, instantiate a new IStatisticsLogger
+            String fullFileName = gameType.name() + "_" + logFile;
+            if (loggerClass.contains("Summary" ))
+                fullFileName = logFile;
+            IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, fullFileName);
+            if (!(logger instanceof FileStatsLogger)) {
+                logger.record("Game", games.get(gameIndex));
+                logger.record("PlayerType", playerToTrack.toString());
+                logger.record("Players", playerCount);
+                logger.record("Opponent", opponentDescriptor);
+            }
+            if (fullData)
+                playerToTrack.setStatsLogger(logger);
 
             Game game = gameType.createGameInstance(playerCount);
             for (int i = 0; i < nGames; i++) {
@@ -101,31 +109,12 @@ public class PlayerReport {
                 game.reset(allPlayers);
                 playerToTrack.initializePlayer(game.getGameState());
                 game.run();
-                playerToTrack.getStatsLogger().record("Win", game.getGameState().getPlayerResults()[playerIndex].value);
-                playerToTrack.getStatsLogger().record("Score", game.getGameState().getGameScore(playerIndex));
+                logger.record("Win", game.getGameState().getPlayerResults()[playerIndex].value);
+                logger.record("Score", game.getGameState().getGameScore(playerIndex));
             }
             // Once all games are complete, call processDataAndFinish()
-            playerToTrack.getStatsLogger().processDataAndFinish();
+            logger.processDataAndFinish();
         }
-    }
-
-    private static IStatisticLogger createLogger(String loggerClass, String logFile) {
-        IStatisticLogger logger = new SummaryLogger();
-        try {
-            Class<?> clazz = Class.forName(loggerClass);
-
-            Constructor<?> constructor;
-            try {
-                constructor = clazz.getConstructor(String.class);
-                logger = (IStatisticLogger) constructor.newInstance(logFile);
-            } catch (NoSuchMethodException e) {
-                constructor = clazz.getConstructor();
-                logger = (IStatisticLogger) constructor.newInstance();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return logger;
     }
 
 }

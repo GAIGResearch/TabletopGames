@@ -16,8 +16,10 @@ import games.diamant.components.DiamantTreasureChest;
 import games.diamant.components.DiamantHand;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static java.util.stream.Collectors.*;
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
@@ -138,11 +140,23 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         return treasureChests.get(playerId).getValue();
     }
 
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
+    @Override
+    public double getGameScore(int playerId) {
+         return treasureChests.get(playerId).getValue();
+    }
+
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId)
     {
-        ArrayList<Integer> ids = new ArrayList<>();
-        ids.add(mainDeck.getComponentID());
+        ArrayList<Integer> ids = mainDeck.getComponents().stream().map(Component::getComponentID).collect(toCollection(ArrayList::new));
         ids.add(actionsPlayed.getComponentID());
         return ids;
     }

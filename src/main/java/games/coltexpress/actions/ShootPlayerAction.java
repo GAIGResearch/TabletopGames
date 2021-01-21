@@ -37,16 +37,18 @@ public class ShootPlayerAction extends DrawCard {
         Compartment target = (Compartment) gs.getComponentById(targetCompartment);
         ColtExpressCard card = (ColtExpressCard) getCard(gs);
 
+        int direction = target.getCompartmentID() - player.getCompartmentID();
+
         ColtExpressGameState cegs = ((ColtExpressGameState) gs);
         cegs.addBullet(targetID, card.playerID);
 
         if (isDjango){
-            int direction = target.getCompartmentID() - player.getCompartmentID();
             if (direction == 0)
             {
-                throw new IllegalArgumentException("when django shoots the player needs to be in a different " +
+                throw new IllegalArgumentException("when shooting the player needs to be in a different " +
                         "compartment than its target");
             }
+
             int movementIndex;
             if (direction > 0){
                 movementIndex = target.getCompartmentID() + 1;

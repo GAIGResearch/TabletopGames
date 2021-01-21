@@ -185,27 +185,42 @@ public class SingleTreeNode {
         statsLogger.record(stats);
     }
 
+    /**
+     * Uses plain java loop instead of streams for performance
+     * (this is called often enough it can make a measurable difference)
+     */
     private int actionVisits(AbstractAction action) {
-        return Arrays.stream(children.get(action))
-                .filter(Objects::nonNull)
-                .mapToInt(n -> n.nVisits)
-                .sum();
+        int retValue = 0;
+        for (SingleTreeNode node : children.get(action)) {
+            if (node != null)
+                retValue += node.nVisits;
+        }
+        return retValue;
     }
 
+    /**
+     * Uses plain java loop instead of streams for performance
+     * (this is called often enough it can make a measurable difference)
+     */
     private double actionTotValue(AbstractAction action, int playerId) {
-        return Arrays.stream(children.get(action))
-                .filter(Objects::nonNull)
-                .mapToDouble(n -> n.totValue[playerId])
-                .sum();
+        double retValue = 0.0;
+        for (SingleTreeNode node : children.get(action)) {
+            if (node != null)
+                retValue += node.totValue[playerId];
+        }
+        return retValue;
     }
 
+    /**
+     * Uses only by TreeStatistics and bestAction() after mctsSearch()
+     * For this reason not converted to old-style java loop as there would be no performance gain
+     */
     private int[] actionVisits() {
         return children.values().stream()
                 .filter(Objects::nonNull)
                 .mapToInt(arr -> Arrays.stream(arr).filter(Objects::nonNull).mapToInt(n -> n.nVisits).sum())
                 .toArray();
     }
-
     /**
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.

@@ -8,7 +8,6 @@ import evaluation.GameLogger;
 import games.GameType;
 import players.PlayerConstants;
 import players.human.ActionController;
-import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
@@ -343,7 +342,8 @@ public class Game {
         copyTime /= tick;
         actionComputeTime /= tick;
         agentTime /= nDecisions;
-        nActionsPerTurnSum /= nActionsPerTurnCount;
+        if (nActionsPerTurnCount > 0)
+            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**
