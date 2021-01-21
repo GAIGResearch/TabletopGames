@@ -8,7 +8,6 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
-import games.catan.actions.BuildRoad;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
@@ -27,6 +26,7 @@ public class CatanGameState extends AbstractGameState {
     protected int scores[]; // score for each player
     protected int victoryPoints[]; // secret points from victory cards
     protected int knights[]; // knight count for each player
+    protected int exchangeRates[][]; // exchange rate with bank for each resource
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
     protected int longestRoad = -1; // playerID of the player currently holding the longest road
     protected int longestRoadLength = 0;
@@ -52,6 +52,9 @@ public class CatanGameState extends AbstractGameState {
         data.load(((CatanParameters)gameParameters).getDataPath());
         scores = new int[((CatanParameters) pp).n_players];
         knights = new int[((CatanParameters) pp).n_players];
+        exchangeRates = new int[((CatanParameters) pp).n_players][CatanParameters.Resources.values().length];
+        for (int i = 0; i < exchangeRates.length; i++)
+            Arrays.fill(exchangeRates[i], ((CatanParameters)pp).default_exchange_rate);
         victoryPoints = new int[((CatanParameters) pp).n_players];
         longestRoadLength = ((CatanParameters) pp).min_longest_road;
     }
@@ -188,6 +191,10 @@ public class CatanGameState extends AbstractGameState {
 
     public int[] getScores(){
         return scores;
+    }
+
+    public int[] getExchangeRates(){
+        return exchangeRates[getCurrentPlayer()];
     }
 
     public int getRoadDistance(int x, int y, int edge){

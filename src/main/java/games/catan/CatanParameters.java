@@ -16,7 +16,7 @@ public class CatanParameters extends AbstractParameters {
     public final int n_resource_cards = 19;
     public final int n_tiles_per_row = 7;
 
-    public final int n_resource_to_trade = 4;
+    public final int default_exchange_rate = 4;
 
     // the minimum number of knights required to take the largest army
     public final int min_army_size = 3;
@@ -97,6 +97,15 @@ public class CatanParameters extends AbstractParameters {
         WOOL
     }
 
+    public enum HarborTypes {
+        BRICK,
+        LUMBER,
+        ORE,
+        GRAIN,
+        WOOL,
+        GENERIC
+    }
+
     public enum CardTypes{
         KNIGHT_CARD,
         PROGRESS_CARD,
@@ -135,5 +144,14 @@ public class CatanParameters extends AbstractParameters {
         put("Year of Plenty", 2);
         put("Road Building", 2);
         put("Victory Point", 5);
+    }};
+
+    public static HashMap<HarborTypes, Integer> harborCount = new HashMap<HarborTypes, Integer>() {{
+        put(HarborTypes.BRICK, 1);
+        put(HarborTypes.LUMBER, 1);
+        put(HarborTypes.ORE, 1);
+        put(HarborTypes.GRAIN, 1);
+        put(HarborTypes.WOOL, 1);
+        put(HarborTypes.GENERIC, 4);
     }};
 }

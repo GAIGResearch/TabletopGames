@@ -13,14 +13,17 @@ import games.catan.CatanParameters.Resources;
 import java.util.ArrayList;
 import java.util.List;
 
-/* Player may trade any 4 resources of the same type of 1 resource of choice with the bank */
+/* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
+* This action also includes the Harbor trades using the exchangeRate*/
 public class DefaultTrade extends AbstractAction {
     Resources resourceOffer;
     Resources resourceToGet;
+    int exchangeRate;
 
-    public DefaultTrade(Resources resourceOffer, Resources resourceToGet){
+    public DefaultTrade(Resources resourceOffer, Resources resourceToGet, int exchangeRate){
         this.resourceOffer = resourceOffer;
         this.resourceToGet = resourceToGet;
+        this.exchangeRate = exchangeRate;
     }
 
 
@@ -32,12 +35,12 @@ public class DefaultTrade extends AbstractAction {
         Deck<Card> resourceDeck = (Deck<Card>)cgs.getComponent(CatanConstants.resourceDeckHash);
         List<Card> cardsToReturn = new ArrayList<>();
         for (Card card: playerResources.getComponents()){
-            if (card.getProperty(CatanConstants.cardType).equals(resourceOffer)){
+            if (card.getProperty(CatanConstants.cardType).toString().equals(resourceOffer.toString())){
                 cardsToReturn.add(card);
             }
         }
-        if (cardsToReturn.size() < params.n_resource_to_trade) return false;
-        for (int i = 0; i < params.n_resource_to_trade; i++){
+        if (cardsToReturn.size() < exchangeRate) return false;
+        for (int i = 0; i < exchangeRate; i++){
             Card card = cardsToReturn.get(i);
             playerResources.remove(card);
             resourceDeck.add(card);
@@ -47,7 +50,7 @@ public class DefaultTrade extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new DefaultTrade(resourceOffer, resourceToGet);
+        return new DefaultTrade(resourceOffer, resourceToGet, exchangeRate);
     }
 
     @Override
@@ -55,7 +58,7 @@ public class DefaultTrade extends AbstractAction {
         if (this == other) return true;
         if (other instanceof DefaultTrade){
             DefaultTrade otherAction = (DefaultTrade)other;
-            return resourceOffer == otherAction.resourceOffer && resourceToGet == otherAction.resourceToGet;
+            return resourceOffer == otherAction.resourceOffer && resourceToGet == otherAction.resourceToGet && exchangeRate == otherAction.exchangeRate;
         }
         return false;
     }
@@ -67,6 +70,6 @@ public class DefaultTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Trade getting 1" + resourceToGet + " in exchange of 4 " + resourceOffer;
+        return "Trade getting 1" + resourceToGet + " in exchange of " +  exchangeRate + " " + resourceOffer;
     }
 }

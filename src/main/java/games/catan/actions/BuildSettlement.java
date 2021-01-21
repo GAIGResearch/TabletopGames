@@ -35,6 +35,7 @@ public class BuildSettlement extends AbstractAction {
             if (cgs.getTurnOrder().getRoundCounter() > 1)
                 if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("settlement"))) return false;
             board[x][y].addSettlement(vertex, playerID);
+            // todo check if other tile has harbor
             return true;
         }
 

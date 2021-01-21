@@ -32,7 +32,6 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
-        // todo set everything to the state
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         CatanGameState state = (CatanGameState) firstState;
@@ -166,7 +165,6 @@ public class CatanForwardModel extends AbstractForwardModel {
                                     System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
                                     ((Deck<Card>)gs.getComponent(resourceDeckHash)).remove(card);
                                     ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
-//                                    ((Deck) gs.getComponentActingPlayer(playerHandHash)).add(card);
                                     counter++;
                                 }
                                 // getType is 1 for settlement; 2 for city
@@ -259,10 +257,6 @@ public class CatanForwardModel extends AbstractForwardModel {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
 
-                // todo set the harbor to the sea tile
-                if (midTile.distance(tile) == mid_x){
-                    tile.addHarbor(0, 1);
-                }
                 // --------- Road ------------
                 for (int edge = 0; edge < HEX_SIDES; edge++) {
                     // Road has already been set
@@ -307,6 +301,8 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
             }
         }
+        // Finally set Harbors types
+        setHarbors(board);
         return board;
     }
 
@@ -331,7 +327,6 @@ public class CatanForwardModel extends AbstractForwardModel {
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
                             Road[] neighbour_roads = neighbour.getRoads();
-                            // todo the rule below is not general
                             graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbour_roads[(i+4)%HEX_SIDES]);
                         }
                     }
@@ -339,7 +334,41 @@ public class CatanForwardModel extends AbstractForwardModel {
             }
         }
         return graph;
+    }
 
+    public void setHarbors(CatanTile[][] board){
+        // set harbors along the tiles where the SEA borders the land
+        ArrayList<Integer> harbors = new ArrayList<>();
+        for (Map.Entry<CatanParameters.HarborTypes, Integer> entry: CatanParameters.harborCount.entrySet()){
+            for (int i = 0; i < entry.getValue(); i++)
+                harbors.add(CatanParameters.HarborTypes.valueOf(entry.getKey().toString()).ordinal());
+        }
+        Collections.shuffle(harbors);
+
+        int radius = board.length/2;
+        // todo edge 4 can work, but random would be better, the math changes with different directions.
+        //Random random = new Random(params.getRandomSeed());
+        //int edge = random.nextInt(HEX_SIDES);
+        int edge = 4;
+        // Get mid tile
+        CatanTile tile = board[radius][radius];
+        // move along a certain edge to reach SEA tiles
+        for (int i = 0; i < radius; i++){
+            int [] tileLocation = CatanTile.get_neighbour_on_edge(tile, edge);
+            tile = board[tileLocation[0]][tileLocation[1]];
+        }
+        // go around in a circle
+        int counter = 0;
+        for (int i = 0; i < HEX_SIDES; i++){
+            for (int j = 0; j < board.length/2; j++){
+                int [] tileLocation = CatanTile.get_neighbour_on_edge(tile, i);
+                tile = board[tileLocation[0]][tileLocation[1]];
+                if (counter % 2 == 0 && harbors.size() > 0) {
+                    tile.addHarbor((i + 2) % HEX_SIDES, harbors.remove(0));
+                }
+                counter++;
+            }
+        }
     }
 
     public int rollDice(long seed){

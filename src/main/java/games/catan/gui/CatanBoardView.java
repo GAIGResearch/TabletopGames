@@ -50,10 +50,6 @@ public class CatanBoardView extends JComponent {
                     drawRobber(g, new Point((int)tile.x_coord, (int)tile.y_coord));
                 }
 
-                if (tile.hasHarbor()){
-                    drawHarbor(g, tile);
-                }
-
                 String type = "" + tile.getType();
                 String number = "" + tile.getNumber();
                 g.drawString(type, (int) tile.x_coord - 20, (int) tile.y_coord);
@@ -68,6 +64,10 @@ public class CatanBoardView extends JComponent {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
+
+                if (tile.hasHarbor()){
+                    drawHarbor(g, tile);
+                }
 
                 // draw roads
                 Road[] roads = tile.getRoads();
@@ -134,12 +134,21 @@ public class CatanBoardView extends JComponent {
     public void drawHarbor(Graphics2D g, CatanTile tile){
         // todo rotate text? should be clear what harbor it is
         //  rotation below does not work as expected
+        // todo draws a black road to represent the harbor for now
         int[] harbors = tile.getHarbors();
         for (int i = 0; i < harbors.length; i++){
             if (harbors[i] > 0){
+                Color color = Color.BLACK;
+                g.setColor(color);
+                Stroke stroke = g.getStroke();
+                g.setStroke(new BasicStroke(8));
+                Point[] location = tile.getEdgeCoords(i);
+                g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
+                g.setStroke(stroke);
 //                AffineTransform original = g.getTransform();
 //                g.rotate(Math.toRadians(-60));
-                g.drawString(("1:3 " + harbors[i]), (int)tile.x_coord, (int)tile.y_coord+10);
+                String type = CatanParameters.HarborTypes.values()[harbors[i]].toString();
+                g.drawString((type + harbors[i]), (int)tile.x_coord, (int)tile.y_coord+10);
 //                g.setTransform(original);
             }
         }

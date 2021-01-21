@@ -1,6 +1,5 @@
 package games.catan;
 
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Card;
@@ -13,8 +12,6 @@ import games.catan.components.Settlement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static games.catan.CatanConstants.cardType;
 
 public class CatanActionFactory {
     /**
@@ -216,23 +213,22 @@ public class CatanActionFactory {
 
     public static List<AbstractAction> getTradeActions(CatanGameState gs){
         // Player can buy dev card and play one
-        CatanParameters params = (CatanParameters) gs.getGameParameters();
         ArrayList<AbstractAction> actions = new ArrayList();
 
         // get playerHand; for each card add a new action
         int[] resources = gs.getPlayerResources();
 
         // default trade
+        int playerExchangeRate[] = gs.getExchangeRates();
         for (int i = 0; i < resources.length; i++){
-            if (resources[i] >= params.n_resource_to_trade){
+            if (resources[i] >= playerExchangeRate[i]){
                 for (int j = 0; j < resources.length; j++){
                     if (j!=i){
                         // list all possible trades
-                        actions.add(new DefaultTrade(CatanParameters.Resources.values()[i], CatanParameters.Resources.values()[j]));
+                        actions.add(new DefaultTrade(CatanParameters.Resources.values()[i], CatanParameters.Resources.values()[j], playerExchangeRate[i]));
                     }
                 }
             }
-            // todo check if there is a harbor on a sea tile next to player
             // todo make trade offers
         }
 
