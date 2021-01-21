@@ -20,6 +20,7 @@ Currently implemented games:
 - [x] Exploding Kittens (Inman and others 2015)
 - [x] Colt Express (Christophe Raimbault 2014)
 - [x] Pandemic (Matt Leacock 2008)
+- [x] Dominion (Donald X. Vaccarino 2008)
 
 Games in progress:
 - [ ] Settlers of Catan (Klaus Teuber 1995)
