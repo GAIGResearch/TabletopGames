@@ -57,10 +57,23 @@ public class CatanActionFactory {
      */
     static List<AbstractAction> getPlayerActions(CatanGameState gs) {
         ArrayList<AbstractAction> actions = new ArrayList();
-        actions.add(new DoNothing());
-        actions.addAll(getBuyActions(gs));
-        actions.addAll(getCardActions(gs));
-        actions.addAll(getTradeActions(gs));
+        if (gs.getRollValue() == 7){
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
+                        actions.add(new MoveRobber(tile));
+                }
+            }
+        }
+        else{
+            actions.add(new DoNothing());
+            actions.addAll(getBuyActions(gs));
+            actions.addAll(getCardActions(gs));
+            actions.addAll(getTradeActions(gs));
+        }
+
 
         return actions;
     }

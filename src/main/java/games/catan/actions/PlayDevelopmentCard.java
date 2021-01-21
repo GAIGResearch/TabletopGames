@@ -22,6 +22,8 @@ public class PlayDevelopmentCard extends AbstractAction {
         // check type of card and execute the relevant action
         String cardType = card.getProperty(CatanConstants.cardType).toString();
         if (card.getProperty(CatanConstants.cardType).toString().equals("Knight")){
+            // todo move robber to a selected tile and take a randomly selected resource from a player who has a settlement
+            //   on the chosen tile
             cgs.addKnight(cgs.getCurrentPlayer());
         } else if (card.getProperty(CatanConstants.cardType).toString().equals("Monopoly")) {
             System.out.println("The player picks a resource and all other players have to give all the their resources of that type");

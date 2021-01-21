@@ -9,8 +9,6 @@ import games.catan.components.Settlement;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.util.Arrays;
 
 public class CatanBoardView extends JComponent {
     // todo calculate the optimal radius for the hexagons
@@ -46,7 +44,7 @@ public class CatanBoardView extends JComponent {
                 g.setColor(Color.BLACK);
                 g.drawPolygon(tile.getHexagon());
 
-                if (tile.getRobber()){
+                if (tile.hasRobber()){
                     drawRobber(g, new Point((int)tile.x_coord, (int)tile.y_coord));
                 }
 

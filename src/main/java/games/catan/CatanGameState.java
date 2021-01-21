@@ -125,6 +125,19 @@ public class CatanGameState extends AbstractGameState {
         this.rollValue = rollValue;
     }
 
+    public CatanTile getRobber(CatanTile[][] board){
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                if (tile.hasRobber()) {
+                    return tile;
+                }
+            }
+        }
+        System.out.println("Robber not found - should not happen");
+        return null;
+    }
+
     void addComponents() {
         super.addAllComponents();
     }

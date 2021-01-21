@@ -105,7 +105,7 @@ public class CatanTile {
         return polygon;
     }
 
-    public boolean getRobber(){
+    public boolean hasRobber(){
         return robber;
     }
 

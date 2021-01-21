@@ -119,10 +119,12 @@ public class CatanForwardModel extends AbstractForwardModel {
                 gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
             } else if (action instanceof BuildCity) {
                 gs.addScore(gs.getCurrentPlayer(), params.city_value);
-            } else if (action instanceof PlayDevelopmentCard){
-                // todo only cards with victory point or knight card if gets the largest army
-                gs.addScore(gs.getCurrentPlayer(), params.victory_point_value);
             }
+            // todo VPs are automatically revealed at the end
+//            else if (action instanceof PlayDevelopmentCard){
+//                // todo only cards with victory point or knight card if gets the largest army
+//                gs.addScore(gs.getCurrentPlayer(), params.victory_point_value);
+//            }
 
             // win condition
             if (gs.getScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
@@ -147,11 +149,15 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         int value = gs.getRollValue();
+        if (value == 7){
+            // todo all player who has 7+ cards have to return the selected half of them to the resourceDeck
+            //  current player steals a resource from a player who has a settlement on the tile where the robber is moved
+        }
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                if (tile.getNumber() == value){
+                if (tile.getNumber() == value && !tile.hasRobber()){
                     // allocate resource for each settlement/city
                     for (Settlement settl: tile.getSettlements()) {
                         if (settl.getOwner() != -1) {
