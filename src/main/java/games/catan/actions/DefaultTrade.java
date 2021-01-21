@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
+import core.properties.PropertyString;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -32,7 +33,7 @@ public class DefaultTrade extends AbstractAction {
         Deck<Card> resourceDeck = (Deck<Card>)cgs.getComponent(CatanConstants.resourceDeckHash);
         List<Card> cardsToReturn = new ArrayList<>();
         for (Card card: playerResources.getComponents()){
-            if (card.getProperty(CatanConstants.cardType).equals(resourceOffer)){
+            if (card.getProperty(CatanConstants.cardType).equals(new PropertyString(resourceOffer.toString()))){
                 cardsToReturn.add(card);
             }
         }
