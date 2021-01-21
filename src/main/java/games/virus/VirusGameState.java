@@ -4,7 +4,6 @@ import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
 import games.virus.cards.*;
