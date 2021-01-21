@@ -25,6 +25,7 @@ public class CatanGameState extends AbstractGameState {
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
     protected int scores[]; // score for each player
+    protected int victoryPoints[]; // secret points from victory cards
     protected int knights[]; // knight count for each player
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
     protected int longestRoad = -1; // playerID of the player currently holding the longest road
@@ -50,6 +51,8 @@ public class CatanGameState extends AbstractGameState {
         data = new CatanData((CatanParameters)pp);
         data.load(((CatanParameters)gameParameters).getDataPath());
         scores = new int[((CatanParameters) pp).n_players];
+        knights = new int[((CatanParameters) pp).n_players];
+        victoryPoints = new int[((CatanParameters) pp).n_players];
         longestRoadLength = ((CatanParameters) pp).min_longest_road;
     }
 
@@ -134,6 +137,16 @@ public class CatanGameState extends AbstractGameState {
             knights[playerID] += 1;
             updateLargestArmy((CatanParameters)getGameParameters());
         }
+    }
+
+    public void addVictoryPoint(int playerID){
+        if (playerID < knights.length){
+            victoryPoints[playerID] += 1;
+        }
+    }
+
+    public int[] getVictoryPoints(){
+        return victoryPoints.clone();
     }
 
     public int updateLargestArmy(CatanParameters params){

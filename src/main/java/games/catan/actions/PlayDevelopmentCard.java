@@ -19,13 +19,18 @@ public class PlayDevelopmentCard extends AbstractAction {
         Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
-        // todo check type of card and execute it
-        card.getProperty(CatanConstants.cardType);
-//        card.getProperty(CatanConstants.cardType).toString().equals("Road Building")
-        // Dev card can be either:
-        //        KNIGHT_CARD,
-        //        PROGRESS_CARD,
-        //        VICTORY_POINT_CARD
+        // check type of card and execute the relevant action
+        String cardType = card.getProperty(CatanConstants.cardType).toString();
+        if (card.getProperty(CatanConstants.cardType).toString().equals("Knight")){
+            cgs.addKnight(cgs.getCurrentPlayer());
+        } else if (card.getProperty(CatanConstants.cardType).toString().equals("Monopoly")) {
+            System.out.println("The player picks a resource and all other players have to give all the their resources of that type");
+        }else if (card.getProperty(CatanConstants.cardType).toString().equals("Year of Plenty")) {
+            System.out.println("Take any 2 resources from the resourceDeck");
+        }else if (card.getProperty(CatanConstants.cardType).toString().equals("Road Building")) {
+            System.out.println("Player can immediately place 2 roads for free");
+        }
+
 
         playerDevDeck.remove(card);
         developmentDiscardDeck.add(card);

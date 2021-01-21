@@ -6,26 +6,26 @@ import java.util.HashMap;
 
 public class CatanParameters extends AbstractParameters {
     private String dataPath;
-    int n_actions_per_turn = 1;
+    public final int n_actions_per_turn = 1;
 
-    int n_players= 4;
+    public final int n_players= 4;
 
-    int n_settlements = 5;
-    int n_cities = 4;
-    int n_roads = 15;
-    int n_resource_cards = 19;
-    int n_tiles_per_row = 7;
+    public final int n_settlements = 5;
+    public final int n_cities = 4;
+    public final int n_roads = 15;
+    public final int n_resource_cards = 19;
+    public final int n_tiles_per_row = 7;
 
     // the minimum number of knights required to take the largest army
-    int min_army_size = 3;
+    public final int min_army_size = 3;
     public final int min_longest_road = 5;
 
-    int settlement_value = 1;
-    int city_value = 2;
-    int longest_road_value = 2;
-    int largest_army_value = 2;
-    int victory_point_value = 1;
-    int points_to_win = 10;
+    public final int settlement_value = 1;
+    public final int city_value = 2;
+    public final int longest_road_value = 2;
+    public final int largest_army_value = 2;
+    public final int victory_point_value = 1;
+    public final int points_to_win = 10;
 
     public CatanParameters(long seed){
         super(seed);

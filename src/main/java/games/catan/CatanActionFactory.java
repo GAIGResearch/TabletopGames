@@ -145,7 +145,7 @@ public class CatanActionFactory {
         return false;
     }
 
-    // ############## Helper functions to keep main functions simpler
+    // --------------- Helper functions to keep main functions simpler -----------------
 
     /* Function that lists all buy actions to the player; building road, settlement or city or buying a development card */
     public static List<AbstractAction> getBuyActions(CatanGameState gs){
@@ -156,7 +156,6 @@ public class CatanActionFactory {
         int[] resources = new int[CatanParameters.Resources.values().length];
 
         for (Card card: playerHand.getComponents()){
-//            System.out.println(card.getProperty(cardType).toString());
             resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
         }
         System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
@@ -194,7 +193,6 @@ public class CatanActionFactory {
                 }
             }
         }
-        // todo buying a development card is not fully implemented
         if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("developmentCard")))
             actions.add(new BuyDevelopmentCard());
     return actions;
@@ -210,7 +208,11 @@ public class CatanActionFactory {
         // get playerHand; for each card add a new action
         Deck<Card> playerDevDeck = (Deck<Card>)gs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         for (Card c: playerDevDeck.getComponents()){
-            actions.add(new PlayDevelopmentCard(c));
+            // victory points are automatically revealed once a player has 10+ points
+            String cardType = c.getProperty(CatanConstants.cardType).toString();
+            if (!cardType.equals("Victory Points")){
+                actions.add(new PlayDevelopmentCard(c));
+            }
         }
 
         return actions;

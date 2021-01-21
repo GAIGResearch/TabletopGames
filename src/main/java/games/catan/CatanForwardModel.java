@@ -126,7 +126,7 @@ public class CatanForwardModel extends AbstractForwardModel {
             }
 
             // win condition
-            if (gs.getScore(gs.getCurrentPlayer()) >= params.points_to_win){
+            if (gs.getScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
                 gs.setGameStatus(Utils.GameResult.GAME_END);
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
