@@ -13,6 +13,7 @@ import games.coltexpress.gui.ColtExpressGUI;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
+import games.dominion.gui.DominionGUI;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUI;
 import games.dotsboxes.DBGameState;
@@ -40,6 +41,7 @@ import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
+import games.dominion.*;
 import gui.PrototypeGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -86,15 +88,31 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
             add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
     DotsAndBoxes(2, 6,
-            new ArrayList<Category>() {{ add(Simple);add(Abstract);add(TerritoryBuilding); }},
-            new ArrayList<Mechanic>() {{ add(Enclosure); }}),
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+                add(TerritoryBuilding);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Enclosure);
+            }}),
     Diamant( 2, 6,
             new ArrayList<Category>() {{ add(Adventure);add(Bluffing);add(Exploration); }},
             new ArrayList<Mechanic>() {{ add(MoveThroughDeck);add(PushYourLuck);add(SimultaneousActionSelection); }}),
     DiceMonastery(2, 4,
             new ArrayList<Category>() {{ add(Strategy);add(Medieval);}},
-            new ArrayList<Mechanic>() {{ add(SetCollection);add(WorkerPlacement);add(EngineBuilding); }})
+            new ArrayList<Mechanic>() {{ add(SetCollection);add(WorkerPlacement);add(EngineBuilding); }}),
+    Dominion (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    DominionSizeDistortion (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    DominionImprovements (2, 4,
+            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
     ;
+
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
@@ -125,6 +143,12 @@ public enum GameType {
                 return DotsAndBoxes;
             case "diamant":
                 return Diamant;
+            case "dominion":
+                return Dominion;
+            case "dominionsizedistortion":
+                return DominionSizeDistortion;
+            case "dominionimprovements" :
+                return DominionImprovements;
             case "dicemonastery" :
                 return DiceMonastery;
         }
@@ -193,6 +217,12 @@ public enum GameType {
                 forwardModel = new DiceMonasteryForwardModel();
                 gameState = new DiceMonasteryGameState(params, nPlayers);
                 break;
+            case Dominion:
+            case DominionImprovements:
+            case DominionSizeDistortion:
+                forwardModel = new DominionForwardModel();
+                gameState = new DominionGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -220,6 +250,12 @@ public enum GameType {
                 return new DBParameters(seed);
             case Diamant:
                 return new DiamantParameters(seed);
+            case Dominion:
+                return DominionParameters.firstGame(seed);
+            case DominionSizeDistortion:
+                return DominionParameters.sizeDistortion(seed);
+            case DominionImprovements:
+                return DominionParameters.improvements(seed);
             case DiceMonastery:
                 return new DiceMonasteryParams(seed);
             default:
@@ -274,6 +310,11 @@ public enum GameType {
                 } else {
                     gui = new PrototypeGUI(null, null, ac, 100);
                 }
+                break;
+            case Dominion:
+            case DominionImprovements:
+            case DominionSizeDistortion:
+                gui = new DominionGUI(game, ac, human);
                 break;
             // TODO: Diamant GUI
             case DiceMonastery:
@@ -380,9 +421,9 @@ public enum GameType {
         MovementPoints,
         MultipleMaps,
         Campaign,
+        MoveThroughDeck,
         Enclosure,
-        DeckManagement,
-        MoveThroughDeck;
+        DeckManagement;
 
         /**
          * Retrieves a list of all games using this mechanic.

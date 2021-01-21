@@ -12,7 +12,6 @@ import utilities.Utils.ComponentType;
 
 import java.util.List;
 
-
 public class Token extends Component {
     protected String tokenType;
 
