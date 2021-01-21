@@ -134,12 +134,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     {
         return new DiamantHeuristic().evaluateState(this, playerId);
     }
-    @Override
-    public double getGameScore(int playerId)
-    {
-        return treasureChests.get(playerId).getValue();
-    }
-
     /**
      * This provides the current score in game turns. This will only be relevant for games that have the concept
      * of victory points, etc.
