@@ -21,8 +21,6 @@ public class Harbinger extends DominionAction implements IExtendedSequence {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.drawCard(player);
-        state.changeActions(1);
         if (state.getDeck(DeckType.DISCARD, player).getSize() > 0)
             state.setActionInProgress(this);
         return true;

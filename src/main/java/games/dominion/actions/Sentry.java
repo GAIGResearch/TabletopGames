@@ -17,46 +17,49 @@ public class Sentry extends DominionAction implements IExtendedSequence {
 
     enum Decision {trash, discard, keep}
 
-    CardType[] topTwo = new CardType[2];
+    public int CARDS_AFFECTED = 2; // TODO: Changing this will require some serious re-writing of the code given combinatorial effects
+
+    CardType[] topCards = new CardType[CARDS_AFFECTED];
     Stage completedStage = playSentry;
-    Decision[] decisions = new Decision[2];
+    Decision[] decisions = new Decision[CARDS_AFFECTED];
 
     public Sentry(int playerId) {
         super(CardType.SENTRY, playerId);
+        if (CARDS_AFFECTED != 2) {
+            throw new AssertionError("Sentry not yet implemented for changing the number of cards drawn.");
+        }
     }
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.changeActions(1);
-        state.drawCard(player);
-        state.drawCard(player);
-        state.drawCard(player);
+        for (int i = 0; i < CARDS_AFFECTED; i++)
+            state.drawCard(player);
         Deck<DominionCard> hand = state.getDeck(DeckType.HAND, player);
-        if (hand.getSize() > 1)
-            topTwo[0] = hand.peek(1).cardType();
-        if (hand.getSize() > 1)
-            topTwo[1] = hand.peek(0).cardType();
+        for (int i = 0; i < CARDS_AFFECTED; i++) {
+            if (hand.getSize() > i)
+                topCards[i] = hand.peek(i).cardType();
+        }
         // we draw two cards into hand, and then keep track of them
-        // string them in hand makes them visible to a human player, and we can DISCARD and TRASH from hand easily
+        // storing them in hand makes them visible to a human player, and we can DISCARD and TRASH from hand easily
         state.setActionInProgress(this);
         return true;
     }
 
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
-        List<AbstractAction> retValue = new ArrayList<>(3);
+        List<AbstractAction> retValue = new ArrayList<>(CARDS_AFFECTED + 1);
         switch (completedStage) {
             case playSentry:
-                if (topTwo[0] != null) {
-                    retValue.add(new TrashCard(topTwo[0], player));
-                    retValue.add(new DiscardCard(topTwo[0], player));
+                if (topCards[0] != null) {
+                    retValue.add(new TrashCard(topCards[0], player));
+                    retValue.add(new DiscardCard(topCards[0], player));
                 }
                 retValue.add(new DoNothing());
                 return retValue;
             case decisionOne:
-                if (topTwo[1] != null) {
-                    retValue.add(new TrashCard(topTwo[1], player));
-                    retValue.add(new DiscardCard(topTwo[1], player));
+                if (topCards[1] != null) {
+                    retValue.add(new TrashCard(topCards[1], player));
+                    retValue.add(new DiscardCard(topCards[1], player));
                 }
                 retValue.add(new DoNothing());
                 return retValue;
@@ -64,14 +67,14 @@ public class Sentry extends DominionAction implements IExtendedSequence {
                 // we should only be here if we keep both cards - otherwise there is no decision to be made
                 retValue.add(
                         new CompositeAction(
-                                new MoveCard(topTwo[0], player, DeckType.HAND, player, DeckType.DRAW, false),
-                                new MoveCard(topTwo[1], player, DeckType.HAND, player, DeckType.DRAW, false)
+                                new MoveCard(topCards[0], player, DeckType.HAND, player, DeckType.DRAW, false),
+                                new MoveCard(topCards[1], player, DeckType.HAND, player, DeckType.DRAW, false)
                         )
                 );
                 retValue.add(
                         new CompositeAction(
-                                new MoveCard(topTwo[1], player, DeckType.HAND, player, DeckType.DRAW, false),
-                                new MoveCard(topTwo[0], player, DeckType.HAND, player, DeckType.DRAW, false)
+                                new MoveCard(topCards[1], player, DeckType.HAND, player, DeckType.DRAW, false),
+                                new MoveCard(topCards[0], player, DeckType.HAND, player, DeckType.DRAW, false)
                         )
                 );
                 return retValue;
@@ -98,22 +101,22 @@ public class Sentry extends DominionAction implements IExtendedSequence {
 
         if (decision != null) {
             if (decisions[0] == null) {
-                if (topTwo[0] == null)
+                if (topCards[0] == null)
                     decision = Decision.trash;
                 decisions[0] = decision;
                 completedStage = decisionOne;
             } else {
-                if (topTwo[1] == null)
+                if (topCards[1] == null)
                     decision = Decision.trash;
                 decisions[1] = decision;
                 completedStage = decisionTwo;
                 // and now we check for the need for a further decision
-                if (decisions[0] == Decision.keep && decisions[1] == Decision.keep && topTwo[0] != topTwo[1]) {
+                if (decisions[0] == Decision.keep && decisions[1] == Decision.keep && topCards[0] != topCards[1]) {
                     // we are keeping two non-identical cards, so have to make decision
                 } else {
                     for (int i = 0; i < 2; i++) {
                         if (decisions[i] == Decision.keep) {
-                            (new MoveCard(topTwo[i], player, DeckType.HAND, player, DeckType.DRAW, false)).execute(state);
+                            (new MoveCard(topCards[i], player, DeckType.HAND, player, DeckType.DRAW, false)).execute(state);
                         }
                     }
                     completedStage = reset;
@@ -137,7 +140,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
         retValue.completedStage = completedStage;
         for (int i = 0; i < 2; i++) {
             retValue.decisions[i] = decisions[i];
-            retValue.topTwo[i] = topTwo[i];
+            retValue.topCards[i] = topCards[i];
         }
         return retValue;
     }
@@ -146,7 +149,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Sentry) {
             Sentry other = (Sentry) obj;
-            return other.completedStage == completedStage && other.topTwo[0] == topTwo[0] && other.topTwo[1] == topTwo[1] &&
+            return other.completedStage == completedStage && other.topCards[0] == topCards[0] && other.topCards[1] == topCards[1] &&
                     other.decisions[0] == decisions[0] && other.decisions[1] == decisions[1];
         }
         return false;
@@ -154,7 +157,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return 89 * super.hashCode() + Objects.hash(topTwo[0], topTwo[1], decisions[0], decisions[1], completedStage);
+        return 89 * super.hashCode() + Objects.hash(topCards[0], topCards[1], decisions[0], decisions[1], completedStage);
     }
 
     @Override
@@ -164,6 +167,6 @@ public class Sentry extends DominionAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Sentry [%s -> %s, %s -> %s] ", topTwo[0], decisions[0], topTwo[1], decisions[1]);
+        return String.format("Sentry [%s -> %s, %s -> %s] ", topCards[0], decisions[0], topCards[1], decisions[1]);
     }
 }

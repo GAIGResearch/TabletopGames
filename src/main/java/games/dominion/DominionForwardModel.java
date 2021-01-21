@@ -26,32 +26,32 @@ public class DominionForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DominionGameState state = (DominionGameState) firstState;
+        DominionParameters params = state.params;
 
         for (int i = 0; i < state.playerCount; i++) {
-            for (int j = 0; j < 7; j++)
+            for (int j = 0; j < params.STARTING_COPPER; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
             state.playerDrawPiles[i].shuffle(state.rnd);
-            for (int k = 0; k < 5; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
+            for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
         }
         state.actionsLeftForCurrentPlayer = 1;
         state.buysLeftForCurrentPlayer = 1;
         state.spentSoFar = 0;
 
-        int victoryCards = state.playerCount == 2 ? 8 : 12;
+        int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.playerCount];
         state.cardsIncludedInGame = new HashMap<>(16);
         state.cardsIncludedInGame.put(CardType.PROVINCE, victoryCards);
         state.cardsIncludedInGame.put(CardType.DUCHY, victoryCards);
         state.cardsIncludedInGame.put(CardType.ESTATE, victoryCards);
-        state.cardsIncludedInGame.put(CardType.GOLD, 30);
-        state.cardsIncludedInGame.put(CardType.SILVER, 40);
-        state.cardsIncludedInGame.put(CardType.COPPER, 32);
-        DominionParameters params = (DominionParameters) state.getGameParameters();
+        state.cardsIncludedInGame.put(CardType.GOLD, params.GOLD_SUPPLY);
+        state.cardsIncludedInGame.put(CardType.SILVER, params.SILVER_SUPPLY);
+        state.cardsIncludedInGame.put(CardType.COPPER, params.COPPER_SUPPLY);
         for (CardType ct : params.cardsUsed) {
-            int cardsToUse = ct.isVictory ? victoryCards : 10;
+            int cardsToUse = ct.isVictory ? victoryCards : params.KINGDOM_CARDS_OF_EACH_TYPE;
             if (ct == CardType.CURSE)
-                cardsToUse = (state.playerCount - 1) * 10;
+                cardsToUse = (state.playerCount - 1) * params.CURSE_CARDS_PER_PLAYER;
             state.cardsIncludedInGame.put(ct, cardsToUse);
         }
         state.setGamePhase(DominionGameState.DominionGamePhase.Play);

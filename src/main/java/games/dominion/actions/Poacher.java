@@ -24,9 +24,6 @@ public class Poacher extends DominionAction implements IExtendedSequence {
         if (cardsToDiscard > 0) {
             state.setActionInProgress(this);
         }
-        state.drawCard(player);
-        state.changeActions(1);
-        state.changeAdditionalSpend(1);
         return true;
     }
 

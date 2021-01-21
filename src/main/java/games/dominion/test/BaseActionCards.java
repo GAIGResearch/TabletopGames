@@ -31,7 +31,7 @@ public class BaseActionCards {
     @Test
     public void village() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction village = new Village(0);
+        DominionAction village = new SimpleAction(CardType.VILLAGE, 0);
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
@@ -44,7 +44,7 @@ public class BaseActionCards {
     @Test
     public void smithy() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction smithy = new Smithy(0);
+        DominionAction smithy = new SimpleAction(CardType.SMITHY, 0);
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
@@ -57,7 +57,7 @@ public class BaseActionCards {
     @Test
     public void laboratory() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction laboratory = new Laboratory(0);
+        DominionAction laboratory = new SimpleAction(CardType.LABORATORY, 0);
         state.addCard(CardType.LABORATORY, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
@@ -70,7 +70,7 @@ public class BaseActionCards {
     @Test
     public void market() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction market = new Market(0);
+        DominionAction market = new SimpleAction(CardType.MARKET, 0);
         state.addCard(CardType.MARKET, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
@@ -87,7 +87,7 @@ public class BaseActionCards {
     @Test
     public void festival() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction festival = new Festival(0);
+        DominionAction festival = new SimpleAction(CardType.FESTIVAL, 0);
         state.addCard(CardType.FESTIVAL, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.actionsLeft());
@@ -226,7 +226,7 @@ public class BaseActionCards {
     @Test
     public void moat() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction moat = new Moat(0);
+        DominionAction moat = new SimpleAction(CardType.MOAT, 0);
         state.addCard(CardType.MOAT, 0, DeckType.HAND);
         fm.next(state, moat);
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
@@ -1266,14 +1266,14 @@ public class BaseActionCards {
         assertEquals(3, nextActions.size());
         CardType firstCard = state.getDeck(DeckType.HAND, 0).get(1).cardType();
         CardType secondCard = state.getDeck(DeckType.HAND, 0).get(0).cardType();
-        assertEquals(new TrashCard(firstCard, 0), nextActions.get(0));
-        assertEquals(new DiscardCard(firstCard, 0), nextActions.get(1));
+        assertEquals(new TrashCard(secondCard, 0), nextActions.get(0));
+        assertEquals(new DiscardCard(secondCard, 0), nextActions.get(1));
         assertEquals(new DoNothing(), nextActions.get(2));
 
         fm.next(state, nextActions.get(0));
         nextActions = fm.computeAvailableActions(state);
-        assertEquals(new TrashCard(secondCard, 0), nextActions.get(0));
-        assertEquals(new DiscardCard(secondCard, 0), nextActions.get(1));
+        assertEquals(new TrashCard(firstCard, 0), nextActions.get(0));
+        assertEquals(new DiscardCard(firstCard, 0), nextActions.get(1));
         assertEquals(new DoNothing(), nextActions.get(2));
         fm.next(state, nextActions.get(1));
 
@@ -1294,7 +1294,7 @@ public class BaseActionCards {
         fm.next(state, sentry);
 
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);
-        CardType secondCard = state.getDeck(DeckType.HAND, 0).get(0).cardType();
+        CardType secondCard = state.getDeck(DeckType.HAND, 0).get(1).cardType();
         fm.next(state, nextActions.get(0));
         nextActions = fm.computeAvailableActions(state);
         fm.next(state, nextActions.get(2));
@@ -1330,11 +1330,11 @@ public class BaseActionCards {
         assertTrue(state.isActionInProgress());
         nextActions = fm.computeAvailableActions(state);
         assertEquals(2, nextActions.size());
-        assertEquals(new CompositeAction(new MoveCard(firstCard, 0, DeckType.HAND, 0, DeckType.DRAW, false),
-                        new MoveCard(secondCard, 0, DeckType.HAND, 0, DeckType.DRAW, false)),
-                nextActions.get(0));
         assertEquals(new CompositeAction(new MoveCard(secondCard, 0, DeckType.HAND, 0, DeckType.DRAW, false),
                         new MoveCard(firstCard, 0, DeckType.HAND, 0, DeckType.DRAW, false)),
+                nextActions.get(0));
+        assertEquals(new CompositeAction(new MoveCard(firstCard, 0, DeckType.HAND, 0, DeckType.DRAW, false),
+                        new MoveCard(secondCard, 0, DeckType.HAND, 0, DeckType.DRAW, false)),
                 nextActions.get(1));
         fm.next(state, nextActions.get(0));
 
@@ -1343,8 +1343,8 @@ public class BaseActionCards {
         assertEquals(6, state.getDeck(DeckType.DRAW, 0).getSize());
         assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
         assertEquals(0, state.getDeck(DeckType.TRASH, 0).getSize());
-        assertEquals(secondCard, state.getDeck(DeckType.DRAW, 0).peek().cardType());
-        assertEquals(firstCard, state.getDeck(DeckType.DRAW, 0).peek(1).cardType());
+        assertEquals(firstCard, state.getDeck(DeckType.DRAW, 0).peek().cardType());
+        assertEquals(secondCard, state.getDeck(DeckType.DRAW, 0).peek(1).cardType());
         assertEquals(1, fm.computeAvailableActions(state).size());
     }
 }

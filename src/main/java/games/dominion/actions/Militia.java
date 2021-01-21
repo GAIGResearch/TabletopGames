@@ -15,9 +15,10 @@ public class Militia extends DominionAttackAction {
         super(CardType.MILITIA, playerId);
     }
 
+    public final int OTHERS_DISCARD_DOWN_TO = 3;
+
     @Override
     boolean _execute(DominionGameState state) {
-        state.changeAdditionalSpend(2); // player gets +2 to spend as direct effects of card
         initiateAttack(state);
         return true;
     }
@@ -63,6 +64,6 @@ public class Militia extends DominionAttackAction {
     @Override
     public boolean isAttackComplete(int currentTarget, DominionGameState state) {
         // Does the victim now have 3 or fewer cards in hand?
-        return state.getDeck(DeckType.HAND, currentTarget).getSize() < 4;
+        return state.getDeck(DeckType.HAND, currentTarget).getSize() <= OTHERS_DISCARD_DOWN_TO;
     }
 }

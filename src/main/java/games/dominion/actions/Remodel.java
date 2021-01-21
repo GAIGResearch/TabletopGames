@@ -16,6 +16,8 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     CardType cardTrashed;
     CardType cardGained;
 
+    public int BONUS_OVER_TRASHED_VALUE = 2;
+
     public Remodel(int playerId) {
         super(CardType.REMODEL, playerId);
     }
@@ -36,14 +38,13 @@ public class Remodel extends DominionAction implements IExtendedSequence {
         if (cardTrashed == null) {
             // Phase 1 - trash a card in hand
             List<DominionCard> cardsInHand = state.getDeck(DominionConstants.DeckType.HAND, player).stream().collect(toList());
-            List<AbstractAction> retValue = cardsInHand.stream()
+            return cardsInHand.stream()
                     .map(card -> new TrashCard(card.cardType(), player))
                     .distinct()
                     .collect(toList());
-            return retValue;
         } else {
             //Phase 2 - gain a card costing up to 2 more
-            int budget = cardTrashed.cost + 2;
+            int budget = cardTrashed.cost + BONUS_OVER_TRASHED_VALUE;
             return state.cardsToBuy().stream()
                     .filter(ct -> ct.cost <= budget)
                     .map(ct -> new GainCard(ct, player))

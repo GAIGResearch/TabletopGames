@@ -17,8 +17,6 @@ public class Witch extends DominionAttackAction {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.drawCard(player);
-        state.drawCard(player);
         initiateAttack(state);
         return true;
     }

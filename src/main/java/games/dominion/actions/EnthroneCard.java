@@ -30,9 +30,12 @@ public class EnthroneCard extends AbstractAction {
                 throw new AssertionError("No such card in hand to be Enthroned : " + enthronedCard);
             }
         }
-        if (enthronedCard != null)
-            DominionCard.create(enthronedCard).getAction(player)._execute(state);
-        // Note that we use _execute() and not execute(), as this does not use up an action
+        if (enthronedCard != null) {
+            DominionCard card = DominionCard.create(enthronedCard);
+            card.getAction(player).executeCoreCardTypeFunctionality(state);
+            card.getAction(player)._execute(state);
+        }
+
         return true;
     }
 

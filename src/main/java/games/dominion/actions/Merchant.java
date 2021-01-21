@@ -14,8 +14,6 @@ public class Merchant extends DominionAction {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.drawCard(player);
-        state.changeActions(1);
         state.addDelayedAction(new MerchantBuyEffect(player));
         return true;
     }
@@ -32,6 +30,8 @@ public class Merchant extends DominionAction {
 class MerchantBuyEffect implements IDelayedAction {
 
     final int player;
+    public final int SPEND_PER_CARD = 1;
+    public final CardType BONUS_SPEND_CARD_TYPE = CardType.SILVER;
 
     public MerchantBuyEffect(int player) {
         this.player = player;
@@ -43,8 +43,8 @@ class MerchantBuyEffect implements IDelayedAction {
             throw new AssertionError("Should only be executed when current player if " + player);
         }
         Deck<DominionCard> hand = state.getDeck(DominionConstants.DeckType.HAND, player);
-        if (hand.stream().anyMatch(c -> c.cardType() == CardType.SILVER)) {
-            state.changeAdditionalSpend(1);
+        if (hand.stream().anyMatch(c -> c.cardType() == BONUS_SPEND_CARD_TYPE)) {
+            state.changeAdditionalSpend(SPEND_PER_CARD);
         }
     }
 

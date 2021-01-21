@@ -10,6 +10,18 @@ public class DominionParameters extends AbstractParameters {
     List<CardType> cardsUsed = new ArrayList<>();
     String dataPath = "data/dominion/";
 
+    public final int HAND_SIZE = 5;
+    public final int PILES_EXHAUSTED_FOR_GAME_END = 3;
+    public final int KINGDOM_CARDS_OF_EACH_TYPE = 10;
+    public final int CURSE_CARDS_PER_PLAYER = 10;
+    public final int STARTING_COPPER = 7;
+    public final int STARTING_ESTATES = 3;
+    public final int COPPER_SUPPLY = 32;
+    public final int SILVER_SUPPLY = 40;
+    public final int GOLD_SUPPLY = 30;
+    public final int[] VICTORY_CARDS_PER_PLAYER = {-1, -1, 8, 12, 12}; // 2-4 players only
+
+
     public DominionParameters(long seed) {
         super(seed);
     }

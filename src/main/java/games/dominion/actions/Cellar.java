@@ -21,7 +21,6 @@ public class Cellar extends DominionAction implements IExtendedSequence{
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.changeActions(1);
         state.setActionInProgress(this);
         return true;
     }

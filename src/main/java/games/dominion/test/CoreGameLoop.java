@@ -121,7 +121,7 @@ public class CoreGameLoop {
         BuyCard newBuy = new BuyCard(CardType.COPPER, 0);
         state.changeBuys(3);
         for (int i = 0; i < 4; i++) {
-            assertEquals(4-i, state.buysLeft());
+            assertEquals(4 - i, state.buysLeft());
             assertEquals(i, state.cardsOfType(CardType.COPPER, 0, DeckType.DISCARD));
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             assertTrue(actions.contains(new EndPhase()));
@@ -168,13 +168,13 @@ public class CoreGameLoop {
         actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertTrue(actions.contains(new EndPhase()));
-        assertTrue(actions.contains(new Village(0)));
+        assertTrue(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         actions = fm.computeAvailableActions(state);
         assertEquals(3, actions.size());
         assertTrue(actions.contains(new EndPhase()));
-        assertTrue(actions.contains(new Village(0)));
-        assertTrue(actions.contains(new Smithy(0)));
+        assertTrue(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));
+        assertTrue(actions.contains(new SimpleAction(CardType.SMITHY, 0)));
     }
 
     @Test
@@ -182,9 +182,9 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
-        List<AbstractAction> actions =  fm.computeAvailableActions(state);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.contains(new EndPhase()));
-        assertFalse(actions.contains(new Village(0)));
+        assertFalse(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
-        (new Smithy(0)).execute(state);
+        (new SimpleAction(CardType.SMITHY, 0)).execute(state);
         assertEquals(0, state.actionsLeft());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
@@ -204,7 +204,7 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         fm.computeAvailableActions(state);
-        fm.next(state, new Village(0));
+        fm.next(state, new SimpleAction(CardType.VILLAGE, 0));
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
     }
 
@@ -213,7 +213,7 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         fm.computeAvailableActions(state);
-        fm.next(state, new Smithy(0));
+        fm.next(state, new SimpleAction(CardType.SMITHY, 0));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 

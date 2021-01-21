@@ -1,4 +1,5 @@
 package games.dominion.actions;
+
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dominion.DominionConstants.*;
@@ -6,8 +7,6 @@ import games.dominion.DominionGameState;
 import games.dominion.DominionGameState.*;
 import games.dominion.cards.CardType;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 public abstract class DominionAction extends AbstractAction {
@@ -30,10 +29,23 @@ public abstract class DominionAction extends AbstractAction {
         if (state.getGamePhase() != DominionGamePhase.Play)
             throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase");
         if (!state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
-            throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d",type, player));
+            throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d", type, player));
         }
-        state.changeActions(-1);
+        state.changeActions(-1);  // use up one action from playing this card
+        executeCoreCardTypeFunctionality(state);
         return _execute(state);
+    }
+
+    /**
+     * Any standard functionality parameterised directly on the CardType. This effectively means:
+     *  - Plus Actions/Draws/Buys/Money
+     */
+    void executeCoreCardTypeFunctionality(DominionGameState state) {
+        state.changeActions(type.plusActions);
+        for (int i = 0; i < type.plusDraws; i++)
+            state.drawCard(player);
+        state.changeBuys(type.plusBuys);
+        state.changeAdditionalSpend(type.plusMoney);
     }
 
     abstract boolean _execute(DominionGameState state);

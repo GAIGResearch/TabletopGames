@@ -13,6 +13,8 @@ public class Moneylender extends DominionAction {
         super(CardType.MONEYLENDER, playerId);
     }
 
+    public final int BONUS_MONEY_FOR_TRASHING = 3;
+    public final CardType TRASHABLE_CARD_TYPE = CardType.COPPER;
 
     /**
      * Technically this should permit the player to optionally Trash a COPPER for +3 spend
@@ -26,9 +28,9 @@ public class Moneylender extends DominionAction {
      */
     @Override
     boolean _execute(DominionGameState state) {
-        if (state.getDeck(DeckType.HAND, player).stream().anyMatch(c -> c.cardType() == CardType.COPPER)) {
-            (new TrashCard(CardType.COPPER, player)).execute(state);
-            state.changeAdditionalSpend(3);
+        if (state.getDeck(DeckType.HAND, player).stream().anyMatch(c -> c.cardType() == TRASHABLE_CARD_TYPE)) {
+            (new TrashCard(TRASHABLE_CARD_TYPE, player)).execute(state);
+            state.changeAdditionalSpend(BONUS_MONEY_FOR_TRASHING);
         }
         return true;
     }

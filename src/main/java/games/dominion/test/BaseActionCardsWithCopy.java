@@ -36,7 +36,7 @@ public class BaseActionCardsWithCopy {
     @Test
     public void village() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction village = new Village(0);
+        DominionAction village = new SimpleAction(CardType.VILLAGE, 0);
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
@@ -51,7 +51,7 @@ public class BaseActionCardsWithCopy {
     @Test
     public void smithy() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        DominionAction smithy = new Smithy(0);
+        DominionAction smithy =  new SimpleAction(CardType.SMITHY, 0);
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
 
@@ -66,7 +66,7 @@ public class BaseActionCardsWithCopy {
         DominionGameState state = (DominionGameState) game.getGameState();
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
-        DominionAction laboratory = new Laboratory(0);
+        DominionAction laboratory =  new SimpleAction(CardType.LABORATORY, 0);
         state.addCard(CardType.LABORATORY, 0, DeckType.HAND);
         fm.next(state, laboratory);
         assertEquals(startHash, copy.hashCode());
@@ -79,7 +79,7 @@ public class BaseActionCardsWithCopy {
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
 
-        DominionAction market = new Market(0);
+        DominionAction market = new SimpleAction(CardType.MARKET, 0);
         state.addCard(CardType.MARKET, 0, DeckType.HAND);
         fm.next(state, market);
         assertEquals(startHash, copy.hashCode());
@@ -91,7 +91,7 @@ public class BaseActionCardsWithCopy {
         DominionGameState state = (DominionGameState) game.getGameState();
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
-        DominionAction festival = new Festival(0);
+        DominionAction festival = new SimpleAction(CardType.FESTIVAL, 0);
         state.addCard(CardType.FESTIVAL, 0, DeckType.HAND);
         fm.next(state, festival);
         assertEquals(startHash, copy.hashCode());
@@ -202,7 +202,7 @@ public class BaseActionCardsWithCopy {
         DominionGameState state = (DominionGameState) game.getGameState();
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
-        DominionAction moat = new Moat(0);
+        DominionAction moat =  new SimpleAction(CardType.MOAT, 0);
         state.addCard(CardType.MOAT, 0, DeckType.HAND);
         fm.next(state, moat);
         assertEquals(startHash, copy.hashCode());

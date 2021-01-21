@@ -12,7 +12,9 @@ import static java.util.stream.Collectors.*;
 
 public class Bandit extends DominionAttackAction {
 
-    DominionCard[] topTwo = new DominionCard[2];
+    public int CARDS_AFFECTED = 2;
+
+    DominionCard[] topCards = new DominionCard[CARDS_AFFECTED];
     boolean cardTrashed = false;
 
     public Bandit(int playerId) {
@@ -35,11 +37,11 @@ public class Bandit extends DominionAttackAction {
         // later we will trash them directly from the discard
 
         // We move to TABLE temporarily in case we shuffle the DISCARD into the DRAW
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < CARDS_AFFECTED; i++) {
             state.drawCard(currentTarget, DeckType.DRAW, currentTarget, DeckType.TABLE);
-            topTwo[i] = state.getDeck(DeckType.TABLE, currentTarget).peek();
+            topCards[i] = state.getDeck(DeckType.TABLE, currentTarget).peek();
         }
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < CARDS_AFFECTED; i++) {
             state.drawCard(currentTarget, DeckType.TABLE, currentTarget, DeckType.DISCARD);
         }
         cardTrashed = false;
@@ -48,7 +50,7 @@ public class Bandit extends DominionAttackAction {
     @Override
     public boolean isAttackComplete(int currentTarget, DominionGameState state) {
         // we are done if there are no non-Copper treasure cards in the topTwo
-        if (Arrays.stream(topTwo).noneMatch(c -> c != null && c.isTreasureCard() && c.cardType() != CardType.COPPER))
+        if (Arrays.stream(topCards).noneMatch(c -> c != null && c.isTreasureCard() && c.cardType() != CardType.COPPER))
             return true;
         // otherwise we are completed only once we have trashed a card
         return cardTrashed;
@@ -56,7 +58,7 @@ public class Bandit extends DominionAttackAction {
 
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
-        return Arrays.stream(topTwo)
+        return Arrays.stream(topCards)
                 .filter(Objects::nonNull)
                 .filter(DominionCard::isTreasureCard)
                 .filter(c -> c.cardType() != CardType.COPPER)
@@ -80,8 +82,7 @@ public class Bandit extends DominionAttackAction {
     @Override
     public Bandit _copy() {
         Bandit retValue = new Bandit(player);
-        retValue.topTwo[0] = topTwo[0];
-        retValue.topTwo[1] = topTwo[1];
+        System.arraycopy(topCards, 0, retValue.topCards, 0, CARDS_AFFECTED);
         retValue.cardTrashed = cardTrashed;
         return retValue;
     }
@@ -91,8 +92,7 @@ public class Bandit extends DominionAttackAction {
         if (obj instanceof Bandit) {
             Bandit other = (Bandit) obj;
             return other.cardTrashed == cardTrashed &&
-                    other.topTwo[0] == topTwo[0] &&
-                    other.topTwo[1] == topTwo[1] &&
+                    Arrays.equals(topCards, other.topCards) &&
                     super.equals(other);
         }
         return false;
@@ -100,6 +100,6 @@ public class Bandit extends DominionAttackAction {
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 13 * Objects.hash(topTwo[0], topTwo[1], cardTrashed);
+        return super.hashCode() + (cardTrashed ? 13 : 0) + 313 * Arrays.hashCode(topCards);
     }
 }

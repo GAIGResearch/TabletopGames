@@ -87,21 +87,16 @@ public class DominionCard extends Card {
     public DominionAction getAction(int playerId) {
         switch (type) {
             case VILLAGE:
-                return new Village(playerId);
             case SMITHY:
-                return new Smithy(playerId);
             case LABORATORY:
-                return new Laboratory(playerId);
             case FESTIVAL:
-                return new Festival(playerId);
             case MARKET:
-                return new Market(playerId);
+            case MOAT:
+                return new SimpleAction(type, playerId);
             case CELLAR:
                 return new Cellar(playerId);
             case MILITIA:
                 return new Militia(playerId);
-            case MOAT:
-                return new Moat(playerId);
             case REMODEL:
                 return new Remodel(playerId);
             case MERCHANT:

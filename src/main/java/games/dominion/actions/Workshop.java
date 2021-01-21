@@ -11,6 +11,8 @@ import static java.util.stream.Collectors.*;
 
 public class Workshop extends DominionAction implements IExtendedSequence {
 
+    public final int COST_OF_GAINED_CARD = 4;
+
     boolean executed;
 
     public Workshop(int playerId) {
@@ -26,7 +28,7 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> followOnActions(DominionGameState state) {
         List<AbstractAction> retValue = state.cardsToBuy().stream()
-                .filter(c -> c.cost <= 4)
+                .filter(c -> c.cost <= COST_OF_GAINED_CARD)
                 .map(c -> new GainCard(c, state.getCurrentPlayer()))
                 .collect(toList());
         if (retValue.isEmpty()) {

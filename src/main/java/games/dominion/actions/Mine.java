@@ -15,6 +15,8 @@ public class Mine extends DominionAction implements IExtendedSequence {
     boolean gainedCard;
     int trashValue;
 
+    public final int BONUS_OVER_TRASHED_VALUE = 3;
+
     public Mine(int playerId) {
         super(CardType.MINE, playerId);
     }
@@ -40,7 +42,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
                     .distinct().collect(toList());
         } else if (!gainedCard) {
             retValue = state.cardsToBuy().stream()
-                    .filter(c -> c.isTreasure && c.cost <= trashValue + 3)
+                    .filter(c -> c.isTreasure && c.cost <= trashValue + BONUS_OVER_TRASHED_VALUE)
                     .map(c -> new GainCard(c, player, DominionConstants.DeckType.HAND))
                     .collect(toList());
         } else {

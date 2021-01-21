@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import core.components.*;
 import games.dominion.*;
 import games.dominion.DominionConstants.*;
-import games.dominion.actions.Moat;
 import games.dominion.actions.MoatReaction;
 import games.dominion.actions.MoveCard;
 import games.dominion.cards.*;

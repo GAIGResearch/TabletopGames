@@ -23,6 +23,7 @@ public class DominionGameState extends AbstractGameState {
 
     Random rnd;
     int playerCount;
+    DominionParameters params;
 
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
@@ -58,6 +59,7 @@ public class DominionGameState extends AbstractGameState {
         rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
         defenceStatus = new boolean[nPlayers];  // defaults to false
+        params = (DominionParameters) gameParameters;
         this._reset();
     }
 
@@ -91,7 +93,7 @@ public class DominionGameState extends AbstractGameState {
         discard.add(table);
         table.clear();
         hand.clear();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < params.HAND_SIZE; i++)
             drawCard(playerID);
 
         defenceStatus = new boolean[playerCount];  // resets to false
@@ -106,7 +108,7 @@ public class DominionGameState extends AbstractGameState {
 
     public boolean gameOver() {
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
-                cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= 3;
+                cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= params.PILES_EXHAUSTED_FOR_GAME_END;
     }
 
     public boolean drawCard(int playerId) {

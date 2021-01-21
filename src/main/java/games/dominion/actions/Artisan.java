@@ -14,6 +14,8 @@ public class Artisan extends DominionAction implements IExtendedSequence {
         super(CardType.ARTISAN, playerId);
     }
 
+    public final int MAX_COST_OF_GAINED_CARD = 5;
+
     public boolean gainedCard;
     public boolean putCardOnDeck;
 
@@ -27,7 +29,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     public List<AbstractAction> followOnActions(DominionGameState state) {
         if (!gainedCard) {
             return state.cardsToBuy().stream()
-                    .filter(c -> c.cost <= 5)
+                    .filter(c -> c.cost <= MAX_COST_OF_GAINED_CARD)
                     .map(c -> new GainCard(c, player, DeckType.HAND))
                     .collect(toList());
         } else {
