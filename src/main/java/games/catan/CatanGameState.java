@@ -2,6 +2,7 @@ package games.catan;
 
 import core.AbstractParameters;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Area;
 import core.components.Card;
 import core.components.Component;
@@ -17,8 +18,7 @@ import java.util.*;
 
 import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.HEX_SIDES;
-import static games.catan.CatanConstants.resourceDeckHash;
+import static games.catan.CatanConstants.*;
 
 public class CatanGameState extends AbstractGameState {
     private CatanData data;
@@ -147,6 +147,16 @@ public class CatanGameState extends AbstractGameState {
 
     public int[] getVictoryPoints(){
         return victoryPoints.clone();
+    }
+
+    public int[] getPlayerResources(){
+        Deck<Card> playerHand = (Deck<Card>)this.getComponentActingPlayer(CoreConstants.playerHandHash);
+        int[] resources = new int[CatanParameters.Resources.values().length];
+
+        for (Card card: playerHand.getComponents()){
+            resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
+        }
+        return resources;
     }
 
     public int updateLargestArmy(CatanParameters params){

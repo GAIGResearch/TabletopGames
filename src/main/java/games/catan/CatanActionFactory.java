@@ -63,6 +63,7 @@ public class CatanActionFactory {
         actions.add(new DoNothing());
         actions.addAll(getBuyActions(gs));
         actions.addAll(getCardActions(gs));
+        actions.addAll(getTradeActions(gs));
 
         return actions;
     }
@@ -152,12 +153,7 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
-        Deck<Card> playerHand = (Deck<Card>)gs.getComponentActingPlayer(CoreConstants.playerHandHash);
-        int[] resources = new int[CatanParameters.Resources.values().length];
-
-        for (Card card: playerHand.getComponents()){
-            resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
-        }
+        int[] resources = gs.getPlayerResources();
         System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
         ArrayList<AbstractAction> actions = new ArrayList();
 
@@ -214,6 +210,32 @@ public class CatanActionFactory {
                 actions.add(new PlayDevelopmentCard(c));
             }
         }
+
+        return actions;
+    }
+
+    public static List<AbstractAction> getTradeActions(CatanGameState gs){
+        // Player can buy dev card and play one
+        CatanParameters params = (CatanParameters) gs.getGameParameters();
+        ArrayList<AbstractAction> actions = new ArrayList();
+
+        // get playerHand; for each card add a new action
+        int[] resources = gs.getPlayerResources();
+
+        // default trade
+        for (int i = 0; i < resources.length; i++){
+            if (resources[i] >= params.n_resource_to_trade){
+                for (int j = 0; j < resources.length; j++){
+                    if (j!=i){
+                        // list all possible trades
+                        actions.add(new DefaultTrade(CatanParameters.Resources.values()[i], CatanParameters.Resources.values()[j]));
+                    }
+                }
+            }
+            // todo check if there is a harbor on a sea tile next to player
+            // todo make trade offers
+        }
+
 
         return actions;
     }

@@ -25,6 +25,8 @@ public class CatanTile {
 
     Road[] roads;
     Settlement[] settlements;
+    int[] harbors;
+    private boolean hasHarbor;
 
     // coordinates to vertices and edges to facilitate drawing roads
     // hexagon is the actual object that can be drawn on the screen
@@ -39,7 +41,8 @@ public class CatanTile {
     public CatanTile(int x, int y) {
         this.x = x;
         this.y = y;
-        roads = new Road[6];
+        roads = new Road[HEX_SIDES];
+        harbors = new int[HEX_SIDES];
         settlements = new Settlement[HEX_SIDES];
         verticesCoords = new Point[HEX_SIDES];
         edgeCoords = new Point[HEX_SIDES][2];
@@ -150,6 +153,23 @@ public class CatanTile {
 
     public Road[] getRoads(){
         return roads;
+    }
+
+    public boolean addHarbor(int edge, int type){
+        if (!hasHarbor) {
+            this.harbors[edge] = type;
+            this.hasHarbor = true;
+            return true;
+        }
+        return false;
+    }
+
+    public int[] getHarbors(){
+        return harbors;
+    }
+
+    public boolean hasHarbor(){
+        return hasHarbor;
     }
 
     public boolean addSettlement(int vertex, int playerID){

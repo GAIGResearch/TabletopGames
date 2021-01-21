@@ -9,6 +9,7 @@ import games.catan.components.Settlement;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.Arrays;
 
 public class CatanBoardView extends JComponent {
@@ -47,6 +48,10 @@ public class CatanBoardView extends JComponent {
 
                 if (tile.getRobber()){
                     drawRobber(g, new Point((int)tile.x_coord, (int)tile.y_coord));
+                }
+
+                if (tile.hasHarbor()){
+                    drawHarbor(g, tile);
                 }
 
                 String type = "" + tile.getType();
@@ -124,6 +129,21 @@ public class CatanBoardView extends JComponent {
         int RADIUS = 10;
         g.setColor(Color.BLACK);
         g.fillOval(point.x, point.y, RADIUS, RADIUS);
+    }
+
+    public void drawHarbor(Graphics2D g, CatanTile tile){
+        // todo rotate text? should be clear what harbor it is
+        //  rotation below does not work as expected
+        int[] harbors = tile.getHarbors();
+        for (int i = 0; i < harbors.length; i++){
+            if (harbors[i] > 0){
+//                AffineTransform original = g.getTransform();
+//                g.rotate(Math.toRadians(-60));
+                g.drawString(("1:3 " + harbors[i]), (int)tile.x_coord, (int)tile.y_coord+10);
+//                g.setTransform(original);
+            }
+        }
+
     }
 
     public void drawRoad(Graphics2D g, Point[] location, Color color){

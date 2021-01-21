@@ -232,7 +232,6 @@ public class CatanForwardModel extends AbstractForwardModel {
         int mid_y = board[0].length/2;
 
         CatanTile midTile = new CatanTile(mid_x, mid_y);
-//        midTile.setTileType(CatanParameters.TileType.DESERT);
 
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
@@ -260,6 +259,10 @@ public class CatanForwardModel extends AbstractForwardModel {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
 
+                // todo set the harbor to the sea tile
+                if (midTile.distance(tile) == mid_x){
+                    tile.addHarbor(0, 1);
+                }
                 // --------- Road ------------
                 for (int edge = 0; edge < HEX_SIDES; edge++) {
                     // Road has already been set
