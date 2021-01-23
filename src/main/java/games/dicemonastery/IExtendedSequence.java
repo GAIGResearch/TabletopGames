@@ -1,4 +1,4 @@
-package games.DiceMonastery;
+package games.dicemonastery;
 
 import core.actions.AbstractAction;
 

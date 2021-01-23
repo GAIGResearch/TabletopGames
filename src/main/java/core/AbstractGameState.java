@@ -132,7 +132,7 @@ public abstract class AbstractGameState {
         AbstractGameState s = _copy(playerId);
         // Copy super class things
         s.turnOrder = turnOrder.copy();
-        s.allComponents = new Area(-1, "All components");
+        s.allComponents = allComponents.emptyCopy();
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;

@@ -1,11 +1,14 @@
-package games.DiceMonastery;
+package games.dicemonastery.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.IExtendedSequence;
+import games.dicemonastery.Monk;
 
 import java.util.*;
 
-import static games.DiceMonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.*;
 import static java.util.stream.Collectors.*;
 
 public class PlaceMonk extends AbstractAction implements IExtendedSequence {
@@ -38,10 +41,10 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
     }
 
     private List<Monk> availableMonks(DiceMonasteryGameState state) {
-        return state.allMonks.values().stream()
-                .filter(m -> (monkPiety == 0 || m.piety == monkPiety)
-                        && m.getOwnerId() == playerId
-                        && state.monkLocations.get(m.getComponentID()) == ActionArea.DORMITORY)
+        return state.monksIn(null, playerId).stream()
+                .filter(m -> (monkPiety == 0 || m.getPiety() == monkPiety)
+                        && m.getPiety() >= destination.dieMinimum
+                        && state.getMonkLocation(m.getComponentID()) == ActionArea.DORMITORY)
                 .collect(toList());
     }
 

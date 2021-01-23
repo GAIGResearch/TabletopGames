@@ -1,11 +1,10 @@
 package games;
 
 import core.*;
-import core.components.Dice;
-import games.DiceMonastery.DiceMonasteryForwardModel;
-import games.DiceMonastery.DiceMonasteryGUI;
-import games.DiceMonastery.DiceMonasteryGameState;
-import games.DiceMonastery.DiceMonasteryParams;
+import games.dicemonastery.DiceMonasteryForwardModel;
+import games.dicemonastery.DiceMonasteryGUI;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.DiceMonasteryParams;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;

@@ -1,13 +1,15 @@
-package games.DiceMonastery;
+package games.dicemonastery;
 
 import core.*;
 import core.actions.AbstractAction;
+import games.dicemonastery.actions.PlaceMonk;
+import games.dicemonastery.actions.UseMonk;
 
 import java.util.*;
 
-import static games.DiceMonastery.DiceMonasteryConstants.*;
-import static games.DiceMonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.DiceMonastery.DiceMonasteryConstants.Resource.*;
+import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
@@ -35,6 +37,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         }
 
         state.setGamePhase(Phase.PLACE_MONKS);
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
+        super.endGame(gameState);
     }
 
     @Override
@@ -83,19 +90,27 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         switch (turnOrder.season) {
             case SPRING:
             case AUTUMN:
-                // we place monks
-                List<Monk> availableMonks = state.monksIn(DORMITORY, currentPlayer);
-                if (availableMonks.isEmpty()) {
-                    throw new AssertionError("We have no monks left for player " + currentPlayer);
+                if (state.getGamePhase() == Phase.PLACE_MONKS) {
+                    // we place monks
+                    List<Monk> availableMonks = state.monksIn(DORMITORY, currentPlayer);
+                    if (availableMonks.isEmpty()) {
+                        throw new AssertionError("We have no monks left for player " + currentPlayer);
+                    }
+                    int mostPiousMonk = availableMonks.stream().mapToInt(Monk::getPiety).max().getAsInt();
+                    return Arrays.stream(ActionArea.values())
+                            .filter(a -> a != DORMITORY && a.dieMinimum <= mostPiousMonk)
+                            .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
+                } else if (state.getGamePhase() == Phase.USE_MONKS) {
+                    List<Monk> availableMonks = state.monksIn(turnOrder.currentAreaBeingExecuted, currentPlayer);
+                    if (availableMonks.isEmpty()) {
+                        throw new AssertionError("We have no monks left for player " + currentPlayer);
+                    }
+                    return availableMonks.stream().map(m -> new UseMonk(m.getComponentID(), turnOrder.currentAreaBeingExecuted)).collect(toList());
                 }
-                int mostPiousMonk = availableMonks.stream().mapToInt(Monk::getPiety).max().getAsInt();
-                return Arrays.stream(ActionArea.values())
-                        .filter(a -> a != DORMITORY && a.dieMinimum <= mostPiousMonk)
-                        .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
             case SUMMER:
             case WINTER:
         }
-        throw new AssertionError("Not yet implemented");
+        throw new AssertionError("Not yet implemented combination " + turnOrder.season + " : " + state.getGamePhase());
     }
 
     @Override

@@ -1,11 +1,12 @@
-package games.DiceMonastery;
+package games.dicemonastery;
 
 import core.*;
 import core.components.*;
+
 import java.util.*;
 
-import static games.DiceMonastery.DiceMonasteryConstants.*;
-import static games.DiceMonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static java.util.stream.Collectors.*;
 
 
@@ -21,7 +22,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DiceMonasteryTurnOrder(nPlayers));
+        super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters));
     }
 
     @Override
@@ -52,7 +53,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (movingMonk == null)
             throw new IllegalArgumentException("Monk does not exist : " + id);
         if (movingMonk.piety < to.dieMinimum)
-            throw new AssertionError(String.format("Monk only has a piety of %d, so cannot move to %s", movingMonk.piety, to.dieMinimum));
+            throw new AssertionError(String.format("Monk only has a piety of %d, so cannot move to %s", movingMonk.piety, to));
         monkLocations.put(id, to);
         actionAreas.get(from).removeComponent(movingMonk);
         actionAreas.get(to).putComponent(movingMonk);
@@ -66,7 +67,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public int getResource(int player, Resource resource) {
-        return playerTreasuries.get(player).getOrDefault(resource,0);
+        return playerTreasuries.get(player).getOrDefault(resource, 0);
     }
 
     public IExtendedSequence currentActionInProgress() {
@@ -86,9 +87,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public List<Monk> monksIn(ActionArea region, int player) {
         return allMonks.values().stream()
-                .filter( m -> (region == null || monkLocations.get(m.getComponentID()) == region) &&
+                .filter(m -> (region == null || monkLocations.get(m.getComponentID()) == region) &&
                         (player == -1 || m.getOwnerId() == player))
                 .collect(toList());
+    }
+
+    public ActionArea getMonkLocation(int id) {
+        return monkLocations.get(id);
     }
 
     @Override
@@ -96,9 +101,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return new ArrayList<>(allMonks.values());
     }
 
-/*
-    List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
-*/
+    /*
+        List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
+    */
     @Override
     protected DiceMonasteryGameState _copy(int playerId) {
         DiceMonasteryGameState retValue = new DiceMonasteryGameState(gameParameters.copy(), getNPlayers());
@@ -154,6 +159,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase);
+        return Objects.hash(allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
+                gameParameters, turnOrder) + 31 * Arrays.hashCode(playerResults);
     }
 }
