@@ -31,7 +31,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     int abbot = 0; // the current 'first player '
     List<Integer> playerOrderForCurrentArea;
     int dominantPiety = 0;
-
+    int actionPointsLeftForCurrentPlayer = 0;
 
     @Override
     protected void _reset() {
@@ -39,19 +39,20 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         year = 1;
         turnOwner = 0;
         abbot = 0;
+        actionPointsLeftForCurrentPlayer = 0;
         currentAreaBeingExecuted = null;
     }
 
     @Override
     protected DiceMonasteryTurnOrder _copy() {
         DiceMonasteryTurnOrder retValue = new DiceMonasteryTurnOrder(nPlayers);
-        retValue.nMaxRounds = nMaxRounds;
         retValue.season = season;
         retValue.year = year;
         retValue.abbot = abbot;
         retValue.currentAreaBeingExecuted = currentAreaBeingExecuted;
         retValue.playerOrderForCurrentArea = playerOrderForCurrentArea != null ? new ArrayList<>(playerOrderForCurrentArea) : null;
         retValue.dominantPiety = dominantPiety;
+        retValue.actionPointsLeftForCurrentPlayer = actionPointsLeftForCurrentPlayer;
         return retValue;
     }
 
@@ -70,16 +71,21 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         currentAreaBeingExecuted = ActionArea.MEADOW;
                         setUpPlayerOrderForCurrentArea(state); // impossible to have no monks placed at this point
                         turnOwner = playerOrderForCurrentArea.get(0);
+                        actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
                         return;
                     }
                     turnOwner = nextPlayer(gameState);
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
                     // in this case we go through players in piety order (as calculated when we start processing the area)
-                    turnOwner = nextPlayer(state);
+                    if (nextPlayer(state) != turnOwner) {
+                        turnOwner = nextPlayer(state);
+                        actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
+                    }
                     if (turnOwner == -1) {
                         // we have completed all actions for that area
                         if (setUpPlayerOrderForCurrentArea(state)) {
                             turnOwner = playerOrderForCurrentArea.get(0);
+                            actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
                         } else {
                             // we have completed this phase
                             season = season.next();
@@ -101,12 +107,16 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         }
     }
 
+    private int actionPoints(DiceMonasteryGameState state, ActionArea region, int player) {
+        return state.monksIn(currentAreaBeingExecuted, turnOwner).stream().mapToInt(Monk::getPiety).sum();
+    }
+
     @Override
     public int nextPlayer(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         switch ((Phase) state.getGamePhase()) {
             case PLACE_MONKS:
-                Collection<Component> monksInDormitory = state.actionAreas.get(ActionArea.DORMITORY).getComponents().values();
+                Collection<Component> monksInDormitory = state.actionAreas.get(ActionArea.DORMITORY).getAll(c -> c instanceof Monk);
                 if (monksInDormitory.size() == 0)
                     return -1;
                 int nextPlayer = turnOwner;
@@ -118,7 +128,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             // (we have already moved the turn on once with super.endPlayerTurn(), so we just need to check
             // the current player has Monks to place.)
             case USE_MONKS:
-                if (state.monksIn(currentAreaBeingExecuted, turnOwner).size() > 0)
+                if (actionPointsLeftForCurrentPlayer > 0)
                     return turnOwner;  // we still have monks for the current player to finish using
                 int currentIndex = playerOrderForCurrentArea.indexOf(turnOwner);
                 if (currentIndex + 1 == playerOrderForCurrentArea.size())
@@ -174,12 +184,17 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         return currentAreaBeingExecuted;
     }
 
+    public int getActionPointsLeft() {
+        return actionPointsLeftForCurrentPlayer;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof DiceMonasteryTurnOrder) {
             DiceMonasteryTurnOrder other = (DiceMonasteryTurnOrder) o;
             return other.season == season && other.year == year && other.dominantPiety == dominantPiety &&
                     other.currentAreaBeingExecuted == currentAreaBeingExecuted && other.abbot == abbot &&
+                    other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
                     other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
                     super.equals(other);
         }
@@ -188,7 +203,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 31 * Objects.hash(season, year, abbot, currentAreaBeingExecuted, dominantPiety, playerOrderForCurrentArea);
+        return super.hashCode() + 31 * Objects.hash(season, year, abbot, currentAreaBeingExecuted,
+                dominantPiety, actionPointsLeftForCurrentPlayer);
     }
 
 

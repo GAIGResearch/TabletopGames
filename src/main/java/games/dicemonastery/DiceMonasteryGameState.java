@@ -13,13 +13,11 @@ import static java.util.stream.Collectors.*;
 public class DiceMonasteryGameState extends AbstractGameState {
 
 
-    Map<ActionArea, Area> actionAreas = new HashMap<>();
+    Map<ActionArea, DMArea> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
     Map<Integer, ActionArea> monkLocations = new HashMap<>();
     List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
-
     Stack<IExtendedSequence> actionsInProgress = new Stack<>();
-
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters));
@@ -30,7 +28,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         actionsInProgress = new Stack<>();
         actionAreas = new HashMap<>();
         Arrays.stream(ActionArea.values()).forEach(a ->
-                actionAreas.put(a, new Area(-1, a.name()))
+                actionAreas.put(a, new DMArea(-1, a.name()))
         );
 
         allMonks = new HashMap<>();
@@ -64,6 +62,30 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (currentLevel + amount < 0)
             throw new IllegalArgumentException(String.format("Only have %d %s in stock; cannot remove %d", currentLevel, resource, -amount));
         playerTreasuries.get(player).put(resource, currentLevel + amount);
+    }
+
+    public void moveCube(int player, Resource resource, ActionArea from, ActionArea to) {
+        Token cubeMoved = null;
+        if (from == STOREROOM) {
+            addResource(player, resource, -1);
+        } else if (from != SUPPLY) {
+            cubeMoved = actionAreas.get(from).take(resource, player);
+        }
+        if (to == STOREROOM) {
+            addResource(player, resource, 1);
+        } else if (to != SUPPLY) {
+            if (cubeMoved == null)
+                cubeMoved = new Token(resource.toString());
+            actionAreas.get(to).putComponent(cubeMoved);
+        }
+    }
+
+    public void useAP(int actionPointsSpent) {
+        DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
+        dto.actionPointsLeftForCurrentPlayer -= actionPointsSpent;
+        if (dto.actionPointsLeftForCurrentPlayer < 0) {
+            throw new IllegalArgumentException("Not enough action points available");
+        }
     }
 
     public int getResource(int player, Resource resource) {
@@ -154,12 +176,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
             return false;
         DiceMonasteryGameState other = (DiceMonasteryGameState) o;
         return other.allMonks.equals(allMonks) && other.monkLocations.equals(monkLocations) &&
-                other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress);
+                other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
+                        other.actionAreas.equals(actionAreas);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
+        return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
                 gameParameters, turnOrder) + 31 * Arrays.hashCode(playerResults);
     }
 }

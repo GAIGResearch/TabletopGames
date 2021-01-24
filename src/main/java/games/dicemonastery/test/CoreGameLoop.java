@@ -1,14 +1,12 @@
 package games.dicemonastery.test;
 
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
+import core.actions.*;
 import games.dicemonastery.*;
-import games.dicemonastery.actions.PlaceMonk;
+import games.dicemonastery.actions.*;
 import org.junit.*;
 import players.simple.RandomPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
@@ -105,13 +103,10 @@ public class CoreGameLoop {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
-        assertEquals(USE_MONKS, state.getGamePhase());
-
-        for (int i = 0; i < 4 * 6; i++) { // 24 monks in total
+        do {
             assertEquals(USE_MONKS, state.getGamePhase());
             fm.next(state, fm.computeAvailableActions(state).get(0));
-            assertEquals(i + 1, state.monksIn(DORMITORY, -1).size());
-        }
+        } while (state.monksIn(DORMITORY, -1).size() < 24);
 
         assertEquals(1, turnOrder.getAbbot());
         assertEquals(1, state.getCurrentPlayer());
@@ -138,17 +133,16 @@ public class CoreGameLoop {
                 .collect(toMap(a -> a, a -> state.monksIn(a, -1).size()));
 
         int totalMonks = 24 - state.monksIn(DORMITORY, -1).size();
-        for (int i = 0; i < totalMonks; i++) {
-            if (i < monksInArea.get(MEADOW))
-                assertEquals(MEADOW, turnOrder.getCurrentArea());
-            else if (i < monksInArea.get(MEADOW) + monksInArea.get(KITCHEN))
-                assertEquals(KITCHEN, turnOrder.getCurrentArea());
-            else if (i < monksInArea.get(MEADOW) + monksInArea.get(KITCHEN) + monksInArea.get(GATEHOUSE))
-                assertEquals(GATEHOUSE, turnOrder.getCurrentArea());
-            else if (i < monksInArea.get(MEADOW) + monksInArea.get(KITCHEN) + monksInArea.get(GATEHOUSE) + monksInArea.get(LIBRARY))
-                assertEquals(LIBRARY, turnOrder.getCurrentArea());
+        Set<ActionArea> areasProcessed = new HashSet<>();
+        do {
+            areasProcessed.add(turnOrder.getCurrentArea());
             fm.next(state, fm.computeAvailableActions(state).get(0));
-        }
+        }while (state.monksIn(DORMITORY, -1).size() < 24);
+
+        assertEquals(4, areasProcessed.size());
+        assertFalse(areasProcessed.contains(CHAPEL));
+        assertFalse(areasProcessed.contains(WORKSHOP));
+
         assertEquals(PLACE_MONKS, state.getGamePhase());
         assertEquals(AUTUMN, turnOrder.getSeason());
         assertEquals(1, turnOrder.getAbbot());
@@ -194,8 +188,8 @@ public class CoreGameLoop {
         // and that this changes each time we move to a new area
 
         ActionArea currentArea = null;
-        int remainingActionsForPlayer = 0;
         int lastPlayer = -1;
+        boolean playerSwitchExpected = false;
         do {
             if (currentArea != turnOrder.getCurrentArea()) {
                 currentArea = turnOrder.getCurrentArea();
@@ -204,19 +198,18 @@ public class CoreGameLoop {
                 int maxPiety = pietyPerPlayer.values().stream().max(Integer::compareTo).get();
                 int actualPiety = pietyPerPlayer.getOrDefault(state.getCurrentPlayer(), 0);
                 assertEquals(maxPiety, actualPiety);
-                remainingActionsForPlayer = state.monksIn(currentArea, state.getCurrentPlayer()).size();
                 lastPlayer = state.getCurrentPlayer();
             } else {
-                if (remainingActionsForPlayer > 0) {
+                if (!playerSwitchExpected) {
                     assertEquals(lastPlayer, state.getCurrentPlayer());
                 } else {
                     assertNotSame(lastPlayer, state.getCurrentPlayer());
-                    remainingActionsForPlayer = state.monksIn(currentArea, state.getCurrentPlayer()).size();
                     lastPlayer = state.getCurrentPlayer();
                 }
             }
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
-            remainingActionsForPlayer--;
+            AbstractAction actionChosen = rnd.getAction(state, fm.computeAvailableActions(state));
+            playerSwitchExpected = actionChosen instanceof Pass || ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
+            fm.next(state, actionChosen);
         } while (state.getGamePhase() == USE_MONKS);
     }
 

@@ -116,11 +116,9 @@ public class CopyTests {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
-        for (int i = 0; i < 4 * 6 - 2; i++) { // 24 monks in total
-            assertEquals(USE_MONKS, state.getGamePhase());
+        do { // until we have two players left wit monks in the Chapel
             fm.next(state, fm.computeAvailableActions(state).get(0));
-            assertEquals(i + 1, state.monksIn(DORMITORY, -1).size());
-        }
+        } while (state.monksIn(CHAPEL, -1).stream().map(Monk::getComponentID).distinct().count() > 2);
 
         int startHash = state.hashCode();
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();

@@ -6,36 +6,31 @@ import games.dicemonastery.DiceMonasteryGameState;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 
-public class UseMonk extends AbstractAction {
+public abstract class UseMonk extends AbstractAction {
 
-    int monkId;
-    ActionArea area;
+    protected int actionPoints;
 
-    public UseMonk(int monkId, ActionArea area) {
-        this.monkId = monkId;
-        this.area = area;
+    public UseMonk(int actionPoints) {
+        this.actionPoints = actionPoints;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        state.moveMonk(monkId, area, ActionArea.DORMITORY);
-        return true;
+        state.useAP(actionPoints);
+        return _execute(state);
     }
+
+    public abstract boolean _execute(DiceMonasteryGameState state);
 
     @Override
     public AbstractAction copy() {
+        // no mutable state
         return this;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof UseMonk;
-    }
-
-    @Override
-    public int hashCode() {
-        return 0;
+    public int getActionPoints() {
+        return actionPoints;
     }
 
     @Override
@@ -43,8 +38,4 @@ public class UseMonk extends AbstractAction {
         return toString();
     }
 
-    @Override
-    public String toString() {
-        return "Sow Wheat";
-    }
 }

@@ -2,14 +2,14 @@ package games.dicemonastery;
 
 import core.*;
 import core.actions.AbstractAction;
-import games.dicemonastery.actions.PlaceMonk;
-import games.dicemonastery.actions.UseMonk;
+import games.dicemonastery.actions.*;
 
 import java.util.*;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
@@ -98,14 +98,32 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     }
                     int mostPiousMonk = availableMonks.stream().mapToInt(Monk::getPiety).max().getAsInt();
                     return Arrays.stream(ActionArea.values())
-                            .filter(a -> a != DORMITORY && a.dieMinimum <= mostPiousMonk)
+                            .filter(a -> a.dieMinimum > 0 && a.dieMinimum <= mostPiousMonk)
                             .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
-                    List<Monk> availableMonks = state.monksIn(turnOrder.currentAreaBeingExecuted, currentPlayer);
-                    if (availableMonks.isEmpty()) {
-                        throw new AssertionError("We have no monks left for player " + currentPlayer);
+                    if (turnOrder.actionPointsLeftForCurrentPlayer <= 0) {
+                        throw new AssertionError("We have no action points left for player " + currentPlayer);
                     }
-                    return availableMonks.stream().map(m -> new UseMonk(m.getComponentID(), turnOrder.currentAreaBeingExecuted)).collect(toList());
+                    List<AbstractAction> retValue = new ArrayList<>();
+                    retValue.add(new Pass());
+                    switch (turnOrder.currentAreaBeingExecuted) {
+                        case MEADOW:
+                            retValue.add(new Forage());
+                            if (turnOrder.season == SPRING) {
+                                retValue.add(new SowWheat());
+                                retValue.add(new PlaceSkep());
+                            } else {
+                                if (state.actionAreas.get(MEADOW).count(GRAIN, currentPlayer) > 0)
+                                    retValue.add(new HarvestWheat());
+                                if (state.actionAreas.get(MEADOW).count(SKEP, currentPlayer) > 0)
+                                    retValue.add(new CollectSkep());
+                            }
+                            break;
+                        default:
+                            break;
+
+                    }
+                    return retValue;
                 }
             case SUMMER:
             case WINTER:
