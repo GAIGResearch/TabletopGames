@@ -28,12 +28,12 @@ public class CoreGameLoop {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
 
         for (int p = 0; p < 4; p++) {
-            assertEquals(2, state.getResource(p, GRAIN));
-            assertEquals(2, state.getResource(p, WAX));
-            assertEquals(2, state.getResource(p, HONEY));
-            assertEquals(2, state.getResource(p, BREAD));
-            assertEquals(6, state.getResource(p, SHILLINGS));
-            assertEquals(1, state.getResource(p, PRAYERS));
+            assertEquals(2, state.getResource(p, GRAIN, STOREROOM));
+            assertEquals(2, state.getResource(p, WAX, STOREROOM));
+            assertEquals(2, state.getResource(p, HONEY, STOREROOM));
+            assertEquals(2, state.getResource(p, BREAD, STOREROOM));
+            assertEquals(6, state.getResource(p, SHILLINGS, STOREROOM));
+            assertEquals(1, state.getResource(p, PRAYERS, STOREROOM));
 
             assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.getGameScore(p), 0.01);
             assertEquals(6, state.monksIn(DORMITORY, p).size());

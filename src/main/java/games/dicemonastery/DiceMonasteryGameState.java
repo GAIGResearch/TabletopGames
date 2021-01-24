@@ -58,7 +58,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void addResource(int player, Resource resource, int amount) {
-        int currentLevel = getResource(player, resource);
+        int currentLevel = getResource(player, resource, STOREROOM);
         if (currentLevel + amount < 0)
             throw new IllegalArgumentException(String.format("Only have %d %s in stock; cannot remove %d", currentLevel, resource, -amount));
         playerTreasuries.get(player).put(resource, currentLevel + amount);
@@ -75,7 +75,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
             addResource(player, resource, 1);
         } else if (to != SUPPLY) {
             if (cubeMoved == null)
-                cubeMoved = new Token(resource.toString());
+                cubeMoved = new Token("Cube");
+            cubeMoved.setOwnerId(player);
+            cubeMoved.setTokenType(resource.toString());
             actionAreas.get(to).putComponent(cubeMoved);
         }
     }
@@ -88,8 +90,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
         }
     }
 
-    public int getResource(int player, Resource resource) {
-        return playerTreasuries.get(player).getOrDefault(resource, 0);
+    public int getResource(int player, Resource resource, ActionArea location) {
+        if (location == STOREROOM) {
+            return playerTreasuries.get(player).getOrDefault(resource, 0);
+        }
+        return actionAreas.get(location).count(resource, player);
     }
 
     public IExtendedSequence currentActionInProgress() {

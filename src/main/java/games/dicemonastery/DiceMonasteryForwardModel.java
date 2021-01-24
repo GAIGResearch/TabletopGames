@@ -111,7 +111,8 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             retValue.add(new Forage());
                             if (turnOrder.season == SPRING) {
                                 retValue.add(new SowWheat());
-                                retValue.add(new PlaceSkep());
+                                if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
+                                    retValue.add(new PlaceSkep());
                             } else {
                                 if (state.actionAreas.get(MEADOW).count(GRAIN, currentPlayer) > 0)
                                     retValue.add(new HarvestWheat());

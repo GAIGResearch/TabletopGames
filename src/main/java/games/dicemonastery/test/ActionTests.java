@@ -5,6 +5,7 @@ import core.actions.*;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
 import org.junit.*;
+import org.omg.PortableServer.POAPackage.WrongAdapterHelper;
 import players.simple.RandomPlayer;
 
 import java.util.*;
@@ -18,29 +19,34 @@ import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 public class ActionTests {
-
-
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
     DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
     DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
     DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) game.getGameState().getTurnOrder();
     RandomPlayer rnd = new RandomPlayer();
 
-    private void startOfUseMonkPhaseForArea(ActionArea region) {
+    private void startOfUseMonkPhaseForArea(ActionArea region, Season season) {
         // first place all monks randomly
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
-        } while (state.getGamePhase() == PLACE_MONKS);
+            // then Pass until we get to the point required
+            while (state.getGamePhase() == USE_MONKS)
+                fm.next(state, new Pass());
 
-        // then Pass until we get to the point required
-        do {
-            fm.next(state, new Pass());
-        } while (turnOrder.getCurrentArea() != region);
+            do {
+                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            } while (state.getGamePhase() == PLACE_MONKS);
+
+            // then Pass until we get to the point required
+            do {
+                fm.next(state, new Pass());
+            } while (turnOrder.getCurrentArea() != region);
+
+        } while (turnOrder.getSeason() != season);
     }
 
     @Test
     public void meadowActionsCorrectSpring() {
-        startOfUseMonkPhaseForArea(MEADOW);
+        startOfUseMonkPhaseForArea(MEADOW, SPRING);
         assertEquals(4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
@@ -50,31 +56,87 @@ public class ActionTests {
 
     @Test
     public void meadowActionsCorrectAutumn() {
-        fail("Not yet implemented");
+        startOfUseMonkPhaseForArea(MEADOW, AUTUMN);
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+
+        state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat()));
+
+        state.moveCube(state.getCurrentPlayer(), SKEP, SUPPLY, MEADOW);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat()));
+        assertTrue(fm.computeAvailableActions(state).contains(new CollectSkep()));
+
+        state.useAP(turnOrder.getActionPointsLeft());
+        try {
+            assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        } catch (AssertionError ignored) {
+            return;
+        }
+        fail();
     }
 
     @Test
     public void sowWheat() {
-        fail("Not yet implemented");
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+        state.useAP(-1);
+        (new SowWheat()).execute(state);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
     }
 
     @Test
     public void harvestGrain() {
-        fail("Not yet implemented");
+        state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+        state.useAP(-1);
+        (new HarvestWheat()).execute(state);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
+        assertEquals(3, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
     }
 
     @Test
     public void placeSkep() {
-        fail("Not yet implemented");
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+        state.useAP(-1);
+        (new PlaceSkep()).execute(state);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
     }
 
     @Test
     public void collectSkep() {
-        fail("Not yet implemented");
+        state.useAP(-2);
+        (new PlaceSkep()).execute(state);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), WAX, STOREROOM));
+        (new CollectSkep()).execute(state);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+        assertEquals(3, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
+        assertEquals(3, state.getResource(state.getCurrentPlayer(), WAX, STOREROOM));
     }
 
     @Test
     public void forage() {
-        fail("Not yet implemented");
+        state.useAP(-100);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAPES, STOREROOM));
+        for (int i = 0; i < 100; i++)
+            (new Forage()).execute(state);
+        assertEquals(33, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
+        assertEquals(33, state.getResource(state.getCurrentPlayer(), GRAPES, STOREROOM), 10);
     }
 }

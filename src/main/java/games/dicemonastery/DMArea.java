@@ -41,7 +41,7 @@ public class DMArea {
         return (int) area.getComponents().values().stream()
                 .filter(c -> c instanceof Token
                         && c.getOwnerId() == player
-                        && ((Token) c).getTokenType().equals(resource.name()))
+                        && ((Token) c).getTokenType().equals(resource.toString()))
                 .count();
     }
 

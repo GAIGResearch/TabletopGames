@@ -6,7 +6,7 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 public class PlaceSkep extends MoveCube {
 
     public PlaceSkep() {
-        super(1, Resource.SKEP, SUPPLY, MEADOW);
+        super(1, Resource.SKEP, STOREROOM, MEADOW);
     }
 
     @Override
