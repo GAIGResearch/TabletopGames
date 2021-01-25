@@ -14,6 +14,17 @@ import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
+    public final AbstractAction FORAGE = new Forage();
+    public final AbstractAction SOW_WHEAT = new SowWheat();
+    public final AbstractAction HARVEST_WHEAT = new HarvestWheat();
+    public final AbstractAction PLACE_SKEP = new PlaceSkep();
+    public final AbstractAction COLLECT_SKEP = new CollectSkep();
+    public final AbstractAction PASS = new Pass();
+    public final AbstractAction BAKE_BREAD = new BakeBread();
+    public final AbstractAction PREPARE_INK = new PrepareInk();
+    public final AbstractAction BREW_BEER = new BrewBeer();
+    public final AbstractAction BREW_MEAD = new BrewMead();
+
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) firstState;
@@ -105,24 +116,35 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         throw new AssertionError("We have no action points left for player " + currentPlayer);
                     }
                     List<AbstractAction> retValue = new ArrayList<>();
-                    retValue.add(new Pass());
+                    retValue.add(PASS);
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
-                            retValue.add(new Forage());
+                            retValue.add(FORAGE);
                             if (turnOrder.season == SPRING) {
-                                retValue.add(new SowWheat());
+                                retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
-                                    retValue.add(new PlaceSkep());
+                                    retValue.add(PLACE_SKEP);
                             } else {
                                 if (state.actionAreas.get(MEADOW).count(GRAIN, currentPlayer) > 0)
-                                    retValue.add(new HarvestWheat());
+                                    retValue.add(HARVEST_WHEAT);
                                 if (state.actionAreas.get(MEADOW).count(SKEP, currentPlayer) > 0)
-                                    retValue.add(new CollectSkep());
+                                    retValue.add(COLLECT_SKEP);
+                            }
+                            break;
+                        case KITCHEN:
+                            if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0)
+                                retValue.add(BAKE_BREAD);
+                            if (turnOrder.getActionPointsLeft() > 1) {
+                                if (state.getResource(currentPlayer, PIGMENT, STOREROOM) > 0)
+                                    retValue.add(PREPARE_INK);
+                                if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0)
+                                    retValue.add(BREW_BEER);
+                                if (state.getResource(currentPlayer, HONEY, STOREROOM) > 0)
+                                    retValue.add(BREW_MEAD);
                             }
                             break;
                         default:
                             break;
-
                     }
                     return retValue;
                 }

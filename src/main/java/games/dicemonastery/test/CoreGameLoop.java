@@ -75,6 +75,10 @@ public class CoreGameLoop {
         assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.getGameScore(0), 0.01);
         assertEquals(1, state.monksIn(MEADOW, -1).size());
         assertEquals(1, state.monksIn(MEADOW, 0).size());
+
+        for(Monk m : state.monksIn(null, -1)) {
+            assertTrue (state.getMonkLocation(m.getComponentID()).dieMinimum <= m.getPiety());
+        }
     }
 
     @Test

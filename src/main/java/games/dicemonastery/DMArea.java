@@ -25,7 +25,7 @@ public class DMArea {
 
     public Token take(Resource resource, int player) {
         Optional<Token> cube = area.getComponents().values().stream()
-                .filter(c -> c.getType() == Utils.ComponentType.TOKEN
+                .filter(c -> c instanceof Token
                         && c.getOwnerId() == player
                         && ((Token) c).getTokenType().equals(resource.name()))
                 .map(c -> (Token) c)

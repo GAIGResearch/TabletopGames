@@ -5,7 +5,6 @@ import core.actions.*;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
 import org.junit.*;
-import org.omg.PortableServer.POAPackage.WrongAdapterHelper;
 import players.simple.RandomPlayer;
 
 import java.util.*;
@@ -15,7 +14,6 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 public class ActionTests {
@@ -138,5 +136,30 @@ public class ActionTests {
             (new Forage()).execute(state);
         assertEquals(33, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
         assertEquals(33, state.getResource(state.getCurrentPlayer(), GRAPES, STOREROOM), 10);
+    }
+
+    @Test
+    public void kitchenActionsCorrect() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void bakeBread() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void prepareInk() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void brewBeer() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void brewMead() {
+        fail("Not yet implemented");
     }
 }
