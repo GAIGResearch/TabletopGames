@@ -10,10 +10,14 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
+    protected int turnStage; // trade stage (0), build stage (1)
+    protected boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
 
     CatanTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
         turnStep = 0;
+        turnStage = 0;
+        developmentCardPlayed = false;
     }
 
     @Override
@@ -26,6 +30,8 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     protected TurnOrder _copy() {
         CatanTurnOrder to = new CatanTurnOrder(nPlayers, nMaxRounds);
         to.turnStep = turnStep;
+        to.turnStage = turnStage;
+        to.developmentCardPlayed = developmentCardPlayed;
         return to;
     }
 
@@ -40,12 +46,33 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
+        turnStage = 0;
+        setDevelopmentCardPlayed(false);
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
             turnStep = 0;
             moveToNextPlayer(gameState, nextPlayer(gameState));
         }
+    }
+
+    public void endTurnStage(AbstractGameState gameState){
+        turnStage++;
+        if (turnStage==2){
+            endPlayerTurn(gameState);
+        }
+    }
+
+    public int getTurnStage() {
+        return turnStage;
+    }
+
+    public boolean isDevelopmentCardPlayed() {
+        return developmentCardPlayed;
+    }
+
+    public void setDevelopmentCardPlayed(boolean developmentCardPlayed) {
+        this.developmentCardPlayed = developmentCardPlayed;
     }
 
     /**
