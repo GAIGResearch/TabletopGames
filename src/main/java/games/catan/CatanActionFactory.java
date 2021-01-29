@@ -52,11 +52,36 @@ public class CatanActionFactory {
     }
 
     /**
-     * Calculates regular Player actions
+     * Calculates regular Player actions in the Trade stage
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getPlayerActions(CatanGameState gs) {
+    static List<AbstractAction> getTradeStageActions(CatanGameState gs) {
+        CatanTurnOrder cto = (CatanTurnOrder)gs.getTurnOrder();
+
         ArrayList<AbstractAction> actions = new ArrayList();
+        actions.add(new DoNothing());
+        actions.addAll(getTradeActions(gs));
+        if (!cto.isDevelopmentCardPlayed()){
+            actions.addAll(getCardActions(gs));
+        }
+
+        return actions;
+    }
+
+    /**
+     * Calculates regular Player actions in Buy stage
+     * @return - ArrayList, various action types (unique).
+     */
+    static List<AbstractAction> getBuyStageActions(CatanGameState gs) {
+        CatanTurnOrder cto = (CatanTurnOrder)gs.getTurnOrder();
+
+        ArrayList<AbstractAction> actions = new ArrayList();
+        actions.add(new DoNothing());
+        actions.addAll(getBuyActions(gs));
+
+        if (!cto.isDevelopmentCardPlayed()){
+            actions.addAll(getCardActions(gs));
+        }
         if (gs.getRollValue() == 7){
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {

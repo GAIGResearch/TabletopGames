@@ -6,6 +6,7 @@ import core.components.Card;
 import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
+import games.catan.CatanTurnOrder;
 
 public class PlayDevelopmentCard extends AbstractAction {
     Card card;
@@ -36,6 +37,8 @@ public class PlayDevelopmentCard extends AbstractAction {
 
         playerDevDeck.remove(card);
         developmentDiscardDeck.add(card);
+
+        ((CatanTurnOrder)cgs.getTurnOrder()).setDevelopmentCardPlayed(true);
 
         return false;
     }

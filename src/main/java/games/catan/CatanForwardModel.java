@@ -133,7 +133,7 @@ public class CatanForwardModel extends AbstractForwardModel {
             }
 
             // end player's turn; roll dice and allocate resources
-            gs.getTurnOrder().endPlayerTurn(gs);
+            cto.endTurnStage(gs);
             rollDiceAndallocateResources(gs);
         }
 
@@ -195,13 +195,19 @@ public class CatanForwardModel extends AbstractForwardModel {
         // 4, trade is a negotiation in the game - should player send an offer to all other players?
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        CatanGameState gs = (CatanGameState)gameState;
+        CatanGameState cgs = (CatanGameState)gameState;
+        CatanTurnOrder cto = (CatanTurnOrder) cgs.getTurnOrder();
 
-        if (gs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
-            return CatanActionFactory.getSetupActions(gs);
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
+            return CatanActionFactory.getSetupActions(cgs);
         }
-        else if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
-            return CatanActionFactory.getPlayerActions(gs);
+        else if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
+            if (cto.getTurnStage()==0){
+                return CatanActionFactory.getTradeStageActions(cgs);
+            }
+            else {
+                return CatanActionFactory.getBuyStageActions(cgs);
+            }
         }
 
         return actions;
