@@ -2,9 +2,13 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Counter;
+import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
+
+import static core.CoreConstants.VERBOSE;
 
 public class BuildRoad extends AbstractAction {
     int x;
@@ -24,8 +28,14 @@ public class BuildRoad extends AbstractAction {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
         if (board[x][y].getRoads()[edge].getOwner() == -1) {
+            if (((Counter)cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum()){
+                if (VERBOSE)
+                    System.out.println("No more roads to build for player " + gs.getCurrentPlayer());
+                return false;
+            }
+            ((Counter)cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).increment(1);
             // take resources after second round
-            if (cgs.getTurnOrder().getRoundCounter() > 1) {
+            if (cgs.getTurnOrder().getRoundCounter() >= 2) {
                 if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("road"))) return false;
             }
             return board[this.x][this.y].addRoad(edge, playerID);

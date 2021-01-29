@@ -56,6 +56,11 @@ public class CatanForwardModel extends AbstractForwardModel {
             playerDevDeck.setOwnerId(i);
             playerArea.putComponent(developmentDeckHash, playerDevDeck);
 
+            // counter value, min, max, name
+            playerArea.putComponent(roadCounterHash, new Counter(0, 0, params.n_roads, "Road Counter"));
+            playerArea.putComponent(settlementCounterHash, new Counter(0, 0, params.n_settlements, "Settlement Counter"));
+            playerArea.putComponent(cityCounterHash, new Counter(0, 0, params.n_cities, "City Counter"));
+
             state.areas.put(i, playerArea);
 
         }

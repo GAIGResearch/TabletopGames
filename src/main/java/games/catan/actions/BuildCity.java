@@ -2,10 +2,14 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Counter;
+import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
 import games.catan.components.Settlement;
+
+import static core.CoreConstants.VERBOSE;
 
 public class BuildCity extends AbstractAction {
     int row;
@@ -28,6 +32,14 @@ public class BuildCity extends AbstractAction {
         Settlement settlement = board[row][col].getSettlements()[vertex];
         if (settlement != null) {
             if (settlement.getOwner() == playerID) {
+                if (((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).isMaximum()){
+                    if (VERBOSE)
+                        System.out.println("No more cities to build for player " + gs.getCurrentPlayer());
+                    return false;
+                }
+                ((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).increment(1);
+                // if player builds a city it gets back the settlement token
+                ((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).decrement(1);
                 if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("city"))) return false;
                 settlement.upgrade();
                 return true;

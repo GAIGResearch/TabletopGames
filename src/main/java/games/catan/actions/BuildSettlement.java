@@ -3,13 +3,16 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Card;
+import core.components.Counter;
 import core.components.Deck;
+import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
 
 import java.util.Arrays;
 
+import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.resourceDeckHash;
 
@@ -31,11 +34,16 @@ public class BuildSettlement extends AbstractAction {
         CatanTile[][] board = cgs.getBoard();
 
         if (board[x][y].getSettlements()[vertex].getOwner() == -1) {
+            if (((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).isMaximum()){
+                if (VERBOSE)
+                    System.out.println("No more settlemens to build for player " + gs.getCurrentPlayer());
+                return false;
+            }
+            ((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).increment(1);
             // take resources after second round
-            if (cgs.getTurnOrder().getRoundCounter() > 1)
+            if (cgs.getTurnOrder().getRoundCounter() >= 2)
                 if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("settlement"))) return false;
             board[x][y].addSettlement(vertex, playerID);
-            // todo check if other tile has harbor
             return true;
         }
 
