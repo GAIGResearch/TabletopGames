@@ -14,10 +14,6 @@ public class Pass extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) gs.getTurnOrder();
-        ActionArea area = turnOrder.getCurrentArea();
-        for (Monk m : state.monksIn(area, state.getCurrentPlayer())) {
-            state.moveMonk(m.getComponentID(), area, DORMITORY);
-        }
         state.useAP(turnOrder.getActionPointsLeft());
         return true;
     }

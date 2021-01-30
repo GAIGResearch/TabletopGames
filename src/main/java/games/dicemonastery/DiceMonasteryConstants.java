@@ -38,7 +38,7 @@ public class DiceMonasteryConstants {
     }
 
     public enum Resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYERS, PIGMENT, INK, CALF_SKIN, VELLUM, GRAPES, BEER, MEAD
+        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYERS, PIGMENT, INK, CALF_SKIN, VELLUM, BEER, MEAD, CANDLE
     }
 
     public enum Phase implements IGamePhase {

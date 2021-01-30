@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.stream.Collectors.*;
 
@@ -130,6 +131,9 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             case USE_MONKS:
                 if (actionPointsLeftForCurrentPlayer > 0)
                     return turnOwner;  // we still have monks for the current player to finish using
+                for (Monk m : state.monksIn(currentAreaBeingExecuted, state.getCurrentPlayer())) {
+                    state.moveMonk(m.getComponentID(), currentAreaBeingExecuted, DORMITORY);
+                }
                 int currentIndex = playerOrderForCurrentArea.indexOf(turnOwner);
                 if (currentIndex + 1 == playerOrderForCurrentArea.size())
                     return -1; // we have now finished this area

@@ -3,6 +3,7 @@ package games.dicemonastery.test;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
+import games.dicemonastery.actions.BakeBread;
 import games.dicemonastery.actions.PlaceMonk;
 import org.junit.*;
 import players.simple.RandomPlayer;
@@ -13,6 +14,8 @@ import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.BREAD;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.GRAIN;
 import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
 import static java.util.stream.Collectors.*;
@@ -132,6 +135,30 @@ public class CopyTests {
         assertFalse(midHash == startHash);
 
         fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void bakeBread() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        state.useAP(-1);
+        // Has 2 Grain in STOREROOM at setup
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        (new BakeBread()).execute(state);
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());

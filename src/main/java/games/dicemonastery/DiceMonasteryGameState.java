@@ -84,10 +84,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public void useAP(int actionPointsSpent) {
         DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
-        dto.actionPointsLeftForCurrentPlayer -= actionPointsSpent;
-        if (dto.actionPointsLeftForCurrentPlayer < 0) {
+        if (dto.actionPointsLeftForCurrentPlayer < actionPointsSpent) {
             throw new IllegalArgumentException("Not enough action points available");
         }
+        dto.actionPointsLeftForCurrentPlayer -= actionPointsSpent;
     }
 
     public int getResource(int player, Resource resource, ActionArea location) {

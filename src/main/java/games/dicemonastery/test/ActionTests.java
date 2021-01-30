@@ -131,35 +131,142 @@ public class ActionTests {
     public void forage() {
         state.useAP(-100);
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
-        assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAPES, STOREROOM));
         for (int i = 0; i < 100; i++)
             (new Forage()).execute(state);
-        assertEquals(33, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
-        assertEquals(33, state.getResource(state.getCurrentPlayer(), GRAPES, STOREROOM), 10);
+        assertEquals(50, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 15);
     }
 
     @Test
     public void kitchenActionsCorrect() {
-        fail("Not yet implemented");
+        startOfUseMonkPhaseForArea(KITCHEN, SPRING);
+
+        while (state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM) > 0)
+            state.moveCube(state.getCurrentPlayer(), GRAIN, STOREROOM, SUPPLY);
+        while (state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM) > 0)
+            state.moveCube(state.getCurrentPlayer(), HONEY, STOREROOM, SUPPLY);
+        while (state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM) > 0)
+            state.moveCube(state.getCurrentPlayer(), PIGMENT, STOREROOM, SUPPLY);
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+
+        state.useAP(turnOrder.getActionPointsLeft() - 1);
+        state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, STOREROOM);
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BakeBread()));
+
+        state.useAP(-1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BakeBread()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BrewBeer()));
+
+        state.moveCube(state.getCurrentPlayer(), HONEY, SUPPLY, STOREROOM);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new BrewMead()));
+
+        state.moveCube(state.getCurrentPlayer(), PIGMENT, SUPPLY, STOREROOM);
+        assertEquals(5, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk()));
+
+        state.useAP(1);
+        assertEquals(2, fm.computeAvailableActions(state).size());
     }
 
     @Test
     public void bakeBread() {
-        fail("Not yet implemented");
+        state.useAP(-1);
+        // Has 2 Grain in STOREROOM at setup
+        (new BakeBread()).execute(state);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+        assertEquals(4, state.getResource(state.getCurrentPlayer(), BREAD, STOREROOM));
     }
 
     @Test
     public void prepareInk() {
-        fail("Not yet implemented");
+        state.useAP(-1);
+        try {
+            (new PrepareInk()).execute(state);
+            fail("Should throw exception");
+        } catch (IllegalArgumentException error) {
+           // expected!
+        }
+        state.useAP(-1);
+        state.moveCube(state.getCurrentPlayer(), PIGMENT, SUPPLY, STOREROOM);
+        (new PrepareInk()).execute(state);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), INK, STOREROOM));
     }
 
     @Test
     public void brewBeer() {
-        fail("Not yet implemented");
+        state.useAP(-2);
+        // Has 2 Grain in STOREROOM at setup
+        (new BrewBeer()).execute(state);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), BEER, STOREROOM));
     }
 
     @Test
     public void brewMead() {
-        fail("Not yet implemented");
+        state.useAP(-2);
+        // Has 2 Honey in STOREROOM at setup
+        (new BrewMead()).execute(state);
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), MEAD, STOREROOM));
+    }
+
+
+    @Test
+    public void workshopActionsCorrect() {
+        startOfUseMonkPhaseForArea(WORKSHOP, SPRING);
+
+        state.useAP(turnOrder.getActionPointsLeft() - 1);
+
+        while (state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM) > 0)
+            state.moveCube(state.getCurrentPlayer(), PIGMENT, STOREROOM, SUPPLY);
+        while (state.getResource(state.getCurrentPlayer(), WAX, STOREROOM) > 0)
+            state.moveCube(state.getCurrentPlayer(), WAX, STOREROOM, SUPPLY);
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new WeaveSkep()));
+
+        state.moveCube(state.getCurrentPlayer(), PIGMENT, SUPPLY, STOREROOM);
+        assertEquals(2, fm.computeAvailableActions(state).size());
+
+        state.useAP(-1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk()));
+
+        state.moveCube(state.getCurrentPlayer(), WAX, SUPPLY, STOREROOM);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new MakeCandle()));
+
+        state.moveCube(state.getCurrentPlayer(), CALF_SKIN, SUPPLY, STOREROOM);
+        assertEquals(5, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareVellum()));
+
+        state.useAP(1);
+        assertEquals(2, fm.computeAvailableActions(state).size());
+    }
+
+
+    @Test
+    public void gatehouseActionsCorrect() {
+        startOfUseMonkPhaseForArea(GATEHOUSE, SPRING);
+
+        state.useAP(turnOrder.getActionPointsLeft() - 1);
+
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BegForAlms()));
+        assertTrue(fm.computeAvailableActions(state).contains(new VisitMarket()));
+
+        state.useAP(-1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+
+        state.useAP(-1);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new HireNovice()));
     }
 }

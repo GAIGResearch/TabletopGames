@@ -133,10 +133,6 @@ public class CoreGameLoop {
             state.moveMonk(m.getComponentID(), CHAPEL, DORMITORY);
         }
         // Now have no monks in CHAPEL or WORKSHOP
-        Map<ActionArea, Integer> monksInArea = Arrays.stream(ActionArea.values())
-                .collect(toMap(a -> a, a -> state.monksIn(a, -1).size()));
-
-        int totalMonks = 24 - state.monksIn(DORMITORY, -1).size();
         Set<ActionArea> areasProcessed = new HashSet<>();
         do {
             areasProcessed.add(turnOrder.getCurrentArea());
@@ -180,6 +176,25 @@ public class CoreGameLoop {
     }
 
     @Test
+    public void whenAPlayerRunsOutOfActionPointsTheirMonksGoToTheDormitory() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (state.monksIn(DORMITORY, 3).size() > 0);
+
+        int firstPlayer = state.getCurrentPlayer();
+        int monksInMeadow = state.monksIn(MEADOW, firstPlayer).size();
+        do {
+            fm.next(state, new SowWheat());
+        } while (state.getCurrentPlayer() == firstPlayer);
+
+        assertEquals(monksInMeadow, state.monksIn(DORMITORY, firstPlayer).size());
+        assertEquals(0, state.monksIn(MEADOW, firstPlayer).size());
+    }
+
+    @Test
     public void playerOrderToUseMonksInPietyOrder() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
@@ -203,6 +218,7 @@ public class CoreGameLoop {
                 int actualPiety = pietyPerPlayer.getOrDefault(state.getCurrentPlayer(), 0);
                 assertEquals(maxPiety, actualPiety);
                 lastPlayer = state.getCurrentPlayer();
+                System.out.printf("Starting %s with player %d and piety %d\n", currentArea, lastPlayer, maxPiety);
             } else {
                 if (!playerSwitchExpected) {
                     assertEquals(lastPlayer, state.getCurrentPlayer());
@@ -212,7 +228,14 @@ public class CoreGameLoop {
                 }
             }
             AbstractAction actionChosen = rnd.getAction(state, fm.computeAvailableActions(state));
-            playerSwitchExpected = actionChosen instanceof Pass || ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
+            if (actionChosen instanceof VisitMarket) {
+                playerSwitchExpected = false;
+            } else if (state.currentActionInProgress() instanceof VisitMarket) {
+                playerSwitchExpected = turnOrder.getActionPointsLeft() == 0;
+            } else {
+                playerSwitchExpected = actionChosen instanceof Pass || ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
+            }
+            System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), playerSwitchExpected);
             fm.next(state, actionChosen);
         } while (state.getGamePhase() == USE_MONKS);
     }

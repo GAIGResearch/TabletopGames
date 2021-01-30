@@ -24,6 +24,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     public final AbstractAction PREPARE_INK = new PrepareInk();
     public final AbstractAction BREW_BEER = new BrewBeer();
     public final AbstractAction BREW_MEAD = new BrewMead();
+    public final AbstractAction WEAVE_SKEP = new WeaveSkep();
+    public final AbstractAction MAKE_CANDLE = new MakeCandle();
+    public final AbstractAction PREPARE_VELLUM = new PrepareVellum();
+    public final AbstractAction BEG = new BegForAlms();
+    public final AbstractAction HIRE_NOVICE = new HireNovice();
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -142,6 +147,25 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                 if (state.getResource(currentPlayer, HONEY, STOREROOM) > 0)
                                     retValue.add(BREW_MEAD);
                             }
+                            break;
+                        case WORKSHOP:
+                            retValue.add(WEAVE_SKEP);
+                            if (turnOrder.getActionPointsLeft() > 1) {
+                                if (state.getResource(currentPlayer, PIGMENT, STOREROOM) > 0)
+                                    retValue.add(PREPARE_INK);
+                                if (state.getResource(currentPlayer, WAX, STOREROOM) > 0)
+                                    retValue.add(MAKE_CANDLE);
+                                if (state.getResource(currentPlayer, CALF_SKIN, STOREROOM) > 0)
+                                    retValue.add(PREPARE_VELLUM);
+                            }
+                            break;
+                        case GATEHOUSE:
+                            retValue.add(BEG);
+                            retValue.add(new VisitMarket());
+                            if (turnOrder.getActionPointsLeft() > 2 &&
+                                    state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
+                                retValue.add(HIRE_NOVICE);
+                            // TODO: "Go on pilgrimage" not yet implemented
                             break;
                         default:
                             break;
