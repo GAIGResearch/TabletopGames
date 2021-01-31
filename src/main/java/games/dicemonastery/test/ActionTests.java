@@ -250,6 +250,50 @@ public class ActionTests {
         assertEquals(2, fm.computeAvailableActions(state).size());
     }
 
+    @Test
+    public void weaveSkep() {
+        state.useAP(-1);
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+        (new WeaveSkep()).execute(state);
+        assertEquals(3, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+    }
+
+    @Test
+    public void prepareVellum() {
+        state.useAP(-2);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), CALF_SKIN, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), VELLUM, STOREROOM));
+        try {
+            (new PrepareVellum()).execute(state);
+            fail("Should not succeed");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        state.useAP(-2);
+        state.addResource(state.getCurrentPlayer(), CALF_SKIN, 1);
+        (new PrepareVellum()).execute(state);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), CALF_SKIN, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), VELLUM, STOREROOM));
+    }
+
+    @Test
+    public void makeCandle() {
+        int player = state.getCurrentPlayer();
+        state.useAP(-1);
+        assertEquals(2, state.getResource(player, WAX, STOREROOM));
+        assertEquals(0, state.getResource(player, CANDLE, STOREROOM));
+        try {
+            (new MakeCandle()).execute(state);
+            fail("Should not succeed");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        assertEquals(1, turnOrder.getActionPointsLeft());
+        state.useAP(-1);
+        fm.next(state, (new MakeCandle()));
+        assertEquals(1, state.getResource(player, WAX, STOREROOM));
+        assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
+    }
 
     @Test
     public void gatehouseActionsCorrect() {
@@ -269,4 +313,75 @@ public class ActionTests {
         assertEquals(4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new HireNovice()));
     }
+
+    @Test
+    public void begForAlms() {
+        int player = state.getCurrentPlayer();
+        state.useAP(-1);
+        assertEquals(6, state.getResource(player, SHILLINGS, STOREROOM));
+        fm.next(state, (new BegForAlms()));
+        assertEquals(7, state.getResource(player, SHILLINGS, STOREROOM));
+        assertEquals(0, turnOrder.getActionPointsLeft());
+    }
+
+    @Test
+    public void visitMarketToBuy() {
+        state.addResource(state.getCurrentPlayer(), BREAD, -2);
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, -4); // should leave 2 over
+        VisitMarket visit = new VisitMarket();
+        visit._execute(state);
+        assertEquals(visit, state.currentActionInProgress());
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new Buy(BREAD, 2), fm.computeAvailableActions(state).get(0));
+
+        int player = state.getCurrentPlayer();
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, 1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+
+        fm.next(state, (new Buy(CALF_SKIN, 3)));
+        assertTrue(visit.executionComplete(state));
+        assertEquals(1, state.getResource(player, CALF_SKIN, STOREROOM));
+        assertEquals(0, state.getResource(player, SHILLINGS, STOREROOM));
+        assertFalse(state.isActionInProgress());
+    }
+
+    @Test
+    public void visitMarketToSell() {
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, -5); // 1 left - not enough to buy anything
+        state.useAP(-1);
+        VisitMarket visit = new VisitMarket();
+        int player = state.getCurrentPlayer();
+        fm.next(state, visit);
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new Sell(BREAD, 1), fm.computeAvailableActions(state).get(0));
+        assertEquals(player, state.getCurrentPlayer());
+        state.addResource(player, BEER, 1);
+        state.addResource(player, MEAD, 1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        Sell action = (Sell) fm.computeAvailableActions(state).get(1);
+
+        fm.next(state, action);
+        assertTrue(visit.executionComplete(state));
+        assertEquals(0, state.getResource(player, action.resource, STOREROOM));
+        assertEquals(1 + action.price, state.getResource(player, SHILLINGS, STOREROOM));
+        assertFalse(state.isActionInProgress());
+    }
+
+    @Test
+    public void visitMarketToDoNothing() {
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, -5); // 1 left - not enough to buy anything
+        state.addResource(state.getCurrentPlayer(), BREAD, -2);
+        state.useAP(-1);
+
+        VisitMarket visit = new VisitMarket();
+        int player = state.getCurrentPlayer();
+        fm.next(state, visit);
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertTrue(visit.executionComplete(state));
+        assertFalse(state.isActionInProgress());
+    }
+
 }

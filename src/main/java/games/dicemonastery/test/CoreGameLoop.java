@@ -34,6 +34,10 @@ public class CoreGameLoop {
             assertEquals(2, state.getResource(p, BREAD, STOREROOM));
             assertEquals(6, state.getResource(p, SHILLINGS, STOREROOM));
             assertEquals(1, state.getResource(p, PRAYERS, STOREROOM));
+            assertEquals(2, state.getResource(p, SKEP, STOREROOM));
+            assertEquals(0, state.getResource(p, CALF_SKIN, STOREROOM));
+            assertEquals(0, state.getResource(p, VELLUM, STOREROOM));
+            assertEquals(0, state.getResource(p, CANDLE, STOREROOM));
 
             assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.getGameScore(p), 0.01);
             assertEquals(6, state.monksIn(DORMITORY, p).size());

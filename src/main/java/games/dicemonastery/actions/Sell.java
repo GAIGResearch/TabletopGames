@@ -12,8 +12,8 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource.SHILLINGS;
 
 public class Sell extends AbstractAction {
 
-    Resource resource;
-    int price;
+    public final Resource resource;
+    public final int price;
 
     public Sell(Resource resource, int price) {
         this.resource = resource;

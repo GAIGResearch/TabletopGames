@@ -12,8 +12,8 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
 public class Buy extends AbstractAction {
 
-    Resource resource;
-    int cost;
+    public final Resource resource;
+    public final int cost;
 
     public Buy(Resource resource, int cost) {
         this.resource = resource;
