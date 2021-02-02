@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static core.CoreConstants.playerHandHash;
+import static games.catan.CatanConstants.resourceDeckHash;
+
 public class CatanActionFactory {
     /**
      * Calculates setup actions
@@ -101,6 +104,60 @@ public class CatanActionFactory {
 
 
         return actions;
+    }
+
+    static List<AbstractAction> getDiscardActions(CatanGameState gs){
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Deck<Card> playerResourceDeck = (Deck<Card>)gs.getComponentActingPlayer(playerHandHash);
+        Deck<Card> commonResourceDeck = (Deck<Card>)gs.getComponent(resourceDeckHash);
+
+        if (playerResourceDeck.getSize() <= ((CatanParameters)gs.getGameParameters()).max_cards_without_discard){
+            actions.add(new DoNothing());
+            return actions;
+        } else{
+            // list all the combinations
+            int n = playerResourceDeck.getSize();
+            int r = n / 2; // remove half of the resources
+
+            List<int[]> results = new ArrayList<>();
+            getCombination(results, new int[r], 0, 0, n, r);
+            for (int[] result: results){
+                ArrayList<Card> cardsToDiscard = new ArrayList<>();
+                for (int i = 0; i < result.length; i++){
+                    cardsToDiscard.add(playerResourceDeck.get(i));
+                }
+                actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
+            }
+
+        }
+
+        return actions;
+    }
+
+    /**
+     * Returns all the possible index combination of an array.
+     * @param data - a list of arrays that gets overwritten and contains the indices
+     * @param buffer - current buffer of indices
+     * @param bufferIndex - current index in buffer
+     * @param dataIndex - current index in data
+     * @param dataLength - length of the original data array
+     * @param r - number of entries to return per array
+     */
+    static void getCombination(List<int[]> data, int buffer[], int bufferIndex, int dataIndex, int dataLength, int r){
+        // buffer is ready to be added to data
+        if (bufferIndex == r){
+            data.add(buffer.clone());
+            return;
+        }
+        // no more elements to add to the buffer
+        if (dataIndex >= dataLength){
+            return;
+        }
+        buffer[bufferIndex] = dataIndex;
+        // iterate with including current bufferIndex
+        getCombination(data, buffer, bufferIndex+1, dataIndex+1, dataLength, r);
+        // iterate with excluding current bufferIndex
+        getCombination(data, buffer, bufferIndex, dataIndex+1, dataLength, r);
     }
 
     /**

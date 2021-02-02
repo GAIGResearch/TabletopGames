@@ -125,11 +125,6 @@ public class CatanForwardModel extends AbstractForwardModel {
             } else if (action instanceof BuildCity) {
                 gs.addScore(gs.getCurrentPlayer(), params.city_value);
             }
-            // todo VPs are automatically revealed at the end
-//            else if (action instanceof PlayDevelopmentCard){
-//                // todo only cards with victory point or knight card if gets the largest army
-//                gs.addScore(gs.getCurrentPlayer(), params.victory_point_value);
-//            }
 
             // win condition
             if (gs.getScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
@@ -155,6 +150,8 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         int value = gs.getRollValue();
         if (value == 7){
+            // todo execute a full turn of discarding
+            gs.setGamePhase(CatanGameState.CatanGamePhase.Discarding);
             // todo all player who has 7+ cards have to return the selected half of them to the resourceDeck
             //  current player steals a resource from a player who has a settlement on the tile where the robber is moved
         }
@@ -205,6 +202,9 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
             return CatanActionFactory.getSetupActions(cgs);
+        }
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discarding){
+            return CatanActionFactory.getDiscardActions(cgs);
         }
         else if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
             if (cto.getTurnStage()==0){
