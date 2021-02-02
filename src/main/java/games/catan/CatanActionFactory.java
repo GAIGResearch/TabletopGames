@@ -71,6 +71,28 @@ public class CatanActionFactory {
         return actions;
     }
 
+    static List<AbstractAction> getStealActions(CatanGameState gs){
+        ArrayList<AbstractAction> actions = new ArrayList();
+        CatanTile[][] board = gs.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                if (tile.hasRobber()){
+                    Settlement[] settlements = tile.getSettlements();
+                    for (int i = 0; i < settlements.length; i++){
+                        if (settlements[i].getOwner() != -1 && settlements[i].getOwner() != gs.getCurrentPlayer()){
+                            actions.add(new StealResource(settlements[i].getOwner()));
+                        }
+                    }
+                }
+            }
+        }
+        if (actions.size() == 0){
+            actions.add(new DoNothing());
+        }
+        return actions;
+    }
+
     /**
      * Calculates regular Player actions in Buy stage
      * @return - ArrayList, various action types (unique).
@@ -85,22 +107,11 @@ public class CatanActionFactory {
         if (!cto.isDevelopmentCardPlayed()){
             actions.addAll(getCardActions(gs));
         }
-        if (gs.getRollValue() == 7){
-            CatanTile[][] board = gs.getBoard();
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
-                        actions.add(new MoveRobber(tile));
-                }
-            }
-        }
-        else{
-            actions.add(new DoNothing());
-            actions.addAll(getBuyActions(gs));
-            actions.addAll(getCardActions(gs));
-            actions.addAll(getTradeActions(gs));
-        }
+
+        actions.add(new DoNothing());
+        actions.addAll(getBuyActions(gs));
+        actions.addAll(getCardActions(gs));
+        actions.addAll(getTradeActions(gs));
 
 
         return actions;
@@ -111,7 +122,8 @@ public class CatanActionFactory {
         Deck<Card> playerResourceDeck = (Deck<Card>)gs.getComponentActingPlayer(playerHandHash);
         Deck<Card> commonResourceDeck = (Deck<Card>)gs.getComponent(resourceDeckHash);
 
-        if (playerResourceDeck.getSize() <= ((CatanParameters)gs.getGameParameters()).max_cards_without_discard){
+        int deckSize = playerResourceDeck.getSize();
+        if (deckSize <= ((CatanParameters)gs.getGameParameters()).max_cards_without_discard){
             actions.add(new DoNothing());
             return actions;
         } else{
@@ -165,10 +177,17 @@ public class CatanActionFactory {
      * @return - ArrayList, various action types (unique).
      */
     static List<AbstractAction> getRobberActions(CatanGameState gs) {
-        // todo
-        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList();
+        if (gs.getRollValue() == 7){
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
+                        actions.add(new MoveRobber(tile));
+                }
+            }
+        }
 
         return actions;
     }

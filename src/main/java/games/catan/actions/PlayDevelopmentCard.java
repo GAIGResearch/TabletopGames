@@ -26,6 +26,9 @@ public class PlayDevelopmentCard extends AbstractAction {
             // todo move robber to a selected tile and take a randomly selected resource from a player who has a settlement
             //   on the chosen tile
             cgs.addKnight(cgs.getCurrentPlayer());
+            ((CatanTurnOrder)cgs.getTurnOrder()).addAllReactivePlayers(gs);
+            cgs.setGamePhase(CatanGameState.CatanGamePhase.Discard);
+            // todo steal resource
         } else if (card.getProperty(CatanConstants.cardType).toString().equals("Monopoly")) {
             System.out.println("The player picks a resource and all other players have to give all the their resources of that type");
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Year of Plenty")) {

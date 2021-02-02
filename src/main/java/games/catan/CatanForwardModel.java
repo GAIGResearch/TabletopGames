@@ -3,7 +3,6 @@ package games.catan;
 import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import games.catan.actions.*;
@@ -89,6 +88,22 @@ public class CatanForwardModel extends AbstractForwardModel {
                         " doesn't have any targets available");
         }
         IGamePhase gamePhase = gs.getGamePhase();
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Robber)){
+            cto.endTurnStage(gs);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
+            cto.endReaction(gs);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
+            cto.endReaction(gs);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){
+            gs.setMainGamePhase();
+            return;
+        }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
             // As player always places a settlement in the setup phase it is awarded the score for it
             gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
@@ -98,8 +113,11 @@ public class CatanForwardModel extends AbstractForwardModel {
                 gs.setMainGamePhase();
             }
         }
-        // todo (mb) check to only execute one of each types of actions
         if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
+            if (action instanceof Trade){
+                // add other player to the reactive player's list
+                ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((Trade)action).getOtherPlayerID());
+            }
             if (action instanceof BuildRoad){
                 BuildRoad br = (BuildRoad)action;
                 // todo remove branches and cycles from road length
@@ -150,37 +168,37 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         int value = gs.getRollValue();
         if (value == 7){
-            // todo execute a full turn of discarding
-            gs.setGamePhase(CatanGameState.CatanGamePhase.Discarding);
-            // todo all player who has 7+ cards have to return the selected half of them to the resourceDeck
-            //  current player steals a resource from a player who has a settlement on the tile where the robber is moved
+            // Add all players to reactive players as they have to react if they have more than 7 cards
+            gs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
         }
-        CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                if (tile.getNumber() == value && !tile.hasRobber()){
-                    // allocate resource for each settlement/city
-                    for (Settlement settl: tile.getSettlements()) {
-                        if (settl.getOwner() != -1) {
-                            // Move the card from the resource deck and give it to the player
-                            List<Card> resourceDeck = ((Deck<Card>)gs.getComponent(resourceDeckHash)).getComponents();
-                            int counter = 0;
-                            for (int i = 0; i < resourceDeck.size(); i++){
-                                Card card = resourceDeck.get(i);
-                                if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())){
-                                    // remove from deck and give it to player
-                                    System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
-                                    ((Deck<Card>)gs.getComponent(resourceDeckHash)).remove(card);
-                                    ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
-                                    counter++;
+        else {
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    if (tile.getNumber() == value && !tile.hasRobber()) {
+                        // allocate resource for each settlement/city
+                        for (Settlement settl : tile.getSettlements()) {
+                            if (settl.getOwner() != -1) {
+                                // Move the card from the resource deck and give it to the player
+                                List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
+                                int counter = 0;
+                                for (int i = 0; i < resourceDeck.size(); i++) {
+                                    Card card = resourceDeck.get(i);
+                                    if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
+                                        // remove from deck and give it to player
+                                        System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
+                                        ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
+                                        ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
+                                        counter++;
+                                    }
+                                    // getType is 1 for settlement; 2 for city
+                                    if (counter >= settl.getType()) {
+                                        break;
+                                    }
                                 }
-                                // getType is 1 for settlement; 2 for city
-                                if (counter >= settl.getType()){
-                                    break;
-                                }
-                            }
 
+                            }
                         }
                     }
                 }
@@ -203,7 +221,13 @@ public class CatanForwardModel extends AbstractForwardModel {
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
             return CatanActionFactory.getSetupActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discarding){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Robber){
+            return CatanActionFactory.getRobberActions(cgs);
+        }
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Steal){
+            return CatanActionFactory.getStealActions(cgs);
+        }
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discard){
             return CatanActionFactory.getDiscardActions(cgs);
         }
         else if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){

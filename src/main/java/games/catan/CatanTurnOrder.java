@@ -6,6 +6,8 @@ import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
+import java.util.LinkedList;
+
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
@@ -32,6 +34,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         to.turnStep = turnStep;
         to.turnStage = turnStage;
         to.developmentCardPlayed = developmentCardPlayed;
+        to.reactivePlayers = new LinkedList<>(reactivePlayers);
         return to;
     }
 
@@ -56,10 +59,27 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
     }
 
+    public void endReaction(AbstractGameState gs){
+        reactivePlayers.poll();
+        if (reactionsFinished()){
+            // discard only happens when a knight card has been played or a 7 has been rolled
+            if (gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Discard)){
+                gs.setGamePhase(CatanGameState.CatanGamePhase.Steal);
+            } else {
+                gs.setMainGamePhase();
+            }
+        }
+    }
+
     public void endTurnStage(AbstractGameState gameState){
-        turnStage++;
-        if (turnStage==2){
-            endPlayerTurn(gameState);
+        if (gameState.getGamePhase().equals(CatanGameState.CatanGamePhase.Robber)){
+            gameState.setGamePhase(CatanGameState.CatanGamePhase.Discard);
+            ((CatanTurnOrder)gameState.getTurnOrder()).addAllReactivePlayers(gameState);
+        } else {
+            turnStage++;
+            if (turnStage == 2) {
+                endPlayerTurn(gameState);
+            }
         }
     }
 
@@ -86,13 +106,5 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         turnStep = 0;
         turnCounter = 0;
         moveToNextPlayer(gameState, nextPlayer(gameState));
-
-        // todo (mb) Catan has no max turns, but logic below could be useful
-//        if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(Utils.GameResult.GAME_END);
-//        else {
-//            turnStep = 0;
-//            turnCounter = 0;
-//            moveToNextPlayer(gameState, nextPlayer(gameState));
-//        }
     }
 }

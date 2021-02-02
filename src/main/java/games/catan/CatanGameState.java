@@ -39,7 +39,8 @@ public class CatanGameState extends AbstractGameState {
     public enum CatanGamePhase implements IGamePhase {
         Setup,
         Robber,
-        Discarding,
+        Discard,
+        Steal,
         TradeReaction
     }
 
