@@ -25,8 +25,8 @@ Currently implemented games:
 
 Games in progress:
 - [ ] Settlers of Catan (Klaus Teuber 1995)
-- [ ] Carcassone (Klaus-Jürgen Wrede 2000)
 - [ ] Descent (Jesper Ejsing, John Goodenough, Frank Walls 2005)
+- [ ] Santorini (Lina Cossette, David Forest 2016)
 
 ## Setting up
 The project requires Java with minimum version 8. In order to run the code, you must either download the repository, or clone it. If you are looking for a particular release, you can find all listed [here](https://github.com/GAIGResearch/TabletopGames/releases). 
