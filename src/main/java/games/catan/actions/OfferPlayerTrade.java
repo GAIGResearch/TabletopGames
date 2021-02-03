@@ -12,12 +12,14 @@ import java.util.List;
 public class OfferPlayerTrade extends AbstractAction {
     List<Resources> resourcesOffered;
     List<Resources> resourcesRequested;
+    int offeringPlayerID;
     int otherPlayerID;
     int negotiationCount = 0;
 
-    public OfferPlayerTrade(List<Resources> resourcesOffered, List<Resources> resourcesRequested, int otherPlayerID){
+    public OfferPlayerTrade(List<Resources> resourcesOffered, List<Resources> resourcesRequested, int offeringPlayerID, int otherPlayerID){
         this.resourcesOffered = resourcesOffered;
         this.resourcesRequested = resourcesRequested;
+        this.offeringPlayerID = offeringPlayerID;
         this.otherPlayerID = otherPlayerID;
     }
 
@@ -34,7 +36,7 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        OfferPlayerTrade other = new OfferPlayerTrade(resourcesOffered, resourcesRequested, otherPlayerID);
+        OfferPlayerTrade other = new OfferPlayerTrade(resourcesOffered, resourcesRequested, offeringPlayerID, otherPlayerID);
         other.negotiationCount = this.negotiationCount;
         return other;
     }
@@ -44,7 +46,7 @@ public class OfferPlayerTrade extends AbstractAction {
         if (this == other) return true;
         if (other instanceof OfferPlayerTrade){
             OfferPlayerTrade otherAction = (OfferPlayerTrade)other;
-            return resourcesOffered == otherAction.resourcesOffered && resourcesRequested == otherAction.resourcesRequested && otherPlayerID == otherAction.otherPlayerID && negotiationCount == otherAction.negotiationCount;
+            return resourcesOffered == otherAction.resourcesOffered && resourcesRequested == otherAction.resourcesRequested && offeringPlayerID == otherAction.offeringPlayerID && otherPlayerID == otherAction.otherPlayerID && negotiationCount == otherAction.negotiationCount;
         }
         return false;
     }
@@ -66,4 +68,5 @@ public class OfferPlayerTrade extends AbstractAction {
     public int getNegotiationCount() {
         return negotiationCount;
     }
+
 }

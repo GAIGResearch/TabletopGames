@@ -83,11 +83,12 @@ public class CatanActionFactory {
         int[] resources = gs.getPlayerResources();
         int exchange_rate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
         int n_players = ((CatanParameters)gs.getGameParameters()).n_players;
+        int current_player = gs.getCurrentPlayer();
         ArrayList<Resources> resources_offered = new ArrayList<>();
         ArrayList<Resources> resources_requested = new ArrayList<>();
 
         for (int player_index = 0; player_index < n_players; player_index++){ // loop through players
-            if(player_index != gs.getCurrentPlayer()){ // exclude current player
+            if(player_index != current_player){ // exclude current player
                 for (int resource_to_offer_index = 0; resource_to_offer_index < resources.length; resource_to_offer_index++ ){ // loop through current players resources to offer
                     if(resources[resource_to_offer_index] > 0){ // don't continue if the player has none of the current resource
                         for (int resource_to_request_index = 0;  resource_to_request_index < resources.length; resource_to_request_index++){ // loop through current players resources to request
@@ -100,7 +101,7 @@ public class CatanActionFactory {
                                         for (int quantity_to_request = 1; quantity_to_request < (quantity_available_to_request_index + 1); quantity_to_request++){ // add the amount of resources to request to the list
                                             resources_requested.add(CatanParameters.Resources.values()[resource_to_request_index]);
                                         }
-                                        actions.add(new OfferPlayerTrade((ArrayList<Resources>)resources_offered.clone(), (ArrayList<Resources>)resources_requested.clone(), player_index)); // create the action
+                                        actions.add(new OfferPlayerTrade((ArrayList<Resources>)resources_offered.clone(), (ArrayList<Resources>)resources_requested.clone(), current_player, player_index)); // create the action
                                         resources_offered.clear(); // clear the offered list
                                         resources_requested.clear(); // clear the requested list
                                     }
@@ -111,9 +112,27 @@ public class CatanActionFactory {
                 }
             }
         }
-
-
         return  actions;
+    }
+
+    static List<AbstractAction> getTradeReactionActions (CatanGameState gs){
+        ArrayList<AbstractAction> actions = new ArrayList();
+
+
+        actions.add(new DoNothing()); // rejects the trade offer
+        //TODO check negotiation count to ensure max negotiations not exceeded
+        actions.addAll(getResponsePlayerTradeOfferActions(gs));
+        actions.add(new AcceptTrade(gs.getCurrentTradeOffer())); // TODO implement
+
+        return actions;
+    }
+
+    static List<AbstractAction> getResponsePlayerTradeOfferActions (CatanGameState gs){
+        ArrayList<AbstractAction> actions = new ArrayList();
+
+        //TODO implement generation of response actions
+
+        return actions;
     }
 
     static List<AbstractAction> getStealActions(CatanGameState gs){

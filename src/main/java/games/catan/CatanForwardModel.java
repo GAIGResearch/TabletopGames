@@ -207,6 +207,10 @@ public class CatanForwardModel extends AbstractForwardModel {
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Build){
             return CatanActionFactory.getBuildStageActions(cgs);
         }
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.TradeReaction){
+            return CatanActionFactory.getTradeReactionActions(cgs);
+        }
+
 
         return actions;
     }
