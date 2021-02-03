@@ -123,6 +123,7 @@ public class CatanActionFactory {
         if (offeredPlayerTrade.getNegotiationCount() < ((CatanParameters)gs.getGameParameters()).max_negotiation_count + 1){ // check that the maximum number of negotiations has not been exceeded to prevent AI looping
             actions.addAll(getResponsePlayerTradeOfferActions(gs));
         }
+        //TODO check that the trade can be accepted by the receiving player
         actions.add(new AcceptTrade(offeredPlayerTrade)); // TODO implement
 
         return actions;

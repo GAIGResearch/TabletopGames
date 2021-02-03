@@ -7,8 +7,6 @@ import games.catan.CatanParameters.Resources;
 
 import java.util.List;
 
-/* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
-* This action also includes the Harbor trades using the exchangeRate*/
 public class OfferPlayerTrade extends AbstractAction {
     List<Resources> resourcesOffered;
     List<Resources> resourcesRequested;
@@ -26,7 +24,6 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // todo update logic to handle trade negotiations
         CatanGameState cgs = (CatanGameState)gs;
         negotiationCount++;
         cgs.setCurrentTradeOffer(this);
@@ -46,13 +43,13 @@ public class OfferPlayerTrade extends AbstractAction {
         if (this == other) return true;
         if (other instanceof OfferPlayerTrade){
             OfferPlayerTrade otherAction = (OfferPlayerTrade)other;
-            return resourcesOffered == otherAction.resourcesOffered && resourcesRequested == otherAction.resourcesRequested && offeringPlayerID == otherAction.offeringPlayerID && otherPlayerID == otherAction.otherPlayerID && negotiationCount == otherAction.negotiationCount;
+            return resourcesOffered == otherAction.resourcesOffered
+                    && resourcesRequested == otherAction.resourcesRequested
+                    && offeringPlayerID == otherAction.offeringPlayerID
+                    && otherPlayerID == otherAction.otherPlayerID
+                    && negotiationCount == otherAction.negotiationCount;
         }
         return false;
-    }
-
-    public int getOtherPlayerID() {
-        return otherPlayerID;
     }
 
     @Override
@@ -62,11 +59,31 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + offeringPlayerID + " offering "+ resourcesOffered.size() + " " + resourcesOffered.get(0) + " in exchange for " + resourcesRequested.size() + " " + resourcesRequested.get(0) + " from player " + otherPlayerID;
+        return "Player " + offeringPlayerID + " offering "
+                + resourcesOffered.size() + " "
+                + resourcesOffered.get(0) + " in exchange for "
+                + resourcesRequested.size() + " "
+                + resourcesRequested.get(0) + " from player "
+                + otherPlayerID;
     }
 
     public int getNegotiationCount() {
         return negotiationCount;
     }
 
+    public int getOfferingPlayerID() {
+        return offeringPlayerID;
+    }
+
+    public int getOtherPlayerID() {
+        return otherPlayerID;
+    }
+
+    public List<Resources> getResourcesOffered() {
+        return resourcesOffered;
+    }
+
+    public List<Resources> getResourcesRequested() {
+        return resourcesRequested;
+    }
 }

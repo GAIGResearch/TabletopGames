@@ -22,6 +22,11 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof AcceptTrade){
+            AcceptTrade otherAction = (AcceptTrade)obj;
+            return offeredTrade.equals(otherAction.offeredTrade);
+        }
         return false;
     }
 
@@ -32,6 +37,11 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return "Player " + offeredTrade.getOtherPlayerID() + " giving "
+                + offeredTrade.getResourcesOffered().size() + " "
+                + offeredTrade.getResourcesOffered().get(0) + " in exchange for "
+                + offeredTrade.getResourcesRequested().size() + " "
+                + offeredTrade.getResourcesRequested().get(0) + " from player "
+                + offeredTrade.getOtherPlayerID();
     }
 }
