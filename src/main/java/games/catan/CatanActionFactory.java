@@ -117,12 +117,13 @@ public class CatanActionFactory {
 
     static List<AbstractAction> getTradeReactionActions (CatanGameState gs){
         ArrayList<AbstractAction> actions = new ArrayList();
-
+        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
 
         actions.add(new DoNothing()); // rejects the trade offer
-        //TODO check negotiation count to ensure max negotiations not exceeded
-        actions.addAll(getResponsePlayerTradeOfferActions(gs));
-        actions.add(new AcceptTrade(gs.getCurrentTradeOffer())); // TODO implement
+        if (offeredPlayerTrade.getNegotiationCount() < ((CatanParameters)gs.getGameParameters()).max_negotiation_count + 1){ // check that the maximum number of negotiations has not been exceeded to prevent AI looping
+            actions.addAll(getResponsePlayerTradeOfferActions(gs));
+        }
+        actions.add(new AcceptTrade(offeredPlayerTrade)); // TODO implement
 
         return actions;
     }

@@ -16,8 +16,9 @@ public class CatanParameters extends AbstractParameters {
     public final int n_resource_cards = 19;
     public final int n_tiles_per_row = 7;
 
+    public final int max_negotiation_count = 3; // max number of attempts to renegotiate player trade
     public final int default_exchange_rate = 4; // trading with the bank 1:4 ratio by default
-    public final int max_cards_without_discard = 7; // max number of resources a player may hold in hand without risking discardig
+    public final int max_cards_without_discard = 7; // max number of resources a player may hold in hand without risking discarding
 
     // the minimum number of knights required to take the largest army
     public final int min_army_size = 3;

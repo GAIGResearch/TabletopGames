@@ -17,7 +17,7 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null;
+        return new AcceptTrade((OfferPlayerTrade) offeredTrade.copy());
     }
 
     @Override

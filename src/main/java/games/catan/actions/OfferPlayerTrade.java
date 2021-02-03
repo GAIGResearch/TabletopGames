@@ -62,7 +62,7 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + gameState.getCurrentPlayer() + " offering "+ resourcesOffered.size() + " " + resourcesOffered.get(0) + " in exchange for " + resourcesRequested.size() + " " + resourcesRequested.get(0) + " from player " + otherPlayerID;
+        return "Player " + offeringPlayerID + " offering "+ resourcesOffered.size() + " " + resourcesOffered.get(0) + " in exchange for " + resourcesRequested.size() + " " + resourcesRequested.get(0) + " from player " + otherPlayerID;
     }
 
     public int getNegotiationCount() {
