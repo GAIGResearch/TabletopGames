@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
-import games.catan.actions.Trade;
 
 import java.util.LinkedList;
 
