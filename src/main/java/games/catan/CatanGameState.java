@@ -8,6 +8,7 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
+import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
@@ -30,6 +31,7 @@ public class CatanGameState extends AbstractGameState {
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
     protected int longestRoad = -1; // playerID of the player currently holding the longest road
     protected int longestRoadLength = 0;
+    protected OfferPlayerTrade currentTradeOffer = null; // Holds the current trade offer to allow access between players
     int rollValue;
 
     // In Catan the "setup" phase is when each player can place a road with a settlement twice. The robber phase is when
@@ -343,5 +345,11 @@ public class CatanGameState extends AbstractGameState {
         return null;
     }
 
+    public OfferPlayerTrade getCurrentTradeOffer() {
+        return currentTradeOffer;
+    }
 
+    public void setCurrentTradeOffer(OfferPlayerTrade currentTradeOffer) {
+        this.currentTradeOffer = currentTradeOffer;
+    }
 }

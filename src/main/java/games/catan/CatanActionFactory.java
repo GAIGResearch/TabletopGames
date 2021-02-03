@@ -8,6 +8,7 @@ import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
+import games.catan.CatanParameters.Resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,11 +65,55 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList();
         actions.add(new DoNothing());
         actions.addAll(getTradeActions(gs));
+        actions.addAll(getPlayerTradeOfferActions(gs));
         if (!cto.isDevelopmentCardPlayed()){
             actions.addAll(getCardActions(gs));
         }
 
         return actions;
+    }
+
+    /**
+     * Calculates all possible PlayerTradeOffers
+     * @param gs
+     * @return - ArrayList, PlayerTradeOffer type (unique).
+     */
+    static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int[] resources = gs.getPlayerResources();
+        int exchange_rate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
+        int n_players = ((CatanParameters)gs.getGameParameters()).n_players;
+        ArrayList<Resources> resources_offered = new ArrayList<>();
+        ArrayList<Resources> resources_requested = new ArrayList<>();
+
+        for (int player_index = 0; player_index < n_players; player_index++){ // loop through players
+            if(player_index != gs.getCurrentPlayer()){ // exclude current player
+                for (int resource_to_offer_index = 0; resource_to_offer_index < resources.length; resource_to_offer_index++ ){ // loop through current players resources to offer
+                    if(resources[resource_to_offer_index] > 0){ // don't continue if the player has none of the current resource
+                        for (int resource_to_request_index = 0;  resource_to_request_index < resources.length; resource_to_request_index++){ // loop through current players resources to request
+                            if (resource_to_request_index != resource_to_offer_index){ // exclude the currently offered resource
+                                for (int quantity_available_to_offer_index = 1; quantity_available_to_offer_index < resources[resource_to_offer_index] + 1; quantity_available_to_offer_index++ ){ // loop through the quantity of resources to offer
+                                    for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
+                                        for (int quantity_to_offer = 1; quantity_to_offer < (quantity_available_to_offer_index + 1); quantity_to_offer++) { // add the amount of resources to offer to the list
+                                            resources_offered.add(CatanParameters.Resources.values()[resource_to_offer_index]);
+                                        }
+                                        for (int quantity_to_request = 1; quantity_to_request < (quantity_available_to_request_index + 1); quantity_to_request++){ // add the amount of resources to request to the list
+                                            resources_requested.add(CatanParameters.Resources.values()[resource_to_request_index]);
+                                        }
+                                        actions.add(new OfferPlayerTrade((ArrayList<Resources>)resources_offered.clone(), (ArrayList<Resources>)resources_requested.clone(), player_index)); // create the action
+                                        resources_offered.clear(); // clear the offered list
+                                        resources_requested.clear(); // clear the requested list
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return  actions;
     }
 
     static List<AbstractAction> getStealActions(CatanGameState gs){

@@ -87,9 +87,10 @@ public class CatanForwardModel extends AbstractForwardModel {
                         " doesn't have any targets available");
         }
         // handle scoring
-        if (action instanceof Trade){
+        if (action instanceof OfferPlayerTrade){
             // add other player to the reactive player's list
-            ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((Trade)action).getOtherPlayerID());
+            gs.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction); // TODO move this into CTO somehow?
+            ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((OfferPlayerTrade)action).getOtherPlayerID());
         }
         if (action instanceof BuildRoad) {
             BuildRoad br = (BuildRoad) action;
