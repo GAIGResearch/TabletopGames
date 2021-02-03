@@ -97,7 +97,7 @@ public class CatanActionFactory {
      * Calculates regular Player actions in Buy stage
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getBuyStageActions(CatanGameState gs) {
+    static List<AbstractAction> getBuildStageActions(CatanGameState gs) {
         CatanTurnOrder cto = (CatanTurnOrder)gs.getTurnOrder();
 
         ArrayList<AbstractAction> actions = new ArrayList();

@@ -38,6 +38,8 @@ public class CatanGameState extends AbstractGameState {
     // offer, which can be accepted or rejected.
     public enum CatanGamePhase implements IGamePhase {
         Setup,
+        Trade,
+        Build,
         Robber,
         Discard,
         Steal,

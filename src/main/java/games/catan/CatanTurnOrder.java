@@ -1,10 +1,10 @@
 package games.catan;
 
 import core.AbstractGameState;
-import core.turnorders.AlternatingTurnOrder;
+import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
-import utilities.Utils;
+import games.catan.actions.Trade;
 
 import java.util.LinkedList;
 
@@ -14,6 +14,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
     protected int turnStage; // trade stage (0), build stage (1)
     protected boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
+    private IGamePhase nextGamePhase; // tracks the game phase where it should be reset after a reaction
 
     CatanTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
@@ -26,6 +27,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     protected void _reset() {
         super._reset();
         turnStep = 0;
+        nextGamePhase = AbstractGameState.DefaultGamePhase.Main;
     }
 
     @Override
@@ -35,6 +37,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         to.turnStage = turnStage;
         to.developmentCardPlayed = developmentCardPlayed;
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
+        to.nextGamePhase = nextGamePhase;
         return to;
     }
 
@@ -66,26 +69,61 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             if (gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Discard)){
                 gs.setGamePhase(CatanGameState.CatanGamePhase.Steal);
             } else {
-                gs.setMainGamePhase();
+                // should only happen from a trade reaction
+                gs.setGamePhase(nextGamePhase);
             }
         }
     }
 
     public void endTurnStage(AbstractGameState gameState){
-        if (gameState.getGamePhase().equals(CatanGameState.CatanGamePhase.Robber)){
+        /* Robber -> Discard
+           Trade -> Build
+        *  */
+        IGamePhase gamePhase = gameState.getGamePhase();
+        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
+            if (((CatanGameState)gameState).getRollValue() == 7){
+                gameState.setGamePhase(CatanGameState.CatanGamePhase.Robber);
+            } else {
+                gameState.setGamePhase(CatanGameState.CatanGamePhase.Trade);
+            }
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Robber)){
+            nextGamePhase = gamePhase;
             gameState.setGamePhase(CatanGameState.CatanGamePhase.Discard);
             ((CatanTurnOrder)gameState.getTurnOrder()).addAllReactivePlayers(gameState);
-        } else {
-            turnStage++;
-            if (turnStage == 2) {
-                endPlayerTurn(gameState);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade)){
+            gameState.setGamePhase(CatanGameState.CatanGamePhase.Build);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Build)){
+            endPlayerTurn(gameState);
+            gameState.setMainGamePhase();
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
+            endReaction(gameState);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
+            endReaction(gameState);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){
+            endPlayerTurn(gameState);
+            gameState.setGamePhase(CatanGameState.CatanGamePhase.Trade);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
+            endPlayerTurn(gameState);
+            if (getRoundCounter() >= 2){
+                // After 2 rounds of setup the main game phase starts
+                gameState.setMainGamePhase();
             }
         }
     }
 
-    public int getTurnStage() {
-        return turnStage;
-    }
 
     public boolean isDevelopmentCardPlayed() {
         return developmentCardPlayed;

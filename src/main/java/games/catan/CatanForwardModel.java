@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.*;
-import core.interfaces.IGamePhase;
 import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
@@ -87,73 +86,52 @@ public class CatanForwardModel extends AbstractForwardModel {
                 System.out.println("Player cannot do anything since he has drawn cards or " +
                         " doesn't have any targets available");
         }
-        IGamePhase gamePhase = gs.getGamePhase();
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Robber)){
-            cto.endTurnStage(gs);
-            return;
+        // handle scoring
+        if (action instanceof Trade){
+            // add other player to the reactive player's list
+            ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((Trade)action).getOtherPlayerID());
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
-            cto.endReaction(gs);
-            return;
-        }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
-            cto.endReaction(gs);
-            return;
-        }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){
-            gs.setMainGamePhase();
-            return;
-        }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
+        if (action instanceof BuildRoad) {
+            BuildRoad br = (BuildRoad) action;
+            // todo remove branches and cycles from road length
+            int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
+            if (new_length > gs.longestRoadLength) {
+                gs.longestRoadLength = new_length;
+                // add points for longest road and set the new road in gamestate
+                if (gs.longestRoad >= 0) {
+                    // in this case the longest road was not claimed yet
+                    gs.addScore(gs.longestRoad, -params.longest_road_value);
+                }
+                gs.addScore(gs.getCurrentPlayer(), params.longest_road_value);
+                gs.longestRoad = gs.getCurrentPlayer();
+                if (VERBOSE) {
+                    System.out.println("Player " + gs.getCurrentPlayer() + " has the longest road with length " + gs.longestRoad);
+                }
+            }
+            if (VERBOSE) {
+                System.out.println("Calculated road length: " + new_length);
+            }
+        } else if (action instanceof PlaceSettlementWithRoad){
             // As player always places a settlement in the setup phase it is awarded the score for it
             gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
-            cto.endPlayerTurn(gs);
-            if (cto.getRoundCounter() >= 2){
-                // After 2 rounds of setup the main game phase starts
-                gs.setMainGamePhase();
-            }
+        } else if (action instanceof BuildSettlement) {
+            gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
+        } else if (action instanceof BuildCity) {
+            gs.addScore(gs.getCurrentPlayer(), params.city_value);
         }
-        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
-            if (action instanceof Trade){
-                // add other player to the reactive player's list
-                ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((Trade)action).getOtherPlayerID());
-            }
-            if (action instanceof BuildRoad){
-                BuildRoad br = (BuildRoad)action;
-                // todo remove branches and cycles from road length
-                int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
-                if (new_length > gs.longestRoadLength){
-                    gs.longestRoadLength = new_length;
-                    // add points for longest road and set the new road in gamestate
-                    if (gs.longestRoad >= 0) {
-                        // in this case the longest road was not claimed yet
-                        gs.addScore(gs.longestRoad, -params.longest_road_value);
-                    }
-                    gs.addScore(gs.getCurrentPlayer(), params.longest_road_value);
-                    gs.longestRoad = gs.getCurrentPlayer();
-                    if (VERBOSE){
-                        System.out.println("Player " + gs.getCurrentPlayer() + " has the longest road with length " + gs.longestRoad);
-                    }
-                }
-                if (VERBOSE) {
-                    System.out.println("Calculated road length: " + new_length);
-                }
-            } else if (action instanceof BuildSettlement){
-                gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
-            } else if (action instanceof BuildCity) {
-                gs.addScore(gs.getCurrentPlayer(), params.city_value);
-            }
 
-            // win condition
-            if (gs.getScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
-                gs.setGameStatus(Utils.GameResult.GAME_END);
-                System.out.println("Game over! winner = " + gs.getCurrentPlayer());
-            }
+        // win condition
+        if (gs.getScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
+            gs.setGameStatus(Utils.GameResult.GAME_END);
+            System.out.println("Game over! winner = " + gs.getCurrentPlayer());
+        }
 
-            // end player's turn; roll dice and allocate resources
-            cto.endTurnStage(gs);
+        // end player's turn; roll dice and allocate resources
+        cto.endTurnStage(gs);
+        if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
             rollDiceAndallocateResources(gs);
         }
+
 
 
     }
@@ -167,38 +145,32 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         int value = gs.getRollValue();
-        if (value == 7){
-            // Add all players to reactive players as they have to react if they have more than 7 cards
-            gs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
-        }
-        else {
-            CatanTile[][] board = gs.getBoard();
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    if (tile.getNumber() == value && !tile.hasRobber()) {
-                        // allocate resource for each settlement/city
-                        for (Settlement settl : tile.getSettlements()) {
-                            if (settl.getOwner() != -1) {
-                                // Move the card from the resource deck and give it to the player
-                                List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
-                                int counter = 0;
-                                for (int i = 0; i < resourceDeck.size(); i++) {
-                                    Card card = resourceDeck.get(i);
-                                    if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
-                                        // remove from deck and give it to player
-                                        System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
-                                        ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
-                                        ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
-                                        counter++;
-                                    }
-                                    // getType is 1 for settlement; 2 for city
-                                    if (counter >= settl.getType()) {
-                                        break;
-                                    }
+        CatanTile[][] board = gs.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                if (tile.getNumber() == value && !tile.hasRobber()) {
+                    // allocate resource for each settlement/city
+                    for (Settlement settl : tile.getSettlements()) {
+                        if (settl.getOwner() != -1) {
+                            // Move the card from the resource deck and give it to the player
+                            List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
+                            int counter = 0;
+                            for (int i = 0; i < resourceDeck.size(); i++) {
+                                Card card = resourceDeck.get(i);
+                                if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
+                                    // remove from deck and give it to player
+                                    System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
+                                    ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
+                                    ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
+                                    counter++;
                                 }
-
+                                // getType is 1 for settlement; 2 for city
+                                if (counter >= settl.getType()) {
+                                    break;
+                                }
                             }
+
                         }
                     }
                 }
@@ -208,16 +180,14 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        // todo (mb) some notes on rules
-        // 1, victory cards may only be played when player has 10+ points, can be in the same turn when drawn
-        // 2, other dev cards cannot be played on the same turn when they are drawn and only 1 card per turn is playable
-        // 3, distance rule - each settlement requires 2 edge distance from other settlements
-        // 4, trade is a negotiation in the game - should player send an offer to all other players?
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanGameState cgs = (CatanGameState)gameState;
-        CatanTurnOrder cto = (CatanTurnOrder) cgs.getTurnOrder();
 
+        if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
+            // special case -> rolling only happens in the Main phase
+            ((CatanTurnOrder)cgs.getTurnOrder()).endTurnStage(cgs);
+        }
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
             return CatanActionFactory.getSetupActions(cgs);
         }
@@ -230,13 +200,11 @@ public class CatanForwardModel extends AbstractForwardModel {
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discard){
             return CatanActionFactory.getDiscardActions(cgs);
         }
-        else if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
-            if (cto.getTurnStage()==0){
-                return CatanActionFactory.getTradeStageActions(cgs);
-            }
-            else {
-                return CatanActionFactory.getBuyStageActions(cgs);
-            }
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Trade){
+            return CatanActionFactory.getTradeStageActions(cgs);
+        }
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Build){
+            return CatanActionFactory.getBuildStageActions(cgs);
         }
 
         return actions;
