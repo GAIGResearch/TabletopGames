@@ -93,7 +93,7 @@ public class CatanActionFactory {
                         for (int resource_to_request_index = 0;  resource_to_request_index < resources.length; resource_to_request_index++){ // loop through current players resources to request
                             if (resource_to_request_index != resource_to_offer_index){ // exclude the currently offered resource
                                 for (int quantity_available_to_offer_index = 1; quantity_available_to_offer_index < resources[resource_to_offer_index] + 1; quantity_available_to_offer_index++ ){ // loop through the quantity of resources to offer
-                                    for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
+                                    for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index) - (quantity_available_to_offer_index - 1); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
                                         for (int quantity_to_offer = 1; quantity_to_offer < (quantity_available_to_offer_index + 1); quantity_to_offer++) { // add the amount of resources to offer to the list
                                             resources_offered.add(CatanParameters.Resources.values()[resource_to_offer_index]);
                                         }
