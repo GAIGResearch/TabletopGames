@@ -1,19 +1,28 @@
 package games.dicemonastery.test;
 
 
-import core.actions.*;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
-import org.junit.*;
+import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.*;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season;
+import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
 
 public class ActionTests {
@@ -24,20 +33,30 @@ public class ActionTests {
     RandomPlayer rnd = new RandomPlayer();
 
     private void startOfUseMonkPhaseForArea(ActionArea region, Season season) {
-        // first place all monks randomly
+        startOfUseMonkPhaseForArea(region, season, new HashMap<>());
+    }
+
+    private void startOfUseMonkPhaseForArea(ActionArea region, Season season, Map<Integer, ActionArea> overrides) {
         do {
-            // then Pass until we get to the point required
+            // first Pass until we get to the point required
             while (state.getGamePhase() == USE_MONKS)
                 fm.next(state, new Pass());
 
+            // then place all monks randomly
             do {
-                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+                int player = state.getCurrentPlayer();
+                List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+                AbstractAction chosen = rnd.getAction(state, availableActions);
+                if (overrides.containsKey(player) && availableActions.contains(new PlaceMonk(player, overrides.get(player)))) {
+                    chosen = new PlaceMonk(player, overrides.get(player));
+                }
+                fm.next(state, chosen);
             } while (state.getGamePhase() == PLACE_MONKS);
 
             // then Pass until we get to the point required
-            do {
+            while (turnOrder.getCurrentArea() != region) {
                 fm.next(state, new Pass());
-            } while (turnOrder.getCurrentArea() != region);
+            }
 
         } while (turnOrder.getSeason() != season);
     }
@@ -73,12 +92,11 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).contains(new CollectSkep()));
 
         state.useAP(turnOrder.getActionPointsLeft());
-        try {
-            assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        } catch (AssertionError ignored) {
-            return;
-        }
-        fail();
+        Set<Integer> pieties = state.monksIn(MEADOW, state.getCurrentPlayer()).stream().mapToInt(Monk::getPiety).boxed().collect(toSet());
+        assertEquals(1 + pieties.size(), fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        for (int p : pieties)
+            assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(p, MEADOW)));
     }
 
     @Test
@@ -374,7 +392,6 @@ public class ActionTests {
         state.useAP(-1);
 
         VisitMarket visit = new VisitMarket();
-        int player = state.getCurrentPlayer();
         fm.next(state, visit);
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
@@ -382,6 +399,57 @@ public class ActionTests {
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertTrue(visit.executionComplete(state));
         assertFalse(state.isActionInProgress());
+    }
+
+    @Test
+    public void hireNovice() {
+        state.useAP(-1);
+        HireNovice action = new HireNovice();
+        try {
+            fm.next(state, action);
+            fail("Should throw exception as not enough AP");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        state.useAP(-2);
+        fm.next(state, action);
+        assertEquals(7, state.monksIn(null, 0).size());
+        assertEquals(7, state.monksIn(DORMITORY, 0).size());
+        assertEquals(3, state.monksIn(DORMITORY, 0).stream().filter(m -> m.getPiety() == 1).count());
+        assertEquals(0, state.getResource(0, SHILLINGS, STOREROOM));
+        assertEquals(0, turnOrder.getActionPointsLeft());
+    }
+
+    @Test
+    public void chapelActionsCorrect() {
+        startOfUseMonkPhaseForArea(CHAPEL, SPRING);
+
+        Set<Integer> pietyOfMonks = state.monksIn(CHAPEL, state.getCurrentPlayer()).stream()
+                .map(Monk::getPiety)
+                .collect(toSet());
+
+        assertTrue(pietyOfMonks.size() > 0);
+        assertEquals(1 + pietyOfMonks.size(), fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        for (int piety : pietyOfMonks) {
+            assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(piety, CHAPEL)));
+        }
+    }
+
+    @Test
+    public void promoteMonk() {
+        startOfUseMonkPhaseForArea(CHAPEL, SPRING);
+        int player = state.getCurrentPlayer();
+
+        int startingTotalPiety = state.monksIn(null, player).stream().mapToInt(Monk::getPiety).sum();
+        List<Integer> pietyOfMonks = state.monksIn(CHAPEL, player).stream()
+                .map(Monk::getPiety)
+                .collect(toList());
+        PromoteMonk promotion = new PromoteMonk(pietyOfMonks.get(0), CHAPEL);
+
+        fm.next(state, promotion);
+        assertEquals(1 + startingTotalPiety,
+                state.monksIn(null, player).stream().mapToInt(Monk::getPiety).sum());
     }
 
 }

@@ -3,41 +3,49 @@ package games.dicemonastery.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
 
-public class Pass extends AbstractAction  {
+public class GainVictoryPoints extends AbstractAction {
+
+    final int vp;
+
+    public GainVictoryPoints(int amount) {
+        vp = amount;
+    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) gs.getTurnOrder();
-        state.useAP(turnOrder.getActionPointsLeft());
-
+        state.addVP(vp, state.getCurrentPlayer());
         return true;
     }
 
     @Override
     public AbstractAction copy() {
+        // no mutable state
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Pass;
+        if (obj instanceof GainVictoryPoints) {
+            GainVictoryPoints other = (GainVictoryPoints) obj;
+            return other.vp == vp;
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 2398734;
+        return vp;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return String.format("Player %d gains %d VP", gameState.getCurrentPlayer(), vp);
     }
 
     @Override
-    public String toString(){
-        return "Pass";
+    public String toString() {
+        return ("Gain " + vp + " VP");
     }
 }

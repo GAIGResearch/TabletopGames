@@ -6,13 +6,12 @@ import core.components.Component;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
-import javax.swing.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
-import static games.dicemonastery.DiceMonasteryConstants.Season.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
 import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryTurnOrder extends TurnOrder {
@@ -31,7 +30,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     ActionArea currentAreaBeingExecuted = null;
     int abbot = 0; // the current 'first player '
     List<Integer> playerOrderForCurrentArea;
-    int dominantPiety = 0;
+    List<Integer> dominantPlayers;
+    List<Integer> rewardsTaken;
     int actionPointsLeftForCurrentPlayer = 0;
 
     @Override
@@ -42,6 +42,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         abbot = 0;
         actionPointsLeftForCurrentPlayer = 0;
         currentAreaBeingExecuted = null;
+        dominantPlayers = new ArrayList<>();
+        rewardsTaken = new ArrayList<>();
     }
 
     @Override
@@ -52,7 +54,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         retValue.abbot = abbot;
         retValue.currentAreaBeingExecuted = currentAreaBeingExecuted;
         retValue.playerOrderForCurrentArea = playerOrderForCurrentArea != null ? new ArrayList<>(playerOrderForCurrentArea) : null;
-        retValue.dominantPiety = dominantPiety;
+        retValue.dominantPlayers = new ArrayList<>(dominantPlayers);
+        retValue.rewardsTaken = new ArrayList<>(rewardsTaken);
         retValue.actionPointsLeftForCurrentPlayer = actionPointsLeftForCurrentPlayer;
         return retValue;
     }
@@ -131,6 +134,11 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             case USE_MONKS:
                 if (actionPointsLeftForCurrentPlayer > 0)
                     return turnOwner;  // we still have monks for the current player to finish using
+                if (dominantPlayers.contains(turnOwner) && !rewardsTaken.contains(turnOwner)) {
+                    // we now need to get the Dominance reward for the area
+                    rewardsTaken.add(turnOwner);
+                    return turnOwner;
+                }
                 for (Monk m : state.monksIn(currentAreaBeingExecuted, state.getCurrentPlayer())) {
                     state.moveMonk(m.getComponentID(), currentAreaBeingExecuted, DORMITORY);
                 }
@@ -164,7 +172,12 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 )
                 .mapToInt(Map.Entry::getKey)
                 .boxed().collect(toList());
-        dominantPiety = pietyPerPlayer.get(playerOrderForCurrentArea.get(0));
+        int dominantPiety = pietyPerPlayer.get(playerOrderForCurrentArea.get(0));
+        dominantPlayers =  IntStream.range(0, nPlayers)
+                .filter(p -> state.monksIn(currentAreaBeingExecuted, p).stream().mapToInt(Monk::getPiety).sum() == dominantPiety)
+                .boxed()
+                .collect(toList());
+        rewardsTaken = new ArrayList<>();
         return true;
     }
 
@@ -196,7 +209,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     public boolean equals(Object o) {
         if (o instanceof DiceMonasteryTurnOrder) {
             DiceMonasteryTurnOrder other = (DiceMonasteryTurnOrder) o;
-            return other.season == season && other.year == year && other.dominantPiety == dominantPiety &&
+            return other.season == season && other.year == year && other.dominantPlayers.equals(dominantPlayers) &&
+                    other.rewardsTaken.equals(rewardsTaken) &&
                     other.currentAreaBeingExecuted == currentAreaBeingExecuted && other.abbot == abbot &&
                     other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
                     other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
@@ -208,7 +222,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public int hashCode() {
         return super.hashCode() + 31 * Objects.hash(season, year, abbot, currentAreaBeingExecuted,
-                dominantPiety, actionPointsLeftForCurrentPlayer);
+                dominantPlayers, actionPointsLeftForCurrentPlayer, rewardsTaken);
     }
 
 

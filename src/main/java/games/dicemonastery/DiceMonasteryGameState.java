@@ -1,23 +1,29 @@
 package games.dicemonastery;
 
-import core.*;
-import core.components.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.components.Component;
+import core.components.Token;
 
 import java.util.*;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static java.util.stream.Collectors.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource;
+import static java.util.stream.Collectors.toList;
 
 
 public class DiceMonasteryGameState extends AbstractGameState {
 
+    final static int[] RETIREMENT_REWARDS = {6, 5, 4, 3, 2, 1};
 
     Map<ActionArea, DMArea> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
     Map<Integer, ActionArea> monkLocations = new HashMap<>();
     List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
     Stack<IExtendedSequence> actionsInProgress = new Stack<>();
+    int nextRetirementReward = 0;
+    int[] victoryPoints;
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters));
@@ -31,11 +37,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 actionAreas.put(a, new DMArea(-1, a.name()))
         );
 
+        victoryPoints = new int[getNPlayers()];
         allMonks = new HashMap<>();
         monkLocations = new HashMap<>();
         playerTreasuries = new ArrayList<>();
         for (int p = 0; p < getNPlayers(); p++)
             playerTreasuries.add(new HashMap<>());
+        nextRetirementReward = 0;
     }
 
     public void createMonk(int piety, int player) {
@@ -82,12 +90,34 @@ public class DiceMonasteryGameState extends AbstractGameState {
         }
     }
 
+    public void retireMonk(Monk monk) {
+        moveMonk(monk.getComponentID(), getMonkLocation(monk.getComponentID()), RETIRED);
+        if (nextRetirementReward >= RETIREMENT_REWARDS.length) {
+            // no more benefits to retirement
+            return;
+        }
+        addVP(RETIREMENT_REWARDS[nextRetirementReward], monk.getOwnerId());
+        nextRetirementReward++;
+    }
+
+    public int getVictoryPoints(int player) {
+        return victoryPoints[player];
+    }
+
+    public void addVP(int amount, int player) {
+        victoryPoints[player] += amount;
+    }
+
     public void useAP(int actionPointsSpent) {
         DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
         if (dto.actionPointsLeftForCurrentPlayer < actionPointsSpent) {
             throw new IllegalArgumentException("Not enough action points available");
         }
         dto.actionPointsLeftForCurrentPlayer -= actionPointsSpent;
+    }
+
+    public int getAPLeft() {
+        return ((DiceMonasteryTurnOrder) turnOrder).getActionPointsLeft();
     }
 
     public int getResource(int player, Resource resource, ActionArea location) {
@@ -123,6 +153,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return monkLocations.get(id);
     }
 
+    public List<Integer> getDominantPlayers() {
+        DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
+        return dto.dominantPlayers;
+    }
+
     @Override
     protected List<Component> _getAllComponents() {
         return new ArrayList<>(allMonks.values());
@@ -154,6 +189,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
         for (int p = 0; p < getNPlayers(); p++) {
             retValue.playerTreasuries.add(new HashMap<>(playerTreasuries.get(p)));
         }
+        retValue.nextRetirementReward = nextRetirementReward;
+
+        retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
         return retValue;
     }
 
@@ -167,7 +205,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return allMonks.values().stream()
                 .filter(m -> m.getOwnerId() == playerId)
                 .mapToInt(Monk::getPiety)
-                .sum();
+                .sum() + getVictoryPoints(playerId);
     }
 
     @Override
@@ -182,12 +220,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
         DiceMonasteryGameState other = (DiceMonasteryGameState) o;
         return other.allMonks.equals(allMonks) && other.monkLocations.equals(monkLocations) &&
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
-                        other.actionAreas.equals(actionAreas);
+                other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
+                Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder) + 31 * Arrays.hashCode(playerResults);
+                gameParameters, turnOrder, nextRetirementReward) + 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 }

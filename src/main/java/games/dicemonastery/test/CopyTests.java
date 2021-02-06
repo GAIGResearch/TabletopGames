@@ -1,25 +1,18 @@
 package games.dicemonastery.test;
 
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.BakeBread;
+import games.dicemonastery.actions.HireNovice;
 import games.dicemonastery.actions.PlaceMonk;
-import org.junit.*;
+import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.*;
+import java.util.List;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
-import static games.dicemonastery.DiceMonasteryConstants.Resource.BREAD;
-import static games.dicemonastery.DiceMonasteryConstants.Resource.GRAIN;
-import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
-import static java.util.stream.Collectors.*;
-import static java.util.stream.Collectors.summingInt;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.CHAPEL;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
 import static org.junit.Assert.*;
 
 
@@ -159,6 +152,39 @@ public class CopyTests {
         assertFalse(midHash == startHash);
 
         (new BakeBread()).execute(state);
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+
+    @Test
+    public void hireNovice() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        state.useAP(-1);
+        HireNovice action = new HireNovice();
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        try {
+            fm.next(state, action);
+            fail("Should throw exception as not enough AP");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertEquals(midHash, startHash); // special case as the next action fails
+
+        state.useAP(-2);
+        fm.next(state, action);
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());

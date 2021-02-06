@@ -1,16 +1,20 @@
 package games.dicemonastery;
 
-import core.*;
+import core.AbstractForwardModel;
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.actions.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.Phase;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static java.util.stream.Collectors.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static java.util.stream.Collectors.toList;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
@@ -90,6 +94,8 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
         // We only consider the next phase once any extended actions are complete
         state.getTurnOrder().endPlayerTurn(state);
+ //       DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
+ //       System.out.printf("After %s, end turn gives next player %d with %d action points\n", action, state.getCurrentPlayer(), dmto.getActionPointsLeft());
 
     }
 
@@ -117,11 +123,25 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             .filter(a -> a.dieMinimum > 0 && a.dieMinimum <= mostPiousMonk)
                             .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
+
+                    List<AbstractAction> retValue = new ArrayList<>();
+                    retValue.add(PASS);
+                    if (turnOrder.actionPointsLeftForCurrentPlayer == 0 && state.getDominantPlayers().contains(currentPlayer)) {
+                        // claim dominance reward
+                        if (turnOrder.currentAreaBeingExecuted == CHAPEL) {
+                            retValue.add(new GainVictoryPoints(1));
+                        } else {
+                            retValue.addAll(state.monksIn(turnOrder.currentAreaBeingExecuted, state.getCurrentPlayer()).stream()
+                                    .mapToInt(Monk::getPiety)
+                                    .distinct()
+                                    .mapToObj(piety -> new PromoteMonk(piety, turnOrder.currentAreaBeingExecuted))
+                                    .collect(toList()));
+                        }
+                        return retValue;
+                    }
                     if (turnOrder.actionPointsLeftForCurrentPlayer <= 0) {
                         throw new AssertionError("We have no action points left for player " + currentPlayer);
                     }
-                    List<AbstractAction> retValue = new ArrayList<>();
-                    retValue.add(PASS);
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
                             retValue.add(FORAGE);
@@ -167,8 +187,18 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                 retValue.add(HIRE_NOVICE);
                             // TODO: "Go on pilgrimage" not yet implemented
                             break;
-                        default:
+                        case LIBRARY:
+                            // TODO: "Write Text" not yet implemented
                             break;
+                        case CHAPEL:
+                            retValue.addAll(state.monksIn(CHAPEL, state.getCurrentPlayer()).stream()
+                                    .mapToInt(Monk::getPiety)
+                                    .distinct()
+                                    .mapToObj(piety -> new PromoteMonk(piety, CHAPEL))
+                                    .collect(toList()));
+                            break;
+                        default:
+                            throw new AssertionError("Unknown area : " + turnOrder.currentAreaBeingExecuted);
                     }
                     return retValue;
                 }

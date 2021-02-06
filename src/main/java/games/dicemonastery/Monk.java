@@ -7,6 +7,8 @@ import java.util.Objects;
 
 public class Monk extends Component {
 
+    final static int MAX_PIETY = 6;
+
     int piety;
 
     public Monk(int value, int ownerId) {
@@ -19,6 +21,12 @@ public class Monk extends Component {
         super(Utils.ComponentType.TOKEN, "Monk", componentId);
         this.ownerId = ownerId;
         piety = value;
+    }
+
+    public void promote(DiceMonasteryGameState state) {
+        piety++;
+        if (piety == MAX_PIETY)
+            state.retireMonk(this);
     }
 
     @Override

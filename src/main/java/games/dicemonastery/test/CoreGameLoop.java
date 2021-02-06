@@ -192,7 +192,11 @@ public class CoreGameLoop {
         int monksInMeadow = state.monksIn(MEADOW, firstPlayer).size();
         do {
             fm.next(state, new SowWheat());
-        } while (state.getCurrentPlayer() == firstPlayer);
+        } while (state.getCurrentPlayer() == firstPlayer && fm.computeAvailableActions(state).contains(new SowWheat()));
+
+        if (state.getDominantPlayers().contains(firstPlayer)) {
+            fm.next(state, new Pass());
+        }
 
         assertEquals(monksInMeadow, state.monksIn(DORMITORY, firstPlayer).size());
         assertEquals(0, state.monksIn(MEADOW, firstPlayer).size());
@@ -213,6 +217,7 @@ public class CoreGameLoop {
         ActionArea currentArea = null;
         int lastPlayer = -1;
         boolean playerSwitchExpected = false;
+        boolean rewardTurn = false;
         do {
             if (currentArea != turnOrder.getCurrentArea()) {
                 currentArea = turnOrder.getCurrentArea();
@@ -237,7 +242,16 @@ public class CoreGameLoop {
             } else if (state.currentActionInProgress() instanceof VisitMarket) {
                 playerSwitchExpected = turnOrder.getActionPointsLeft() == 0;
             } else {
-                playerSwitchExpected = actionChosen instanceof Pass || ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
+                playerSwitchExpected = actionChosen instanceof Pass ||
+                        actionChosen instanceof PromoteMonk || actionChosen instanceof GainVictoryPoints ||
+                        ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
+            }
+            if (playerSwitchExpected && !rewardTurn && state.getDominantPlayers().contains(lastPlayer)) {
+                // wait one more turn for reward decision
+                playerSwitchExpected = false;
+                rewardTurn = true;
+            } else {
+                rewardTurn = false;
             }
             System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), playerSwitchExpected);
             fm.next(state, actionChosen);
