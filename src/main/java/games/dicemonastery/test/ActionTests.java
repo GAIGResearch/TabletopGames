@@ -8,10 +8,7 @@ import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
@@ -434,6 +431,16 @@ public class ActionTests {
         for (int piety : pietyOfMonks) {
             assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(piety, CHAPEL)));
         }
+
+        int player = state.getCurrentPlayer();
+        int vp = state.getVictoryPoints(player);
+        fm.next(state, fm.computeAvailableActions(state).get(1));
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new GainVictoryPoints(1)));
+        fm.next(state, new GainVictoryPoints(1));
+        assertEquals(vp + 1, state.getVictoryPoints(player));
+        assertEquals(USE_MONKS, state.getGamePhase());
+        assertTrue(state.getCurrentPlayer() != player);
     }
 
     @Test
@@ -450,6 +457,55 @@ public class ActionTests {
         fm.next(state, promotion);
         assertEquals(1 + startingTotalPiety,
                 state.monksIn(null, player).stream().mapToInt(Monk::getPiety).sum());
+
+        fm.next(state, new Pass());
     }
 
+
+    @Test
+    public void dominanceRewardsGoToDominantPlayersOnly() {
+        Map<Integer, ActionArea> override = new HashMap<>();
+        override.put(2, KITCHEN);
+        override.put(0, KITCHEN);
+        // players 0 and 2 will put all their monks in the Kitchen, and hence be co-dominant
+        startOfUseMonkPhaseForArea(KITCHEN, SPRING, override);
+        assertEquals(2, state.getDominantPlayers().size());
+        assertEquals(Arrays.asList(0, 2), state.getDominantPlayers());
+
+        do {
+            int player = state.getCurrentPlayer();
+            fm.next(state, new Pass());
+            if (player == 0 || player == 2) {
+                assertEquals(player, state.getCurrentPlayer());
+                assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> a instanceof PromoteMonk));
+            } else {
+                assertNotSame(player, state.getCurrentPlayer());
+                assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof PromoteMonk));
+            }
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getCurrentArea() == KITCHEN);
+    }
+
+    @Test
+    public void retiringMonksGivesVPsAndRemovesThemFromGame() {
+        startOfUseMonkPhaseForArea(KITCHEN, AUTUMN);
+
+        int startingVP = state.getVictoryPoints(1);
+        int startingMonks = state.monksIn(null, 1).size();
+        List<Monk> monks = state.monksIn(null, 1);
+        promoteToRetirement(monks.get(0));
+        assertEquals(startingVP + 6, state.getVictoryPoints(1));
+        assertEquals(startingMonks - 1, state.monksIn(null, 1).size());
+
+        promoteToRetirement(monks.get(1));
+        assertEquals(startingVP + 11, state.getVictoryPoints(1));
+        assertEquals(startingMonks - 2, state.monksIn(null, 1).size());
+    }
+
+    private void promoteToRetirement(Monk m) {
+        do {
+            m.promote(state);
+        } while (m.getPiety() < 6);
+        m.promote(state);
+    }
 }

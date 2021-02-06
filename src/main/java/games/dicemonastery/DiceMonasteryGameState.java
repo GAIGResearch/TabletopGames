@@ -144,7 +144,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public List<Monk> monksIn(ActionArea region, int player) {
         return allMonks.values().stream()
-                .filter(m -> (region == null || monkLocations.get(m.getComponentID()) == region) &&
+                .filter(m -> ((region == null && monkLocations.get(m.getComponentID()) != RETIRED)|| monkLocations.get(m.getComponentID()) == region) &&
                         (player == -1 || m.getOwnerId() == player))
                 .collect(toList());
     }
