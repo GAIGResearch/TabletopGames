@@ -16,10 +16,8 @@ import players.PlayerFactory;
 import utilities.*;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.summarizingInt;
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
 
@@ -155,19 +153,19 @@ public class GameReportII {
 //            IntSummaryStatistics bf = branchingByStates.stream().mapToInt(i -> i).summaryStatistics();
 //            data.put("BranchingFactor", bf.getAverage());
 //            data.put("MaxBranchingFactor", bf.getMax());
-            StatSummary sc = scores.stream().collect(new TAGSummariser());
+            TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
             data.put("ScoreMedian", sc.median());
             data.put("ScoreMean", sc.mean());
             data.put("ScoreMax", sc.max());
             data.put("ScoreMin", sc.min());
             data.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
-            StatSummary stateSize = components.stream().collect(new TAGSummariser());
+            TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
             data.put("StateSizeMedian", stateSize.median());
             data.put("StateSizeMean", stateSize.mean());
             data.put("StateSizeMax", stateSize.max());
             data.put("StateSizeMin", stateSize.min());
             data.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
-            StatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
+            TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
             data.put("HiddenInfoMedian", visibility.median());
             data.put("HiddenInfoMean", visibility.mean());
             data.put("HiddenInfoMax", visibility.max());
@@ -257,7 +255,7 @@ public class GameReportII {
 
         //    Retrieves a list with one entry per game tick, each a pair (active player ID, # actions)
         List<Pair<Integer, Integer>> actionSpaceRecord = game.getActionSpaceSize();
-        StatSummary stats = actionSpaceRecord.stream()
+        TAGStatSummary stats = actionSpaceRecord.stream()
                 .map(r -> r.b)
                 .filter(size -> size > 1)
                 .collect(new TAGSummariser());

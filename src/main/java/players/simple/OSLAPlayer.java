@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
+import core.interfaces.ITunableParameters;
 
 import java.util.List;
 import java.util.Random;

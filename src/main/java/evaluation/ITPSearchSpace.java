@@ -114,7 +114,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             throw new AssertionError("We have a problem with null data in JSON file using key " + key);
                         itp.setParameterValue(key, data);
                     }
-                } else {
+                } else if (!baseKey.equals("class")){
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
                 }
             }
