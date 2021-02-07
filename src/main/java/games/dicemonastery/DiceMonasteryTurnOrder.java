@@ -11,7 +11,9 @@ import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.MEADOW;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static games.dicemonastery.DiceMonasteryConstants.Season.WINTER;
 import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryTurnOrder extends TurnOrder {
@@ -80,12 +82,17 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                     }
                     turnOwner = nextPlayer(gameState);
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
-                    // in this case we go through players in piety order (as calculated when we start processing the area)
-                    if (nextPlayer(state) != turnOwner) {
+                    // first we check to see if we have finished using all monks; in which case move to next player
+                    if (actionPointsLeftForCurrentPlayer == 0 && (!dominantPlayers.contains(turnOwner) || rewardsTaken.contains(turnOwner))) {
+                        // first move all Monks back to dormitory for the current player
+                        for (Monk m : state.monksIn(currentAreaBeingExecuted, state.getCurrentPlayer())) {
+                            state.moveMonk(m.getComponentID(), currentAreaBeingExecuted, DORMITORY);
+                        }
+                        // then move to next player
                         turnOwner = nextPlayer(state);
                         actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
                     }
-                    if (turnOwner == -1) {
+                    if (state.monksIn(currentAreaBeingExecuted, -1).isEmpty()) {
                         // we have completed all actions for that area
                         if (setUpPlayerOrderForCurrentArea(state)) {
                             turnOwner = playerOrderForCurrentArea.get(0);
@@ -93,21 +100,30 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         } else {
                             // we have completed this phase
                             season = season.next();
-                            if (season == SPRING)
-                                year++;
-                            if (year > nMaxRounds)
-                                state.setGameStatus(Utils.GameResult.GAME_END);
-                            abbot = (abbot + 1 + nPlayers) % nPlayers;
+                            // and set the player back to the abbot
                             turnOwner = abbot;
                             state.setGamePhase(Phase.PLACE_MONKS);
+                            if (season == WINTER) {
+                                // we do the winter housekeeping
+                                state.winterHousekeeping();
+                            }
                         }
                     }
                 }
                 break;
             case WINTER:
+                // and then increment year
+                if (turnOwner == abbot) {
+                    season = season.next();
+                    year++;
+                    if (year > nMaxRounds)
+                        state.setGameStatus(Utils.GameResult.GAME_END);
+                    abbot = (abbot + 1 + nPlayers) % nPlayers;
+                    turnOwner = abbot;
+                }
+                break;
             case SUMMER:
-                throw new AssertionError(String.format("Unknown Game Phase of %s in %s", season, state.getGamePhase()));
-
+                throw new AssertionError(String.format("Unknown Game Phase of %s in %s", state.getGamePhase(), season));
         }
     }
 
@@ -118,36 +134,41 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public int nextPlayer(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
-        switch ((Phase) state.getGamePhase()) {
-            case PLACE_MONKS:
-                Collection<Component> monksInDormitory = state.actionAreas.get(ActionArea.DORMITORY).getAll(c -> c instanceof Monk);
-                if (monksInDormitory.size() == 0)
-                    return -1;
-                int nextPlayer = turnOwner;
-                do {
-                    nextPlayer = (nPlayers + nextPlayer + 1) % nPlayers;
-                } while (state.monksIn(ActionArea.DORMITORY, nextPlayer).size() == 0);
-                return nextPlayer;
-            // still monks left; so get the next player as usual, but skip any who have no monks left to place
-            // (we have already moved the turn on once with super.endPlayerTurn(), so we just need to check
-            // the current player has Monks to place.)
-            case USE_MONKS:
-                if (actionPointsLeftForCurrentPlayer > 0)
-                    return turnOwner;  // we still have monks for the current player to finish using
-                if (dominantPlayers.contains(turnOwner) && !rewardsTaken.contains(turnOwner)) {
-                    // we now need to get the Dominance reward for the area
-                    rewardsTaken.add(turnOwner);
-                    return turnOwner;
-                }
-                for (Monk m : state.monksIn(currentAreaBeingExecuted, state.getCurrentPlayer())) {
-                    state.moveMonk(m.getComponentID(), currentAreaBeingExecuted, DORMITORY);
-                }
-                int currentIndex = playerOrderForCurrentArea.indexOf(turnOwner);
-                if (currentIndex + 1 == playerOrderForCurrentArea.size())
-                    return -1; // we have now finished this area
-                return playerOrderForCurrentArea.get(currentIndex + 1);
+        if (season == WINTER) {
+            // one decision each in Winter (which monk to promote)
+            return (turnOwner + 1 + nPlayers) % nPlayers;
+        } else {
+            switch ((Phase) state.getGamePhase()) {
+                case PLACE_MONKS:
+                    Collection<Component> monksInDormitory = state.actionAreas.get(ActionArea.DORMITORY).getAll(c -> c instanceof Monk);
+                    if (monksInDormitory.size() == 0)
+                        return playerOrderFor(MEADOW, state).get(0); // we move on to the MEADOW next
+                    int nextPlayer = turnOwner;
+                    do {
+                        nextPlayer = (nPlayers + nextPlayer + 1) % nPlayers;
+                    } while (state.monksIn(ActionArea.DORMITORY, nextPlayer).size() == 0);
+                    return nextPlayer;
+                // still monks left; so get the next player as usual, but skip any who have no monks left to place
+                // (we have already moved the turn on once with super.endPlayerTurn(), so we just need to check
+                // the current player has Monks to place.)
+                case USE_MONKS:
+                    if (actionPointsLeftForCurrentPlayer > 0)
+                        return turnOwner;  // we still have monks for the current player to finish using
+                    if (dominantPlayers.contains(turnOwner) && !rewardsTaken.contains(turnOwner)) {
+                        // we now need to get the Dominance reward for the area
+                        return turnOwner;
+                    }
+                    int currentIndex = playerOrderForCurrentArea.indexOf(turnOwner);
+                    if (currentIndex + 1 == playerOrderForCurrentArea.size())
+                        return abbot; // we have now finished this area, and we always start placing with the Abbot
+                    return playerOrderForCurrentArea.get(currentIndex + 1);
+            }
         }
-        throw new AssertionError("Unexpected situation for Phase " + state.getGamePhase());
+        throw new AssertionError(String.format("Unexpected situation for Season %s and Phase %s", season, state.getGamePhase()));
+    }
+
+    public void setRewardTaken(int player) {
+        rewardsTaken.add(player);
     }
 
     private boolean setUpPlayerOrderForCurrentArea(DiceMonasteryGameState state) {
@@ -159,9 +180,20 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             }
         }
 
-        Map<Integer, Integer> pietyPerPlayer = state.monksIn(currentAreaBeingExecuted, -1).stream()
+        playerOrderForCurrentArea = playerOrderFor(currentAreaBeingExecuted, state);
+        int dominantPiety = state.monksIn(currentAreaBeingExecuted, playerOrderForCurrentArea.get(0)).stream().mapToInt(Monk::getPiety).sum();
+        dominantPlayers = IntStream.range(0, nPlayers)
+                .filter(p -> state.monksIn(currentAreaBeingExecuted, p).stream().mapToInt(Monk::getPiety).sum() == dominantPiety)
+                .boxed()
+                .collect(toList());
+        rewardsTaken = new ArrayList<>();
+        return true;
+    }
+
+    private List<Integer> playerOrderFor(ActionArea area, DiceMonasteryGameState state) {
+        Map<Integer, Integer> pietyPerPlayer = state.monksIn(area, -1).stream()
                 .collect(groupingBy(Monk::getOwnerId, summingInt(Monk::getPiety)));
-        playerOrderForCurrentArea = pietyPerPlayer.entrySet().stream()
+        return pietyPerPlayer.entrySet().stream()
                 .sorted((e1, e2) -> {
                             // based on different in piety, with ties broken by turn order wrt to the abbot
                             int pietyDiff = e2.getValue() - e1.getValue();
@@ -172,14 +204,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 )
                 .mapToInt(Map.Entry::getKey)
                 .boxed().collect(toList());
-        int dominantPiety = pietyPerPlayer.get(playerOrderForCurrentArea.get(0));
-        dominantPlayers =  IntStream.range(0, nPlayers)
-                .filter(p -> state.monksIn(currentAreaBeingExecuted, p).stream().mapToInt(Monk::getPiety).sum() == dominantPiety)
-                .boxed()
-                .collect(toList());
-        rewardsTaken = new ArrayList<>();
-        return true;
     }
+
 
     public Season getSeason() {
         return season;

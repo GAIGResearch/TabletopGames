@@ -1,8 +1,6 @@
 package games.dicemonastery;
 
-import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
-import games.dicemonastery.actions.*;
 
 public class DiceMonasteryConstants {
 
@@ -39,7 +37,7 @@ public class DiceMonasteryConstants {
     }
 
     public enum Resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYERS, PIGMENT, INK, CALF_SKIN, VELLUM, BEER, MEAD, CANDLE
+        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYERS, PIGMENT, INK, CALF_SKIN, VELLUM, BEER, MEAD, CANDLE, BERRIES
     }
 
     public enum Phase implements IGamePhase {
@@ -56,7 +54,7 @@ public class DiceMonasteryConstants {
                 case SUMMER:
                     return AUTUMN;
                 case AUTUMN:
-                    return SPRING;
+                    return WINTER;
                 case WINTER:
                     return SPRING;
                 default:

@@ -10,6 +10,7 @@ import java.util.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource;
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 
@@ -156,6 +157,39 @@ public class DiceMonasteryGameState extends AbstractGameState {
     public List<Integer> getDominantPlayers() {
         DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
         return dto.dominantPlayers;
+    }
+
+    public void winterHousekeeping() {
+        for (int player = 0; player < getNPlayers(); player++) {
+            // for each player feed monks, and then discard perishables
+            List<Monk> monks = monksIn(null, player);
+            int requiredFood = monks.size();
+            requiredFood -= getResource(player, Resource.BERRIES, STOREROOM);
+            requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
+            if (requiredFood > 0) {
+                int honeyEaten = Math.min(requiredFood, getResource(player, Resource.HONEY, STOREROOM));
+                addResource(player, Resource.HONEY, -honeyEaten);
+                requiredFood -= honeyEaten;
+            }
+            if (requiredFood > 0) {
+                // monks starve
+                addVP(-requiredFood, player);
+                // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
+                // TODO: Make this a player decision
+                monks.stream()
+                        .filter(m -> m.getPiety() > 1)
+                        .sorted(comparingInt(Monk::getPiety))
+                        .limit(requiredFood)
+                        .forEach(Monk::demote);
+            }
+            // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
+            addResource(player, Resource.BREAD, getResource(player, Resource.BREAD, STOREROOM));
+            addResource(player, Resource.BERRIES, getResource(player, Resource.BERRIES, STOREROOM));
+            addResource(player, Resource.CALF_SKIN, getResource(player, Resource.CALF_SKIN, STOREROOM));
+            int unharvestedWheat = getResource(player, Resource.GRAIN, MEADOW);
+            for (int i = 0; i < unharvestedWheat; i++)
+                moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
+        }
     }
 
     @Override

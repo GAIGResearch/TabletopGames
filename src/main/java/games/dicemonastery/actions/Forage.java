@@ -1,11 +1,10 @@
 package games.dicemonastery.actions;
 
-import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
 
 import java.util.Random;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
 public class Forage extends UseMonk {
 
@@ -22,9 +21,11 @@ public class Forage extends UseMonk {
         switch (roll) {
             case 1:
             case 2:
-            case 3:
                 break;
+            case 3:
             case 4:
+                r = Resource.BERRIES;
+                break;
             case 5:
             case 6:
                 r = Resource.PIGMENT;

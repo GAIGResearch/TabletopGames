@@ -37,7 +37,7 @@ public class ActionTests {
         do {
             // first Pass until we get to the point required
             while (state.getGamePhase() == USE_MONKS)
-                fm.next(state, new Pass());
+                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
 
             // then place all monks randomly
             do {
@@ -52,7 +52,7 @@ public class ActionTests {
 
             // then Pass until we get to the point required
             while (turnOrder.getCurrentArea() != region) {
-                fm.next(state, new Pass());
+                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
             }
 
         } while (turnOrder.getSeason() != season);
@@ -71,6 +71,11 @@ public class ActionTests {
     @Test
     public void meadowActionsCorrectAutumn() {
         startOfUseMonkPhaseForArea(MEADOW, AUTUMN);
+        while (state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW) > 0)
+            state.moveCube(state.getCurrentPlayer(), GRAIN, MEADOW, SUPPLY);
+        while (state.getResource(state.getCurrentPlayer(), SKEP, MEADOW) > 0)
+            state.moveCube(state.getCurrentPlayer(), SKEP, MEADOW, SUPPLY);
+
         assertEquals(2, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
@@ -91,9 +96,9 @@ public class ActionTests {
         state.useAP(turnOrder.getActionPointsLeft());
         Set<Integer> pieties = state.monksIn(MEADOW, state.getCurrentPlayer()).stream().mapToInt(Monk::getPiety).boxed().collect(toSet());
         assertEquals(1 + pieties.size(), fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass(true)));
         for (int p : pieties)
-            assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(p, MEADOW)));
+            assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(p, MEADOW, true)));
     }
 
     @Test
@@ -148,7 +153,8 @@ public class ActionTests {
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
         for (int i = 0; i < 100; i++)
             (new Forage()).execute(state);
-        assertEquals(50, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 15);
+        assertEquals(33, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
+        assertEquals(33, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
     }
 
     @Test
@@ -429,15 +435,15 @@ public class ActionTests {
         assertEquals(1 + pietyOfMonks.size(), fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         for (int piety : pietyOfMonks) {
-            assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(piety, CHAPEL)));
+            assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(piety, CHAPEL, false)));
         }
 
         int player = state.getCurrentPlayer();
         int vp = state.getVictoryPoints(player);
         fm.next(state, fm.computeAvailableActions(state).get(1));
         assertEquals(2, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new GainVictoryPoints(1)));
-        fm.next(state, new GainVictoryPoints(1));
+        assertTrue(fm.computeAvailableActions(state).contains(new GainVictoryPoints(1, true)));
+        fm.next(state, new GainVictoryPoints(1, true));
         assertEquals(vp + 1, state.getVictoryPoints(player));
         assertEquals(USE_MONKS, state.getGamePhase());
         assertTrue(state.getCurrentPlayer() != player);
@@ -452,7 +458,7 @@ public class ActionTests {
         List<Integer> pietyOfMonks = state.monksIn(CHAPEL, player).stream()
                 .map(Monk::getPiety)
                 .collect(toList());
-        PromoteMonk promotion = new PromoteMonk(pietyOfMonks.get(0), CHAPEL);
+        PromoteMonk promotion = new PromoteMonk(pietyOfMonks.get(0), CHAPEL, false);
 
         fm.next(state, promotion);
         assertEquals(1 + startingTotalPiety,
@@ -472,18 +478,20 @@ public class ActionTests {
         assertEquals(2, state.getDominantPlayers().size());
         assertEquals(Arrays.asList(0, 2), state.getDominantPlayers());
 
-        do {
+        while (turnOrder.getCurrentArea() == KITCHEN) {
             int player = state.getCurrentPlayer();
+            // Pass the first action
             fm.next(state, new Pass());
             if (player == 0 || player == 2) {
                 assertEquals(player, state.getCurrentPlayer());
                 assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> a instanceof PromoteMonk));
-            } else {
+                // and take action at random
+                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            } else if (turnOrder.getCurrentArea() == KITCHEN) {
                 assertNotSame(player, state.getCurrentPlayer());
                 assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof PromoteMonk));
             }
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
-        } while (turnOrder.getCurrentArea() == KITCHEN);
+        }
     }
 
     @Test

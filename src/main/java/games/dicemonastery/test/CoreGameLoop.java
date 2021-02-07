@@ -116,8 +116,8 @@ public class CoreGameLoop {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         } while (state.monksIn(DORMITORY, -1).size() < 24);
 
-        assertEquals(1, turnOrder.getAbbot());
-        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(0, turnOrder.getAbbot());
+        assertEquals(0, state.getCurrentPlayer());
         assertEquals(PLACE_MONKS, state.getGamePhase());
         assertEquals(AUTUMN, turnOrder.getSeason());
     }
@@ -149,8 +149,8 @@ public class CoreGameLoop {
 
         assertEquals(PLACE_MONKS, state.getGamePhase());
         assertEquals(AUTUMN, turnOrder.getSeason());
-        assertEquals(1, turnOrder.getAbbot());
-        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(0, turnOrder.getAbbot());
+        assertEquals(0, state.getCurrentPlayer());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class CoreGameLoop {
         } while (state.getCurrentPlayer() == firstPlayer && fm.computeAvailableActions(state).contains(new SowWheat()));
 
         if (state.getDominantPlayers().contains(firstPlayer)) {
-            fm.next(state, new Pass());
+            fm.next(state, new Pass(true));
         }
 
         assertEquals(monksInMeadow, state.monksIn(DORMITORY, firstPlayer).size());
@@ -253,7 +253,7 @@ public class CoreGameLoop {
             } else {
                 rewardTurn = false;
             }
-            System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), playerSwitchExpected);
+            System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Reward: %s, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), rewardTurn, playerSwitchExpected);
             fm.next(state, actionChosen);
         } while (state.getGamePhase() == USE_MONKS);
     }

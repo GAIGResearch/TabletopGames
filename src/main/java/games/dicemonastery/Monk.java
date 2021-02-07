@@ -1,6 +1,6 @@
 package games.dicemonastery;
 
-import core.components.*;
+import core.components.Component;
 import utilities.Utils;
 
 import java.util.Objects;
@@ -27,6 +27,11 @@ public class Monk extends Component {
         piety++;
         if (piety == MAX_PIETY)
             state.retireMonk(this);
+    }
+
+    public void demote() {
+        if (piety > 1)
+            piety--;
     }
 
     @Override

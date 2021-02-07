@@ -3,6 +3,7 @@ package games.dicemonastery.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.Monk;
 
 import java.util.Optional;
@@ -13,19 +14,24 @@ public class PromoteMonk extends AbstractAction {
 
     final int pietyLevelToPromote;
     final ActionArea location;
+    final boolean areaReward;
 
-    public PromoteMonk(int piety, ActionArea where) {
+    public PromoteMonk(int piety, ActionArea where, boolean reward) {
         pietyLevelToPromote = piety;
         location = where;
+        areaReward = reward;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        // we use all available AP, and choose one of the monks in the CHAPEL
-        // to increase in piety
+        // we use all available AP, and choose one of the monks to increase in piety
         state.useAP(state.getAPLeft());
 
+        if (areaReward) {
+            DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) state.getTurnOrder();
+            dto.setRewardTaken(state.getCurrentPlayer());
+        }
         Optional<Monk> optMonk = state.monksIn(location, state.getCurrentPlayer()).stream()
                 .filter(m -> m.getPiety() == pietyLevelToPromote)
                 .findFirst();
