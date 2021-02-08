@@ -12,7 +12,8 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        return false;
+
+        return true;
     }
 
     @Override
@@ -37,11 +38,8 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + offeredTrade.getOtherPlayerID() + " giving "
-                + offeredTrade.getResourcesOffered().size() + " "
-                + offeredTrade.getResourcesOffered().get(0) + " in exchange for "
-                + offeredTrade.getResourcesRequested().size() + " "
-                + offeredTrade.getResourcesRequested().get(0) + " from player "
+        //todo expand string
+        return "Player " + offeredTrade.getOtherPlayerID() + " trading with "
                 + offeredTrade.getOtherPlayerID();
     }
 }

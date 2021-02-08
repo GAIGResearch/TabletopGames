@@ -84,8 +84,8 @@ public class CatanActionFactory {
         int exchange_rate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
         int n_players = ((CatanParameters)gs.getGameParameters()).n_players;
         int current_player = gs.getCurrentPlayer();
-        ArrayList<Resources> resources_offered = new ArrayList<>();
-        ArrayList<Resources> resources_requested = new ArrayList<>();
+        int[] resources_offered = new int[5];
+        int[] resources_requested = new int[5];
 
         for (int player_index = 0; player_index < n_players; player_index++){ // loop through players
             if(player_index != current_player){ // exclude current player
@@ -96,14 +96,14 @@ public class CatanActionFactory {
                                 for (int quantity_available_to_offer_index = 1; quantity_available_to_offer_index < resources[resource_to_offer_index] + 1; quantity_available_to_offer_index++ ){ // loop through the quantity of resources to offer
                                     for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index) - (quantity_available_to_offer_index - 1); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
                                         for (int quantity_to_offer = 1; quantity_to_offer < (quantity_available_to_offer_index + 1); quantity_to_offer++) { // add the amount of resources to offer to the list
-                                            resources_offered.add(CatanParameters.Resources.values()[resource_to_offer_index]);
+                                            resources_offered[resource_to_offer_index]++;
                                         }
                                         for (int quantity_to_request = 1; quantity_to_request < (quantity_available_to_request_index + 1); quantity_to_request++){ // add the amount of resources to request to the list
-                                            resources_requested.add(CatanParameters.Resources.values()[resource_to_request_index]);
+                                            resources_requested[resource_to_request_index]++;
                                         }
-                                        actions.add(new OfferPlayerTrade((ArrayList<Resources>)resources_offered.clone(), (ArrayList<Resources>)resources_requested.clone(), current_player, player_index)); // create the action
-                                        resources_offered.clear(); // clear the offered list
-                                        resources_requested.clear(); // clear the requested list
+                                        actions.add(new OfferPlayerTrade(resources_offered.clone(), resources_requested.clone(), current_player, player_index)); // create the action
+                                        Arrays.fill(resources_offered,0);
+                                        Arrays.fill(resources_requested,0);
                                     }
                                 }
                             }
@@ -123,8 +123,19 @@ public class CatanActionFactory {
         if (offeredPlayerTrade.getNegotiationCount() < ((CatanParameters)gs.getGameParameters()).max_negotiation_count + 1){ // check that the maximum number of negotiations has not been exceeded to prevent AI looping
             actions.addAll(getResponsePlayerTradeOfferActions(gs));
         }
-        //TODO check that the trade can be accepted by the receiving player
-        actions.add(new AcceptTrade(offeredPlayerTrade)); // TODO implement
+        actions.addAll(getAcceptTradeActions(gs));
+
+        return actions;
+    }
+
+    static List<AbstractAction> getAcceptTradeActions(CatanGameState gs){
+        ArrayList<AbstractAction> actions = new ArrayList();
+        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
+       g int[] resources = gs.getPlayerResources();
+
+        if(CatanGameState.checkCost(resources, offeredPlayerTrade.getResourcesRequested())){
+            actions.add(new AcceptTrade(offeredPlayerTrade));
+        }
 
         return actions;
     }

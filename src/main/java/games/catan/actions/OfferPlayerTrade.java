@@ -8,13 +8,13 @@ import games.catan.CatanParameters.Resources;
 import java.util.List;
 
 public class OfferPlayerTrade extends AbstractAction {
-    List<Resources> resourcesOffered;
-    List<Resources> resourcesRequested;
+    int[] resourcesOffered;
+    int[] resourcesRequested;
     int offeringPlayerID;
     int otherPlayerID;
     int negotiationCount = 0;
 
-    public OfferPlayerTrade(List<Resources> resourcesOffered, List<Resources> resourcesRequested, int offeringPlayerID, int otherPlayerID){
+    public OfferPlayerTrade(int[] resourcesOffered, int[] resourcesRequested, int offeringPlayerID, int otherPlayerID){
         this.resourcesOffered = resourcesOffered;
         this.resourcesRequested = resourcesRequested;
         this.offeringPlayerID = offeringPlayerID;
@@ -27,7 +27,6 @@ public class OfferPlayerTrade extends AbstractAction {
         CatanGameState cgs = (CatanGameState)gs;
         negotiationCount++;
         cgs.setCurrentTradeOffer(this);
-
         return true;
     }
 
@@ -59,12 +58,10 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + offeringPlayerID + " offering "
-                + resourcesOffered.size() + " "
-                + resourcesOffered.get(0) + " in exchange for "
-                + resourcesRequested.size() + " "
-                + resourcesRequested.get(0) + " from player "
+        //todo expand this string method
+        return "Player " + offeringPlayerID + " offering trade to player "
                 + otherPlayerID;
+
     }
 
     public int getNegotiationCount() {
@@ -79,11 +76,11 @@ public class OfferPlayerTrade extends AbstractAction {
         return otherPlayerID;
     }
 
-    public List<Resources> getResourcesOffered() {
+    public int[] getResourcesOffered() {
         return resourcesOffered;
     }
 
-    public List<Resources> getResourcesRequested() {
+    public int[] getResourcesRequested() {
         return resourcesRequested;
     }
 }
