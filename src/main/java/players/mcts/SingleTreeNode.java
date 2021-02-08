@@ -108,7 +108,6 @@ public class SingleTreeNode {
 
         // Tracking number of iterations for iteration budget
         int numIters = 0;
-
         boolean stop = false;
         // We keep a copy of this, as if we are using an open loop approach, then we need to advance a state
         // through the tree on each iteration, while still keeping an unchanged master copy (rootState)
@@ -134,7 +133,7 @@ public class SingleTreeNode {
             selected.backUp(delta);
             // Finished iteration
             numIters++;
-
+     //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = player.params.budgetType;
             if (budgetType == BUDGET_TIME) {
@@ -153,7 +152,6 @@ public class SingleTreeNode {
                 stop = copyCount > player.params.budget || numIters > player.params.budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
                 stop = (copyCount + fmCallsCount) > player.params.budget || numIters > player.params.budget;
-
             }
         }
 
