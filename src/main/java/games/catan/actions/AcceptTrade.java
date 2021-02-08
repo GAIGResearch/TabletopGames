@@ -2,6 +2,7 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.catan.CatanGameState;
 
 public class AcceptTrade extends AbstractAction {
     protected OfferPlayerTrade offeredTrade;
@@ -12,9 +13,10 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-
-
-        return true;
+        if (CatanGameState.swapResources((CatanGameState) gs, gs.getCurrentPlayer(), offeredTrade.getOfferingPlayerID(), offeredTrade.getResourcesRequested(), offeredTrade.getResourcesOffered())){
+            return true;
+        }
+        return false;
     }
 
     @Override

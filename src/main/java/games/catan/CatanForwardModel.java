@@ -126,7 +126,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         cto.endTurnStage(gs);
 
 
-        if (action instanceof OfferPlayerTrade){ //TODO need to move this somewhere
+        if (action instanceof OfferPlayerTrade){ //TODO need to move this
             // add other player to the reactive player's list
             gs.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction); // TODO move this into CTO somehow?
             ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((OfferPlayerTrade)action).getOtherPlayerID());

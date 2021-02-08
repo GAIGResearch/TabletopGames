@@ -302,6 +302,66 @@ public class CatanGameState extends AbstractGameState {
         return true;
     }
 
+    /**
+     * Swaps cards between players
+     * @param gs
+     * @param playerID
+     * @param otherPlayerID
+     * @param playerResourcesToTrade
+     * @param otherPlayerResourcesToTrade
+     * @return
+     */
+    public static boolean swapResources(CatanGameState gs, int playerID, int otherPlayerID, int[] playerResourcesToTrade, int[] otherPlayerResourcesToTrade){
+        int[] playerResourcesToTradeCopy = playerResourcesToTrade.clone();
+        int[] otherPlayerResourcesToTradeCopy = otherPlayerResourcesToTrade.clone();
+        List<Card> playerHand = ((Deck<Card>)gs.getComponent(playerHandHash,playerID)).getComponents();
+        List<Card> otherPlayerHand = ((Deck<Card>)gs.getComponent(playerHandHash,otherPlayerID)).getComponents();
+        ArrayList<Card> cardsToGiveToPlayer = new ArrayList<>();
+        ArrayList<Card> cardsToGiveToOtherPlayer = new ArrayList<>();
+
+        for (Card card : playerHand) {
+            int index = CatanParameters.Resources.valueOf(card.getProperty(CatanConstants.cardType).toString()).ordinal();
+            if (playerResourcesToTradeCopy[index] > 0) {
+                cardsToGiveToOtherPlayer.add(card);
+                playerResourcesToTradeCopy[index] -= 1;
+            }
+        }
+
+        for (Card card : otherPlayerHand) {
+            int index = CatanParameters.Resources.valueOf(card.getProperty(CatanConstants.cardType).toString()).ordinal();
+            if (otherPlayerResourcesToTradeCopy[index] > 0) {
+                cardsToGiveToPlayer.add(card);
+                otherPlayerResourcesToTradeCopy[index] -= 1;
+            }
+        }
+
+        for (int i = 0; i < playerResourcesToTradeCopy.length; i++){
+            if (playerResourcesToTradeCopy[i] > 0){
+                if (VERBOSE)
+                    System.out.println("Player does not have enough resources in hand");
+                return false;
+            }
+            if (otherPlayerResourcesToTradeCopy[i] > 0){
+                if (VERBOSE)
+                    System.out.println("Other player does not have enough resources in hand");
+                return false;
+            }
+        }
+
+        for (int i = 0; i < cardsToGiveToOtherPlayer.size(); i++){
+            Card card = cardsToGiveToOtherPlayer.get(i);
+            playerHand.remove(card);
+            otherPlayerHand.add(card);
+        }
+        for (int i = 0; i < cardsToGiveToPlayer.size(); i++){
+            Card card = cardsToGiveToPlayer.get(i);
+            otherPlayerHand.remove(card);
+            playerHand.add(card);
+        }
+
+        return true;
+    }
+
     /* Takes the resource cards specified in the cost array from the current player, returns true if successful */
     public static boolean spendResources(CatanGameState gs, int[] cost){
         int[] costCopy = cost.clone();

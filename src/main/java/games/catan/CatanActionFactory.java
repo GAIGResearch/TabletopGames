@@ -82,29 +82,29 @@ public class CatanActionFactory {
     static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int[] resources = gs.getPlayerResources();
-        int exchange_rate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
+        int exchangeRate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
         int n_players = ((CatanParameters)gs.getGameParameters()).n_players;
-        int current_player = gs.getCurrentPlayer();
-        int[] resources_offered = new int[5];
-        int[] resources_requested = new int[5];
+        int currentPlayer = gs.getCurrentPlayer();
+        int[] resourcesOffered = new int[5];
+        int[] resourcesRequested = new int[5];
 
-        for (int player_index = 0; player_index < n_players; player_index++){ // loop through players
-            if(player_index != current_player){ // exclude current player
-                for (int resource_to_offer_index = 0; resource_to_offer_index < resources.length; resource_to_offer_index++ ){ // loop through current players resources to offer
-                    if(resources[resource_to_offer_index] > 0){ // don't continue if the player has none of the current resource
-                        for (int resource_to_request_index = 0;  resource_to_request_index < resources.length; resource_to_request_index++){ // loop through current players resources to request
-                            if (resource_to_request_index != resource_to_offer_index){ // exclude the currently offered resource
-                                for (int quantity_available_to_offer_index = 1; quantity_available_to_offer_index < resources[resource_to_offer_index] + 1; quantity_available_to_offer_index++ ){ // loop through the quantity of resources to offer
-                                    for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index) - (quantity_available_to_offer_index - 1); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
-                                        for (int quantity_to_offer = 1; quantity_to_offer < (quantity_available_to_offer_index + 1); quantity_to_offer++) { // add the amount of resources to offer to the list
-                                            resources_offered[resource_to_offer_index]++;
+        for (int playerIndex = 0; playerIndex < n_players; playerIndex++){ // loop through players
+            if(playerIndex != currentPlayer){ // exclude current player
+                for (int resourceToOfferIndex = 0; resourceToOfferIndex < resources.length; resourceToOfferIndex++ ){ // loop through current players resources to offer
+                    if(resources[resourceToOfferIndex] > 0){ // don't continue if the player has none of the current resource
+                        for (int resourceToRequestIndex = 0;  resourceToRequestIndex < resources.length; resourceToRequestIndex++){ // loop through current players resources to request
+                            if (resourceToRequestIndex != resourceToOfferIndex){ // exclude the currently offered resource
+                                for (int quantityAvailableToOfferIndex = 1; quantityAvailableToOfferIndex < resources[resourceToOfferIndex] + 1; quantityAvailableToOfferIndex++ ){ // loop through the quantity of resources to offer
+                                    for (int quantityAvailableToRequestIndex = 1; quantityAvailableToRequestIndex < (exchangeRate * quantityAvailableToOfferIndex) - (quantityAvailableToOfferIndex - 1); quantityAvailableToRequestIndex++){ // loop to generate all possible combinations of offer for the current resource pair
+                                        for (int quantityToOffer = 1; quantityToOffer < (quantityAvailableToOfferIndex + 1); quantityToOffer++) { // add the amount of resources to offer to the list
+                                            resourcesOffered[resourceToOfferIndex]++;
                                         }
-                                        for (int quantity_to_request = 1; quantity_to_request < (quantity_available_to_request_index + 1); quantity_to_request++){ // add the amount of resources to request to the list
-                                            resources_requested[resource_to_request_index]++;
+                                        for (int quantityToRequest = 1; quantityToRequest < (quantityAvailableToRequestIndex + 1); quantityToRequest++){ // add the amount of resources to request to the list
+                                            resourcesRequested[resourceToRequestIndex]++;
                                         }
-                                        actions.add(new OfferPlayerTrade(resources_offered.clone(), resources_requested.clone(), current_player, player_index)); // create the action
-                                        Arrays.fill(resources_offered,0);
-                                        Arrays.fill(resources_requested,0);
+                                        actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex)); // create the action
+                                        Arrays.fill(resourcesOffered,0);
+                                        Arrays.fill(resourcesRequested,0);
                                     }
                                 }
                             }
@@ -151,37 +151,37 @@ public class CatanActionFactory {
     static List<AbstractAction> getResponsePlayerTradeOfferActions (CatanGameState gs){
         ArrayList<AbstractAction> actions = new ArrayList();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-        int exchange_rate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
-        int[] player_resources = gs.getPlayerResources();
-        int[] resources_offered = offeredPlayerTrade.getResourcesOffered();
-        int[] resources_requested = offeredPlayerTrade.getResourcesRequested();
-        int[] resources_to_offer = new int[5];
-        int[] resources_to_request = new int[5];
-        int resource_requested_index = 0;
-        int resource_offered_index = 0;
+        int exchangeRate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
+        int[] playerResources = gs.getPlayerResources();
+        int[] resourcesOffered = offeredPlayerTrade.getResourcesOffered();
+        int[] resourcesRequested = offeredPlayerTrade.getResourcesRequested();
+        int[] resourcesToOffer = new int[5];
+        int[] resourcesToRequest = new int[5];
+        int resourceRequestedIndex = 0;
+        int resourceOfferedIndex = 0;
 
-        for (int i = 0; i < resources_offered.length; i++){ // Sets the index of which resources are involved in the trade
-            if (resources_offered[i]>0){
-                resource_offered_index=i;
+        for (int i = 0; i < resourcesOffered.length; i++){ // Sets the index of which resources are involved in the trade
+            if (resourcesOffered[i]>0){
+                resourceOfferedIndex=i;
             }
-            if (resources_requested[i]>0){
-                resource_requested_index=i;
+            if (resourcesRequested[i]>0){
+                resourceRequestedIndex=i;
             }
         }
 
-        for (int quantity_available_to_offer_index = 1; quantity_available_to_offer_index < player_resources[resource_requested_index] + 1; quantity_available_to_offer_index++ ){ // loop through the quantity of resources to offer
-            for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index) - (quantity_available_to_offer_index - 1); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
-                for (int quantity_to_offer = 1; quantity_to_offer < (quantity_available_to_offer_index + 1); quantity_to_offer++) { // add the amount of resources to offer to the list
-                    resources_to_offer[resource_requested_index]++;
+        for (int quantityAvailableToOfferIndex = 1; quantityAvailableToOfferIndex < playerResources[resourceRequestedIndex] + 1; quantityAvailableToOfferIndex++ ){ // loop through the quantity of resources to offer
+            for (int quantityAvailableToRequestIndex = 1; quantityAvailableToRequestIndex < (exchangeRate * quantityAvailableToOfferIndex) - (quantityAvailableToOfferIndex - 1); quantityAvailableToRequestIndex++){ // loop to generate all possible combinations of offer for the current resource pair
+                for (int quantityToOffer = 1; quantityToOffer < (quantityAvailableToOfferIndex + 1); quantityToOffer++) { // add the amount of resources to offer to the list
+                    resourcesToOffer[resourceRequestedIndex]++;
                 }
-                for (int quantity_to_request = 1; quantity_to_request < (quantity_available_to_request_index + 1); quantity_to_request++){ // add the amount of resources to request to the list
-                    resources_to_request[resource_offered_index]++;
+                for (int quantityToRequest = 1; quantityToRequest < (quantityAvailableToRequestIndex + 1); quantityToRequest++){ // add the amount of resources to request to the list
+                    resourcesToRequest[resourceOfferedIndex]++;
                 }
-                if(!(resources_to_offer.equals(resources_requested) && resources_to_request.equals(resources_offered))){ // ensures the trade offer is not the same as the existing trade offer
-                    actions.add(new OfferPlayerTrade(resources_offered.clone(), resources_requested.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
+                if(!(resourcesToOffer.equals(resourcesRequested) && resourcesToRequest.equals(resourcesOffered))){ // ensures the trade offer is not the same as the existing trade offer
+                    actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
                 }
-                Arrays.fill(resources_to_offer,0);
-                Arrays.fill(resources_to_request,0);
+                Arrays.fill(resourcesToOffer,0);
+                Arrays.fill(resourcesToRequest,0);
             }
         }
 
