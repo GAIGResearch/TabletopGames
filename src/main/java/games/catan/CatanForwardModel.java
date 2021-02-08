@@ -87,11 +87,6 @@ public class CatanForwardModel extends AbstractForwardModel {
                         " doesn't have any targets available");
         }
         // handle scoring
-        if (action instanceof OfferPlayerTrade){
-            // add other player to the reactive player's list
-            gs.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction); // TODO move this into CTO somehow?
-            ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((OfferPlayerTrade)action).getOtherPlayerID());
-        }
         if (action instanceof BuildRoad) {
             BuildRoad br = (BuildRoad) action;
             // todo remove branches and cycles from road length
@@ -129,6 +124,14 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         // end player's turn; roll dice and allocate resources
         cto.endTurnStage(gs);
+
+
+        if (action instanceof OfferPlayerTrade){ //TODO need to move this somewhere
+            // add other player to the reactive player's list
+            gs.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction); // TODO move this into CTO somehow?
+            ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((OfferPlayerTrade)action).getOtherPlayerID());
+        }
+
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
             rollDiceAndallocateResources(gs);
         }

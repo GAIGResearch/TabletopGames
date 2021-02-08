@@ -21,6 +21,14 @@ public class OfferPlayerTrade extends AbstractAction {
         this.otherPlayerID = otherPlayerID;
     }
 
+    public OfferPlayerTrade(int[] resourcesOffered, int[] resourcesRequested, int offeringPlayerID, int otherPlayerID, int negotiationCount){
+        this.resourcesOffered = resourcesOffered;
+        this.resourcesRequested = resourcesRequested;
+        this.offeringPlayerID = offeringPlayerID;
+        this.otherPlayerID = otherPlayerID;
+        this.negotiationCount = negotiationCount;
+    }
+
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -83,4 +91,6 @@ public class OfferPlayerTrade extends AbstractAction {
     public int[] getResourcesRequested() {
         return resourcesRequested;
     }
+
+
 }

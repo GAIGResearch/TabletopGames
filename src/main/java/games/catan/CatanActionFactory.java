@@ -74,7 +74,8 @@ public class CatanActionFactory {
     }
 
     /**
-     * Calculates all possible PlayerTradeOffers
+     * Generates PlayerTradeOffers relating to single type trades
+     * i.e Lumber for Grain, Brick for Stone
      * @param gs
      * @return - ArrayList, PlayerTradeOffer type (unique).
      */
@@ -131,7 +132,7 @@ public class CatanActionFactory {
     static List<AbstractAction> getAcceptTradeActions(CatanGameState gs){
         ArrayList<AbstractAction> actions = new ArrayList();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-       g int[] resources = gs.getPlayerResources();
+        int[] resources = gs.getPlayerResources();
 
         if(CatanGameState.checkCost(resources, offeredPlayerTrade.getResourcesRequested())){
             actions.add(new AcceptTrade(offeredPlayerTrade));
@@ -140,10 +141,49 @@ public class CatanActionFactory {
         return actions;
     }
 
+    /**
+     * Generates PlayerTradeOffer actions that act as renegotiation on an existing trade offer
+     * This function only generates actions that involve changing the quantities of the offered/requested resources for
+     * single resource type trades
+     * @param gs
+     * @return
+     */
     static List<AbstractAction> getResponsePlayerTradeOfferActions (CatanGameState gs){
         ArrayList<AbstractAction> actions = new ArrayList();
+        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
+        int exchange_rate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
+        int[] player_resources = gs.getPlayerResources();
+        int[] resources_offered = offeredPlayerTrade.getResourcesOffered();
+        int[] resources_requested = offeredPlayerTrade.getResourcesRequested();
+        int[] resources_to_offer = new int[5];
+        int[] resources_to_request = new int[5];
+        int resource_requested_index = 0;
+        int resource_offered_index = 0;
 
-        //TODO implement generation of response actions
+        for (int i = 0; i < resources_offered.length; i++){ // Sets the index of which resources are involved in the trade
+            if (resources_offered[i]>0){
+                resource_offered_index=i;
+            }
+            if (resources_requested[i]>0){
+                resource_requested_index=i;
+            }
+        }
+
+        for (int quantity_available_to_offer_index = 1; quantity_available_to_offer_index < player_resources[resource_requested_index] + 1; quantity_available_to_offer_index++ ){ // loop through the quantity of resources to offer
+            for (int quantity_available_to_request_index = 1; quantity_available_to_request_index < (exchange_rate * quantity_available_to_offer_index) - (quantity_available_to_offer_index - 1); quantity_available_to_request_index++){ // loop to generate all possible combinations of offer for the current resource pair
+                for (int quantity_to_offer = 1; quantity_to_offer < (quantity_available_to_offer_index + 1); quantity_to_offer++) { // add the amount of resources to offer to the list
+                    resources_to_offer[resource_requested_index]++;
+                }
+                for (int quantity_to_request = 1; quantity_to_request < (quantity_available_to_request_index + 1); quantity_to_request++){ // add the amount of resources to request to the list
+                    resources_to_request[resource_offered_index]++;
+                }
+                if(!(resources_to_offer.equals(resources_requested) && resources_to_request.equals(resources_offered))){ // ensures the trade offer is not the same as the existing trade offer
+                    actions.add(new OfferPlayerTrade(resources_offered.clone(), resources_requested.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
+                }
+                Arrays.fill(resources_to_offer,0);
+                Arrays.fill(resources_to_request,0);
+            }
+        }
 
         return actions;
     }

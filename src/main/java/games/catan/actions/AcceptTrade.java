@@ -13,6 +13,7 @@ public class AcceptTrade extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
 
+
         return true;
     }
 
