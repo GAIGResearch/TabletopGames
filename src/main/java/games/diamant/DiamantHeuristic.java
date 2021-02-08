@@ -13,19 +13,23 @@ public class DiamantHeuristic implements IStateHeuristic {
      * If the player has more -> 1.0
      * Else if the player has less -> - 1.0
      * Else -> 0.0
-     * @param gs - game state to evaluate and score.
+     *
+     * @param gs        - game state to evaluate and score.
      * @param playerId: player for whom we want to estimate the score
      * @return a value -1,0,1 indicating how good is to be in this game state
      */
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        DiamantGameState dgs = (DiamantGameState) gs;
+        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        if (playerResult == Utils.GameResult.LOSE)
+            return -1;
+        if (playerResult == Utils.GameResult.WIN)
+            return 1;
 
-        int max_ngens= 0;      // small number
-        for (int i=0; i<dgs.getNPlayers(); i++)
-        {
-            if (i != playerId)
-            {
+        DiamantGameState dgs = (DiamantGameState) gs;
+        int max_ngens = 0;      // small number
+        for (int i = 0; i < dgs.getNPlayers(); i++) {
+            if (i != playerId) {
                 int nGems = dgs.treasureChests.get(i).getValue();
                 if (nGems > max_ngens)
                     max_ngens = nGems;
@@ -33,14 +37,9 @@ public class DiamantHeuristic implements IStateHeuristic {
         }
 
         int player_gems = dgs.treasureChests.get(playerId).getValue();
-        double score;
+        double score = player_gems / 139.0; // so is 1.0 if a player has every single gem....
 
-        if      (player_gems == max_ngens) score = 1.0;
-        else if (player_gems <  max_ngens) score = -1.0;
-        else                               score = 0.0;
-
-        if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING)
-            score = score / 2;
+        if (player_gems == max_ngens) score += 0.05;
 
         return score;
     }

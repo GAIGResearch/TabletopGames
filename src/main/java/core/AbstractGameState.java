@@ -8,6 +8,7 @@ import core.turnorders.TurnOrder;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
@@ -141,7 +142,7 @@ public abstract class AbstractGameState {
         s.history = new ArrayList<>(history);
         s.historyText = new ArrayList<>(historyText);
         if (extraChecks && historyText.size() > 1000) {
-            throw new AssertionError("History really shouldn;t be this long");
+            throw new AssertionError("History really shouldn't be over 1000 entries long?");
         }
             // we do not copy individual actions in history, as these are now dead and should not change
 
@@ -259,6 +260,7 @@ public abstract class AbstractGameState {
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
+
     void setGameID(int id) {gameID = id;} // package level deliberately
     public int getGameID() {return gameID;}
 

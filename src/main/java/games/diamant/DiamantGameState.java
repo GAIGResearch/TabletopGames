@@ -7,6 +7,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.SimultaneousTurnOrder;
 import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
@@ -50,7 +51,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public DiamantGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new SimultaneousTurnOrder(nPlayers));
     }
 
     @Override
@@ -89,7 +90,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.treasureChests = new ArrayList<>();
         dgs.playerInCave   = new ArrayList<>();
 
-
         for (Counter c : hands)
             dgs.hands.add(c.copy());
 
@@ -106,24 +106,19 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.playerInCave.addAll(playerInCave);
 
         // mainDeck and is actionsPlayed are hidden.
-        // For each player in the cave not being the actual player, a random action is obtained
         if (PARTIAL_OBSERVABLE && playerId != -1)
         {
             dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
 
-            // Randomize actions for other players
-            for (int i=0; i<getNPlayers(); i++)
-            {
-                if (playerInCave.get(i)) {
-                    if (i != playerId) {
-                        if (r.nextDouble() <= 0.5)
-                            dgs.actionsPlayed.put(i, new ContinueInCave());
-                        else
-                            dgs.actionsPlayed.put(i, new ExitFromCave());
-                    }
-                } else
-                    dgs.actionsPlayed.put(i, new OutOfCave());
-            }
+            dgs.actionsPlayed.clear();
+
+            // TODO: We also should remove the history entries for the removed actions
+            // This is not formally necessary, as nothing currently uses this information, but in
+            // a competition setting for example, it would be critical. There is no simple way to do this at the moment
+            // because history (as part of the super-class) is only copied after we return from this _copy() method.
+
+           // Randomize actions for other players (or any other modelling approach)
+            // is now the responsibility of the deciding agent (see for example OSLA)
 
         }
         return dgs;
@@ -264,4 +259,5 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     public List<Counter>     getHands()          { return hands;          }
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
+    public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
 }
