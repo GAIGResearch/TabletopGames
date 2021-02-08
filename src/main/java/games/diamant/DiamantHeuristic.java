@@ -27,11 +27,11 @@ public class DiamantHeuristic extends TunableParameters implements IStateHeurist
 
     @Override
     public void _reset() {
-        FACTOR_SCORE = (double) getDefaultParameterValue("FACTOR_SCORE");
-        FACTOR_LEADER = (double) getDefaultParameterValue("FACTOR_LEADER");
-        FACTOR_BEHIND = (double) getDefaultParameterValue("FACTOR_BEHIND");
-        FACTOR_AHEAD = (double) getDefaultParameterValue("FACTOR_AHEAD");
-        FACTOR_IN_CAVE = (double) getDefaultParameterValue("FACTOR_IN_CAVE");
+        FACTOR_SCORE = (double) getParameterValue("FACTOR_SCORE");
+        FACTOR_LEADER = (double) getParameterValue("FACTOR_LEADER");
+        FACTOR_BEHIND = (double) getParameterValue("FACTOR_BEHIND");
+        FACTOR_AHEAD = (double) getParameterValue("FACTOR_AHEAD");
+        FACTOR_IN_CAVE = (double) getParameterValue("FACTOR_IN_CAVE");
     }
 
     /**
