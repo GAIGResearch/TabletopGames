@@ -6,7 +6,10 @@ import core.components.Card;
 import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.CatanTurnOrder;
+
+import java.time.Year;
 
 public class PlayDevelopmentCard extends AbstractAction {
     Card card;
@@ -23,16 +26,16 @@ public class PlayDevelopmentCard extends AbstractAction {
         // check type of card and execute the relevant action
         String cardType = card.getProperty(CatanConstants.cardType).toString();
         if (card.getProperty(CatanConstants.cardType).toString().equals("Knight")){
-            // todo move robber to a selected tile and take a randomly selected resource from a player who has a settlement
-            //   on the chosen tile
             cgs.addKnight(cgs.getCurrentPlayer());
             ((CatanTurnOrder)cgs.getTurnOrder()).addAllReactivePlayers(gs);
             cgs.setGamePhase(CatanGameState.CatanGamePhase.Discard);
-            // todo steal resource
         } else if (card.getProperty(CatanConstants.cardType).toString().equals("Monopoly")) {
             System.out.println("The player picks a resource and all other players have to give all the their resources of that type");
+            // todo make sure that it is applicable to all resources
+            new Monopoly(CatanParameters.Resources.BRICK);
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Year of Plenty")) {
             System.out.println("Take any 2 resources from the resourceDeck");
+            new YearOfPlenty(CatanParameters.Resources.BRICK, CatanParameters.Resources.BRICK);
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Road Building")) {
             System.out.println("Player can immediately place 2 roads for free");
         }
