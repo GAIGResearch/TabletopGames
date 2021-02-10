@@ -1,6 +1,7 @@
 package games.tictactoe.gui;
 
 import core.components.GridBoard;
+import core.components.Token;
 import gui.views.ComponentView;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ public class TTTBoardView extends ComponentView {
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
 
-    public TTTBoardView(GridBoard<Character> gridBoard) {
+    public TTTBoardView(GridBoard<Token> gridBoard) {
         super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
         rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
         highlight = new ArrayList<>();
@@ -42,7 +43,7 @@ public class TTTBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<Character>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard<Token>) component, 0, 0);
 
         if (highlight.size() > 0) {
             g.setColor(Color.green);
@@ -55,7 +56,7 @@ public class TTTBoardView extends ComponentView {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<Character> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard<Token> gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -80,7 +81,7 @@ public class TTTBoardView extends ComponentView {
         }
     }
 
-    private void drawCell(Graphics2D g, Character element, int x, int y) {
+    private void drawCell(Graphics2D g, Token element, int x, int y) {
         // Paint cell background
         g.setColor(Color.lightGray);
         g.fillRect(x, y, defaultItemSize, defaultItemSize);

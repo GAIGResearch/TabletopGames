@@ -17,10 +17,12 @@ public class Token extends Component {
 
     public Token(String name){
         super(ComponentType.TOKEN, name);
+        this.tokenType = name;
     }
 
     public Token(String name, int ID){
         super(ComponentType.TOKEN, name, ID);
+        this.tokenType = name;
     }
 
     @Override
@@ -86,5 +88,10 @@ public class Token extends Component {
     @Override
     public final int hashCode() {
         return componentID;
+    }
+
+    @Override
+    public String toString() {
+        return tokenType;
     }
 }

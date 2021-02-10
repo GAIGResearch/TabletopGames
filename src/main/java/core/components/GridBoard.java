@@ -12,53 +12,47 @@ import utilities.Vector2D;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static core.CoreConstants.imgHash;
 import static utilities.Utils.getNeighbourhood;
 
-public class GridBoard<T> extends Component {
+public class GridBoard<T extends Component> extends Component {
 
     private int width;  // Width of the board
     private int height;  // Height of the board
 
-    private T[][] grid;  // 2D grid representation of this board
-    private Class<T> typeParameterClass;  // Type of this class
+    private Component[][] grid;  // 2D grid representation of this board
 
     protected GridBoard() {
         super(Utils.ComponentType.BOARD);
-        typeParameterClass = (Class<T>) String.class;
     }
 
-    public GridBoard(int width, int height, Class<T> typeParameterClass) {
+    public GridBoard(int width, int height) {
         super(Utils.ComponentType.BOARD);
         this.width = width;
         this.height = height;
-        this.typeParameterClass = typeParameterClass;
-        this.grid = (T[][]) Array.newInstance(typeParameterClass, height, width);
+        this.grid = new Component[height][width];
     }
 
-    public GridBoard(int width, int height, Class<T> typeParameterClass, T defaultValue) {
-        this(width, height, typeParameterClass);
+    public GridBoard(int width, int height, T defaultValue) {
+        this(width, height);
         for (int y = 0; y < height; y++)
             Arrays.fill(grid[y], defaultValue);
     }
 
-    public GridBoard(T[][] grid, Class<T> typeParameterClass) {
+    public GridBoard(Component[][] grid) {
         super(Utils.ComponentType.BOARD);
         this.width = grid[0].length;
         this.height = grid.length;
         this.grid = grid;
-        this.typeParameterClass = typeParameterClass;
     }
 
-    protected GridBoard(T[][] grid, Class<T> typeParameterClass, int ID) {
+    protected GridBoard(Component[][] grid, int ID) {
         super(Utils.ComponentType.BOARD, ID);
         this.width = grid[0].length;
         this.height = grid.length;
         this.grid = grid;
-        this.typeParameterClass = typeParameterClass;
     }
 
     public GridBoard(GridBoard<T> orig) {
@@ -66,7 +60,6 @@ public class GridBoard<T> extends Component {
         this.width = orig.getWidth();
         this.height = orig.getHeight();
         this.grid = orig.grid.clone();
-        this.typeParameterClass = orig.typeParameterClass;
     }
 
     /**
@@ -115,7 +108,7 @@ public class GridBoard<T> extends Component {
         this.width = width;
         this.height = height;
 
-        T[][] grid = (T[][]) Array.newInstance(typeParameterClass, height, width);
+        Component[][] grid = new Component[height][width];
         for (int i = 0; i < h; i++) {
             if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i + offsetY], offsetX, w);
         }
@@ -147,7 +140,7 @@ public class GridBoard<T> extends Component {
      */
     public T getElement(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height)
-            return grid[y][x];
+            return (T)grid[y][x];
         return null;
     }
 
@@ -156,7 +149,7 @@ public class GridBoard<T> extends Component {
      *
      * @return - 2D grid.
      */
-    public T[][] getGridValues() {
+    public Component[][] getGridValues() {
         return grid;
     }
 
@@ -178,7 +171,7 @@ public class GridBoard<T> extends Component {
      * @param orientation - int orientation, how many times it should be rotated clockwise
      * @return - new grid with the same elements and correct orientation.
      */
-    public T[][] rotate(int orientation) {
+    public Component[][] rotate(int orientation) {
         GridBoard<T> copy = copy();
         orientation %= 4;  // Maximum 4 sides to a grid
         for (int i = 0; i < orientation; i++) {
@@ -193,10 +186,10 @@ public class GridBoard<T> extends Component {
      * @param original - original grid to rotate
      * @return rotated grid
      */
-    private T[][] rotateClockWise(T[][] original) {
+    private Component[][] rotateClockWise(Component[][] original) {
         final int M = original.length;
         final int N = original[0].length;
-        T[][] grid = (T[][]) Array.newInstance(typeParameterClass, N, M);
+        Component[][] grid = new Component[N][M];
         for (int r = 0; r < M; r++) {
             for (int c = 0; c < N; c++) {
                 grid[c][M - 1 - r] = original[r][c];
@@ -212,20 +205,20 @@ public class GridBoard<T> extends Component {
      */
     public T[] flattenGrid() {
         int length = getHeight() * getWidth();
-        T[] array = (T[]) Array.newInstance(typeParameterClass, length);
+        Component[] array = new Component[length];
         for (int i = 0; i < getHeight(); i++) {
             System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
         }
-        return array;
+        return (T[])array;
     }
 
     @Override
     public GridBoard<T> copy() {
-        T[][] gridCopy = (T[][]) Array.newInstance(typeParameterClass, getHeight(), getWidth());
+        Component[][] gridCopy = new Component[getHeight()][getWidth()];
         for (int i = 0; i < height; i++) {
             if (width >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
         }
-        GridBoard<T> g = new GridBoard<>(gridCopy, typeParameterClass, componentID);
+        GridBoard<T> g = new GridBoard<>(gridCopy, componentID);
         copyComponentTo(g);
         return g;
     }
@@ -236,8 +229,7 @@ public class GridBoard<T> extends Component {
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
                 T t = getElement(x, y);
-                if (t instanceof Character && t.equals(' ')) s += '.';
-                else s += t + " ";
+                s += t.toString() + " ";
             }
             s += "\n";
         }
@@ -286,14 +278,7 @@ public class GridBoard<T> extends Component {
             properties.put(imgHash, new PropertyString((String) board.get("img")));
         }
 
-        String classType = ((String) board.get("class")).toLowerCase();
-        if (classType.equals("string")) {
-            typeParameterClass = (Class<T>) String.class;
-        } else if (classType.equals("character")) {
-            typeParameterClass = (Class<T>) Character.class;
-        }  // TODO: others
-
-        this.grid = (T[][]) Array.newInstance(typeParameterClass, height, width);
+        this.grid = new Component[height][width];
 
         JSONArray grids = (JSONArray) board.get("grid");
         int y = 0;
