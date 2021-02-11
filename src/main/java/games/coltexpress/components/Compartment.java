@@ -2,14 +2,17 @@ package games.coltexpress.components;
 
 import core.components.Component;
 import core.components.Deck;
+import core.interfaces.IComponentContainer;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.ColtExpressTypes;
 import utilities.Utils;
 
 import java.util.*;
 
+import static core.CoreConstants.VisibilityMode;
 
-public class Compartment extends Component {
+
+public class Compartment extends Component implements IComponentContainer<Deck<Loot>> {
 
     public Deck<Loot> lootInside;
     public Deck<Loot> lootOnTop;
@@ -25,8 +28,8 @@ public class Compartment extends Component {
 
     private Compartment(int nPlayers, int compartmentID, int ID){
         super(Utils.ComponentType.BOARD_NODE, ID);
-        this.lootInside = new Deck<>("lootInside");
-        this.lootOnTop = new Deck<>("lootOntop");
+        this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
+        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();
@@ -36,8 +39,8 @@ public class Compartment extends Component {
 
     public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
         super(Utils.ComponentType.BOARD_NODE);
-        this.lootInside = new Deck<>("lootInside");
-        this.lootOnTop = new Deck<>("lootOntop");
+        this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
+        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();
@@ -152,4 +155,14 @@ public class Compartment extends Component {
         return sb.toString();
     }
 
+    @Override
+    public List<Deck<Loot>> getComponents() {
+        return Arrays.asList(lootInside, lootOnTop);
+    }
+
+    @Override
+    public VisibilityMode getVisibilityMode() {
+        // The Loot is not visible..but the decks are.
+        return VisibilityMode.VISIBLE_TO_ALL;
+    }
 }

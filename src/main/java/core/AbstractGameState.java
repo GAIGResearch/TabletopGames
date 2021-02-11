@@ -3,13 +3,18 @@ package core;
 import core.actions.AbstractAction;
 import core.components.Area;
 import core.components.Component;
+import core.components.PartialObservableDeck;
+import core.interfaces.IComponentContainer;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
+import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 
@@ -97,22 +102,58 @@ public abstract class AbstractGameState {
     }
 
     // Getters
-    public final TurnOrder getTurnOrder(){return turnOrder;}
-    public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
-    public final Utils.GameResult getGameStatus() {  return gameStatus; }
-    public final AbstractParameters getGameParameters() { return this.gameParameters; }
-    public final int getNPlayers() { return turnOrder.nPlayers(); }
-    public final Utils.GameResult[] getPlayerResults() { return playerResults; }
-    public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
+    public final TurnOrder getTurnOrder() {
+        return turnOrder;
+    }
+
+    public final int getCurrentPlayer() {
+        return turnOrder.getCurrentPlayer(this);
+    }
+
+    public final Utils.GameResult getGameStatus() {
+        return gameStatus;
+    }
+
+    public final AbstractParameters getGameParameters() {
+        return this.gameParameters;
+    }
+
+    public final int getNPlayers() {
+        return turnOrder.nPlayers();
+    }
+
+    public final Utils.GameResult[] getPlayerResults() {
+        return playerResults;
+    }
+
+    public final boolean isNotTerminal() {
+        return gameStatus == GAME_ONGOING;
+    }
+
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
+
     public final Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
+
     public final Area getAllComponents() {
         return allComponents;
     }
+
+    /**
+     * While getAllComponents() returns an Area containing every component, this method
+     * returns a list of just the top-level items. So, for example, a Deck of Cards appears once here, while
+     * the Area returned by getAllComponents() will contain the Deck, and every single Card it contains too.
+     *
+     * @return Return
+     */
+    public final List<Component> getAllTopLevelComponents() {
+        return _getAllComponents();
+    }
+
+
     /* Limited access final methods */
 
     /**
@@ -189,10 +230,49 @@ public abstract class AbstractGameState {
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
      * Depending on the game, in the copies these might be completely missing, or just randomized.
+     *
+     * Generally speaking there is no need to implement this method if you consistently use PartialObservableDeck,
+     * Deck, and IComponentContainer (for anything else that contains Components)
+     *
+     * Only if you have some top-level item (say a single face-down Event Card that is not in a Deck), should you need to implement
+     * this.
+     *
      * @param playerId - ID of player observing the state.
      * @return - list of component IDs unobservable by the given player.
      */
-    protected abstract ArrayList<Integer> _getUnknownComponentsIds(int playerId);
+    protected List<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<>();
+    }
+
+    private List<Integer> unknownComponents(IComponentContainer<?> container, int player) {
+        ArrayList<Integer> retValue = new ArrayList<>();
+        if (container instanceof PartialObservableDeck<?>) {
+            PartialObservableDeck<?> pod = (PartialObservableDeck<?>) container;
+            for (int i = 0; i < pod.getSize(); i++) {
+                if (!pod.getVisibilityForPlayer(i, player))
+                    retValue.add(pod.get(i).getComponentID());
+            }
+        } else {
+            switch (container.getVisibilityMode()) {
+                case VISIBLE_TO_ALL:
+                    break;
+                case HIDDEN_TO_ALL:
+                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    break;
+                case VISIBLE_TO_OWNER:
+                    if (((Component) container).getOwnerId() != player)
+                        retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    break;
+                case ITS_COMPLICATED:
+                    throw new AssertionError("If something uses this visibility mode, then you need to also add code to this method please!");
+            }
+        }
+        // we also need to run through the contents in case that contains any Containers
+        container.getComponents().stream().filter(c -> c instanceof IComponentContainer<?>).forEach( c->
+                retValue.addAll(unknownComponents((IComponentContainer<?>) c, player))
+        );
+        return retValue;
+    }
 
     /**
      * Resets variables initialised for this game state.
@@ -201,6 +281,7 @@ public abstract class AbstractGameState {
 
     /**
      * Checks if the given object is the same as the current.
+     *
      * @param o - other object to test equals for.
      * @return true if the two objects are equal, false otherwise
      */
@@ -234,8 +315,19 @@ public abstract class AbstractGameState {
      * @param playerId - ID of player observing the state.
      * @return - list of component IDs unobservable by the given player.
      */
-    public final ArrayList<Integer> getUnknownComponentsIds(int playerId) {
-        return _getUnknownComponentsIds(playerId);
+    public final List<Integer> getUnknownComponentsIds(int playerId) {
+        // the default implementation assumes that IComponentContainer and PartialObservableDeck have all been
+        // used correctly. In this situation there should be no need for any extra game-specific coding.
+        // If there is, then use _getUnknownComponentsIds
+        List<Component> everything = getAllTopLevelComponents();
+        ArrayList<Integer> retValue = new ArrayList<>();
+
+        for (Component c : everything) {
+            if (c instanceof IComponentContainer<?>)
+                retValue.addAll(unknownComponents((IComponentContainer<?>) c, playerId));
+        }
+        retValue.addAll(_getUnknownComponentsIds(playerId));
+        return  retValue;
     }
 
     /**

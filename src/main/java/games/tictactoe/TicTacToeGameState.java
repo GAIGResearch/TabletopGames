@@ -63,11 +63,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<>();  // Always fully observable
-    }
-
-    @Override
     protected void _reset() {
         gridBoard = null;
     }

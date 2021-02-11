@@ -6,21 +6,16 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.SimultaneousTurnOrder;
-import games.diamant.actions.ContinueInCave;
-import games.diamant.actions.ExitFromCave;
-import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import games.diamant.components.DiamantTreasureChest;
-import games.diamant.components.DiamantHand;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
-import static java.util.stream.Collectors.*;
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
@@ -145,7 +140,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId)
     {
-        ArrayList<Integer> ids = mainDeck.getComponents().stream().map(Component::getComponentID).collect(toCollection(ArrayList::new));
+        ArrayList<Integer> ids = new ArrayList<>();
         ids.add(actionsPlayed.getComponentID());
         return ids;
     }

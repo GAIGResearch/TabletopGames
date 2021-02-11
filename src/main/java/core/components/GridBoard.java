@@ -1,5 +1,7 @@
 package core.components;
 
+import core.CoreConstants;
+import core.interfaces.IComponentContainer;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import org.json.simple.JSONArray;
@@ -14,11 +16,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.imgHash;
 import static utilities.Utils.getNeighbourhood;
 
-public class GridBoard<T> extends Component {
+public class GridBoard<T> extends Component implements IComponentContainer<Token> {
 
     private int width;  // Width of the board
     private int height;  // Height of the board
@@ -400,5 +403,19 @@ public class GridBoard<T> extends Component {
     @Override
     public final int hashCode() {
         return Objects.hash(componentID) + 5 * Arrays.hashCode(flattenGrid());
+    }
+
+    @Override
+    public List<Token> getComponents() {
+        // TODO: This is a bit of a hack, and the ID of each new Token will be different every time this is called
+        // However, this is only used in GameReport at the moment.
+        // Ideally <T extends Component> in the Class signature would solve this problem...but left for the future
+        // and I know Raluca is thinking about refactoring this anyway for performance reasons
+        return Arrays.stream(flattenGrid()).map(node -> new Token(node.toString())).collect(Collectors.toList());
+    }
+
+    @Override
+    public CoreConstants.VisibilityMode getVisibilityMode() {
+        return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
     }
 }

@@ -1,23 +1,24 @@
 package games.coltexpress;
 
-import core.AbstractParameters;
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
-import core.components.PartialObservableDeck;
-import games.coltexpress.ColtExpressTypes.*;
 import utilities.Pair;
 
 import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.VisibilityMode;
 
 public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 
@@ -43,7 +44,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     // The train to loot
     LinkedList<Compartment> trainCompartments;
     // The round cards
-    Deck<RoundCard> rounds;
+    PartialObservableDeck<RoundCard> rounds;
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
@@ -58,10 +59,8 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         components.add(plannedActions);
         components.addAll(trainCompartments);
 
-        for (Compartment compartment: trainCompartments) {
-            components.add(compartment.getLootInside());
-            components.add(compartment.getLootOnTop());
-        }
+        components.addAll(trainCompartments);
+        // we now support recursion of Decks (or any Container)
 
         components.addAll(playerHandCards);
         components.addAll(playerDecks);
@@ -170,7 +169,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             for (Map.Entry<Integer, ArrayList<Integer>> e: cardReplacements.entrySet()) {
                 // loop over each player, and shuffle their decks (which now includes all cards we can't see)
                 copy.playerDecks.get(e.getKey()).shuffle(r);
-                Deck<ColtExpressCard> bulletCards = new Deck<>("tempDeck");
+                Deck<ColtExpressCard> bulletCards = new Deck<>("tempDeck", VisibilityMode.HIDDEN_TO_ALL);
                 for (int i: e.getValue()) {
                     // This might be a bullet card...
                     ColtExpressCard topCard = copy.playerDecks.get(e.getKey()).draw();
@@ -210,50 +209,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            // Other player hands and decks are not visible
-            // All loot is not visible
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerHandCards.get(i).getComponentID());
-                    for (Component co: playerHandCards.get(i).getComponents()) {
-                        add(co.getComponentID());
-                    }
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component co: playerDecks.get(i).getComponents()) {
-                        add(co.getComponentID());
-                    }
-                }
-                add(playerLoot.get(i).getComponentID());
-                for (Component co: playerLoot.get(i).getComponents()) {
-                    add(co.getComponentID());
-                }
-            }
-            for (Compartment c: trainCompartments) {
-                add(c.lootInside.getComponentID());
-                for (Component co: c.lootInside.getComponents()) {
-                    add(co.getComponentID());
-                }
-                add(c.lootOnTop.getComponentID());
-                for (Component co: c.lootOnTop.getComponents()) {
-                    add(co.getComponentID());
-                }
-            }
-            // Following round cards are not visible
-            for (int i = getTurnOrder().getRoundCounter()+1; i < rounds.getSize(); i++) {
-                add(rounds.getComponents().get(i).getComponentID());
-            }
-            // Some planned actions might not be visible
-            for (int i = 0; i < plannedActions.getSize(); i++) {
-                if (!plannedActions.isComponentVisible(i, playerId)) {
-                    add(plannedActions.getComponents().get(i).getComponentID());
-                }
-            }
-        }};
-    }
-
-    @Override
     protected void _reset() {
         playerHandCards = new ArrayList<>();
         playerDecks = new ArrayList<>();
@@ -263,7 +218,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         playerPlayingBelle = -1;
         plannedActions = null;
         trainCompartments = new LinkedList<>();
-        rounds = new Deck<>("Rounds", -1);
+        rounds = new PartialObservableDeck<>("Rounds", -1);
         gamePhase = ColtExpressGamePhase.PlanActions;
     }
 

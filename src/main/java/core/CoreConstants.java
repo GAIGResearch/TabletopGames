@@ -34,4 +34,8 @@ public class CoreConstants {
     public enum GameEvents {
         GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
     }
+
+    public enum VisibilityMode {
+        VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, ITS_COMPLICATED
+    }
 }

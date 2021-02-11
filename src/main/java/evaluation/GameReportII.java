@@ -2,18 +2,13 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.components.*;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
-import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.components.Compartment;
-import games.diamant.DiamantGameState;
-import games.uno.UnoGameState;
-import games.virus.VirusGameState;
-import games.virus.components.VirusOrgan;
 import players.PlayerFactory;
-import utilities.*;
+import utilities.Pair;
+import utilities.TAGStatSummary;
+import utilities.TAGSummariser;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -52,7 +47,7 @@ public class GameReportII {
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
 
         int nGames = getArg(args, "nGames", 1000);
-        List<String> games = Arrays.asList(getArg(args, "games", "").split("\\|"));
+        List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "").split("\\|")));
         if (games.isEmpty())
             throw new IllegalArgumentException("Must specify at least one game, or 'all'");
         if (games.get(0).equals("all"))
@@ -69,6 +64,10 @@ public class GameReportII {
                         return new Pair<>(Integer.valueOf(str), Integer.valueOf(str));
                 }).collect(toList());
 
+        if (games.size() == 1 && nPlayers.size() > 1) {
+            for (int loop = 0; loop < nPlayers.size() - 1; loop++)
+                games.add(games.get(0));
+        }
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
@@ -91,6 +90,7 @@ public class GameReportII {
                 collectedData.put("PlayerType", playerDescriptor);
 
                 Game game = gameType.createGameInstance(playerCount);
+
                 for (int i = 0; i < nGames; i++) {
                     List<AbstractPlayer> allPlayers = new ArrayList<>();
                     for (int j = 0; j < playerCount; j++) {
@@ -98,11 +98,12 @@ public class GameReportII {
                     }
                     // Run games, resetting the player each time
                     game.reset(allPlayers);
-                    preGameProcessing(game, collectedData);
                     GameReportListener gameTracker = new GameReportListener(game.getForwardModel());
                     game.addListener(gameTracker);
+                    preGameProcessing(game, collectedData);
                     game.run();
                     postGameProcessing(game, collectedData);
+                    game.clearListeners();
                     collectedData.putAll(gameTracker.extractData());
                     logger.record(collectedData);
                     collectedData.clear();
@@ -131,7 +132,6 @@ public class GameReportII {
                 // each action taken, we record branching factor and states (this is triggered when the decision is made,
                 // so before it is executed
                 int player = state.getCurrentPlayer();
-
                 List<AbstractAction> allActions = fm.computeAvailableActions(state);
                 if (allActions.size() < 2) return;
 //                HashSet<Integer> forwardStates = new HashSet<>();
@@ -145,6 +145,7 @@ public class GameReportII {
                 Pair<Integer, int[]> allComp = countComponents(state);
                 components.add(allComp.a);
                 visibilityOnTurn.add(allComp.b[player] / (double) allComp.a);
+                //          System.out.printf("Turn: %d, Player: %d, Action: %s%n", state.getTurnOrder().getTurnCounter(), player, actionChosen);
             }
         }
 
@@ -203,53 +204,11 @@ public class GameReportII {
      */
     private static Pair<Integer, int[]> countComponents(AbstractGameState state) {
         int[] hiddenByPlayer = new int[state.getNPlayers()];
-        int total = componentSize(state.getAllComponents(), hiddenByPlayer);
-        if (state instanceof VirusGameState || state instanceof ColtExpressGameState ||
-                state instanceof DiamantGameState || state instanceof UnoGameState) {
-            // TODO: a hack for the moment - ultimately I want to rely purely on the counts back from GameStates
+        int total = state.getAllComponents().size();
             for (int p = 0; p < hiddenByPlayer.length; p++)
                 hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
-        }
         return new Pair<>(total, hiddenByPlayer);
     }
-
-    private static int componentSize(Component c, int[] hiddenByPlayer) {
-        // TODO: Move the game-specific logic in the if...else... block into the relevant Games where it belongs
-        if (c instanceof PartialObservableDeck) {
-            PartialObservableDeck<?> deck = (PartialObservableDeck<?>) c;
-            for (int i = 0; i < deck.getSize(); i++) {
-                for (int p = 0; p < hiddenByPlayer.length; p++) {
-                    if (!deck.getVisibilityForPlayer(i, p))
-                        hiddenByPlayer[p]++;
-                }
-            }
-            return deck.getSize();
-        } else if (c instanceof Deck) {
-            Deck<?> deck = (Deck<?>) c;
-            for (int i = 0; i < hiddenByPlayer.length; i++)
-                hiddenByPlayer[i] += deck.getSize();
-            return deck.getSize();
-        } else if (c instanceof GraphBoard) {
-            return ((GraphBoard) c).getBoardNodes().size();
-        } else if (c instanceof GridBoard) {
-            return ((GridBoard<?>) c).flattenGrid().length;
-        } else if (c instanceof Area) {
-            int count = 0;
-            for (Component sub : ((Area) c).getComponents().values()) {
-                count += componentSize(sub, hiddenByPlayer);
-            }
-            return count;
-        } else if (c instanceof Compartment) {
-            Compartment comp = (Compartment) c;
-            return comp.lootInside.getSize() + comp.lootOnTop.getSize();
-        } else if (c instanceof VirusOrgan) {
-            VirusOrgan organ = (VirusOrgan) c;
-            return organ.cards.getSize();
-        } else {
-            return 1;
-        }
-    }
-
 
     private static void postGameProcessing(Game game, Map<String, Object> data) {
 

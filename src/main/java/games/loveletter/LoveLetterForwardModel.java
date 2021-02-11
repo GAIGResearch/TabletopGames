@@ -1,10 +1,10 @@
 package games.loveletter;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.AbstractForwardModel;
-import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.loveletter.actions.*;
@@ -13,9 +13,8 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.*;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
-import static core.CoreConstants.VERBOSE;
 
 
 public class LoveLetterForwardModel extends AbstractForwardModel {
@@ -98,7 +97,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
                 llgs.playerHandCards.add(playerCards);
 
                 // create a player's discard pile, which is visible to all players
-                Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i, i);
+                Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i, i, VisibilityMode.VISIBLE_TO_ALL);
                 llgs.playerDiscardCards.add(discardCards);
             }
         } else {

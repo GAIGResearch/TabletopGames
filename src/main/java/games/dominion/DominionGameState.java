@@ -11,6 +11,7 @@ import utilities.Utils;
 import java.util.*;
 import java.util.function.Function;
 
+import static core.CoreConstants.*;
 import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
 
@@ -253,7 +254,7 @@ public class DominionGameState extends AbstractGameState {
                 allCards = getDeck(deck, playerId);
                 break;
             case ALL:
-                allCards = new Deck<>("temp");
+                allCards = new Deck<>("temp", VisibilityMode.HIDDEN_TO_ALL);
                 allCards.add(playerHands[playerId]);
                 allCards.add(playerDiscards[playerId]);
                 allCards.add(playerDrawPiles[playerId]);
@@ -404,18 +405,6 @@ public class DominionGameState extends AbstractGameState {
     }
 
     /**
-     * Provide a list of component IDs which are hidden in partially observable copies of games.
-     * Depending on the game, in the copies these might be completely missing, or just randomized.
-     *
-     * @param playerId - ID of player observing the state.
-     * @return - list of component IDs unobservable by the given player.
-     */
-    @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<>();
-    }
-
-    /**
      * Resets variables initialised for this game state.
      */
     @Override
@@ -425,14 +414,14 @@ public class DominionGameState extends AbstractGameState {
         playerDiscards = new Deck[playerCount];
         playerTableaux = new Deck[playerCount];
 
-        trashPile = new Deck<>("Trash");
+        trashPile = new Deck<>("Trash", VisibilityMode.VISIBLE_TO_ALL);
         for (int i = 0; i < playerCount; i++) {
             boolean[] handVisibility = new boolean[playerCount];
             handVisibility[i] = true;
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
             playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[playerCount]);
-            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1);
-            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1);
+            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VisibilityMode.VISIBLE_TO_ALL);
+            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VisibilityMode.VISIBLE_TO_ALL);
         }
     }
 

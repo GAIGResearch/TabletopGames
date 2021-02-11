@@ -1,12 +1,12 @@
 package games.explodingkittens;
 
-import core.AbstractParameters;
-import core.components.Component;
-import core.interfaces.IGamePhase;
-import core.actions.AbstractAction;
-import core.components.Deck;
 import core.AbstractGameState;
+import core.AbstractParameters;
+import core.actions.AbstractAction;
+import core.components.Component;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
@@ -14,6 +14,7 @@ import utilities.Utils;
 import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.VisibilityMode;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 
@@ -88,7 +89,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
             // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
             ekgs.drawPile.shuffleVisible(r, playerId, false);
-            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp");
+            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
@@ -138,26 +139,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     @Override
     public double getGameScore(int playerId) {
         return 0;
-    }
-
-    @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerHandCards.get(i).getComponentID());
-                    for (Component c: playerHandCards.get(i).getComponents()) {
-                        add(c.getComponentID());
-                    }
-                }
-            }
-            add(drawPile.getComponentID());
-            for (int i = 0; i < drawPile.getSize(); i++) {
-                if (!drawPile.isComponentVisible(i, playerId)) {
-                    add(drawPile.get(i).getComponentID());
-                }
-            }
-        }};
     }
 
     @Override
