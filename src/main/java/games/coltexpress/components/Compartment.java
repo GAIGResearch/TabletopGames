@@ -28,8 +28,11 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
 
     private Compartment(int nPlayers, int compartmentID, int ID){
         super(Utils.ComponentType.BOARD_NODE, ID);
-        this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
-        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
+        // Technically loot is face-down, and hence not Visible. But...players know which ones are Jewels and StrongBoxes
+        // So all that is actually hidden is which purses are 250 versus 500...on the whole this means that much more information
+        // is known than unknown.
+        this.lootInside = new Deck<>("lootInside", VisibilityMode.VISIBLE_TO_ALL);
+        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.VISIBLE_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();
@@ -39,8 +42,8 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
 
     public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
         super(Utils.ComponentType.BOARD_NODE);
-        this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
-        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
+        this.lootInside = new Deck<>("lootInside", VisibilityMode.VISIBLE_TO_ALL);
+        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.VISIBLE_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();

@@ -9,10 +9,7 @@ import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -139,6 +136,7 @@ public abstract class AbstractGameState {
     }
 
     public final Area getAllComponents() {
+        addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
         return allComponents;
     }
 
@@ -320,7 +318,7 @@ public abstract class AbstractGameState {
         // used correctly. In this situation there should be no need for any extra game-specific coding.
         // If there is, then use _getUnknownComponentsIds
         List<Component> everything = getAllTopLevelComponents();
-        ArrayList<Integer> retValue = new ArrayList<>();
+        List<Integer> retValue = new ArrayList<>();
 
         for (Component c : everything) {
             if (c instanceof IComponentContainer<?>)

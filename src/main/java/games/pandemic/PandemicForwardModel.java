@@ -145,7 +145,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         int capacity = pp.max_cards_per_player;
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = new Area(i, "Player Area");
-            Deck<Card> playerHand = new Deck<>("Player Hand", VISIBLE_TO_OWNER);
+            Deck<Card> playerHand = new Deck<>("Player Hand", VISIBLE_TO_ALL);
             playerHand.setOwnerId(i);
             playerHand.setCapacity(capacity);
             playerArea.putComponent(playerHandHash, playerHand);

@@ -2,6 +2,7 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IComponentContainer;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
@@ -26,44 +27,48 @@ public class GameReportII {
      */
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        if (argsList.isEmpty() || argsList.contains("--help") || argsList.contains("-h")) System.out.println(
-                "There are a number of possible arguments:\n" +
-                        "\tgames=         A list of the games to be played. If there is more than one, then use a \n" +
-                        "\t               pipe-delimited list, for example games=Uno|ColtExpress|Pandemic.\n" +
-                        "\t               'all' can be used to indicate that all games should be analysed.\n" +
-                        "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
-                        "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
-                        "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
-                        "\t               Defaults to SummaryLogger. \n" +
-                        "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
-                        "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
-                        "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
-                        "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
-                        "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n"
-        );
+        if (argsList.contains("--help") || argsList.contains("-h")) {
+            System.out.println(
+                    "There are a number of possible arguments:\n" +
+                            "\tgames=         A list of the games to be played. If there is more than one, then use a \n" +
+                            "\t               pipe-delimited list, for example games=Uno|ColtExpress|Pandemic.\n" +
+                            "\t               The default is 'all' to indicate that all games should be analysed.\n" +
+                            "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
+                            "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
+                            "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
+                            "\t               Defaults to SummaryLogger. \n" +
+                            "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
+                            "\tnPlayers=      The total number of players in each game (the default is 'all') \n " +
+                            "\t               A range can also be specified, for example 3-5. \n " +
+                            "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
+                            "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
+                            "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n"
+            );
+            return;
+        }
 
         // Get Player to be used
         String playerDescriptor = getArg(args, "player", "random");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
 
         int nGames = getArg(args, "nGames", 1000);
-        List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "").split("\\|")));
-        if (games.isEmpty())
-            throw new IllegalArgumentException("Must specify at least one game, or 'all'");
+        List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
         if (games.get(0).equals("all"))
-            games = Arrays.stream(GameType.values()).map(String::valueOf).collect(toList());
+            games = Arrays.stream(GameType.values()).map(Enum::name).collect(toList());
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
-        // TODO: Implement recognition for 'all' to apply min/max for each game
-        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "nPlayers", "2").split("\\|"))
+        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "nPlayers", "all").split("\\|"))
                 .map(str -> {
                     if (str.contains("-")) {
                         int hyphenIndex = str.indexOf("-");
                         return new Pair<>(Integer.valueOf(str.substring(0, hyphenIndex)), Integer.valueOf(str.substring(hyphenIndex + 1)));
+                    } else if (str.equals("all")) {
+                        return new Pair<>(-1, -1); // this is later interpreted as "All the player counts"
                     } else
                         return new Pair<>(Integer.valueOf(str), Integer.valueOf(str));
                 }).collect(toList());
 
+        // if only one game size was provided, then it applies to all games in the list
         if (games.size() == 1 && nPlayers.size() > 1) {
             for (int loop = 0; loop < nPlayers.size() - 1; loop++)
                 games.add(games.get(0));
@@ -78,10 +83,18 @@ public class GameReportII {
             GameType gameType = GameType.valueOf(games.get(gameIndex));
 
             Pair<Integer, Integer> playerCounts = nPlayers.size() == 1 ? nPlayers.get(0) : nPlayers.get(gameIndex);
-            int minPlayers = playerCounts.a;
-            int maxPlayers = playerCounts.b;
+            int minPlayers = playerCounts.a > -1 ? playerCounts.a : gameType.getMinPlayers();
+            int maxPlayers = playerCounts.b > -1 ? playerCounts.b : gameType.getMaxPlayers();
             for (int playerCount = minPlayers; playerCount <= maxPlayers; playerCount++) {
                 System.out.printf("Game: %s, Players: %d\n", gameType.name(), playerCount);
+                if (gameType.getMinPlayers() > playerCount) {
+                    System.out.printf("Skipping game - minimum player count is %d%n", gameType.getMinPlayers());
+                    continue;
+                }
+                if (gameType.getMaxPlayers() < playerCount) {
+                    System.out.printf("Skipping game - maximum player count is %d%n", gameType.getMaxPlayers());
+                    continue;
+                }
                 IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
 
                 Map<String, Object> collectedData = new HashMap<>();
@@ -204,14 +217,15 @@ public class GameReportII {
      */
     private static Pair<Integer, int[]> countComponents(AbstractGameState state) {
         int[] hiddenByPlayer = new int[state.getNPlayers()];
-        int total = state.getAllComponents().size();
-            for (int p = 0; p < hiddenByPlayer.length; p++)
-                hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
+        // we do not include containers in the count...just the lowest-level items
+        // open to debate on this. But we are consistent across State Size and Hidden Information stats
+        int total = (int) state.getAllComponents().stream().filter(c -> !(c instanceof IComponentContainer)).count();
+        for (int p = 0; p < hiddenByPlayer.length; p++)
+            hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
         return new Pair<>(total, hiddenByPlayer);
     }
 
     private static void postGameProcessing(Game game, Map<String, Object> data) {
-
         //    Retrieves a list with one entry per game tick, each a pair (active player ID, # actions)
         List<Pair<Integer, Integer>> actionSpaceRecord = game.getActionSpaceSize();
         TAGStatSummary stats = actionSpaceRecord.stream()

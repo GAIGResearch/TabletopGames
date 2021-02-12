@@ -1,9 +1,11 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import static utilities.Utils.GameResult.GAME_END;
@@ -58,7 +60,10 @@ public class ColtExpressTurnOrder extends TurnOrder {
      * @param round - round card.
      * @param turn - turn index (of turn type array in round card).
      */
-    private void initTurn(RoundCard round, int turn){
+    private void initTurn(RoundCard round, int turn, ColtExpressGameState state){
+        boolean[] allTrue = new boolean[nPlayers];
+        Arrays.fill(allTrue, true);
+        state.rounds.setVisibilityOfComponent(roundCounter, allTrue);
         currentTurnType = round.getTurnTypes()[turn];
         switch (round.getTurnTypes()[turn]){
             case NormalTurn:
@@ -126,6 +131,8 @@ public class ColtExpressTurnOrder extends TurnOrder {
      */
     @Override
     public void endRound(AbstractGameState gameState) {
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+
         turnCounter = 0;
         fullPlayerTurnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
@@ -134,7 +141,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         RoundCard currentRoundCard = cegs.getRounds().get(roundCounter);
         if (fullPlayerTurnCounter < currentRoundCard.getTurnTypes().length) {
             // Initialize next full player turn
-            initTurn(currentRoundCard, fullPlayerTurnCounter);
+            initTurn(currentRoundCard, fullPlayerTurnCounter, cegs);
         } else {
             // All turns in this round played, execute the actions
             gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
@@ -155,7 +162,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
             turnCounter = 0;
             fullPlayerTurnCounter = 0;
             turnOwner = firstPlayerOfRound;
-            initTurn(gameState.getRounds().get(roundCounter), 0);
+            initTurn(gameState.getRounds().get(roundCounter), 0, gameState);
             gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.PlanActions);
             gameState.setGameStatus(GAME_ONGOING);
         } else {

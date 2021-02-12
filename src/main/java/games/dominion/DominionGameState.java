@@ -379,7 +379,7 @@ public class DominionGameState extends AbstractGameState {
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      *
-     * @param playerId
+     * @param playerId - id of the player
      * @return - double, score of current state
      */
     @Override

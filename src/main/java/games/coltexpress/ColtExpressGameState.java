@@ -58,10 +58,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         List<Component> components = new ArrayList<>();
         components.add(plannedActions);
         components.addAll(trainCompartments);
-
-        components.addAll(trainCompartments);
-        // we now support recursion of Decks (or any Container)
-
         components.addAll(playerHandCards);
         components.addAll(playerDecks);
         components.addAll(playerLoot);
@@ -218,7 +214,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         playerPlayingBelle = -1;
         plannedActions = null;
         trainCompartments = new LinkedList<>();
-        rounds = new PartialObservableDeck<>("Rounds", -1);
+        rounds = new PartialObservableDeck<>("Rounds", -1, getNPlayers());
         gamePhase = ColtExpressGamePhase.PlanActions;
     }
 

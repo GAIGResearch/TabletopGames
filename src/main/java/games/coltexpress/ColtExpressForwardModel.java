@@ -87,7 +87,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     }
 
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
-        cegs.rounds = new PartialObservableDeck<>("Rounds", -1);
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
 
         // Add random round cards
         ArrayList<Integer> availableRounds = new ArrayList<>();
@@ -100,6 +100,10 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
             availableRounds.remove(Integer.valueOf(choice));
         }
+        // set first card to be visible
+        boolean[] allTrue = new boolean[cegs.getNPlayers()];
+        Arrays.fill(allTrue, true);
+        cegs.rounds.setVisibilityOfComponent(0, allTrue);
 
         // Add 1 random end round card
         cegs.rounds.add(cegs.getRandomEndRoundCard(cep, cegs.getTurnOrder().getRoundCounter()));
