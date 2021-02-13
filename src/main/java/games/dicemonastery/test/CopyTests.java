@@ -1,6 +1,7 @@
 package games.dicemonastery.test;
 
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.BakeBread;
 import games.dicemonastery.actions.HireNovice;
@@ -11,8 +12,9 @@ import players.simple.RandomPlayer;
 import java.util.List;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.CHAPEL;
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static org.junit.Assert.*;
 
 
@@ -190,6 +192,69 @@ public class CopyTests {
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
+    }
+
+
+    @Test
+    public void foodIsRemovedToFeedMonksAtYearEnd() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        state.addResource(1, BERRIES, 1);
+        state.addResource(1, BREAD, 10);
+        state.addResource(1, HONEY, 2);
+        state.addResource(1, GRAIN, 20);
+        state.addResource(2, BERRIES, 1);
+        state.addResource(2, BREAD, 2);
+        state.addResource(2, HONEY, 10);
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void allSurplusPerishablesAreRemovedAtYearEnd() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        state.addResource(0, BERRIES, 20);
+        state.addResource(0, BREAD, 20);
+        state.addResource(0, HONEY, 20);
+        state.addResource(0, CALF_SKIN, 20 - state.getResource(0, CALF_SKIN, STOREROOM));
+        state.addResource(0, BEER, 20 - state.getResource(0, BEER, STOREROOM));
+        state.addResource(0, GRAIN, 20 - state.getResource(0, GRAIN, STOREROOM));
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new DoNothing()); // don't promote anyone
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+
     }
 
 }

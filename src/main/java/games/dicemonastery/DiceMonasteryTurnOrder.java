@@ -100,18 +100,21 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         } else {
                             // we have completed this phase
                             season = season.next();
+                            if (season == WINTER)
+                                state.winterHousekeeping();
                             // and set the player back to the abbot
                             turnOwner = abbot;
                             state.setGamePhase(Phase.PLACE_MONKS);
-                            if (season == WINTER) {
-                                // we do the winter housekeeping
-                                state.winterHousekeeping();
-                            }
                         }
                     }
                 }
                 break;
             case WINTER:
+                if (state.monksIn(null, turnOwner).size() == 0) {
+                    // get a free novice if you ever run out of monks
+                    state.createMonk(1, turnOwner); // goes into the DORMITORY
+                }
+                turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
                 // and then increment year
                 if (turnOwner == abbot) {
                     season = season.next();

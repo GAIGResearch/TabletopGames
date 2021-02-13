@@ -16,8 +16,7 @@ import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season;
-import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
@@ -515,5 +514,20 @@ public class ActionTests {
             m.promote(state);
         } while (m.getPiety() < 6);
         m.promote(state);
+    }
+
+    @Test
+    public void endOfYearPromotion() {
+        turnOrder.setAbbot(1);
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getSeason() != WINTER);
+
+        // We have now moved to Winter
+        assertEquals(1, state.getCurrentPlayer());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PromoteMonk));
+        Set<Integer> pietyLevels = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).boxed().collect(toSet());
+        assertEquals(pietyLevels.size(), actions.size());
     }
 }
