@@ -23,6 +23,7 @@ public class CatanGameState extends AbstractGameState {
     private CatanData data;
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
+    protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
     protected int scores[]; // score for each player
     protected int victoryPoints[]; // secret points from victory cards
     protected int knights[]; // knight count for each player
@@ -216,6 +217,14 @@ public class CatanGameState extends AbstractGameState {
 
     public int[] getExchangeRates(){
         return exchangeRates[getCurrentPlayer()];
+    }
+
+    public void setBoughtDevCard(Card card){
+        this.boughtDevCard = card;
+    }
+
+    public Card getBoughtDevCard(){
+        return boughtDevCard;
     }
 
     public int getRoadDistance(int x, int y, int edge){

@@ -312,6 +312,10 @@ public class CatanActionFactory {
         // get playerHand; for each card add a new action
         Deck<Card> playerDevDeck = (Deck<Card>)gs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         for (Card c: playerDevDeck.getComponents()){
+            // avoid playing a card that has been bought in the same turn
+            if (c == gs.getBoughtDevCard()){
+                continue;
+            }
             // victory points are automatically revealed once a player has 10+ points
             String cardType = c.getProperty(CatanConstants.cardType).toString();
             if (cardType.equals("Knight")){

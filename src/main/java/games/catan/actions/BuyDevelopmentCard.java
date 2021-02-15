@@ -18,6 +18,7 @@ public class BuyDevelopmentCard extends AbstractAction {
         Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         Deck<Card> devDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDeckHash);
         Card card = devDeck.pick(0);
+        cgs.setBoughtDevCard(card);
         if (card != null) {
             playerDevDeck.add(card);
             //  if card is a Victory Point card and player already has 9 points then use it

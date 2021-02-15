@@ -129,10 +129,10 @@ public class CatanForwardModel extends AbstractForwardModel {
         // end player's turn; roll dice and allocate resources
         cto.endTurnStage(gs);
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
+            // reset recently bought dev card to null
+            gs.boughtDevCard = null;
             rollDiceAndallocateResources(gs);
         }
-
-
 
     }
 
