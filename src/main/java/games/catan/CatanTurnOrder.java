@@ -75,6 +75,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
     }
 
+    // todo check if transitions are correct in all cases
     public void endTurnStage(AbstractGameState gameState){
         /* Robber -> Discard
            Trade -> Build
@@ -104,10 +105,16 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
             endReaction(gameState);
+            gameState.setGamePhase(CatanGameState.CatanGamePhase.Steal);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
             endReaction(gameState);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.PlaceRoad)){
+            endPlayerTurn(gameState);
+            gameState.setGamePhase(nextGamePhase);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){

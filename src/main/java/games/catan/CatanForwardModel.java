@@ -139,7 +139,7 @@ public class CatanForwardModel extends AbstractForwardModel {
     private void rollDiceAndallocateResources(CatanGameState gs){
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
-        gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
+        gs.setRollValue(getDiceRoll(gs.getGameParameters().getRandomSeed()));
         if (VERBOSE) {
             System.out.println("New role value = " + gs.rollValue);
         }
@@ -345,7 +345,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         return graph;
     }
 
-    public void setHarbors(CatanTile[][] board){
+    private void setHarbors(CatanTile[][] board){
         // set harbors along the tiles where the SEA borders the land
         ArrayList<Integer> harbors = new ArrayList<>();
         for (Map.Entry<CatanParameters.HarborTypes, Integer> entry: CatanParameters.harborCount.entrySet()){
@@ -380,7 +380,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
     }
 
-    public int rollDice(long seed){
+    public int getDiceRoll(long seed){
         /* Rolls 2 random dices given a single random seed */
         Random r1 = new Random(seed + rollCounter);
         rollCounter += 1;

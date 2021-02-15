@@ -305,10 +305,8 @@ public class CatanActionFactory {
     }
 
     public static List<AbstractAction> getDevCardActions(CatanGameState gs){
+        // todo player should not be able to play a dev card bought in the same round
         // Player can buy dev card and play one
-        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList();
 
         // get playerHand; for each card add a new action
@@ -316,33 +314,44 @@ public class CatanActionFactory {
         for (Card c: playerDevDeck.getComponents()){
             // victory points are automatically revealed once a player has 10+ points
             String cardType = c.getProperty(CatanConstants.cardType).toString();
-            if (!cardType.equals("Victory Points")){
-                actions.add(new PlayDevelopmentCard(c));
-            }
-            // todo handle all the dev card actions here
-            // todo cards are not actually removed only with the PlayDevelopmentCard
             if (cardType.equals("Knight")){
-                actions.add(new PlayDevelopmentCard(c));
+                actions.add(new PlayKnightCard(c));
             }
             if (cardType.equals("Monopoly")){
                 for (CatanParameters.Resources resource: CatanParameters.Resources.values()){
-                    actions.add(new Monopoly(resource));
+                    actions.add(new Monopoly(resource, c));
                 }
             }
             if (cardType.equals("Year of Plenty")){
                 for (CatanParameters.Resources resource1: CatanParameters.Resources.values()){
                     for (CatanParameters.Resources resource2: CatanParameters.Resources.values()) {
-                        actions.add(new YearOfPlenty(resource1, resource2));
+                        actions.add(new YearOfPlenty(resource1, resource2, c));
                     }
                 }
             }
             if (cardType.equals("Road Building")){
-                // todo create 2 roads
-                actions.add(new PlayDevelopmentCard(c));
+                for (Road road: getRoadsToBuild(gs))
+                    actions.add(new PlaceRoad(road, c));
             }
         }
 
         return actions;
+    }
+
+    public static List<Road> getRoadsToBuild(CatanGameState gs){
+        CatanTile[][] board = gs.getBoard();
+        ArrayList<Road> roads = new ArrayList<>();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
+                    if (checkRoadPlacement(i, tile, gs)){
+                        roads.add(tile.getRoads()[i]);
+                    }
+                }
+            }
+        }
+        return roads;
     }
 
     public static List<AbstractAction> getTradeActions(CatanGameState gs){

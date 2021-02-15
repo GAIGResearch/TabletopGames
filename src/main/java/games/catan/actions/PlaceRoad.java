@@ -2,27 +2,29 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Card;
 import core.components.Counter;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.CatanTile;
 import games.catan.components.Road;
 
 import static core.CoreConstants.VERBOSE;
 
-// Builds the Road by reference
-public class BuildRoadByRef extends AbstractAction {
+// Places a road by reference - player is not charged resources
+public class PlaceRoad extends AbstractAction {
     Road road;
+    Card card;
 
-    public BuildRoadByRef(Road road){
+    public PlaceRoad(Road road, Card card){
         this.road = road;
+        this.card = card;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        CatanTile[][] board = cgs.getBoard();
+
         if (road.getOwner() == -1) {
             if (((Counter)cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum()){
                 if (VERBOSE)
@@ -39,16 +41,16 @@ public class BuildRoadByRef extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        BuildRoadByRef copy = new BuildRoadByRef(road);
+        PlaceRoad copy = new PlaceRoad(road, card);
         return copy;
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
-        if (other instanceof BuildRoadByRef){
-            BuildRoadByRef otherAction = (BuildRoadByRef)other;
-            return road.equals(otherAction.road);
+        if (other instanceof PlaceRoad){
+            PlaceRoad otherAction = (PlaceRoad)other;
+            return road.equals(otherAction.road) && card.equals(otherAction.card);
         }
         return false;
     }
@@ -60,6 +62,6 @@ public class BuildRoadByRef extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Buildroad by reference with road = " + road.toString();
+        return "Place Road with road = " + road.toString() + " and card = " + card.toString();
     }
 }

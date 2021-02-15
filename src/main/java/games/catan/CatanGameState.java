@@ -43,7 +43,8 @@ public class CatanGameState extends AbstractGameState {
         Robber,
         Discard,
         Steal,
-        TradeReaction
+        TradeReaction,
+        PlaceRoad,
     }
 
     // Collection of areas, mapped to player ID, -1 is the general game area containing the board, counters and several decks.
@@ -156,6 +157,10 @@ public class CatanGameState extends AbstractGameState {
             knights[playerID] += 1;
             updateLargestArmy((CatanParameters)getGameParameters());
         }
+    }
+
+    public int[] getKnights(){
+        return knights.clone();
     }
 
     public void addVictoryPoint(int playerID){

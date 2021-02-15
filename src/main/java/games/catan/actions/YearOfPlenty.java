@@ -15,16 +15,20 @@ import static core.CoreConstants.playerHandHash;
 public class YearOfPlenty extends AbstractAction {
     CatanParameters.Resources resource1;
     CatanParameters.Resources resource2;
+    Card card;
 
-    public YearOfPlenty(CatanParameters.Resources resource1, CatanParameters.Resources resource2){
+    public YearOfPlenty(CatanParameters.Resources resource1, CatanParameters.Resources resource2, Card card){
         this.resource1 = resource1;
         this.resource2 = resource2;
+        this.card = card;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         List<Card> playerResourceDeck = ((Deck<Card>)cgs.getComponentActingPlayer(playerHandHash)).getComponents();
         List<Card> commonResourceDeck = ((Deck<Card>)cgs.getComponent(playerHandHash)).getComponents();
+        Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
+        Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
         boolean resource1_done = false;
         boolean resource2_done = false;
         for (int i = 0; i < commonResourceDeck.size(); i++){
@@ -40,6 +44,9 @@ public class YearOfPlenty extends AbstractAction {
                 resource2_done = true;
             }
             if (resource1_done && resource2_done){
+                // Knight card gets "discarded" but it remains known in gamestate
+                playerDevDeck.remove(this.card);
+                developmentDiscardDeck.add(this.card);
                 return true;
             }
         }
@@ -49,7 +56,7 @@ public class YearOfPlenty extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new YearOfPlenty(resource1, resource2);
+        return new YearOfPlenty(resource1, resource2, card);
     }
 
     @Override
@@ -57,7 +64,7 @@ public class YearOfPlenty extends AbstractAction {
         if (this == other) return true;
         if (other instanceof YearOfPlenty){
             YearOfPlenty otherAction = (YearOfPlenty)other;
-            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2);
+            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2) && card == otherAction.card;
         }
         return false;
     }
@@ -69,6 +76,6 @@ public class YearOfPlenty extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Year of Plenty with resource1 = " + resource1.toString() + " and resource 2 = " + resource2.toString();
+        return "Year of Plenty with resource1 = " + resource1.toString() + " and resource 2 = " + resource2.toString() + " and with card = " + card.toString();
     }
 }

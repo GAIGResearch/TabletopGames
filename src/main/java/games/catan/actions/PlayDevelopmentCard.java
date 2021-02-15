@@ -24,6 +24,7 @@ public class PlayDevelopmentCard extends AbstractAction {
         Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
         // check type of card and execute the relevant action
+        // todo set game phase
         String cardType = card.getProperty(CatanConstants.cardType).toString();
         if (card.getProperty(CatanConstants.cardType).toString().equals("Knight")){
             cgs.addKnight(cgs.getCurrentPlayer());
@@ -32,10 +33,10 @@ public class PlayDevelopmentCard extends AbstractAction {
         } else if (card.getProperty(CatanConstants.cardType).toString().equals("Monopoly")) {
             System.out.println("The player picks a resource and all other players have to give all the their resources of that type");
             // todo make sure that it is applicable to all resources
-            new Monopoly(CatanParameters.Resources.BRICK);
+            new Monopoly(CatanParameters.Resources.BRICK, card);
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Year of Plenty")) {
             System.out.println("Take any 2 resources from the resourceDeck");
-            new YearOfPlenty(CatanParameters.Resources.BRICK, CatanParameters.Resources.BRICK);
+            new YearOfPlenty(CatanParameters.Resources.BRICK, CatanParameters.Resources.BRICK, card);
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Road Building")) {
             System.out.println("Player can immediately place 2 roads for free");
         }
