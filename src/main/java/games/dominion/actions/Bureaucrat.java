@@ -23,7 +23,7 @@ public class Bureaucrat extends DominionAttackAction {
     @Override
     boolean _execute(DominionGameState state) {
         // first gain a silver onto drawpile
-        (new GainCard(CardType.SILVER, player, DeckType.DRAW))._execute(state);
+        (new GainCard(CardType.SILVER, player, DeckType.DRAW)).execute(state);
         // and now everyone knows this
         PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, player);
         for (int i = 0; i< state.getNPlayers(); i++)

@@ -5,12 +5,12 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.virus.actions.*;
-import games.virus.cards.*;
+import games.virus.cards.VirusCard;
+import games.virus.cards.VirusTreatmentCard;
 import games.virus.components.VirusBody;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static core.CoreConstants.VERBOSE;
 import static games.virus.cards.VirusCard.OrganType.Treatment;

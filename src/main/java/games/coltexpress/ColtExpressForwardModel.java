@@ -304,7 +304,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (VERBOSE) {
                 System.out.println("Player on planned action card is -1: " + plannedActionCard.toString());
             }
-            new DrawCard(deckFromID, deckToID, cardIdx)._execute(cegs);
+            new DrawCard(deckFromID, deckToID, cardIdx).execute(cegs);
             actions.add(new DoNothing());
             return actions;
         }

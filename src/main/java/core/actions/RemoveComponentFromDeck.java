@@ -18,11 +18,11 @@ public class RemoveComponentFromDeck<T extends Component> extends DrawCard {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         ((Deck<T>)gs.getComponentById(deck)).remove(componentIdx); // card removed from the game
 
         // Discard other card from player hand
-        return super._execute(gs);
+        return super.execute(gs);
     }
 
     @Override

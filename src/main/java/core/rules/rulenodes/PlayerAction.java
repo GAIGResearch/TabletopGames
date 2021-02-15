@@ -16,7 +16,7 @@ public class PlayerAction extends RuleNode {
     @Override
     protected boolean run(AbstractGameState gs) {
         if (action != null) {
-            action._execute(gs);
+            action.execute(gs);
             return true;
         }
         return false;

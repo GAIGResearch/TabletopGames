@@ -22,8 +22,8 @@ public class SchemeAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs){
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs){
+        super.execute(gs);
 
         PartialObservableDeck<ColtExpressCard> actionList = (PartialObservableDeck<ColtExpressCard>) gs.getComponentById(deckTo);
         ColtExpressCard card = (ColtExpressCard) getCard(gs);

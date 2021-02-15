@@ -23,7 +23,7 @@ public class BaronAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
         Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
@@ -45,7 +45,7 @@ public class BaronAction extends DrawCard implements IPrintable {
             }
         }
 
-        return super._execute(gs);
+        return super.execute(gs);
     }
 
     @Override

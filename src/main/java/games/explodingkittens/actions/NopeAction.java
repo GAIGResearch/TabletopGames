@@ -33,7 +33,7 @@ public class NopeAction extends DrawCard implements IPrintable, IsNopeable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super._execute(gs);
+        super.execute(gs);
     }
 
     @Override

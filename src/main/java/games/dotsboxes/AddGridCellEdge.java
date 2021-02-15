@@ -14,7 +14,7 @@ public class AddGridCellEdge extends AbstractAction {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         // Find neighbouring cells
         DBGameState dbgs = (DBGameState) gs;
         HashSet<DBCell> cells = dbgs.edgeToCellMap.get(edge);

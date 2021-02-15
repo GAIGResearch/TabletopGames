@@ -117,7 +117,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
                 } else {
                     for (int i = 0; i < 2; i++) {
                         if (decisions[i] == Decision.keep) {
-                            (new MoveCard(topCards[i], player, DeckType.HAND, player, DeckType.DRAW, false))._execute(state);
+                            (new MoveCard(topCards[i], player, DeckType.HAND, player, DeckType.DRAW, false)).execute(state);
                         }
                     }
                     completedStage = reset;

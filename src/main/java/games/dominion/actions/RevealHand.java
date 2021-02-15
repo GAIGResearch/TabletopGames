@@ -19,7 +19,7 @@ public class RevealHand extends AbstractAction {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         PartialObservableDeck<DominionCard> hand = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, player);
         for (int i = 0; i < hand.getSize(); i++) {

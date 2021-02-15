@@ -26,7 +26,7 @@ public class SetGridValueAction<T> extends AbstractAction implements IPrintable 
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         return ((GridBoard<T>)gs.getComponentById(gridBoard)).setElement(x, y, value);
     }
 

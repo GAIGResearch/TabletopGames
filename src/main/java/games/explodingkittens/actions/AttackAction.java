@@ -21,9 +21,9 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         // Discard card played
-        super._execute(gs);
+        super.execute(gs);
         // Execute action
         ((ExplodingKittensTurnOrder) gs.getTurnOrder()).registerAttackAction(attackTargetID);
         return false;
@@ -41,7 +41,7 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super._execute(gs);
+        super.execute(gs);
     }
 
     @Override

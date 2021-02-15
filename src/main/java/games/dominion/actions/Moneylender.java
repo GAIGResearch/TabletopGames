@@ -29,7 +29,7 @@ public class Moneylender extends DominionAction {
     @Override
     boolean _execute(DominionGameState state) {
         if (state.getDeck(DeckType.HAND, player).stream().anyMatch(c -> c.cardType() == TRASHABLE_CARD_TYPE)) {
-            (new TrashCard(TRASHABLE_CARD_TYPE, player))._execute(state);
+            (new TrashCard(TRASHABLE_CARD_TYPE, player)).execute(state);
             state.changeAdditionalSpend(BONUS_MONEY_FOR_TRASHING);
         }
         return true;

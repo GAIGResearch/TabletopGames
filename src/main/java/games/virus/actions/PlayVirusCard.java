@@ -19,10 +19,10 @@ public class PlayVirusCard extends DrawCard {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         VirusGameState vgs = (VirusGameState) gs;
         int playerId = vgs.getCurrentPlayer();
-        super._execute(gs);
+        super.execute(gs);
 
         if (vgs.getDrawDeck().getSize() == 0)
             discardToDraw(vgs);

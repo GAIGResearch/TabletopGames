@@ -13,8 +13,8 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        boolean success = super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        boolean success = super.execute(gs);
 
         gs.setMainGamePhase();
         ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);

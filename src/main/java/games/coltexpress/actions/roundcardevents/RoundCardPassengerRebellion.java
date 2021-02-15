@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class RoundCardPassengerRebellion extends AbstractAction {
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
         LinkedList<Compartment> train = gameState.getTrainCompartments();
         for (Compartment c : train) {

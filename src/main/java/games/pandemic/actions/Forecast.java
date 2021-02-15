@@ -12,9 +12,9 @@ public class Forecast extends DrawCard {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         // Discards the card
-        return super._execute(gs);
+        return super.execute(gs);
    }
 
     @Override

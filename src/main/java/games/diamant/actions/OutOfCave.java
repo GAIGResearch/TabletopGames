@@ -7,7 +7,7 @@ import core.interfaces.IPrintable;
 // This action is used when the player is out of the Cave
 public class OutOfCave extends AbstractAction implements IPrintable {
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         // Nothing to be executed. The actions are executed in the ForwardModel
         return true;
     }

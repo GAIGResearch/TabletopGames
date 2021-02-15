@@ -36,7 +36,7 @@ public class TreatDisease extends AbstractAction {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
 
         Counter diseaseToken = (Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + color));

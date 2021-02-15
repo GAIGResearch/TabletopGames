@@ -23,8 +23,8 @@ public class ReplaceCards extends DrawComponents {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
         Deck<VirusCard> from     = (Deck<VirusCard>) gs.getComponentById(deckFrom);
         Deck<VirusCard> drawDeck = (Deck<VirusCard>) gs.getComponentById(deckDraw);
 

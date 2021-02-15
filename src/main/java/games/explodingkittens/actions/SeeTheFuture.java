@@ -23,7 +23,7 @@ public class SeeTheFuture extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         gs.setGamePhase(SeeTheFuture);
         gs.getTurnOrder().setTurnOwner(playerID);
 
@@ -54,7 +54,7 @@ public class SeeTheFuture extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super._execute(gs);
+        super.execute(gs);
     }
 
     @Override

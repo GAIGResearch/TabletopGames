@@ -21,7 +21,7 @@ public class DrawNewPlayerHand extends AbstractAction implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         VirusGameState vgs = (VirusGameState) gs;
 
         Deck<VirusCard> playerHand    =  (Deck<VirusCard>) vgs.getComponentById(playerHandId);

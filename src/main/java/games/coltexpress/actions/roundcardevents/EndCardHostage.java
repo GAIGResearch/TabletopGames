@@ -13,7 +13,7 @@ import static games.coltexpress.ColtExpressTypes.LootType.Purse;
 public class EndCardHostage extends AbstractAction {
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
         Compartment locomotive = gameState.getTrainCompartments().get(gameState.getNPlayers());
         int reward = ((ColtExpressParameters)gs.getGameParameters()).nCardHostageReward;

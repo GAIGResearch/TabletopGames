@@ -22,8 +22,8 @@ public class MoveMarshalAction extends DrawCard {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
 
         Compartment source = (Compartment) gs.getComponentById(sourceCompartment);
         Compartment target = (Compartment) gs.getComponentById(targetCompartment);

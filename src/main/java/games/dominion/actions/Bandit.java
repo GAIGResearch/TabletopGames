@@ -25,7 +25,7 @@ public class Bandit extends DominionAttackAction {
     @Override
     boolean _execute(DominionGameState state) {
         // first gain a gold
-        (new GainCard(CardType.GOLD, player))._execute(state);
+        (new GainCard(CardType.GOLD, player)).execute(state);
         // the rest is an attack, with decisions made by the victims
         initiateAttack(state);
         return true;

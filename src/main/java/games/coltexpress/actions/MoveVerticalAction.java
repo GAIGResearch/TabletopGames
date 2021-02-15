@@ -22,8 +22,8 @@ public class MoveVerticalAction extends DrawCard {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
 
         Compartment comp = (Compartment) gs.getComponentById(compartment);
         ColtExpressCard card = (ColtExpressCard) getCard(gs);

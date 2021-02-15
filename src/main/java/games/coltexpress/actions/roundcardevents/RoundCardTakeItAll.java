@@ -13,7 +13,7 @@ import java.util.LinkedList;
 public class RoundCardTakeItAll extends AbstractAction {
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         LinkedList<Compartment> train = ((ColtExpressGameState)gs).getTrainCompartments();
         int reward = ((ColtExpressParameters)gs.getGameParameters()).nCardTakeItAllReward;
         for (Compartment c : train) {

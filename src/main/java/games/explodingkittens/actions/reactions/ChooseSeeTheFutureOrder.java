@@ -18,8 +18,8 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
 
         // set the visibility again since it has been changed by aboves execute
         PartialObservableDeck<ExplodingKittensCard> drawPile = ((ExplodingKittensGameState)gs).getDrawPile();

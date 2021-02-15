@@ -28,9 +28,9 @@ public class PlayCard extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gameState) {
+    public boolean execute(AbstractGameState gameState) {
         UnoGameState ugs = (UnoGameState)gameState;
-        super._execute(gameState);
+        super.execute(gameState);
 
         Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
 

@@ -22,8 +22,8 @@ public class KingAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
 
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);

@@ -45,7 +45,7 @@ public class DrawCard extends AbstractAction {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         executed = true;
         Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
         Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);

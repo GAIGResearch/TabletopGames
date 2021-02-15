@@ -39,8 +39,8 @@ public class PunchAction  extends DrawCard {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gameState) {
-        super._execute(gameState);
+    public boolean execute(AbstractGameState gameState) {
+        super.execute(gameState);
         if (opponentID == -1)
             return false;    //no player to punch
 

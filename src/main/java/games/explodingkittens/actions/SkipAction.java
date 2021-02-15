@@ -17,9 +17,9 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         // Discard the card played
-        super._execute(gs);
+        super.execute(gs);
         // Execute action
         gs.setMainGamePhase();
         ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
@@ -38,7 +38,7 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super._execute(gs);
+        super.execute(gs);
     }
 
     @Override

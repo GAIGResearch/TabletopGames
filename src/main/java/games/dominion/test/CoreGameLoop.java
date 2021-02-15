@@ -201,7 +201,7 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
-        (new SimpleAction(CardType.SMITHY, 0))._execute(state);
+        (new SimpleAction(CardType.SMITHY, 0)).execute(state);
         assertEquals(0, state.actionsLeft());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());

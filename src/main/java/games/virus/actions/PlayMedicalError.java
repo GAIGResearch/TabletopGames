@@ -24,9 +24,9 @@ public class PlayMedicalError extends PlayVirusCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         VirusGameState vgs = (VirusGameState) gs;
-        super._execute(gs);
+        super.execute(gs);
 
         VirusBody myBody    = (VirusBody) vgs.getComponentById(bodyId);
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherBodyId);

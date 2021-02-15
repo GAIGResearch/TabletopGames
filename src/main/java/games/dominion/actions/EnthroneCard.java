@@ -22,7 +22,7 @@ public class EnthroneCard extends AbstractAction {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         if (cardExecutions == 0) {
             // this is the first Enthrone action, so we move a card from hand to the tableau

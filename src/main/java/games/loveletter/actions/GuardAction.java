@@ -25,7 +25,7 @@ public class GuardAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
@@ -36,7 +36,7 @@ public class GuardAction extends DrawCard implements IPrintable {
                 llgs.killPlayer(opponentID);
             }
         }
-        return super._execute(gs);
+        return super.execute(gs);
     }
 
     @Override

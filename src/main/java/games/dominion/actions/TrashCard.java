@@ -35,7 +35,7 @@ public class TrashCard extends AbstractAction {
      * @return - true if successfully executed, false otherwise.
      */
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         List<DominionCard> matchingCards = state.getDeck(fromDeck, player).stream()
                 .filter(c -> c.cardType() == trashedCard).collect(toList());

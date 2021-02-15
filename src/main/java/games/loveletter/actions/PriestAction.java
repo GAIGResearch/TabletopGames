@@ -23,7 +23,7 @@ public class PriestAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
@@ -34,7 +34,7 @@ public class PriestAction extends DrawCard implements IPrintable {
                 opponentDeck.setVisibilityOfComponent(i, playerID, true);
         }
 
-        return super._execute(gs);
+        return super.execute(gs);
     }
 
     @Override

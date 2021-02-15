@@ -22,9 +22,9 @@ public class AddResearchStationFrom extends AddResearchStation {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
-        boolean success = super._execute(gs);
+        boolean success = super.execute(gs);
 
         // Remove research station from "fromCity" location
         BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, fromCity);

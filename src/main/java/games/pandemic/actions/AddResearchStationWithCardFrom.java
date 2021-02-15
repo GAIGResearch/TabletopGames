@@ -26,12 +26,12 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         executed = true;
         Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
         Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
         cardId = playerHand.getComponents().get(cardIdx).getComponentID();
-        return super._execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx)._execute(gs);
+        return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
     }
 
     public Card getCard(AbstractGameState gs) {

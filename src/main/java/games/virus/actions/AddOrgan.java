@@ -14,8 +14,8 @@ public class AddOrgan extends PlayVirusCard implements IPrintable {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
-        super._execute(gs);
+    public boolean execute(AbstractGameState gs) {
+        super.execute(gs);
         getBody(gs).addOrgan((VirusCard)getCard(gs));
         return true;
     }

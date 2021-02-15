@@ -71,7 +71,7 @@ public class RoundCard extends Card {
 
     public final void endRoundCardEvent(ColtExpressGameState gameState) {
         if (endRoundCardEvent != null) {
-            endRoundCardEvent._execute(gameState);
+            endRoundCardEvent.execute(gameState);
         }
     }
 

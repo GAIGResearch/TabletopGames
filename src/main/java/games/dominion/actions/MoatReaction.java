@@ -19,7 +19,7 @@ public class MoatReaction extends AbstractAction implements IDominionReaction {
     }
 
     @Override
-    public boolean _execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         PartialObservableDeck<DominionCard> hand = (PartialObservableDeck<DominionCard>) state.getDeck(DominionConstants.DeckType.HAND, player);
         for (int pos = 0; pos < hand.getSize(); pos++) {
