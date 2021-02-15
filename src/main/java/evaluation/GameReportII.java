@@ -173,6 +173,12 @@ public class GameReportII {
             data.put("ScoreMax", sc.max());
             data.put("ScoreMin", sc.min());
             data.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
+            TAGStatSummary scoreDelta = scores.size() > 1 ?
+                    IntStream.range(0, scores.size() - 1)
+                            .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
+                            .collect(new TAGSummariser())
+                    : new TAGStatSummary();
+            data.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
             TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
             data.put("StateSizeMedian", stateSize.median());
             data.put("StateSizeMean", stateSize.mean());
@@ -187,7 +193,6 @@ public class GameReportII {
             data.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
             return data;
         }
-
     }
 
     private static void preGameProcessing(Game game, Map<String, Object> data) {
