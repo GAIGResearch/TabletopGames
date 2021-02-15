@@ -33,7 +33,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     public PartialObservableDeck(String id, int ownerID, boolean[] defaultVisibility) {
-        super(id, ownerID, VisibilityMode.ITS_COMPLICATED);
+        super(id, ownerID, VisibilityMode.MIXED_VISIBILITY);
         this.deckVisibility = defaultVisibility;
     }
 
@@ -46,7 +46,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     private PartialObservableDeck(String name, int ownerID, boolean[] defaultVisibility, int ID) {
-        super(name, ownerID, ID, VisibilityMode.ITS_COMPLICATED);
+        super(name, ownerID, ID, VisibilityMode.MIXED_VISIBILITY);
         this.deckVisibility = defaultVisibility;
     }
 

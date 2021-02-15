@@ -35,7 +35,14 @@ public class CoreConstants {
         GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
     }
 
+    /**
+     * Used in Components that contain other Components (see IComponentContainer) to mark which players can see the
+     * contents.
+     * MIXED_VISIBILITY is an indicator that none of the previous three apply, and that the IComponentContainer
+     * will need to implement more sophisticated logic. This is done for example in PartialObservableDeck - and
+     * this should cover almost all future eventualities.
+     */
     public enum VisibilityMode {
-        VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, ITS_COMPLICATED
+        VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, MIXED_VISIBILITY
     }
 }

@@ -261,7 +261,7 @@ public abstract class AbstractGameState {
                     if (((Component) container).getOwnerId() != player)
                         retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
                     break;
-                case ITS_COMPLICATED:
+                case MIXED_VISIBILITY:
                     throw new AssertionError("If something uses this visibility mode, then you need to also add code to this method please!");
             }
         }
