@@ -24,7 +24,7 @@ public class MovePlayer extends AbstractAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
         PropertyString prop = (PropertyString) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx).getProperty(PandemicConstants.playerLocationHash);
         removePlayer((PandemicGameState)gs, prop.value, playerIdx);

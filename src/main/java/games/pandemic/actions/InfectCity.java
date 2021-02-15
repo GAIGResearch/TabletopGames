@@ -36,8 +36,8 @@ public class InfectCity extends DrawCard {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+    public boolean _execute(AbstractGameState gs) {
+        super._execute(gs);
 
         PandemicGameState pgs = (PandemicGameState)gs;
         Card infectingCard = getCard(gs);

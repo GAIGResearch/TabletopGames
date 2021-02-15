@@ -18,8 +18,8 @@ public class ReplaceComponents<T extends Component> extends DrawComponents {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+    public boolean _execute(AbstractGameState gs) {
+        super._execute(gs);
         Deck<T> from = (Deck<T>) gs.getComponentById(deckFrom);
         Deck<T> drawDeck = (Deck<T>) gs.getComponentById(deckDraw);
 

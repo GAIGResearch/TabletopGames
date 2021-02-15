@@ -1,17 +1,16 @@
 package core.components;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import utilities.Utils.ComponentType;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import utilities.Utils.ComponentType;
 
 /**
  * Class for a deck of components.
@@ -333,9 +332,7 @@ public class Deck<T extends Component> extends Component {
     protected void copyTo(Deck<T> deck) {
         ArrayList<T> newComponents = new ArrayList<>();
         for (T c : components)
-        {
-            newComponents.add((T)c.copy());
-        }
+            newComponents.add((T) c.copy());
         deck.components = newComponents;
         deck.capacity = capacity;
 

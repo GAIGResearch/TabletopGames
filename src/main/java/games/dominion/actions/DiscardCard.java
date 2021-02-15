@@ -24,7 +24,7 @@ public class DiscardCard extends AbstractAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState ags) {
+    public boolean _execute(AbstractGameState ags) {
         DominionGameState state = (DominionGameState) ags;
         Optional<DominionCard> cardToDiscard = state.getDeck(DeckType.HAND, player).stream()
                 .filter(card -> card.cardType() == this.type).findFirst();

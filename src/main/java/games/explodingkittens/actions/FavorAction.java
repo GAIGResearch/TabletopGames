@@ -23,8 +23,8 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+    public boolean _execute(AbstractGameState gs) {
+        super._execute(gs);
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
         ekgs.setGamePhase(Favor);
@@ -37,7 +37,7 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super.execute(gs);
+        super._execute(gs);
     }
 
     @Override

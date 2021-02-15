@@ -15,9 +15,9 @@ public class DrawCard extends core.actions.DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), false);
-        return super.execute(gs);
+        return super._execute(gs);
     }
 
     @Override

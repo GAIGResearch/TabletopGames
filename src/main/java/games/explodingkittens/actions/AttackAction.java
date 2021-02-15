@@ -3,8 +3,6 @@ package games.explodingkittens.actions;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.components.Card;
-import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensTurnOrder;
@@ -23,9 +21,9 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         // Discard card played
-        super.execute(gs);
+        super._execute(gs);
         // Execute action
         ((ExplodingKittensTurnOrder) gs.getTurnOrder()).registerAttackAction(attackTargetID);
         return false;
@@ -43,7 +41,7 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super.execute(gs);
+        super._execute(gs);
     }
 
     @Override

@@ -16,8 +16,8 @@ public class CompositeAction extends AbstractAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        return components.stream().allMatch(a -> a.execute(gs));
+    public boolean _execute(AbstractGameState gs) {
+        return components.stream().allMatch(a -> a._execute(gs));
     }
 
     @Override

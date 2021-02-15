@@ -1,20 +1,20 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static games.dominion.DominionConstants.DeckType;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
-public class Chapel extends DominionAction implements IExtendedSequence{
+public class Chapel extends DominionAction implements IExtendedSequence {
     public Chapel(int playerId) {
         super(CardType.CHAPEL, playerId);
     }
@@ -41,7 +41,8 @@ public class Chapel extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         // we can trash any card in hand, so create a TrashCard action for each
         List<DominionCard> cardsInHand = state.getDeck(DeckType.HAND, player).stream().collect(toList());
         List<AbstractAction> trashActions = cardsInHand.stream()
@@ -54,7 +55,7 @@ public class Chapel extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // if the action is DoNothing, then we have stopped
         // else we continue discarding
         if (action instanceof DoNothing) {
@@ -63,12 +64,12 @@ public class Chapel extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return executed;
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         // Chapel is a purely personal sequence of actions - no reactions are needed
         return player;
     }

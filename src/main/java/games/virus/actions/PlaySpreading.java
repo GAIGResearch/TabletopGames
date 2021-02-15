@@ -29,9 +29,9 @@ public class PlaySpreading extends PlayVirusCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         VirusGameState vgs = (VirusGameState) gs;
-        super.execute(gs);
+        super._execute(gs);
 
         VirusBody myBody    = (VirusBody) vgs.getComponentById(bodyId);
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherPlayerBodyId);

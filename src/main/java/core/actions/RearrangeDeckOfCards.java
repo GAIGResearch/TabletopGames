@@ -37,10 +37,10 @@ public class RearrangeDeckOfCards extends DrawCard {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         // Discard card played
         boolean result = true;
-        if (deckFrom != -1) result = super.execute(gs);
+        if (deckFrom != -1) result = super._execute(gs);
         Deck<Card> rd = (Deck<Card>) gs.getComponentById(rearrangeDeck);
 
         Card[] cards = new Card[newCardOrder.length];

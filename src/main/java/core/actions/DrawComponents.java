@@ -50,7 +50,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         executed = true;
         componentIds = new int[nComponents];
         Deck<T> from = (Deck<T>) gs.getComponentById(deckFrom);

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class RoundCardSwivelArm extends AbstractAction {
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         ColtExpressGameState cegs = (ColtExpressGameState) gs;
 
         LinkedList<Compartment> train = ((ColtExpressGameState)gs).getTrainCompartments();

@@ -49,7 +49,7 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
                         String city = ((MovePlayer) action).getDestination();
                         boolean disease_cured = diseaseToken.getValue() > 0;
                         if (disease_cured) {
-                            new TreatDisease(n_initial_disease_cubes, color, city, true).execute(gs);
+                            new TreatDisease(n_initial_disease_cubes, color, city, true)._execute(gs);
                         }
                     }
                 }

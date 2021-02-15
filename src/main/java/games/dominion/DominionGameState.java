@@ -1,18 +1,22 @@
 package games.dominion;
 
-import core.*;
-import core.components.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.components.Component;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
-import games.dominion.actions.*;
-import games.dominion.cards.*;
-import games.dominion.DominionConstants.*;
+import games.dominion.DominionConstants.DeckType;
+import games.dominion.actions.IDelayedAction;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static java.util.Comparator.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState {
 
@@ -45,7 +49,6 @@ public class DominionGameState extends AbstractGameState {
     int additionalSpendAvailable = 0;
 
 
-    Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     List<IDelayedAction> delayedActions = new ArrayList<>();
 
     /**
@@ -78,8 +81,6 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public void endOfTurn(int playerID) {
-        if (!actionsInProgress.empty())
-            throw new AssertionError("Should not have an action in progress beyond the Play phase (yet)");
         if (playerID != getCurrentPlayer())
             throw new AssertionError("Not yet supported");
         // 1) put hand and cards played into discard
@@ -184,23 +185,6 @@ public class DominionGameState extends AbstractGameState {
             throw new AssertionError("Not yet supported");
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
-    }
-
-    public IExtendedSequence currentActionInProgress() {
-        return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
-    }
-
-    public boolean isActionInProgress() {
-        return !actionsInProgress.empty();
-    }
-
-    public void setActionInProgress(IExtendedSequence action) {
-        if (gamePhase != DominionGamePhase.Play)
-            throw new AssertionError("ExtendedActions are currently only supported during the Play action phase");
-        if (action == null && !actionsInProgress.isEmpty())
-            actionsInProgress.pop();
-        else
-            actionsInProgress.push(action);
     }
 
     public void addDelayedAction(IDelayedAction action) {
@@ -347,10 +331,6 @@ public class DominionGameState extends AbstractGameState {
 
         retValue.defenceStatus = defenceStatus.clone();
 
-        retValue.actionsInProgress = new Stack<>();
-        actionsInProgress.forEach(
-                a -> retValue.actionsInProgress.push(a.copy())
-        );
         retValue.delayedActions = delayedActions.stream().map(IDelayedAction::copy).collect(toList());
         return retValue;
     }
@@ -453,13 +433,11 @@ public class DominionGameState extends AbstractGameState {
                 Arrays.equals(playerDiscards, other.playerDiscards) &&
                 Arrays.equals(playerTableaux, other.playerTableaux) &&
                 Arrays.equals(playerDrawPiles, other.playerDrawPiles) &&
-                actionsInProgress.equals(other.actionsInProgress) &&
                 trashPile.equals(other.trashPile) &&
                 buysLeftForCurrentPlayer == other.buysLeftForCurrentPlayer &&
                 actionsLeftForCurrentPlayer == other.actionsLeftForCurrentPlayer &&
                 spentSoFar == other.spentSoFar && additionalSpendAvailable == other.additionalSpendAvailable &&
                 Arrays.equals(defenceStatus, other.defenceStatus) &&
-                gamePhase == other.gamePhase && gameStatus == other.gameStatus &&
                 delayedActions.equals(other.delayedActions);
     }
 

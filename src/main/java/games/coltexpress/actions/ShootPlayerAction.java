@@ -28,8 +28,8 @@ public class ShootPlayerAction extends DrawCard {
 
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+    public boolean _execute(AbstractGameState gs) {
+        super._execute(gs);
         if (targetID == -1)
             return false;
 

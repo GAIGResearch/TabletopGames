@@ -14,7 +14,7 @@ import java.util.Random;
 public class EndCardPickPocket extends AbstractAction {
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
         Random random = new Random(gs.getGameParameters().getRandomSeed());
 

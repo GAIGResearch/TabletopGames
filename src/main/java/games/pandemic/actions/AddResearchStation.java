@@ -21,7 +21,7 @@ public class AddResearchStation extends AbstractAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         BoardNode bn = ((PandemicGameState)gs).getWorld().getNodeByStringProperty(nameHash, city);
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {

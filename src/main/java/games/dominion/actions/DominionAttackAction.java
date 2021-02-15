@@ -1,6 +1,7 @@
 package games.dominion.actions;
 
 import core.AbstractGameState;
+import core.interfaces.IExtendedSequence;
 import games.dominion.*;
 import games.dominion.cards.CardType;
 
@@ -79,8 +80,9 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState gs) {
         // this will only be called if this is top of the Reaction Stack (i.e. if the last reaction has completed)
+        DominionGameState state = (DominionGameState) gs;
         nextPhaseOfReactionAttackCycle(state);
         for (int i = 0; i < attacksComplete.length; i++) {
             if (!attacksComplete[i]) {

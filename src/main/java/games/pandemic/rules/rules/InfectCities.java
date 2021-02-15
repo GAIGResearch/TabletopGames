@@ -33,7 +33,7 @@ public class InfectCities extends RuleNode {
             Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
             for (int c = 0; c < noCardsDrawn; c++) {  // Check the drawn cards and infect cities
                 new InfectCity(infectionDeck.getComponentID(), infectionDiscardDeck.getComponentID(), 0,
-                        max_cubes_per_city, n_cubes_infection).execute(gs);
+                        max_cubes_per_city, n_cubes_infection)._execute(gs);
             }
         }
         // No more quiet night, no more epidemic

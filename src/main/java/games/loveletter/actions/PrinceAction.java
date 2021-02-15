@@ -23,7 +23,7 @@ public class PrinceAction extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
         Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(opponentID);
@@ -48,7 +48,7 @@ public class PrinceAction extends DrawCard implements IPrintable {
 
         }
 
-        return super.execute(gs);
+        return super._execute(gs);
     }
 
     @Override

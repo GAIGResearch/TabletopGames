@@ -1,6 +1,8 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.dominion.*;
 import games.dominion.cards.CardType;
 
@@ -28,28 +30,29 @@ public class Poacher extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         // we can discard any card in hand
-        List<AbstractAction> retValue = state.getDeck(DominionConstants.DeckType.HAND, player).stream()
+        DominionGameState state = (DominionGameState) gs;
+        return state.getDeck(DominionConstants.DeckType.HAND, player).stream()
                 .map(c -> new DiscardCard(c.cardType(), player))
                 .distinct().collect(toList());
-        return retValue;
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof DiscardCard && ((DiscardCard) action).player == player) {
             cardsDiscarded++;
         }
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         if (state.getDeck(DominionConstants.DeckType.HAND, player).getSize() == 0) {
             // highly unusual event - but could occur as an edge case with 2 empty supply decks, and
             // Poacher as the last card in hand

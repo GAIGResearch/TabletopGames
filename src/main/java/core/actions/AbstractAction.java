@@ -6,13 +6,22 @@ import core.interfaces.IPrintable;
 
 public abstract class AbstractAction implements IPrintable {
 
+
+    public final boolean execute(AbstractGameState gs) {
+        if (gs.isActionInProgress()) {
+            // we register the action with the currently active ActionSequence
+            gs.currentActionInProgress().registerActionTaken(gs, this);
+        }
+        return _execute(gs);
+    }
+
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the AbstractGameState.getComponentById(int id) method.
      * @param gs - game state which should be modified by this action.
      * @return - true if successfully executed, false otherwise.
      */
-    public abstract boolean execute(AbstractGameState gs);
+    public abstract boolean _execute(AbstractGameState gs);
 
     /**
      * Create a copy of this action, with all of its variables.

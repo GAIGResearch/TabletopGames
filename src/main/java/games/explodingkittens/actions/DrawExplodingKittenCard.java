@@ -19,7 +19,7 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         int playerID = gs.getCurrentPlayer();
         Deck<ExplodingKittensCard> from = ((ExplodingKittensGameState) gs).getDrawPile();
@@ -27,7 +27,7 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
         Deck<ExplodingKittensCard> discardDeck = ((ExplodingKittensGameState)gs).getDiscardPile();
 
         // Draw the card for the player
-        super.execute(gs);
+        super._execute(gs);
 
         // Execute exploding kitten effect
         ExplodingKittensCard c = (ExplodingKittensCard) getCard(gs);
@@ -43,7 +43,7 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
             }
             if (defuseCard != -1){
                 // Player does have defuse card. Set game phase and put defuse card in discard deck
-                new DrawCard(deckTo, discardDeck.getComponentID(), defuseCard).execute(gs);
+                new DrawCard(deckTo, discardDeck.getComponentID(), defuseCard)._execute(gs);
                 gs.setGamePhase(Defuse);
             } else {
                 if (VERBOSE) {

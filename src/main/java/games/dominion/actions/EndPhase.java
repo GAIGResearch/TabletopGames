@@ -12,7 +12,7 @@ public class EndPhase extends AbstractAction {
 
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         return true;
     }
 

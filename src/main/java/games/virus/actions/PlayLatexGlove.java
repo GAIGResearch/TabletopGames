@@ -6,7 +6,6 @@ import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.virus.VirusGameParameters;
-import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
 import java.util.Objects;
@@ -22,8 +21,8 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+    public boolean _execute(AbstractGameState gs) {
+        super._execute(gs);
 
         // Discard three card on other player hand
         Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);

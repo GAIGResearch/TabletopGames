@@ -1,25 +1,25 @@
 package games.coltexpress;
 
-import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
+import games.coltexpress.ColtExpressTypes.CharacterType;
+import games.coltexpress.ColtExpressTypes.LootType;
 import games.coltexpress.actions.*;
 import games.coltexpress.cards.ColtExpressCard;
-import games.coltexpress.components.Loot;
-import games.coltexpress.ColtExpressTypes.*;
-import utilities.Group;
 import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
+import utilities.Group;
 import utilities.Utils;
-
-import static core.CoreConstants.VERBOSE;
 
 import java.util.*;
 
+import static core.CoreConstants.VERBOSE;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
 
 public class ColtExpressForwardModel extends AbstractForwardModel {
@@ -114,13 +114,6 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState gameState, AbstractAction action) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
         ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) gameState.getTurnOrder();
-        if (action != null) {
-            action.execute(gameState);
-        } else {
-            if (VERBOSE)
-                System.out.println("Player cannot do anything since he has drawn cards or " +
-                    " doesn't have any targets available");
-        }
 
         IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
@@ -311,7 +304,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (VERBOSE) {
                 System.out.println("Player on planned action card is -1: " + plannedActionCard.toString());
             }
-            new DrawCard(deckFromID, deckToID, cardIdx).execute(cegs);
+            new DrawCard(deckFromID, deckToID, cardIdx)._execute(cegs);
             actions.add(new DoNothing());
             return actions;
         }

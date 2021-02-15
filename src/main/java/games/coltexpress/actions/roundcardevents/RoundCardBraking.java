@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class RoundCardBraking extends AbstractAction {
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         LinkedList<Compartment> train = ((ColtExpressGameState)gs).getTrainCompartments();
         Compartment targetCompartment = train.get(train.size()-1);
         Compartment sourceCompartment;

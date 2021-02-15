@@ -26,8 +26,8 @@ public class CollectMoneyAction extends DrawCard {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        super.execute(gameState);
+    public boolean _execute(AbstractGameState gameState) {
+        super._execute(gameState);
         if (loot == null) {
             return false;
         }

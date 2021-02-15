@@ -2,18 +2,27 @@ package games.dominion.test;
 
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.components.*;
-import games.dominion.*;
-import games.dominion.DominionGameState.*;
-import games.dominion.DominionConstants.*;
-import games.dominion.actions.*;
-import games.dominion.cards.*;
-import org.junit.*;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
+import games.dominion.DominionConstants.DeckType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGame;
+import games.dominion.DominionGameState;
+import games.dominion.DominionGameState.DominionGamePhase;
+import games.dominion.DominionParameters;
+import games.dominion.actions.BuyCard;
+import games.dominion.actions.EndPhase;
+import games.dominion.actions.SimpleAction;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class CoreGameLoop {
 
@@ -192,7 +201,7 @@ public class CoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
-        (new SimpleAction(CardType.SMITHY, 0)).execute(state);
+        (new SimpleAction(CardType.SMITHY, 0))._execute(state);
         assertEquals(0, state.actionsLeft());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());

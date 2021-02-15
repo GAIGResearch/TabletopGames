@@ -5,7 +5,6 @@ import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
@@ -19,9 +18,9 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         ((ExplodingKittensGameState)gs).getDrawPile().shuffle(new Random(gs.getGameParameters().getRandomSeed()));
-        return super.execute(gs);
+        return super._execute(gs);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public void nopedExecute(AbstractGameState gs) {
-        super.execute(gs);
+        super._execute(gs);
     }
 
     @Override

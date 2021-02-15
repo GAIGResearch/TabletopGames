@@ -20,7 +20,7 @@ public abstract class DominionAction extends AbstractAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         if (state.getCurrentPlayer() != player)
             throw new AssertionError("Attempting to play an action out of turn");

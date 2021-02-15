@@ -3,9 +3,9 @@ package core;
 import core.actions.AbstractAction;
 import utilities.Utils;
 
-import java.util.*;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static core.CoreConstants.DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED;
 import static core.CoreConstants.VERBOSE;
@@ -126,24 +126,16 @@ public abstract class AbstractForwardModel {
     }
 
     /**
-     * The use case for this method is Simultaneous Move games
-     *
-     * @param currentState  - current game state, to be modified by the actions
-     * @param actionPerPlayer  - a list of actions, which will be executed in order
-     */
-    public final void next(AbstractGameState currentState, List<AbstractAction> actionPerPlayer) {
-        if (actionPerPlayer.size() != currentState.getNPlayers())
-            throw new AssertionError("We should have one provided action per player");
-        actionPerPlayer.forEach(a -> next(currentState, a));
-    }
-
-    /**
      * Computes the available actions and updates the game state accordingly.
      *
      * @param gameState - game state to update with the available actions.
      * @return - the list of actions available.
      */
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+        // If there is an action in progress (see IExtendedSequence), then delegate to that
+        if (gameState.isActionInProgress()) {
+            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
+        }
         return _computeAvailableActions(gameState);
     }
 

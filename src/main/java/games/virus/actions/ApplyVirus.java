@@ -21,9 +21,9 @@ public class ApplyVirus extends PlayVirusCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         VirusGameState vgs = (VirusGameState) gs;
-        super.execute(gs);
+        super._execute(gs);
         VirusCard card = (VirusCard) getCard(gs);
         VirusBody body = getBody(gs);
 

@@ -3,7 +3,6 @@ package games.virus.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawComponents;
-import core.components.Component;
 import core.components.Deck;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
@@ -20,8 +19,8 @@ public class ReplaceAllCards extends DrawComponents {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
+    public boolean _execute(AbstractGameState gs) {
+        super._execute(gs);
         Deck<VirusCard> from     = (Deck<VirusCard>) gs.getComponentById(deckFrom);
         Deck<VirusCard> drawDeck = (Deck<VirusCard>) gs.getComponentById(deckDraw);
 

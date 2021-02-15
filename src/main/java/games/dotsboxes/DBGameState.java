@@ -18,6 +18,7 @@ public class DBGameState extends AbstractGameState {
 
     // Variables for speeding up computations
     int nCellsComplete;
+    boolean completedCellOnLastTurn = false;
     int[] nCellsPerPlayer;
     HashMap<DBEdge, HashSet<DBCell>> edgeToCellMap;  // Mapping from each edge to the cells it neighbours
 
@@ -42,6 +43,7 @@ public class DBGameState extends AbstractGameState {
         dbgs.grid = deepCopyGrid();
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
         dbgs.nCellsComplete = nCellsComplete;
+        dbgs.completedCellOnLastTurn = completedCellOnLastTurn;
         dbgs.edgeToCellMap = generateEdgeToCellMap(dbgs.grid);  // Re-generate this mapping from the copied grid
         return dbgs;
     }
@@ -99,6 +101,7 @@ public class DBGameState extends AbstractGameState {
     protected void _reset() {
         grid = null;
         nCellsComplete = 0;
+        completedCellOnLastTurn = false;
         nCellsPerPlayer = null;
         edgeToCellMap = null;
     }
@@ -111,13 +114,14 @@ public class DBGameState extends AbstractGameState {
         DBGameState that = (DBGameState) o;
         return nCellsComplete == that.nCellsComplete &&
                 Objects.equals(grid, that.grid) &&
+                completedCellOnLastTurn == that.completedCellOnLastTurn &&
                 Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
                 Objects.equals(edgeToCellMap, that.edgeToCellMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), grid, nCellsComplete, edgeToCellMap);
+        int result = Objects.hash(super.hashCode(), grid, nCellsComplete, edgeToCellMap, completedCellOnLastTurn);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }

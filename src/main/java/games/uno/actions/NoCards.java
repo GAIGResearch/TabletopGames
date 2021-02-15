@@ -16,7 +16,7 @@ public class NoCards extends AbstractAction implements IPrintable {
 
     // If the card drawn is playable, then play it
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         UnoGameState ugs = (UnoGameState)gs;
         Deck<UnoCard> drawDeck = ugs.getDrawDeck();
         Deck<UnoCard> discardDeck = ugs.getDiscardDeck();

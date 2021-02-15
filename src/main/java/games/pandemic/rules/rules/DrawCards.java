@@ -24,7 +24,7 @@ public class DrawCards extends RuleNode {
 
         Deck<Card> playerDeck = (Deck<Card>) pgs.getComponent(playerDeckHash);
         DrawCard action = new DrawCard(playerDeck.getComponentID(), tempDeck.getComponentID(), 0);
-        boolean drawn = action.execute(gs);
+        boolean drawn = action._execute(gs);
 
         if (drawn) {
             Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);

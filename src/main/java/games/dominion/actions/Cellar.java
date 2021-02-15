@@ -1,7 +1,9 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import games.dominion.*;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
@@ -11,7 +13,7 @@ import java.util.*;
 import static games.dominion.DominionConstants.*;
 import static java.util.stream.Collectors.*;
 
-public class Cellar extends DominionAction implements IExtendedSequence{
+public class Cellar extends DominionAction implements IExtendedSequence {
     public Cellar(int playerId) {
         super(CardType.CELLAR, playerId);
     }
@@ -40,7 +42,8 @@ public class Cellar extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         // we can discard any card in hand, so create a DiscardCard action for each
         Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, player).stream().collect(toSet());
         List<AbstractAction> discardActions = uniqueCardsInHand.stream()
@@ -53,7 +56,8 @@ public class Cellar extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+        DominionGameState state = (DominionGameState) gs;
         // if the action is DoNothing, then we have stopped
         // else we continue discarding
         if (action instanceof DoNothing) {
@@ -68,12 +72,12 @@ public class Cellar extends DominionAction implements IExtendedSequence{
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return executed;
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         // Cellar is a purely personal sequence of actions - no reactions are needed
         return player;
     }

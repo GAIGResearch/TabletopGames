@@ -31,7 +31,7 @@ public class GainCard extends AbstractAction {
      * @return - true if successfully executed, false otherwise.
      */
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         // We execute by removing the card from the table and adding it to the relevant deck
         DominionGameState state = (DominionGameState) gs;
         if (state.removeCardFromTable(cardType)) {

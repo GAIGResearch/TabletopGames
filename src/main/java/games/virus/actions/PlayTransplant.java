@@ -7,7 +7,6 @@ import core.interfaces.IPrintable;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 import games.virus.components.VirusBody;
-import games.virus.components.VirusOrgan;
 
 import java.util.Objects;
 
@@ -29,9 +28,9 @@ public class PlayTransplant extends PlayVirusCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         VirusGameState vgs = (VirusGameState) gs;
-        super.execute(gs);
+        super._execute(gs);
 
         VirusBody myBody    = (VirusBody) vgs.getComponentById(bodyId);
         VirusBody otherBody = (VirusBody) vgs.getComponentById(otherBodyId);

@@ -1,13 +1,8 @@
 package games.dominion.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.actions.DrawCard;
-import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.*;
-
-import java.util.Objects;
 
 /**
  * An extension of GainCard that implements control over Buys and AvailableSpend
@@ -26,14 +21,14 @@ public class BuyCard extends GainCard {
      * @return - true if successfully executed, false otherwise.
      */
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
         // We execute by:
         // i) Checking that we have enough money and buy actions
         // ii) Removing the card from the table and adding it to the player's discard pile
         // iii) Updating the available money and buy actions
         DominionGameState state = (DominionGameState) gs;
         if (state.buysLeft() > 0 && state.availableSpend(buyingPlayer) >= cardType.cost) {
-            boolean success = super.execute(state);
+            boolean success = super._execute(state);
             if (success) {
                 state.changeBuys(-1);
                 state.spend(cardType.cost);

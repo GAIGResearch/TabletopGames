@@ -8,7 +8,7 @@ import core.AbstractGameState;
 public class DoNothing extends AbstractAction {
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(AbstractGameState gs) {
        return true;
    }
 

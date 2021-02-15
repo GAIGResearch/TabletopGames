@@ -13,13 +13,13 @@ import games.uno.UnoGameState;
 import games.virus.VirusGameState;
 import games.virus.components.VirusOrgan;
 import players.PlayerFactory;
-import utilities.*;
+import utilities.Pair;
+import utilities.StatSummary;
+import utilities.TAGSummariser;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.summarizingInt;
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
 
@@ -108,6 +108,7 @@ public class GameReportII {
                     collectedData.putAll(gameTracker.extractData());
                     logger.record(collectedData);
                     collectedData.clear();
+                    game.clearListeners();
                 }
                 // Once all games are complete, call processDataAndFinish()
                 logger.processDataAndFinish();
