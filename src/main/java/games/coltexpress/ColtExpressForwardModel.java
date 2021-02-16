@@ -65,7 +65,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
             cegs.playerHandCards.add(playerHand);
 
-            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
+            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_ALL);
             for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
                 LootType lootType = e.a;
                 int value = e.b;

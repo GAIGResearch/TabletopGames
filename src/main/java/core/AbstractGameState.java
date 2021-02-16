@@ -9,7 +9,10 @@ import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -260,6 +263,16 @@ public abstract class AbstractGameState {
                 case VISIBLE_TO_OWNER:
                     if (((Component) container).getOwnerId() != player)
                         retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    break;
+                case FIRST_VISIBLE_TO_ALL:
+                    // add everything as unseen, and then remove the first element
+                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    retValue.remove(container.getComponents().get(0).getComponentID());
+                    break;
+                case LAST_VISIBLE_TO_ALL:
+                    // add in the ID of the last item only
+                    int length = container.getComponents().size();
+                    retValue.add(container.getComponents().get(length - 1).getComponentID());
                     break;
                 case MIXED_VISIBILITY:
                     throw new AssertionError("If something uses this visibility mode, then you need to also add code to this method please!");
