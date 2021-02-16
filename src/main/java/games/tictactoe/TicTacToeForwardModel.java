@@ -19,7 +19,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
         int gridSize = tttgp.gridSize;
         TicTacToeGameState state = (TicTacToeGameState)firstState;
-        state.gridBoard = new GridBoard<>(gridSize, gridSize, TicTacToeConstants.defaultToken);
+        state.gridBoard = new GridBoard<>(gridSize, gridSize);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
 
         for (int x = 0; x < tttgs.gridBoard.getWidth(); x++){
             for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                if (tttgs.gridBoard.getElement(x, y).equals(TicTacToeConstants.defaultToken))
+                if (tttgs.gridBoard.getElement(x, y) == null)
                     actions.add(new SetGridValueAction(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
             }
         }
@@ -68,10 +68,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         // Check columns
         for (int x = 0; x < gridBoard.getWidth(); x++){
             Token c = gridBoard.getElement(x, 0);
-            if (!c.getTokenType().equals(" ")) {
+            if (c != null) {
                 boolean win = true;
                 for (int y = 1; y < gridBoard.getHeight(); y++) {
-                    if (!gridBoard.getElement(x, y).equals(c)) {
+                    Token o = gridBoard.getElement(x, y);
+                    if (o == null || !o.equals(c)) {
                         win = false;
                         break;
                     }
@@ -86,10 +87,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         // Check rows
         for (int y = 0; y < gridBoard.getHeight(); y++){
             Token c = gridBoard.getElement(0, y);
-            if (!c.getTokenType().equals(" ")) {
+            if (c != null) {
                 boolean win = true;
                 for (int x = 1; x < gridBoard.getWidth(); x++) {
-                    if (!gridBoard.getElement(x, y).equals(c)) {
+                    Token o = gridBoard.getElement(x, y);
+                    if (o == null || !o.equals(c)) {
                         win = false;
                         break;
                     }
@@ -104,10 +106,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         // Check diagonals
         // Primary
         Token c = gridBoard.getElement(0, 0);
-        if (!c.getTokenType().equals(" ")) {
+        if (c != null) {
             boolean win = true;
             for (int i = 1; i < gridBoard.getWidth(); i++) {
-                if (!gridBoard.getElement(i, i).equals(c)) {
+                Token o = gridBoard.getElement(i, i);
+                if (o == null || !o.equals(c)) {
                     win = false;
                 }
             }
@@ -119,10 +122,11 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
 
         // Secondary
         c = gridBoard.getElement(gridBoard.getWidth()-1, 0);
-        if (!c.getTokenType().equals(" ")) {
+        if (c != null) {
             boolean win = true;
             for (int i = 1; i < gridBoard.getWidth(); i++) {
-                if (!gridBoard.getElement(gridBoard.getWidth()-1-i, i).equals(c)) {
+                Token o = gridBoard.getElement(gridBoard.getWidth()-1-i, i);
+                if (o == null || !o.equals(c)) {
                     win = false;
                 }
             }
@@ -135,7 +139,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
         Component[][] grid = gridBoard.getGridValues();
         for (Component[] row: grid){
             for (Component field: row){
-                if (field.equals(TicTacToeConstants.defaultToken)) {
+                if (field == null) {
                     tie = false;
                     break;
                 }

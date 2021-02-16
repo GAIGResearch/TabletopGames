@@ -89,10 +89,12 @@ public class TTTBoardView extends ComponentView {
         g.drawRect(x, y, defaultItemSize, defaultItemSize);
 
         // Paint element in cell
-        Font f = g.getFont();
-        g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize*3/2));
-        g.drawString(element.toString(), x + defaultItemSize/16, y + defaultItemSize - defaultItemSize/16);
-        g.setFont(f);
+        if (element != null) {
+            Font f = g.getFont();
+            g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize * 3 / 2));
+            g.drawString(element.toString(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
+            g.setFont(f);
+        }
     }
 
     public ArrayList<Rectangle> getHighlight() {
