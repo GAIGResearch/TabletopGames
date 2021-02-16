@@ -203,13 +203,13 @@ public class GridBoard<T extends Component> extends Component {
      *
      * @return 1D flattened grid
      */
-    public T[] flattenGrid() {
+    public Component[] flattenGrid() {
         int length = getHeight() * getWidth();
         Component[] array = new Component[length];
         for (int i = 0; i < getHeight(); i++) {
             System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
         }
-        return (T[])array;
+        return array;
     }
 
     @Override
