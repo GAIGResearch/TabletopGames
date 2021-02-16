@@ -3,8 +3,8 @@ package games.dotsboxes;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.GridBoard;
 import utilities.Utils;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,38 +18,50 @@ public class DBForwardModel extends AbstractForwardModel {
         DBGameState dbgs = (DBGameState) firstState;
         DBParameters dbp = (DBParameters) firstState.getGameParameters();
 
-        // Create initial board
-        dbgs.grid = new GridBoard<>(dbp.gridWidth, dbp.gridHeight, DBCell.class);
-
         // Generate edge to cell mapping and all cell objects with appropriate constructor
         dbgs.edgeToCellMap = new HashMap<>();
+        dbgs.cellToEdgesMap = new HashMap<>();
+        dbgs.cellToOwnerMap = new HashMap<>();
+        dbgs.edgeToOwnerMap = new HashMap<>();
+        dbgs.edges = new HashSet<>();
+        dbgs.cells = new HashSet<>();
         for (int i = 0; i < dbp.gridHeight; i++) {
             for (int j = 0; j < dbp.gridWidth; j++) {
                 DBCell c = new DBCell(j, i);
-                dbgs.grid.setElement(j, i, c);
-                for (DBEdge edge: c.edges) {
+                dbgs.cells.add(c);
+                HashSet<DBEdge> edges = new HashSet<>(4);
+                edges.add(new DBEdge(new Vector2D(j, i), new Vector2D(j, i+1)));
+                edges.add(new DBEdge(new Vector2D(j, i), new Vector2D(j+1, i)));
+                edges.add(new DBEdge(new Vector2D(j+1, i), new Vector2D(j+1, i+1)));
+                edges.add(new DBEdge(new Vector2D(j, i+1), new Vector2D(j+1, i+1)));
+                
+                for (DBEdge edge: edges) {
+                    dbgs.edges.add(edge);
                     if (!dbgs.edgeToCellMap.containsKey(edge)) {
                         dbgs.edgeToCellMap.put(edge, new HashSet<>());
                     }
                     dbgs.edgeToCellMap.get(edge).add(c);
                 }
+
+                dbgs.cellToEdgesMap.put(c, edges);
             }
         }
         // Initialise other variables
         dbgs.nCellsPerPlayer = new int[dbgs.getNPlayers()];
-        dbgs.nCellsComplete = 0;
     }
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         DBGameState dbgs = (DBGameState) currentState;
+        DBParameters dbp = (DBParameters) currentState.getGameParameters();
+
         // Will need to check if any cells completed through this action, as that would keep the turn to the current
         // player, otherwise it changes. So keep track of current number of cells completed before action is executed.
-        int nCellsCompleteBefore = dbgs.nCellsComplete;
+        int nCellsCompleteBefore = dbgs.cellToOwnerMap.size();
         // Execute action
         action.execute(currentState);
         // Check end of game (when all cells completed)
-        if (dbgs.nCellsComplete == dbgs.grid.getWidth() * dbgs.grid.getHeight()) {
+        if (dbgs.cellToOwnerMap.size() == dbp.gridWidth * dbp.gridHeight) {
             // Game is over. Set status and find winner
             dbgs.setGameStatus(Utils.GameResult.GAME_END);
             int winner = -1;
@@ -70,7 +82,7 @@ public class DBForwardModel extends AbstractForwardModel {
         }
 
         // If not returned, check if the action completed one more box, otherwise move to the next player
-        if (dbgs.nCellsComplete == nCellsCompleteBefore) {
+        if (dbgs.cellToOwnerMap.size() == nCellsCompleteBefore) {
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
     }
@@ -81,19 +93,10 @@ public class DBForwardModel extends AbstractForwardModel {
         DBGameState dbgs = (DBGameState) gameState;
 
         // Actions in this game are adding edges to the board (that don't already exist)
-        for (int i = 0; i < dbgs.grid.getHeight(); i++) {
-            for (int j = 0; j < dbgs.grid.getWidth(); j++) {
-                DBCell c = dbgs.grid.getElement(j, i);
-                if (c.nEdgesComplete < 4) {
-                    // Can still add an edge in this cell
-                    for (int e = 0; e < 4; e++) {
-                        DBEdge edge = c.edges.get(e);
-                        if (edge.owner == -1) {
-                            // This edge does not yet exist, we can add it
-                            actions.add(new AddGridCellEdge(edge));
-                        }
-                    }
-                }
+        for (DBEdge e: dbgs.edges) {
+            if (!dbgs.edgeToOwnerMap.containsKey(e)) {
+                // Can add this edge
+                actions.add(new AddGridCellEdge(e));
             }
         }
 
