@@ -20,7 +20,6 @@ import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
 
 public class CatanGameState extends AbstractGameState {
-    private CatanData data;
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
     protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
@@ -53,8 +52,6 @@ public class CatanGameState extends AbstractGameState {
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
-        data = new CatanData((CatanParameters)pp);
-        data.load(((CatanParameters)gameParameters).getDataPath());
         scores = new int[((CatanParameters) pp).n_players];
         knights = new int[((CatanParameters) pp).n_players];
         exchangeRates = new int[((CatanParameters) pp).n_players][CatanParameters.Resources.values().length];
@@ -84,10 +81,6 @@ public class CatanGameState extends AbstractGameState {
     }
     Area getArea(int playerId) {
         return areas.get(playerId);
-    }
-
-    public CatanData getData(){
-        return data;
     }
 
     @Override

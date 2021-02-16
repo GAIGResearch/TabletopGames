@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.*;
+import core.properties.PropertyString;
 import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
@@ -34,8 +35,6 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters)state.getGameParameters();
-        // data is read in from JSON it has all the cards, tokens and counters
-        CatanData data = state.getData();
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
@@ -66,8 +65,30 @@ public class CatanForwardModel extends AbstractForwardModel {
         // Initialize the game area
         Area gameArea = new Area(-1, "Game Area");
         state.areas.put(-1, gameArea);
-        gameArea.putComponent(resourceDeckHash, data.findDeck("resourceDeck"));
-        gameArea.putComponent(developmentDeckHash, data.findDeck("developmentDeck"));
+
+        // create resource deck
+        Deck<Card> resourceDeck = new Deck("resourceDeck");
+        for (CatanParameters.Resources res: CatanParameters.Resources.values()) {
+            for (int i = 0; i < params.n_resource_cards; i++) {
+                Card c = new Card();
+                c.setProperty(new PropertyString("cardType", res.name()));
+                resourceDeck.add(c);
+            }
+        }
+
+        // create and shuffle developmentDeck
+        Deck<Card> developmentDeck = new Deck("developmentDeck");
+        for (Map.Entry<String, Integer> entry: params.developmentCardCount.entrySet()){
+            for (int i = 0; i < entry.getValue(); i++){
+                Card card = new Card();
+                card.setProperty(new PropertyString("cardType", entry.getKey()));
+                developmentDeck.add(card);
+            }
+        }
+        developmentDeck.shuffle(new Random(params.getRandomSeed()));
+
+        gameArea.putComponent(resourceDeckHash, resourceDeck);
+        gameArea.putComponent(developmentDeckHash, developmentDeck);
         gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck"));
 
         state.addComponents();
