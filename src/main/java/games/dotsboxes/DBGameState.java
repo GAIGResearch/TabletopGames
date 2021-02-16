@@ -74,11 +74,6 @@ public class DBGameState extends AbstractGameState {
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<>();  // fully observable at all times
-    }
-
-    @Override
     protected void _reset() {
         nCellsPerPlayer = null;
         cellToOwnerMap = null;

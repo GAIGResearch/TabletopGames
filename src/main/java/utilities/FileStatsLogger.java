@@ -103,7 +103,7 @@ public class FileStatsLogger implements IStatisticLogger {
      * @return A summary of the data
      */
     @Override
-    public Map<String, StatSummary> summary() {
+    public Map<String, TAGStatSummary> summary() {
         return new HashMap<>();
     }
 }

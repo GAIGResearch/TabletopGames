@@ -1,14 +1,18 @@
 package games.virus.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
+import core.interfaces.IComponentContainer;
 import games.virus.cards.VirusCard;
 import utilities.Utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class VirusBody extends Component {
+public class VirusBody extends Component implements IComponentContainer<VirusOrgan> {
     public HashMap<VirusCard.OrganType, VirusOrgan> organs;
 
     public VirusBody()
@@ -185,5 +189,15 @@ public class VirusBody extends Component {
                 nHealthy ++;
         }
         return nHealthy;
+    }
+
+    @Override
+    public List<VirusOrgan> getComponents() {
+        return new ArrayList<>(organs.values());
+    }
+
+    @Override
+    public CoreConstants.VisibilityMode getVisibilityMode() {
+        return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
     }
 }

@@ -1,6 +1,5 @@
 package games.uno;
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Utils;
@@ -19,9 +18,9 @@ public class UnoHeuristic extends TunableParameters implements IStateHeuristic {
 
     @Override
     public void _reset() {
-        FACTOR_PLAYER = (double) getDefaultParameterValue("FACTOR_PLAYER");
-        FACTOR_OPPONENT = (double) getDefaultParameterValue("FACTOR_OPPONENT");
-        FACTOR_N_CARDS = (double) getDefaultParameterValue("FACTOR_N_CARDS");
+        FACTOR_PLAYER = (double) getParameterValue("FACTOR_PLAYER");
+        FACTOR_OPPONENT = (double) getParameterValue("FACTOR_OPPONENT");
+        FACTOR_N_CARDS = (double) getParameterValue("FACTOR_N_CARDS");
     }
 
     @Override
