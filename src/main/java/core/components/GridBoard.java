@@ -1,5 +1,7 @@
 package core.components;
 
+import core.CoreConstants;
+import core.interfaces.IComponentContainer;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import org.json.simple.JSONArray;
@@ -13,11 +15,12 @@ import utilities.Vector2D;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.imgHash;
 import static utilities.Utils.getNeighbourhood;
 
-public class GridBoard<T extends Component> extends Component {
+public class GridBoard<T extends Component> extends Component implements IComponentContainer<T> {
 
     private int width;  // Width of the board
     private int height;  // Height of the board
@@ -385,5 +388,15 @@ public class GridBoard<T extends Component> extends Component {
     @Override
     public final int hashCode() {
         return Objects.hash(componentID) + 5 * Arrays.hashCode(flattenGrid());
+    }
+
+    @Override
+    public List<T> getComponents() {
+        return Arrays.stream(flattenGrid()).map( component -> (T) component).collect(Collectors.toList());
+    }
+
+    @Override
+    public CoreConstants.VisibilityMode getVisibilityMode() {
+        return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
     }
 }
