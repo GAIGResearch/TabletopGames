@@ -85,7 +85,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                 developmentDeck.add(card);
             }
         }
-        developmentDeck.shuffle(new Random(params.getRandomSeed()));
+        developmentDeck.shuffle(rnd);
 
         gameArea.putComponent(resourceDeckHash, resourceDeck);
         gameArea.putComponent(developmentDeckHash, developmentDeck);

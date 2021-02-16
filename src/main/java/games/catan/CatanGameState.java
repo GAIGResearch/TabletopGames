@@ -18,6 +18,8 @@ import java.util.*;
 import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
+import static games.pandemic.PandemicConstants.infectionHash;
+import static games.pandemic.PandemicConstants.playerDeckHash;
 
 public class CatanGameState extends AbstractGameState {
     protected CatanTile[][] board;
@@ -32,10 +34,7 @@ public class CatanGameState extends AbstractGameState {
     protected int longestRoadLength = 0;
     int rollValue;
 
-    // In Catan the "setup" phase is when each player can place a road with a settlement twice. The robber phase is when
-    // the player rolls a 7. The discarding phase is when the robber is activate and a player has more than 7 resource
-    // cards, in this case half of the cards have to be discarded. the TradeReaction is when another player makes an
-    // offer, which can be accepted or rejected.
+    // GamePhases that may occur in Catan
     public enum CatanGamePhase implements IGamePhase {
         Setup,
         Trade,
@@ -64,8 +63,6 @@ public class CatanGameState extends AbstractGameState {
     @Override
     protected List<Component> _getAllComponents() {
         List<Component> components = new ArrayList<>(areas.values());
-//        components.add(tempDeck);
-//        components.add(world);
         return components;
     }
 
@@ -337,17 +334,35 @@ public class CatanGameState extends AbstractGameState {
         }
         return true;
     }
-    // todo implement methods below
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        return this;
+        // todo check if has anything else
+        CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
+        copy.scores = scores.clone();
+        copy.knights = knights.clone();
+        copy.exchangeRates = exchangeRates.clone();
+        copy.victoryPoints = victoryPoints.clone();
+        copy.longestRoadLength = longestRoad;
+        return copy;
     }
 
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return null;
+        // todo return unknown components
+        return new ArrayList<Integer>() {{
+            Deck<Card> resourceDeck = (Deck<Card>) getComponent(playerDeckHash);
+            Deck<Card> devDeck = (Deck<Card>) getComponent(developmentDeckHash);
+            add(resourceDeck.getComponentID());
+            add(devDeck.getComponentID());
+            for (Component c: resourceDeck.getComponents()) {
+                add(c.getComponentID());
+            }
+            for (Component c: devDeck.getComponents()) {
+                add(c.getComponentID());
+            }
+        }};
     }
 
 
