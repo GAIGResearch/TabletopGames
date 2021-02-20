@@ -1,19 +1,22 @@
 package evaluation;
 
-import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evodef.AgentSearchSpace;
-import org.json.simple.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import players.mcts.MCTSParams;
 import utilities.Pair;
 
 import java.io.FileReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.*;
-
-import java.util.stream.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * This is a wrapper around ITunableParameters<T> (the TAG standard) to implement the AgentSearchSpace
@@ -112,7 +115,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         // this defines a default we should be using in itp
                         if (data == null)
                             throw new AssertionError("We have a problem with null data in JSON file using key " + key);
-                        itp.setParameterValue(key, data);
+                        String[] namespaceSplit = key.split("\\.");
+                        itp.setParameterValue(namespaceSplit[namespaceSplit.length - 1], data);
                     }
                 } else if (!baseKey.equals("class")){
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);

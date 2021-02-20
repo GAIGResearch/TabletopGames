@@ -1,9 +1,9 @@
 package players.simple;
 
 import core.AbstractForwardModel;
-import core.actions.AbstractAction;
-import core.AbstractPlayer;
 import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.SimultaneousTurnOrder;
 
@@ -44,7 +44,9 @@ public class OSLAPlayer extends AbstractPlayer {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
 
-        for (AbstractAction action : actions) {
+        double[] valState = new double[actions.size()];
+        for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
+            AbstractAction action = actions.get(actionIndex);
             AbstractGameState gsCopy = gs.copy();
 
             getForwardModel().next(gsCopy, action);
@@ -53,14 +55,14 @@ public class OSLAPlayer extends AbstractPlayer {
                 advanceToEndOfRoundWithRandomActions(gsCopy);
             }
 
-            double valState;
             if (heuristic != null) {
-                valState = heuristic.evaluateState(gsCopy, this.getPlayerID());
+                valState[actionIndex] = heuristic.evaluateState(gsCopy, this.getPlayerID());
             } else {
-                valState = gsCopy.getHeuristicScore(this.getPlayerID());
+                valState[actionIndex] = gsCopy.getHeuristicScore(this.getPlayerID());
             }
 
-            double Q = noise(valState, this.epsilon, this.random.nextDouble());
+            double Q = noise(valState[actionIndex], this.epsilon, this.random.nextDouble());
+       //     System.out.println(Arrays.stream(valState).mapToObj(v -> String.format("%1.3f", v)).collect(Collectors.joining("\t")));
 
             if (Q > maxQ) {
                 maxQ = Q;
