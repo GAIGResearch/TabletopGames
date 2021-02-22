@@ -6,7 +6,6 @@ import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
-import games.dominion.DominionGameState;
 import utilities.Utils;
 
 import java.util.*;
@@ -172,8 +171,6 @@ public abstract class AbstractGameState {
     }
 
     public void setActionInProgress(IExtendedSequence action) {
-        if (gamePhase != DominionGameState.DominionGamePhase.Play)
-            throw new AssertionError("ExtendedActions are currently only supported during the Play action phase");
         if (action == null && !actionsInProgress.isEmpty())
             actionsInProgress.pop();
         else
