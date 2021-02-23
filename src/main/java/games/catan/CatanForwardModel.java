@@ -38,8 +38,6 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
-        state.getRoads();
-        state.getSettlements();
         state.areas = new HashMap<>();
 
         // Setup areas

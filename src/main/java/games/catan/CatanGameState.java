@@ -220,6 +220,8 @@ public class CatanGameState extends AbstractGameState {
     public int getRoadDistance(int x, int y, int edge){
         // calculates the distance length of the road
         HashSet<Road> roadSet = new HashSet<>();
+        roadSet.add(board[x][y].getRoads()[edge]);
+
         ArrayList<Settlement> dir1 = new ArrayList<>();
         ArrayList<Settlement> dir2 = new ArrayList<>();
         Settlement settl1 = board[x][y].getSettlements()[edge];
@@ -229,10 +231,10 @@ public class CatanGameState extends AbstractGameState {
         dir2.addAll(catanGraph.getNeighbourNodes(settl2));
 
         // find longest segment, we first follow dir_1 then dir_2
-        expandRoad(this, roadSet, dir1);
-        expandRoad(this, roadSet, dir2);
+        // todo probably crashes, need to look into this
+//        expandRoad(this, roadSet, dir1);
+//        expandRoad(this, roadSet, dir2);
 
-        roadSet.add(board[x][y].getRoads()[edge]);
         return roadSet.size();
     }
 
