@@ -3,8 +3,14 @@ package games.catan.components;
 public class Settlement {
     private int type; // settlement = 1, city = 2
     private int owner;
+    private int x;
+    private int y;
+    private int vertex;
 
-    public Settlement(int owner){
+    public Settlement(int x, int y, int vertex, int owner){
+        this.x = x;
+        this.y = y;
+        this.vertex = vertex;
         this.owner = owner;
         this.type = 1;
     }
@@ -29,5 +35,21 @@ public class Settlement {
         return type;
     }
 
+    public int getX() {
+        return x;
+    }
 
+    public int getY() {
+        return y;
+    }
+
+    public int getVertex() {
+        return vertex;
+    }
+
+    public Settlement copy(){
+        Settlement copy = new Settlement(x, y, vertex, owner);
+        copy.type = this.type;
+        return copy;
+    }
 }

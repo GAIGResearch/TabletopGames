@@ -66,5 +66,14 @@ public class Graph<N, E> {
         }
     }
 
+    public Graph copy(){
+        Graph copy = new Graph();
+        Set<N> set = map.keySet();
+        for (N vertex : set) {
+            copy.map.put(vertex, map.get(vertex));
+        }
+        return copy;
+    }
+
 }
 

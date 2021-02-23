@@ -114,7 +114,6 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
         if (action instanceof BuildRoad) {
             BuildRoad br = (BuildRoad) action;
-            // todo remove branches and cycles from road length
             int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
             if (new_length > gs.longestRoadLength) {
                 gs.longestRoadLength = new_length;
@@ -161,9 +160,6 @@ public class CatanForwardModel extends AbstractForwardModel {
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
         gs.setRollValue(getDiceRoll(gs.getGameParameters().getRandomSeed()));
-        if (VERBOSE) {
-            System.out.println("New role value = " + gs.rollValue);
-        }
 
         int value = gs.getRollValue();
         CatanTile[][] board = gs.getBoard();
@@ -256,16 +252,16 @@ public class CatanForwardModel extends AbstractForwardModel {
         Collections.shuffle(numberList);
 
         CatanTile[][] board = new CatanTile[7][7];
-        int mid_x = board.length/2;
-        int mid_y = board[0].length/2;
+        int midX = board.length/2;
+        int midY = board[0].length/2;
 
-        CatanTile midTile = new CatanTile(mid_x, mid_y);
+        CatanTile midTile = new CatanTile(midX, midY);
 
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
                 CatanTile tile = new CatanTile(x, y);
                 // mid_x should be the same as the distance
-                if (midTile.distance(tile) >= mid_x){
+                if (midTile.distance(tile) >= midX){
                     tile.setTileType(CatanParameters.TileType.SEA);
                 }
                 else if (tileList.size() > 0) {
@@ -292,7 +288,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                     // Road has already been set
                     if (tile.getRoads()[edge] == null) {
                         // set a new road without owner
-                        Road road = new Road(-1);
+                        Road road = new Road(x, y, edge, -1);
                         tile.setRoad(edge, road);
 
                         int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
@@ -311,7 +307,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                 for (int vertex = 0; vertex < HEX_SIDES; vertex++){
                     // settlement has already been set so skip this loop
                     if (tile.getSettlements()[vertex] == null){
-                        Settlement settlement = new Settlement(-1);
+                        Settlement settlement = new Settlement(x, y, vertex,-1);
                         tile.setSettlement(vertex, settlement);
 
                         // Get the other 2 settlements along that vertex and set both of them separately
@@ -356,8 +352,8 @@ public class CatanForwardModel extends AbstractForwardModel {
                         if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
-                            Road[] neighbour_roads = neighbour.getRoads();
-                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbour_roads[(i+4)%HEX_SIDES]);
+                            Road[] neighbourRoads = neighbour.getRoads();
+                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbourRoads[(i+4)%HEX_SIDES]);
                         }
                     }
                 }

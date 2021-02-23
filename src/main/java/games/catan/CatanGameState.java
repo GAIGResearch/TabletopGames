@@ -220,38 +220,59 @@ public class CatanGameState extends AbstractGameState {
     public int getRoadDistance(int x, int y, int edge){
         // calculates the distance length of the road
         HashSet<Road> roadSet = new HashSet<>();
-        ArrayList<Settlement> unvisited = new ArrayList<>();
+        ArrayList<Settlement> dir1 = new ArrayList<>();
+        ArrayList<Settlement> dir2 = new ArrayList<>();
         Settlement settl1 = board[x][y].getSettlements()[edge];
         Settlement settl2 = board[x][y].getSettlements()[(edge+1)%6];
 
-        unvisited.addAll(catanGraph.getNeighbourNodes(settl1));
-        unvisited.addAll(catanGraph.getNeighbourNodes(settl2));
+        dir1.addAll(catanGraph.getNeighbourNodes(settl1));
+        dir2.addAll(catanGraph.getNeighbourNodes(settl2));
 
-        while (unvisited.size() > 0){
-            // Expand a new vertex
-            Settlement settlement = unvisited.remove(0);
-            List<Edge<Settlement, Road>> edges = catanGraph.getEdges(settlement);
-            // todo check in what case it is null
+        // find longest segment, we first follow dir_1 then dir_2
+        expandRoad(this, roadSet, dir1);
+        expandRoad(this, roadSet, dir2);
+
+        roadSet.add(board[x][y].getRoads()[edge]);
+        return roadSet.size();
+    }
+
+    private static int expandRoad(CatanGameState gs, HashSet<Road> roadSet, List<Settlement> unexpanded){
+        // return length, makes it possible to compare segments
+        // modify original set
+        while (unexpanded.size() > 0){
+            // Handle branching
+            if (unexpanded.size() == 2){
+                // road branches -> explore both directions
+                List unexpanded_copy = new ArrayList(unexpanded);
+                unexpanded.remove(1); // list with first element
+                unexpanded_copy.remove(0); // list with second element
+                HashSet roadSetCopy = new HashSet(roadSet);
+                int length1 = expandRoad(gs, roadSet, unexpanded);
+                int length2 = expandRoad(gs, roadSetCopy, unexpanded_copy);
+                if (length2 > length1){
+                    // has to swap the set if second option is longer
+                    roadSet = roadSetCopy;
+                }
+                unexpanded = new ArrayList<>(); // empty list, fully explored it
+            }
+            // logic for expanding a node
+            Settlement settlement = unexpanded.remove(0);
+            List<Edge<Settlement, Road>> edges = gs.getGraph().getEdges(settlement);
             if (edges != null){
                 for (Edge<Settlement, Road> e: edges){
-                    // todo probably creates cycles - adds up everything
                     Road road = e.getValue();
-
                     if (!roadSet.contains(e.getValue())){
-                        if (road.getOwner() == getCurrentPlayer()){
+                        // todo check if opponent has a settlement along the longest road as it breaks the longest road
+                        if (road.getOwner() == gs.getCurrentPlayer()){
                             // only add it if it's the players and unvisited
                             roadSet.add(road);
-                            unvisited.add(e.getDest());
+                            unexpanded.add(e.getDest());
                         }
                     }
                 }
             }
         }
-
-        roadSet.add(board[x][y].getRoads()[edge]);
-
         return roadSet.size();
-
     }
 
     public ArrayList<Road> getRoads(){
@@ -339,11 +360,25 @@ public class CatanGameState extends AbstractGameState {
     protected AbstractGameState _copy(int playerId) {
         // todo check if has anything else
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
+        copy.gamePhase = gamePhase;
+        copy.board = board.clone();
+        copy.catanGraph = catanGraph.copy();
+        copy.areas = copyAreas();
+        copy.gameStatus = gameStatus;
+        copy.playerResults = playerResults.clone();
         copy.scores = scores.clone();
         copy.knights = knights.clone();
         copy.exchangeRates = exchangeRates.clone();
         copy.victoryPoints = victoryPoints.clone();
         copy.longestRoadLength = longestRoad;
+        return copy;
+    }
+
+    private HashMap<Integer, Area> copyAreas(){
+        HashMap<Integer, Area> copy = new HashMap();
+        for (Map.Entry<Integer, Area> entry: this.areas.entrySet()){
+            copy.put(entry.getKey(), entry.getValue());
+        }
         return copy;
     }
 
