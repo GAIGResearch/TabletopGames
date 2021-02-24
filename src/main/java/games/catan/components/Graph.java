@@ -28,6 +28,10 @@ public class Graph<N extends Copiable, E extends Copiable> {
     /* Returns the connected nodes from a node
     *  */
     public List<N> getNeighbourNodes(N src){
+//        for (Map.EntrySet entry: map.entrySet){System.out.println((List<Settlement>)entry.getValue()))}
+//        for (Map.EntrySet entry: map.entrySet) {
+//            System.out.println(((Settlement) entry.getKey()).id);
+//        }
         List<Edge<N, E>> edges = map.get(src);
         ArrayList<N> destinations = new ArrayList<>();
         for (Edge<N, E> edge: edges){
@@ -67,14 +71,13 @@ public class Graph<N extends Copiable, E extends Copiable> {
     }
 
     public Graph copy(){
-        // todo deep copy
         Graph copy = new Graph();
         for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
             List<Edge<N, E>> edgeList = new ArrayList<>();
             for (Edge edge: entry.getValue()){
                 edgeList.add(edge.copy());
             }
-            copy.map.put(entry.getKey(), edgeList);
+            copy.map.put(entry.getKey().copy(), edgeList);
         }
         return copy;
     }

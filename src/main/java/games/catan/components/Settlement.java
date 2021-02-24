@@ -11,6 +11,11 @@ public class Settlement implements Copiable {
         this.type = 1;
         this.id = counter++;
     }
+    public Settlement(int owner, int id){
+        this.owner = owner;
+        this.type = 1;
+        this.id = id;
+    }
 
     public boolean upgrade(){
         if (this.type ==1){
@@ -38,9 +43,8 @@ public class Settlement implements Copiable {
 
 
     public Settlement copy(){
-        Settlement copy = new Settlement(owner);
+        Settlement copy = new Settlement(owner, id);
         copy.type = this.type;
-        copy.id = id;
         return copy;
     }
 
@@ -52,6 +56,12 @@ public class Settlement implements Copiable {
             return id == otherAction.id;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+//        return super.hashCode();
+        return id;
     }
 
     @Override

@@ -28,6 +28,7 @@ public class CatanGame extends Game {
 
         List<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new OSLAPlayer());
+//        agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));

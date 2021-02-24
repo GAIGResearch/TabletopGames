@@ -11,6 +11,10 @@ public class Road implements Copiable {
         this.owner = owner;
         this.id = counter++;
     }
+    private Road(int owner, int id){
+        this.owner = owner;
+        this.id = id;
+    }
 
     public int getOwner(){
         return owner;
@@ -25,8 +29,7 @@ public class Road implements Copiable {
     }
 
     public Road copy(){
-        Road copy = new Road(owner);
-        copy.id = id;
+        Road copy = new Road(owner, id);
         return copy;
     }
 
