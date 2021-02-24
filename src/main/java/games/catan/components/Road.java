@@ -2,15 +2,12 @@ package games.catan.components;
 
 public class Road {
     private int owner;
-    private int x;
-    private int y;
-    private int edge;
+    private static int counter = 0;
+    private int id;
 
-    public Road(int x, int y, int edge, int owner){
-        this.x = x;
-        this.y = y;
-        this.edge = edge;
+    public Road(int owner){
         this.owner = owner;
+        this.id = counter++;
     }
 
     public int getOwner(){
@@ -21,19 +18,13 @@ public class Road {
         this.owner = playerID;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getEdge() {
-        return edge;
+    public int getID() {
+        return id;
     }
 
     public Road copy(){
-        return new Road(x, y , edge, owner);
+        Road copy = new Road(owner);
+        copy.id = id;
+        return copy;
     }
 }

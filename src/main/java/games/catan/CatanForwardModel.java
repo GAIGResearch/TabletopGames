@@ -286,7 +286,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                     // Road has already been set
                     if (tile.getRoads()[edge] == null) {
                         // set a new road without owner
-                        Road road = new Road(x, y, edge, -1);
+                        Road road = new Road(-1);
                         tile.setRoad(edge, road);
 
                         int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
@@ -305,7 +305,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                 for (int vertex = 0; vertex < HEX_SIDES; vertex++){
                     // settlement has already been set so skip this loop
                     if (tile.getSettlements()[vertex] == null){
-                        Settlement settlement = new Settlement(x, y, vertex,-1);
+                        Settlement settlement = new Settlement(-1);
                         tile.setSettlement(vertex, settlement);
 
                         // Get the other 2 settlements along that vertex and set both of them separately
