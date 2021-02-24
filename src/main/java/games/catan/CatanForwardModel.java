@@ -227,7 +227,9 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected AbstractForwardModel _copy() {
-        return null;
+        CatanForwardModel copy = new CatanForwardModel(params, nPlayers);
+        copy.rollCounter = rollCounter;
+        return copy;
     }
 
     private CatanTile[][] generateBoard(CatanParameters params){

@@ -1,6 +1,8 @@
 package games.catan.components;
 
-public class Road {
+import games.catan.actions.BuildRoadByRef;
+
+public class Road implements Copiable {
     private int owner;
     private static int counter = 0;
     private int id;
@@ -26,5 +28,20 @@ public class Road {
         Road copy = new Road(owner);
         copy.id = id;
         return copy;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof Road){
+            Road otherAction = (Road)obj;
+            return id == otherAction.id;
+        }
+        return false;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return this.copy();
     }
 }

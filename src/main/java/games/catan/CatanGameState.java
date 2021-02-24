@@ -363,7 +363,7 @@ public class CatanGameState extends AbstractGameState {
         // todo check if has anything else
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
-        copy.board = board.clone();
+        copy.board = copyBoard();
         copy.catanGraph = catanGraph.copy();
         copy.areas = copyAreas();
         copy.gameStatus = gameStatus;
@@ -380,6 +380,16 @@ public class CatanGameState extends AbstractGameState {
         HashMap<Integer, Area> copy = new HashMap();
         for (Map.Entry<Integer, Area> entry: this.areas.entrySet()){
             copy.put(entry.getKey(), entry.getValue());
+        }
+        return copy;
+    }
+
+    private CatanTile[][] copyBoard(){
+        CatanTile[][] copy = new CatanTile[board.length][board[0].length];
+        for (int x = 0; x < board.length; x++){
+            for (int y = 0; y < board[0].length; y++){
+                copy[x][y] = board[x][y].copy();
+            }
         }
         return copy;
     }

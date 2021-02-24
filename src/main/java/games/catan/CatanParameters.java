@@ -155,4 +155,11 @@ public class CatanParameters extends AbstractParameters {
         put(HarborTypes.WOOL, 1);
         put(HarborTypes.GENERIC, 4);
     }};
+
+    @Override
+    public AbstractParameters copy() {
+        // todo set all variables
+        CatanParameters copy = new CatanParameters(getRandomSeed());
+        return copy;
+    }
 }

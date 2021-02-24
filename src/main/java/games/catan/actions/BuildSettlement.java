@@ -52,7 +52,7 @@ public class BuildSettlement extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null;
+        return new BuildSettlement(x, y, vertex, playerID);
     }
 
     @Override

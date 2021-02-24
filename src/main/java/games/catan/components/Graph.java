@@ -3,7 +3,7 @@ package games.catan.components;
 import java.util.*;
 
 /* Implementation of a generic Graph using generic edges */
-public class Graph<N, E> {
+public class Graph<N extends Copiable, E extends Copiable> {
     private Map<N, List<Edge<N, E>>> map;
 
     public Graph(){
@@ -67,10 +67,14 @@ public class Graph<N, E> {
     }
 
     public Graph copy(){
+        // todo deep copy
         Graph copy = new Graph();
-        Set<N> set = map.keySet();
-        for (N vertex : set) {
-            copy.map.put(vertex, map.get(vertex));
+        for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
+            List<Edge<N, E>> edgeList = new ArrayList<>();
+            for (Edge edge: entry.getValue()){
+                edgeList.add(edge.copy());
+            }
+            copy.map.put(entry.getKey(), edgeList);
         }
         return copy;
     }
