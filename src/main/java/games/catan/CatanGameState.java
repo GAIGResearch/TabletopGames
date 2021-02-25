@@ -3,6 +3,7 @@ package games.catan;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.actions.AbstractAction;
 import core.components.Area;
 import core.components.Card;
 import core.components.Component;
@@ -14,6 +15,7 @@ import games.catan.components.Road;
 import games.catan.components.Settlement;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
@@ -370,9 +372,14 @@ public class CatanGameState extends AbstractGameState {
         copy.playerResults = playerResults.clone();
         copy.scores = scores.clone();
         copy.knights = knights.clone();
-        copy.exchangeRates = exchangeRates.clone();
+        copy.exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
+        for (int i = 0; i < exchangeRates.length; i++){
+            copy.exchangeRates[i] = exchangeRates[i].clone();
+        }
         copy.victoryPoints = victoryPoints.clone();
         copy.longestRoadLength = longestRoad;
+        copy.rollValue = rollValue;
+        copy.availableActions = new ArrayList<>(availableActions);
         return copy;
     }
 
