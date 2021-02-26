@@ -1,6 +1,7 @@
 package games;
 
 import core.*;
+import core.components.Card;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -110,7 +111,18 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    SushiGO( 2, 6,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Probability);
+                add(Cards);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(SetCollection);
+                add(PushYourLuck);
+                add(SimultaneousActionSelection);
+            }})
     ;
 
 //    Carcassonne (2, 5,
@@ -346,7 +358,8 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        Probability;
 
         /**
          * Retrieves a list of all games within this category.
