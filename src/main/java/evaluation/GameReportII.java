@@ -201,7 +201,7 @@ public class GameReportII {
         AbstractForwardModel fm = game.getForwardModel();
         long s = System.nanoTime();
         fm.setup(gs);
-        data.put("TimeSetup", (System.nanoTime() - s) / 10e3);
+        data.put("TimeSetup", (System.nanoTime() - s) / 1e3);
 
         Pair<Integer, int[]> components = countComponents(gs);
         data.put("StateSizeStart", components.a);
@@ -245,10 +245,10 @@ public class GameReportII {
         data.put("ActionSpaceKurtosis", stats.kurtosis());
         data.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
         data.put("Decisions", stats.n());
-        data.put("TimeNext", game.getNextTime() / 10e3);
-        data.put("TimeCopy", game.getCopyTime() / 10e3);
-        data.put("TimeActionCompute", game.getActionComputeTime() / 10e3);
-        data.put("TimeAgent", game.getAgentTime() / 10e3);
+        data.put("TimeNext", game.getNextTime() / 1e3);
+        data.put("TimeCopy", game.getCopyTime() / 1e3);
+        data.put("TimeActionCompute", game.getActionComputeTime() / 1e3);
+        data.put("TimeAgent", game.getAgentTime() / 1e3);
 
         data.put("Ticks", game.getTick());
         data.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
