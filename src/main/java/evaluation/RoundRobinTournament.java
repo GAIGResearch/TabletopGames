@@ -109,8 +109,8 @@ public class RoundRobinTournament extends AbstractTournament {
             createAndRunMatchUp(matchUp, g);
 
             for (int i = 0; i < this.agents.size(); i++) {
-                System.out.println(String.format("%s got %d points ", agents.get(i), pointsPerPlayer[i]));
-                System.out.println(String.format("%s won %.1f%% of the games ", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun)));
+                System.out.printf("%s got %d points %n", agents.get(i), pointsPerPlayer[i]);
+                System.out.printf("%s won %.1f%% of the games %n", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun));
             }
         }
         if (dataLogger != null)

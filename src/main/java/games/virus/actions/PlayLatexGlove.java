@@ -6,7 +6,6 @@ import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.virus.VirusGameParameters;
-import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
 import java.util.Objects;

@@ -5,14 +5,12 @@ import core.components.Area;
 import core.components.Component;
 import core.components.PartialObservableDeck;
 import core.interfaces.IComponentContainer;
+import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -48,6 +46,9 @@ public abstract class AbstractGameState {
 
     // Data for this game
     protected AbstractGameData data;
+
+    // Stack for extended actions
+    protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
 
     private int gameID;
 
@@ -102,42 +103,19 @@ public abstract class AbstractGameState {
     }
 
     // Getters
-    public final TurnOrder getTurnOrder() {
-        return turnOrder;
-    }
-
-    public final int getCurrentPlayer() {
-        return turnOrder.getCurrentPlayer(this);
-    }
-
-    public final Utils.GameResult getGameStatus() {
-        return gameStatus;
-    }
-
-    public final AbstractParameters getGameParameters() {
-        return this.gameParameters;
-    }
-
-    public final int getNPlayers() {
-        return turnOrder.nPlayers();
-    }
-
-    public final Utils.GameResult[] getPlayerResults() {
-        return playerResults;
-    }
-
-    public final boolean isNotTerminal() {
-        return gameStatus == GAME_ONGOING;
-    }
-
+    public final TurnOrder getTurnOrder(){return turnOrder;}
+    public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
+    public final Utils.GameResult getGameStatus() {  return gameStatus; }
+    public final AbstractParameters getGameParameters() { return this.gameParameters; }
+    public final int getNPlayers() { return turnOrder.nPlayers(); }
+    public final Utils.GameResult[] getPlayerResults() { return playerResults; }
+    public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
-
     public final Component getComponentById(int id) {
         return allComponents.getComponent(id);
     }
-
     public final Area getAllComponents() {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
         return allComponents;
@@ -188,12 +166,40 @@ public abstract class AbstractGameState {
         }
             // we do not copy individual actions in history, as these are now dead and should not change
 
+        s.actionsInProgress = new Stack<>();
+        actionsInProgress.forEach(
+                a -> s.actionsInProgress.push(a.copy())
+        );
+
         // Update the list of components for ID matching in actions.
         s.addAllComponents();
         return s;
     }
 
     /* Methods to be implemented by subclass, protected access. */
+
+    public IExtendedSequence currentActionInProgress() {
+        return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
+    }
+
+    public boolean isActionInProgress() {
+        checkActionsInProgress();
+        return !actionsInProgress.empty();
+    }
+
+    public void setActionInProgress(IExtendedSequence action) {
+        if (action == null && !actionsInProgress.isEmpty())
+            actionsInProgress.pop();
+        else
+            actionsInProgress.push(action);
+    }
+
+    void checkActionsInProgress() {
+        while (!actionsInProgress.isEmpty() &&
+                currentActionInProgress().executionComplete(this)) {
+            actionsInProgress.pop();
+        }
+    }
 
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
@@ -378,6 +384,7 @@ public abstract class AbstractGameState {
                 gameStatus == gameState.gameStatus &&
                 Arrays.equals(playerResults, gameState.playerResults) &&
                 Objects.equals(gamePhase, gameState.gamePhase) &&
+                Objects.equals(actionsInProgress, gameState.actionsInProgress) &&
                 _equals(o);
         // we deliberately exclude history from this equality check
     }

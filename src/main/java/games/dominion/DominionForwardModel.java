@@ -2,8 +2,6 @@ package games.dominion;
 
 import core.*;
 import core.actions.*;
-import core.components.Deck;
-import core.components.PartialObservableDeck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
@@ -72,32 +70,13 @@ public class DominionForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
 
-        if (!state.actionsInProgress.isEmpty()) {
-            // we just register the action with the currently active action
-            state.actionsInProgress.peek().registerActionTaken(state, action);
-        }
-
         action.execute(state);
 
-        // we may be in an extended action, so update that
-        if (!state.actionsInProgress.isEmpty()) {
-            // we just register the action taken with the currently active action
-            // and then remove anything which is now complete
-            int loopCount = 0;
-            while (!state.actionsInProgress.isEmpty() && state.actionsInProgress.peek().executionComplete(state)) {
-                state.actionsInProgress.pop();
-                loopCount++;
-                if (loopCount > 100) {
-                    throw new AssertionError("WTF?");
-                }
-            }
-        }
         int playerID = state.getCurrentPlayer();
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                if (!state.isActionInProgress() &&
-                        (state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase)) {
+                if ((state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) && !state.isActionInProgress()) {
                     // change phase
                     // no change to current player
                     state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
@@ -156,9 +135,6 @@ public class DominionForwardModel extends AbstractForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                if (state.isActionInProgress()) {
-                    return state.actionsInProgress.peek().followOnActions(state);
-                }
                 if (state.actionsLeft() > 0) {
                     Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
                             .filter(DominionCard::isActionCard).collect(toSet());

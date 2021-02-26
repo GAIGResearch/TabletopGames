@@ -156,6 +156,10 @@ public abstract class TurnOrder {
      * @return int, current player ID.
      */
     public int getCurrentPlayer(AbstractGameState gameState) {
+        if (gameState.isActionInProgress()) {
+            // this is when things might differ from the default
+            return gameState.currentActionInProgress().getCurrentPlayer(gameState);
+        }
         return turnOwner;
     }
 

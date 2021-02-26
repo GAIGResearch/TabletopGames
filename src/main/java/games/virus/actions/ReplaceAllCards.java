@@ -3,7 +3,6 @@ package games.virus.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawComponents;
-import core.components.Component;
 import core.components.Deck;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;

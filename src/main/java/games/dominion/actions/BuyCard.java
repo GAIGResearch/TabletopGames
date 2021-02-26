@@ -1,13 +1,8 @@
 package games.dominion.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.actions.DrawCard;
-import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.*;
-
-import java.util.Objects;
 
 /**
  * An extension of GainCard that implements control over Buys and AvailableSpend

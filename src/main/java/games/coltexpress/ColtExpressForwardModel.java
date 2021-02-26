@@ -1,7 +1,7 @@
 package games.coltexpress;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;

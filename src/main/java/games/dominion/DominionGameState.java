@@ -1,19 +1,23 @@
 package games.dominion;
 
-import core.*;
-import core.components.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.components.Component;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
-import games.dominion.actions.*;
-import games.dominion.cards.*;
-import games.dominion.DominionConstants.*;
+import games.dominion.DominionConstants.DeckType;
+import games.dominion.actions.IDelayedAction;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static core.CoreConstants.*;
-import static java.util.Comparator.*;
-import static java.util.stream.Collectors.*;
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState {
 
@@ -46,7 +50,6 @@ public class DominionGameState extends AbstractGameState {
     int additionalSpendAvailable = 0;
 
 
-    Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     List<IDelayedAction> delayedActions = new ArrayList<>();
 
     /**
@@ -79,8 +82,6 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public void endOfTurn(int playerID) {
-        if (!actionsInProgress.empty())
-            throw new AssertionError("Should not have an action in progress beyond the Play phase (yet)");
         if (playerID != getCurrentPlayer())
             throw new AssertionError("Not yet supported");
         // 1) put hand and cards played into discard
@@ -187,23 +188,6 @@ public class DominionGameState extends AbstractGameState {
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
     }
 
-    public IExtendedSequence currentActionInProgress() {
-        return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
-    }
-
-    public boolean isActionInProgress() {
-        return !actionsInProgress.empty();
-    }
-
-    public void setActionInProgress(IExtendedSequence action) {
-        if (gamePhase != DominionGamePhase.Play)
-            throw new AssertionError("ExtendedActions are currently only supported during the Play action phase");
-        if (action == null && !actionsInProgress.isEmpty())
-            actionsInProgress.pop();
-        else
-            actionsInProgress.push(action);
-    }
-
     public void addDelayedAction(IDelayedAction action) {
         delayedActions.add(action);
     }
@@ -254,7 +238,7 @@ public class DominionGameState extends AbstractGameState {
                 allCards = getDeck(deck, playerId);
                 break;
             case ALL:
-                allCards = new Deck<>("temp", VisibilityMode.HIDDEN_TO_ALL);
+                allCards = new Deck<>("temp", VISIBLE_TO_ALL);
                 allCards.add(playerHands[playerId]);
                 allCards.add(playerDiscards[playerId]);
                 allCards.add(playerDrawPiles[playerId]);
@@ -348,10 +332,6 @@ public class DominionGameState extends AbstractGameState {
 
         retValue.defenceStatus = defenceStatus.clone();
 
-        retValue.actionsInProgress = new Stack<>();
-        actionsInProgress.forEach(
-                a -> retValue.actionsInProgress.push(a.copy())
-        );
         retValue.delayedActions = delayedActions.stream().map(IDelayedAction::copy).collect(toList());
         return retValue;
     }
@@ -379,7 +359,7 @@ public class DominionGameState extends AbstractGameState {
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      *
-     * @param playerId - id of the player
+     * @param playerId Player number
      * @return - double, score of current state
      */
     @Override
@@ -405,6 +385,18 @@ public class DominionGameState extends AbstractGameState {
     }
 
     /**
+     * Provide a list of component IDs which are hidden in partially observable copies of games.
+     * Depending on the game, in the copies these might be completely missing, or just randomized.
+     *
+     * @param playerId - ID of player observing the state.
+     * @return - list of component IDs unobservable by the given player.
+     */
+    @Override
+    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
+        return new ArrayList<>();
+    }
+
+    /**
      * Resets variables initialised for this game state.
      */
     @Override
@@ -414,14 +406,14 @@ public class DominionGameState extends AbstractGameState {
         playerDiscards = new Deck[playerCount];
         playerTableaux = new Deck[playerCount];
 
-        trashPile = new Deck<>("Trash", VisibilityMode.VISIBLE_TO_ALL);
+        trashPile = new Deck<>("Trash", VISIBLE_TO_ALL);
         for (int i = 0; i < playerCount; i++) {
             boolean[] handVisibility = new boolean[playerCount];
             handVisibility[i] = true;
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
             playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[playerCount]);
-            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VisibilityMode.VISIBLE_TO_ALL);
-            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VisibilityMode.VISIBLE_TO_ALL);
+            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VISIBLE_TO_ALL);
+            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VISIBLE_TO_ALL);
         }
     }
 
@@ -442,13 +434,11 @@ public class DominionGameState extends AbstractGameState {
                 Arrays.equals(playerDiscards, other.playerDiscards) &&
                 Arrays.equals(playerTableaux, other.playerTableaux) &&
                 Arrays.equals(playerDrawPiles, other.playerDrawPiles) &&
-                actionsInProgress.equals(other.actionsInProgress) &&
                 trashPile.equals(other.trashPile) &&
                 buysLeftForCurrentPlayer == other.buysLeftForCurrentPlayer &&
                 actionsLeftForCurrentPlayer == other.actionsLeftForCurrentPlayer &&
                 spentSoFar == other.spentSoFar && additionalSpendAvailable == other.additionalSpendAvailable &&
                 Arrays.equals(defenceStatus, other.defenceStatus) &&
-                gamePhase == other.gamePhase && gameStatus == other.gameStatus &&
                 delayedActions.equals(other.delayedActions);
     }
 
