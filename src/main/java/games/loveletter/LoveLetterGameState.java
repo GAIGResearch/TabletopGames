@@ -123,35 +123,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // Draw pile, other player hands and reserve cards
-        return new ArrayList<Integer>() {{
-            add(drawPile.getComponentID());
-            for (int i = 0; i < drawPile.getSize(); i++) {
-                if (!drawPile.isComponentVisible(i, playerId)) {
-                    add(drawPile.get(i).getComponentID());
-                }
-            }
-            add(reserveCards.getComponentID());
-            for (int i = 0; i < reserveCards.getSize(); i++) {
-                if (!reserveCards.isComponentVisible(i, playerId)) {
-                    add(reserveCards.get(i).getComponentID());
-                }
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (playerHandCards.get(i).getDeckVisibility()[playerId]){
-                    add(playerHandCards.get(i).getComponentID());
-                    for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
-                        if (!playerHandCards.get(i).isComponentVisible(j, playerId)) {
-                            add(playerHandCards.get(i).get(j).getComponentID());
-                        }
-                    }
-                }
-            }
-        }};
-    }
-
-    @Override
     protected void _reset() {
         gamePhase = Draw;
         playerHandCards = new ArrayList<>();

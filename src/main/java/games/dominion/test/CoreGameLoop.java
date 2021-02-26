@@ -1,6 +1,7 @@
 package games.dominion.test;
 
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -41,7 +42,7 @@ public class CoreGameLoop {
             assertEquals(5, state.getDeck(DeckType.HAND, i).getSize());
             assertEquals(5, state.getDeck(DeckType.DRAW, i).getSize());
             assertEquals(0, state.getDeck(DeckType.DISCARD, i).getSize());
-            Deck<DominionCard> allCards = new Deck<>("test");
+            Deck<DominionCard> allCards = new Deck<>("test", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
             allCards.add(state.getDeck(DeckType.HAND, i));
             allCards.add(state.getDeck(DeckType.DRAW, i));
             assertEquals(7, allCards.stream().filter(c -> c.cardType() == CardType.COPPER).count());

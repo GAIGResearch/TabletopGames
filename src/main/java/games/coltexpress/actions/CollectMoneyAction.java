@@ -12,6 +12,8 @@ import games.coltexpress.components.Loot;
 import java.util.Objects;
 import java.util.Random;
 
+import static core.CoreConstants.VisibilityMode;
+
 public class CollectMoneyAction extends DrawCard {
 
     private final int availableLoot;
@@ -33,7 +35,7 @@ public class CollectMoneyAction extends DrawCard {
         }
 
         // Find all loot of type
-        Deck<Loot> possible = new Deck<>("tmp");
+        Deck<Loot> possible = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
         Deck<Loot> availableLootDeck = (Deck<Loot>) gameState.getComponentById(availableLoot);
         for (Loot available : availableLootDeck.getComponents()){
             if (available.getLootType() == loot) {

@@ -118,22 +118,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            Deck<Card> pd = (Deck<Card>) getComponent(playerDeckHash);
-            Deck<Card> id = (Deck<Card>) getComponent(infectionHash);
-            add(pd.getComponentID());
-            add(id.getComponentID());
-            for (Component c: pd.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (Component c: id.getComponents()) {
-                add(c.getComponentID());
-            }
-        }};
-    }
-
-    @Override
     protected void _reset() {
         areas = null;
         tempDeck = null;
@@ -244,7 +228,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
             if (playerId != -1 && key == -1) {
                 // Hiding face-down decks in game area
                 a = new Area(key, "Game area");
-                HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
+                HashMap<Integer, Component> oldComponents = areas.get(key).getComponentsMap();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
                     if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
                         Random r = new Random(gs.getGameParameters().getRandomSeed());

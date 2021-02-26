@@ -1,5 +1,7 @@
 package core.components;
 
+import core.CoreConstants;
+import core.interfaces.IComponentContainer;
 import utilities.Utils;
 
 import java.util.*;
@@ -7,7 +9,7 @@ import java.util.*;
 /**
  * An Area is a collection of components such as Decks, Token, Dices, Cards and Boards, mapping to their IDs.
  */
-public class Area extends Component {
+public class Area extends Component implements IComponentContainer<Component> {
 
     // Collection of components stored in this area, mapping to their IDs
     protected HashMap<Integer, Component> components;
@@ -45,8 +47,18 @@ public class Area extends Component {
      * Retrieve the collection of components in this area.
      * @return - HashMap, components mapped to their IDs
      */
-    public HashMap<Integer, Component> getComponents() {
+    public HashMap<Integer, Component> getComponentsMap() {
         return this.components;
+    }
+
+    @Override
+    public CoreConstants.VisibilityMode getVisibilityMode() {
+        return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+    }
+
+    @Override
+    public List<Component> getComponents() {
+        return new ArrayList<>(components.values());
     }
 
     /**
@@ -72,9 +84,12 @@ public class Area extends Component {
      * @param component - component to add to the collection.
      */
     public void putComponent(Component component) {
-        if (component instanceof Deck) putComponents((Deck<? extends Component>)component);
-        else if (component instanceof Area) putComponents((Area)component);
-        else this.components.put(component.getComponentID(), component);
+        this.components.put(component.getComponentID(), component);
+        if (component instanceof IComponentContainer) {
+            for (Component nestedC : ((IComponentContainer<?>) component).getComponents()) {
+                putComponent(nestedC);
+            }
+        }
     }
 
     /**
@@ -83,28 +98,6 @@ public class Area extends Component {
      */
     public void putComponents(List<? extends Component> components) {
         for (Component c: components) {
-            putComponent(c);
-        }
-    }
-
-    /**
-     * Adds all components from a deck to the collection, using their own component IDs as the keys in the map.
-     * @param deck - deck to add to the collection.
-     */
-    public <T extends Component> void putComponents(Deck<T> deck) {
-        this.components.put(deck.getComponentID(), deck);
-        for (Component c: deck.getComponents()) {
-            putComponent(c);
-        }
-    }
-
-    /**
-     * Adds all components in an area to the collection, using their own component IDs as the keys in the map.
-     * @param area - area to add to the collection.
-     */
-    public void putComponents(Area area) {
-        this.components.put(area.getComponentID(), area);
-        for (Component c: area.components.values()) {
             putComponent(c);
         }
     }

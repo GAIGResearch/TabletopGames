@@ -1,7 +1,7 @@
 package games.coltexpress;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
@@ -20,6 +20,7 @@ import utilities.Utils;
 import java.util.*;
 
 import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.VisibilityMode;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
 
 public class ColtExpressForwardModel extends AbstractForwardModel {
@@ -51,7 +52,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (characterType == CharacterType.Belle)
                 cegs.playerPlayingBelle = playerIndex;
 
-            Deck<ColtExpressCard> playerCards = new Deck<>("playerCards" + playerIndex, playerIndex);
+            Deck<ColtExpressCard> playerCards = new Deck<>("playerCards" + playerIndex, playerIndex, VisibilityMode.HIDDEN_TO_ALL);
             for (ColtExpressCard.CardType type : cep.cardCounts.keySet()){
                 for (int j = 0; j < cep.cardCounts.get(type); j++) {
                     playerCards.add(new ColtExpressCard(playerIndex, type));
@@ -60,12 +61,11 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             cegs.playerDecks.add(playerCards);
             playerCards.shuffle(new Random(cep.getRandomSeed()+playerIndex));
 
-            Deck<ColtExpressCard> playerHand = new Deck<>(
-                    "playerHand" + playerIndex, playerIndex);
+            Deck<ColtExpressCard> playerHand = new Deck<>("playerHand" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
 
             cegs.playerHandCards.add(playerHand);
 
-            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex);
+            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_ALL);
             for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
                 LootType lootType = e.a;
                 int value = e.b;
@@ -87,7 +87,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     }
 
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
-        cegs.rounds = new Deck<>("Rounds", -1);
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
 
         // Add random round cards
         ArrayList<Integer> availableRounds = new ArrayList<>();
@@ -100,6 +100,10 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
             availableRounds.remove(Integer.valueOf(choice));
         }
+        // set first card to be visible
+        boolean[] allTrue = new boolean[cegs.getNPlayers()];
+        Arrays.fill(allTrue, true);
+        cegs.rounds.setVisibilityOfComponent(0, allTrue);
 
         // Add 1 random end round card
         cegs.rounds.add(cegs.getRandomEndRoundCard(cep, cegs.getTurnOrder().getRoundCounter()));
@@ -114,6 +118,13 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState gameState, AbstractAction action) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
         ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) gameState.getTurnOrder();
+        if (action != null) {
+            action.execute(gameState);
+        } else {
+            if (VERBOSE)
+                System.out.println("Player cannot do anything since he has drawn cards or " +
+                    " doesn't have any targets available");
+        }
 
         IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {

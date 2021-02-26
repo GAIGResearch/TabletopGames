@@ -3,12 +3,6 @@ package games.dotsboxes;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.components.Component;
-import core.components.Deck;
-import games.GameType;
-import gui.views.AreaView;
-import gui.views.CardView;
-import gui.views.ComponentView;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -29,7 +23,7 @@ public class DBGUI extends AbstractGUI {
         this.width = displayWidth;
         this.height = displayHeight;
 
-        view = new DBGridBoardView(((DBGameState)gameState).grid);
+        view = new DBGridBoardView(((DBGameState)gameState));
 
         JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
@@ -44,7 +38,7 @@ public class DBGUI extends AbstractGUI {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            view.updateComponent(((DBGameState)gameState).grid);
+            view.updateGameState(((DBGameState)gameState));
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
             }
