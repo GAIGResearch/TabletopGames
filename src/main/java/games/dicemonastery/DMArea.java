@@ -1,13 +1,15 @@
 package games.dicemonastery;
 
-import core.components.*;
-import utilities.Utils;
+import core.components.Area;
+import core.components.Component;
+import core.components.Token;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
 /**
  * A wrapper around Area to provide helper methods to get stuff
@@ -24,7 +26,7 @@ public class DMArea {
     }
 
     public Token take(Resource resource, int player) {
-        Optional<Token> cube = area.getComponents().values().stream()
+        Optional<Token> cube = area.stream()
                 .filter(c -> c instanceof Token
                         && c.getOwnerId() == player
                         && ((Token) c).getTokenType().equals(resource.name()))
@@ -38,7 +40,7 @@ public class DMArea {
     }
 
     public int count(Resource resource, int player) {
-        return (int) area.getComponents().values().stream()
+        return (int) area.stream()
                 .filter(c -> c instanceof Token
                         && c.getOwnerId() == player
                         && ((Token) c).getTokenType().equals(resource.toString()))
@@ -47,12 +49,12 @@ public class DMArea {
 
     public DMArea copy() {
         Area emptyArea = area.emptyCopy();
-        area.getComponents().values().forEach( c -> emptyArea.putComponent(c.copy()));
+        area.getComponents().forEach( c -> emptyArea.putComponent(c.copy()));
         return new DMArea(emptyArea);
     }
 
     public List<Component> getAll(Predicate<Component> filter) {
-        return area.getComponents().values().stream().filter(filter).collect(Collectors.toList());
+        return area.stream().filter(filter).collect(Collectors.toList());
     }
 
     public void putComponent(Component c) {

@@ -2,14 +2,17 @@ package games.dicemonastery.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.IExtendedSequence;
 import games.dicemonastery.Monk;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
-import static java.util.stream.Collectors.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
@@ -49,24 +52,25 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DiceMonasteryGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         // we can pick any of our monks...but we can ignore duplicate values
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         Set<Integer> pietyValues = availableMonks(state).stream().map(Monk::getPiety).collect(toSet());
         return pietyValues.stream().map(ChooseMonk::new).collect(toList());
     }
 
     @Override
-    public int getCurrentPlayer(DiceMonasteryGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return playerId;
     }
 
     @Override
-    public void registerActionTaken(DiceMonasteryGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // not used
     }
 
     @Override
-    public boolean executionComplete(DiceMonasteryGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return monkPiety != 0;
     }
 

@@ -4,15 +4,16 @@ import com.google.common.collect.ImmutableMap;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Dice;
+import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.IExtendedSequence;
 
-import java.util.*;
-import static games.dicemonastery.DiceMonasteryConstants.*;
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import java.util.List;
+import java.util.Objects;
+
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+import static games.dicemonastery.DiceMonasteryConstants.Resource;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 public class VisitMarket extends UseMonk implements IExtendedSequence {
 
@@ -32,13 +33,14 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
-        state.setActionInProgress(this);
         player = state.getCurrentPlayer();
+        state.setActionInProgress(this);
         return true;
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DiceMonasteryGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         List<AbstractAction> retValue = buyPrices.entrySet().stream()
                 .filter(entry -> state.getResource(state.getCurrentPlayer(), SHILLINGS, STOREROOM) >= entry.getValue())
                 .map(entry -> new Buy(entry.getKey(), entry.getValue()))
@@ -55,18 +57,18 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DiceMonasteryGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DiceMonasteryGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof Buy || action instanceof Sell || action instanceof DoNothing)
             traded = true;
     }
 
     @Override
-    public boolean executionComplete(DiceMonasteryGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return traded;
     }
 
