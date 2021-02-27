@@ -2,7 +2,7 @@ package games;
 
 import core.*;
 import games.dicemonastery.DiceMonasteryForwardModel;
-import games.dicemonastery.DiceMonasteryGUI;
+import games.dicemonastery.gui.DiceMonasteryGUI;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.DiceMonasteryParams;
 import games.coltexpress.ColtExpressForwardModel;
@@ -317,7 +317,7 @@ public enum GameType {
                 break;
             // TODO: Diamant GUI
             case DiceMonastery:
-                gui = new DiceMonasteryGUI(game, ac);
+                gui = new DiceMonasteryGUI(game, ac, human);
                 break;
         }
 

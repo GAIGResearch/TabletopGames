@@ -96,6 +96,8 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        if (monkPiety == 0)
+            return String.format("Move monk to %s", destination);
         return toString();
     }
 

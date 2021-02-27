@@ -11,13 +11,16 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.RandomPlayer;
-import utilities.*;
+import utilities.Pair;
+import utilities.TAGStatSummary;
+import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.*;
+import static games.GameType.DiceMonastery;
 
 public class Game {
 
@@ -682,13 +685,13 @@ public class Game {
         MCTSParams params1 = new MCTSParams();
 
         players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
-//        players.add(new MCTSPlayer(params1));
+        players.add(new RMHCPlayer());
+        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DotsAndBoxes, players, seed, ac, false, null);
+        runOne(DiceMonastery, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
