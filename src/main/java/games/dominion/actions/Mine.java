@@ -2,6 +2,7 @@ package games.dominion.actions;
 
 import core.AbstractGameState;
 import core.actions.*;
+import core.interfaces.IExtendedSequence;
 import games.dominion.*;
 import games.dominion.cards.*;
 
@@ -33,7 +34,8 @@ public class Mine extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         List<AbstractAction> retValue;
         if (!trashedCard) {
             retValue = state.getDeck(DominionConstants.DeckType.HAND, player).stream()
@@ -55,12 +57,12 @@ public class Mine extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (!trashedCard && action instanceof TrashCard && ((TrashCard) action).player == player) {
             trashedCard = true;
             trashValue = ((TrashCard) action).trashedCard.cost;
@@ -71,7 +73,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return trashedCard && gainedCard;
     }
 

@@ -4,12 +4,9 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
-import evaluation.GameLogger;
 import games.GameType;
-import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
@@ -21,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
-import static java.util.stream.Collectors.*;
 
 public class Game {
 
@@ -532,12 +528,12 @@ public class Game {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        StatSummary[] overall = new StatSummary[nPlayers];
+        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
         String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
             String[] split = players.get(i).getClass().toString().split("\\.");
             String agentName = split[split.length - 1] + "-" + i;
-            overall[i] = new StatSummary("Overall " + agentName);
+            overall[i] = new TAGStatSummary("Overall " + agentName);
             agentNames[i] = agentName;
         }
 
@@ -545,9 +541,9 @@ public class Game {
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
+                statSummaries[i] = new TAGStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -609,18 +605,18 @@ public class Game {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        StatSummary[] overall = new StatSummary[nPlayers];
+        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new StatSummary("Overall Player " + i);
+            overall[i] = new TAGStatSummary("Overall Player " + i);
         }
 
         // For each game...
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new TAGStatSummary("Game: " + gt.name() + "; Player: " + i);
             }
 
             // Play n repetitions of this game and record player results
@@ -655,7 +651,7 @@ public class Game {
      * @param statSummaries - object recording statistics
      * @param game          - finished game
      */
-    public static void recordPlayerResults(StatSummary[] statSummaries, Game game) {
+    public static void recordPlayerResults(TAGStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
         Utils.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
@@ -686,13 +682,13 @@ public class Game {
         MCTSParams params1 = new MCTSParams();
 
         players.add(new RandomPlayer());
-        players.add(new RMHCPlayer());
-        players.add(new MCTSPlayer(params1));
+//        players.add(new RMHCPlayer());
+//        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(LoveLetter, players, seed, ac, false, null);
+        runOne(DotsAndBoxes, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

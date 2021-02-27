@@ -1,7 +1,9 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
@@ -27,7 +29,8 @@ public class Harbinger extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         List<CardType> discardTypes = state.getDeck(DeckType.DISCARD, player).stream()
                 .map(DominionCard::cardType).distinct().collect(toList());
         List<AbstractAction> retValue = discardTypes.stream()
@@ -38,19 +41,19 @@ public class Harbinger extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof DoNothing || (action instanceof MoveCard && ((MoveCard) action).playerFrom == player)) {
             executed = true;
         }
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return executed;
     }
 

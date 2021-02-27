@@ -79,24 +79,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            add(drawDeck.getComponentID());
-            for (Component c: drawDeck.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component c: playerDecks.get(i).getComponents()) {
-                        add(c.getComponentID());
-                    }
-                }
-            }
-        }};
-    }
-
-    @Override
     protected void _reset() {
         playerBodies = new ArrayList<>();
         playerDecks = new ArrayList<>();

@@ -1,9 +1,11 @@
 package players.simple;
 
-import core.actions.AbstractAction;
-import core.AbstractPlayer;
+import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import core.turnorders.SimultaneousTurnOrder;
 
 import java.util.List;
 import java.util.Random;
@@ -17,21 +19,23 @@ public class OSLAPlayer extends AbstractPlayer {
     // Heuristics used for the agent
     IStateHeuristic heuristic;
 
-    public OSLAPlayer(Random random)  {
+    public OSLAPlayer(Random random) {
         this.random = random;
+        setName("OSLA");
     }
 
-    public OSLAPlayer(){
+    public OSLAPlayer() {
         this(new Random());
     }
 
-    public OSLAPlayer(IStateHeuristic heuristic){
+    public OSLAPlayer(IStateHeuristic heuristic) {
         this(heuristic, new Random());
     }
 
-    public OSLAPlayer(IStateHeuristic heuristic, Random random){
+    public OSLAPlayer(IStateHeuristic heuristic, Random random) {
         this(random);
         this.heuristic = heuristic;
+        setName("OSLA");
     }
 
     @Override
@@ -40,17 +44,25 @@ public class OSLAPlayer extends AbstractPlayer {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
 
-        for (AbstractAction action : actions) {
+        double[] valState = new double[actions.size()];
+        for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
+            AbstractAction action = actions.get(actionIndex);
             AbstractGameState gsCopy = gs.copy();
+
             getForwardModel().next(gsCopy, action);
-            double valState = 0;
-            if (heuristic != null){
-                valState = heuristic.evaluateState(gsCopy, this.getPlayerID());
-            } else {
-                valState = gsCopy.getHeuristicScore(this.getPlayerID());
+
+            if (gsCopy.getTurnOrder() instanceof SimultaneousTurnOrder) {
+                advanceToEndOfRoundWithRandomActions(gsCopy);
             }
 
-            double Q = noise(valState, this.epsilon, this.random.nextDouble());
+            if (heuristic != null) {
+                valState[actionIndex] = heuristic.evaluateState(gsCopy, this.getPlayerID());
+            } else {
+                valState[actionIndex] = gsCopy.getHeuristicScore(this.getPlayerID());
+            }
+
+            double Q = noise(valState[actionIndex], this.epsilon, this.random.nextDouble());
+       //     System.out.println(Arrays.stream(valState).mapToObj(v -> String.format("%1.3f", v)).collect(Collectors.joining("\t")));
 
             if (Q > maxQ) {
                 maxQ = Q;
@@ -61,9 +73,16 @@ public class OSLAPlayer extends AbstractPlayer {
         return bestAction;
     }
 
-    @Override
-    public String toString() {
-        return "OSLA";
+    private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy) {
+        // we assume that every other player now has to make a decision
+        RandomPlayer rnd = new RandomPlayer(random);
+        AbstractForwardModel fm = getForwardModel();
+        for (int p = 0; p < gsCopy.getNPlayers() - 1; p++) {
+            if (gsCopy.getCurrentPlayer() == getPlayerID()) {
+                throw new AssertionError("Not expecting to return to player " + getPlayerID());
+            }
+            AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+            fm.next(gsCopy, action);
+        }
     }
-
 }

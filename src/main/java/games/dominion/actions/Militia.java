@@ -1,5 +1,6 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dominion.*;
 import games.dominion.DominionConstants.*;
@@ -24,7 +25,8 @@ public class Militia extends DominionAttackAction {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         // we can discard any card in hand, so create a DiscardCard action for each
         if (isAttackComplete(currentTarget, state))
             throw new AssertionError("Should not be here - there are no actions to be taken");
@@ -36,12 +38,12 @@ public class Militia extends DominionAttackAction {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return currentTarget;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // Do nothing
     }
 

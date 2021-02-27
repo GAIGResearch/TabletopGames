@@ -4,6 +4,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.AbstractGameState;
+import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
@@ -15,13 +16,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Character>, IVectorObservation {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token>, IVectorObservation {
 
-    GridBoard<Character> gridBoard;
-    final ArrayList<Character> playerMapping = new ArrayList<Character>() {{
-        add('x');
-        add('o');
-    }};
+    GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers){
         super(gameParameters, new AlternatingTurnOrder(nPlayers));
@@ -63,11 +60,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<>();  // Always fully observable
-    }
-
-    @Override
     protected void _reset() {
         gridBoard = null;
     }
@@ -78,22 +70,17 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         if (!(o instanceof TicTacToeGameState)) return false;
         if (!super.equals(o)) return false;
         TicTacToeGameState that = (TicTacToeGameState) o;
-        return Objects.equals(gridBoard, that.gridBoard) &&
-                Objects.equals(playerMapping, that.playerMapping);
+        return Objects.equals(gridBoard, that.gridBoard);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), gridBoard, playerMapping);
+        return Objects.hash(super.hashCode(), gridBoard);
     }
 
     @Override
-    public GridBoard<Character> getGridBoard() {
+    public GridBoard<Token> getGridBoard() {
         return gridBoard;
-    }
-
-    public ArrayList<Character> getPlayerMapping() {
-        return playerMapping;
     }
 
     @Override

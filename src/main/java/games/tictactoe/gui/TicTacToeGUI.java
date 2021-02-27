@@ -6,6 +6,8 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.Token;
+import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -58,11 +60,10 @@ public class TicTacToeGUI extends AbstractGUI {
             if (highlight.size() > 0) {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
-                    SetGridValueAction<Character> action = (SetGridValueAction<Character>) abstractAction;
+                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
                     if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
-                        actionButtons[0].setButtonAction(action, "Play " +
-                                ((TicTacToeGameState) gameState).getPlayerMapping().get(player.getPlayerID()));
+                        actionButtons[0].setButtonAction(action, "Play " + TicTacToeConstants.playerMapping.get(player.getPlayerID()));
                         break;
                     }
                 }

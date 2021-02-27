@@ -1,18 +1,23 @@
 package players.mcts;
 
-import core.*;
-import core.interfaces.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.interfaces.IStateHeuristic;
+import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 
-import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.Strategies.*;
-import static players.mcts.MCTSEnums.TreePolicy.*;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
+import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.Strategies.RANDOM;
+import static players.mcts.MCTSEnums.TreePolicy.UCB;
 
 public class MCTSParams extends PlayerParameters {
 
@@ -85,6 +90,7 @@ public class MCTSParams extends PlayerParameters {
         ITunableParameters child = super.registerChild(nameSpace, json);
         if (child instanceof IStateHeuristic) {
             heuristic = (IStateHeuristic) child;
+            setParameterValue("heuristic", child);
         }
         return child;
     }

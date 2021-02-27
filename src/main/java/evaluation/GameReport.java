@@ -10,7 +10,7 @@ import players.simple.RandomPlayer;
 import utilities.BoxPlot;
 import utilities.LineChart;
 import utilities.Pair;
-import utilities.StatSummary;
+import utilities.TAGStatSummary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +29,17 @@ public class GameReport {
      * @param nPlayers - number of players taking part in this test.
      * @param lc       - line chart to add this data to, can be null if only printing required
      */
-    public static StatSummary actionSpace(GameType game, int nPlayers, LineChart lc) {
+    public static TAGStatSummary actionSpace(GameType game, int nPlayers, LineChart lc) {
         if (VERBOSE) {
             System.out.println("--------------------\nAction Space Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
         }
 
-        StatSummary actionSpace = new StatSummary(game.name() + "-" + nPlayers + "p");
-        StatSummary actionSpaceOnePerRep = new StatSummary(game.name() + "-" + nPlayers + "p");
-        ArrayList<StatSummary> sumData = new ArrayList<>();
+        TAGStatSummary actionSpace = new TAGStatSummary(game.name() + "-" + nPlayers + "p");
+        TAGStatSummary actionSpaceOnePerRep = new TAGStatSummary(game.name() + "-" + nPlayers + "p");
+        ArrayList<TAGStatSummary> sumData = new ArrayList<>();
 
         for (int i = 0; i < nRep; i++) {
-            StatSummary ss = new StatSummary();
+            TAGStatSummary ss = new TAGStatSummary();
 
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -56,7 +56,7 @@ public class GameReport {
                     ss.add(size);
 
                     if (j >= sumData.size()) {
-                        sumData.add(new StatSummary(nPlayers + "-" + j));
+                        sumData.add(new TAGStatSummary(nPlayers + "-" + j));
                     }
                     sumData.get(j).add(size);
                 }
@@ -95,13 +95,13 @@ public class GameReport {
      * @param game     - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static Pair<Integer, StatSummary> generalTest(GameType game, int nPlayers) {
+    public static Pair<Integer, TAGStatSummary> generalTest(GameType game, int nPlayers) {
         if (VERBOSE) {
             System.out.println("--------------------\nGeneral Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
         }
 
         Game g = game.createGameInstance(nPlayers);
-        Pair<Integer, StatSummary> ret = null;
+        Pair<Integer, TAGStatSummary> ret = null;
         if (g != null) {
             AbstractGameState gs = g.getGameState();
             if (VERBOSE) {
@@ -109,7 +109,7 @@ public class GameReport {
             }
 
             // TODO: run games
-            StatSummary ss = new StatSummary();
+            TAGStatSummary ss = new TAGStatSummary();
             for (int i = 0; i < nPlayers; i++) {
                 ss.add(gs.getUnknownComponentsIds(i).size());
             }
@@ -136,19 +136,19 @@ public class GameReport {
      * @param game     - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static StatSummary[] gameSpeed(GameType game, int nPlayers) {
+    public static TAGStatSummary[] gameSpeed(GameType game, int nPlayers) {
         if (VERBOSE) {
             System.out.println("--------------------\nSpeed Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
         }
 
-        StatSummary[] ret = new StatSummary[4];
-        StatSummary nextT = new StatSummary();
+        TAGStatSummary[] ret = new TAGStatSummary[4];
+        TAGStatSummary nextT = new TAGStatSummary();
         ret[0] = nextT;
-        StatSummary copyT = new StatSummary();
+        TAGStatSummary copyT = new TAGStatSummary();
         ret[1] = copyT;
-        StatSummary actionT = new StatSummary();
+        TAGStatSummary actionT = new TAGStatSummary();
         ret[2] = actionT;
-        StatSummary setupT = new StatSummary();
+        TAGStatSummary setupT = new TAGStatSummary();
         ret[3] = setupT;
 
         for (int i = 0; i < nRep; i++) {
@@ -194,16 +194,16 @@ public class GameReport {
      * @param game     - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static StatSummary[] gameLength(GameType game, int nPlayers) {
+    public static TAGStatSummary[] gameLength(GameType game, int nPlayers) {
         if (VERBOSE) {
             System.out.println("--------------------\nGame Length Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
         }
 
-        StatSummary[] ret = new StatSummary[4];
-        StatSummary nDecisions = new StatSummary();
-        StatSummary nTicks = new StatSummary();
-        StatSummary nRounds = new StatSummary();
-        StatSummary nActionsPerTurn = new StatSummary();
+        TAGStatSummary[] ret = new TAGStatSummary[4];
+        TAGStatSummary nDecisions = new TAGStatSummary();
+        TAGStatSummary nTicks = new TAGStatSummary();
+        TAGStatSummary nRounds = new TAGStatSummary();
+        TAGStatSummary nActionsPerTurn = new TAGStatSummary();
         ret[0] = nDecisions;
         ret[1] = nTicks;
         ret[2] = nRounds;
@@ -250,13 +250,13 @@ public class GameReport {
      * @param game     - game to test.
      * @param nPlayers - number of players taking part in this test.
      */
-    public static Pair<StatSummary, StatSummary> playerObservationTest(GameType game, int nPlayers) {
+    public static Pair<TAGStatSummary, TAGStatSummary> playerObservationTest(GameType game, int nPlayers) {
         if (VERBOSE) {
             System.out.println("--------------------\nPlayer Observation Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
         }
 
-        StatSummary rs = new StatSummary("Reward Sparsity");
-        StatSummary bf = new StatSummary("Branching Factor");
+        TAGStatSummary rs = new TAGStatSummary("Reward Sparsity");
+        TAGStatSummary bf = new TAGStatSummary("Branching Factor");
         for (int i = 0; i < nRep; i++) {
             Game g = game.createGameInstance(nPlayers);
             List<AbstractPlayer> players = new ArrayList<>();
@@ -309,7 +309,7 @@ public class GameReport {
 
             for (GameType gt : games) {
                 if (gt.getMinPlayers() > p && gt.getMaxPlayers() < p) continue;
-                StatSummary ss = actionSpace(gt, p, lc);
+                TAGStatSummary ss = actionSpace(gt, p, lc);
 
                 bp.addSeries(ss.getElements(), gt.name());
                 lc.setVisible(true);
@@ -332,7 +332,7 @@ public class GameReport {
             bp.setVisible(false);
 
             for (int p = gt.getMinPlayers(); p <= gt.getMaxPlayers(); p++) {
-                StatSummary ss = actionSpace(gt, p, lc);
+                TAGStatSummary ss = actionSpace(gt, p, lc);
 
                 bp.addSeries(ss.getElements(), p + "p");
                 lc.setVisible(true);
@@ -376,41 +376,41 @@ public class GameReport {
             if (gt == ColtExpress) continue;
             //     if (gt == Dominion) continue;
 
-            StatSummary as = new StatSummary("Action space size (" + gt.name() + ")");
-            StatSummary ss = new StatSummary("State size (" + gt.name() + ")");
-            StatSummary hidi = new StatSummary("Hidden info size (" + gt.name() + ")");
-            StatSummary cp = new StatSummary("GS.copy() (" + gt.name() + ") exe/sec");
-            StatSummary sp = new StatSummary("FM.setup() (" + gt.name() + ") exe/sec");
-            StatSummary ne = new StatSummary("FM.next() (" + gt.name() + ") exe/sec");
-            StatSummary ac = new StatSummary("FM.actions() (" + gt.name() + ") exe/sec");
-            StatSummary nd = new StatSummary("#decisions (" + gt.name() + ")");
-            StatSummary nt = new StatSummary("#ticks (" + gt.name() + ")");
-            StatSummary nr = new StatSummary("#rounds (" + gt.name() + ")");
-            StatSummary napt = new StatSummary("#apt (" + gt.name() + ")");
-            StatSummary rs = new StatSummary("Reward Sparsity (" + gt.name() + ")");
-            StatSummary bf = new StatSummary("Branching Factor (" + gt.name() + ")");
+            TAGStatSummary as = new TAGStatSummary("Action space size (" + gt.name() + ")");
+            TAGStatSummary ss = new TAGStatSummary("State size (" + gt.name() + ")");
+            TAGStatSummary hidi = new TAGStatSummary("Hidden info size (" + gt.name() + ")");
+            TAGStatSummary cp = new TAGStatSummary("GS.copy() (" + gt.name() + ") exe/sec");
+            TAGStatSummary sp = new TAGStatSummary("FM.setup() (" + gt.name() + ") exe/sec");
+            TAGStatSummary ne = new TAGStatSummary("FM.next() (" + gt.name() + ") exe/sec");
+            TAGStatSummary ac = new TAGStatSummary("FM.actions() (" + gt.name() + ") exe/sec");
+            TAGStatSummary nd = new TAGStatSummary("#decisions (" + gt.name() + ")");
+            TAGStatSummary nt = new TAGStatSummary("#ticks (" + gt.name() + ")");
+            TAGStatSummary nr = new TAGStatSummary("#rounds (" + gt.name() + ")");
+            TAGStatSummary napt = new TAGStatSummary("#apt (" + gt.name() + ")");
+            TAGStatSummary rs = new TAGStatSummary("Reward Sparsity (" + gt.name() + ")");
+            TAGStatSummary bf = new TAGStatSummary("Branching Factor (" + gt.name() + ")");
 
             for (int i = gt.getMinPlayers(); i <= gt.getMaxPlayers(); i++) {
                 System.out.println(gt.name() + " " + i);
                 as.add(actionSpace(gt, i, null));
 
-                Pair<Integer, StatSummary> ret = generalTest(gt, i);
+                Pair<Integer, TAGStatSummary> ret = generalTest(gt, i);
                 ss.add(ret.a);
                 hidi.add(ret.b);
 
-                StatSummary[] rett = gameSpeed(gt, i);
+                TAGStatSummary[] rett = gameSpeed(gt, i);
                 cp.add(rett[0]);
                 sp.add(rett[1]);
                 ne.add(rett[2]);
                 ac.add(rett[3]);
 
-                StatSummary[] rettt = gameLength(gt, i);
+                TAGStatSummary[] rettt = gameLength(gt, i);
                 nd.add(rettt[0]);
                 nt.add(rettt[1]);
                 nr.add(rettt[2]);
                 napt.add(rettt[3]);
 
-                Pair<StatSummary, StatSummary> retttt = playerObservationTest(gt, i);
+                Pair<TAGStatSummary, TAGStatSummary> retttt = playerObservationTest(gt, i);
                 rs.add(retttt.a);
                 bf.add(retttt.b);
             }

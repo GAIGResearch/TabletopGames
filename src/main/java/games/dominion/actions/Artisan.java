@@ -1,6 +1,8 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 
@@ -26,7 +28,8 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         if (!gainedCard) {
             return state.cardsToBuy().stream()
                     .filter(c -> c.cost <= MAX_COST_OF_GAINED_CARD)
@@ -41,12 +44,12 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof GainCard && ((GainCard) action).buyingPlayer == player)
             gainedCard = true;
         if (action instanceof MoveCard && ((MoveCard) action).playerFrom == player)
@@ -54,7 +57,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return gainedCard && putCardOnDeck;
     }
 
