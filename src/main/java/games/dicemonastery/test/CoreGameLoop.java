@@ -6,11 +6,9 @@ import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
@@ -183,6 +181,7 @@ public class CoreGameLoop {
 
         assertEquals(4, turnOrder.getYear());
         assertEquals(SPRING, turnOrder.getSeason());
+        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch( r -> r == Utils.GameResult.GAME_ONGOING));
     }
 
     @Test

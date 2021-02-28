@@ -55,16 +55,16 @@ public class DiceMonasteryGUI extends AbstractGUI {
             this.height = (int) (playerAreaHeight * nVertAreas);
 
             JPanel mainGameArea = new JPanel();
-            mainGameArea.setLayout(new BorderLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            mainGameArea.setLayout(new GridBagLayout());
 
             mainBoard = new MainBoard();
             playerBoards = IntStream.range(0, nPlayers).mapToObj(PlayerBoard::new).collect(toList());
 
-            // Player hands go on the edges
-            String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
-            JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
-            int next = 0;
-
+            // P1  *   P2
+            // Main Board
+            // P3  *   P4
+            int[][] locations = {{0, 0}, {2, 0}, {0, 2}, {2, 2}};
             for (int i = 0; i < nPlayers; i++) {
                 // Get agent name
                 String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -74,21 +74,19 @@ public class DiceMonasteryGUI extends AbstractGUI {
                 TitledBorder title = BorderFactory.createTitledBorder(
                         BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + agentName + "]",
                         TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
-                playerViewBorders.add(title);
                 PlayerBoard pb = playerBoards.get(i);
+                playerViewBorders.add(title);
                 pb.setBorder(title);
-                sides[next].add(pb);
-                sides[next].setLayout(new GridBagLayout());
-                next = (next + 1) % (locations.length);
-            }
-            for (int i = 0; i < locations.length; i++) {
-                mainGameArea.add(sides[i], locations[i]);
+                gbc.gridx = locations[i][0];
+                gbc.gridy = locations[i][1];
+                gbc.weightx = 1.0;
+                mainGameArea.add(pb, gbc);
             }
 
             // Discard and draw piles go in the center
-            JPanel centerArea = new JPanel();
-            centerArea.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-            mainGameArea.add(centerArea, BorderLayout.CENTER);
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            mainGameArea.add(mainBoard, gbc);
 
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dice Monastery", gameState, width, defaultInfoPanelHeight);

@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Token;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -175,6 +176,18 @@ public class DiceMonasteryGameState extends AbstractGameState {
              for (int i = 0; i < unharvestedWheat; i++)
                  moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
          }
+    }
+
+    void endGame() {
+        setGameStatus(Utils.GameResult.GAME_END);
+        int[] finalScores = new int[getNPlayers()];
+        for (int p = 0; p < getNPlayers(); p++) {
+            finalScores[p] = (int) getGameScore(p);
+        }
+        int winningScore = Arrays.stream(finalScores).max().orElseThrow(() -> new AssertionError("No MAX score found"));
+        for (int p = 0; p < getNPlayers(); p++) {
+            setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
+        }
     }
 
     @Override

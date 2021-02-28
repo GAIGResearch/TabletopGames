@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Component;
 import core.turnorders.TurnOrder;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -19,8 +18,7 @@ import static java.util.stream.Collectors.*;
 public class DiceMonasteryTurnOrder extends TurnOrder {
 
     public DiceMonasteryTurnOrder(int nPlayers, DiceMonasteryParams params) {
-        super(nPlayers);
-        nMaxRounds = params.YEARS;
+        super(nPlayers, params.YEARS);
     }
 
     private DiceMonasteryTurnOrder(int nPlayers) {
@@ -119,8 +117,9 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 if (turnOwner == abbot) {
                     season = season.next();
                     year++;
-                    if (year > nMaxRounds)
-                        state.setGameStatus(Utils.GameResult.GAME_END);
+                    if (year > nMaxRounds) {
+                        state.endGame();
+                    }
                     abbot = (abbot + 1 + nPlayers) % nPlayers;
                     turnOwner = abbot;
                 }

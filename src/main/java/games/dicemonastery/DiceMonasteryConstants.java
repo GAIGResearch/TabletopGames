@@ -2,7 +2,11 @@ package games.dicemonastery;
 
 import core.interfaces.IGamePhase;
 
+import java.awt.*;
+
 public class DiceMonasteryConstants {
+
+    public static Color[] playerColours = {Color.GREEN, Color.RED, Color.BLUE, Color.ORANGE};
 
     public enum ActionArea {
         MEADOW(1), KITCHEN(2), WORKSHOP(3),
