@@ -75,7 +75,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null;
+        return new PlaceSettlementWithRoad((BuildSettlement)bs.copy(), (BuildRoad)br.copy());
     }
 
     @Override

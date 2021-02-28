@@ -1,12 +1,20 @@
 package games.catan.components;
 
-public class Settlement {
+public class Settlement implements Copiable {
     private int type; // settlement = 1, city = 2
     private int owner;
+    private static int counter = 0;
+    private int id;
 
     public Settlement(int owner){
         this.owner = owner;
         this.type = 1;
+        this.id = counter++;
+    }
+    public Settlement(int owner, int id){
+        this.owner = owner;
+        this.type = 1;
+        this.id = id;
     }
 
     public boolean upgrade(){
@@ -29,5 +37,35 @@ public class Settlement {
         return type;
     }
 
+    public int getID(){
+        return id;
+    }
 
+
+    public Settlement copy(){
+        Settlement copy = new Settlement(owner, id);
+        copy.type = this.type;
+        return copy;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof Settlement){
+            Settlement otherAction = (Settlement)obj;
+            return id == otherAction.id;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+//        return super.hashCode();
+        return id;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return this.copy();
+    }
 }

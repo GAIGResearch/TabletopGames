@@ -4,6 +4,7 @@ import games.catan.components.Road;
 import games.catan.components.Settlement;
 
 import java.awt.*;
+import java.util.Arrays;
 
 import static games.catan.CatanConstants.HEX_SIDES;
 
@@ -259,5 +260,23 @@ public class CatanTile {
         int[][] coords = {{tile.x + direction_first[0], tile.y + direction_first[1]},
                 {tile.x + direction_second[0], tile.y + direction_second[1]}};
         return coords;
+    }
+
+    public CatanTile copy() {
+        CatanTile copy = new CatanTile(x, y);
+        copy.roads = new Road[HEX_SIDES];
+        for (int i = 0 ; i < roads.length; i++){
+            copy.roads[i] = roads[i].copy();
+        }
+        copy.harbors = new int[HEX_SIDES];
+        copy.harbors = Arrays.copyOf(harbors, harbors.length);
+        copy.settlements = new Settlement[HEX_SIDES];
+        for (int i = 0 ; i < settlements.length; i++){
+            copy.settlements[i] = settlements[i].copy();
+        }
+        copy.robber = robber;
+        copy.tileType = tileType;
+
+        return copy;
     }
 }

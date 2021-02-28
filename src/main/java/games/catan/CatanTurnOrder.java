@@ -31,13 +31,13 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
 
     @Override
     protected TurnOrder _copy() {
-        CatanTurnOrder to = new CatanTurnOrder(nPlayers, nMaxRounds);
-        to.turnStep = turnStep;
-        to.turnStage = turnStage;
-        to.developmentCardPlayed = developmentCardPlayed;
-        to.reactivePlayers = new LinkedList<>(reactivePlayers);
-        to.nextGamePhase = nextGamePhase;
-        return to;
+        CatanTurnOrder copy = new CatanTurnOrder(nPlayers, nMaxRounds);
+        copy.turnStep = turnStep;
+        copy.turnStage = turnStage;
+        copy.developmentCardPlayed = developmentCardPlayed;
+        copy.reactivePlayers = new LinkedList<>(reactivePlayers);
+        copy.nextGamePhase = nextGamePhase;
+        return copy;
     }
 
     /**
@@ -74,6 +74,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
     }
 
+    // todo check if transitions are correct in all cases
     public void endTurnStage(AbstractGameState gameState){
         /* Robber -> Discard
            Trade -> Build
@@ -103,10 +104,16 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
             endReaction(gameState);
+            gameState.setGamePhase(CatanGameState.CatanGamePhase.Steal);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
             endReaction(gameState);
+            return;
+        }
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.PlaceRoad)){
+            endPlayerTurn(gameState);
+            gameState.setGamePhase(nextGamePhase);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){

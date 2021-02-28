@@ -1,12 +1,14 @@
 package games.catan.components;
 
+import core.components.Component;
+
 import java.util.Objects;
 
 /*
  * Generic implementation of an edge between 2 nodes of the same type
  * Edge encapsulates another object
  * */
-public class Edge<N, E> {
+public class Edge<N extends Copiable, E extends Copiable> {
     N src;
     N dest;
     E value;
@@ -54,5 +56,10 @@ public class Edge<N, E> {
 
     public E getValue() {
         return value;
+    }
+
+    public Edge<N, E> copy(){
+        Edge<N, E> copy = new Edge(src.copy(), dest.copy(), value.copy());
+        return copy;
     }
 }

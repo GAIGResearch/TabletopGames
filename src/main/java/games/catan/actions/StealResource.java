@@ -31,6 +31,9 @@ public class StealResource extends AbstractAction {
         Deck<Card> currentPlayerResources = (Deck<Card>)cgs.getComponentActingPlayer(CoreConstants.playerHandHash);
         Deck<Card> targetPlayerResources = (Deck<Card>)cgs.getComponent(CoreConstants.playerHandHash, targetPlayerID);
         Random random = new Random(gs.getGameParameters().getRandomSeed());
+        if (targetPlayerResources.getSize() == 0){
+            return false;
+        }
         int cardIndex = random.nextInt(targetPlayerResources.getSize());
 
         Card card = targetPlayerResources.pick(cardIndex);

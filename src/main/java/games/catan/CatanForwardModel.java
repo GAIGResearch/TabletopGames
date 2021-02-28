@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.components.*;
+import core.properties.PropertyString;
 import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
@@ -34,13 +35,9 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters)state.getGameParameters();
-        // data is read in from JSON it has all the cards, tokens and counters
-        CatanData data = state.getData();
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
-        state.getRoads();
-        state.getSettlements();
         state.areas = new HashMap<>();
 
         // Setup areas
@@ -66,8 +63,30 @@ public class CatanForwardModel extends AbstractForwardModel {
         // Initialize the game area
         Area gameArea = new Area(-1, "Game Area");
         state.areas.put(-1, gameArea);
-        gameArea.putComponent(resourceDeckHash, data.findDeck("resourceDeck"));
-        gameArea.putComponent(developmentDeckHash, data.findDeck("developmentDeck"));
+
+        // create resource deck
+        Deck<Card> resourceDeck = new Deck("resourceDeck");
+        for (CatanParameters.Resources res: CatanParameters.Resources.values()) {
+            for (int i = 0; i < params.n_resource_cards; i++) {
+                Card c = new Card();
+                c.setProperty(new PropertyString("cardType", res.name()));
+                resourceDeck.add(c);
+            }
+        }
+
+        // create and shuffle developmentDeck
+        Deck<Card> developmentDeck = new Deck("developmentDeck");
+        for (Map.Entry<String, Integer> entry: params.developmentCardCount.entrySet()){
+            for (int i = 0; i < entry.getValue(); i++){
+                Card card = new Card();
+                card.setProperty(new PropertyString("cardType", entry.getKey()));
+                developmentDeck.add(card);
+            }
+        }
+        developmentDeck.shuffle(rnd);
+
+        gameArea.putComponent(resourceDeckHash, resourceDeck);
+        gameArea.putComponent(developmentDeckHash, developmentDeck);
         gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck"));
 
         state.addComponents();
@@ -89,7 +108,6 @@ public class CatanForwardModel extends AbstractForwardModel {
         // handle scoring
         if (action instanceof BuildRoad) {
             BuildRoad br = (BuildRoad) action;
-            // todo remove branches and cycles from road length
             int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
             if (new_length > gs.longestRoadLength) {
                 gs.longestRoadLength = new_length;
@@ -133,20 +151,17 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
+            // reset recently bought dev card to null
+            gs.boughtDevCard = null;
             rollDiceAndallocateResources(gs);
         }
-
-
 
     }
 
     private void rollDiceAndallocateResources(CatanGameState gs){
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
-        gs.setRollValue(rollDice(gs.getGameParameters().getRandomSeed()));
-        if (VERBOSE) {
-            System.out.println("New role value = " + gs.rollValue);
-        }
+        gs.setRollValue(getDiceRoll(gs.getGameParameters().getRandomSeed()));
 
         int value = gs.getRollValue();
         CatanTile[][] board = gs.getBoard();
@@ -220,7 +235,9 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected AbstractForwardModel _copy() {
-        return null;
+        CatanForwardModel copy = new CatanForwardModel(params, nPlayers);
+        copy.rollCounter = rollCounter;
+        return copy;
     }
 
     private CatanTile[][] generateBoard(CatanParameters params){
@@ -243,16 +260,16 @@ public class CatanForwardModel extends AbstractForwardModel {
         Collections.shuffle(numberList);
 
         CatanTile[][] board = new CatanTile[7][7];
-        int mid_x = board.length/2;
-        int mid_y = board[0].length/2;
+        int midX = board.length/2;
+        int midY = board[0].length/2;
 
-        CatanTile midTile = new CatanTile(mid_x, mid_y);
+        CatanTile midTile = new CatanTile(midX, midY);
 
         for (int x = 0; x < board.length; x++){
             for (int y = 0; y < board[x].length; y++){
                 CatanTile tile = new CatanTile(x, y);
                 // mid_x should be the same as the distance
-                if (midTile.distance(tile) >= mid_x){
+                if (midTile.distance(tile) >= midX){
                     tile.setTileType(CatanParameters.TileType.SEA);
                 }
                 else if (tileList.size() > 0) {
@@ -343,8 +360,8 @@ public class CatanForwardModel extends AbstractForwardModel {
                         if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
-                            Road[] neighbour_roads = neighbour.getRoads();
-                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbour_roads[(i+4)%HEX_SIDES]);
+                            Road[] neighbourRoads = neighbour.getRoads();
+                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbourRoads[(i+4)%HEX_SIDES]);
                         }
                     }
                 }
@@ -353,7 +370,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         return graph;
     }
 
-    public void setHarbors(CatanTile[][] board){
+    private void setHarbors(CatanTile[][] board){
         // set harbors along the tiles where the SEA borders the land
         ArrayList<Integer> harbors = new ArrayList<>();
         for (Map.Entry<CatanParameters.HarborTypes, Integer> entry: CatanParameters.harborCount.entrySet()){
@@ -388,7 +405,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
     }
 
-    public int rollDice(long seed){
+    public int getDiceRoll(long seed){
         /* Rolls 2 random dices given a single random seed */
         Random r1 = new Random(seed + rollCounter);
         rollCounter += 1;

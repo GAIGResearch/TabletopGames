@@ -7,6 +7,8 @@ import games.GameType;
 import games.catan.gui.CatanGUI;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
+import players.mcts.MCTSPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
@@ -25,7 +27,8 @@ public class CatanGame extends Game {
     public static void main(String[] args){
 
         List<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new RandomPlayer(new Random()));
+        agents.add(new OSLAPlayer());
+//        agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
