@@ -384,9 +384,17 @@ public class CatanGameState extends AbstractGameState {
     }
 
     private HashMap<Integer, Area> copyAreas(){
-        HashMap<Integer, Area> copy = new HashMap();
-        for (Map.Entry<Integer, Area> entry: this.areas.entrySet()){
-            copy.put(entry.getKey(), entry.getValue());
+        HashMap<Integer, Area> copy = new HashMap<>();
+        for(int key : areas.keySet()) {
+            Area a = areas.get(key);
+            if (key != -1) {
+                HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
+                // todo need to handle PO
+                for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
+                    a.putComponent(e.getKey(), e.getValue().copy());
+                }
+            }
+            copy.put(key, a.copy());
         }
         return copy;
     }

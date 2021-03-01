@@ -71,13 +71,14 @@ public class Graph<N extends Copiable, E extends Copiable> {
     }
 
     public Graph copy(){
-        Graph copy = new Graph();
+        // todo problem seem to be memory location vs ID
+        Graph<N, E> copy = new Graph();
         for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
             List<Edge<N, E>> edgeList = new ArrayList<>();
             for (Edge edge: entry.getValue()){
                 edgeList.add(edge.copy());
             }
-            copy.map.put(entry.getKey().copy(), edgeList);
+            copy.map.put((N) entry.getKey().copy(), edgeList);
         }
         return copy;
     }
