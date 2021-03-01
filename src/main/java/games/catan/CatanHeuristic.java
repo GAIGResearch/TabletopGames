@@ -13,7 +13,7 @@ import static core.CoreConstants.playerHandHash;
 public class CatanHeuristic implements IStateHeuristic {
 
     double FACTOR_PLAYER_SCORE = 0.9;
-    double FACTOR_OPPONENTS_SCORE = 1/3;
+    double FACTOR_OPPONENTS_SCORE = 1.0/3.0;
     double FACTOR_PLAYER_RESOURCES = 0.1;
 
 
@@ -21,7 +21,6 @@ public class CatanHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         /**
          * TODO factors to evaluate:
-         * player resources
          * cities
          * towns
          * ports
@@ -49,12 +48,7 @@ public class CatanHeuristic implements IStateHeuristic {
         }
 
         List<Card> playerHand = ((Deck<Card>)cgs.getComponent(playerHandHash,playerId)).getComponents();
-        for (int i = 0; i < playerHand.size(); i++){
-            if(i == 7){
-                break; // shouldn't hold more than 7 cards because of the robber
-            }
-            stateValue+=FACTOR_PLAYER_RESOURCES*1/7;
-        }
+        stateValue += FACTOR_PLAYER_RESOURCES * (Math.min(playerHand.size(),7) * (1.0/7.0));
 
         return stateValue;
     }
