@@ -1,13 +1,20 @@
 package games.catan;
 
 import core.AbstractGameState;
+import core.components.Card;
+import core.components.Deck;
 import core.interfaces.IStateHeuristic;
 import utilities.Utils;
 
+import java.util.List;
+
+import static core.CoreConstants.playerHandHash;
+
 public class CatanHeuristic implements IStateHeuristic {
 
-    double FACTOR_PLAYER_SCORE = 1;
-    double FACTOR_OPPONENTS_SCORE = -0.33;
+    double FACTOR_PLAYER_SCORE = 0.9;
+    double FACTOR_OPPONENTS_SCORE = 1/3;
+    double FACTOR_PLAYER_RESOURCES = 0.1;
 
 
     @Override
@@ -24,21 +31,29 @@ public class CatanHeuristic implements IStateHeuristic {
         CatanGameState cgs = (CatanGameState)gs;
         Utils.GameResult gameStatus = cgs.getGameStatus();
 
-        double stateValue = 0; //todo condense this down into a single line return statement once testing is done
-
         if(gameStatus == Utils.GameResult.LOSE)
-            stateValue = -1;
+            return -1;
         if(gameStatus == Utils.GameResult.WIN)
-            stateValue = 1;
+            return 1;
+
+        double stateValue = 0;
 
         int[] scores = cgs.getScores();
         for (int i = 0; i < scores.length; i++){
             if (i == playerId){
-                stateValue+=FACTOR_PLAYER_SCORE*scores[i]*0.1;
+                stateValue+=FACTOR_PLAYER_SCORE*(scores[i]*0.1);
             }
             else {
-                stateValue+=FACTOR_OPPONENTS_SCORE*scores[i]*0.1;
+                stateValue+=FACTOR_OPPONENTS_SCORE*(scores[i]*0.1);
             }
+        }
+
+        List<Card> playerHand = ((Deck<Card>)cgs.getComponent(playerHandHash,playerId)).getComponents();
+        for (int i = 0; i < playerHand.size(); i++){
+            if(i == 7){
+                break; // shouldn't hold more than 7 cards because of the robber
+            }
+            stateValue+=FACTOR_PLAYER_RESOURCES*1/7;
         }
 
         return stateValue;

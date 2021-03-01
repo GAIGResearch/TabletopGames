@@ -13,10 +13,7 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (CatanGameState.swapResources((CatanGameState) gs, gs.getCurrentPlayer(), offeredTrade.getOfferingPlayerID(), offeredTrade.getResourcesRequested(), offeredTrade.getResourcesOffered())){
-            return true;
-        }
-        return false;
+        return CatanGameState.swapResources((CatanGameState) gs, gs.getCurrentPlayer(), offeredTrade.getOfferingPlayerID(), offeredTrade.getResourcesRequested(), offeredTrade.getResourcesOffered());
     }
 
     @Override
