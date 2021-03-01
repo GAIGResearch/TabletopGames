@@ -1,5 +1,6 @@
 package games.catan;
 
+import games.catan.actions.Monopoly;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
 
@@ -278,5 +279,20 @@ public class CatanTile {
         copy.tileType = tileType;
 
         return copy;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof CatanTile){
+            CatanTile other = (CatanTile) obj;
+            return x == other.x && y == other.y && robber == other.robber;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "CatanTile at x " + x + " y " + y + " robber = " + robber;
     }
 }

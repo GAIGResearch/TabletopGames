@@ -26,8 +26,6 @@ public class CatanBoardView extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        // todo set background colour to blue so it looks like sea, line below doesn't work
-//        g2.setBackground(Color.BLUE);
         super.paintComponent(g);
         drawBoard(g2);
     }

@@ -17,8 +17,7 @@ import games.catan.components.Settlement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static core.CoreConstants.VERBOSE;
-import static core.CoreConstants.playerHandHash;
+import static core.CoreConstants.*;
 import static games.catan.CatanConstants.*;
 import static games.pandemic.PandemicConstants.infectionHash;
 import static games.pandemic.PandemicConstants.playerDeckHash;
@@ -166,13 +165,23 @@ public class CatanGameState extends AbstractGameState {
         return victoryPoints.clone();
     }
 
-    public int[] getPlayerResources(){
-        Deck<Card> playerHand = (Deck<Card>)this.getComponentActingPlayer(CoreConstants.playerHandHash);
+    public int[] getPlayerResources(int playerID){
+        Deck<Card> playerHand = (Deck<Card>)this.getComponent(CoreConstants.playerHandHash, playerID);
         int[] resources = new int[CatanParameters.Resources.values().length];
 
         for (Card card: playerHand.getComponents()){
             resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
         }
+        return resources;
+    }
+
+    public int[] getPLayerDevCards(int playerID){
+        Deck<Card> playerHand = (Deck<Card>)this.getComponent(developmentDeckHash, playerID);
+        int[] resources = new int[CatanParameters.CardTypes.values().length];
+
+//        for (Card card: playerHand.getComponents()){
+//            resources[CatanParameters.CardTypes.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
+//        }
         return resources;
     }
 
@@ -321,6 +330,14 @@ public class CatanGameState extends AbstractGameState {
         return settlements;
     }
 
+    public int getLongestRoadOwner(){
+        return longestRoad;
+    }
+
+    public int getLongestRoadLength(){
+        return longestRoadLength;
+    }
+
     /* checks if given resources cover the price or not */
     public static boolean checkCost(int[] resources, int[] price){
         for (int i = 0; i < resources.length; i++){
@@ -387,9 +404,10 @@ public class CatanGameState extends AbstractGameState {
         HashMap<Integer, Area> copy = new HashMap<>();
         for(int key : areas.keySet()) {
             Area a = areas.get(key);
-            if (key != -1) {
+            if (PARTIAL_OBSERVABLE && key != -1) {
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
                 // todo need to handle PO
+                // todo create a cardpool that players may have, shuffle and distribute them
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
                     a.putComponent(e.getKey(), e.getValue().copy());
                 }

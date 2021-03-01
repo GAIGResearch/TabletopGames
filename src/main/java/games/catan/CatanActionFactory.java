@@ -183,7 +183,7 @@ public class CatanActionFactory {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
-                        actions.add(new MoveRobber(tile));
+                        actions.add(new MoveRobber(x, y));
                 }
             }
         }
@@ -263,7 +263,7 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
-        int[] resources = gs.getPlayerResources();
+        int[] resources = gs.getPlayerResources(activePlayer);
         System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
         ArrayList<AbstractAction> actions = new ArrayList();
 
@@ -363,7 +363,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList();
 
         // get playerHand; for each card add a new action
-        int[] resources = gs.getPlayerResources();
+        int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
 
         // default trade
         int playerExchangeRate[] = gs.getExchangeRates();

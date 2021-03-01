@@ -135,6 +135,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         } else if (action instanceof BuildSettlement) {
             gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
         } else if (action instanceof BuildCity) {
+            gs.addScore(gs.getCurrentPlayer(), -params.settlement_value);
             gs.addScore(gs.getCurrentPlayer(), params.city_value);
         }
 
