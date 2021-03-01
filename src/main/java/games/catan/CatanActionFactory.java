@@ -131,6 +131,8 @@ public class CatanActionFactory {
             int r = n / 2; // remove half of the resources
 
             List<int[]> results = new ArrayList<>();
+            // todo limit number of actions when too many cards are in player's hand
+            System.out.println("Discarding " + r + " card from " + n + "cards");
             getCombination(results, new int[r], 0, 0, n, r);
             for (int[] result: results){
                 ArrayList<Card> cardsToDiscard = new ArrayList<>();
@@ -305,7 +307,6 @@ public class CatanActionFactory {
     }
 
     public static List<AbstractAction> getDevCardActions(CatanGameState gs){
-        // todo player should not be able to play a dev card bought in the same round
         // Player can buy dev card and play one
         ArrayList<AbstractAction> actions = new ArrayList();
 
@@ -318,22 +319,22 @@ public class CatanActionFactory {
             }
             // victory points are automatically revealed once a player has 10+ points
             String cardType = c.getProperty(CatanConstants.cardType).toString();
-            if (cardType.equals("Knight")){
+            if (cardType.equals(CatanParameters.CardTypes.KNIGHT_CARD.toString())){
                 actions.add(new PlayKnightCard(c));
             }
-            if (cardType.equals("Monopoly")){
+            if (cardType.equals(CatanParameters.CardTypes.MONOPOLY.toString())){
                 for (CatanParameters.Resources resource: CatanParameters.Resources.values()){
                     actions.add(new Monopoly(resource, c));
                 }
             }
-            if (cardType.equals("Year of Plenty")){
+            if (cardType.equals(CatanParameters.CardTypes.YEAR_OF_PLENTY.toString())){
                 for (CatanParameters.Resources resource1: CatanParameters.Resources.values()){
                     for (CatanParameters.Resources resource2: CatanParameters.Resources.values()) {
                         actions.add(new YearOfPlenty(resource1, resource2, c));
                     }
                 }
             }
-            if (cardType.equals("Road Building")){
+            if (cardType.equals(CatanParameters.CardTypes.ROAD_BUILDING.toString())){
                 for (Road road: getRoadsToBuild(gs))
                     actions.add(new PlaceRoad(road, c));
             }

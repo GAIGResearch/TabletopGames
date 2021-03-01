@@ -22,7 +22,7 @@ public class CatanGUI extends AbstractGUI {
     JLabel scoreLabel;
     JLabel victoryPointsLabel;
     JLabel diceRollLabel;
-    JLabel knigthCount;
+    JLabel knightCount;
     JLabel longestRoad;
     JLabel playerResources;
     JLabel devCards;
@@ -53,7 +53,7 @@ public class CatanGUI extends AbstractGUI {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         scoreLabel.setText("Scores: " + Arrays.toString(gs.getScores()));
         diceRollLabel.setText("Dice Roll: " + ((CatanGameState)gameState).getRollValue());
-        knigthCount.setText("Knights: " + Arrays.toString(gs.getKnights()));
+        knightCount.setText("Knights: " + Arrays.toString(gs.getKnights()));
         longestRoad.setText("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         victoryPointsLabel.setText("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
 
@@ -81,7 +81,7 @@ public class CatanGUI extends AbstractGUI {
 
         updateGameStateInfo(gameState);
 
-        knigthCount = new JLabel("Knights: " + Arrays.toString(gs.getKnights()));
+        knightCount = new JLabel("Knights: " + Arrays.toString(gs.getKnights()));
         longestRoad = new JLabel("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         victoryPointsLabel = new JLabel("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
         scoreLabel = new JLabel("Scores: " + Arrays.toString(gs.getScores()));
@@ -105,7 +105,7 @@ public class CatanGUI extends AbstractGUI {
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
-        gameInfo.add(knigthCount);
+        gameInfo.add(knightCount);
         gameInfo.add(longestRoad);
         gameInfo.add(victoryPointsLabel);
         gameInfo.add(scoreLabel);

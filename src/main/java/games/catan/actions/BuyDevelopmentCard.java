@@ -23,7 +23,7 @@ public class BuyDevelopmentCard extends AbstractAction {
             playerDevDeck.add(card);
             //  if card is a Victory Point card and player already has 9 points then use it
             String cardType = card.getProperty(CatanConstants.cardType).toString();
-            if (cardType.equals("Victory Point")){
+            if (cardType.equals(CatanParameters.CardTypes.VICTORY_POINT_CARD.toString())){
                 cgs.addVictoryPoint(cgs.getCurrentPlayer());
             }
             return true;

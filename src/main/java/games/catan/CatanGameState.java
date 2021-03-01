@@ -152,7 +152,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
     public int[] getKnights(){
-        return knights.clone();
+        return Arrays.copyOf(knights, knights.length);
     }
 
     public void addVictoryPoint(int playerID){
@@ -176,13 +176,13 @@ public class CatanGameState extends AbstractGameState {
     }
 
     public int[] getPLayerDevCards(int playerID){
-        Deck<Card> playerHand = (Deck<Card>)this.getComponent(developmentDeckHash, playerID);
-        int[] resources = new int[CatanParameters.CardTypes.values().length];
+        Deck<Card> playerDevCards = (Deck<Card>)this.getComponent(developmentDeckHash, playerID);
+        int[] devCards = new int[CatanParameters.CardTypes.values().length];
 
-//        for (Card card: playerHand.getComponents()){
-//            resources[CatanParameters.CardTypes.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
-//        }
-        return resources;
+        for (Card card: playerDevCards.getComponents()){
+            devCards[CatanParameters.CardTypes.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
+        }
+        return devCards;
     }
 
     public int updateLargestArmy(CatanParameters params){

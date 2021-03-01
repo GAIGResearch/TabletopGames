@@ -109,7 +109,9 @@ public class CatanParameters extends AbstractParameters {
 
     public enum CardTypes{
         KNIGHT_CARD,
-        PROGRESS_CARD,
+        MONOPOLY,
+        YEAR_OF_PLENTY,
+        ROAD_BUILDING,
         VICTORY_POINT_CARD
     }
 
@@ -139,12 +141,12 @@ public class CatanParameters extends AbstractParameters {
         put("road", 15);
     }};
 
-    HashMap<String, Integer> developmentCardCount = new HashMap<String, Integer>() {{
-        put("Knight", 14);
-        put("Monopoly", 2);
-        put("Year of Plenty", 2);
-        put("Road Building", 2);
-        put("Victory Point", 5);
+    HashMap<CardTypes, Integer> developmentCardCount = new HashMap<CardTypes, Integer>() {{
+        put(CardTypes.KNIGHT_CARD, 14);
+        put(CardTypes.MONOPOLY, 2);
+        put(CardTypes.YEAR_OF_PLENTY, 2);
+        put(CardTypes.ROAD_BUILDING, 2);
+        put(CardTypes.VICTORY_POINT_CARD, 5);
     }};
 
     public static HashMap<HarborTypes, Integer> harborCount = new HashMap<HarborTypes, Integer>() {{

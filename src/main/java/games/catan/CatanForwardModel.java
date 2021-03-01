@@ -76,10 +76,10 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         // create and shuffle developmentDeck
         Deck<Card> developmentDeck = new Deck("developmentDeck");
-        for (Map.Entry<String, Integer> entry: params.developmentCardCount.entrySet()){
+        for (Map.Entry<CatanParameters.CardTypes, Integer> entry: params.developmentCardCount.entrySet()){
             for (int i = 0; i < entry.getValue(); i++){
                 Card card = new Card();
-                card.setProperty(new PropertyString("cardType", entry.getKey()));
+                card.setProperty(new PropertyString("cardType", entry.getKey().toString()));
                 developmentDeck.add(card);
             }
         }
