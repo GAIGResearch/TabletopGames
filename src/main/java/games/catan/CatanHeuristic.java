@@ -12,9 +12,10 @@ import static core.CoreConstants.playerHandHash;
 
 public class CatanHeuristic implements IStateHeuristic {
 
-    double FACTOR_PLAYER_SCORE = 0.9;
-    double FACTOR_OPPONENTS_SCORE = 1.0/3.0;
+    double FACTOR_PLAYER_SCORE = 0.7;
+    double FACTOR_OPPONENTS_SCORE = -1.0/3.0;
     double FACTOR_PLAYER_RESOURCES = 0.1;
+    double FACTOR_PLAYER_DEVELOPMENT_CARDS = 0.2;
 
 
     @Override
@@ -24,8 +25,10 @@ public class CatanHeuristic implements IStateHeuristic {
          * cities
          * towns
          * ports
+         * knight count
+         * longest road closeness
+         * development card advanced
          * opponents resource estimates
-         * development card count
          */
         CatanGameState cgs = (CatanGameState)gs;
         Utils.GameResult gameStatus = cgs.getGameStatus();
@@ -36,7 +39,7 @@ public class CatanHeuristic implements IStateHeuristic {
             return 1;
 
         double stateValue = 0;
-
+        // scores evaluation
         int[] scores = cgs.getScores();
         for (int i = 0; i < scores.length; i++){
             if (i == playerId){
@@ -46,9 +49,13 @@ public class CatanHeuristic implements IStateHeuristic {
                 stateValue+=FACTOR_OPPONENTS_SCORE*(scores[i]*0.1);
             }
         }
-
+        // player resource evaluation
         List<Card> playerHand = ((Deck<Card>)cgs.getComponent(playerHandHash,playerId)).getComponents();
         stateValue += FACTOR_PLAYER_RESOURCES * (Math.min(playerHand.size(),7) * (1.0/7.0));
+        // player development card evaluation - very simple at the moment
+        Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
+        stateValue += FACTOR_PLAYER_DEVELOPMENT_CARDS * (Math.min(playerDevDeck.getComponents().size(),10) * 0.1);
+
 
         return stateValue;
     }
