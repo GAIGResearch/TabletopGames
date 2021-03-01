@@ -97,7 +97,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getScore(int playerID) {
-        return scores[playerID];
+        return new CatanHeuristic().evaluateState(this,playerID);
     }
 
     public void setBoard(CatanTile[][] board){
@@ -442,6 +442,11 @@ public class CatanGameState extends AbstractGameState {
         copy.longestRoadLength = longestRoad;
         copy.rollValue = rollValue;
         copy.availableActions = new ArrayList<>(availableActions);
+        if (currentTradeOffer == null){
+            copy.currentTradeOffer = null;
+        } else {
+            copy.currentTradeOffer = (OfferPlayerTrade) this.currentTradeOffer.copy();
+        }
         return copy;
     }
 

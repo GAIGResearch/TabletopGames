@@ -108,6 +108,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
+            nextGamePhase = CatanGameState.CatanGamePhase.Build;
             endReaction(gameState);
             return;
         }

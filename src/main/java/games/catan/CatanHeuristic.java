@@ -13,12 +13,13 @@ public class CatanHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         /**
-         * TODO factors to evaluate further down the line:
+         * TODO factors to evaluate:
          * player resources
          * cities
          * towns
          * ports
          * opponents resource estimates
+         * development card count
          */
         CatanGameState cgs = (CatanGameState)gs;
         Utils.GameResult gameStatus = cgs.getGameStatus();
