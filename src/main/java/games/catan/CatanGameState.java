@@ -97,7 +97,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getScore(int playerID) {
-        return new CatanHeuristic().evaluateState(this,playerID);
+        return scores[playerID];
     }
 
     public void setBoard(CatanTile[][] board){
