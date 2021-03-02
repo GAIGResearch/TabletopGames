@@ -1,0 +1,77 @@
+# Site settings
+title: TAG
+description: Tabletop Games Framework
+favicon: /assets/img/favicon.png
+baseurl: 
+url: 
+rss_url: /pages/atom.xml
+google_analytics: UA-63653234-1
+
+# Build settings
+markdown: kramdown
+
+exclude: [vendor]
+
+# Author settings
+author:
+  name: TAG
+  title: Framework
+  address: QMUL
+  email: 
+  link: https://github.com/GAIGResearch/TabletopGames
+  github: GAIGResearch/TabletopGames
+  twitter: QMUL_GameAI
+  gavatar: /resumecard/assets/img/avatar.JPG
+  stackoverflow:
+#  stackoverflow: 4582127
+  milestones:
+    - m:
+      title: Team Growth
+      location: QMUL+SPAIN+MALMO
+      started: 2021
+      duration: Jan 2021
+      description: More students joined.
+    - m:
+      title: Published
+      location: EXAG
+      started: 2020
+      duration: Oct 2020
+      description: First published. James joined.
+    - m:
+      title: Renewed Efforts
+      location: QMUL
+      started: 2020
+      duration: Apr 2020
+      description: Alex joined. Serious work
+    - m:
+      title: GAIG Game AI Jam
+      location: QMUL
+      started: 2019
+      duration: Aug 2019
+      description: This is where it all started. Raluca, Diego, Martin, Raul
+  topics:
+    - t:
+      name: General tabletop games
+      proficiency: Main focus
+    - t:
+      name: Model-based game-playing
+      proficiency: Main focus
+    - t:
+      name: Model-free game-playing
+      proficiency: Possible
+    - t:
+      name: Game analysis
+      proficiency: Supported
+    - t:
+      name: AI analysis
+      proficiency: Supported
+    - t:
+      name: Procedural Content Generation
+      proficiency: Supported
+  programmingLanguages:
+    - l:
+      name: Java
+      percentage: 90%
+    - l:
+      name: JSON
+      percentage: 10%

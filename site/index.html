@@ -1,8 +1,161 @@
-<html>
-<head>
-<title>TAG</title>
-</head>
-<body>
-<h1> Tabletop Games Framework </h1>
-</body>
-</html>
+---
+layout: default
+---
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-md-8">
+                <h3 class="title with-icon"><span class="fa fa-info cat-title"></span>Information</h3>
+                <ul class="timeline">
+	  
+					<li class="timeline-inverted">
+						<div class="timeline-badge info">About</div>
+						<div class="timeline-panel grid-block">
+							<div class="timeline-body">
+								<p>The Tabletop Games Framework (TAG) is a Java-based benchmark for developing modern board games for AI research. TAG provides a common skeleton for implementing tabletop games based on a common API for AI agents, a set of components and classes to easily add new games and an import module for defining data in JSON format. At present, this platform includes the implementation of seven different tabletop games that can also be used as an example for further developments. Additionally, TAG also incorporates logging functionality that allows the user to perform a detailed analysis of the game, in terms of action space, branching factor, hidden information, and other measures of interest for Game AI research.</p>
+								<h3>Currently implemented games</h3>
+									<ol>
+										<li> Tic-Tac-Toe</li>
+										<li> Dots and Boxes</li>
+										<li> Love Letter (Seiji Kanai 2012)</li>
+										<li> Uno (Merle Robbins 1971)</li>
+										<li> Virus! (Cabrero and others 2015)</li>
+										<li> Exploding Kittens (Inman and others 2015)</li>
+										<li> Colt Express (Christophe Raimbault 2014)</li>
+										<li> Pandemic (Matt Leacock 2008)</li>
+										<li> Diamant (Bruno Faidutti and Alan R. Moon 2005)</li>
+										<li> Dominion (Donald X. Vaccarino 2008)</li>
+									</ol>
+								<h3>Games in progress:</h3>
+									<ol>
+										<li>Settlers of Catan (Klaus Teuber 1995)</li>
+										<li>Descent (Jesper Ejsing, John Goodenough, Frank Walls 2005)</li>
+										<li>Santorini (Lina Cossette, David Forest 2016)</li>
+									</ol>
+								<h3>Citing Information</h3>
+								<p>To cite TAG in your work, please cite this paper:</p>
+								
+								<pre>@inproceedings{gaina2020tag,
+		 author= {Raluca D. Gaina and Martin Balla and Alexander Dockhorn and Raul Montoliu and Diego Perez-Liebana},
+		 title= {&#123;TAG: A Tabletop Games Framework&#125;},
+		 year= {2020},
+		 booktitle= {&#123;Experimental AI in Games (EXAG), AIIDE 2020 Workshop&#125;},
+		 abstract= {Tabletop games come in a variety of forms, including board games, card games, and dice games. In recent years, their complexity has considerably increased, with many components, rules that change dynamically through the game, diverse player roles, and a series of control parameters that influence a game's balance. As such, they also encompass novel and intricate challenges for Artificial Intelligence methods, yet research largely focuses on classical board games such as chess and Go. We introduce in this work the Tabletop Games (TAG) framework, which promotes research into general AI in modern tabletop games, facilitating the implementation of new games and AI players, while providing analytics to capture the complexities of the challenges proposed. We include preliminary results with sample AI players, showing some moderate success, with plenty of room for improvement, and discuss further developments and new research directions.}
+	}</pre>
+								<h3>Acknowledgements</h3>
+								<p>This work was partly funded by the EPSRC CDT in Intelligent Games and Game Intelligence (IGGI) EP/L015846/1 and EPSRC research grant EP/T008962/1.</p>
+							</div>
+						</div>
+					</li>
+					
+					
+					<li class="timeline-inverted">
+						<div class="timeline-badge info">Start</div>
+						<div class="timeline-panel grid-block">
+							<div class="timeline-body">
+								<h3>Setting up</h3>
+								<p>The project requires Java with minimum version 8. In order to run the code, you must either download the repository, or clone it. If you are looking for a particular release, you can find all listed here.</p>
+
+								<p>The simplest way to run the code is to create a new project in IntelliJ IDEA or a similar IDE. In IntelliJ, create a new project from existing sources, pointing to the code downloaded or cloned and selecting the Maven framework for import. This process should automatically set up the environment and add any project libraries as well.</p>
+
+								<p>Alternatively, open the code directly in your IDE of choice, right click the pom.xml file and setup the project with the Maven framework. Make sure src/main/java is marked as sources root. You can run the core.Game.java class to test if all is set up properly and compiling. This video includes the steps of loading the project correctly in IntelliJ.</p>
+
+								<h3>Getting started</h3>
+								<p>To get started the wiki provides various guides and descriptions of the framework. Another good resource is our continuously updated paper "Design and Implementation of TAG: A Tabletop Games Framework".</p>
+							</div>
+						</div>
+					</li>
+					
+					
+					<li class="timeline-inverted">
+						<div class="timeline-badge info">Team</div>
+						<div class="timeline-panel grid-block">
+							<div class="timeline-body">
+								<p>Raluca, Martin, Alex, Raul, James, Diego</p>
+							</div>
+						</div>
+					</li>
+					
+                </ul>
+        </div>
+        <div class="col-md-4">
+			{% if site.author.topics %}
+				<h3 class="title with-icon"><span class="fa fa-list cat-title"></span> Topics</h3>
+				<div class="grid-block">
+					<ul class="list-unstyled list-strip">
+						{% for topic in site.author.topics %}
+							{% if topic.name %}
+								{% if topic.proficiency %}
+									<li>
+										<i class="fa fa-check"></i> <span class="badge badge-green badge-right-float">{{ topic.proficiency }}</span>{{ topic.name }}
+									</li>
+								{% endif %}
+							{% endif %}
+						{% endfor %}
+					</ul>
+				</div>
+			{% endif %}
+            {% if site.author.programmingLanguages %}
+				<div class="deviter"></div>
+                <h3 class="title with-icon"><span class="fa fa-code cat-title"></span> Programming Languages</h3>
+                <div class="grid-block">
+                    <ul class="list-unstyled list-skills">
+                        {% for language in site.author.programmingLanguages %}
+                            <li>
+                                {% if language.name %}
+                                    <span class="caption-skill">{{ language.name }}</span>
+                                {% endif %}
+                                {% if language.percentage %}
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ language.percentage }}">
+                                            <span>{{ language.percentage }} </span>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+			<div class="deviter"></div>
+            <h3 class="title with-icon"><span class="fa fa-location-arrow cat-title"></span> Location</h3>
+            <div class="grid-block">
+                <iframe src="https://www.google.com/maps/embed/v1/place?q={{ site.author.address }}&key=AIzaSyClEWLh20lxrQBFR7omuuVESviszPxONyk" width="100%" height="100%" frameborder="0" style="border:0"></iframe>
+            </div>
+            <div class="deviter"></div>
+            {% if site.author.milestones %}
+                <h3 class="title with-icon"><span class="fa fa-plane cat-title"></span>Milestones</h3>
+                <ul class="timeline">
+                    {% for milestone in site.author.milestones %}
+                        <li class="timeline-inverted">
+                            {% if milestone.started %}
+                                <div class="timeline-badge info">{{ milestone.started }}</div>
+                            {% endif %}
+                            <div class="timeline-panel grid-block">
+                                <div class="timeline-heading">
+                                    {% if milestone.title %}
+                                        <h4 class="timeline-title">{{ milestone.title }}</h4>
+                                    {% endif %}
+                                    <p>
+                                        <small class="text-muted">
+                                            {% if milestone.duration %}
+                                                <i class="fa fa-calendar"></i> {{ milestone.duration }} |
+                                            {% endif %}
+                                            {% if milestone.location %}
+                                                <i class="fa fa-map-marker"></i>  {{ milestone.location }}
+                                            {% endif %}
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="timeline-body">
+                                    {% if milestone.description %}
+                                        <p>{{ milestone.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>

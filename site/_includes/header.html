@@ -1,0 +1,46 @@
+<div class="header">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="col-sm-4">
+                <h1>TAG: A Tabletop Games Framework</h1>
+                <div class="clearfix"></div>
+            </div>
+            <div class="col-sm-4 visible-md-block visible-lg-block visible-sm-block">
+				<!--2nd column -->
+            </div>
+        </div>
+    </div>
+</div>
+<!--<div class="navbar" id="top">
+	<a href="{{ site.baseurl }}/">{{ site.title }}</a>
+	<nav id="headerNav">
+		<ul>
+			<li><a href="">Home</li>
+			<li><a href="">Other</li>
+			<li>
+				{% if page.url == '/' %}
+				<a class="active" href="{{site.baseurl}}/">
+					{% else %}
+				<a href="{{site.baseurl}}/">
+				{% endif %}
+					<i class="fas fa-home"></i>Home
+				</a>
+			</li>
+
+			{% for my_page in site.pages %}
+				{% if my_page.type == 'page' %}
+				<li>
+					{% if my_page.url == page.url %}
+					<a class="active" href="{{ my_page.url | prepend: site.baseurl }}">
+						{% else %}
+					<a href="{{ my_page.url | prepend: site.baseurl }}">
+					{% endif %}
+						<i class="fas fa-{{my_page.icon}}"></i>{{ my_page.title }}
+					</a>
+				</li>
+				{% endif %}
+			{% endfor %}
+			
+		</ul>
+	</nav>
+</div>-->
