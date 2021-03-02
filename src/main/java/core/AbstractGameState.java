@@ -328,6 +328,18 @@ public abstract class AbstractGameState {
         return copy(-1);
     }
 
+    public final ElapsedCpuChessTimer[] getPlayerTimer() {
+        return playerTimer;
+    }
+
+    public final GameType getGameType() {
+        return gameType;
+    }
+
+    public final Stack<IExtendedSequence> getActionsInProgress() {
+        return actionsInProgress;
+    }
+
     /**
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
