@@ -61,27 +61,34 @@ public enum GameType {
     Pandemic(2, 4,
             new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
             new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
-            add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }}),
+            add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }},
+            30, 1),
     TicTacToe (2, 2,
             new ArrayList<Category>() {{ add(Simple); add(Abstract); }},
-            new ArrayList<Mechanic>() {{ add(PatternBuilding); }}),
+            new ArrayList<Mechanic>() {{ add(PatternBuilding); }},
+            5, 0),
     ExplodingKittens (2, 5,
             new ArrayList<Category>() {{ add(Strategy); add(Animals); add(Cards); add(ComicBook); add(Humour); }},
             new ArrayList<Mechanic>() {{ add(HandManagement); add(HotPotato); add(PlayerElimination); add(PushYourLuck);
-            add(SetCollection); add(TakeThat); }}),
+            add(SetCollection); add(TakeThat); }},
+            20, 0),
     LoveLetter (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Deduction); add(Renaissance); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(PlayerElimination); }}),
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(PlayerElimination); }},
+            20, 0),
     Uno (2, 10,
             new ArrayList<Category>() {{ add(Cards); add(ComicBook); add(Number); add(MoviesTVRadio); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(LoseATurn); add(TakeThat); }}),
+            new ArrayList<Mechanic>() {{ add(HandManagement); add(LoseATurn); add(TakeThat); }},
+            20, 0),
     Virus (2, 6,
             new ArrayList<Category>() {{ add(Cards); add(Medical); }},
-            new ArrayList<Mechanic>() {{ add(CardDrafting); add(SetCollection); add(TakeThat); }}),
+            new ArrayList<Mechanic>() {{ add(CardDrafting); add(SetCollection); add(TakeThat); }},
+            20,0),
     ColtExpress (2, 6,
             new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
             new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }},
+            20, 0),
     DotsAndBoxes(2, 6,
             new ArrayList<Category>() {{
                 add(Simple);
@@ -90,7 +97,8 @@ public enum GameType {
             }},
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
-            }}),
+            }},
+            5, 0),
     Diamant( 2, 6,
             new ArrayList<Category>() {{
                 add(Adventure);
@@ -101,16 +109,20 @@ public enum GameType {
                 add(MoveThroughDeck);
                 add(PushYourLuck);
                 add(SimultaneousActionSelection);
-            }}),
+            }},
+            10, 0),
     Dominion (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }},
+            30, 0),
     DominionSizeDistortion (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }},
+            30, 0),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }},
+            30, 0)
     ;
 
 //    Carcassonne (2, 5,
@@ -317,11 +329,14 @@ public enum GameType {
 
 
     // Minimum and maximum number of players supported in this game
-    private int minPlayers, maxPlayers;
+    private final int minPlayers, maxPlayers;
+
+    // Player thinking time for the entire game, in minutes. Increment in seconds (added after a decision is taken)
+    private long thinkingTimeMins, incrementS;
 
     // boardgamegeek.com topic classification of games
-    private ArrayList<Category> categories;
-    private ArrayList<Mechanic> mechanics;
+    private final ArrayList<Category> categories;
+    private final ArrayList<Mechanic> mechanics;
 
     public enum Category {
         Strategy,
@@ -444,11 +459,13 @@ public enum GameType {
         }
     }
 
-    GameType(int minPlayers, int maxPlayers, ArrayList<Category> categories, ArrayList<Mechanic> mechanics) {
+    GameType(int minPlayers, int maxPlayers, ArrayList<Category> categories, ArrayList<Mechanic> mechanics, long thinkingTimeMS, long incrementS) {
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.categories = categories;
         this.mechanics = mechanics;
+        this.thinkingTimeMins = thinkingTimeMS;
+        this.incrementS = incrementS;
     }
 
     // Getters
@@ -457,6 +474,12 @@ public enum GameType {
     }
     public int getMaxPlayers() {
         return maxPlayers;
+    }
+    public long getThinkingTimeMins() {
+        return thinkingTimeMins;
+    }
+    public long getIncrementS() {
+        return incrementS;
     }
     public ArrayList<Category> getCategories() {
         return categories;
@@ -477,6 +500,14 @@ public enum GameType {
             if (gt.minPlayers > max) max = gt.minPlayers;
         }
         return max;
+    }
+
+    // Setters
+    public void setThinkingTimeMins(long mins) {
+        this.thinkingTimeMins = mins;
+    }
+    public void setIncrementS(long inc) {
+        this.incrementS = inc;
     }
 
     /**

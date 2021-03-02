@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public class DBGameState extends AbstractGameState {
      * @param nPlayers      - number of players.
      */
     public DBGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.DotsAndBoxes);
     }
 
     @Override

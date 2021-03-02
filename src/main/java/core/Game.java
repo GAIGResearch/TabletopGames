@@ -231,25 +231,49 @@ public class Game {
                     if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
                         // Can only do 1 action, so do it.
                         action = observedActions.get(0);
+                        if (TIMER_ENABLED) {
+                            gameState.playerTimer[activePlayer].resume();
+                        }
                         currentPlayer.registerUpdatedObservation(observation);
+                        if (TIMER_ENABLED) {
+                            gameState.playerTimer[activePlayer].pause();
+                        }
                     } else {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                            if (TIMER_ENABLED) {
+                                gameState.playerTimer[activePlayer].resume();
+                            }
                             while (action == null && gui.isWindowOpen()) {
                                 action = currentPlayer.getAction(observation, observedActions);
                                 updateGUI(gui);
                             }
+                            if (TIMER_ENABLED) {
+                                gameState.playerTimer[activePlayer].pause();
+                            }
                         } else {
                             // Get action from player, and time it
+                            if (TIMER_ENABLED) {
+                                gameState.playerTimer[activePlayer].resume();
+                            }
                             s = System.nanoTime();
                             action = currentPlayer.getAction(observation, observedActions);
                             agentTime += (System.nanoTime() - s);
+                            if (TIMER_ENABLED) {
+                                gameState.playerTimer[activePlayer].pause();
+                            }
                             nDecisions++;
                         }
                     }
                     AbstractAction finalAction = action;
                     listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
                 } else {
+                    if (TIMER_ENABLED) {
+                        gameState.playerTimer[activePlayer].resume();
+                    }
                     currentPlayer.registerUpdatedObservation(observation);
+                    if (TIMER_ENABLED) {
+                        gameState.playerTimer[activePlayer].pause();
+                    }
                 }
 
                 if (VERBOSE) {
@@ -260,10 +284,15 @@ public class Game {
                     }
                 }
 
-                // Resolve action and game rules, time it
-                s = System.nanoTime();
-                forwardModel.next(gameState, action);
-                nextTime += (System.nanoTime() - s);
+                // Check player timeout
+                if (TIMER_ENABLED && observation.playerTimer[activePlayer].exceededMaxTime()) {
+                    forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
+                } else {
+                    // Resolve action and game rules, time it
+                    s = System.nanoTime();
+                    forwardModel.next(gameState, action);
+                    nextTime += (System.nanoTime() - s);
+                }
             } else {
                 if (firstEnd) {
                     if (VERBOSE) {

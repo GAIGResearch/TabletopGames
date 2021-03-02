@@ -8,6 +8,8 @@ import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
+import games.GameType;
+import utilities.ElapsedCpuChessTimer;
 import utilities.Utils;
 
 import java.util.*;
@@ -32,6 +34,11 @@ public abstract class AbstractGameState {
     protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;
     private Area allComponents;
+
+    // Timers for all players
+    protected ElapsedCpuChessTimer[] playerTimer;
+    // Game being played
+    protected final GameType gameType;
 
     // A record of all actions taken to reach this game state
     private List<AbstractAction> history = new ArrayList<>();
@@ -61,9 +68,10 @@ public abstract class AbstractGameState {
      * @param gameParameters - game parameters.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder){
+    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType){
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
+        this.gameType = gameType;
     }
 
     /**
@@ -78,6 +86,7 @@ public abstract class AbstractGameState {
         gamePhase = DefaultGamePhase.Main;
         history = new ArrayList<>();
         historyText = new ArrayList<>();
+        playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
         _reset();
     }
 
@@ -171,6 +180,11 @@ public abstract class AbstractGameState {
                 a -> s.actionsInProgress.push(a.copy())
         );
 
+        s.playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            s.playerTimer[i] = playerTimer[i].copy();
+        }
+
         // Update the list of components for ID matching in actions.
         s.addAllComponents();
         return s;
@@ -229,7 +243,7 @@ public abstract class AbstractGameState {
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
-     * @param playerId
+     * @param playerId - player observing the state.
      * @return - double, score of current state
      */
     public abstract double getGameScore(int playerId);

@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import games.virus.components.VirusOrgan;
@@ -24,7 +25,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Virus);
     }
 
     @Override
