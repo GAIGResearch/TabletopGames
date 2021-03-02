@@ -105,7 +105,8 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
             endReaction(gameState);
-            gameState.setGamePhase(CatanGameState.CatanGamePhase.Steal);
+            if (reactionsFinished())
+                gameState.setGamePhase(CatanGameState.CatanGamePhase.Steal);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
