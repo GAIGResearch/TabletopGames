@@ -65,7 +65,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
             cegs.playerHandCards.add(playerHand);
 
-            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_ALL);
+            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.HIDDEN_TO_ALL);
             for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
                 LootType lootType = e.a;
                 int value = e.b;
@@ -89,24 +89,22 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
         cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
 
+        // Add 1 random end round card
+        // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck)
+        cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
+
         // Add random round cards
-        ArrayList<Integer> availableRounds = new ArrayList<>();
-        for (int i = 0; i < cep.roundCards.length; i++) {
-            availableRounds.add(i);
-        }
+        ArrayList<ColtExpressTypes.RegularRoundCard> availableRounds = new ArrayList<>(Arrays.asList(cep.roundCards));
         for (int i = 0; i < cep.nMaxRounds-1; i++) {
             Random r = new Random(cep.getRandomSeed() + cegs.getTurnOrder().getRoundCounter() + i);
             int choice = r.nextInt(availableRounds.size());
-            cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
-            availableRounds.remove(Integer.valueOf(choice));
+            cegs.rounds.add(cegs.getRoundCard(availableRounds.get(choice), cegs.getNPlayers()));
+            availableRounds.remove(availableRounds.get(choice));
         }
         // set first card to be visible
         boolean[] allTrue = new boolean[cegs.getNPlayers()];
         Arrays.fill(allTrue, true);
         cegs.rounds.setVisibilityOfComponent(0, allTrue);
-
-        // Add 1 random end round card
-        cegs.rounds.add(cegs.getRandomEndRoundCard(cep, cegs.getTurnOrder().getRoundCounter()));
     }
 
     @Override
