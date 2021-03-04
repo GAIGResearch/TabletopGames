@@ -65,7 +65,7 @@ public class YearOfPlenty extends AbstractAction {
         if (this == other) return true;
         if (other instanceof YearOfPlenty){
             YearOfPlenty otherAction = (YearOfPlenty)other;
-            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2) && card == otherAction.card;
+            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2) && card.equals(otherAction.card);
         }
         return false;
     }
