@@ -1,14 +1,20 @@
 package evaluation;
 
 import core.AbstractGameState;
+import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.*;
+import core.interfaces.IGameAttribute;
+import core.interfaces.IGameListener;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import static core.CoreConstants.*;
-import static java.util.stream.Collectors.*;
+import static core.CoreConstants.GameEvents;
+import static java.util.stream.Collectors.joining;
 
 public class GameLogger implements IGameListener {
 
@@ -37,6 +43,17 @@ public class GameLogger implements IGameListener {
     }
 
     @Override
+    public void onGameEvent(GameEvents type, Game game) {
+        if (filter.contains(type)) {
+            String allData = gameAttributes.stream()
+                    .map(att -> att.getAsString(game.getGameState(), null))
+                    .collect(joining("\t"));
+            ;
+            writeData(allData + "\n");
+        }
+    }
+
+    @Override
     public void onEvent(GameEvents event, AbstractGameState state, AbstractAction action) {
         if (filter.contains(event)) {
             String allData = gameAttributes.stream()
@@ -45,6 +62,16 @@ public class GameLogger implements IGameListener {
             ;
             writeData(allData + "\n");
         }
+    }
+
+    @Override
+    public Map<String, Object> getAllData() {
+        return null;
+    }
+
+    @Override
+    public void clear() {
+        // nothing
     }
 
     private void writeData(String data) {

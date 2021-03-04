@@ -2,10 +2,11 @@ package utilities;
 
 import core.interfaces.IStatisticLogger;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A Class to log details to file for later analysis
@@ -26,17 +27,18 @@ public class FileStatsLogger implements IStatisticLogger {
      * @param fileName  The full location of the file to write results to
      * @param delimiter The delimiter to use in the file between data items
      */
-    public FileStatsLogger(String fileName, String delimiter) {
+    public FileStatsLogger(String fileName, String delimiter, boolean append) {
         this.delimiter = delimiter;
         try {
-            writer = new FileWriter(fileName);
+            writer = new FileWriter(fileName, append);
         } catch (Exception e) {
             e.printStackTrace();
             throw new AssertionError("Problem opening file " + fileName + " : " + e.getMessage());
         }
     }
+
     public FileStatsLogger(String fileName) {
-        this(fileName, "\t");
+        this(fileName, "\t", true);
     }
 
     /**

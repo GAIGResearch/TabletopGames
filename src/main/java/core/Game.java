@@ -8,21 +8,22 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
 import players.simple.RandomPlayer;
-import utilities.*;
+import utilities.Pair;
+import utilities.TAGStatSummary;
+import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.*;
+import static games.GameType.DotsAndBoxes;
 
 public class Game {
 
     // Type of game
-    private GameType gameType;
+    private final GameType gameType;
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
@@ -165,6 +166,7 @@ public class Game {
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
+        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
     /**
@@ -316,7 +318,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onEvent(GameEvents.GAME_OVER, gameState, null));
+        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
         if (VERBOSE) {
             System.out.println("Game Over");
         }
