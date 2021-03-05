@@ -1,18 +1,15 @@
 package evaluation;
 
-import core.*;
-import core.actions.AbstractAction;
-import core.interfaces.IComponentContainer;
+import core.AbstractPlayer;
+import core.CoreConstants;
+import core.Game;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
-import utilities.TAGStatSummary;
-import utilities.TAGSummariser;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
@@ -35,8 +32,12 @@ public class GameReportII {
                             "\t               The default is 'all' to indicate that all games should be analysed.\n" +
                             "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
                             "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
+                            "\tlistener=      The full class name of an IGameListener implementation. \n" +
+                            "\t               Defaults to utilities.GameReportListener. \n" +
+                            "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
+                            "\t               from the same set of games." +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
-                            "\t               Defaults to SummaryLogger. \n" +
+                            "\t               Defaults to utilities.SummaryLogger. \n" +
                             "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
                             "\tnPlayers=      The total number of players in each game (the default is 'all') \n " +
                             "\t               A range can also be specified, for example 3-5. \n " +
@@ -50,6 +51,8 @@ public class GameReportII {
         // Get Player to be used
         String playerDescriptor = getArg(args, "player", "random");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
+        String listenerClass = getArg(args, "listener", "utilities.GameReportListener");
+
 
         int nGames = getArg(args, "nGames", 1000);
         List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
@@ -95,14 +98,12 @@ public class GameReportII {
                     System.out.printf("Skipping game - maximum player count is %d%n", gameType.getMaxPlayers());
                     continue;
                 }
-                IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-
-                Map<String, Object> collectedData = new HashMap<>();
-                collectedData.put("Game", games.get(gameIndex));
-                collectedData.put("Players", String.valueOf(playerCount));
-                collectedData.put("PlayerType", playerDescriptor);
 
                 Game game = gameType.createGameInstance(playerCount);
+
+                IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
+                IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
+                game.addListener(gameTracker);
 
                 for (int i = 0; i < nGames; i++) {
                     List<AbstractPlayer> allPlayers = new ArrayList<>();
@@ -110,162 +111,14 @@ public class GameReportII {
                         allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
                     }
                     // Run games, resetting the player each time
+
                     game.reset(allPlayers);
-                    GameReportListener gameTracker = new GameReportListener(game.getForwardModel());
-                    game.addListener(gameTracker);
-                    preGameProcessing(game, collectedData);
                     game.run();
-                    postGameProcessing(game, collectedData);
-                    game.clearListeners();
-                    collectedData.putAll(gameTracker.extractData());
-                    logger.record(collectedData);
-                    collectedData.clear();
                 }
-                // Once all games are complete, call processDataAndFinish()
-                logger.processDataAndFinish();
+                // Once all games are complete, let the gameTracker know
+                gameTracker.onGameEvent(CoreConstants.GameEvents.GAME_SEQUENCE_OVER, game);
             }
         }
-    }
-
-    private static class GameReportListener implements IGameListener {
-
-        List<Double> scores = new ArrayList<>();
-        //        List<Integer> branchingByStates = new ArrayList<>();
-        List<Double> visibilityOnTurn = new ArrayList<>();
-        List<Integer> components = new ArrayList<>();
-        AbstractForwardModel fm;
-
-        public GameReportListener(AbstractForwardModel forwardModel) {
-            fm = forwardModel;
-        }
-
-        @Override
-        public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction actionChosen) {
-            if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
-                // each action taken, we record branching factor and states (this is triggered when the decision is made,
-                // so before it is executed
-                int player = state.getCurrentPlayer();
-                List<AbstractAction> allActions = fm.computeAvailableActions(state);
-                if (allActions.size() < 2) return;
-//                HashSet<Integer> forwardStates = new HashSet<>();
-//                for (AbstractAction action : allActions) {
-//                    AbstractGameState gsCopy = state.copy();
-//                    fm.next(gsCopy, action);
-//                    forwardStates.add(gsCopy.hashCode());
-//                }
-//                branchingByStates.add(forwardStates.size());
-                scores.add(state.getGameScore(player));
-                Pair<Integer, int[]> allComp = countComponents(state);
-                components.add(allComp.a);
-                visibilityOnTurn.add(allComp.b[player] / (double) allComp.a);
-                //          System.out.printf("Turn: %d, Player: %d, Action: %s%n", state.getTurnOrder().getTurnCounter(), player, actionChosen);
-            }
-        }
-
-        public Map<String, Object> extractData() {
-            Map<String, Object> data = new HashMap<>();
-//            IntSummaryStatistics bf = branchingByStates.stream().mapToInt(i -> i).summaryStatistics();
-//            data.put("BranchingFactor", bf.getAverage());
-//            data.put("MaxBranchingFactor", bf.getMax());
-            TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
-            data.put("ScoreMedian", sc.median());
-            data.put("ScoreMean", sc.mean());
-            data.put("ScoreMax", sc.max());
-            data.put("ScoreMin", sc.min());
-            data.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
-            TAGStatSummary scoreDelta = scores.size() > 1 ?
-                    IntStream.range(0, scores.size() - 1)
-                            .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
-                            .collect(new TAGSummariser())
-                    : new TAGStatSummary();
-            data.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
-            TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
-            data.put("StateSizeMedian", stateSize.median());
-            data.put("StateSizeMean", stateSize.mean());
-            data.put("StateSizeMax", stateSize.max());
-            data.put("StateSizeMin", stateSize.min());
-            data.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
-            TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
-            data.put("HiddenInfoMedian", visibility.median());
-            data.put("HiddenInfoMean", visibility.mean());
-            data.put("HiddenInfoMax", visibility.max());
-            data.put("HiddenInfoMin", visibility.min());
-            data.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
-            return data;
-        }
-    }
-
-    private static void preGameProcessing(Game game, Map<String, Object> data) {
-        AbstractGameState gs = game.getGameState();
-
-        AbstractForwardModel fm = game.getForwardModel();
-        long s = System.nanoTime();
-        fm.setup(gs);
-        data.put("TimeSetup", (System.nanoTime() - s) / 1e3);
-
-        Pair<Integer, int[]> components = countComponents(gs);
-        data.put("StateSizeStart", components.a);
-
-        IntStream.range(0, game.getPlayers().size()).forEach(p -> {
-            int unseen = components.b[p];
-            data.put("HiddenInfoStart", unseen / (double) components.a);
-        });
-    }
-
-    /**
-     * Returns the total number of components in the state as the first element of the returned value
-     * and an array of the counts that are hidden to each player
-     * <p>
-     *
-     * @param state
-     * @return The total number of components
-     */
-    private static Pair<Integer, int[]> countComponents(AbstractGameState state) {
-        int[] hiddenByPlayer = new int[state.getNPlayers()];
-        // we do not include containers in the count...just the lowest-level items
-        // open to debate on this. But we are consistent across State Size and Hidden Information stats
-        int total = (int) state.getAllComponents().stream().filter(c -> !(c instanceof IComponentContainer)).count();
-        for (int p = 0; p < hiddenByPlayer.length; p++)
-            hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
-        return new Pair<>(total, hiddenByPlayer);
-    }
-
-    private static void postGameProcessing(Game game, Map<String, Object> data) {
-        //    Retrieves a list with one entry per game tick, each a pair (active player ID, # actions)
-        List<Pair<Integer, Integer>> actionSpaceRecord = game.getActionSpaceSize();
-        TAGStatSummary stats = actionSpaceRecord.stream()
-                .map(r -> r.b)
-                .filter(size -> size > 1)
-                .collect(new TAGSummariser());
-        data.put("ActionSpaceMean", stats.mean());
-        data.put("ActionSpaceMin", stats.min());
-        data.put("ActionSpaceMedian", stats.median());
-        data.put("ActionSpaceMax", stats.max());
-        data.put("ActionSpaceSkew", stats.skew());
-        data.put("ActionSpaceKurtosis", stats.kurtosis());
-        data.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
-        data.put("Decisions", stats.n());
-        data.put("TimeNext", game.getNextTime() / 1e3);
-        data.put("TimeCopy", game.getCopyTime() / 1e3);
-        data.put("TimeActionCompute", game.getActionComputeTime() / 1e3);
-        data.put("TimeAgent", game.getAgentTime() / 1e3);
-
-        data.put("Ticks", game.getTick());
-        data.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
-        data.put("ActionsPerTurn", game.getNActionsPerTurn());
-
-//        IntStream.range(0, game.getPlayers().size()).forEach(p -> {
-//            StatSummary playerStats = actionSpaceRecord.stream()
-//                    .filter(r -> r.a == p)
-//                    .map(r -> r.b)
-//                    .filter(size -> size > 1)
-//                    .collect(new TAGSummariser());
-//            data.put("ActionSpaceMean_P" + p, playerStats.mean());
-//            data.put("ActionSpaceMin_P" + p, playerStats.min());
-//            data.put("ActionSpaceMax_P" + p, playerStats.max());
-//            data.put("Decisions_P" + p, playerStats.n());
-//        });
-
     }
 }
 
