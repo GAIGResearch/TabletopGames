@@ -18,7 +18,7 @@ public class FileStatsLogger implements IStatisticLogger {
     public String doubleFormat = "%.3g";
     public String intFormat = "%d";
 
-    private Set<String> allKeys = new HashSet<>();
+    private Set<String> allKeys = new LinkedHashSet<>();
 
     /**
      * Note that one line will be output to the file per Map<String, ?>

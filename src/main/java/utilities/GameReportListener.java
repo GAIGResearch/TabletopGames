@@ -7,6 +7,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
 import core.interfaces.IGameListener;
+import core.interfaces.IStatisticLogger;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -20,6 +21,14 @@ public class GameReportListener implements IGameListener {
     List<Integer> components = new ArrayList<>();
     Map<String, Object> collectedData = new HashMap<>();
     AbstractForwardModel fm;
+    IStatisticLogger logger;
+
+    public GameReportListener(IStatisticLogger logger) {
+        this.logger = logger;
+    }
+    public GameReportListener() {
+        this.logger = null;
+    }
 
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction actionChosen) {
@@ -46,6 +55,10 @@ public class GameReportListener implements IGameListener {
             AbstractGameState state = game.getGameState();
             long s = System.nanoTime();
             fm = game.getForwardModel();
+
+            collectedData.put("Game", game.getGameState().getGameID());
+            collectedData.put("Players", String.valueOf(game.getGameState().getNPlayers()));
+            collectedData.put("PlayerType", game.getPlayers().get(0).toString());
             fm.setup(state);
             collectedData.put("TimeSetup", (System.nanoTime() - s) / 1e3);
 
@@ -75,41 +88,39 @@ public class GameReportListener implements IGameListener {
             collectedData.put("Ticks", game.getTick());
             collectedData.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
             collectedData.put("ActionsPerTurn", game.getNActionsPerTurn());
+
+            TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
+            collectedData.put("ScoreMedian", sc.median());
+            collectedData.put("ScoreMean", sc.mean());
+            collectedData.put("ScoreMax", sc.max());
+            collectedData.put("ScoreMin", sc.min());
+            collectedData.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
+            TAGStatSummary scoreDelta = scores.size() > 1 ?
+                    IntStream.range(0, scores.size() - 1)
+                            .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
+                            .collect(new TAGSummariser())
+                    : new TAGStatSummary();
+            collectedData.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
+
+            TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
+            collectedData.put("StateSizeMedian", stateSize.median());
+            collectedData.put("StateSizeMean", stateSize.mean());
+            collectedData.put("StateSizeMax", stateSize.max());
+            collectedData.put("StateSizeMin", stateSize.min());
+            collectedData.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
+
+            TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
+            collectedData.put("HiddenInfoMedian", visibility.median());
+            collectedData.put("HiddenInfoMean", visibility.mean());
+            collectedData.put("HiddenInfoMax", visibility.max());
+            collectedData.put("HiddenInfoMin", visibility.min());
+            collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
+
+            logger.record(collectedData);
+            collectedData = new HashMap<>();
+        } else if (type == GAME_SEQUENCE_OVER) {
+            logger.processDataAndFinish();
         }
-    }
-
-    @Override
-    public Map<String, Object> getAllData() {
-        TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
-        collectedData.put("ScoreMedian", sc.median());
-        collectedData.put("ScoreMean", sc.mean());
-        collectedData.put("ScoreMax", sc.max());
-        collectedData.put("ScoreMin", sc.min());
-        collectedData.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
-        TAGStatSummary scoreDelta = scores.size() > 1 ?
-                IntStream.range(0, scores.size() - 1)
-                        .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
-                        .collect(new TAGSummariser())
-                : new TAGStatSummary();
-        collectedData.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
-        TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
-        collectedData.put("StateSizeMedian", stateSize.median());
-        collectedData.put("StateSizeMean", stateSize.mean());
-        collectedData.put("StateSizeMax", stateSize.max());
-        collectedData.put("StateSizeMin", stateSize.min());
-        collectedData.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
-        TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
-        collectedData.put("HiddenInfoMedian", visibility.median());
-        collectedData.put("HiddenInfoMean", visibility.mean());
-        collectedData.put("HiddenInfoMax", visibility.max());
-        collectedData.put("HiddenInfoMin", visibility.min());
-        collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
-        return collectedData;
-    }
-
-    @Override
-    public void clear() {
-        collectedData = new LinkedHashMap<>();
     }
 
     /**

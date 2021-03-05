@@ -7,7 +7,6 @@ import core.actions.AbstractAction;
 import utilities.GameReportListener;
 
 import java.lang.reflect.Constructor;
-import java.util.Map;
 
 public interface IGameListener {
 
@@ -30,29 +29,33 @@ public interface IGameListener {
     // for all other event types
     void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action);
 
-    /**
-     * IGameListener is responsible for collecting data.
-     * IStatisticsLogger is then used to store or further process data.
-     * This method is the usual means of communicating between them, and complements IStatisticsLogger.record()
-     *
-     * @return A Map of all the data collected by the IGameListener so far
-     */
-    Map<String, Object> getAllData();
 
-    /**
-     * This clears out all data collected so far and resets the GameListener.
-     * This may be used if one Listener listens to several games and we do not want to merge data extracted across games
-     */
-    void clear();
+    static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
+        IGameListener listener = new GameReportListener(logger);
+        try {
+            Class<?> clazz = Class.forName(listenerClass);
+
+            Constructor<?> constructor;
+            try {
+                constructor = clazz.getConstructor(IStatisticLogger.class);
+                listener = (IGameListener) constructor.newInstance(logger);
+            } catch (NoSuchMethodException e) {
+                return createListener(listenerClass);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return listener;
+    }
 
     static IGameListener createListener(String listenerClass) {
         IGameListener listener = new GameReportListener();
         try {
             Class<?> clazz = Class.forName(listenerClass);
-
             Constructor<?> constructor;
             constructor = clazz.getConstructor();
             listener = (IGameListener) constructor.newInstance();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

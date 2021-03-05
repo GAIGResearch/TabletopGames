@@ -1,6 +1,7 @@
 package evaluation;
 
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
@@ -101,7 +102,7 @@ public class GameReportII {
                 Game game = gameType.createGameInstance(playerCount);
 
                 IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-                IGameListener gameTracker = IGameListener.createListener(listenerClass);
+                IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
                 game.addListener(gameTracker);
 
                 for (int i = 0; i < nGames; i++) {
@@ -112,19 +113,10 @@ public class GameReportII {
                     // Run games, resetting the player each time
 
                     game.reset(allPlayers);
-                    Map<String, Object> collectedData = new LinkedHashMap<>();  // iterates in insertion order
-                    collectedData.put("Game", game.getGameState().getGameID());
-                    collectedData.put("Players", String.valueOf(game.getGameState().getNPlayers()));
-                    collectedData.put("PlayerType", playerDescriptor);
-
                     game.run();
-
-                    collectedData.putAll(gameTracker.getAllData());
-                    logger.record(collectedData);
-                    collectedData.clear();
                 }
-                // Once all games are complete, call processDataAndFinish()
-                logger.processDataAndFinish();
+                // Once all games are complete, let the gameTracker know
+                gameTracker.onGameEvent(CoreConstants.GameEvents.GAME_SEQUENCE_OVER, game);
             }
         }
     }

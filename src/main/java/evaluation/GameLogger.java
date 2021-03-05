@@ -11,7 +11,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static core.CoreConstants.GameEvents;
 import static java.util.stream.Collectors.joining;
@@ -62,16 +61,6 @@ public class GameLogger implements IGameListener {
             ;
             writeData(allData + "\n");
         }
-    }
-
-    @Override
-    public Map<String, Object> getAllData() {
-        return null;
-    }
-
-    @Override
-    public void clear() {
-        // nothing
     }
 
     private void writeData(String data) {
