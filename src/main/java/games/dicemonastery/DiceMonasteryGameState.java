@@ -8,21 +8,20 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Resource;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 
 public class DiceMonasteryGameState extends AbstractGameState {
 
-    final static int[] RETIREMENT_REWARDS = {6, 5, 4, 3, 2, 1};
-
     Map<ActionArea, DMArea> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
     Map<Integer, ActionArea> monkLocations = new HashMap<>();
     List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
+    List<Map<Resource, Integer>> playerHands = new ArrayList<>();
+    List<Map<Resource, Integer>> playerBids = new ArrayList<>();
     int nextRetirementReward = 0;
     int[] victoryPoints;
 
@@ -41,8 +40,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
         allMonks = new HashMap<>();
         monkLocations = new HashMap<>();
         playerTreasuries = new ArrayList<>();
-        for (int p = 0; p < getNPlayers(); p++)
+        playerHands = new ArrayList<>();
+        playerBids = new ArrayList<>();
+        for (int p = 0; p < getNPlayers(); p++) {
             playerTreasuries.add(new HashMap<>());
+            playerHands.add(new HashMap<>());
+            playerBids.add(new HashMap<>());
+        }
         nextRetirementReward = 0;
     }
 
@@ -56,6 +60,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public void moveMonk(int id, ActionArea from, ActionArea to) {
         Monk movingMonk = allMonks.get(id);
+    //    System.out.printf("\tMoving Monk %s%n", movingMonk);
         if (movingMonk == null)
             throw new IllegalArgumentException("Monk does not exist : " + id);
         if (movingMonk.piety < to.dieMinimum)
@@ -87,6 +92,62 @@ public class DiceMonasteryGameState extends AbstractGameState {
             cubeMoved.setOwnerId(player);
             cubeMoved.setTokenType(resource.toString());
             actionAreas.get(to).putComponent(cubeMoved);
+        }
+    }
+
+    public boolean reserveBid(int beer, int mead) {
+        int player = getCurrentPlayer();
+        int totalBeer = getResource(player, Resource.BEER, STOREROOM);
+        int totalMead = getResource(player, Resource.MEAD, STOREROOM);
+        if (beer > totalBeer || mead > totalMead)
+            throw new AssertionError(String.format("Cannot bid more beer or mead than you have %d of %d, %d of %d", beer, totalBeer, mead, totalMead));
+
+        playerHands.get(player).put(Resource.BEER, totalBeer - beer);
+        playerHands.get(player).put(Resource.MEAD, totalMead - mead);
+        playerBids.get(player).put(Resource.BEER, beer);
+        playerBids.get(player).put(Resource.MEAD, mead);
+        return true;
+    }
+
+    public void executeBids() {
+        if (((DiceMonasteryTurnOrder) turnOrder).season != Season.SUMMER)
+            throw new AssertionError(String.format("Wrong season (%s) for Viking raids!", ((DiceMonasteryTurnOrder) turnOrder).season));
+
+        List<Integer> bidPerPlayer = playerBids.stream().map(
+                bid -> bid.getOrDefault(Resource.BEER, 0) + bid.getOrDefault(Resource.MEAD, 0) * 2
+        ).collect(toList());
+
+        int lowestBid = bidPerPlayer.stream().min(comparingInt(Integer::intValue)).orElseThrow(() -> new AssertionError("Empty List?!"));
+
+        // sorted in descending order
+        List<Integer> sortedBids = bidPerPlayer.stream().sorted(comparingInt(i -> -i)).collect(toList());
+
+        // contains the ordinality of the player bids, 0 = best bid (including joint equals) and so on.
+        List<Integer> playerOrdinality = bidPerPlayer.stream().map(sortedBids::indexOf).collect(toList());
+
+        for (int player = 0; player < bidPerPlayer.size(); player++) {
+            Map<Resource, Integer> treasury = playerTreasuries.get(player);
+            if (bidPerPlayer.get(player) == lowestBid) {
+                // this takes precedence over ordinality - no VP, and lose a monk
+                Monk lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety))
+                        .orElseThrow(() -> new AssertionError("No monks...?"));
+                moveMonk(lowestMonk.getComponentID(), DORMITORY, GRAVEYARD);
+                // but they do get their bid back
+                treasury.merge(Resource.BEER, playerBids.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
+                treasury.merge(Resource.MEAD, playerBids.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
+                playerBids.get(player).clear();
+            } else {
+                // Gain VP
+                int vp = VIKING_REWARDS[bidPerPlayer.size() - 1][playerOrdinality.get(player)];
+                // TODO: Technically need to divide this among people with same ordinality
+                addVP(vp, player);
+                // and then lose stuff in Bid
+                playerBids.get(player).clear();
+            }
+            // put Hand back into Storeroom
+            treasury.merge(Resource.BEER, playerHands.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
+            treasury.merge(Resource.MEAD, playerHands.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
+            playerHands.get(player).clear();
         }
     }
 
@@ -131,8 +192,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public List<Monk> monksIn(ActionArea region, int player) {
         return allMonks.values().stream()
-                .filter(m -> ((region == null && monkLocations.get(m.getComponentID()) != RETIRED)|| monkLocations.get(m.getComponentID()) == region) &&
-                        (player == -1 || m.getOwnerId() == player))
+                .filter(m -> {
+                    ActionArea location = monkLocations.get(m.getComponentID());
+                    return (
+                            ((region == null && location != RETIRED && location != GRAVEYARD) || region == location)
+                                    && (player == -1 || player == m.getOwnerId()));
+                })
                 .collect(toList());
     }
 
@@ -213,8 +278,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
         retValue.monkLocations = new HashMap<>(monkLocations);
 
         retValue.playerTreasuries = new ArrayList<>();
+        retValue.playerBids = new ArrayList<>();
+        retValue.playerHands = new ArrayList<>();
         for (int p = 0; p < getNPlayers(); p++) {
             retValue.playerTreasuries.add(new HashMap<>(playerTreasuries.get(p)));
+            retValue.playerBids.add(new HashMap<>(playerBids.get(p)));
+            retValue.playerHands.add(new HashMap<>(playerHands.get(p)));
         }
         retValue.nextRetirementReward = nextRetirementReward;
 
@@ -236,17 +305,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<>();
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (!(o instanceof DiceMonasteryGameState))
             return false;
         DiceMonasteryGameState other = (DiceMonasteryGameState) o;
         return other.allMonks.equals(allMonks) && other.monkLocations.equals(monkLocations) &&
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
+                other.playerHands.equals(playerHands) && other.playerBids.equals(playerBids) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
@@ -254,6 +319,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward) + 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
+                gameParameters, turnOrder, nextRetirementReward, playerBids, playerHands) +
+                31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
+
 }

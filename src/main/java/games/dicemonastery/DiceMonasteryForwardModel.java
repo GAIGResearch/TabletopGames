@@ -4,10 +4,12 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.actions.*;
+import utilities.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
@@ -183,7 +185,13 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                 }
                 break;
             case SUMMER:
-                break;
+                // we generate up to 16 SummerBids for every possibility of 0% to 100% of total stuff in 33% increments
+                // taking each of beer and mead independently
+                //  (removing any duplicate bids, so in practise the actual number will be rather lower)
+                int totalBeer = state.getResource(currentPlayer, BEER, STOREROOM);
+                int totalMead = state.getResource(currentPlayer, MEAD, STOREROOM);
+                return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
+                        .distinct().collect(toList());
             case WINTER:
                 return state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()
                         .mapToInt(Monk::getPiety)
@@ -193,6 +201,13 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         }
         throw new AssertionError("Not yet implemented combination " + turnOrder.season + " : " + state.getGamePhase());
     }
+
+    // just create this once for performance - could also manually write out the array
+    private static final List<Pair<Integer, Integer>> bidCombinations = IntStream.range(0, 3)
+            .boxed()
+            .flatMap(b -> IntStream.range(0, 3)
+                    .mapToObj(m -> new Pair<>(b, m)))
+            .collect(toList());
 
     @Override
     protected DiceMonasteryForwardModel _copy() {

@@ -11,8 +11,7 @@ import java.util.stream.IntStream;
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.MEADOW;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
-import static games.dicemonastery.DiceMonasteryConstants.Season.WINTER;
+import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryTurnOrder extends TurnOrder {
@@ -105,6 +104,14 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                     }
                 }
                 break;
+            case SUMMER:
+                turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
+                if (turnOwner == abbot) {
+                    // we have completed SUMMER bidding
+                    state.executeBids();
+                    season = season.next();
+                }
+                break;
             case WINTER:
                 if (state.monksIn(null, turnOwner).size() == 0) {
                     // get a free novice if you ever run out of monks
@@ -115,7 +122,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 if (turnOwner == abbot)
                     endRound(state);
                 break;
-            case SUMMER:
+            default:
                 throw new AssertionError(String.format("Unknown Game Phase of %s in %s", state.getGamePhase(), season));
         }
     }
@@ -141,8 +148,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public int nextPlayer(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
-        if (season == WINTER) {
-            // one decision each in Winter (which monk to promote)
+        if (season == WINTER || season == SUMMER) {
+            // one decision each in Summer/Winter (how much to bid / which monk to promote)
             return (turnOwner + 1 + nPlayers) % nPlayers;
         } else {
             switch ((Phase) state.getGamePhase()) {

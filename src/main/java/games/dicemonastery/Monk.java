@@ -55,4 +55,9 @@ public class Monk extends Component {
     public int getPiety() {
         return piety;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Monk %d: Piety %d, Owner %d", componentID, piety, ownerId);
+    }
 }

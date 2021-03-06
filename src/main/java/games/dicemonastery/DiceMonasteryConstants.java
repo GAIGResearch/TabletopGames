@@ -12,7 +12,7 @@ public class DiceMonasteryConstants {
         MEADOW(1), KITCHEN(2), WORKSHOP(3),
         GATEHOUSE(1), LIBRARY(4), CHAPEL(1),
         DORMITORY(0), STOREROOM(0), SUPPLY(0),
-        RETIRED(0);
+        RETIRED(0), GRAVEYARD(0);
 
         public final int dieMinimum;
 
@@ -54,7 +54,7 @@ public class DiceMonasteryConstants {
         public Season next() {
             switch (this) {
                 case SPRING:
-                    return AUTUMN;
+                    return SUMMER;
                 case SUMMER:
                     return AUTUMN;
                 case AUTUMN:
@@ -68,5 +68,13 @@ public class DiceMonasteryConstants {
 
     }
 
+    public final static int[] RETIREMENT_REWARDS = {6, 5, 4, 3, 2, 1};
 
+    // rows are number of players; columns are ordinal position in bidding
+    public final static int[][] VIKING_REWARDS = {
+            {0, 0, 0, 0},
+            {2, 0, 0, 0},
+            {4, 2, 0, 0},
+            {6, 4, 2, 0}
+    };
 }
