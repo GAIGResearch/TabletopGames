@@ -7,8 +7,8 @@ import games.dicemonastery.DiceMonasteryTurnOrder;
 
 public class GainVictoryPoints extends AbstractAction {
 
-    final int vp;
-    final boolean asReward;
+    public final int vp;
+    public final boolean asReward;
 
     public GainVictoryPoints(int amount, boolean asReward) {
         vp = amount;

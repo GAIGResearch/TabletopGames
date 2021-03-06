@@ -12,9 +12,9 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 
 public class PromoteMonk extends AbstractAction {
 
-    final int pietyLevelToPromote;
-    final ActionArea location;
-    final boolean areaReward;
+    public final int pietyLevelToPromote;
+    public final ActionArea location;
+    public final boolean areaReward;
 
     public PromoteMonk(int piety, ActionArea where, boolean reward) {
         pietyLevelToPromote = piety;

@@ -26,7 +26,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     }
 
     Season season = SPRING;
-    int year = 1;
     ActionArea currentAreaBeingExecuted = null;
     int abbot = 0; // the current 'first player '
     List<Integer> playerOrderForCurrentArea;
@@ -37,7 +36,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     protected void _reset() {
         season = SPRING;
-        year = 1;
         turnOwner = 0;
         abbot = 0;
         actionPointsLeftForCurrentPlayer = 0;
@@ -50,7 +48,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     protected DiceMonasteryTurnOrder _copy() {
         DiceMonasteryTurnOrder retValue = new DiceMonasteryTurnOrder(nPlayers);
         retValue.season = season;
-        retValue.year = year;
+        retValue.roundCounter = roundCounter;
         retValue.abbot = abbot;
         retValue.currentAreaBeingExecuted = currentAreaBeingExecuted;
         retValue.playerOrderForCurrentArea = playerOrderForCurrentArea != null ? new ArrayList<>(playerOrderForCurrentArea) : null;
@@ -114,19 +112,26 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 }
                 turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
                 // and then increment year
-                if (turnOwner == abbot) {
-                    season = season.next();
-                    year++;
-                    if (year > nMaxRounds) {
-                        state.endGame();
-                    }
-                    abbot = (abbot + 1 + nPlayers) % nPlayers;
-                    turnOwner = abbot;
-                }
+                if (turnOwner == abbot)
+                    endRound(state);
                 break;
             case SUMMER:
                 throw new AssertionError(String.format("Unknown Game Phase of %s in %s", state.getGamePhase(), season));
         }
+    }
+
+    @Override
+    public void endRound(AbstractGameState state) {
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
+
+        roundCounter++;
+        season = season.next();
+        roundCounter++;
+        if (getYear() > nMaxRounds) {
+            ((DiceMonasteryGameState) state).endGame();
+        }
+        abbot = (abbot + 1 + nPlayers) % nPlayers;
+        turnOwner = abbot;
     }
 
     private int actionPoints(DiceMonasteryGameState state, ActionArea region, int player) {
@@ -214,7 +219,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     }
 
     public int getYear() {
-        return year;
+        return roundCounter + 1;
     }
 
     public int getAbbot() {
@@ -237,7 +242,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     public boolean equals(Object o) {
         if (o instanceof DiceMonasteryTurnOrder) {
             DiceMonasteryTurnOrder other = (DiceMonasteryTurnOrder) o;
-            return other.season == season && other.year == year && other.dominantPlayers.equals(dominantPlayers) &&
+            return other.season == season && other.dominantPlayers.equals(dominantPlayers) &&
                     other.rewardsTaken.equals(rewardsTaken) &&
                     other.currentAreaBeingExecuted == currentAreaBeingExecuted && other.abbot == abbot &&
                     other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
@@ -249,7 +254,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 31 * Objects.hash(season, year, abbot, currentAreaBeingExecuted,
+        return super.hashCode() + 31 * Objects.hash(season, abbot, currentAreaBeingExecuted,
                 dominantPlayers, actionPointsLeftForCurrentPlayer, rewardsTaken);
     }
 

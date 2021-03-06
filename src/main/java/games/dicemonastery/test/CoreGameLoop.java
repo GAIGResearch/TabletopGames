@@ -68,7 +68,7 @@ public class CoreGameLoop {
         fm.next(state, new PlaceMonk(0, MEADOW));
         actions = fm.computeAvailableActions(state);
         assertEquals(4, actions.size());
-        assertTrue(actions.stream().allMatch(a -> a.toString().contains("Choose Monk")));
+        assertTrue(actions.stream().allMatch(a -> a instanceof ChooseMonk));
 
         assertEquals(24, state.monksIn(DORMITORY, -1).size());
         assertEquals(6, state.monksIn(DORMITORY, 0).size());
@@ -179,7 +179,7 @@ public class CoreGameLoop {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.isNotTerminal());
 
-        assertEquals(4, turnOrder.getYear());
+        assertEquals(4, turnOrder.getRoundCounter());
         assertEquals(SPRING, turnOrder.getSeason());
         assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch( r -> r == Utils.GameResult.GAME_ONGOING));
     }
