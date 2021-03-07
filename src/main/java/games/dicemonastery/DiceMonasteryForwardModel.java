@@ -203,9 +203,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     }
 
     // just create this once for performance - could also manually write out the array
-    private static final List<Pair<Integer, Integer>> bidCombinations = IntStream.range(0, 3)
+    private static final List<Pair<Integer, Integer>> bidCombinations = IntStream.rangeClosed(0, 3)
             .boxed()
-            .flatMap(b -> IntStream.range(0, 3)
+            .flatMap(b -> IntStream.rangeClosed(0, 3)
                     .mapToObj(m -> new Pair<>(b, m)))
             .collect(toList());
 

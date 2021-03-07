@@ -20,7 +20,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Map<Integer, Monk> allMonks = new HashMap<>();
     Map<Integer, ActionArea> monkLocations = new HashMap<>();
     List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
-    List<Map<Resource, Integer>> playerHands = new ArrayList<>();
     List<Map<Resource, Integer>> playerBids = new ArrayList<>();
     int nextRetirementReward = 0;
     int[] victoryPoints;
@@ -40,11 +39,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
         allMonks = new HashMap<>();
         monkLocations = new HashMap<>();
         playerTreasuries = new ArrayList<>();
-        playerHands = new ArrayList<>();
         playerBids = new ArrayList<>();
         for (int p = 0; p < getNPlayers(); p++) {
             playerTreasuries.add(new HashMap<>());
-            playerHands.add(new HashMap<>());
             playerBids.add(new HashMap<>());
         }
         nextRetirementReward = 0;
@@ -102,8 +99,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (beer > totalBeer || mead > totalMead)
             throw new AssertionError(String.format("Cannot bid more beer or mead than you have %d of %d, %d of %d", beer, totalBeer, mead, totalMead));
 
-        playerHands.get(player).put(Resource.BEER, totalBeer - beer);
-        playerHands.get(player).put(Resource.MEAD, totalMead - mead);
         playerBids.get(player).put(Resource.BEER, beer);
         playerBids.get(player).put(Resource.MEAD, mead);
         return true;
@@ -132,9 +127,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 Monk lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety))
                         .orElseThrow(() -> new AssertionError("No monks...?"));
                 moveMonk(lowestMonk.getComponentID(), DORMITORY, GRAVEYARD);
-                // but they do get their bid back
-                treasury.merge(Resource.BEER, playerBids.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
-                treasury.merge(Resource.MEAD, playerBids.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
                 playerBids.get(player).clear();
             } else {
                 // Gain VP
@@ -142,12 +134,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 // TODO: Technically need to divide this among people with same ordinality
                 addVP(vp, player);
                 // and then lose stuff in Bid
+                treasury.merge(Resource.BEER, -playerBids.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
+                treasury.merge(Resource.MEAD, -playerBids.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
                 playerBids.get(player).clear();
             }
-            // put Hand back into Storeroom
-            treasury.merge(Resource.BEER, playerHands.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
-            treasury.merge(Resource.MEAD, playerHands.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
-            playerHands.get(player).clear();
         }
     }
 
@@ -279,11 +269,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
         retValue.playerTreasuries = new ArrayList<>();
         retValue.playerBids = new ArrayList<>();
-        retValue.playerHands = new ArrayList<>();
         for (int p = 0; p < getNPlayers(); p++) {
             retValue.playerTreasuries.add(new HashMap<>(playerTreasuries.get(p)));
             retValue.playerBids.add(new HashMap<>(playerBids.get(p)));
-            retValue.playerHands.add(new HashMap<>(playerHands.get(p)));
         }
         retValue.nextRetirementReward = nextRetirementReward;
 
@@ -311,7 +299,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         DiceMonasteryGameState other = (DiceMonasteryGameState) o;
         return other.allMonks.equals(allMonks) && other.monkLocations.equals(monkLocations) &&
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
-                other.playerHands.equals(playerHands) && other.playerBids.equals(playerBids) &&
+                 other.playerBids.equals(playerBids) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
@@ -319,7 +307,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward, playerBids, playerHands) +
+                gameParameters, turnOrder, nextRetirementReward, playerBids) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

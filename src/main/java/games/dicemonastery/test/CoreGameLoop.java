@@ -9,6 +9,7 @@ import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
@@ -423,5 +424,118 @@ public class CoreGameLoop {
         fm.next(state, new DoNothing()); // don't promote anyone
         assertEquals(1, state.monksIn(DORMITORY, 0).size());
         assertEquals(1, state.monksIn(DORMITORY, 0).get(0).getPiety());
+    }
+
+    private void advanceToSummer() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (!(turnOrder.getSeason() == SUMMER));
+    }
+
+    private void emptyAllStores() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values()) {
+                state.addResource(p, r, -state.getResource(p, r, STOREROOM));
+            }
+        }
+    }
+
+    @Test
+    public void summerActionsCorrect() {
+        advanceToSummer();
+        emptyAllStores();
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new SummerBid(0, 0), actions.get(0));
+
+        state.addResource(0, BEER, 1);
+        state.addResource(0, MEAD, 1);
+        actions = fm.computeAvailableActions(state);
+        assertEquals(4, actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof SummerBid));
+        assertTrue(actions.contains(new SummerBid(0, 0)));
+        assertTrue(actions.contains(new SummerBid(0, 1)));
+        assertTrue(actions.contains(new SummerBid(1, 0)));
+        assertTrue(actions.contains(new SummerBid(1, 1)));
+
+        state.addResource(0, BEER, 1);
+        state.addResource(0, MEAD, 1);
+        actions = fm.computeAvailableActions(state);
+        assertEquals(9, actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof SummerBid));
+        assertTrue(actions.contains(new SummerBid(0, 0)));
+        assertTrue(actions.contains(new SummerBid(0, 1)));
+        assertTrue(actions.contains(new SummerBid(1, 0)));
+        assertTrue(actions.contains(new SummerBid(1, 1)));
+        assertTrue(actions.contains(new SummerBid(0, 2)));
+        assertTrue(actions.contains(new SummerBid(1, 2)));
+        assertTrue(actions.contains(new SummerBid(2, 0)));
+        assertTrue(actions.contains(new SummerBid(2, 1)));
+        assertTrue(actions.contains(new SummerBid(2, 2)));
+
+        state.addResource(0, BEER, 4);
+        state.addResource(0, MEAD, -1);
+        actions = fm.computeAvailableActions(state);
+        assertEquals(8, actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof SummerBid));
+        assertTrue(actions.contains(new SummerBid(0, 0)));
+        assertTrue(actions.contains(new SummerBid(0, 1)));
+        assertTrue(actions.contains(new SummerBid(2, 0)));
+        assertTrue(actions.contains(new SummerBid(2, 1)));
+        assertTrue(actions.contains(new SummerBid(4, 0)));
+        assertTrue(actions.contains(new SummerBid(4, 1)));
+        assertTrue(actions.contains(new SummerBid(6, 0)));
+        assertTrue(actions.contains(new SummerBid(6, 1)));
+    }
+
+    @Test
+    public void uniqueSummerBidsForAllPlayer() {
+        advanceToSummer();
+        emptyAllStores();
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            state.addResource(p, BEER, 10);
+            state.addResource(p, MEAD, 10);
+        }
+        int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
+        int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
+        fm.next(state, new SummerBid(1, 0));
+        assertEquals(10, state.getResource(0, BEER, STOREROOM));
+        assertEquals(10, state.getResource(0, MEAD, STOREROOM));
+        fm.next(state, new SummerBid(1, 5));
+        assertEquals(10, state.getResource(1, BEER, STOREROOM));
+        assertEquals(10, state.getResource(1, MEAD, STOREROOM));
+        fm.next(state, new SummerBid(0, 5));
+        fm.next(state, new SummerBid(3, 2));
+
+        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(startVP[0], state.getVictoryPoints(0));
+        assertEquals(startVP[1] + 6, state.getVictoryPoints(1));
+        assertEquals(startVP[2] + 4, state.getVictoryPoints(2));
+        assertEquals(startVP[3] + 2, state.getVictoryPoints(3));
+
+        // Then check that
+        assertEquals(10, state.getResource(0, BEER, STOREROOM));
+        assertEquals(10, state.getResource(0, MEAD, STOREROOM));
+        assertEquals(9, state.getResource(1, BEER, STOREROOM));
+        assertEquals(5, state.getResource(1, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(2, BEER, STOREROOM));
+        assertEquals(5, state.getResource(2, MEAD, STOREROOM));
+        assertEquals(7, state.getResource(3, BEER, STOREROOM));
+        assertEquals(8, state.getResource(3, MEAD, STOREROOM));
+
+        assertEquals(startMonks[0] - 1, state.monksIn(DORMITORY, 0).size());
+        assertEquals(startMonks[1], state.monksIn(DORMITORY, 1).size());
+        assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
+        assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
+
     }
 }
