@@ -1,14 +1,22 @@
 package evaluation;
 
-import core.*;
+import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.Game;
 import core.interfaces.IStatisticLogger;
-import evodef.*;
+import evodef.SearchSpace;
+import evodef.SolutionEvaluator;
 import games.GameType;
 import utilities.SummaryLogger;
 
-import java.util.*;
-import java.util.stream.*;
-import static java.util.stream.Collectors.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  *  Game Evaluator is used for NTBEA optimisation of parameters. It implements the SolutionEvaluator interface.
@@ -28,6 +36,7 @@ public class GameEvaluator implements SolutionEvaluator {
     boolean fullyCoop;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
+    BiFunction<AbstractGameState, Integer, Double> evalFn;
 
     /**
      * GameEvaluator
@@ -45,13 +54,14 @@ public class GameEvaluator implements SolutionEvaluator {
      *                                any state, or that make any use of their playerId. (So RandomPlayer is fine.)
      *
      */
-    public <T> GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
-                             int nPlayers,
-                             List<AbstractPlayer> opponents, long seed,
-                             boolean avoidOpponentDuplicates) {
+    public GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
+                         int nPlayers, BiFunction<AbstractGameState, Integer, Double> evaluationFunction,
+                         List<AbstractPlayer> opponents, long seed,
+                         boolean avoidOpponentDuplicates) {
         this.game = game;
         this.searchSpace = parametersToTune;
         this.nPlayers = nPlayers;
+        evalFn = evaluationFunction;
         this.opponents = opponents;
         this.rnd = new Random(seed);
         this.avoidOppDupes = avoidOpponentDuplicates;
@@ -118,7 +128,7 @@ public class GameEvaluator implements SolutionEvaluator {
         AbstractGameState finalState = newGame.getGameState();
 
         nEvals++;
-        return finalState.getHeuristicScore(playerIndex);
+        return evalFn.apply(finalState, playerIndex);
     }
 
     /**
