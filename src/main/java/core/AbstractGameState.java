@@ -14,6 +14,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.WIN;
 
 
 /**
@@ -229,10 +230,35 @@ public abstract class AbstractGameState {
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
+     *
      * @param playerId
      * @return - double, score of current state
      */
     public abstract double getGameScore(int playerId);
+
+    /**
+     * Returns the ordinal position of a player using getGameScore().
+     *
+     * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
+     * then this method should be overridden.
+     * This may also apply for games with important tie-breaking rules not visible in the raw score.
+     *
+     * @param playerId player ID
+     * @return The ordinal position of the player; 1 is 1st, 2 is 2nd and so on.
+     */
+    public int getOrdinalPosition(int playerId) {
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1;
+        double playerScore = getGameScore(playerId);
+        int ordinal = 1;
+        for (int i = 0, n = getNPlayers(); i < n; i++) {
+            if (getGameScore(i) > playerScore)
+                ordinal++;
+        }
+        if (ordinal == 1 && !isNotTerminal() && playerResults[playerId] != Utils.GameResult.WIN)
+            ordinal = 1 + (int) Arrays.stream(playerResults).filter(r -> r == WIN).count();
+        return ordinal;
+    }
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.

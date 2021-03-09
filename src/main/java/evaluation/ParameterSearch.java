@@ -1,10 +1,13 @@
 package evaluation;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.ITunableParameters;
-import evodef.*;
+import evodef.EvoAlg;
+import evodef.SearchSpace;
 import games.GameType;
-import ntbea.*;
+import ntbea.NTupleBanditEA;
+import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
@@ -16,7 +19,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,6 +47,7 @@ public class ParameterSearch {
                         "\t               one of mcts|rmhc|random|osla|<className>  \n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
                         "\t               with a no-argument constructor\n" +
+                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising. Defaults to Win.\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
                         "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
@@ -62,6 +70,7 @@ public class ParameterSearch {
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
+        String evalMethod = getArg(args, "eval", "Win");
 
         // Create the SearchSpace, and report some useful stuff to the console.
         ITPSearchSpace searchSpace;
@@ -105,8 +114,8 @@ public class ParameterSearch {
         int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
         boolean useThreeTuples = Arrays.asList(args).contains("useThreeTuples");
 
-        System.out.println(String.format("Search space consists of %d states and %d possible 2-Tuples%s",
-                searchSpaceSize, twoTupleSize, useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : ""));
+        System.out.printf("Search space consists of %d states and %d possible 2-Tuples%s%n",
+                searchSpaceSize, twoTupleSize, useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : "");
 
         for (int i = 0; i < searchSpace.nDims(); i++) {
             int finalI = i;
@@ -130,14 +139,24 @@ public class ParameterSearch {
             opponents.add(opponent);
         }
 
-        // TODO: At some later point we also need to allow different evaluation functions to be used. Win/Lose / Score / Ordinal position
-        // and then for Game tuning other items that measure how close the result is, etc.
+        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
+        if (evalMethod.equals("Win"))
+            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId].value;
+        if (evalMethod.equals("Score"))
+            evalFunction = AbstractGameState::getGameScore;
+        if (evalMethod.equals("Heuristic"))
+            evalFunction = AbstractGameState::getHeuristicScore;
+        if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
+            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
+        if (evalFunction == null)
+            throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
         // Initialise the GameEvaluator that will do all the heavy lifting
         GameEvaluator evaluator = new GameEvaluator(
                 game,
                 searchSpace,
                 nPlayers,
+                evalFunction,
                 opponents,
                 seed,
                 true
