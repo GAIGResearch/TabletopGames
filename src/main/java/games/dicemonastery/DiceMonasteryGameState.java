@@ -7,9 +7,11 @@ import core.components.Token;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
@@ -20,7 +22,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Map<Integer, Monk> allMonks = new HashMap<>();
     Map<Integer, ActionArea> monkLocations = new HashMap<>();
     List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
-    List<Map<Resource, Integer>> playerBids = new ArrayList<>();
+    Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
     int[] victoryPoints;
 
@@ -39,10 +41,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
         allMonks = new HashMap<>();
         monkLocations = new HashMap<>();
         playerTreasuries = new ArrayList<>();
-        playerBids = new ArrayList<>();
+        playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
             playerTreasuries.add(new HashMap<>());
-            playerBids.add(new HashMap<>());
         }
         nextRetirementReward = 0;
     }
@@ -99,18 +100,21 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (beer > totalBeer || mead > totalMead)
             throw new AssertionError(String.format("Cannot bid more beer or mead than you have %d of %d, %d of %d", beer, totalBeer, mead, totalMead));
 
+        playerBids.put(player, new HashMap<>());
         playerBids.get(player).put(Resource.BEER, beer);
         playerBids.get(player).put(Resource.MEAD, mead);
         return true;
     }
 
     public void executeBids() {
-        if (((DiceMonasteryTurnOrder) turnOrder).season != Season.SUMMER)
+        if (((DiceMonasteryTurnOrder) turnOrder).season != SUMMER)
             throw new AssertionError(String.format("Wrong season (%s) for Viking raids!", ((DiceMonasteryTurnOrder) turnOrder).season));
 
-        List<Integer> bidPerPlayer = playerBids.stream().map(
-                bid -> bid.getOrDefault(Resource.BEER, 0) + bid.getOrDefault(Resource.MEAD, 0) * 2
-        ).collect(toList());
+        List<Integer> bidPerPlayer = IntStream.range(0, getNPlayers()).map(player -> {
+                    Map<Resource, Integer> bid = playerBids.get(player);
+                    return bid.getOrDefault(Resource.BEER, 0) + bid.getOrDefault(Resource.MEAD, 0) * 2;
+                }
+        ).boxed().collect(toList());
 
         int lowestBid = bidPerPlayer.stream().min(comparingInt(Integer::intValue)).orElseThrow(() -> new AssertionError("Empty List?!"));
 
@@ -127,7 +131,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 Monk lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety))
                         .orElseThrow(() -> new AssertionError("No monks...?"));
                 moveMonk(lowestMonk.getComponentID(), DORMITORY, GRAVEYARD);
-                playerBids.get(player).clear();
+                playerBids.remove(player);
             } else {
                 // Gain VP
                 int vp = VIKING_REWARDS[bidPerPlayer.size() - 1][playerOrdinality.get(player)];
@@ -136,7 +140,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 // and then lose stuff in Bid
                 treasury.merge(Resource.BEER, -playerBids.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
                 treasury.merge(Resource.MEAD, -playerBids.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
-                playerBids.get(player).clear();
+                playerBids.remove(player);
             }
         }
     }
@@ -200,35 +204,39 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return dto.dominantPlayers;
     }
 
+    public boolean allBidsIn() {
+        return IntStream.range(0, getNPlayers()).allMatch(playerBids::containsKey);
+    }
+
     void winterHousekeeping() {
-         for (int player = 0; player < turnOrder.nPlayers(); player++) {
-             // for each player feed monks, and then discard perishables
-             List<Monk> monks = monksIn(null, player);
-             int requiredFood = monks.size();
-             requiredFood -= getResource(player, Resource.BERRIES, STOREROOM);
-             requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
-             if (requiredFood > 0) {
-                 int honeyEaten = Math.min(requiredFood, getResource(player, Resource.HONEY, STOREROOM));
-                 addResource(player, Resource.HONEY, -honeyEaten);
-                 requiredFood -= honeyEaten;
-             }
-             if (requiredFood > 0) {
-                 // monks starve
-                 addVP(-requiredFood, player);
-                 // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
-                 // TODO: Make this a player decision
-                 monks.stream()
-                         .filter(m -> m.getPiety() > 1)
-                         .sorted(comparingInt(Monk::getPiety))
-                         .limit(requiredFood)
-                         .forEach(Monk::demote);
-             }
-             // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
-             addResource(player, Resource.BREAD, -getResource(player, Resource.BREAD, STOREROOM));
-             addResource(player, Resource.BERRIES, -getResource(player, Resource.BERRIES, STOREROOM));
-             addResource(player, Resource.CALF_SKIN, -getResource(player, Resource.CALF_SKIN, STOREROOM));
-             int unharvestedWheat = getResource(player, Resource.GRAIN, MEADOW);
-             for (int i = 0; i < unharvestedWheat; i++)
+        for (int player = 0; player < turnOrder.nPlayers(); player++) {
+            // for each player feed monks, and then discard perishables
+            List<Monk> monks = monksIn(null, player);
+            int requiredFood = monks.size();
+            requiredFood -= getResource(player, Resource.BERRIES, STOREROOM);
+            requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
+            if (requiredFood > 0) {
+                int honeyEaten = Math.min(requiredFood, getResource(player, Resource.HONEY, STOREROOM));
+                addResource(player, Resource.HONEY, -honeyEaten);
+                requiredFood -= honeyEaten;
+            }
+            if (requiredFood > 0) {
+                // monks starve
+                addVP(-requiredFood, player);
+                // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
+                // TODO: Make this a player decision
+                monks.stream()
+                        .filter(m -> m.getPiety() > 1)
+                        .sorted(comparingInt(Monk::getPiety))
+                        .limit(requiredFood)
+                        .forEach(Monk::demote);
+            }
+            // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
+            addResource(player, Resource.BREAD, -getResource(player, Resource.BREAD, STOREROOM));
+            addResource(player, Resource.BERRIES, -getResource(player, Resource.BERRIES, STOREROOM));
+            addResource(player, Resource.CALF_SKIN, -getResource(player, Resource.CALF_SKIN, STOREROOM));
+            int unharvestedWheat = getResource(player, Resource.GRAIN, MEADOW);
+            for (int i = 0; i < unharvestedWheat; i++)
                  moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
          }
     }
@@ -256,6 +264,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     @Override
     protected DiceMonasteryGameState _copy(int playerId) {
         DiceMonasteryGameState retValue = new DiceMonasteryGameState(gameParameters.copy(), getNPlayers());
+        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         for (ActionArea a : actionAreas.keySet()) {
             retValue.actionAreas.put(a, actionAreas.get(a).copy());
         }
@@ -268,14 +277,21 @@ public class DiceMonasteryGameState extends AbstractGameState {
         retValue.monkLocations = new HashMap<>(monkLocations);
 
         retValue.playerTreasuries = new ArrayList<>();
-        retValue.playerBids = new ArrayList<>();
+        retValue.playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
             retValue.playerTreasuries.add(new HashMap<>(playerTreasuries.get(p)));
-            retValue.playerBids.add(new HashMap<>(playerBids.get(p)));
+            if (playerBids.containsKey(p))
+                retValue.playerBids.put(p, new HashMap<>(playerBids.get(p)));
         }
         retValue.nextRetirementReward = nextRetirementReward;
 
         retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
+
+        if (playerId != -1 && dmto.getSeason() == SUMMER && !allBidsIn()) {
+            // we are in the middle of obtaining all Bids. This is hidden information.
+            // So we blank out all current bids (which will force Turn Order to go through them all)
+            retValue.playerBids = new HashMap<>();
+        }
         return retValue;
     }
 
@@ -286,10 +302,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return allMonks.values().stream()
-                .filter(m -> m.getOwnerId() == playerId)
-                .mapToInt(Monk::getPiety)
-                .sum() + getVictoryPoints(playerId);
+        return playerTreasuries.get(playerId).getOrDefault(Resource.BEER, 0) +
+                playerTreasuries.get(playerId).getOrDefault(Resource.MEAD, 0) * 2 +
+                getVictoryPoints(playerId);
     }
 
     @Override

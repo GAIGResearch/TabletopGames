@@ -106,10 +106,11 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 break;
             case SUMMER:
                 turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
-                if (turnOwner == abbot) {
+                if (state.allBidsIn()) {
                     // we have completed SUMMER bidding
                     state.executeBids();
                     season = season.next();
+                    turnOwner = abbot;
                 }
                 break;
             case WINTER:

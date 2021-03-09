@@ -495,7 +495,7 @@ public class CoreGameLoop {
     }
 
     @Test
-    public void uniqueSummerBidsForAllPlayer() {
+    public void summerBidsUniqueForAllPlayers() {
         advanceToSummer();
         emptyAllStores();
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
@@ -536,6 +536,86 @@ public class CoreGameLoop {
         assertEquals(startMonks[1], state.monksIn(DORMITORY, 1).size());
         assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
         assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
-
     }
+
+    @Test
+    public void summerBidTiesForFirstAndThird() {
+        advanceToSummer();
+        emptyAllStores();
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            state.addResource(p, BEER, 10);
+            state.addResource(p, MEAD, 10);
+        }
+        int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
+        int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
+        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(0, 1));
+        fm.next(state, new SummerBid(0, 1));
+
+        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(startVP[0], state.getVictoryPoints(0));
+        assertEquals(startVP[1], state.getVictoryPoints(1));
+        assertEquals(startVP[2] + 6, state.getVictoryPoints(2));
+        assertEquals(startVP[3] + 6, state.getVictoryPoints(3));
+
+        // Then check that
+        assertEquals(10, state.getResource(0, BEER, STOREROOM));
+        assertEquals(10, state.getResource(0, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(1, BEER, STOREROOM));
+        assertEquals(10, state.getResource(1, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(2, BEER, STOREROOM));
+        assertEquals(9, state.getResource(2, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(3, BEER, STOREROOM));
+        assertEquals(9, state.getResource(3, MEAD, STOREROOM));
+
+        assertEquals(startMonks[0] - 1, state.monksIn(DORMITORY, 0).size());
+        assertEquals(startMonks[1] - 1, state.monksIn(DORMITORY, 1).size());
+        assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
+        assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
+    }
+
+    @Test
+    public void summerBidTiesForSecond() {
+        advanceToSummer();
+        emptyAllStores();
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            state.addResource(p, BEER, 10);
+            state.addResource(p, MEAD, 10);
+        }
+        int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
+        int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
+        fm.next(state, new SummerBid(2, 0));
+        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(0, 2));
+        fm.next(state, new SummerBid(0, 1));
+
+        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(startVP[0] + 4, state.getVictoryPoints(0));
+        assertEquals(startVP[1], state.getVictoryPoints(1));
+        assertEquals(startVP[2] + 6, state.getVictoryPoints(2));
+        assertEquals(startVP[3] + 4, state.getVictoryPoints(3));
+
+        // Then check that
+        assertEquals(8, state.getResource(0, BEER, STOREROOM));
+        assertEquals(10, state.getResource(0, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(1, BEER, STOREROOM));
+        assertEquals(10, state.getResource(1, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(2, BEER, STOREROOM));
+        assertEquals(8, state.getResource(2, MEAD, STOREROOM));
+        assertEquals(10, state.getResource(3, BEER, STOREROOM));
+        assertEquals(9, state.getResource(3, MEAD, STOREROOM));
+
+        assertEquals(startMonks[0], state.monksIn(DORMITORY, 0).size());
+        assertEquals(startMonks[1] - 1, state.monksIn(DORMITORY, 1).size());
+        assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
+        assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
+    }
+
 }
