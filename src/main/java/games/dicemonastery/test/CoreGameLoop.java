@@ -44,7 +44,7 @@ public class CoreGameLoop {
             assertEquals(0, state.getResource(p, VELLUM, STOREROOM));
             assertEquals(0, state.getResource(p, CANDLE, STOREROOM));
 
-            assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.getGameScore(p), 0.01);
+            assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.monksIn(DORMITORY, p).stream().mapToInt(Monk::getPiety).sum(), 0.01);
             assertEquals(6, state.monksIn(DORMITORY, p).size());
         }
         assertEquals(0, state.getCurrentPlayer());
@@ -81,7 +81,7 @@ public class CoreGameLoop {
         assertEquals(PLACE_MONKS, state.getGamePhase());
         assertEquals(23, state.monksIn(DORMITORY, -1).size());
         assertEquals(5, state.monksIn(DORMITORY, 0).size());
-        assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.getGameScore(0), 0.01);
+        assertEquals(4 + 3 + 2 + 2 + 1 + 1, state.monksIn(null, 0).stream().mapToInt(Monk::getPiety).sum(), 0.01);
         assertEquals(1, state.monksIn(MEADOW, -1).size());
         assertEquals(1, state.monksIn(MEADOW, 0).size());
 
@@ -419,12 +419,18 @@ public class CoreGameLoop {
         } while (turnOrder.getSeason() != WINTER);
 
         assertEquals(0, state.getCurrentPlayer());
-        state.monksIn(DORMITORY, 0).forEach(state::retireMonk);
-        assertEquals(0, state.monksIn(DORMITORY, 0).size());
-        fm.next(state, new DoNothing()); // don't promote anyone
-        assertEquals(1, state.monksIn(DORMITORY, 0).size());
-        assertEquals(1, state.monksIn(DORMITORY, 0).get(0).getPiety());
+        state.monksIn(DORMITORY, 1).forEach(state::retireMonk);  // retire all of P1's monks so that their turn will be skipped, and they gain a novice
+        assertEquals(0, state.monksIn(DORMITORY, 1).size());
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new HireNovice(0), fm.computeAvailableActions(state).get(0));
+        fm.next(state, new HireNovice(0));
+        assertEquals(2, state.getCurrentPlayer());
+        assertEquals(1, state.monksIn(DORMITORY, 1).size());
+        assertEquals(1, state.monksIn(DORMITORY, 1).get(0).getPiety());
     }
+
 
     private void advanceToSummer() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();

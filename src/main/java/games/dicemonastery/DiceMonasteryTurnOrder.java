@@ -114,10 +114,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 }
                 break;
             case WINTER:
-                if (state.monksIn(null, turnOwner).size() == 0) {
-                    // get a free novice if you ever run out of monks
-                    state.createMonk(1, turnOwner); // goes into the DORMITORY
-                }
                 turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
                 // and then increment year
                 if (turnOwner == abbot)

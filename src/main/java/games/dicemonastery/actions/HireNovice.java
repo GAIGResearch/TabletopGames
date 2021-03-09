@@ -1,15 +1,24 @@
 package games.dicemonastery.actions;
 
-import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
 
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.SHILLINGS;
 
 public class HireNovice extends UseMonk {
 
+    /**
+     * This is used for hiring a free monk if you run out of them; generally the
+     * argument-less constructor is used with the default AP cost
+     *
+     * @param ap Action Points
+     */
+    public HireNovice(int ap) {
+        super(ap);
+    }
+
     public HireNovice() {
-        super(3);
+        this(3);
     }
 
     @Override
@@ -27,12 +36,12 @@ public class HireNovice extends UseMonk {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof HireNovice;
+        return obj instanceof HireNovice && ((HireNovice) obj).actionPoints == actionPoints;
     }
 
     @Override
     public int hashCode() {
-        return 309823;
+        return 309823 + actionPoints * 37;
     }
 
     @Override

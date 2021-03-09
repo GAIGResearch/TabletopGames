@@ -193,11 +193,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                 return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
                         .distinct().collect(toList());
             case WINTER:
-                return state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()
+                List<AbstractAction> retValue = state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()
                         .mapToInt(Monk::getPiety)
                         .distinct()
                         .mapToObj(piety -> new PromoteMonk(piety, DORMITORY, false))
                         .collect(toList());
+                if (retValue.isEmpty())
+                    retValue.add(new HireNovice(0)); // hire a free novice if no monks left (careless!)
+                return retValue;
         }
         throw new AssertionError("Not yet implemented combination " + turnOrder.season + " : " + state.getGamePhase());
     }

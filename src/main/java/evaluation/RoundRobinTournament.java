@@ -46,6 +46,8 @@ public class RoundRobinTournament extends AbstractTournament {
             File dir = new File(playerDirectory);
             if (dir.exists() && dir.isDirectory()) {
                 for (String fileName : dir.list()) {
+                    if (!fileName.endsWith(".json"))
+                        continue;
                     System.out.println(fileName);
                     AbstractPlayer player = PlayerFactory.createPlayer(dir.getAbsolutePath() + File.separator + fileName);
                     agents.add(player);
