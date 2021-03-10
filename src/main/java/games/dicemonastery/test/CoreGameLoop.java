@@ -134,6 +134,7 @@ public class CoreGameLoop {
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
+        assertEquals(0, state.monksIn(DORMITORY, -1).size());
 
         for (Monk m : state.monksIn(WORKSHOP, -1)) {
             state.moveMonk(m.getComponentID(), WORKSHOP, DORMITORY);
@@ -141,14 +142,18 @@ public class CoreGameLoop {
         for (Monk m : state.monksIn(CHAPEL, -1)) {
             state.moveMonk(m.getComponentID(), CHAPEL, DORMITORY);
         }
+        Set<ActionArea> areasWithMonks = Arrays.stream(ActionArea.values())
+                .filter(a -> a != RETIRED && a != GRAVEYARD && a != DORMITORY)
+                .filter(a -> state.monksIn(a, -1).size() > 0).collect(toSet());
+        assertTrue(areasWithMonks.size() <= 4);
         // Now have no monks in CHAPEL or WORKSHOP
         Set<ActionArea> areasProcessed = new HashSet<>();
         do {
             areasProcessed.add(turnOrder.getCurrentArea());
             fm.next(state, fm.computeAvailableActions(state).get(0));
-        }while (state.monksIn(DORMITORY, -1).size() < 24);
+        } while (state.monksIn(DORMITORY, -1).size() < 24);
 
-        assertEquals(4, areasProcessed.size());
+        assertEquals(areasWithMonks, areasProcessed);
         assertFalse(areasProcessed.contains(CHAPEL));
         assertFalse(areasProcessed.contains(WORKSHOP));
 
@@ -332,13 +337,13 @@ public class CoreGameLoop {
     private void advanceToWinterRemoveAllFoodAndThenMoveToWinter() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-
+        fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have at least one in the CHAPEL
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (!(turnOrder.getSeason() == AUTUMN && turnOrder.getCurrentArea() == CHAPEL && state.monksIn(CHAPEL, -1).size() == 1));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
-
+        assertEquals(1, turnOrder.getYear());
 
         for (int player = 0; player < turnOrder.nPlayers(); player++) {
             // clear out all food supplies for players 1 and 2
@@ -355,6 +360,7 @@ public class CoreGameLoop {
     public void unfedMonksDeclineInPiety() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+        assertEquals(1, turnOrder.getYear());
         advanceToWinterRemoveAllFoodAndThenMoveToWinter();
 
         state.addVP(10 - state.getVictoryPoints(0), 0);
@@ -406,6 +412,38 @@ public class CoreGameLoop {
         assertEquals(20, state.getResource(0, HONEY, STOREROOM));
         assertEquals(20, state.getResource(0, BEER, STOREROOM));
         assertEquals(20, state.getResource(0, GRAIN, STOREROOM));
+    }
+
+    @Test
+    public void lackOfAnyMonksWillSkipPlaceMonksPhaseForAPlayer() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        state.monksIn(DORMITORY, 1).forEach(state::retireMonk);  // retire all of P1's monks so that their turn will be skipped
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // P0 PlaceMonk
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // P0 ChooseMonk
+
+        assertEquals(2, state.getCurrentPlayer());
+        assertEquals(0, state.monksIn(null, 1).size());
+    }
+
+    @Test
+    public void lackOfMonksAtEndOfSummerCorrectlyAccountedForInTurnOrderInAutumn() {
+        // if the Abbot loses their last monk to the vikings in summer, then we should skip directly to the next player in Autumn placing phase
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getSeason() != SUMMER);
+        // repeat until all of Player 0's monks are back in the dormitory
+        // before we do the Bidding we remove all of P0's monks
+        state.monksIn(DORMITORY, 0).forEach(state::retireMonk);
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getSeason() != AUTUMN);
+        assertEquals(1, state.getCurrentPlayer());
     }
 
     @Test

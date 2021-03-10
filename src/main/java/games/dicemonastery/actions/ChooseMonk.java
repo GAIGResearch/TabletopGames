@@ -16,7 +16,7 @@ public class ChooseMonk extends AbstractAction {
     public final int piety;
     public final ActionArea destination;
 
-    ChooseMonk(int piety, ActionArea destination) {
+    public ChooseMonk(int piety, ActionArea destination) {
         this.piety = piety;
         this.destination = destination;
     }

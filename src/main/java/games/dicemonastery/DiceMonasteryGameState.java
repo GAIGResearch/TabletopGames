@@ -128,9 +128,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
             Map<Resource, Integer> treasury = playerTreasuries.get(player);
             if (bidPerPlayer.get(player) == lowestBid) {
                 // this takes precedence over ordinality - no VP, and lose a monk
-                Monk lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety))
-                        .orElseThrow(() -> new AssertionError("No monks...?"));
-                moveMonk(lowestMonk.getComponentID(), DORMITORY, GRAVEYARD);
+                Optional<Monk> lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety));
+                lowestMonk.ifPresent(monk -> moveMonk(monk.getComponentID(), DORMITORY, GRAVEYARD));
                 playerBids.remove(player);
             } else {
                 // Gain VP

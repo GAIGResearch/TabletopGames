@@ -500,12 +500,13 @@ public class ActionTests {
         int startingVP = state.getVictoryPoints(1);
         int startingMonks = state.monksIn(null, 1).size();
         List<Monk> monks = state.monksIn(null, 1);
+        int retiredMonks = state.monksIn(RETIRED, -1).size();
         promoteToRetirement(monks.get(0));
-        assertEquals(startingVP + 6, state.getVictoryPoints(1));
+        assertEquals(startingVP + 6 - retiredMonks, state.getVictoryPoints(1));
         assertEquals(startingMonks - 1, state.monksIn(null, 1).size());
 
         promoteToRetirement(monks.get(1));
-        assertEquals(startingVP + 11, state.getVictoryPoints(1));
+        assertEquals(startingVP + 11 - retiredMonks, state.getVictoryPoints(1));
         assertEquals(startingMonks - 2, state.monksIn(null, 1).size());
     }
 

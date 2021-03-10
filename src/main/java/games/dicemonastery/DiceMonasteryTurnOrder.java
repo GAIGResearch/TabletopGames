@@ -110,7 +110,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                     // we have completed SUMMER bidding
                     state.executeBids();
                     season = season.next();
-                    turnOwner = abbot;
+                    turnOwner = firstPlayerWithMonks(state);
                 }
                 break;
             case WINTER:
@@ -135,7 +135,18 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             ((DiceMonasteryGameState) state).endGame();
         }
         abbot = (abbot + 1 + nPlayers) % nPlayers;
-        turnOwner = abbot;
+        turnOwner = firstPlayerWithMonks((DiceMonasteryGameState) state);
+    }
+
+    private int firstPlayerWithMonks(DiceMonasteryGameState state) {
+        for (int p = 0; p < nPlayers; p++) {
+            int player = (abbot + p + nPlayers) % nPlayers;
+            if (!state.monksIn(DORMITORY, player).isEmpty())
+                return player;
+        }
+        // should only reach here if NO player has any monks left! So we skip the entire season!
+        season.next();
+        return abbot;
     }
 
     private int actionPoints(DiceMonasteryGameState state, ActionArea region, int player) {
