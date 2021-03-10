@@ -41,7 +41,8 @@ public class DiceMonasteryConstants {
     }
 
     public enum Resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYERS, PIGMENT, INK, CALF_SKIN, VELLUM, BEER, MEAD, CANDLE, BERRIES
+        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, DEVOTION, PIGMENT, INK, CALF_SKIN, VELLUM,
+        BEER, PROTO_BEER_1, PROTO_BEER_2, MEAD, PROTO_MEAD_1, PROTO_MEAD_2, CANDLE, BERRIES
     }
 
     public enum Phase implements IGamePhase {
@@ -68,7 +69,7 @@ public class DiceMonasteryConstants {
 
     }
 
-    public final static int[] RETIREMENT_REWARDS = {6, 5, 4, 3, 2, 1};
+    public final static int[] RETIREMENT_REWARDS = {5, 4, 4, 3, 3, 2, 2, 2};
 
     // rows are number of players; columns are ordinal position in bidding
     public final static int[][] VIKING_REWARDS = {

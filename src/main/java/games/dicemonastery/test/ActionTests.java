@@ -17,8 +17,7 @@ import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 public class ActionTests {
@@ -431,15 +430,37 @@ public class ActionTests {
                 .collect(toSet());
 
         assertTrue(pietyOfMonks.size() > 0);
-        assertEquals(1 + pietyOfMonks.size(), fm.computeAvailableActions(state).size());
+        int player = state.getCurrentPlayer();
+        int vp = state.getVictoryPoints(player);
+
+        // NEW RULE (v1.8) with all monks auto-promoted
+        Map<Integer, Integer> startingPieties = state.monksIn(CHAPEL, player).stream()
+                .collect(toMap(Monk::getComponentID, Monk::getPiety));
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new PromoteAllMonks(CHAPEL)));
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // Promote All Monks
+        List<Monk> allMonks = state.monksIn(null, player);
+        for (int id : startingPieties.keySet()) {
+            if (startingPieties.get(id) == 6) {
+                // retired
+                assertTrue(state.monksIn(RETIRED, player).stream().anyMatch(m -> m.getComponentID() == id));
+            } else {
+                assertEquals(1 + startingPieties.get(id),
+                        allMonks.stream().filter(m -> m.getComponentID() == id).collect(toList()).get(0).getPiety());
+            }
+        }
+
+        // then check that all monks have up-pipped
+
+
+/*   OLD RULE (v1.7)    assertEquals(1 + pietyOfMonks.size(), fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         for (int piety : pietyOfMonks) {
             assertTrue(fm.computeAvailableActions(state).contains(new PromoteMonk(piety, CHAPEL, false)));
         }
-
-        int player = state.getCurrentPlayer();
-        int vp = state.getVictoryPoints(player);
-        fm.next(state, fm.computeAvailableActions(state).get(1));
+        fm.next(state, fm.computeAvailableActions(state).get(1)); // Promote a monk
+ */
+        // rewards unchanged under either rule set
         assertEquals(2, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new GainVictoryPoints(1, true)));
         fm.next(state, new GainVictoryPoints(1, true));
@@ -501,12 +522,14 @@ public class ActionTests {
         int startingMonks = state.monksIn(null, 1).size();
         List<Monk> monks = state.monksIn(null, 1);
         int retiredMonks = state.monksIn(RETIRED, -1).size();
+        int expectedReward = DiceMonasteryConstants.RETIREMENT_REWARDS[retiredMonks];
         promoteToRetirement(monks.get(0));
-        assertEquals(startingVP + 6 - retiredMonks, state.getVictoryPoints(1));
+        assertEquals(startingVP + expectedReward, state.getVictoryPoints(1));
         assertEquals(startingMonks - 1, state.monksIn(null, 1).size());
 
+        int nextExpectedReward = DiceMonasteryConstants.RETIREMENT_REWARDS[retiredMonks + 1];
         promoteToRetirement(monks.get(1));
-        assertEquals(startingVP + 11 - retiredMonks, state.getVictoryPoints(1));
+        assertEquals(startingVP + expectedReward + nextExpectedReward, state.getVictoryPoints(1));
         assertEquals(startingMonks - 2, state.monksIn(null, 1).size());
     }
 

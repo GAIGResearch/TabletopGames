@@ -38,7 +38,7 @@ public class CoreGameLoop {
             assertEquals(2, state.getResource(p, HONEY, STOREROOM));
             assertEquals(2, state.getResource(p, BREAD, STOREROOM));
             assertEquals(6, state.getResource(p, SHILLINGS, STOREROOM));
-            assertEquals(1, state.getResource(p, PRAYERS, STOREROOM));
+            assertEquals(1, state.getResource(p, DEVOTION, STOREROOM));
             assertEquals(2, state.getResource(p, SKEP, STOREROOM));
             assertEquals(0, state.getResource(p, CALF_SKIN, STOREROOM));
             assertEquals(0, state.getResource(p, VELLUM, STOREROOM));
@@ -255,7 +255,7 @@ public class CoreGameLoop {
             } else if (state.currentActionInProgress() instanceof VisitMarket) {
                 playerSwitchExpected = turnOrder.getActionPointsLeft() == 0;
             } else {
-                playerSwitchExpected = actionChosen instanceof Pass ||
+                playerSwitchExpected = actionChosen instanceof Pass || actionChosen instanceof PromoteAllMonks ||
                         actionChosen instanceof PromoteMonk || actionChosen instanceof GainVictoryPoints ||
                         ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
             }
@@ -309,7 +309,7 @@ public class CoreGameLoop {
     public void foodIsRemovedToFeedMonksAtYearEnd() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        advanceToWinterRemoveAllFoodAndThenMoveToWinter();
+        advanceToJustBeforeStartofWinterandRemoveFood();
 
         int monksP2 = state.monksIn(null, 2).size();
 
@@ -334,13 +334,19 @@ public class CoreGameLoop {
         assertEquals(10 + 3 - monksP2, state.getResource(2, HONEY, STOREROOM));
     }
 
-    private void advanceToWinterRemoveAllFoodAndThenMoveToWinter() {
+    private void advanceToJustBeforeStartofWinterandRemoveFood() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have at least one in the CHAPEL
+
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
-        } while (!(turnOrder.getSeason() == AUTUMN && turnOrder.getCurrentArea() == CHAPEL && state.monksIn(CHAPEL, -1).size() == 1));
+        } while (turnOrder.getSeason() != AUTUMN);
+        fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have at least one in the CHAPEL in the AUTUMN
+        do {
+            AbstractAction action = rnd.getAction(state, fm.computeAvailableActions(state));
+    //        System.out.printf("Player: %d, %s%n", state.getCurrentPlayer(), action);
+            fm.next(state, action);
+        } while (!(turnOrder.getSeason() == AUTUMN && turnOrder.getCurrentArea() == CHAPEL));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
         assertEquals(1, turnOrder.getYear());
@@ -361,25 +367,27 @@ public class CoreGameLoop {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         assertEquals(1, turnOrder.getYear());
-        advanceToWinterRemoveAllFoodAndThenMoveToWinter();
+        advanceToJustBeforeStartofWinterandRemoveFood();
 
-        state.addVP(10 - state.getVictoryPoints(0), 0);
+        state.addVP(10 - state.getVictoryPoints(1), 1);
 
-        state.createMonk(1, 0);  // ensure we have at least one Piety 1 monk
-        List<Monk> monksP0 = state.monksIn(null, 0);
-        int totalPips = monksP0.stream().mapToInt(Monk::getPiety).sum();
-        int totalOners = (int) monksP0.stream().filter(m -> m.getPiety() == 1).count();
+        state.createMonk(1, 1);  // ensure we have at least one Piety 1 monk
+        List<Monk> monksP1 = state.monksIn(null, 1);
+        int totalPips = monksP1.stream().mapToInt(Monk::getPiety).sum();
+        int totalOners = (int) monksP1.stream().filter(m -> m.getPiety() == 1).count();
         assertTrue(totalOners > 0);
+        int monksInChapelWhoWillPipUp = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() < 6).count();
+        int pietyOneMonksInChapel =  (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
+        totalOners -= pietyOneMonksInChapel; // they won't be oners when they get to feeding time
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last few actions of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
         assertEquals(WINTER, turnOrder.getSeason());
 
-        int newPips = state.monksIn(null, 0).stream().mapToInt(Monk::getPiety).sum();
-
-        assertEquals(totalPips - monksP0.size() + totalOners, newPips);
-        assertEquals(10 - monksP0.size(), state.getVictoryPoints(0));
+        int newPips = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).sum();
+        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp, newPips);
+        assertEquals(10 - monksP1.size(), state.getVictoryPoints(1));
     }
 
     @Test
@@ -393,7 +401,7 @@ public class CoreGameLoop {
     public void allSurplusPerishablesAreRemovedAtYearEnd() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        advanceToWinterRemoveAllFoodAndThenMoveToWinter();
+        advanceToJustBeforeStartofWinterandRemoveFood();
 
         state.addResource(0, BERRIES, 20);
         state.addResource(0, BREAD, 20);
@@ -450,7 +458,7 @@ public class CoreGameLoop {
     public void gainAFreeNoviceIfNoMonksLeftAtEndOfTurn() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        advanceToWinterRemoveAllFoodAndThenMoveToWinter();
+        advanceToJustBeforeStartofWinterandRemoveFood();
 
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER

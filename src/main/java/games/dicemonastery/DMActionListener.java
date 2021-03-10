@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IActionAttribute;
+import core.interfaces.IGameAttribute;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 
@@ -29,7 +29,7 @@ public class DMActionListener implements IGameListener {
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
             Map<String, Object> data = Arrays.stream(DiceMonasteryActionAttributes.values())
-                    .collect(Collectors.toMap(IActionAttribute::name, attr -> attr.get(state, action)));
+                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, action)));
             logger.record(data);
         } else if (type == CoreConstants.GameEvents.GAME_SEQUENCE_OVER) {
             logger.processDataAndFinish();

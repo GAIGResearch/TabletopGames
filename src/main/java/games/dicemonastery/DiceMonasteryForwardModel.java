@@ -55,7 +55,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
             state.addResource(p, BREAD, 2);
 
             state.addResource(p, SHILLINGS, 6);
-            state.addResource(p, PRAYERS, 1);
+            state.addResource(p, DEVOTION, 1);
         }
 
         state.setGamePhase(Phase.PLACE_MONKS);
@@ -167,16 +167,22 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                     state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
                                 retValue.add(HIRE_NOVICE);
                             // TODO: "Go on pilgrimage" not yet implemented
+                            // TODO: Buying Treasures not yet implemented
                             break;
                         case LIBRARY:
                             // TODO: "Write Text" not yet implemented
                             break;
                         case CHAPEL:
-                            retValue.addAll(state.monksIn(CHAPEL, state.getCurrentPlayer()).stream()
+                            // No actions required....we just auto-pip up every Monk in the Chapel
+/*                           This was the old code when the rule said that you could pip up one monk. Now they all pip up!
+                             Left as cruft in case we want to tune this.
+                              retValue.addAll(state.monksIn(CHAPEL, state.getCurrentPlayer()).stream()
                                     .mapToInt(Monk::getPiety)
                                     .distinct()
                                     .mapToObj(piety -> new PromoteMonk(piety, CHAPEL, false))
-                                    .collect(toList()));
+                                    .collect(toList())); */
+                            retValue.remove(0); // remove Pass
+                            retValue.add(new PromoteAllMonks(CHAPEL));
                             break;
                         default:
                             throw new AssertionError("Unknown area : " + turnOrder.currentAreaBeingExecuted);

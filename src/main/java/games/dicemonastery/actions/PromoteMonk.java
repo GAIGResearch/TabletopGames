@@ -38,7 +38,7 @@ public class PromoteMonk extends AbstractAction {
         if (optMonk.isPresent()) {
             optMonk.get().promote(state);
         } else {
-            throw new AssertionError(String.format("No monk with piety level %d for player %d in Chapel", pietyLevelToPromote, state.getCurrentPlayer()));
+            throw new AssertionError(String.format("No monk with piety level %d for player %d in %s", pietyLevelToPromote, state.getCurrentPlayer(), location));
         }
         return true;
     }

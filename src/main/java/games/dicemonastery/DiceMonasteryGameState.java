@@ -11,10 +11,9 @@ import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
+import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
-
 
 public class DiceMonasteryGameState extends AbstractGameState {
 

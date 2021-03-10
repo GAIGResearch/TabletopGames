@@ -2,12 +2,12 @@ package games.dicemonastery;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IActionAttribute;
+import core.interfaces.IGameAttribute;
 import games.dicemonastery.actions.*;
 
 import java.util.function.BiFunction;
 
-public enum DiceMonasteryActionAttributes implements IActionAttribute<Object> {
+public enum DiceMonasteryActionAttributes implements IGameAttribute {
 
     GAME_ID((s, a) -> s.getGameID()),
     SEASON((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason()),
@@ -45,6 +45,12 @@ public enum DiceMonasteryActionAttributes implements IActionAttribute<Object> {
         if (a instanceof PromoteMonk) return ((PromoteMonk) a).areaReward;
         if (a instanceof GainVictoryPoints) return  ((GainVictoryPoints) a).asReward;
         return false;
+    }),
+    BID_VALUE((s, a) -> {
+       if (a == null) return 0;
+       if (a instanceof SummerBid)
+           return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
+       return 0;
     }),
     ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder)s.getTurnOrder()).getActionPointsLeft())
     ;
