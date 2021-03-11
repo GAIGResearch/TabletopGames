@@ -1,11 +1,9 @@
 package games.dicemonastery.actions;
 
-import games.dicemonastery.DiceMonasteryConstants;
-
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
-public class BegForAlms extends MoveCube {
+public class BegForAlms extends MoveCubes {
 
     public BegForAlms() {
         super(1, SHILLINGS, SUPPLY, STOREROOM);

@@ -1,11 +1,9 @@
 package games.dicemonastery.actions;
 
-import games.dicemonastery.DiceMonasteryConstants;
-
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 
-public class WeaveSkep extends MoveCube{
+public class WeaveSkep extends MoveCubes {
 
     public WeaveSkep(){
         super(1, Resource.SKEP, SUPPLY, STOREROOM);

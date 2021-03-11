@@ -117,7 +117,7 @@ public class ActionTests {
         state.useAP(-1);
         (new HarvestWheat()).execute(state);
         assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
-        assertEquals(3, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+        assertEquals(4, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
     }
 
     @Test
@@ -223,7 +223,10 @@ public class ActionTests {
         // Has 2 Grain in STOREROOM at setup
         (new BrewBeer()).execute(state);
         assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
-        assertEquals(1, state.getResource(state.getCurrentPlayer(), BEER, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), PROTO_BEER_1, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PROTO_BEER_2, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), BEER, STOREROOM));
+
     }
 
     @Test
@@ -232,7 +235,9 @@ public class ActionTests {
         // Has 2 Honey in STOREROOM at setup
         (new BrewMead()).execute(state);
         assertEquals(1, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
-        assertEquals(1, state.getResource(state.getCurrentPlayer(), MEAD, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), PROTO_MEAD_1, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PROTO_MEAD_2, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), MEAD, STOREROOM));
     }
 
 

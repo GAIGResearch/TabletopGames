@@ -14,7 +14,7 @@ public class BrewBeer extends UseMonk {
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
         state.moveCube(state.getCurrentPlayer(), Resource.GRAIN, STOREROOM, SUPPLY);
-        state.moveCube(state.getCurrentPlayer(), Resource.BEER, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), Resource.PROTO_BEER_1, SUPPLY, STOREROOM);
         return true;
     }
 

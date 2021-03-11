@@ -2,6 +2,7 @@ package games.dicemonastery.test;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
@@ -178,6 +179,73 @@ public class CoreGameLoop {
     }
 
     @Test
+    public void springHousekeepingFermentsAlcohol() {
+        // we set up stocks of ProtoBeer and Mead, and check they move as expected
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+        state.addResource(0, PROTO_BEER_1, 1);
+        state.addResource(1, PROTO_BEER_2, 2);
+        state.addResource(2, PROTO_MEAD_1, 3);
+        state.addResource(3, PROTO_MEAD_2, 4);
+        fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have one monk at least in the CHAPEL, so that we can stop before Housekeeping
+        do {
+            List<AbstractAction> available = fm.computeAvailableActions(state);
+            fm.next(state, rnd.getAction(state, available));
+        } while (state.monksIn(DORMITORY, -1).size() > 1);
+        // This should leave us with one monk left in the Dormitory
+
+        do {
+            List<AbstractAction> available = fm.computeAvailableActions(state);
+            fm.next(state, rnd.getAction(state, available));
+        } while (!state.monksIn(LIBRARY, -1).isEmpty()  || !state.monksIn(GATEHOUSE, -1).isEmpty());
+        // This should leave us with just the CHAPEL to process, and that has no mechanism to gain Resources
+        // so we can now track what resources we have at the end of Spring
+
+        assertEquals(SPRING, turnOrder.getSeason());
+        List<Map<Resource, Integer>> springResources = new ArrayList<>();
+        for (int player = 0; player < 4; player++) {
+            springResources.add(getResourcesFor(state, player));
+        }
+
+        // Now advance into Summer
+        do {
+            List<AbstractAction> available = fm.computeAvailableActions(state);
+            fm.next(state, rnd.getAction(state, available));
+        } while (turnOrder.getSeason() != SUMMER);
+
+        List<Map<Resource, Integer>> summerResources = new ArrayList<>();
+        for (int player = 0; player < 4; player++) {
+            summerResources.add(getResourcesFor(state, player));
+        }
+
+        List<Resource> nonAlcoholicResources = Arrays.stream(Resource.values())
+                .filter(r -> !r.name().contains("BEER") && !r.name().contains("MEAD"))
+                .collect(toList());
+        for (int player = 0; player < 4; player++) {
+        //    System.out.println("Player : " + player);
+            Map<Resource, Integer> spring = springResources.get(player);
+            Map<Resource, Integer> summer = summerResources.get(player);
+            for (Resource r : nonAlcoholicResources) {
+         //       System.out.println("Resource : " + r);
+                assertEquals(spring.get(r), summer.get(r));
+            }
+            assertEquals(spring.get(BEER) + spring.get(PROTO_BEER_2), summer.get(BEER).intValue());
+            assertEquals(spring.get(PROTO_BEER_1).intValue(), summer.get(PROTO_BEER_2).intValue());
+            assertEquals(spring.get(MEAD) + spring.get(PROTO_MEAD_2), summer.get(MEAD).intValue());
+            assertEquals(spring.get(PROTO_MEAD_1).intValue(), summer.get(PROTO_MEAD_2).intValue());
+            assertEquals(0, summer.get(PROTO_MEAD_1).intValue());
+            assertEquals(0, summer.get(PROTO_BEER_1).intValue());
+        }
+
+    }
+
+    private Map<Resource, Integer> getResourcesFor(DiceMonasteryGameState state, int player) {
+        return Arrays.stream(Resource.values())
+                .collect(toMap(r -> r, r -> state.getResource(player, r, STOREROOM)));
+    }
+
+
+    @Test
     public void gameEndsAfterThreeYears() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
@@ -187,7 +255,7 @@ public class CoreGameLoop {
 
         assertEquals(4, turnOrder.getRoundCounter());
         assertEquals(SPRING, turnOrder.getSeason());
-        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch( r -> r == Utils.GameResult.GAME_ONGOING));
+        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == Utils.GameResult.GAME_ONGOING));
     }
 
     @Test
@@ -408,6 +476,8 @@ public class CoreGameLoop {
         state.addResource(0, HONEY, 20);
         state.addResource(0, CALF_SKIN, 20 - state.getResource(0, CALF_SKIN, STOREROOM));
         state.addResource(0, BEER, 20 - state.getResource(0, BEER, STOREROOM));
+        state.addResource(0, PROTO_BEER_1,  - state.getResource(0, PROTO_BEER_1, STOREROOM));
+        state.addResource(0, PROTO_BEER_2,  - state.getResource(0, PROTO_BEER_2, STOREROOM));
         state.addResource(0, GRAIN, 20 - state.getResource(0, GRAIN, STOREROOM));
 
         do {
@@ -436,8 +506,8 @@ public class CoreGameLoop {
     }
 
     @Test
-    public void lackOfMonksAtEndOfSummerCorrectlyAccountedForInTurnOrderInAutumn() {
-        // if the Abbot loses their last monk to the vikings in summer, then we should skip directly to the next player in Autumn placing phase
+    public void monkGainedForFreeAtStartOfSeason() {
+        // if the Abbot loses their last monk to the vikings in summer
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
@@ -447,11 +517,13 @@ public class CoreGameLoop {
         // repeat until all of Player 0's monks are back in the dormitory
         // before we do the Bidding we remove all of P0's monks
         state.monksIn(DORMITORY, 0).forEach(state::retireMonk);
+        assertEquals(0, state.monksIn(DORMITORY, 0).size());
 
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != AUTUMN);
-        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(1, state.monksIn(DORMITORY, 0).size());
+        assertEquals(0, state.getCurrentPlayer());
     }
 
     @Test
@@ -490,7 +562,7 @@ public class CoreGameLoop {
     private void emptyAllStores() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         for (int p = 0; p < state.getNPlayers(); p++) {
-            for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values()) {
+            for (Resource r : Resource.values()) {
                 state.addResource(p, r, -state.getResource(p, r, STOREROOM));
             }
         }

@@ -6,12 +6,12 @@ import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 
-public class MoveCube extends UseMonk{
+public class MoveCubes extends UseMonk{
 
     Resource resource;
     ActionArea from, to;
 
-    public MoveCube(int actionPoints, Resource resource, ActionArea from, ActionArea to) {
+    public MoveCubes(int actionPoints, Resource resource, ActionArea from, ActionArea to) {
         super(actionPoints);
         this.from = from;
         this.to = to;
@@ -26,8 +26,8 @@ public class MoveCube extends UseMonk{
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof MoveCube) {
-            MoveCube other = (MoveCube) obj;
+        if (obj instanceof MoveCubes) {
+            MoveCubes other = (MoveCubes) obj;
             return other.resource == resource && other.from == from && other.to == to;
         }
         return false;

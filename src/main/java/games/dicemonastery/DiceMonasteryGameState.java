@@ -206,6 +206,36 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return IntStream.range(0, getNPlayers()).allMatch(playerBids::containsKey);
     }
 
+    void springAutumnHousekeeping() {
+        // We move PROTO_ stuff on its merry way
+        for (int player = 0; player < turnOrder.nPlayers(); player++) {
+            int almostBeer = getResource(player, Resource.PROTO_BEER_2, STOREROOM);
+            addResource(player, Resource.BEER, almostBeer);
+            int notBeer = getResource(player, Resource.PROTO_BEER_1, STOREROOM);
+            addResource(player, Resource.PROTO_BEER_2, notBeer - almostBeer);
+            addResource(player, Resource.PROTO_BEER_1, -notBeer);
+            int almostMead = getResource(player, Resource.PROTO_MEAD_2, STOREROOM);
+            addResource(player, Resource.MEAD, almostMead);
+            int notMead = getResource(player, Resource.PROTO_MEAD_1, STOREROOM);
+            addResource(player, Resource.PROTO_MEAD_2, notMead - almostMead);
+            addResource(player, Resource.PROTO_MEAD_1, -notMead);
+        }
+        checkAtLeastOneMonk();
+    }
+
+    void summerHousekeeping() {
+        checkAtLeastOneMonk();
+    }
+
+    void checkAtLeastOneMonk() {
+        for (int player = 0; player < getNPlayers(); player++) {
+            if (monksIn(null, player).isEmpty()) {
+                // Hire a free novice!
+                createMonk(1, player);
+            }
+        }
+    }
+
     void winterHousekeeping() {
         for (int player = 0; player < turnOrder.nPlayers(); player++) {
             // for each player feed monks, and then discard perishables
@@ -237,6 +267,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             for (int i = 0; i < unharvestedWheat; i++)
                  moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
          }
+        // Deliberately do not check monks here...that is done afterwards...Winter housekeeping is done before winter actions
     }
 
     void endGame() {

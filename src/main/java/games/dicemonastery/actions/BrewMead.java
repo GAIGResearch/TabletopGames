@@ -13,7 +13,7 @@ public class BrewMead extends UseMonk{
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
         state.moveCube(state.getCurrentPlayer(), Resource.HONEY, STOREROOM, SUPPLY);
-        state.moveCube(state.getCurrentPlayer(), Resource.MEAD, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), Resource.PROTO_MEAD_1, SUPPLY, STOREROOM);
         return true;
     }
 

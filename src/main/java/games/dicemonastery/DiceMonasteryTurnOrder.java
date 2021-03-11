@@ -94,9 +94,10 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                             actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
                         } else {
                             // we have completed this phase
+                            state.springAutumnHousekeeping();
                             season = season.next();
                             if (season == WINTER)
-                                state.winterHousekeeping();
+                                state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
                             // and set the player back to the abbot
                             turnOwner = abbot;
                             state.setGamePhase(Phase.PLACE_MONKS);
@@ -110,6 +111,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                     // we have completed SUMMER bidding
                     state.executeBids();
                     season = season.next();
+                    state.summerHousekeeping();
                     turnOwner = firstPlayerWithMonks(state);
                 }
                 break;
