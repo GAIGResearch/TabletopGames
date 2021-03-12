@@ -3,11 +3,15 @@ package utilities;
 public class ElapsedCpuChessTimer extends ElapsedCpuTimer {
 
     private long timeRemaining;
-    private final long increment;
+    private final long incrementAction, incrementTurn, incrementRound, incrementMilestone;
 
-    public ElapsedCpuChessTimer(long maxTimeMinutes, long incrementSeconds) {
+    public ElapsedCpuChessTimer(long maxTimeMinutes, long incrementAction, long incrementTurn, long incrementRound,
+                                long incrementMilestone) {
         setMaxTimeMillis(maxTimeMinutes * 60000);
-        this.increment = incrementSeconds * 1000000000;
+        this.incrementAction = incrementAction * 1000000000;
+        this.incrementTurn = incrementTurn * 1000000000;
+        this.incrementRound = incrementRound * 1000000000;
+        this.incrementMilestone = incrementMilestone * 1000000000;
         reset();
     }
 
@@ -19,8 +23,26 @@ public class ElapsedCpuChessTimer extends ElapsedCpuTimer {
     public void pause() {
         // Update timeRemaining variable with time elapsed
         timeRemaining -= elapsed();
+    }
+
+    public void incrementAction() {
         // Add increment
-        timeRemaining += increment;
+        timeRemaining += incrementAction;
+    }
+
+    public void incrementTurn() {
+        // Add increment
+        timeRemaining += incrementTurn;
+    }
+
+    public void incrementRound() {
+        // Add increment
+        timeRemaining += incrementRound;
+    }
+
+    public void incrementMileStone() {
+        // Add increment
+        timeRemaining += incrementMilestone;
     }
 
     public void resume() {
@@ -37,12 +59,13 @@ public class ElapsedCpuChessTimer extends ElapsedCpuTimer {
     }
 
     public boolean exceededMaxTime() {
-        return (timeRemaining - increment) <= 0;
+        return (timeRemaining - incrementAction) <= 0;
     }
 
     public ElapsedCpuChessTimer copy()
     {
-        ElapsedCpuChessTimer newCpuTimer = new ElapsedCpuChessTimer(this.maxTime, this.increment);
+        ElapsedCpuChessTimer newCpuTimer = new ElapsedCpuChessTimer(this.maxTime, this.incrementAction,
+                this.incrementTurn, this.incrementRound, this.incrementMilestone);
         newCpuTimer.oldTime = this.oldTime;
         newCpuTimer.bean = this.bean;
         newCpuTimer.nIters = this.nIters;
@@ -52,6 +75,6 @@ public class ElapsedCpuChessTimer extends ElapsedCpuTimer {
 
     @Override
     public String toString() {
-        return remainingTimeMillis() + " ms remaining (" + increment/1000000.0 + " ms) increment";
+        return remainingTimeMillis() + " ms remaining (" + incrementAction/1000000.0 + " ms) increment act";
     }
 }

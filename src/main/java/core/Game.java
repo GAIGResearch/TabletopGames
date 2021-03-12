@@ -225,56 +225,39 @@ public class Game {
                     ((IPrintable) observation).printToConsole();
                 }
 
+                // Start the timer for this decision
+                gameState.playerTimer[activePlayer].resume();
+
                 // Either ask player which action to use or, in case no actions are available, report the updated observation
                 AbstractAction action = null;
                 if (observedActions.size() > 0) {
                     if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
                         // Can only do 1 action, so do it.
                         action = observedActions.get(0);
-                        if (TIMER_ENABLED) {
-                            gameState.playerTimer[activePlayer].resume();
-                        }
                         currentPlayer.registerUpdatedObservation(observation);
-                        if (TIMER_ENABLED) {
-                            gameState.playerTimer[activePlayer].pause();
-                        }
                     } else {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
-                            if (TIMER_ENABLED) {
-                                gameState.playerTimer[activePlayer].resume();
-                            }
                             while (action == null && gui.isWindowOpen()) {
                                 action = currentPlayer.getAction(observation, observedActions);
                                 updateGUI(gui);
                             }
-                            if (TIMER_ENABLED) {
-                                gameState.playerTimer[activePlayer].pause();
-                            }
                         } else {
                             // Get action from player, and time it
-                            if (TIMER_ENABLED) {
-                                gameState.playerTimer[activePlayer].resume();
-                            }
                             s = System.nanoTime();
                             action = currentPlayer.getAction(observation, observedActions);
                             agentTime += (System.nanoTime() - s);
-                            if (TIMER_ENABLED) {
-                                gameState.playerTimer[activePlayer].pause();
-                            }
                             nDecisions++;
                         }
                     }
                     AbstractAction finalAction = action;
                     listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
                 } else {
-                    if (TIMER_ENABLED) {
-                        gameState.playerTimer[activePlayer].resume();
-                    }
                     currentPlayer.registerUpdatedObservation(observation);
-                    if (TIMER_ENABLED) {
-                        gameState.playerTimer[activePlayer].pause();
-                    }
                 }
+
+                // End the timer for this decision
+                gameState.playerTimer[activePlayer].pause();
+                gameState.playerTimer[activePlayer].incrementAction();
 
                 if (VERBOSE) {
                     if (action != null) {
@@ -285,7 +268,7 @@ public class Game {
                 }
 
                 // Check player timeout
-                if (TIMER_ENABLED && observation.playerTimer[activePlayer].exceededMaxTime()) {
+                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
                     forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
                 } else {
                     // Resolve action and game rules, time it

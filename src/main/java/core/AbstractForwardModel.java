@@ -27,7 +27,9 @@ public abstract class AbstractForwardModel {
         firstState.gamePhase = AbstractGameState.DefaultGamePhase.Main;
         firstState.playerTimer = new ElapsedCpuChessTimer[firstState.getNPlayers()];
         for (int i = 0; i < firstState.getNPlayers(); i++) {
-            firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameType.getThinkingTimeMins(), firstState.gameType.getIncrementS());
+            firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameParameters.thinkingTimeMins,
+                    firstState.gameParameters.incrementActionS, firstState.gameParameters.incrementTurnS,
+                    firstState.gameParameters.incrementRoundS, firstState.gameParameters.incrementMilestoneS);
         }
 
         _setup(firstState);
