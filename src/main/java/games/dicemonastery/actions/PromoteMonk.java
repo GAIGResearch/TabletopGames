@@ -3,9 +3,9 @@ package games.dicemonastery.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.Monk;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
@@ -14,24 +14,16 @@ public class PromoteMonk extends AbstractAction {
 
     public final int pietyLevelToPromote;
     public final ActionArea location;
-    public final boolean areaReward;
 
-    public PromoteMonk(int piety, ActionArea where, boolean reward) {
+    public PromoteMonk(int piety, ActionArea where) {
         pietyLevelToPromote = piety;
         location = where;
-        areaReward = reward;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        // we use all available AP, and choose one of the monks to increase in piety
-        state.useAP(state.getAPLeft());
-
-        if (areaReward) {
-            DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) state.getTurnOrder();
-            dto.setRewardTaken(state.getCurrentPlayer());
-        }
+        //  choose one of the monks to increase in piety
         Optional<Monk> optMonk = state.monksIn(location, state.getCurrentPlayer()).stream()
                 .filter(m -> m.getPiety() == pietyLevelToPromote)
                 .findFirst();
@@ -53,14 +45,14 @@ public class PromoteMonk extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof PromoteMonk) {
             PromoteMonk other = (PromoteMonk) obj;
-            return pietyLevelToPromote == other.pietyLevelToPromote;
+            return pietyLevelToPromote == other.pietyLevelToPromote && location == other.location;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return pietyLevelToPromote;
+        return Objects.hash(pietyLevelToPromote, location);
     }
 
     @Override
@@ -70,6 +62,6 @@ public class PromoteMonk extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Promote Monk of piety " + pietyLevelToPromote;
+        return String.format("Promote Monk of piety %d in %s", pietyLevelToPromote, location);
     }
 }

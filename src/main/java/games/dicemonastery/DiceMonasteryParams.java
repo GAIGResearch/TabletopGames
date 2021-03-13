@@ -10,6 +10,7 @@ public class DiceMonasteryParams extends AbstractParameters {
     }
 
     public final int YEARS = 3;
+    public final int[] BONUS_TOKENS_PER_PLAYER = {0, 0, 1, 2, 2};
 
     @Override
     protected DiceMonasteryParams _copy() {

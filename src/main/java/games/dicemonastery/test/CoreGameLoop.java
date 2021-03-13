@@ -39,7 +39,7 @@ public class CoreGameLoop {
             assertEquals(2, state.getResource(p, HONEY, STOREROOM));
             assertEquals(2, state.getResource(p, BREAD, STOREROOM));
             assertEquals(6, state.getResource(p, SHILLINGS, STOREROOM));
-            assertEquals(1, state.getResource(p, DEVOTION, STOREROOM));
+            assertEquals(1, state.getResource(p, PRAYER, STOREROOM));
             assertEquals(2, state.getResource(p, SKEP, STOREROOM));
             assertEquals(0, state.getResource(p, CALF_SKIN, STOREROOM));
             assertEquals(0, state.getResource(p, VELLUM, STOREROOM));
@@ -221,12 +221,14 @@ public class CoreGameLoop {
         List<Resource> nonAlcoholicResources = Arrays.stream(Resource.values())
                 .filter(r -> !r.name().contains("BEER") && !r.name().contains("MEAD"))
                 .collect(toList());
+        nonAlcoholicResources.remove(SHILLINGS);  // could change due to BONUS_TOKENS
+        nonAlcoholicResources.remove(PRAYER);  // could change due to BONUS_TOKENS
         for (int player = 0; player < 4; player++) {
-        //    System.out.println("Player : " + player);
+     //       System.out.println("Player : " + player);
             Map<Resource, Integer> spring = springResources.get(player);
             Map<Resource, Integer> summer = summerResources.get(player);
             for (Resource r : nonAlcoholicResources) {
-         //       System.out.println("Resource : " + r);
+       //         System.out.println("Resource : " + r);
                 assertEquals(spring.get(r), summer.get(r));
             }
             assertEquals(spring.get(BEER) + spring.get(PROTO_BEER_2), summer.get(BEER).intValue());
@@ -271,13 +273,12 @@ public class CoreGameLoop {
 
         int firstPlayer = state.getCurrentPlayer();
         int monksInMeadow = state.monksIn(MEADOW, firstPlayer).size();
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
+        if (state.isActionInProgress())
+            fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
         do {
             fm.next(state, new SowWheat());
         } while (state.getCurrentPlayer() == firstPlayer && fm.computeAvailableActions(state).contains(new SowWheat()));
-
-        if (state.getDominantPlayers().contains(firstPlayer)) {
-            fm.next(state, new Pass(true));
-        }
 
         assertEquals(monksInMeadow, state.monksIn(DORMITORY, firstPlayer).size());
         assertEquals(0, state.monksIn(MEADOW, firstPlayer).size());
@@ -298,7 +299,6 @@ public class CoreGameLoop {
         ActionArea currentArea = null;
         int lastPlayer = -1;
         boolean playerSwitchExpected = false;
-        boolean rewardTurn = false;
         do {
             if (currentArea != turnOrder.getCurrentArea()) {
                 currentArea = turnOrder.getCurrentArea();
@@ -324,17 +324,9 @@ public class CoreGameLoop {
                 playerSwitchExpected = turnOrder.getActionPointsLeft() == 0;
             } else {
                 playerSwitchExpected = actionChosen instanceof Pass || actionChosen instanceof PromoteAllMonks ||
-                        actionChosen instanceof PromoteMonk || actionChosen instanceof GainVictoryPoints ||
-                        ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft();
+                        (actionChosen instanceof UseMonk && ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft());
             }
-            if (playerSwitchExpected && !rewardTurn && state.getDominantPlayers().contains(lastPlayer)) {
-                // wait one more turn for reward decision
-                playerSwitchExpected = false;
-                rewardTurn = true;
-            } else {
-                rewardTurn = false;
-            }
-            System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Reward: %s, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), rewardTurn, playerSwitchExpected);
+            System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), playerSwitchExpected);
             fm.next(state, actionChosen);
         } while (state.getGamePhase() == USE_MONKS);
     }
@@ -741,5 +733,6 @@ public class CoreGameLoop {
         assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
         assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
     }
+
 
 }

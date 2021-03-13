@@ -25,7 +25,7 @@ public class Monk extends Component {
 
     public void promote(DiceMonasteryGameState state) {
         piety++;
-        if (piety == MAX_PIETY)
+        if (piety > MAX_PIETY)
             state.retireMonk(this);
     }
 

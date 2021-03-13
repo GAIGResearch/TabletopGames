@@ -6,7 +6,6 @@ import core.components.Component;
 import core.turnorders.TurnOrder;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
@@ -28,8 +27,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     ActionArea currentAreaBeingExecuted = null;
     int abbot = 0; // the current 'first player '
     List<Integer> playerOrderForCurrentArea;
-    List<Integer> dominantPlayers;
-    List<Integer> rewardsTaken;
+    boolean turnOwnerTakenReward;
     int actionPointsLeftForCurrentPlayer = 0;
 
     @Override
@@ -39,8 +37,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         abbot = 0;
         actionPointsLeftForCurrentPlayer = 0;
         currentAreaBeingExecuted = null;
-        dominantPlayers = new ArrayList<>();
-        rewardsTaken = new ArrayList<>();
+        turnOwnerTakenReward = false;
     }
 
     @Override
@@ -51,8 +48,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         retValue.abbot = abbot;
         retValue.currentAreaBeingExecuted = currentAreaBeingExecuted;
         retValue.playerOrderForCurrentArea = playerOrderForCurrentArea != null ? new ArrayList<>(playerOrderForCurrentArea) : null;
-        retValue.dominantPlayers = new ArrayList<>(dominantPlayers);
-        retValue.rewardsTaken = new ArrayList<>(rewardsTaken);
+        retValue.turnOwnerTakenReward = turnOwnerTakenReward;
         retValue.actionPointsLeftForCurrentPlayer = actionPointsLeftForCurrentPlayer;
         return retValue;
     }
@@ -72,19 +68,21 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         currentAreaBeingExecuted = ActionArea.MEADOW;
                         setUpPlayerOrderForCurrentArea(state); // impossible to have no monks placed at this point
                         turnOwner = playerOrderForCurrentArea.get(0);
+                        turnOwnerTakenReward = false;
                         actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
                         return;
                     }
                     turnOwner = nextPlayer(gameState);
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
                     // first we check to see if we have finished using all monks; in which case move to next player
-                    if (actionPointsLeftForCurrentPlayer == 0 && (!dominantPlayers.contains(turnOwner) || rewardsTaken.contains(turnOwner))) {
+                    if (actionPointsLeftForCurrentPlayer == 0) {
                         // first move all Monks back to dormitory for the current player
                         for (Monk m : state.monksIn(currentAreaBeingExecuted, state.getCurrentPlayer())) {
                             state.moveMonk(m.getComponentID(), currentAreaBeingExecuted, DORMITORY);
                         }
                         // then move to next player
                         turnOwner = nextPlayer(state);
+                        turnOwnerTakenReward = false;
                         actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
                     }
                     if (state.monksIn(currentAreaBeingExecuted, -1).isEmpty()) {
@@ -92,6 +90,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         if (setUpPlayerOrderForCurrentArea(state)) {
                             turnOwner = playerOrderForCurrentArea.get(0);
                             actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
+                            turnOwnerTakenReward = false;
                         } else {
                             // we have completed this phase
                             state.springAutumnHousekeeping();
@@ -155,6 +154,10 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         return state.monksIn(currentAreaBeingExecuted, turnOwner).stream().mapToInt(Monk::getPiety).sum();
     }
 
+    void addActionPoints(int number) {
+        actionPointsLeftForCurrentPlayer += number;
+    }
+
     @Override
     public int nextPlayer(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
@@ -178,10 +181,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 case USE_MONKS:
                     if (actionPointsLeftForCurrentPlayer > 0)
                         return turnOwner;  // we still have monks for the current player to finish using
-                    if (dominantPlayers.contains(turnOwner) && !rewardsTaken.contains(turnOwner)) {
-                        // we now need to get the Dominance reward for the area
-                        return turnOwner;
-                    }
                     int currentIndex = playerOrderForCurrentArea.indexOf(turnOwner);
                     if (currentIndex + 1 == playerOrderForCurrentArea.size())
                         return abbot; // we have now finished this area, and we always start placing with the Abbot
@@ -189,10 +188,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             }
         }
         throw new AssertionError(String.format("Unexpected situation for Season %s and Phase %s", season, state.getGamePhase()));
-    }
-
-    public void setRewardTaken(int player) {
-        rewardsTaken.add(player);
     }
 
     private boolean setUpPlayerOrderForCurrentArea(DiceMonasteryGameState state) {
@@ -205,12 +200,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         }
 
         playerOrderForCurrentArea = playerOrderFor(currentAreaBeingExecuted, state);
-        int dominantPiety = state.monksIn(currentAreaBeingExecuted, playerOrderForCurrentArea.get(0)).stream().mapToInt(Monk::getPiety).sum();
-        dominantPlayers = IntStream.range(0, nPlayers)
-                .filter(p -> state.monksIn(currentAreaBeingExecuted, p).stream().mapToInt(Monk::getPiety).sum() == dominantPiety)
-                .boxed()
-                .collect(toList());
-        rewardsTaken = new ArrayList<>();
         return true;
     }
 
@@ -226,8 +215,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                             return pietyDiff;
                         }
                 )
-                .mapToInt(Map.Entry::getKey)
-                .boxed().collect(toList());
+                .map(Map.Entry::getKey)
+                .collect(toList());
     }
 
 
@@ -259,9 +248,9 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     public boolean equals(Object o) {
         if (o instanceof DiceMonasteryTurnOrder) {
             DiceMonasteryTurnOrder other = (DiceMonasteryTurnOrder) o;
-            return other.season == season && other.dominantPlayers.equals(dominantPlayers) &&
-                    other.rewardsTaken.equals(rewardsTaken) &&
-                    other.currentAreaBeingExecuted == currentAreaBeingExecuted && other.abbot == abbot &&
+            return other.season == season && other.abbot == abbot &&
+                    other.turnOwnerTakenReward == turnOwnerTakenReward &&
+                    other.currentAreaBeingExecuted == currentAreaBeingExecuted &&
                     other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
                     other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
                     super.equals(other);
@@ -272,7 +261,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public int hashCode() {
         return super.hashCode() + 31 * Objects.hash(season, abbot, currentAreaBeingExecuted,
-                dominantPlayers, actionPointsLeftForCurrentPlayer, rewardsTaken);
+                actionPointsLeftForCurrentPlayer, turnOwnerTakenReward);
     }
 
 

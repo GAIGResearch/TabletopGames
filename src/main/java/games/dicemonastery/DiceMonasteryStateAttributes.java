@@ -36,7 +36,7 @@ public enum DiceMonasteryStateAttributes implements IGameAttribute {
     SKEP((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.SKEP, STOREROOM)),
     WHEAT((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.GRAIN, MEADOW)),
     HIVES((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.SKEP, MEADOW)),
-    DEVOTION((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.DEVOTION, STOREROOM)),
+    DEVOTION((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.PRAYER, STOREROOM)),
     RETIRED((s, p) -> s.monksIn(ActionArea.RETIRED, p)),
     DEAD((s, p) -> s.monksIn(GRAVEYARD, p)),
     MONKS_1((s,p) -> s.monksIn(null, p).stream().filter(m -> m.getPiety() == 1).count()),

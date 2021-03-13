@@ -3,10 +3,7 @@ package games.dicemonastery.test;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
-import games.dicemonastery.actions.BakeBread;
-import games.dicemonastery.actions.HireNovice;
-import games.dicemonastery.actions.PlaceMonk;
-import games.dicemonastery.actions.SummerBid;
+import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -14,6 +11,7 @@ import java.util.List;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
@@ -360,4 +358,110 @@ public class CopyTests {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
     }
+
+    @Test
+    public void takeTokenI() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        state.putToken(DORMITORY, DONATION, 0);
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new TakeToken(DONATION, DORMITORY, 1));
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void takeTokenII() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        state.putToken(DORMITORY, DONATION, 0);
+        fm.next(state, new TakeToken(DONATION, DORMITORY, 1));
+
+        state.putToken(DORMITORY, DEVOTION, 0);
+        fm.next(state, new TakeToken(DEVOTION, DORMITORY, 1));
+
+        state.putToken(DORMITORY, PRESTIGE, 0);
+        fm.next(state, new TakeToken(PRESTIGE, DORMITORY, 2));
+
+        state.putToken(DORMITORY, PROMOTION, 0);
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, new TakeToken(PROMOTION, DORMITORY, 3));
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new PromoteMonk(1, DORMITORY));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    private void advanceToSummer() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (!(turnOrder.getSeason() == SUMMER));
+    }
+
+    private void emptyAllStores() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values()) {
+                state.addResource(p, r, -state.getResource(p, r, STOREROOM));
+            }
+        }
+    }
+
+    @Test
+    public void summerBidTiesForSecond() {
+        advanceToSummer();
+        emptyAllStores();
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            state.addResource(p, BEER, 10);
+            state.addResource(p, MEAD, 10);
+        }
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, new SummerBid(2, 0));
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new SummerBid(0, 0));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+
 }

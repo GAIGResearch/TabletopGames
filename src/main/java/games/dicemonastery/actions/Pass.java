@@ -7,26 +7,12 @@ import games.dicemonastery.DiceMonasteryTurnOrder;
 
 public class Pass extends AbstractAction {
 
-    final boolean asReward;
-
-    public Pass() {
-        this(false);
-    }
-
-    public Pass(boolean rewardStep) {
-        asReward = rewardStep;
-    }
-
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) gs.getTurnOrder();
         state.useAP(turnOrder.getActionPointsLeft());
 
-        if (asReward) {
-            DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) state.getTurnOrder();
-            dto.setRewardTaken(state.getCurrentPlayer());
-        }
         return true;
     }
 
@@ -38,12 +24,12 @@ public class Pass extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Pass && ((Pass) obj).asReward == asReward;
+        return obj instanceof Pass;
     }
 
     @Override
     public int hashCode() {
-        return 2398734 + (asReward ? 31 : 0);
+        return 2398734;
     }
 
     @Override

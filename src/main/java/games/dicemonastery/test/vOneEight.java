@@ -1,0 +1,75 @@
+package games.dicemonastery.test;
+
+import core.components.Component;
+import games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import games.dicemonastery.*;
+import games.dicemonastery.actions.PlaceMonk;
+import org.junit.Test;
+import players.simple.RandomPlayer;
+
+import java.util.Arrays;
+import java.util.Map;
+
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.CHAPEL;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
+import static java.util.stream.Collectors.toMap;
+import static org.junit.Assert.assertEquals;
+
+public class vOneEight {
+
+    DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
+    DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 3));
+    RandomPlayer rnd = new RandomPlayer();
+
+    @Test
+    public void bonusTokenDistribution() {
+        for (int np = 2; np <= 4; np++) {
+            game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), np));
+            DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+            DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
+            for (ActionArea area : ActionArea.values()) {
+                int expectedTokens = area.dieMinimum == 0 ? 0 : params.BONUS_TOKENS_PER_PLAYER[np];
+                assertEquals(expectedTokens, state.availableBonusTokens(area).size());
+            }
+        }
+    }
+
+    @Test
+    public void bonusTokensRefreshedCorrectlyWithHousekeeping() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have one monk at least in the CHAPEL, so that we can stop before Housekeeping
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (state.monksIn(DORMITORY, -1).size() > 0);
+        // Once the Dormitory is empty, all Monks have been place, so we can calculate
+        // how many Bonus Tokens should be taken as rewards
+        Map<ActionArea, Integer> playersPerArea = Arrays.stream(ActionArea.values())
+                .filter(a -> a.dieMinimum > 0)
+                .collect(toMap(a -> a, a -> (int) state.monksIn(a, -1).stream().mapToInt(Component::getOwnerId).distinct().count()));
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getCurrentArea() != CHAPEL);  // stop when we are on the Chapel
+
+        // check that some bonus tokens have been removed as rewards (1 or 2)
+        for (ActionArea area : ActionArea.values()) {
+            if (area == CHAPEL || area.dieMinimum == 0) continue;
+       //    System.out.printf("%s has %d players and %s tokens%n", area, playersPerArea.getOrDefault(area, 0), state.availableBonusTokens(area).size());
+            int expectedTokens = 2 - playersPerArea.getOrDefault(area, 0);
+            if (expectedTokens < 0) expectedTokens = 0;
+            assertEquals(expectedTokens, state.availableBonusTokens(area).size());
+        }
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getSeason() != DiceMonasteryConstants.Season.SUMMER);  // stop when we have done HouseKeeping
+
+        for (ActionArea area : ActionArea.values()) {
+            if (area == CHAPEL || area.dieMinimum == 0) continue;
+            assertEquals(2, state.availableBonusTokens(area).size());
+        }
+    }
+
+}

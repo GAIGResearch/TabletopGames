@@ -40,12 +40,6 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         if (a instanceof Sell) return ((Sell) a).price;
         return 0;
     }),
-    REWARD((s, a) -> {
-        if (a == null) return false;
-        if (a instanceof PromoteMonk) return ((PromoteMonk) a).areaReward;
-        if (a instanceof GainVictoryPoints) return  ((GainVictoryPoints) a).asReward;
-        return false;
-    }),
     BID_VALUE((s, a) -> {
        if (a == null) return 0;
        if (a instanceof SummerBid)

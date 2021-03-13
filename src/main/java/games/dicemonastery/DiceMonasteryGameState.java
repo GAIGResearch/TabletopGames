@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
@@ -24,9 +24,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
     int[] victoryPoints;
+    Random rnd;
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters));
+        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -47,12 +49,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
         nextRetirementReward = 0;
     }
 
-    public void createMonk(int piety, int player) {
+    public Monk createMonk(int piety, int player) {
         Monk monk = new Monk(piety, player);
         int id = monk.getComponentID();
         allMonks.put(id, monk);
         monkLocations.put(id, DORMITORY);
         actionAreas.get(DORMITORY).putComponent(monk);
+        return monk;
     }
 
     public void moveMonk(int id, ActionArea from, ActionArea to) {
@@ -144,6 +147,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void retireMonk(Monk monk) {
+        if (getMonkLocation(monk.getComponentID()) == RETIRED)
+            throw new AssertionError("Already retired!");
         moveMonk(monk.getComponentID(), getMonkLocation(monk.getComponentID()), RETIRED);
         if (nextRetirementReward >= RETIREMENT_REWARDS.length) {
             // no more benefits to retirement
@@ -197,11 +202,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return monkLocations.get(id);
     }
 
-    public List<Integer> getDominantPlayers() {
-        DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
-        return dto.dominantPlayers;
-    }
-
     public boolean allBidsIn() {
         return IntStream.range(0, getNPlayers()).allMatch(playerBids::containsKey);
     }
@@ -221,6 +221,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             addResource(player, Resource.PROTO_MEAD_1, -notMead);
         }
         checkAtLeastOneMonk();
+        drawBonusTokens();
     }
 
     void summerHousekeeping() {
@@ -234,6 +235,56 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 createMonk(1, player);
             }
         }
+    }
+
+    void drawBonusTokens() {
+        int tokensPerArea = ((DiceMonasteryParams) getGameParameters()).BONUS_TOKENS_PER_PLAYER[getNPlayers()];
+        for (ActionArea key : actionAreas.keySet()) {
+            if (key.dieMinimum > 0) {
+                DMArea area = actionAreas.get(key);
+                for (int i = 0; i < tokensPerArea; i++) {
+                    area.tokens[i] = drawToken(rnd);
+                }
+            }
+        }
+    }
+
+    BONUS_TOKEN drawToken(Random rnd) {
+        double dieRoll = rnd.nextDouble();
+        for (BONUS_TOKEN value : BONUS_TOKEN.values()) {
+            dieRoll -= value.getChance();
+            if (dieRoll < 0.0)
+                return value;
+        }
+        throw new AssertionError("BONUS_TOKEN probabilities sum to less than 1.0");
+    }
+
+    public List<BONUS_TOKEN> availableBonusTokens(ActionArea area) {
+        DMArea dma = actionAreas.get(area);
+        if (dma == null)
+            throw new AssertionError("Area does not exist: " + area);
+        return Arrays.stream(dma.tokens).filter(Objects::nonNull).collect(toList());
+    }
+
+    public void removeToken(BONUS_TOKEN token, ActionArea area) {
+        BONUS_TOKEN[] tokens = actionAreas.get(area).tokens;
+        DiceMonasteryTurnOrder to = (DiceMonasteryTurnOrder) turnOrder;
+        to.turnOwnerTakenReward = true;
+        for (int i = 0; i < tokens.length; i++) {
+            if (tokens[i] == token) {
+                tokens[i] = null;
+                return;
+            }
+        }
+        throw new AssertionError(String.format("No %s token found in %s", token, area));
+    }
+
+    public void addActionPoints(int number) {
+        ((DiceMonasteryTurnOrder) turnOrder).addActionPoints(number);
+    }
+
+    public void putToken(ActionArea area, BONUS_TOKEN token, int position) {
+        actionAreas.get(area).tokens[position] = token;
     }
 
     void winterHousekeeping() {

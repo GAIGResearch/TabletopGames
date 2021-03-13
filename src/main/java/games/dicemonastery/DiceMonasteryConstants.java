@@ -3,6 +3,7 @@ package games.dicemonastery;
 import core.interfaces.IGamePhase;
 
 import java.awt.*;
+import java.util.Arrays;
 
 public class DiceMonasteryConstants {
 
@@ -41,7 +42,7 @@ public class DiceMonasteryConstants {
     }
 
     public enum Resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, DEVOTION, PIGMENT, INK, CALF_SKIN, VELLUM,
+        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYER, PIGMENT, INK, CALF_SKIN, VELLUM,
         BEER, PROTO_BEER_1, PROTO_BEER_2, MEAD, PROTO_MEAD_1, PROTO_MEAD_2, CANDLE, BERRIES
     }
 
@@ -78,4 +79,18 @@ public class DiceMonasteryConstants {
             {4, 2, 0, 0},
             {6, 4, 2, 0}
     };
+
+    public enum BONUS_TOKEN {
+        PROMOTION(48), DEVOTION(24), PRESTIGE(12), DONATION(12);
+
+        private final int number;
+
+        BONUS_TOKEN(int number) {
+            this.number = number;
+        }
+        public double getChance() {
+            return number / (double)Arrays.stream(BONUS_TOKEN.values()).mapToInt(t -> t.number).sum();
+        }
+    }
+
 }

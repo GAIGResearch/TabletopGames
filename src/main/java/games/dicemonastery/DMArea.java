@@ -3,7 +3,9 @@ package games.dicemonastery;
 import core.components.Area;
 import core.components.Component;
 import core.components.Token;
+import games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -17,6 +19,7 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource;
 public class DMArea {
 
     protected Area area;
+    BONUS_TOKEN[] tokens = new BONUS_TOKEN[2];
 
     public DMArea(int owner, String name) {
         area = new Area(owner, name);
@@ -50,7 +53,10 @@ public class DMArea {
     public DMArea copy() {
         Area emptyArea = area.emptyCopy();
         area.getComponents().forEach( c -> emptyArea.putComponent(c.copy()));
-        return new DMArea(emptyArea);
+        DMArea retValue = new DMArea(emptyArea);
+        retValue.tokens[0] = tokens[0];
+        retValue.tokens[1] = tokens[1];
+        return retValue;
     }
 
     public List<Component> getAll(Predicate<Component> filter) {
@@ -71,14 +77,14 @@ public class DMArea {
 
     @Override
     public int hashCode() {
-        return area.hashCode();
+        return area.hashCode() + 7 * Arrays.hashCode(tokens);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof DMArea) {
             DMArea other = (DMArea) obj;
-            return area.equals(other.area);
+            return area.equals(other.area) && Arrays.equals(tokens, other.tokens);
         }
         return false;
     }

@@ -25,7 +25,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat();
     public final AbstractAction PLACE_SKEP = new PlaceSkep();
     public final AbstractAction COLLECT_SKEP = new CollectSkep();
-    public final AbstractAction PASS = new Pass(false);
+    public final AbstractAction PASS = new Pass();
     public final AbstractAction BAKE_BREAD = new BakeBread();
     public final AbstractAction PREPARE_INK = new PrepareInk();
     public final AbstractAction BREW_BEER = new BrewBeer();
@@ -55,8 +55,10 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
             state.addResource(p, BREAD, 2);
 
             state.addResource(p, SHILLINGS, 6);
-            state.addResource(p, DEVOTION, 1);
+            state.addResource(p, PRAYER, 1);
         }
+
+        state.drawBonusTokens();
 
         state.setGamePhase(Phase.PLACE_MONKS);
     }
@@ -77,15 +79,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
         // We only consider the next phase once any extended actions are complete
         state.getTurnOrder().endPlayerTurn(state);
- //       DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
- //       System.out.printf("After %s, end turn gives next player %d with %d action points\n", action, state.getCurrentPlayer(), dmto.getActionPointsLeft());
-
+        //       DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
+        //       System.out.printf("After %s, end turn gives next player %d with %d action points\n", action, state.getCurrentPlayer(), dmto.getActionPointsLeft());
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
-        
+
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         int currentPlayer = turnOrder.getCurrentPlayer(state);
         switch (turnOrder.season) {
@@ -102,22 +103,12 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             .filter(a -> a.dieMinimum > 0 && a.dieMinimum <= mostPiousMonk)
                             .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
-
                     List<AbstractAction> retValue = new ArrayList<>();
-
-                    if (turnOrder.actionPointsLeftForCurrentPlayer == 0 && state.getDominantPlayers().contains(currentPlayer)) {
-                        // claim dominance reward
-                        retValue.add(new Pass(true));
-                        if (turnOrder.currentAreaBeingExecuted == CHAPEL) {
-                            retValue.add(new GainVictoryPoints(1, true));
-                        } else {
-                            retValue.addAll(state.monksIn(turnOrder.currentAreaBeingExecuted, state.getCurrentPlayer()).stream()
-                                    .mapToInt(Monk::getPiety)
-                                    .distinct()
-                                    .mapToObj(piety -> new PromoteMonk(piety, turnOrder.currentAreaBeingExecuted, true))
-                                    .collect(toList()));
-                        }
-                        return retValue;
+                    if (!turnOrder.turnOwnerTakenReward && !state.availableBonusTokens(turnOrder.currentAreaBeingExecuted).isEmpty()) {
+                        // The first action of a player must be to take a BONUS_TOKEN, if there are any left
+                        return state.availableBonusTokens(turnOrder.currentAreaBeingExecuted).stream().distinct()
+                                .map(token -> new TakeToken(token, turnOrder.currentAreaBeingExecuted, currentPlayer))
+                                .collect(toList());
                     }
                     retValue.add(PASS);
                     if (turnOrder.actionPointsLeftForCurrentPlayer <= 0) {
@@ -202,7 +193,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                 List<AbstractAction> retValue = state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()
                         .mapToInt(Monk::getPiety)
                         .distinct()
-                        .mapToObj(piety -> new PromoteMonk(piety, DORMITORY, false))
+                        .mapToObj(piety -> new PromoteMonk(piety, DORMITORY))
                         .collect(toList());
                 if (retValue.isEmpty())
                     retValue.add(new HireNovice(0)); // hire a free novice if no monks left (careless!)
