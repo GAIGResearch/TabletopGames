@@ -21,10 +21,11 @@ public class ActionSpaceView extends JComponent {
 
     ActionArea area;
     JPanel meepleArea, wheatArea, skepArea;
+    JTextArea tokenArea;
     List<Monk> currentlyDisplayedMonks = new ArrayList<>();
     int[] currentWheatLevels = new int[DiceMonasteryConstants.playerColours.length];
     int[] currentSkepLevels = new int[DiceMonasteryConstants.playerColours.length];
-
+    List<DiceMonasteryConstants.BONUS_TOKEN> bonusTokens = new ArrayList<>();
 
     public ActionSpaceView(ActionArea area) {
         this.area = area;
@@ -43,6 +44,10 @@ public class ActionSpaceView extends JComponent {
             skepArea.add(new JLabel("SKEPS "));
             this.add(skepArea, BorderLayout.EAST);
         }
+        tokenArea = new JTextArea(2, 1);
+        this.add(tokenArea, BorderLayout.SOUTH);
+        bonusTokens.add(null);
+        bonusTokens.add(null);
     }
 
     public void update(DiceMonasteryGameState state) {
@@ -59,6 +64,22 @@ public class ActionSpaceView extends JComponent {
         List<Monk> newMonks = monksPresent.stream().filter(m -> !currentlyDisplayedMonks.contains(m)).collect(toList());
         currentlyDisplayedMonks.addAll(newMonks);
         newMonks.forEach(m -> meepleArea.add(new MonkView(m)));
+
+
+        for (int i = 0; i < 2; i++) {
+            DiceMonasteryConstants.BONUS_TOKEN current = state.availableBonusTokens(area).size() <= i ? null : state.availableBonusTokens(area).get(i);
+            if (current != bonusTokens.get(i)) {
+                bonusTokens.add(i, null);
+                if (current != null)
+                    bonusTokens.add(i, current);
+                StringBuilder newString = new StringBuilder();
+                if (bonusTokens.get(0) != null)
+                    newString.append(bonusTokens.get(0).name()).append("\n");
+                if (bonusTokens.get(1) != null)
+                    newString.append(bonusTokens.get(1).name());
+                tokenArea.setText(newString.toString());
+            }
+        }
 
         if (area == MEADOW) {
             wheatArea.setPreferredSize(new Dimension(60, 250));
