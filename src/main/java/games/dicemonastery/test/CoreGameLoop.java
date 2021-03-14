@@ -276,6 +276,7 @@ public class CoreGameLoop {
         fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
         if (state.isActionInProgress())
             fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+        fm.next(state, new Pray(0)); // decline to Pray
         do {
             fm.next(state, new SowWheat());
         } while (state.getCurrentPlayer() == firstPlayer && fm.computeAvailableActions(state).contains(new SowWheat()));
@@ -733,6 +734,7 @@ public class CoreGameLoop {
         assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
         assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
     }
+
 
 
 }

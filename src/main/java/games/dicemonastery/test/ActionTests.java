@@ -64,6 +64,10 @@ public class ActionTests {
         fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
         if (state.isActionInProgress())
             fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+
+        // then we decide not to Pray (if we have the option)
+        if (fm.computeAvailableActions(state).stream().anyMatch(a -> a instanceof Pray))
+            fm.next(state, new Pray(0)); // decline to Pray
     }
 
     @Test
@@ -74,6 +78,61 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
         assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
         assertTrue(fm.computeAvailableActions(state).contains(new PlaceSkep()));
+    }
+
+    @Test
+    public void noPrayerOpportunityIfNoPrayerTokens() {
+        for (int p = 0; p < 4; p++)
+            state.addResource(p, PRAYER, -1); // remove starting Prayers
+        startOfUseMonkPhaseForArea(MEADOW, SPRING, Collections.emptyMap());
+        // finally we take BONUS_TOKEN and possible PROMOTION
+        assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
+        if (state.isActionInProgress())
+            fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+
+        // Now check we move straight on to actions
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PRAYER, STOREROOM));
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
+        assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new PlaceSkep()));
+    }
+
+    @Test
+    public void prayerOptionsIfWeHaveDevotionTokens() {
+        startOfUseMonkPhaseForArea(MEADOW, SPRING, Collections.emptyMap());
+        state.addResource(state.getCurrentPlayer(), PRAYER, 1); // add Prayer token
+
+        // finally we take BONUS_TOKEN and possible PROMOTION
+        assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
+        if (state.isActionInProgress())
+            fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+
+        // Now check that we have an option to Pray
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        for (int i = 0; i <= 2; i++)
+            assertTrue(fm.computeAvailableActions(state).contains(new Pray(i)));
+    }
+
+    @Test
+    public void pray() {
+        startOfUseMonkPhaseForArea(MEADOW, SPRING, Collections.emptyMap());
+
+        // finally we take BONUS_TOKEN and possible PROMOTION
+        assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
+        fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
+        if (state.isActionInProgress())
+            fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+        state.addResource(state.getCurrentPlayer(), PRAYER, 1); // add Prayer token
+
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), PRAYER, STOREROOM));
+        int startingAP = turnOrder.getActionPointsLeft();
+        fm.next(state, new Pray(2));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PRAYER, STOREROOM));
+        assertEquals(4 + startingAP, turnOrder.getActionPointsLeft());
     }
 
     @Test

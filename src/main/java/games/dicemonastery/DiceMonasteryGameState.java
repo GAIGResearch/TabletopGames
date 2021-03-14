@@ -269,7 +269,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
     public void removeToken(BONUS_TOKEN token, ActionArea area) {
         BONUS_TOKEN[] tokens = actionAreas.get(area).tokens;
         DiceMonasteryTurnOrder to = (DiceMonasteryTurnOrder) turnOrder;
-        to.turnOwnerTakenReward = true;
         for (int i = 0; i < tokens.length; i++) {
             if (tokens[i] == token) {
                 tokens[i] = null;

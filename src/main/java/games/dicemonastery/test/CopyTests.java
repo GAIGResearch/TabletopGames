@@ -463,5 +463,26 @@ public class CopyTests {
         assertFalse(midHash == state.hashCode());
     }
 
+    @Test
+    public void pray() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
 
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        state.addResource(state.getCurrentPlayer(), PRAYER, 1); // add Prayer token
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new Pray(2));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
 }

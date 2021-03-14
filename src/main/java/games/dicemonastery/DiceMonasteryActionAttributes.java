@@ -41,12 +41,22 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         return 0;
     }),
     BID_VALUE((s, a) -> {
-       if (a == null) return 0;
-       if (a instanceof SummerBid)
-           return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
-       return 0;
+        if (a == null) return 0;
+        if (a instanceof SummerBid)
+            return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
+        return 0;
     }),
-    ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder)s.getTurnOrder()).getActionPointsLeft())
+    ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft()),
+    TOKEN_TAKEN((s, a) -> {
+        if (a == null) return "";
+        if (a instanceof TakeToken) return ((TakeToken) a).token.name();
+        return "";
+    }),
+    AMOUNT((s, a) -> {
+        if (a == null) return 0;
+        if (a instanceof Pray) return ((Pray) a).prayerCount;
+        return 0;
+    })
     ;
 
     private final BiFunction<DiceMonasteryGameState, AbstractAction, Object> lambda;

@@ -71,8 +71,17 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) currentState;
+        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
 
         action.execute(state);
+
+        // We do this here to get direct access to TurnOrder (we could do this in the Actions..but that adds extra
+        // set() options on State/TurnOrder that really shouldn't be publicly accessible
+        // and since this is core to the whole game loop, the muddying of responsibilities is acceptable
+        if (action instanceof Pray)
+            dmto.turnOwnerPrayed = true;
+        if (action instanceof TakeToken)
+            dmto.turnOwnerTakenReward = true;
 
         if (state.isActionInProgress())
             return;
@@ -104,16 +113,21 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
                     List<AbstractAction> retValue = new ArrayList<>();
-                    if (!turnOrder.turnOwnerTakenReward && !state.availableBonusTokens(turnOrder.currentAreaBeingExecuted).isEmpty()) {
+                    if (!turnOrder.turnOwnerTakenReward) {
                         // The first action of a player must be to take a BONUS_TOKEN, if there are any left
                         return state.availableBonusTokens(turnOrder.currentAreaBeingExecuted).stream().distinct()
                                 .map(token -> new TakeToken(token, turnOrder.currentAreaBeingExecuted, currentPlayer))
                                 .collect(toList());
                     }
-                    retValue.add(PASS);
+                    if (!turnOrder.turnOwnerPrayed) {
+                        return IntStream.rangeClosed(0, state.getResource(currentPlayer, PRAYER, STOREROOM))
+                                .mapToObj(Pray::new).collect(toList());
+                    }
                     if (turnOrder.actionPointsLeftForCurrentPlayer <= 0) {
                         throw new AssertionError("We have no action points left for player " + currentPlayer);
                     }
+
+                    retValue.add(PASS);
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
                             retValue.add(FORAGE);
