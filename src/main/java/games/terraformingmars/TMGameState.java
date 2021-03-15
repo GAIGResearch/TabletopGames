@@ -2,51 +2,54 @@ package games.terraformingmars;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import core.turnorders.AlternatingTurnOrder;
-import games.terraformingmars.components.Corporation;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.Award;
 import games.terraformingmars.rules.Bonus;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.Milestone;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class TMGameState extends AbstractGameState {
 
     enum TMPhase implements IGamePhase {
-        Setup,
+        CorporationSelect,
         Research,
         Actions,
         Production
     }
 
+    // General state info
     GridBoard<TMMapTile> board;
     TMMapTile[] extraTiles;
-
     Counter[] globalParameters;
     Bonus[] bonuses;
+    Deck<TMCard> projectCards, corpCards, discardCards;  // Face-down decks
 
-    Deck<TMCard> projectCards, corpCards;  // Face-down decks
+    // Effects and actions played
+    HashSet<AbstractAction>[] playerCardsPlayedEffects;
+    HashSet<AbstractAction>[] playerCardsPlayedActions;
 
+    // Player-specific counters
     HashMap<TMTypes.Resource, Counter>[] playerResources;
     HashMap<TMTypes.Resource, Counter>[] playerProduction;
-
-    // TODO: initialize
-    PartialObservableDeck<TMCard>[] playerCardsPlayed;
     HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
-    Counter[] playerNCities;
-    Counter[] playerNGreeneries;
+    HashMap<TMTypes.CardType, Counter>[] playerCardsPlayedTypes;
+    HashMap<TMTypes.Tile, Counter>[] tilesPlaced;
 
-    PartialObservableDeck<TMCard>[] playerHands;
-    PartialObservableDeck<TMCard>[] playerCardChoice;
-    Deck<Corporation>[] playerCorporations;
+    // Player cards
+    Deck<TMCard>[] playerHands;
+    Deck<TMCard>[] playerCardChoice;
+    TMCard[] playerCorporations;
 
-    // To add: milestones, awards
+    // Milestones and awards TODO: components?
+    Milestone[] milestones;
+    Award[] awards;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -64,19 +67,18 @@ public class TMGameState extends AbstractGameState {
             add(projectCards);
             add(corpCards);
             this.addAll(Arrays.asList(extraTiles));
-            addAll(Arrays.asList(globalParameters));
-//            this.addAll(Arrays.asList(playerCardsPlayed));
-//            this.addAll(Arrays.asList(playerNCities));
-//            this.addAll(Arrays.asList(playerNGreeneries));
-//            this.addAll(Arrays.asList(playerHands));
-//            this.addAll(Arrays.asList(playerCardChoice));
+            this.addAll(Arrays.asList(globalParameters));
+            this.addAll(Arrays.asList(playerHands));
+            this.addAll(Arrays.asList(playerCardChoice));
 //            this.addAll(Arrays.asList(playerCorporations));
             for (int i = 0; i < getNPlayers(); i++) {
                 addAll(playerResources[i].values());
                 addAll(playerProduction[i].values());
-//                addAll(playerCardsPlayedTags[i].values());
+                addAll(playerCardsPlayedTags[i].values());
+                addAll(tilesPlaced[i].values());
+                addAll(playerCardsPlayedTypes[i].values());
             }
-        }};  // TODO
+        }};
     }
 
     @Override
@@ -131,10 +133,6 @@ public class TMGameState extends AbstractGameState {
         return playerResources;
     }
 
-    public Deck<TMCard>[] getPlayerCardsPlayed() {
-        return playerCardsPlayed;
-    }
-
     public GridBoard<TMMapTile> getBoard() {
         return board;
     }
@@ -151,7 +149,52 @@ public class TMGameState extends AbstractGameState {
         return extraTiles;
     }
 
-    public PartialObservableDeck<TMCard>[] getPlayerHands() {
+    public Deck<TMCard>[] getPlayerHands() {
         return playerHands;
+    }
+
+    public HashMap<TMTypes.Tag, Counter>[] getPlayerCardsPlayedTags() {
+        return playerCardsPlayedTags;
+    }
+
+    public HashMap<TMTypes.CardType, Counter>[] getPlayerCardsPlayedTypes() {
+        return playerCardsPlayedTypes;
+    }
+
+    public HashSet<AbstractAction>[] getPlayerCardsPlayedActions() {
+        return playerCardsPlayedActions;
+    }
+
+    public HashSet<AbstractAction>[] getPlayerCardsPlayedEffects() {
+        return playerCardsPlayedEffects;
+    }
+
+    public HashMap<TMTypes.Tile, Counter>[] getTilesPlaced() {
+        return tilesPlaced;
+    }
+
+    public Milestone[] getMilestones() {
+        return milestones;
+    }
+
+    public Award[] getAwards() {
+        return awards;
+    }
+
+    public TMCard[] getPlayerCorporations() {
+        return playerCorporations;
+    }
+
+    public Deck<TMCard>[] getPlayerCardChoice() {
+        return playerCardChoice;
+    }
+
+    public boolean canPlayerPay(int amount) {
+        // TODO: "use resource as MC effects"
+        return playerResources[getCurrentPlayer()].get(TMTypes.Resource.MegaCredit).getValue() >= amount;
+    }
+
+    public Deck<TMCard> getDiscardCards() {
+        return discardCards;
     }
 }

@@ -1,13 +1,12 @@
 package games.terraformingmars.gui;
 
-import core.AbstractGUI;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.Game;
+import core.*;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.Deck;
 import core.components.Token;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.components.TMCard;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -27,9 +26,13 @@ public class TMGUI extends AbstractGUI {
 
     TMBoardView view;
     TMPlayerView playerView;
-    TMDeckDisplay playerHand;
+    TMDeckDisplay playerHand, playerCardChoice, playerCorporation;
     JPanel infoPanel;
     private boolean adjustedSize;
+
+    static int fontSize = 16;
+    static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
+    static int focusPlayer = 0;
 
     public TMGUI(Game game, ActionController ac) {
         super(ac, 500);
@@ -57,20 +60,57 @@ public class TMGUI extends AbstractGUI {
 
         JPanel playerViewWrapper = new JPanel();
         playerViewWrapper.setLayout(new BoxLayout(playerViewWrapper, BoxLayout.Y_AXIS));
-        playerView = new TMPlayerView(gameState, 0);
-        playerHand = new TMDeckDisplay(gameState, gameState.getPlayerHands()[0]);
-        JScrollPane pane = new JScrollPane(playerHand);
-        pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        pane.setPreferredSize(new Dimension(playerView.getPreferredSize().width, playerHand.getPreferredSize().height + 20));
-        playerViewWrapper.add(playerView);
-        playerViewWrapper.add(pane);
+        playerView = new TMPlayerView(gameState, focusPlayer);
+
+        playerHand = new TMDeckDisplay(gameState, gameState.getPlayerHands()[focusPlayer]);
+        JScrollPane pane1 = new JScrollPane(playerHand);
+        pane1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        pane1.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
+
+        playerCorporation = new TMDeckDisplay(gameState, null);
+
+        playerCardChoice = new TMDeckDisplay(gameState, gameState.getPlayerCardChoice()[focusPlayer]);
+        JScrollPane pane2 = new JScrollPane(playerCardChoice);
+        pane2.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        pane2.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
+
+        JPanel playerMainWrap = new JPanel();
+        playerMainWrap.add(playerView);
+        playerMainWrap.add(playerCorporation);
+        playerViewWrapper.add(playerMainWrap);
+        playerViewWrapper.add(pane1);
+        playerViewWrapper.add(pane2);
 
         JPanel main = new JPanel();
         main.add(view);
         main.add(playerViewWrapper);
 
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
+        JPanel top = new JPanel();
+        top.add(infoPanel);
+        JPanel playerFlipButtons = new JPanel();
+        top.add(playerFlipButtons);
+        JLabel jLabel1 = new JLabel("Change player display:");
+        jLabel1.setFont(defaultFont);
+        jLabel1.setForeground(Color.white);
+        playerFlipButtons.add(jLabel1);
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
+            JButton jb = new JButton("p" + i);
+            jb.setFont(defaultFont);
+            jb.setForeground(Color.white);
+            jb.setBackground(Color.darkGray);
+            jb.addActionListener(e -> focusPlayer = Integer.parseInt(jb.getText().replace("p","")));
+            playerFlipButtons.add(jb);
+        }
+
+        top.setOpaque(false);
+        playerMainWrap.setOpaque(false);
+        playerCorporation.setOpaque(false);
+        playerFlipButtons.setOpaque(false);
+        pane1.setOpaque(false);
+        pane1.getViewport().setOpaque(false);
+        playerCardChoice.setOpaque(false);
+        pane2.setOpaque(false);
+        pane2.getViewport().setOpaque(false);
         playerHand.setOpaque(false);
         playerView.setOpaque(false);
         playerViewWrapper.setOpaque(false);
@@ -80,9 +120,9 @@ public class TMGUI extends AbstractGUI {
         main.setOpaque(false);
 
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        getContentPane().add(infoPanel);
+        getContentPane().add(top);
         getContentPane().add(main);
-        getContentPane().add(actionPanel);
+//        getContentPane().add(actionPanel);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setFrameProperties();
@@ -120,17 +160,20 @@ public class TMGUI extends AbstractGUI {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            view.update((TMGameState)gameState);
-            playerView.update((TMGameState) gameState);  // TODO: interface buttons for changing players, or automatic for current player
-            playerHand.update((TMGameState) gameState);  // TODO: interface buttons for changing players, or automatic for current player
+            TMGameState gs = ((TMGameState) gameState);
+            view.update(gs);
+            playerView.update(gs);
+            playerHand.update(gs.getPlayerHands()[focusPlayer]);
+            playerCardChoice.update(gs.getPlayerCardChoice()[focusPlayer]);
+            Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+            TMCard corp = gs.getPlayerCorporations()[focusPlayer];
+            if (corp != null) {
+                temp.add(corp);
+            }
+            playerCorporation.update(temp);
 
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
-            }
-            if (!adjustedSize && view.getPreferredSize().height != 20) {
-//                pack();
-//                revalidate();
-                adjustedSize = true;
             }
         }
         repaint();

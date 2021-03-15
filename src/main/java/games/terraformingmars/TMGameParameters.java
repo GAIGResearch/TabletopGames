@@ -24,6 +24,7 @@ public class TMGameParameters extends AbstractParameters {
             put(res, 0);
         }
         put(TMTypes.Resource.TR, 20);
+        put(TMTypes.Resource.MegaCredit, 500);  // TODO Test
     }};
     HashMap<TMTypes.Resource, Integer> startingProduction = new HashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
@@ -36,8 +37,10 @@ public class TMGameParameters extends AbstractParameters {
     int[] oxygenScales = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     int nOceanTiles = 9;
-
     int projectPurchaseCost = 3;
+    int nCorpChoiceStart = 2;
+    int nProjectsStart = 10;
+    int nProjectsResearch = 4;
 
     public TMGameParameters(long seed) {
         super(seed);
@@ -51,5 +54,65 @@ public class TMGameParameters extends AbstractParameters {
     @Override
     protected boolean _equals(Object o) {
         return false;
+    }
+
+    public HashMap<TMTypes.Resource, Integer> getMinimumProduction() {
+        return minimumProduction;
+    }
+
+    public HashMap<TMTypes.Resource, Integer> getStartingProduction() {
+        return startingProduction;
+    }
+
+    public HashMap<TMTypes.Resource, Integer> getStartingResources() {
+        return startingResources;
+    }
+
+    public int getBoardSize() {
+        return boardSize;
+    }
+
+    public int getMaxPoints() {
+        return maxPoints;
+    }
+
+    public int getnCorpChoiceStart() {
+        return nCorpChoiceStart;
+    }
+
+    public int getnOceanTiles() {
+        return nOceanTiles;
+    }
+
+    public int getProjectPurchaseCost() {
+        return projectPurchaseCost;
+    }
+
+    public int[] getOxygenScales() {
+        return oxygenScales;
+    }
+
+    public int[] getTemperatureScales() {
+        return temperatureScales;
+    }
+
+    public String getBoardPath() {
+        return boardPath;
+    }
+
+    public String getCorpsPath() {
+        return corpsPath;
+    }
+
+    public String getProjectsPath() {
+        return projectsPath;
+    }
+
+    public int getnProjectsResearch() {
+        return nProjectsResearch;
+    }
+
+    public int getnProjectsStart() {
+        return nProjectsStart;
     }
 }

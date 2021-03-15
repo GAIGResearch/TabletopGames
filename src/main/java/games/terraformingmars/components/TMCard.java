@@ -64,6 +64,29 @@ public class TMCard extends Card {
         return card;
     }
 
+    public static TMCard loadCorporationHTML(JSONObject cardDef) {
+        TMCard card = new TMCard();
+        card.cardType = TMTypes.CardType.Corporation;
+        card.number = (int)(long)cardDef.get("id");
+        card.setComponentName((String)cardDef.get("name"));
+
+        String effect = (String) cardDef.get("effect");
+        String start = (String) cardDef.get("start");
+
+        if (cardDef.get("tags") != null) {
+            JSONArray ts = (JSONArray) cardDef.get("tags");
+            card.tags = new TMTypes.Tag[ts.size()];
+            int i = 0;
+            for (Object o: ts) {
+                TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, (String)o);
+                card.tags[i] = t;
+                i++;
+            }
+        }
+
+        return card;
+    }
+
     public static TMCard loadCardHTML(JSONObject cardDef) {
         TMCard card = new TMCard();
         String classDef = (String)cardDef.get("@class");

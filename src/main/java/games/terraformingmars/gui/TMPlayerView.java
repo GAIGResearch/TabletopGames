@@ -2,6 +2,8 @@ package games.terraformingmars.gui;
 
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.rules.Award;
+import games.terraformingmars.rules.Milestone;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 
@@ -9,15 +11,14 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import static core.AbstractGUI.*;
+import static games.terraformingmars.gui.TMGUI.focusPlayer;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMPlayerView extends ComponentView {
 
-    int player;
     TMGameState gs;
 
     Rectangle[] rects;  // Used for highlights + action trimming
@@ -31,21 +32,15 @@ public class TMPlayerView extends ComponentView {
     int spacing = 10;
 
     // TODO: standard actions with resources
-    // Player choice cards
-    // Tags cards played
-    // Effects cards played
-    // Actions cards played
-    // Number of cards played by type
-    // Milestones available with progress, highlight claimed
-    // Awards available with progress, highlight claimed
+    // Effects cards played  // TODO
+    // Actions cards played  // TODO
 
     public TMPlayerView(TMGameState gs, int player) {
         super(gs.getBoard(), 0, 0);
         this.gs = gs;
-        this.player = player;
 
         width = defaultItemSize * 2 * TMTypes.Resource.nPlayerBoardRes() + offsetX*2;
-        height = defaultItemSize * 2 + offsetX*2;
+        height = defaultItemSize * 2 + offsetX*8 + defaultItemSize*5/3;
 
         rects = new Rectangle[gs.getBoard().getWidth() * gs.getBoard().getHeight()];
         highlight = new ArrayList<>();
@@ -76,7 +71,7 @@ public class TMPlayerView extends ComponentView {
     protected void paintComponent(Graphics g1) {
         Graphics2D g = (Graphics2D) g1;
 
-        g.setFont(new Font("Prototype", Font.BOLD, fontSize));
+        g.setFont(TMGUI.defaultFont);
 
         // Draw resources and production
         int k = 0;
@@ -85,27 +80,107 @@ public class TMPlayerView extends ComponentView {
                 // Rect containing resource image, count next to it. Next line: prod background with prod count
                 Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
                 drawImage(g, resImg, offsetX + spacing / 5 + k * defaultItemSize * 2, offsetX + spacing / 5, defaultItemSize, defaultItemSize);
-                drawShadowStringCentered(g, "" + gs.getPlayerResources()[player].get(res).getValue(),
+                drawShadowStringCentered(g, "" + gs.getPlayerResources()[focusPlayer].get(res).getValue(),
                         new Rectangle2D.Double(offsetX + spacing / 5. + defaultItemSize + k * defaultItemSize * 2, offsetX + spacing / 5., defaultItemSize, defaultItemSize));
                 drawImage(g, production, offsetX + spacing / 5 + defaultItemSize / 2 + k * defaultItemSize * 2, offsetX + spacing / 5 + defaultItemSize, defaultItemSize, defaultItemSize);
-                drawShadowStringCentered(g, "" + gs.getPlayerProduction()[player].get(res).getValue(),
+                drawShadowStringCentered(g, "" + gs.getPlayerProduction()[focusPlayer].get(res).getValue(),
                         new Rectangle2D.Double(offsetX + spacing / 5. + defaultItemSize / 2. + k * defaultItemSize * 2, offsetX + spacing / 5. + defaultItemSize, defaultItemSize, defaultItemSize));
 
-                g.setColor(playerColors[player]);
+                g.setColor(playerColors[focusPlayer]);
                 g.drawRect(offsetX + k * defaultItemSize * 2, offsetX, defaultItemSize * 2, defaultItemSize * 2);
                 k++;
             }
         }
 
-        if (highlight.size() > 0) {
-            g.setColor(Color.green);
-            Stroke s = g.getStroke();
-            g.setStroke(new BasicStroke(3));
-
-            Rectangle r = highlight.get(0);
-            g.drawRect(r.x, r.y, r.width, r.height);
-            g.setStroke(s);
+        // Draw tags from cards played, tag + count
+        k = 0;
+        int startX = offsetX;
+        int startY = offsetX*2 + defaultItemSize*2;
+        drawShadowStringCentered(g, "Tags played:", new Rectangle2D.Double(startX, startY, defaultItemSize*2, defaultItemSize/3.), null, null, 12);
+        startX += defaultItemSize*2;
+        for (TMTypes.Tag t: TMTypes.Tag.values()) {
+            int nCards = gs.getPlayerCardsPlayedTags()[focusPlayer].get(t).getValue();
+            Image img = ImageIO.GetInstance().getImage(t.getImagePath());
+            drawImage(g, img, startX + k*spacing/2 + k*2*defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3);
+            drawShadowStringCentered(g, "" + nCards,
+                    new Rectangle2D.Double(startX + k*spacing/2. + k*2*defaultItemSize/3. + defaultItemSize/3., startY, defaultItemSize/3., defaultItemSize/3.));
+            k++;
         }
+
+        // Draw number of cards played by type
+        k = 0;
+        startX = offsetX;
+        startY = offsetX*3 + defaultItemSize*2 + defaultItemSize/3;
+        Font f = g.getFont();
+        g.setFont(new Font(f.getName(), f.getStyle(), 12));
+        FontMetrics metrics = g.getFontMetrics(g.getFont());
+        String text = "Card types played:";
+        drawShadowStringCentered(g, text, new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize/3.), null, null, 12);
+        startX += metrics.stringWidth(text) + spacing*2;
+        for (TMTypes.CardType t: TMTypes.CardType.values()) {
+            if (t.isPlayableStandard()) {
+                int nCards = gs.getPlayerCardsPlayedTypes()[focusPlayer].get(t).getValue();
+                text = t.name() + ": " + nCards;
+                drawShadowStringCentered(g, text,
+                        new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), t.getColor(), null, 12);
+                startX += metrics.stringWidth(text) + spacing*2;
+                k++;
+            }
+        }
+
+        // Draw number of tiles by type
+        k = 0;
+        startX = offsetX;
+        startY = offsetX*4 + defaultItemSize*2 + 2*defaultItemSize/3;
+        drawShadowStringCentered(g, "Tiles placed:", new Rectangle2D.Double(startX, startY, defaultItemSize*2, defaultItemSize/3.), null, null, 12);
+        startX += defaultItemSize*2;
+        for (TMTypes.Tile t: TMTypes.Tile.values()) {
+            int nTiles = gs.getTilesPlaced()[focusPlayer].get(t).getValue();
+            Image img = ImageIO.GetInstance().getImage(t.getImagePath());
+            drawImage(g, img, startX + k*spacing/2 + k*2*defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3);
+            drawShadowStringCentered(g, "" + nTiles,
+                    new Rectangle2D.Double(startX + k*spacing/2. + k*2*defaultItemSize/3. + defaultItemSize/3., startY, defaultItemSize/3., defaultItemSize/3.));
+            k++;
+        }
+
+        // Draw milestones with progress, highlight claimed
+        k = 0;
+        startX = offsetX;
+        startY = offsetX*5 + defaultItemSize*2 + defaultItemSize;
+        text = "Milestones:";
+        drawShadowStringCentered(g, text, new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize/3.), null, null, 12);
+        startX += metrics.stringWidth(text) + spacing;
+        for (Milestone m: gs.getMilestones()) {
+            Color color = Color.white;
+            if (m.isClaimed()) color = playerColors[m.claimed];
+
+            int progress = m.checkProgress(gs, focusPlayer);
+            text = m.name + ": " + progress + "/" + m.min;
+            drawShadowStringCentered(g, text,
+                    new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), color, null, 12);
+            startX += metrics.stringWidth(text) + spacing;
+            k++;
+        }
+        g.setFont(f);
+
+        k = 0;
+        startX = offsetX;
+        startY = offsetX*6 + defaultItemSize*2 + defaultItemSize*4/3;
+        text = "Awards:";
+        drawShadowStringCentered(g, text, new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize/3.), null, null, 12);
+        startX += metrics.stringWidth(text) + spacing;
+        for (Award a: gs.getAwards()) {
+            Color color = Color.white;
+            if (a.isClaimed()) color = playerColors[a.claimed];
+
+            int progress = a.checkProgress(gs, focusPlayer);
+            text = a.name + ": " + progress;
+            drawShadowStringCentered(g, text,
+                    new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), color, null, 12);
+            startX += metrics.stringWidth(text) + spacing;
+            k++;
+        }
+        g.setFont(f);
     }
 
     public ArrayList<Rectangle> getHighlight() {

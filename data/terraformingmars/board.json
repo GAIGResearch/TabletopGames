@@ -9,5 +9,7 @@
             ["0", "Ground-Steel-Steel", "Ground", "Ground-Card", "Ground-Card", "Ground", "Ground-Titanium", "0", "0"],
             ["0", "0", "Ground-Steel", "Ground-Steel-Steel", "Ground", "Ground", "Ocean-Titanium-Titanium", "0", "0"]],
   "extra": ["Phobos", "Ganymede"],
-  "bonus": ["oxygen:8:inc-temperature-2", "temperature:3:inc-Heatprod-1", "temperature:5:inc-Heatprod-1", "temperature:15:placetile/ocean/ocean"]
+  "bonus": ["oxygen:8:inc-temperature-2", "temperature:3:inc-Heatprod-1", "temperature:5:inc-Heatprod-1", "temperature:15:placetile/ocean/ocean"],
+  "milestones": ["terraformer:tr:35", "mayor:city:3", "gardner:greenery:3", "builder:building:8", "planner:card:16"],
+  "awards": ["landlord:city", "banker:megacreditprod", "scientist:science", "thermalist:heat", "miner:steel-titanium"]
 }

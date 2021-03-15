@@ -18,15 +18,7 @@ public class TagRequirement implements Requirement {
     public boolean testCondition(TMGameState gs) {
         for (int i = 0; i < nMin.length; i++) {
             TMTypes.Tag tag = tags[i];
-            int nCount = 0;
-            for (TMCard card : gs.getPlayerCardsPlayed()[gs.getCurrentPlayer()].getComponents()) {
-                for (TMTypes.Tag t : card.tags) {
-                    if (t == tag) {
-                        nCount++;
-                    }
-                }
-            }
-            if (nCount < nMin[i]) return false;
+            if (gs.getPlayerCardsPlayedTags()[gs.getCurrentPlayer()].get(tag).getValue() < nMin[i]) return false;
         }
         return true;
     }

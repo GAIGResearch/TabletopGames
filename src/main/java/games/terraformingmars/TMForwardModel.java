@@ -9,12 +9,15 @@ import core.actions.ModifyCounter;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
-import core.components.PartialObservableDeck;
+import games.terraformingmars.actions.BuyCard;
+import games.terraformingmars.actions.DiscardCard;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.Award;
 import games.terraformingmars.rules.Bonus;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.Milestone;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -24,11 +27,9 @@ import utilities.Vector2D;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
+import static games.terraformingmars.TMGameState.TMPhase.*;
 import static games.terraformingmars.TMGameState.stringToGPCounter;
 import static games.terraformingmars.TMTypes.neighbor_directions;
 
@@ -38,6 +39,7 @@ public class TMForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         TMGameState gs = (TMGameState) firstState;
         TMGameParameters params = (TMGameParameters) firstState.getGameParameters();
+        Random rnd = new Random(params.getRandomSeed());
 
         gs.globalParameters = new Counter[3];  // hardcoded, read from json/params
         gs.globalParameters[0] = new Counter(params.temperatureScales, "temperature");
@@ -58,21 +60,54 @@ public class TMForwardModel extends AbstractForwardModel {
 
         gs.projectCards = new Deck<>("Projects", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         gs.corpCards = new Deck<>("Corporations", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        gs.discardCards = new Deck<>("Discard", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         loadCards(params.projectsPath, gs.projectCards);
         loadCards(params.corpsPath, gs.corpCards);
         loadBoard(gs);
 
-        gs.playerHands = new PartialObservableDeck[gs.getNPlayers()];
+        HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
+        HashSet<AbstractAction>[] playerCardsPlayedEffects;
+        HashSet<AbstractAction>[] playerCardsPlayedActions;
+        HashMap<TMTypes.CardType, Counter>[] playerCardsPlayedTypes;
+        HashMap<TMTypes.Tile, Counter>[] tilesPlaced;
+
+        gs.playerCorporations = new TMCard[gs.getNPlayers()];
+        gs.playerCardChoice = new Deck[gs.getNPlayers()];
+        gs.playerHands = new Deck[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            boolean[] visibility = new boolean[gs.getNPlayers()];
-            visibility[i] = true;
-            gs.playerHands[i] = new PartialObservableDeck<>("Hand Player " + i, i, visibility);
+            gs.playerHands[i] = new Deck<>("Hand Player " + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+            gs.playerCardChoice[i] = new Deck<>("Card Choice Player " + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
         }
-        int p = 0;
-        for (TMCard c: gs.projectCards.getComponents()) {
-            gs.playerHands[p].add(c);
-            p = (p + 1) % gs.getNPlayers();
+
+        gs.tilesPlaced = new HashMap[gs.getNPlayers()];
+        gs.playerCardsPlayedTypes = new HashMap[gs.getNPlayers()];
+        gs.playerCardsPlayedTags = new HashMap[gs.getNPlayers()];
+        gs.playerCardsPlayedActions = new HashSet[gs.getNPlayers()];
+        gs.playerCardsPlayedEffects = new HashSet[gs.getNPlayers()];
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            gs.tilesPlaced[i] = new HashMap<>();
+            for (TMTypes.Tile t: TMTypes.Tile.values()) {
+                gs.tilesPlaced[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " tiles placed player " + i));
+            }
+            gs.playerCardsPlayedTypes[i] = new HashMap<>();
+            for (TMTypes.CardType t: TMTypes.CardType.values()) {
+                gs.playerCardsPlayedTypes[i].put(t, new Counter(0,0,params.maxPoints,t.name() + " cards played player " + i));
+            }
+            gs.playerCardsPlayedTags[i] = new HashMap<>();
+            for (TMTypes.Tag t: TMTypes.Tag.values()) {
+                gs.playerCardsPlayedTags[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " cards played player " + i));
+            }
+            gs.playerCardsPlayedActions[i] = new HashSet<>();
+            gs.playerCardsPlayedEffects[i] = new HashSet<>();
+        }
+
+        // First thing to do is select corporations
+        gs.setGamePhase(CorporationSelect);
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            for (int j = 0; j < params.nCorpChoiceStart; j++) {
+                gs.playerCardChoice[i].add(gs.corpCards.pick(rnd));
+            }
         }
     }
 
@@ -80,6 +115,50 @@ public class TMForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
         currentState.getTurnOrder().endPlayerTurn(currentState);
+        TMGameState gs = (TMGameState)currentState;
+        TMGameParameters params = (TMGameParameters) gs.getGameParameters();
+        Random rnd = new Random(params.getRandomSeed());
+
+        // Test
+        gs.milestones[2].claim(gs);
+
+        if (gs.getGamePhase() == CorporationSelect) {
+            boolean allChosen = true;
+            for (TMCard card: gs.getPlayerCorporations()) {
+                if (card == null) {
+                    allChosen = false;
+                    break;
+                }
+            }
+            if (allChosen) {
+                gs.setGamePhase(Research);
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    for (int j = 0; j < params.nProjectsStart; j++) {
+                        gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
+                    }
+                }
+            }
+        } else if (gs.getGamePhase() == Research) {
+            // Check if finished: no ore cards in card choice decks
+            boolean allDone = true;
+            for (Deck<TMCard> deck: gs.getPlayerCardChoice()) {
+                if (deck.getSize() > 0) {
+                    allDone = false;
+                }
+            }
+            if (allDone) {
+                gs.setGamePhase(Actions);
+            }
+        } else if (gs.getGamePhase() == Actions) {
+            // TODO Check if finished: all players passed
+            // TODO production
+            gs.setGamePhase(Research);
+            for (int i = 0; i < gs.getNPlayers(); i++) {
+                for (int j = 0; j < params.nProjectsResearch; j++) {
+                    gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
+                }
+            }
+        }
     }
 
     @Override
@@ -87,15 +166,23 @@ public class TMForwardModel extends AbstractForwardModel {
         // play a card (if valid), standard projects, claim milestone, fund award, card actions, 8 plants -> greenery, 8 heat -> temperature, pass
         // event cards are face-down after played, tags don't apply!
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
         TMGameState gs = (TMGameState)gameState;
 
-        for (int i = 0; i < gs.board.getHeight(); i++) {
-            for (int j = 0; j < gs.board.getWidth(); j++) {
-                TMMapTile mt = gs.board.getElement(j, i);
-                if (mt != null) {
-                    if (mt.getTileType() == TMTypes.MapTileType.Ground && mt.getTilePlaced() == null){
-                        actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery));
+        if (gs.getGamePhase() == CorporationSelect || gs.getGamePhase() == Research) {
+            // Decide one at a time, alternating
+            actions.add(new BuyCard(0));
+            if (gs.getPlayerCardChoice()[gs.getCurrentPlayer()].get(0).cardType != TMTypes.CardType.Corporation) {
+                actions.add(new DiscardCard(0));
+            }
+        } else {
+            actions.add(new DoNothing());
+            for (int i = 0; i < gs.board.getHeight(); i++) {
+                for (int j = 0; j < gs.board.getWidth(); j++) {
+                    TMMapTile mt = gs.board.getElement(j, i);
+                    if (mt != null) {
+                        if (mt.getTileType() == TMTypes.MapTileType.Ground && mt.getTilePlaced() == null) {
+                            actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery));
+                        }
                     }
                 }
             }
@@ -152,6 +239,20 @@ public class TMForwardModel extends AbstractForwardModel {
             gs.bonuses = new Bonus[bonus.size()];
             for (int i = 0; i < bonus.size(); i++) {
                 gs.bonuses[i] = stringToBonus(gs, (String)bonus.get(i));
+            }
+
+            // Process milestones and awards
+            JSONArray milestones = (JSONArray) data.get("milestones");
+            gs.milestones = new Milestone[milestones.size()];
+            for (int i = 0; i < milestones.size(); i++) {
+                String[] split = ((String)milestones.get(i)).split(":");
+                gs.milestones[i] = new Milestone(split[0], Integer.parseInt(split[2]), split[1]);
+            }
+            JSONArray awards = (JSONArray) data.get("awards");
+            gs.awards = new Award[awards.size()];
+            for (int i = 0; i < awards.size(); i++) {
+                String[] split = ((String)awards.get(i)).split(":");
+                gs.awards[i] = new Award(split[0], split[1]);
             }
 
         } catch (IOException | ParseException e) {
@@ -260,7 +361,12 @@ public class TMForwardModel extends AbstractForwardModel {
         try (FileReader reader = new FileReader(path)) {
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for (Object o: data) {
-                TMCard card = TMCard.loadCardHTML((JSONObject) o);
+                TMCard card;
+                if (deck.getComponentName().equalsIgnoreCase("corporations")) {
+                    card = TMCard.loadCorporationHTML((JSONObject)o);
+                } else {
+                    card = TMCard.loadCardHTML((JSONObject) o);
+                }  // TODO: other types of cards
                 deck.add(card);
             }
 

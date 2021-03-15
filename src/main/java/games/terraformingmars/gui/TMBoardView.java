@@ -76,7 +76,7 @@ public class TMBoardView extends ComponentView {
     protected void paintComponent(Graphics g1) {
         Graphics2D g = (Graphics2D) g1;
 
-        g.setFont(new Font("Prototype", Font.BOLD, fontSize));
+        g.setFont(TMGUI.defaultFont);
 
         // Draw global parameters
         double height = 0;
@@ -114,16 +114,6 @@ public class TMBoardView extends ComponentView {
         }
         if (offsetX + trWidth > width) {
             width = offsetX + trWidth;
-        }
-
-        if (highlight.size() > 0) {
-            g.setColor(Color.green);
-            Stroke s = g.getStroke();
-            g.setStroke(new BasicStroke(3));
-
-            Rectangle r = highlight.get(0);
-            g.drawRect(r.x, r.y, r.width, r.height);
-            g.setStroke(s);
         }
 
         if (this.height == 20) {

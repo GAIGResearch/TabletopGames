@@ -136,22 +136,34 @@ public class TMTypes {
     }
 
     public enum CardType {
-        Automated("data/terraformingmars/images/cards/card-automated.png"),
-        Active("data/terraformingmars/images/cards/card-active.png"),
-        Event("data/terraformingmars/images/cards/card-event.png"),
-        Corporation("data/terraformingmars/images/cards/corp-card-bg.png"),
-        Prelude("data/terraformingmars/images/cards/proj-card-bg.png"),
-        Colony("data/terraformingmars/images/cards/proj-card-bg.png"),
-        GlobalEvent("data/terraformingmars/images/cards/proj-card-bg.png");
+        Automated("data/terraformingmars/images/cards/card-automated.png", true, Color.green),
+        Active("data/terraformingmars/images/cards/card-active.png", true, Color.cyan),
+        Event("data/terraformingmars/images/cards/card-event.png", true, Color.orange),
+        Corporation("data/terraformingmars/images/cards/corp-card-bg.png", false, Color.gray),
+        Prelude("data/terraformingmars/images/cards/proj-card-bg.png", false, Color.pink),
+        Colony("data/terraformingmars/images/cards/proj-card-bg.png", false, Color.lightGray),
+        GlobalEvent("data/terraformingmars/images/cards/proj-card-bg.png", false, Color.blue);
 
         String imagePath;
+        Color color;
+        boolean isPlayableStandard;
 
-        CardType(String imagePath) {
+        CardType(String imagePath, boolean isPlayableStandard, Color color) {
             this.imagePath = imagePath;
+            this.isPlayableStandard = isPlayableStandard;
+            this.color = color;
         }
 
         public String getImagePath() {
             return imagePath;
+        }
+
+        public boolean isPlayableStandard() {
+            return isPlayableStandard;
+        }
+
+        public Color getColor() {
+            return color;
         }
     }
 
