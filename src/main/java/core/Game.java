@@ -682,13 +682,14 @@ public class Game {
         MCTSParams params1 = new MCTSParams();
 
         players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DotsAndBoxes, players, seed, ac, false, null);
+        runOne(TerraformingMars, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

@@ -10,7 +10,6 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -19,7 +18,7 @@ import static java.util.stream.Collectors.*;
 public abstract class AbstractGUI extends JFrame {
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
-    public static int defaultInfoPanelHeight = 160;
+    public static int defaultInfoPanelHeight = 170;
     public static int defaultCardWidth = 100, defaultCardHeight = 80;
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
     public static int defaultDisplayWidth = 500, defaultDisplayHeight = 400;
@@ -260,10 +259,5 @@ public abstract class AbstractGUI extends JFrame {
                 actionButton.setButtonAction(null, "");
             }
         }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
     }
 }

@@ -38,6 +38,8 @@ public abstract class Utils {
                 return Color.ORANGE;
             case "light green":
                 return Color.GREEN;
+            case "purple":
+                return new Color(143, 77, 175);
             default:
                 return null;
         }
@@ -239,5 +241,14 @@ public abstract class Utils {
         } catch (IOException | ParseException e) {
             throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " +e.toString());
         }
+    }
+
+    public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
+        for (T each : enumeration.getEnumConstants()) {
+            if (each.name().compareToIgnoreCase(search) == 0) {
+                return each;
+            }
+        }
+        return null;
     }
 }

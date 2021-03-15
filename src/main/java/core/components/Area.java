@@ -87,7 +87,9 @@ public class Area extends Component implements IComponentContainer<Component> {
         this.components.put(component.getComponentID(), component);
         if (component instanceof IComponentContainer) {
             for (Component nestedC : ((IComponentContainer<?>) component).getComponents()) {
-                putComponent(nestedC);
+                if (nestedC != null) {
+                    putComponent(nestedC);
+                }
             }
         }
     }

@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Electro Catapult",
+    "type": "Active",
+    "cost": 17,
+    "requirement": "oxygen:8:max",
+    "tags": ["Building"],
+    "actions": ["buy:Plant-1/Steel-1:MegaCredit-7"],
+    "effects": ["dec-Energyprod-1"],
+    "points": 1.0
+  },
+  {
+    "name": "Asteroid Mining",
+    "type": "Automated",
+    "cost": 30,
+    "tags": ["Space", "Jovian"],
+    "effects": ["inc-Titaniumprod-2"],
+    "points": 2.0
+  },
+  {
+    "name": "Asteroid Mining Consortium",
+    "type": "Automated",
+    "cost": 13,
+    "requirement": "Titaniumprod:1:min",
+    "tags": ["Jovian"],
+    "effects": ["inc-Titaniumprod-1", "dec-Titaniumprod-1-any"],
+    "points": 1.0
+  },
+  {
+    "name": "Cupola City",
+    "type": "Automated",
+    "cost": 16,
+    "requirement": "oxygen:9:max",
+    "tags": ["City", "Building"],
+    "effects": ["dec-Energyprod-1", "inc-MegaCreditprod-3", "placecity"]
+  },
+  {
+    "name": "Asteroid",
+    "type": "Event",
+    "cost": 14,
+    "tags": ["Event", "Space"],
+    "effects": ["inc-temperature-1", "inc-Titanium-2", "dec-Plant-3-any"]
+  },
+  {
+    "name": "Shuttles",
+    "type": "Active",
+    "cost": 10,
+    "requirement": "oxygen:5:min",
+    "tags": ["Space"],
+    "rules": ["discount-Space-2"],
+    "effects": ["dec-Energyprod-1", "inc-MegaCreditprod-2"],
+    "points": 1.0
+  },
+  {
+    "name": "Livestock",
+    "type": "Active",
+    "cost": 13,
+    "requirement": "oxygen:9:min",
+    "tags": ["Animal"],
+    "actions": ["add-Animal-1"],
+    "effects": ["dec-Plantprod-1", "inc-MegaCreditprod-2"],
+    "points": 1.0,
+    "token-type": "Animal"
+  }
+]

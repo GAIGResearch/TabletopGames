@@ -25,6 +25,10 @@ import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUI;
+import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameParameters;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.gui.TMGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -110,50 +114,20 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    TerraformingMars (2, 5,
+            new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
+                        add(Cards); add(Strategy); add(Exploration); }},
+            new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
+                        add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
+                        add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}})
+
     ;
 
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
 
-    /**
-     * Converts a given string to the enum type corresponding to the game.
-     * Add here all games, planned or implemented.
-     *
-     * @param game - string of a game type
-     * @return - GameType corresponding to String
-     */
-    public GameType stringToGameType(String game) {
-        switch (game.toLowerCase()) {
-            case "pandemic":
-                return Pandemic;
-            case "tictactoe":
-                return TicTacToe;
-            case "explodingkittens":
-                return ExplodingKittens;
-            case "loveletter":
-                return LoveLetter;
-            case "uno":
-                return Uno;
-            case "virus":
-                return Virus;
-            case "coltexpress":
-                return ColtExpress;
-            case "dotsandboxes":
-                return DotsAndBoxes;
-            case "diamant":
-                return Diamant;
-            case "dominion":
-                return Dominion;
-            case "dominionsizedistortion":
-                return DominionSizeDistortion;
-            case "dominionimprovements" :
-                return DominionImprovements;
-        }
-        System.out.println("Game type not found, returning null. ");
-        return null;
-    }
 
     /**
      * Creates an instance of the given game type, with a specific number of players and game seed.
@@ -218,6 +192,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case TerraformingMars:
+                forwardModel = new TMForwardModel();
+                gameState = new TMGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -225,6 +203,11 @@ public enum GameType {
         return new Game(this, forwardModel, gameState);
     }
 
+    /**
+     * Retrieves default parameters for the given game type, with given random seed.
+     * @param seed - random seed to use in parameter initialisation
+     * @return - parameter set for the game
+     */
     public AbstractParameters getDefaultParams(long seed) {
         switch (this) {
             case Pandemic:
@@ -251,6 +234,8 @@ public enum GameType {
                 return DominionParameters.sizeDistortion(seed);
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
+            case TerraformingMars:
+                return new TMGameParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -310,6 +295,8 @@ public enum GameType {
                 gui = new DominionGUI(game, ac, human);
                 break;
             // TODO: Diamant GUI
+            case TerraformingMars:
+                gui = new TMGUI(game, ac);
         }
 
         return gui;
@@ -346,7 +333,10 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        Economic,
+        Environmental,
+        Manufacturing;
 
         /**
          * Retrieves a list of all games within this category.
@@ -411,7 +401,14 @@ public enum GameType {
         Campaign,
         MoveThroughDeck,
         Enclosure,
-        DeckManagement;
+        DeckManagement,
+        Drafting,
+        EndGameBonus,
+        HexagonGrid,
+        Income,
+        ProgressiveTurnOrder,
+        EngineBuilding,
+        TableauBuilding;
 
         /**
          * Retrieves a list of all games using this mechanic.
