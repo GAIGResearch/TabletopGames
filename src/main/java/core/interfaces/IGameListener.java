@@ -32,18 +32,20 @@ public interface IGameListener {
 
     static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
         IGameListener listener = new GameReportListener(logger);
-        try {
-            Class<?> clazz = Class.forName(listenerClass);
-
-            Constructor<?> constructor;
+        if (!listenerClass.equals("")) {
             try {
-                constructor = clazz.getConstructor(IStatisticLogger.class);
-                listener = (IGameListener) constructor.newInstance(logger);
-            } catch (NoSuchMethodException e) {
-                return createListener(listenerClass);
+                Class<?> clazz = Class.forName(listenerClass);
+
+                Constructor<?> constructor;
+                try {
+                    constructor = clazz.getConstructor(IStatisticLogger.class);
+                    listener = (IGameListener) constructor.newInstance(logger);
+                } catch (NoSuchMethodException e) {
+                    return createListener(listenerClass);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return listener;
     }
