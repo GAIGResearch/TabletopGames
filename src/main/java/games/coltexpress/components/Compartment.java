@@ -42,8 +42,8 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
 
     public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
         super(Utils.ComponentType.BOARD_NODE);
-        this.lootInside = new Deck<>("lootInside", VisibilityMode.VISIBLE_TO_ALL);
-        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.VISIBLE_TO_ALL);
+        this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
+        this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
         playersInsideCompartment = new HashSet<>();

@@ -8,16 +8,17 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
 import players.simple.RandomPlayer;
-import utilities.*;
+import utilities.Pair;
+import utilities.TAGStatSummary;
+import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.*;
+import static games.GameType.DotsAndBoxes;
 
 public class Game {
 
@@ -245,6 +246,10 @@ public class Game {
                             agentTime += (System.nanoTime() - s);
                             nDecisions++;
                         }
+                    }
+                    if (COMPETITION_MODE && !observedActions.contains(action)) {
+                        System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                        action = null;
                     }
                     AbstractAction finalAction = action;
                     listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));

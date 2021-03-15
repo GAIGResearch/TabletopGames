@@ -52,10 +52,6 @@ public abstract class AbstractGameState {
 
     private int gameID;
 
-    // this will add some extra sanity/fragility checks to help detect errors with GameStates behaving in
-    // unusual - and probably wrong - ways.
-    private boolean extraChecks = false;
-
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
@@ -159,13 +155,16 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.data = data;  // Should never be modified
 
-        s.history = new ArrayList<>(history);
-        s.historyText = new ArrayList<>(historyText);
-        if (extraChecks && historyText.size() > 1000) {
-            throw new AssertionError("History really shouldn't be over 1000 entries long?");
-        }
+        if (!CoreConstants.COMPETITION_MODE) {
+            s.history = new ArrayList<>(history);
+            s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
-
+            // History is for debugging and spectation of games. There is a risk that History might contain information
+            // formally hidden to some participants. For this reason, in COMPETITION_MODE we explicitly do not copy
+            // any history over in case a sneaky agent tries to take advantage of it.
+            // If there is any information only available in History that could legitimately be used, then this should
+            // be incorporated in the game-specific data in GameState where the correct hiding protocls can be enforced.
+        }
         s.actionsInProgress = new Stack<>();
         actionsInProgress.forEach(
                 a -> s.actionsInProgress.push(a.copy())
@@ -355,9 +354,6 @@ public abstract class AbstractGameState {
     protected void recordAction(AbstractAction action) {
         history.add(action);
         historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
-        if (extraChecks && history.size() > 1000) {
-            throw new AssertionError("History is probably a bit too long...");
-        }
     }
 
     /**
