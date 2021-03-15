@@ -95,6 +95,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         } else {
                             // we have completed this phase
                             state.springAutumnHousekeeping();
+                            listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
                             season = season.next();
                             if (season == SUMMER && getYear() == 1)
                                 season = season.next(); // we skip Summer in the first year
@@ -112,8 +113,9 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 if (state.allBidsIn()) {
                     // we have completed SUMMER bidding
                     state.executeBids();
-                    season = season.next();
                     state.summerHousekeeping();
+                    listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
+                    season = season.next();
                     turnOwner = firstPlayerWithMonks(state);
                 }
                 break;
@@ -140,7 +142,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public void endRound(AbstractGameState state) {
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
-
         roundCounter++;
         season = season.next();
         if (getYear() > nMaxRounds) {
@@ -157,6 +158,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 return player;
         }
         // should only reach here if NO player has any monks left! So we skip the entire season!
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
         season.next();
         return abbot;
     }

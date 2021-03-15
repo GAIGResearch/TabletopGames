@@ -12,11 +12,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DMActionListener implements IGameListener {
+public class DMSeasonListener implements IGameListener {
 
     IStatisticLogger logger;
 
-    public DMActionListener(IStatisticLogger logger) {
+    public DMSeasonListener(IStatisticLogger logger) {
         this.logger = logger;
     }
 
@@ -29,10 +29,13 @@ public class DMActionListener implements IGameListener {
 
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
-            Map<String, Object> data = Arrays.stream(DiceMonasteryActionAttributes.values())
-                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, action)));
-            logger.record(data);
+        if (type == CoreConstants.GameEvents.ROUND_OVER) {
+            for (int p = 0; p < state.getNPlayers(); p++) {
+                int finalP = p;
+                Map<String, Object> data = Arrays.stream(DiceMonasteryStateAttributes.values())
+                        .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, finalP)));
+                logger.record(data);
+            }
         }
     }
 }
