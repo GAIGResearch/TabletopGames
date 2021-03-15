@@ -12,20 +12,18 @@ public interface IGameAttribute {
      * @param state The game state
      * @return The value of whatever the attribute is in this state
      */
-    Object get(AbstractGameState state, AbstractAction action);
+    default Object get(AbstractGameState state, AbstractAction action) {
+        return 0;
+    }
 
-    default String getAsString(AbstractGameState state, AbstractAction action) {
-        Object value = get(state, action);
-        if (value instanceof Double) {
-            return String.format("%.4g", value);
-        }
-        if (value instanceof Integer) {
-            return String.format("%d", value);
-        }
-        if (value instanceof Boolean) {
-            return (Boolean) value ? "1" : "0";
-        }
-        return value.toString();
+    /**
+     *
+     * @param state The game state
+     * @param player The player for whom we are reporting
+     * @return
+     */
+    default Object get(AbstractGameState state, int player) {
+        return 0;
     }
 
     String name();
