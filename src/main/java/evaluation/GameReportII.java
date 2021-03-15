@@ -9,7 +9,9 @@ import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
@@ -39,6 +41,8 @@ public class GameReportII {
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
                             "\t               Defaults to utilities.SummaryLogger. \n" +
                             "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
+                            "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
+                            "\t               use a different log file.\n" +
                             "\tnPlayers=      The total number of players in each game (the default is 'all') \n " +
                             "\t               A range can also be specified, for example 3-5. \n " +
                             "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
@@ -51,8 +55,11 @@ public class GameReportII {
         // Get Player to be used
         String playerDescriptor = getArg(args, "player", "random");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
-        String listenerClass = getArg(args, "listener", "utilities.GameReportListener");
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameReportListener").split("\\|")));
+        List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
 
+        if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
+            throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
         int nGames = getArg(args, "nGames", 1000);
         List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
@@ -79,8 +86,6 @@ public class GameReportII {
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
-        String logFile = getArg(args, "logFile", "GameReport.txt");
-
         // Then iterate over the Game Types
         for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {
             GameType gameType = GameType.valueOf(games.get(gameIndex));
@@ -101,9 +106,15 @@ public class GameReportII {
 
                 Game game = gameType.createGameInstance(playerCount);
 
-                IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-                IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
-                game.addListener(gameTracker);
+                List<IGameListener> gameTrackers = new ArrayList<>();
+                for (int i = 0; i < listenerClasses.size(); i++) {
+                    String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
+                    String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(i);
+                    IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
+                    IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
+                    game.addListener(gameTracker);
+                    gameTrackers.add(gameTracker);
+                }
 
                 for (int i = 0; i < nGames; i++) {
                     List<AbstractPlayer> allPlayers = new ArrayList<>();
@@ -116,7 +127,9 @@ public class GameReportII {
                     game.run();
                 }
                 // Once all games are complete, let the gameTracker know
-                gameTracker.onGameEvent(CoreConstants.GameEvents.GAME_SEQUENCE_OVER, game);
+                for (IGameListener gameTracker : gameTrackers) {
+                    gameTracker.onGameEvent(CoreConstants.GameEvents.GAME_SEQUENCE_OVER, game);
+                }
             }
         }
     }
