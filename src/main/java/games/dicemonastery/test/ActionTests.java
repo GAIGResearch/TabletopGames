@@ -235,8 +235,8 @@ public class ActionTests {
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
         for (int i = 0; i < 100; i++)
             (new Forage()).execute(state);
-        assertEquals(33, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
-        assertEquals(33, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
+        assertEquals(67, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
+        assertEquals(17, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
     }
 
     @Test

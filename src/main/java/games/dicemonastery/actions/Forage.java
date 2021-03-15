@@ -20,15 +20,15 @@ public class Forage extends UseMonk {
         Resource r = null;
         switch (roll) {
             case 1:
-            case 2:
                 break;
+            case 2:
             case 3:
             case 4:
-                r = Resource.BERRIES;
-                break;
             case 5:
-            case 6:
                 r = Resource.PIGMENT;
+                break;
+            case 6:
+                r = Resource.BERRIES;
                 break;
             default:
                 throw new AssertionError("Unexpected number rolled : " + roll);
