@@ -125,7 +125,7 @@ public class CoreGameLoop {
         assertEquals(0, turnOrder.getAbbot());
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(PLACE_MONKS, state.getGamePhase());
-        assertEquals(SUMMER, turnOrder.getSeason());
+        assertEquals(AUTUMN, turnOrder.getSeason()); // skip SUMMER in first year
     }
 
     @Test
@@ -159,7 +159,7 @@ public class CoreGameLoop {
         assertFalse(areasProcessed.contains(WORKSHOP));
 
         assertEquals(PLACE_MONKS, state.getGamePhase());
-        assertEquals(SUMMER, turnOrder.getSeason());
+        assertEquals(AUTUMN, turnOrder.getSeason());  // skip SUMMER in first year
         assertEquals(0, turnOrder.getAbbot());
         assertEquals(0, state.getCurrentPlayer());
     }
@@ -207,11 +207,11 @@ public class CoreGameLoop {
             springResources.add(getResourcesFor(state, player));
         }
 
-        // Now advance into Summer
+        // Now advance into Autumn (no Summer in year 1)
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
             fm.next(state, rnd.getAction(state, available));
-        } while (turnOrder.getSeason() != SUMMER);
+        } while (turnOrder.getSeason() != AUTUMN);
 
         List<Map<Resource, Integer>> summerResources = new ArrayList<>();
         for (int player = 0; player < 4; player++) {
@@ -255,7 +255,7 @@ public class CoreGameLoop {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.isNotTerminal());
 
-        assertEquals(4, turnOrder.getRoundCounter());
+        assertEquals(4, turnOrder.getYear());
         assertEquals(SPRING, turnOrder.getSeason());
         assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == Utils.GameResult.GAME_ONGOING));
     }
@@ -516,7 +516,6 @@ public class CoreGameLoop {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != AUTUMN);
         assertEquals(1, state.monksIn(DORMITORY, 0).size());
-        assertEquals(0, state.getCurrentPlayer());
     }
 
     @Test
@@ -550,6 +549,8 @@ public class CoreGameLoop {
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (!(turnOrder.getSeason() == SUMMER));
+
+        assertEquals(2, turnOrder.getYear());
     }
 
     private void emptyAllStores() {
@@ -571,8 +572,8 @@ public class CoreGameLoop {
         assertEquals(1, actions.size());
         assertEquals(new SummerBid(0, 0), actions.get(0));
 
-        state.addResource(0, BEER, 1);
-        state.addResource(0, MEAD, 1);
+        state.addResource(1, BEER, 1);
+        state.addResource(1, MEAD, 1);
         actions = fm.computeAvailableActions(state);
         assertEquals(4, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof SummerBid));
@@ -581,8 +582,8 @@ public class CoreGameLoop {
         assertTrue(actions.contains(new SummerBid(1, 0)));
         assertTrue(actions.contains(new SummerBid(1, 1)));
 
-        state.addResource(0, BEER, 1);
-        state.addResource(0, MEAD, 1);
+        state.addResource(1, BEER, 1);
+        state.addResource(1, MEAD, 1);
         actions = fm.computeAvailableActions(state);
         assertEquals(9, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof SummerBid));
@@ -596,8 +597,8 @@ public class CoreGameLoop {
         assertTrue(actions.contains(new SummerBid(2, 1)));
         assertTrue(actions.contains(new SummerBid(2, 2)));
 
-        state.addResource(0, BEER, 4);
-        state.addResource(0, MEAD, -1);
+        state.addResource(1, BEER, 4);
+        state.addResource(1, MEAD, -1);
         actions = fm.computeAvailableActions(state);
         assertEquals(8, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof SummerBid));
@@ -624,14 +625,14 @@ public class CoreGameLoop {
         }
         int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
         int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
-        fm.next(state, new SummerBid(1, 0));
-        assertEquals(10, state.getResource(0, BEER, STOREROOM));
-        assertEquals(10, state.getResource(0, MEAD, STOREROOM));
         fm.next(state, new SummerBid(1, 5));
         assertEquals(10, state.getResource(1, BEER, STOREROOM));
         assertEquals(10, state.getResource(1, MEAD, STOREROOM));
         fm.next(state, new SummerBid(0, 5));
         fm.next(state, new SummerBid(3, 2));
+        fm.next(state, new SummerBid(1, 0));
+        assertEquals(10, state.getResource(0, BEER, STOREROOM));
+        assertEquals(10, state.getResource(0, MEAD, STOREROOM));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
         assertEquals(startVP[0], state.getVictoryPoints(0));
@@ -669,9 +670,9 @@ public class CoreGameLoop {
         int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
         int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
         fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(0, 1));
+        fm.next(state, new SummerBid(0, 1));
         fm.next(state, new SummerBid(1, 0));
-        fm.next(state, new SummerBid(0, 1));
-        fm.next(state, new SummerBid(0, 1));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
         assertEquals(startVP[0], state.getVictoryPoints(0));
@@ -708,10 +709,10 @@ public class CoreGameLoop {
         }
         int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
         int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
-        fm.next(state, new SummerBid(2, 0));
         fm.next(state, new SummerBid(1, 0));
         fm.next(state, new SummerBid(0, 2));
         fm.next(state, new SummerBid(0, 1));
+        fm.next(state, new SummerBid(2, 0));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
         assertEquals(startVP[0] + 4, state.getVictoryPoints(0));
@@ -734,7 +735,5 @@ public class CoreGameLoop {
         assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
         assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
     }
-
-
 
 }

@@ -44,8 +44,7 @@ public class SummerBid extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        // this string is public knowledge
-        return "Bids an appropriate amount to ward off the Vikings";
+        return toString();
     }
 
     @Override

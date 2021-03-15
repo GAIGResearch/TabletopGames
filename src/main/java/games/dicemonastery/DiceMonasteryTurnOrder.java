@@ -96,6 +96,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                             // we have completed this phase
                             state.springAutumnHousekeeping();
                             season = season.next();
+                            if (season == SUMMER && getYear() == 1)
+                                season = season.next(); // we skip Summer in the first year
                             if (season == WINTER)
                                 state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
                             // and set the player back to the abbot
@@ -131,8 +133,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         turnOwnerPrayed = false;
         if (state.availableBonusTokens(currentAreaBeingExecuted).isEmpty())
             turnOwnerTakenReward = true; // no rewards to take
-        if (state.getResource(turnOwner, Resource.PRAYER, STOREROOM) == 0)
-            turnOwnerPrayed = true; // No prayers
+        if (currentAreaBeingExecuted == CHAPEL || state.getResource(turnOwner, Resource.PRAYER, STOREROOM) == 0)
+            turnOwnerPrayed = true; // No prayers in CHAPEL, and if we don't have any
     }
 
     @Override
@@ -141,7 +143,6 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
         roundCounter++;
         season = season.next();
-        roundCounter++;
         if (getYear() > nMaxRounds) {
             ((DiceMonasteryGameState) state).endGame();
         }

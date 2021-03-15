@@ -117,6 +117,28 @@ public class ActionTests {
             assertTrue(fm.computeAvailableActions(state).contains(new Pray(i)));
     }
 
+
+    @Test
+    public void prayerOptionIsSkippedInTheChapel() {
+        startOfUseMonkPhaseForArea(CHAPEL, SPRING, Collections.emptyMap());
+        for (int p = 0; p < 4; p++)
+            state.addResource(p, PRAYER, 1); // add Prayer token, as they might have ben used already
+
+        for (int i = 0; i < 2; i++) {  // we do this for the first two players who will have TOKENS to take
+            // finally we take BONUS_TOKEN and possible PROMOTION
+            assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
+            fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
+            if (state.isActionInProgress())
+                fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+
+            // Now check that we have no option to Pray
+     //       System.out.println(fm.computeAvailableActions(state).stream().map(Objects::toString).collect(joining("\n")));
+            assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof Pray));
+
+            fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote all monks
+        }
+    }
+
     @Test
     public void pray() {
         startOfUseMonkPhaseForArea(MEADOW, SPRING, Collections.emptyMap());
@@ -453,11 +475,11 @@ public class ActionTests {
         visit._execute(state);
         assertEquals(visit, state.currentActionInProgress());
         assertEquals(1, fm.computeAvailableActions(state).size());
-        assertEquals(new Buy(BREAD, 2), fm.computeAvailableActions(state).get(0));
+        assertEquals(new Buy(GRAIN, 2), fm.computeAvailableActions(state).get(0));
 
         int player = state.getCurrentPlayer();
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 1);
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(2, fm.computeAvailableActions(state).size());
 
         fm.next(state, (new Buy(CALF_SKIN, 3)));
         assertTrue(visit.executionComplete(state));
@@ -474,11 +496,13 @@ public class ActionTests {
         int player = state.getCurrentPlayer();
         fm.next(state, visit);
         assertEquals(1, fm.computeAvailableActions(state).size());
-        assertEquals(new Sell(BREAD, 1), fm.computeAvailableActions(state).get(0));
+        assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
         assertEquals(player, state.getCurrentPlayer());
         state.addResource(player, BEER, 1);
         state.addResource(player, MEAD, 1);
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Sell(BEER, 1)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Sell(MEAD, 2)));
         Sell action = (Sell) fm.computeAvailableActions(state).get(1);
 
         fm.next(state, action);

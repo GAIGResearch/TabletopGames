@@ -288,22 +288,22 @@ public class CopyTests {
         // copy state from P2 perspective
         DiceMonasteryGameState perspectiveCopy = (DiceMonasteryGameState) state.copy(2);
 
-        assertEquals(2, fullCopy.getCurrentPlayer());
-        assertEquals(2, perspectiveCopy.getCurrentPlayer());
+        assertEquals(3, fullCopy.getCurrentPlayer());
+        assertEquals(3, perspectiveCopy.getCurrentPlayer());
         assertNotSame(perspectiveCopy.hashCode(), fullCopy.hashCode());
         assertFalse(perspectiveCopy.equals(fullCopy));
 
         fm.next(fullCopy, new SummerBid(1, 0));
         fm.next(fullCopy, new SummerBid(1, 5));
 
-        assertEquals(0, fullCopy.getCurrentPlayer());
+        assertEquals(1, fullCopy.getCurrentPlayer());
         assertEquals(AUTUMN, ((DiceMonasteryTurnOrder)fullCopy.getTurnOrder()).getSeason());
         assertTrue(fm.computeAvailableActions(fullCopy).stream().noneMatch(a -> a instanceof SummerBid));
 
         fm.next(perspectiveCopy, new SummerBid(1, 0));
         fm.next(perspectiveCopy, new SummerBid(1, 5));
 
-        assertEquals(0, perspectiveCopy.getCurrentPlayer()); // still P0 to move
+        assertEquals(1, perspectiveCopy.getCurrentPlayer()); // still P0 to move
         assertEquals(SUMMER, ((DiceMonasteryTurnOrder)perspectiveCopy.getTurnOrder()).getSeason());  // but still in SUMMER
         assertTrue(fm.computeAvailableActions(perspectiveCopy).stream().allMatch(a -> a instanceof SummerBid));
     }

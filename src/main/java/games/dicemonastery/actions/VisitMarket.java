@@ -23,8 +23,8 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
     boolean traded = false;
 
     {
-        buyPrices = ImmutableMap.of(BREAD, 2, CALF_SKIN, 3, BEER, 3);
-        sellPrices = ImmutableMap.of(BREAD, 1, BEER, 2, MEAD, 2);
+        buyPrices = ImmutableMap.of(GRAIN, 2, CALF_SKIN, 3);
+        sellPrices = ImmutableMap.of(CANDLE, 3, BEER, 1, MEAD, 2);
     }
 
     public VisitMarket() {
