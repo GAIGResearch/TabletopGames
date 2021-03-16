@@ -7,12 +7,12 @@ import games.terraformingmars.TMTypes;
 
 import java.util.Objects;
 
-public class PlaceholderModifyCounter extends ModifyCounter {
+public class PlaceholderModifyCounter extends TMModifyCounter {
     TMTypes.Resource resource;
     boolean production;
 
-    public PlaceholderModifyCounter(int change, TMTypes.Resource resource, boolean production) {
-        super(-1, change);
+    public PlaceholderModifyCounter(int change, TMTypes.Resource resource, boolean production, boolean free) {
+        super(-1, change, free);
         this.resource = resource;
         this.production = production;
     }

@@ -12,6 +12,8 @@ public class Bonus {
     public final AbstractAction effect;
     public final String effectString;
 
+    public boolean executed;  // Can only execute once
+
     public Bonus(int counter, int threshold, AbstractAction effect, String effectString) {
         this.counterID = counter;
         this.threshold = threshold;
@@ -19,17 +21,20 @@ public class Bonus {
         this.effectString = effectString;
     }
 
-    public boolean checkBonus(TMGameState gs) {
-        Counter c = (Counter) gs.getComponentById(counterID);
-        if (c.getValue() == threshold) {
-            effect.execute(gs);
-            return true;
+    public void checkBonus(TMGameState gs) {
+        if (!executed) {
+            Counter c = (Counter) gs.getComponentById(counterID);
+            if (c.getValue() == threshold) {
+                effect.execute(gs);
+                executed = true;
+            }
         }
-        return false;
     }
 
     public Bonus copy() {
-        return new Bonus(counterID, threshold, effect, effectString);
+        Bonus b = new Bonus(counterID, threshold, effect, effectString);
+        b.executed = executed;
+        return b;
     }
 
     @Override

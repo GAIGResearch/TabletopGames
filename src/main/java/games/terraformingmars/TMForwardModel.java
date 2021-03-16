@@ -4,18 +4,14 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.actions.ModifyCounter;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
-import games.terraformingmars.actions.BuyCard;
-import games.terraformingmars.actions.DiscardCard;
+import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.Award;
 import games.terraformingmars.rules.Bonus;
-import games.terraformingmars.actions.PlaceTile;
-import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.Milestone;
 import org.json.simple.JSONArray;
@@ -113,11 +109,12 @@ public class TMForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
-        currentState.getTurnOrder().endPlayerTurn(currentState);
         TMGameState gs = (TMGameState)currentState;
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
         Random rnd = new Random(params.getRandomSeed());
+
+        // Execute action
+        action.execute(currentState);
 
         // Test
         gs.milestones[2].claim(gs);
@@ -132,6 +129,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             if (allChosen) {
                 gs.setGamePhase(Research);
+                gs.getTurnOrder().endRound(gs);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsStart; j++) {
                         gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
@@ -148,14 +146,32 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             if (allDone) {
                 gs.setGamePhase(Actions);
+                gs.getTurnOrder().endRound(gs);
             }
         } else if (gs.getGamePhase() == Actions) {
-            // TODO Check if finished: all players passed
-            // TODO production
-            gs.setGamePhase(Research);
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                for (int j = 0; j < params.nProjectsResearch; j++) {
-                    gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
+            // Check if finished: all players passed
+            if (((TMTurnOrder)gs.getTurnOrder()).nPassed == gs.getNPlayers()) {
+                // Production
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    // First, energy turns to heat
+                    gs.getPlayerResources()[i].get(TMTypes.Resource.Heat).increment(gs.getPlayerResources()[i].get(TMTypes.Resource.Energy).getValue());
+                    gs.getPlayerResources()[i].get(TMTypes.Resource.Energy).setValue(0);
+                    // Then, all production values are added to resources
+                    for (TMTypes.Resource res: TMTypes.Resource.values()) {
+                        gs.getPlayerResources()[i].get(res).increment(gs.getPlayerProduction()[i].get(res).getValue());
+                    }
+                    // TR also adds to mega credits
+                    gs.getPlayerResources()[i].get(TMTypes.Resource.MegaCredit).increment(gs.playerResources[i].get(TMTypes.Resource.TR).getValue());
+                }
+
+                // TODO check game end before next research phase
+                // Move to research phase
+                gs.getTurnOrder().endRound(gs);
+                gs.setGamePhase(Research);
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    for (int j = 0; j < params.nProjectsResearch; j++) {
+                        gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
+                    }
                 }
             }
         }
@@ -168,20 +184,33 @@ public class TMForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         TMGameState gs = (TMGameState)gameState;
 
-        if (gs.getGamePhase() == CorporationSelect || gs.getGamePhase() == Research) {
-            // Decide one at a time, alternating
-            actions.add(new BuyCard(0));
-            if (gs.getPlayerCardChoice()[gs.getCurrentPlayer()].get(0).cardType != TMTypes.CardType.Corporation) {
-                actions.add(new DiscardCard(0));
+        if (gs.getGamePhase() == CorporationSelect) {
+            // Decide one card at a time, first one player, then the other
+            Deck<TMCard> cardChoice = gs.getPlayerCardChoice()[gs.getCurrentPlayer()];
+            if (cardChoice.getSize() == 0) {
+                actions.add(new TMAction());  // Pass
+            } else {
+                for (int i = 0; i < cardChoice.getSize(); i++) {
+                    actions.add(new BuyCard(i, true));
+                }
+            }
+        } else if (gs.getGamePhase() == Research) {
+            // Decide one card at a time, first one player, then the other
+            Deck<TMCard> cardChoice = gs.getPlayerCardChoice()[gs.getCurrentPlayer()];
+            if (cardChoice.getSize() == 0) {
+                actions.add(new TMAction());  // Pass
+            } else {
+                actions.add(new BuyCard(0, true));
+                actions.add(new DiscardCard(0, true));
             }
         } else {
-            actions.add(new DoNothing());
+            actions.add(new TMAction());  // Can always just pass
             for (int i = 0; i < gs.board.getHeight(); i++) {
                 for (int j = 0; j < gs.board.getWidth(); j++) {
                     TMMapTile mt = gs.board.getElement(j, i);
                     if (mt != null) {
                         if (mt.getTileType() == TMTypes.MapTileType.Ground && mt.getTilePlaced() == null) {
-                            actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery));
+                            actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery, false));
                         }
                     }
                 }
@@ -323,7 +352,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 // A resource or production instead
                 String resString = split2[1].split("prod")[0];
                 TMTypes.Resource res = TMTypes.Resource.valueOf(resString);
-                effect = new PlaceholderModifyCounter(increment, res, split2[1].contains("prod"));
+                effect = new PlaceholderModifyCounter(increment, res, split2[1].contains("prod"), true);
             } else {
                 // A global counter (temp, oxygen, oceantiles)
                 effect = new ModifyCounter(which.getComponentID(), increment);
@@ -347,7 +376,7 @@ public class TMForwardModel extends AbstractForwardModel {
                     }
                 }
             }
-            effect = new PlaceTile(toPlace, legalPositions);  // Extended sequence, will ask player where to put it
+            effect = new PlaceTile(toPlace, legalPositions, true);  // Extended sequence, will ask player where to put it
             effectString = split2[1];
         }
         if (c != null) {

@@ -36,12 +36,14 @@ public class TMBoardView extends ComponentView {
     int offsetX = 10;
     int spacing = 10;
 
+    private boolean adjustedSize;
+
     public TMBoardView(TMGameState gs) {
         super(gs.getBoard(), 0, 0);
         this.gs = gs;
 
-        width = 20;
-        height = 20;
+        width = 500;
+        height = 500;
 
         rects = new Rectangle[gs.getBoard().getWidth() * gs.getBoard().getHeight()];
         highlight = new ArrayList<>();
@@ -116,9 +118,10 @@ public class TMBoardView extends ComponentView {
             width = offsetX + trWidth;
         }
 
-        if (this.height == 20) {
+        if (!adjustedSize) {
             this.height = (int) height;
             this.width = (int) width + offsetX;
+            adjustedSize = true;
         }
     }
 

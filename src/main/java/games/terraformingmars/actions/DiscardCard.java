@@ -9,10 +9,11 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.Objects;
 
-public class DiscardCard extends AbstractAction {
+public class DiscardCard extends TMAction {
     final int cardIdx;
 
-    public DiscardCard(int cardIdx) {
+    public DiscardCard(int cardIdx, boolean free) {
+        super(free);
         this.cardIdx = cardIdx;
     }
 
@@ -24,7 +25,7 @@ public class DiscardCard extends AbstractAction {
         if (card.cardType != TMTypes.CardType.Corporation) {
             gs.getDiscardCards().add(card);
         }
-        return true;
+        return super.execute(gs);
     }
 
     @Override
@@ -36,17 +37,23 @@ public class DiscardCard extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DiscardCard)) return false;
-        DiscardCard buyCard = (DiscardCard) o;
-        return cardIdx == buyCard.cardIdx;
+        if (!super.equals(o)) return false;
+        DiscardCard that = (DiscardCard) o;
+        return cardIdx == that.cardIdx;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardIdx);
+        return Objects.hash(super.hashCode(), cardIdx);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Buy card idx " + cardIdx;
+        return "Discard card idx " + cardIdx;
+    }
+
+    @Override
+    public String toString() {
+        return "Discard card idx " + cardIdx;
     }
 }

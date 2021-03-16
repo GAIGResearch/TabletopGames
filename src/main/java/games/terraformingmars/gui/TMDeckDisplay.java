@@ -4,10 +4,10 @@ import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
-import gui.views.ComponentView;
 import utilities.ImageIO;
 import utilities.Vector2D;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import static core.AbstractGUI.defaultItemSize;
 import static games.terraformingmars.gui.Utils.*;
 
-public class TMDeckDisplay extends ComponentView {
+public class TMDeckDisplay extends JComponent {
 
     Deck<TMCard> deck;
     TMGameState gs;
@@ -29,6 +29,7 @@ public class TMDeckDisplay extends ComponentView {
 
     Image pointBg;
     Image projCardBg;
+    int width, height;
 
     static int offsetX = 10;
     static int spacing = 10;
@@ -36,7 +37,6 @@ public class TMDeckDisplay extends ComponentView {
     static int cardWidth;
 
     public TMDeckDisplay(TMGameState gs, Deck<TMCard> deck) {
-        super(gs.getBoard(), 0, 0);
         this.gs = gs;
         this.deck = deck;
 
@@ -46,11 +46,12 @@ public class TMDeckDisplay extends ComponentView {
         pointBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/card-point-bg.png");
         projCardBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/proj-card-bg.png");
 
-
         Vector2D dim = scaleLargestDimImg(projCardBg, cardHeight);
         cardWidth = dim.getX();
         if (deck != null) {
             width = deck.getSize() * cardWidth + offsetX * 2;
+        } else {
+            width = cardWidth + offsetX * 2;
         }
         height = cardHeight + offsetX*2;
 
@@ -158,6 +159,12 @@ public class TMDeckDisplay extends ComponentView {
         this.deck = deck;
         if (deck != null) {
             width = deck.getSize() * cardWidth + offsetX * 2;
+            revalidate();
         }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height);
     }
 }

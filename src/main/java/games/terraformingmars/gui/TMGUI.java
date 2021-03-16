@@ -27,12 +27,14 @@ public class TMGUI extends AbstractGUI {
     TMBoardView view;
     TMPlayerView playerView;
     TMDeckDisplay playerHand, playerCardChoice, playerCorporation;
+    JScrollPane paneHand, paneCardChoice;
     JPanel infoPanel;
-    private boolean adjustedSize;
 
     static int fontSize = 16;
     static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
     static int focusPlayer = 0;
+
+    boolean focusCurrentPlayer;
 
     public TMGUI(Game game, ActionController ac) {
         super(ac, 500);
@@ -63,23 +65,26 @@ public class TMGUI extends AbstractGUI {
         playerView = new TMPlayerView(gameState, focusPlayer);
 
         playerHand = new TMDeckDisplay(gameState, gameState.getPlayerHands()[focusPlayer]);
-        JScrollPane pane1 = new JScrollPane(playerHand);
-        pane1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        pane1.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
+        paneHand = new JScrollPane(playerHand);
+        paneHand.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        paneHand.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
 
         playerCorporation = new TMDeckDisplay(gameState, null);
+        playerCorporation.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth + TMDeckDisplay.offsetX * 2, TMDeckDisplay.cardHeight + TMDeckDisplay.offsetX * 2));
 
         playerCardChoice = new TMDeckDisplay(gameState, gameState.getPlayerCardChoice()[focusPlayer]);
-        JScrollPane pane2 = new JScrollPane(playerCardChoice);
-        pane2.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        pane2.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
+        paneCardChoice = new JScrollPane(playerCardChoice);
+        paneCardChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        paneCardChoice.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
 
         JPanel playerMainWrap = new JPanel();
         playerMainWrap.add(playerView);
         playerMainWrap.add(playerCorporation);
         playerViewWrapper.add(playerMainWrap);
-        playerViewWrapper.add(pane1);
-        playerViewWrapper.add(pane2);
+        playerViewWrapper.add(paneHand);
+        playerViewWrapper.add(paneCardChoice);
 
         JPanel main = new JPanel();
         main.add(view);
@@ -93,12 +98,21 @@ public class TMGUI extends AbstractGUI {
         jLabel1.setFont(defaultFont);
         jLabel1.setForeground(Color.white);
         playerFlipButtons.add(jLabel1);
-        for (int i = 0; i < gameState.getNPlayers(); i++) {
-            JButton jb = new JButton("p" + i);
+        for (int i = 0; i < gameState.getNPlayers() + 1; i++) {
+            String text = "p" + i;
+            if (i == gameState.getNPlayers()) text = "Current player";
+            JButton jb = new JButton(text);
             jb.setFont(defaultFont);
             jb.setForeground(Color.white);
             jb.setBackground(Color.darkGray);
-            jb.addActionListener(e -> focusPlayer = Integer.parseInt(jb.getText().replace("p","")));
+            jb.addActionListener(e -> {
+                if (jb.getText().equalsIgnoreCase("current player")) {
+                    focusCurrentPlayer = true;
+                } else {
+                    focusPlayer = Integer.parseInt(jb.getText().replace("p",""));
+                    focusCurrentPlayer = false;
+                }
+            });
             playerFlipButtons.add(jb);
         }
 
@@ -106,11 +120,11 @@ public class TMGUI extends AbstractGUI {
         playerMainWrap.setOpaque(false);
         playerCorporation.setOpaque(false);
         playerFlipButtons.setOpaque(false);
-        pane1.setOpaque(false);
-        pane1.getViewport().setOpaque(false);
+        paneHand.setOpaque(false);
+        paneHand.getViewport().setOpaque(false);
         playerCardChoice.setOpaque(false);
-        pane2.setOpaque(false);
-        pane2.getViewport().setOpaque(false);
+        paneCardChoice.setOpaque(false);
+        paneCardChoice.getViewport().setOpaque(false);
         playerHand.setOpaque(false);
         playerView.setOpaque(false);
         playerViewWrapper.setOpaque(false);
@@ -161,6 +175,10 @@ public class TMGUI extends AbstractGUI {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             TMGameState gs = ((TMGameState) gameState);
+            if (focusCurrentPlayer) {
+                focusPlayer = gs.getCurrentPlayer();
+            }
+
             view.update(gs);
             playerView.update(gs);
             playerHand.update(gs.getPlayerHands()[focusPlayer]);

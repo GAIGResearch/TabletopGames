@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-public class PlaceTile extends AbstractAction implements IExtendedSequence {
+public class PlaceTile extends TMAction implements IExtendedSequence {
     int x,y;
     final TMTypes.Tile tile;
     HashSet<Vector2D> legalPositions;
@@ -23,14 +23,16 @@ public class PlaceTile extends AbstractAction implements IExtendedSequence {
     boolean impossible;
     int player;
 
-    public PlaceTile(int x, int y, TMTypes.Tile tile) {
+    public PlaceTile(int x, int y, TMTypes.Tile tile, boolean free) {
+        super(free);
         this.x = x;
         this.y = y;
         this.tile = tile;
         this.legalPositions = new HashSet<>();
     }
 
-    public PlaceTile(TMTypes.Tile tile, HashSet<Vector2D> legalPositions) {
+    public PlaceTile(TMTypes.Tile tile, HashSet<Vector2D> legalPositions, boolean free) {
+        super(free);
         this.x = -1;
         this.y = -1;
         this.tile = tile;
@@ -41,7 +43,7 @@ public class PlaceTile extends AbstractAction implements IExtendedSequence {
     public boolean execute(AbstractGameState gs) {
         if (x != -1 && tile != null) {
             TMGameState ggs = (TMGameState) gs;
-            return ggs.getBoard().getElement(x, y).placeTile(tile, ggs);
+            return ggs.getBoard().getElement(x, y).placeTile(tile, ggs) && super.execute(gs);
         }
         player = gs.getCurrentPlayer();
         gs.setActionInProgress(this);
@@ -50,7 +52,7 @@ public class PlaceTile extends AbstractAction implements IExtendedSequence {
 
     @Override
     public PlaceTile copy() {
-        PlaceTile copy = new PlaceTile(x, y, tile);
+        PlaceTile copy = new PlaceTile(x, y, tile, free);
         copy.impossible = impossible;
         copy.placed = placed;
         HashSet<Vector2D> copyPos = new HashSet<>();
@@ -72,7 +74,7 @@ public class PlaceTile extends AbstractAction implements IExtendedSequence {
                 for (int j = 0; j < gs.getBoard().getWidth(); j++) {
                     TMMapTile mt = gs.getBoard().getElement(j, i);
                     if (mt.getTilePlaced() == null && legalPositions.contains(new Vector2D(j, i))) {
-                        actions.add(new PlaceTile(j, i, tile));
+                        actions.add(new PlaceTile(j, i, tile, free));
                     }
                 }
             }
@@ -106,6 +108,7 @@ public class PlaceTile extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlaceTile)) return false;
+        if (!super.equals(o)) return false;
         PlaceTile placeTile = (PlaceTile) o;
         return x == placeTile.x &&
                 y == placeTile.y &&
@@ -118,7 +121,7 @@ public class PlaceTile extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, tile, legalPositions, placed, impossible, player);
+        return Objects.hash(super.hashCode(), x, y, tile, legalPositions, placed, impossible, player);
     }
 
     @Override

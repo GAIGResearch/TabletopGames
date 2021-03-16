@@ -57,7 +57,7 @@ public class TMGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TMGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters)gameParameters).nActionsPerPlayer));
     }
 
     @Override

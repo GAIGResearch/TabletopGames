@@ -2,7 +2,6 @@ package games.terraformingmars;
 
 import core.AbstractParameters;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TMGameParameters extends AbstractParameters {
@@ -41,6 +40,7 @@ public class TMGameParameters extends AbstractParameters {
     int nCorpChoiceStart = 2;
     int nProjectsStart = 10;
     int nProjectsResearch = 4;
+    int nActionsPerPlayer = 2;
 
     public TMGameParameters(long seed) {
         super(seed);

@@ -9,10 +9,11 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.Objects;
 
-public class BuyCard extends AbstractAction {
+public class BuyCard extends TMAction {
     final int cardIdx;
 
-    public BuyCard(int cardIdx) {
+    public BuyCard(int cardIdx, boolean free) {
+        super(free);
         this.cardIdx = cardIdx;
     }
 
@@ -20,20 +21,23 @@ public class BuyCard extends AbstractAction {
     public boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
+
         TMCard card = gs.getPlayerCardChoice()[gs.getCurrentPlayer()].pick(cardIdx);
         if (card.cardType == TMTypes.CardType.Corporation) {
+            // 1 card chosen, the rest are discarded
             gs.getPlayerCorporations()[gs.getCurrentPlayer()] = card;
             gs.getPlayerCardChoice()[gs.getCurrentPlayer()].clear();
-            return true;
+            return super.execute(gs);
         } else {
             if (gs.canPlayerPay(gp.getProjectPurchaseCost())) {
                 gs.getPlayerHands()[gs.getCurrentPlayer()].add(card);
                 gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.MegaCredit).decrement(gp.getProjectPurchaseCost());
                 // TODO: pay with other resources
-                return true;
+                return super.execute(gs);
             } else {
                 // Can't pay for it, discard instead
                 gs.getDiscardCards().add(card);
+                super.execute(gs);
                 return false;
             }
         }
@@ -48,17 +52,23 @@ public class BuyCard extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BuyCard)) return false;
+        if (!super.equals(o)) return false;
         BuyCard buyCard = (BuyCard) o;
         return cardIdx == buyCard.cardIdx;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardIdx);
+        return Objects.hash(super.hashCode(), cardIdx);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return "Buy card idx " + cardIdx;
+    }
+
+    @Override
+    public String toString() {
         return "Buy card idx " + cardIdx;
     }
 }
