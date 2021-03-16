@@ -14,19 +14,19 @@ import static core.CoreConstants.playerHandHash;
 
 public class CatanHeuristic implements IStateHeuristic {
 
-    double FACTOR_PLAYER_SCORE = 0.5;
+    double FACTOR_PLAYER_SCORE = 100;
+    double FACTOR_PLAYER_RESOURCES = 10;
+    double FACTOR_PLAYER_DEVELOPMENT_CARDS = 10;
+    double FACTOR_PLAYER_CITIES = 50;
+    double FACTOR_PLAYER_SETTLEMENTS = 40;
+    double FACTOR_PLAYER_PORTS = 20;
     double FACTOR_OPPONENTS_SCORE = -1.0/3.0;
-    double FACTOR_PLAYER_RESOURCES = 0.05;
-    double FACTOR_PLAYER_DEVELOPMENT_CARDS = 0.1;
-    double FACTOR_PLAYER_CITIES = 0.2;
-    double FACTOR_PLAYER_SETTLEMENTS = 0.15;
 
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         /**
          * TODO factors to evaluate:
-         * ports
          * largest army
          * longest road
          * development card advanced
@@ -69,7 +69,15 @@ public class CatanHeuristic implements IStateHeuristic {
         }
         stateValue+= FACTOR_PLAYER_SETTLEMENTS * (settlementCount * 0.2);
         stateValue+= FACTOR_PLAYER_CITIES * (cityCount * 0.25);
-
+        // Player port port control evaluation
+        int[] playerExchangeRate = cgs.getExchangeRates(); // {4, 4, 4, 4, 4}
+        int portControlCount = 0;
+        for (int i = 0; i < playerExchangeRate.length; i++){
+            if (playerExchangeRate[i] < 4) {
+                portControlCount++;
+            }
+        }
+        stateValue+= FACTOR_PLAYER_PORTS * (portControlCount * 0.2);
 
         return stateValue;
     }
