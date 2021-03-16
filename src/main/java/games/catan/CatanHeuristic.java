@@ -16,25 +16,18 @@ import static core.CoreConstants.playerHandHash;
 
 public class CatanHeuristic implements IStateHeuristic {
 
-    double FACTOR_PLAYER_SCORE = 100;
-    double FACTOR_PLAYER_RESOURCES = 10;
-    double FACTOR_PLAYER_DEVELOPMENT_CARDS = 10;
-    double FACTOR_PLAYER_CITIES = 50;
-    double FACTOR_PLAYER_SETTLEMENTS = 40;
-    double FACTOR_PLAYER_PORTS = 20;
-    double FACTOR_PLAYER_KNIGHTS = 15;
+    double FACTOR_PLAYER_SCORE = 0.416;
+    double FACTOR_PLAYER_RESOURCES = 0.0416;
+    double FACTOR_PLAYER_DEVELOPMENT_CARDS = 0.0416;
+    double FACTOR_PLAYER_CITIES = 0.2083;
+    double FACTOR_PLAYER_SETTLEMENTS = 0.1666;
+    double FACTOR_PLAYER_PORTS = 0.0833;
+    double FACTOR_PLAYER_KNIGHTS = 0.0416;
     double FACTOR_OPPONENTS_SCORE = -1.0/3.0;
 
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        /**
-         * TODO factors to evaluate:
-         * largest army
-         * longest road
-         * development card advanced
-         * opponents resource estimates
-         */
         CatanGameState cgs = (CatanGameState)gs;
         Utils.GameResult gameStatus = cgs.getGameStatus();
 
@@ -81,7 +74,7 @@ public class CatanHeuristic implements IStateHeuristic {
             }
         }
         stateValue+= FACTOR_PLAYER_PORTS * (portControlCount * 0.2);
-        // Player knight count evalution
+        // Player knight count evaluation
         int[] knights = cgs.getKnights();
         int playerKnightsCount = knights[playerId];
         int highestKnightsCount = Arrays.stream(knights).max().getAsInt();
