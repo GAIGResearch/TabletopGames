@@ -10,14 +10,13 @@ import utilities.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.OptionalInt;
 
 import static core.CoreConstants.playerHandHash;
 
 public class CatanHeuristic implements IStateHeuristic {
 
     double FACTOR_PLAYER_SCORE = 0.416;
-    double FACTOR_PLAYER_RESOURCES = 0.0416;
+    double FACTOR_PLAYER_RESOURCES_COUNT = 0.0416;
     double FACTOR_PLAYER_DEVELOPMENT_CARDS = 0.0416;
     double FACTOR_PLAYER_CITIES = 0.2083;
     double FACTOR_PLAYER_SETTLEMENTS = 0.1666;
@@ -49,7 +48,7 @@ public class CatanHeuristic implements IStateHeuristic {
         }
         // player resource evaluation
         List<Card> playerHand = ((Deck<Card>)cgs.getComponent(playerHandHash,playerId)).getComponents();
-        stateValue += FACTOR_PLAYER_RESOURCES * (Math.min(playerHand.size(),7) * (1.0/7.0));
+        stateValue += FACTOR_PLAYER_RESOURCES_COUNT * (Math.min(playerHand.size(),7) * (1.0/7.0));
         // player development card evaluation - very simple at the moment
         Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         stateValue += FACTOR_PLAYER_DEVELOPMENT_CARDS * (Math.min(playerDevDeck.getComponents().size(),10) * 0.1);
@@ -78,7 +77,9 @@ public class CatanHeuristic implements IStateHeuristic {
         int[] knights = cgs.getKnights();
         int playerKnightsCount = knights[playerId];
         int highestKnightsCount = Arrays.stream(knights).max().getAsInt();
-        stateValue += FACTOR_PLAYER_KNIGHTS * (((double) ((100 / highestKnightsCount^2) * playerKnightsCount^2))/100) ;
+        if (highestKnightsCount != 0){
+            stateValue += FACTOR_PLAYER_KNIGHTS * (((double) ((100 / highestKnightsCount^2) * playerKnightsCount^2))/100);
+        }
 
         return stateValue;
     }
