@@ -69,7 +69,7 @@ public class TMMapTile extends Component {
                 // If ocean, decrease number of tiles available and increase TR
                 Counter oceanTiles = TMGameState.stringToGPCounter(gs, "oceanTiles");
                 if (oceanTiles != null) {
-                    boolean succeeded = oceanTiles.decrement(1);
+                    boolean succeeded = oceanTiles.increment(1);
                     if (succeeded) {
                         gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.TR).increment(1);
                         setTilePlaced(which, gs);

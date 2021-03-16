@@ -168,17 +168,19 @@ public class TMTypes {
     }
 
     public enum GlobalParameter {
-        Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray),
-        Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white),
-        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow),
-        Venus ("data/terraformingmars/images/global-parameters/venus.png", Color.white);
+        Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true),
+        Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white, true),
+        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true),
+        Venus ("data/terraformingmars/images/global-parameters/venus.png", Color.white, false);
 
         String imagePath;
         Color color;
+        boolean countsForEndGame;
 
-        GlobalParameter(String imagePath, Color color) {
+        GlobalParameter(String imagePath, Color color, boolean countsForEndGame) {
             this.imagePath = imagePath;
             this.color = color;
+            this.countsForEndGame = countsForEndGame;
         }
 
         public String getImagePath() {
@@ -187,6 +189,10 @@ public class TMTypes {
 
         public Color getColor() {
             return color;
+        }
+
+        public boolean countsForEndGame() {
+            return countsForEndGame;
         }
     }
 

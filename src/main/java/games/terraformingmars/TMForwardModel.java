@@ -38,7 +38,7 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.globalParameters = new Counter[3];  // hardcoded, read from json/params
         gs.globalParameters[0] = new Counter(params.temperatureScales, "temperature");
         gs.globalParameters[1] = new Counter(params.oxygenScales, "oxygen");
-        gs.globalParameters[2] = new Counter(params.nOceanTiles, 0, params.nOceanTiles, "oceanTiles");
+        gs.globalParameters[2] = new Counter(0, 0, params.nOceanTiles, "oceanTiles");
 
         gs.playerResources = new HashMap[gs.getNPlayers()];
         gs.playerProduction = new HashMap[gs.getNPlayers()];
@@ -267,6 +267,15 @@ public class TMForwardModel extends AbstractForwardModel {
         }
 
         return actions;
+    }
+
+    private boolean checkGameEnd(TMGameState gs) {
+        boolean ended = true;
+        for (Counter c: gs.globalParameters) {
+            TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
+            if (gp != null && gp.countsForEndGame() && !c.isMaximum()) ended = false;
+        }
+        return ended;
     }
 
     @Override

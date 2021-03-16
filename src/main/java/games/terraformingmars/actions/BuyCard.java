@@ -2,6 +2,7 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Counter;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -35,9 +36,11 @@ public class BuyCard extends TMAction {
 
             return super.execute(gs);
         } else {
-            if (gs.canPlayerPay(null, null, gp.getProjectPurchaseCost())) {
+            Counter c = gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.MegaCredit);
+            // TODO: maybe allow use of other resources
+            if (c.getValue() >= gp.getProjectPurchaseCost()) {
                 gs.getPlayerHands()[gs.getCurrentPlayer()].add(card);
-                gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.MegaCredit).decrement(gp.getProjectPurchaseCost());
+                c.decrement(gp.getProjectPurchaseCost());
                 return super.execute(gs);
             } else {
                 // Can't pay for it, discard instead

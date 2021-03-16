@@ -23,7 +23,6 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     int player;
     int costPaid;
     int stage;
-    int nStages;
     TMTypes.Resource[] resourcesToPayWith;
 
     public PayForAction(TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
@@ -59,7 +58,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState) state;
         TMTypes.Resource res = resourcesToPayWith[stage];
         // Find minimum that must be spent of this resource so that the card is still payable with remaining resources
-        HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, nStages));
+        HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
 
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
@@ -88,7 +87,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         stage++;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == nStages-1 || costPaid == costTotal) {
+        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == resourcesToPayWith.length-1 || costPaid == costTotal) {
             // Action paid for, execute
             action.execute(state);
         }
@@ -99,14 +98,13 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState)state;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        return card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == nStages-1 || costPaid == costTotal;
+        return card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == resourcesToPayWith.length-1 || costPaid == costTotal;
     }
 
     @Override
     public PayForAction copy() {
         PayForAction p = new PayForAction((TMAction) action.copy(), resourceToPay, costTotal, cardIdx);
         p.costPaid = costPaid;
-        p.nStages = nStages;
         p.player = player;
         p.resourcesToPayWith = resourcesToPayWith.clone();
         p.stage = stage;
