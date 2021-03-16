@@ -54,6 +54,8 @@ public class TMGameState extends AbstractGameState {
     // Milestones and awards TODO: components?
     Milestone[] milestones;
     Award[] awards;
+    Counter nMilestonesClaimed;
+    Counter nAwardsFunded;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -70,6 +72,8 @@ public class TMGameState extends AbstractGameState {
             add(board);
             add(projectCards);
             add(corpCards);
+            add(nAwardsFunded);
+            add(nMilestonesClaimed);
             this.addAll(Arrays.asList(extraTiles));
             this.addAll(Arrays.asList(globalParameters));
             this.addAll(Arrays.asList(playerHands));
@@ -267,6 +271,14 @@ public class TMGameState extends AbstractGameState {
 
     public HashSet<ResourceMapping>[] getPlayerResourceMap() {
         return playerResourceMap;
+    }
+
+    public Counter getnAwardsFunded() {
+        return nAwardsFunded;
+    }
+
+    public Counter getnMilestonesClaimed() {
+        return nMilestonesClaimed;
     }
 
     static HashSet<Vector2D> getEmptyTilesOfType(TMGameState gs, TMTypes.MapTileType type) {

@@ -12,15 +12,10 @@ public class Milestone extends Award {
         this.min = min;
     }
 
-    public boolean claim(TMGameState gs) {
-        if (claimed == -1) {
-            int count = checkProgress(gs, gs.getCurrentPlayer());
-            if (count >= min) {
-                claimed = gs.getCurrentPlayer();
-                return true;
-            }
-        }
-        return false;
+    @Override
+    public boolean canClaim(TMGameState gs) {
+        int count = checkProgress(gs, gs.getCurrentPlayer());
+        return claimed == -1 && count >= min;
     }
 
     public Milestone copy() {

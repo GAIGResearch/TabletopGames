@@ -101,6 +101,9 @@ public class TMForwardModel extends AbstractForwardModel {
             gs.playerCardsPlayedEffects[i] = new HashSet<>();
         }
 
+        gs.nAwardsFunded = new Counter(0,0, params.nCostAwards.length,"Awards funded");
+        gs.nMilestonesClaimed = new Counter(0, 0, params.nCostMilestone.length, "Milestones claimed");
+
         // First thing to do is select corporations
         gs.setGamePhase(CorporationSelect);
         for (int i = 0; i < gs.getNPlayers(); i++) {
@@ -216,11 +219,14 @@ public class TMForwardModel extends AbstractForwardModel {
             }
 
             // Buy a standard project
-            // - Discard cards for MC
+            // - Discard cards for MC TODO
             // - Increase energy production 1 step for 11 MC
+            Counter c = gs.playerProduction[gs.getCurrentPlayer()].get(TMTypes.Resource.Energy);
+            actions.add(new PayForAction(new ModifyGlobalParameter(c.getComponentID(), 1, false),
+                    TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
             // - Increase temperature 1 step for 14 MC
-            Counter temp = stringToGPCounter(gs, "temperature");  // TODO: check if already maxed
-            if (temp != null) {
+            Counter temp = stringToGPCounter(gs, "temperature");
+            if (temp != null && !temp.isMaximum()) {
                 actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPTemp, -1));
             }
@@ -233,29 +239,31 @@ public class TMForwardModel extends AbstractForwardModel {
             actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.City, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
 
             // Claim a milestone
-//            gs.milestones[2].claim(gs);
+            if (!gs.getnMilestonesClaimed().isMaximum()) {
+                for (Milestone m : gs.milestones) {
+                    if (m.canClaim(gs)) {
+                        actions.add(new PayForAction(new ClaimAwardMilestone(m), TMTypes.Resource.MegaCredit, params.nCostMilestone[gs.nMilestonesClaimed.getValue()], -1));
+                    }
+                }
+            }
             // Fund an award
+            if (!gs.getnAwardsFunded().isMaximum()) {
+                for (Award a : gs.awards) {
+                    if (a.canClaim(gs)) {
+                        actions.add(new PayForAction(new ClaimAwardMilestone(a), TMTypes.Resource.MegaCredit, params.nCostAwards[gs.nAwardsFunded.getValue()], -1));
+                    }
+                }
+            }
 
-            // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation
+            // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation TODO
 
             // 8 plants into greenery tile TODO adjacency requirement
             actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.Plant, params.nCostGreeneryPlant, -1));
             // 8 heat into temperature increase
-            if (temp != null) {  // TODO: check if already maxed
+            if (temp != null && !temp.isMaximum()) {
                 actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
                         TMTypes.Resource.Heat, params.nCostTempHeat, -1));
             }
-
-//            for (int i = 0; i < gs.board.getHeight(); i++) {
-//                for (int j = 0; j < gs.board.getWidth(); j++) {
-//                    TMMapTile mt = gs.board.getElement(j, i);
-//                    if (mt != null) {
-//                        if (mt.getTileType() == TMTypes.MapTileType.Ground && mt.getTilePlaced() == null) {
-//                            actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery, false));
-//                        }
-//                    }
-//                }
-//            }
         }
 
         return actions;

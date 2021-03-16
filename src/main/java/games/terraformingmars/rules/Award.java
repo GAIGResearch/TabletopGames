@@ -51,7 +51,7 @@ public class Award {
     }
 
     public boolean claim(TMGameState gs) {
-        if (claimed == -1) {
+        if (canClaim(gs)) {
             claimed = gs.getCurrentPlayer();
             return true;
         }
@@ -60,6 +60,10 @@ public class Award {
 
     public boolean isClaimed() {
         return claimed != -1;
+    }
+
+    public boolean canClaim(TMGameState gs) {
+        return claimed == -1;
     }
 
     public Award copy() {

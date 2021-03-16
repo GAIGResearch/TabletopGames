@@ -47,6 +47,8 @@ public class TMGameParameters extends AbstractParameters {
     double nTitaniumMC = 3;
 
     // standard projects
+    int nGainCardDiscard = 1;
+    int nCostSPEnergy = 11;
     int nCostSPTemp = 14;
     int nCostSPOcean = 18;
     int nCostSPGreenery = 23;
@@ -55,6 +57,10 @@ public class TMGameParameters extends AbstractParameters {
     // Resource actions
     int nCostGreeneryPlant = 8;
     int nCostTempHeat = 8;
+
+    // Milestones, awards
+    int[] nCostMilestone = new int[] {8, 8, 8};
+    int[] nCostAwards = new int[] {8, 14, 20};
 
     public TMGameParameters(long seed) {
         super(seed);
