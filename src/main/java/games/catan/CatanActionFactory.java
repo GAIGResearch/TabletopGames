@@ -178,7 +178,7 @@ public class CatanActionFactory {
                     resourcesToRequest[resourceOfferedIndex]++;
                 }
                 if(!(resourcesToOffer.equals(resourcesRequested) && resourcesToRequest.equals(resourcesOffered))){ // ensures the trade offer is not the same as the existing trade offer
-                    actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
+                    actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
                 }
                 Arrays.fill(resourcesToOffer,0);
                 Arrays.fill(resourcesToRequest,0);
