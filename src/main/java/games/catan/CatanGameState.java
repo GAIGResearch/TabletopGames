@@ -323,6 +323,17 @@ public class CatanGameState extends AbstractGameState {
         return settlements;
     }
 
+    public ArrayList<Settlement> getPlayersSettlements(int playerId){
+        ArrayList<Settlement> playerSettlements = new ArrayList<>();
+        ArrayList<Settlement> allSettlements = getSettlements();
+        for (int i = 0; i < allSettlements.size(); i++){
+            if (allSettlements.get(i).getOwner()==playerId){
+                playerSettlements.add(allSettlements.get(i));
+            }
+        }
+        return playerSettlements;
+    }
+
     /* checks if given resources cover the price or not */
     public static boolean checkCost(int[] resources, int[] price){
         for (int i = 0; i < resources.length; i++){
