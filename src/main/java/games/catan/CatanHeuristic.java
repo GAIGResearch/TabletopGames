@@ -8,7 +8,9 @@ import games.catan.components.Settlement;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 
 import static core.CoreConstants.playerHandHash;
 
@@ -20,6 +22,7 @@ public class CatanHeuristic implements IStateHeuristic {
     double FACTOR_PLAYER_CITIES = 50;
     double FACTOR_PLAYER_SETTLEMENTS = 40;
     double FACTOR_PLAYER_PORTS = 20;
+    double FACTOR_PLAYER_KNIGHTS = 15;
     double FACTOR_OPPONENTS_SCORE = -1.0/3.0;
 
 
@@ -69,7 +72,7 @@ public class CatanHeuristic implements IStateHeuristic {
         }
         stateValue+= FACTOR_PLAYER_SETTLEMENTS * (settlementCount * 0.2);
         stateValue+= FACTOR_PLAYER_CITIES * (cityCount * 0.25);
-        // Player port port control evaluation
+        // Player port control evaluation
         int[] playerExchangeRate = cgs.getExchangeRates(); // {4, 4, 4, 4, 4}
         int portControlCount = 0;
         for (int i = 0; i < playerExchangeRate.length; i++){
@@ -78,6 +81,11 @@ public class CatanHeuristic implements IStateHeuristic {
             }
         }
         stateValue+= FACTOR_PLAYER_PORTS * (portControlCount * 0.2);
+        // Player knight count evalution
+        int[] knights = cgs.getKnights();
+        int playerKnightsCount = knights[playerId];
+        int highestKnightsCount = Arrays.stream(knights).max().getAsInt();
+        stateValue += FACTOR_PLAYER_KNIGHTS * (((double) ((100 / highestKnightsCount^2) * playerKnightsCount^2))/100) ;
 
         return stateValue;
     }
