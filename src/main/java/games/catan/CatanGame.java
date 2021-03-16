@@ -48,7 +48,7 @@ public class CatanGame extends Game {
 //        agents.add(new MCTSPlayer(mctsParams));
 
 //        agents.add(new RandomPlayer(new Random()));
-        agents.add(new RandomPlayer(new Random()));
+        //agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));

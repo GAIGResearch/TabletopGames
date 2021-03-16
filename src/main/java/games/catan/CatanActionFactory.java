@@ -81,7 +81,7 @@ public class CatanActionFactory {
      */
     static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int[] resources = gs.getPlayerResources();
+        int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
         int exchangeRate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
         int n_players = ((CatanParameters)gs.getGameParameters()).n_players;
         int currentPlayer = gs.getCurrentPlayer();
@@ -132,7 +132,7 @@ public class CatanActionFactory {
     static List<AbstractAction> getAcceptTradeActions(CatanGameState gs){
         ArrayList<AbstractAction> actions = new ArrayList();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-        int[] resources = gs.getPlayerResources();
+        int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
 
         if(CatanGameState.checkCost(resources, offeredPlayerTrade.getResourcesRequested())){
             actions.add(new AcceptTrade(offeredPlayerTrade));
@@ -152,7 +152,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
         int exchangeRate = ((CatanParameters)gs.getGameParameters()).default_exchange_rate;
-        int[] playerResources = gs.getPlayerResources();
+        int[] playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
         int[] resourcesOffered = offeredPlayerTrade.getResourcesOffered();
         int[] resourcesRequested = offeredPlayerTrade.getResourcesRequested();
         int[] resourcesToOffer = new int[5];
