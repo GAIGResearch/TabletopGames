@@ -57,7 +57,7 @@ public class Monopoly extends AbstractAction {
         if (this == other) return true;
         if (other instanceof Monopoly){
             Monopoly otherAction = (Monopoly)other;
-            return resource.equals(otherAction.resource) && card == otherAction.card;
+            return resource.equals(otherAction.resource) && card.equals(otherAction.card);
         }
         return false;
     }

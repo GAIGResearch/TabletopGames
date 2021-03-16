@@ -26,8 +26,6 @@ public class CatanBoardView extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        // todo set background colour to blue so it looks like sea, line below doesn't work
-//        g2.setBackground(Color.BLUE);
         super.paintComponent(g);
         drawBoard(g2);
     }
@@ -87,6 +85,10 @@ public class CatanBoardView extends JComponent {
                     if (settlements[i] != null && settlements[i].getOwner() != -1) {
                         drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
                     }
+                    // todo lines below are useful for debugging as they display settlement IDs
+//                    g.setFont(new Font("TimeRoman", Font.PLAIN, 20));
+//                    g.setColor(Color.GRAY);
+//                    g.drawString(settlements[i].getID() + "", tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
                 }
 
                 // lines below render cube coordinates and distances from middle

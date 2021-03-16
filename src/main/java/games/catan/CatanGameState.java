@@ -18,8 +18,7 @@ import games.catan.components.Settlement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static core.CoreConstants.VERBOSE;
-import static core.CoreConstants.playerHandHash;
+import static core.CoreConstants.*;
 import static games.catan.CatanConstants.*;
 import static games.pandemic.PandemicConstants.infectionHash;
 import static games.pandemic.PandemicConstants.playerDeckHash;
@@ -155,7 +154,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
     public int[] getKnights(){
-        return knights.clone();
+        return Arrays.copyOf(knights, knights.length);
     }
 
     public void addVictoryPoint(int playerID){
@@ -168,14 +167,24 @@ public class CatanGameState extends AbstractGameState {
         return victoryPoints.clone();
     }
 
-    public int[] getPlayerResources(){
-        Deck<Card> playerHand = (Deck<Card>)this.getComponentActingPlayer(CoreConstants.playerHandHash);
+    public int[] getPlayerResources(int playerID){
+        Deck<Card> playerHand = (Deck<Card>)this.getComponent(CoreConstants.playerHandHash, playerID);
         int[] resources = new int[CatanParameters.Resources.values().length];
 
         for (Card card: playerHand.getComponents()){
             resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
         }
         return resources;
+    }
+
+    public int[] getPLayerDevCards(int playerID){
+        Deck<Card> playerDevCards = (Deck<Card>)this.getComponent(developmentDeckHash, playerID);
+        int[] devCards = new int[CatanParameters.CardTypes.values().length];
+
+        for (Card card: playerDevCards.getComponents()){
+            devCards[CatanParameters.CardTypes.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
+        }
+        return devCards;
     }
 
     public int updateLargestArmy(CatanParameters params){
@@ -224,61 +233,98 @@ public class CatanGameState extends AbstractGameState {
     public int getRoadDistance(int x, int y, int edge){
         // calculates the distance length of the road
         HashSet<Road> roadSet = new HashSet<>();
-        roadSet.add(board[x][y].getRoads()[edge]);
+        HashSet<Road> roadSet2 = new HashSet<>();
+//        roadSet.add(board[x][y].getRoads()[edge]);
 
         ArrayList<Settlement> dir1 = new ArrayList<>();
         ArrayList<Settlement> dir2 = new ArrayList<>();
         Settlement settl1 = board[x][y].getSettlements()[edge];
         Settlement settl2 = board[x][y].getSettlements()[(edge+1)%6];
 
-        dir1.addAll(catanGraph.getNeighbourNodes(settl1));
-        dir2.addAll(catanGraph.getNeighbourNodes(settl2));
+        dir1.add(settl1);
+        dir2.add(settl2);
+
+        // todo this should be done somewhere else in the FM
+        // update the placed road in the graph in both directions not just on the board
+        for (Edge<Settlement, Road> e: catanGraph.getEdges(settl1)){
+            if (e.getDest().equals(settl2)){
+                e.getValue().setOwner(getCurrentPlayer());
+            }
+        }
+        for (Edge<Settlement, Road> e: catanGraph.getEdges(settl2)){
+            if (e.getDest().equals(settl1)){
+                e.getValue().setOwner(getCurrentPlayer());
+            }
+        }
 
         // find longest segment, we first follow dir_1 then dir_2
-        // todo probably crashes, need to look into this
-//        expandRoad(this, roadSet, dir1);
-//        expandRoad(this, roadSet, dir2);
+        // todo look into if keeping visited on the first iteration should be kept or not
+        roadSet = expandRoad(this, roadSet, new ArrayList<>(dir1), new ArrayList<>(dir2));
+        roadSet.addAll(expandRoad(this, roadSet2, new ArrayList<>(dir2), new ArrayList<>(dir1)));
 
+        // todo unexpanded reached size 3
         return roadSet.size();
     }
 
-    private static int expandRoad(CatanGameState gs, HashSet<Road> roadSet, List<Settlement> unexpanded){
+    private static HashSet<Road> expandRoad(CatanGameState gs, HashSet<Road> roadSet, List<Settlement> unexpanded, List<Settlement> expanded){
         // return length, makes it possible to compare segments
         // modify original set
-        while (unexpanded.size() > 0){
+        if (unexpanded.size() == 0){
+            return roadSet;
+        }
+        if (unexpanded.size() == 2) {
             // Handle branching
-            if (unexpanded.size() == 2){
-                // road branches -> explore both directions
-                List unexpanded_copy = new ArrayList(unexpanded);
-                unexpanded.remove(1); // list with first element
-                unexpanded_copy.remove(0); // list with second element
+            int length = 0;
+            for (Settlement settlement : unexpanded) {
+                ArrayList<Settlement> toExpand = new ArrayList<>();
+                toExpand.add(settlement);
                 HashSet roadSetCopy = new HashSet(roadSet);
-                int length1 = expandRoad(gs, roadSet, unexpanded);
-                int length2 = expandRoad(gs, roadSetCopy, unexpanded_copy);
-                if (length2 > length1){
-                    // has to swap the set if second option is longer
+                roadSetCopy = expandRoad(gs, roadSetCopy, toExpand, expanded);
+                if (roadSetCopy.size() >= length) {
+                    length = roadSetCopy.size();
                     roadSet = roadSetCopy;
                 }
-                unexpanded = new ArrayList<>(); // empty list, fully explored it
             }
-            // logic for expanding a node
+            return roadSet;
+        } else {
+            // case of expanding a single settlement
             Settlement settlement = unexpanded.remove(0);
+            expanded.add(settlement);
+
+            // find which edge took us here and add it to the visited roads
             List<Edge<Settlement, Road>> edges = gs.getGraph().getEdges(settlement);
+            boolean roadFound = false;
             if (edges != null){
                 for (Edge<Settlement, Road> e: edges){
-                    Road road = e.getValue();
-                    if (!roadSet.contains(e.getValue())){
-                        // todo check if opponent has a settlement along the longest road as it breaks the longest road
-                        if (road.getOwner() == gs.getCurrentPlayer()){
-                            // only add it if it's the players and unvisited
-                            roadSet.add(road);
-                            unexpanded.add(e.getDest());
+                    // find road taking to new node
+                    if (expanded.contains(e.getDest())){
+                        Road road = e.getValue();
+                        if (!roadSet.contains(e.getValue())){
+                            if (road.getOwner() == gs.getCurrentPlayer()){
+                                // only add it if it's the players and unvisited
+                                roadSet.add(road);
+                                roadFound = true;
+                            }
+                        }
+                    }
+                }
+                if (roadFound) {
+                    // if settlement is not taken or belongs to player we add the neighbouring settlements to the unvisited list
+                    if (settlement.getOwner() == -1 || settlement.getOwner() == gs.getCurrentPlayer()) {
+                        // Add new settlements to the unexpanded list
+                        for (Edge<Settlement, Road> e : edges) {
+                            // find road taking to new node
+                            // todo could not find destination in visited
+                            if (!expanded.contains(e.getDest())) {
+                                unexpanded.add(e.getDest());
+                            }
                         }
                     }
                 }
             }
         }
-        return roadSet.size();
+        // todo only gets here when explored a single one
+        return expandRoad(gs, roadSet, unexpanded, expanded);
     }
 
     public ArrayList<Road> getRoads(){
@@ -321,6 +367,14 @@ public class CatanGameState extends AbstractGameState {
         }
         System.out.println("There are " + counter + " settlements");
         return settlements;
+    }
+
+    public int getLongestRoadOwner(){
+        return longestRoad;
+    }
+
+    public int getLongestRoadLength(){
+        return longestRoadLength;
     }
 
     public ArrayList<Settlement> getPlayersSettlements(int playerId){
@@ -462,9 +516,18 @@ public class CatanGameState extends AbstractGameState {
     }
 
     private HashMap<Integer, Area> copyAreas(){
-        HashMap<Integer, Area> copy = new HashMap();
-        for (Map.Entry<Integer, Area> entry: this.areas.entrySet()){
-            copy.put(entry.getKey(), entry.getValue());
+        HashMap<Integer, Area> copy = new HashMap<>();
+        for(int key : areas.keySet()) {
+            Area a = areas.get(key);
+            if (PARTIAL_OBSERVABLE && key != -1) {
+                HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
+                // todo need to handle PO
+                // todo create a cardpool that players may have, shuffle and distribute them
+                for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
+                    a.putComponent(e.getKey(), e.getValue().copy());
+                }
+            }
+            copy.put(key, a.copy());
         }
         return copy;
     }

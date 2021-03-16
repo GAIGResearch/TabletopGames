@@ -6,24 +6,28 @@ import games.catan.CatanGameState;
 import games.catan.CatanTile;
 
 public class MoveRobber extends AbstractAction {
-    CatanTile to;
+    int x;
+    int y;
 
-    public MoveRobber(CatanTile to){
-        this.to = to;
+    public MoveRobber(int x, int y){
+        this.x = x;
+        this.y = y;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
         CatanTile robberTile = cgs.getRobber(cgs.getBoard());
+        System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
         if (robberTile.removeRobber()){
-            to.placeRobber();
+            cgs.getBoard()[x][y].placeRobber();
+            return true;
         }
         return false;
     }
 
     @Override
     public AbstractAction copy() {
-        return new MoveRobber(to);
+        return new MoveRobber(x, y);
     }
 
     @Override
@@ -31,7 +35,7 @@ public class MoveRobber extends AbstractAction {
         if (this == other) return true;
         if (other instanceof MoveRobber){
             MoveRobber otherAction = (MoveRobber)other;
-            return to.equals(otherAction.to);
+            return x == otherAction.x && y == otherAction.y;
         }
         return false;
     }
@@ -43,6 +47,6 @@ public class MoveRobber extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "MoveRobber to " + to;
+        return "MoveRobber to x=" + x + " y=" + y;
     }
 }

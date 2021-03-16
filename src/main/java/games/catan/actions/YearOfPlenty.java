@@ -11,6 +11,7 @@ import games.catan.CatanParameters;
 import java.util.List;
 
 import static core.CoreConstants.playerHandHash;
+import static games.catan.CatanConstants.resourceDeckHash;
 
 public class YearOfPlenty extends AbstractAction {
     CatanParameters.Resources resource1;
@@ -26,7 +27,7 @@ public class YearOfPlenty extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         List<Card> playerResourceDeck = ((Deck<Card>)cgs.getComponentActingPlayer(playerHandHash)).getComponents();
-        List<Card> commonResourceDeck = ((Deck<Card>)cgs.getComponent(playerHandHash)).getComponents();
+        List<Card> commonResourceDeck = ((Deck<Card>)cgs.getComponent(resourceDeckHash)).getComponents();
         Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
         boolean resource1_done = false;
@@ -64,7 +65,7 @@ public class YearOfPlenty extends AbstractAction {
         if (this == other) return true;
         if (other instanceof YearOfPlenty){
             YearOfPlenty otherAction = (YearOfPlenty)other;
-            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2) && card == otherAction.card;
+            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2) && card.equals(otherAction.card);
         }
         return false;
     }
