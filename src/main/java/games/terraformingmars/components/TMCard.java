@@ -2,7 +2,9 @@ package games.terraformingmars.components;
 
 import core.actions.AbstractAction;
 import core.components.Card;
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.rules.Requirement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,7 +16,7 @@ public class TMCard extends Card {
     public int number;
     public TMTypes.CardType cardType;
     public int cost;
-    public Requirement requirement;
+    public Requirement<TMGameState> requirement;
     public TMTypes.Tag[] tags;
 
     public AbstractAction[] rules;  // long-lasting effects
@@ -64,14 +66,31 @@ public class TMCard extends Card {
         return card;
     }
 
-    public static TMCard loadCorporationHTML(JSONObject cardDef) {
+    public static TMCard loadCorporation(JSONObject cardDef) {
         TMCard card = new TMCard();
         card.cardType = TMTypes.CardType.Corporation;
         card.number = (int)(long)cardDef.get("id");
         card.setComponentName((String)cardDef.get("name"));
 
-        String effect = (String) cardDef.get("effect");
-        String start = (String) cardDef.get("start");
+        JSONArray effect = (JSONArray) cardDef.get("effect");  // TODO
+
+        JSONArray start = (JSONArray) cardDef.get("start");
+        String startResources = (String) start.get(0);
+        String[] split = startResources.split(",");
+        card.effects = new AbstractAction[split.length];
+        int k = 0;
+        for (String s: split) {
+            s = s.trim();
+            String[] split2 = s.split(" ");
+            // First is amount
+            int amount = Integer.parseInt(split2[0]);
+            // Second is what resource
+            String resString = split2[1].split("prod")[0];
+            TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
+            card.effects[k] = new PlaceholderModifyCounter(amount, res, split2[1].contains("prod"), true);
+            k++;
+        }
+        // TODO: other start, e.g. first action
 
         if (cardDef.get("tags") != null) {
             JSONArray ts = (JSONArray) cardDef.get("tags");

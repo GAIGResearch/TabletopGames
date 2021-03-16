@@ -6,7 +6,7 @@ import games.terraformingmars.TMTypes;
 
 import static games.terraformingmars.TMGameState.stringToGPCounter;
 
-public class CounterRequirement implements Requirement {
+public class CounterRequirement implements Requirement<TMGameState> {
 
     String counterCode;
 

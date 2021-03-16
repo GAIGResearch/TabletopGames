@@ -115,6 +115,12 @@ public class TMGUI extends AbstractGUI {
             });
             playerFlipButtons.add(jb);
         }
+        JButton jb = new JButton("Pause/Resume");
+        jb.setFont(defaultFont);
+        jb.setForeground(Color.white);
+        jb.setBackground(Color.gray);
+        jb.addActionListener(e -> game.flipPaused());
+        playerFlipButtons.add(jb);
 
         top.setOpaque(false);
         playerMainWrap.setOpaque(false);

@@ -166,10 +166,10 @@ public abstract class AbstractGameState {
         }
             // we do not copy individual actions in history, as these are now dead and should not change
 
-        s.actionsInProgress = new Stack<>();
-        actionsInProgress.forEach(
-                a -> s.actionsInProgress.push(a.copy())
-        );
+//        s.actionsInProgress = new Stack<>();
+//        actionsInProgress.forEach(
+//                a -> s.actionsInProgress.push(a.copy())
+//        );
 
         // Update the list of components for ID matching in actions.
         s.addAllComponents();

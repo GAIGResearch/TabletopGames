@@ -2,70 +2,84 @@
   {
     "id": 1,
     "name": "credicor",
-    "effect": "(Effect: After you pay for a card or standard project with a basic cost of 20 megacredit or more, you gain 4 megacredit.)",
-    "start": "(You start with 57 megacredit.)"
+    "effect": ["Effect: buy(card, standard project, cost > 20): gain 4 megacredit"],
+    "start": ["57 megacredit"]
   },
   {
     "id": 2,
     "name": "ecoline",
     "tags" : ["plant"],
-    "effect" : "(Effect: You may always pay 7 plants, instead of 8, to place greenery.)",
-    "start": "(You start with 2 plantprod, 3 plants, and 36 megacredit)"
+    "effect" : ["Action: buy(greenery, 7 plant)"],
+    "start": ["2 plantprod, 3 plant, 36 megacredit"]
   },
   {
     "id": 3,
     "name": "Helion",
     "tags": ["space"],
-    "effect" : "(Effect: Your may use heat as megacredit. You may not use megacredit as heat.)",
-    "start": "(You start with 3 heatprod and 42 megacredit.)"
+    "effect" : ["Special: use(heat, megacredit)"],
+    "start": ["3 heatprod, 42 megacredit"]
   },
   {
     "id": 4,
     "name": "Mining Guild",
     "tags": ["building", "building"],
-    "effect": "(Effect: Each time you get any steel or titanium as a placement bonus on the map, increase your steelprod 1 step.)",
-    "start": "(You start with 30 megacredit, 5 steel, and 1 steelprod)"
+    "effect": ["Effect: gain(placetile, steel-titanium) : inc-steelprod-1"],
+    "start": ["30 megacredit, 5 steel, 1 steelprod"]
   },
   {
     "id": 5,
     "name": "INTERPLANETARY CINEMATICS",
     "tags": ["building"],
-    "effect": "(Effect: Each time you play an event, you gain 2 megacredit.)",
-    "start": "(You start with 20 steel and 30 megacredit.)"
+    "effect": ["Effect: play(event) : gain 2 megacredit"],
+    "start": ["20 steel, 30 megacredit"]
   },
   {
     "id": 6,
     "name": "Inventrix",
     "tags": ["science"],
-    "effect": "(Effect: Your temperature, oxygen and ocean requirements are +2 or -2 steps, your choice in each case.)",
-    "start": "(As you first action in the game, draw 3 cards. Start with 45 megacredit.)"
+    "effect": ["Special: temperature, oxygen, ocean requirements are +2 or -2 steps"],
+    "start": ["45 megacredit", "first: draw 3"]
   },
   {
     "id": 7,
     "name": "Phoblog",
     "tags": ["space"],
-    "effect": "(Effect: Your titanium resources are each worth 1 megacredit extra.)",
-    "start": "(You start with 10 titanium and 23 megacredit.)"
+    "effect": ["Special: use(titanium, megacredit+1)"],
+    "start": ["10 titanium, 23 megacredit"]
   },
   {
     "id": 8,
     "name": "Tharsis Republic",
     "tags": ["building"],
-    "effect": "(Effect: When any city tile is placed ON MARS, increase your megacreditprod 1 step. When you place a city tile, gain 3 megacredit.)",
-    "start": "(You start with 40 megacredit. As your first action in the game, place a city tile.)"
+    "effect": ["Effect: placetile(city, grid, any) : inc-megacreditprod-1", "Effect: placetile(city) : inc-megacredit-3"],
+    "start": ["40 megacredit", "first: placetile-city"]
   },
   {
     "id": 9,
     "name": "Thorgate",
     "tags": ["power"],
-    "effect": "(Effect: When playing a power card OR THE STANDARD PROJECT POWER PLANT, you pay 3 megacredit less for it.)",
-    "start":  "(You start with 1 energyprod and 48 megacredit.)"
+    "effect": ["Discount: power-powerplant : 3"],
+    "start":  ["1 energyprod, 48 megacredit"]
   },
   {
     "id": 10,
     "name": "UNITED NATIONS MARS INITIATIVE",
     "tags": ["earth"],
-    "effect": "(Action:If your tr was raised this generation, you may pay 3 megacredit to raise tr 1 step more.)",
-    "start":  "(You start with 40 megacredit.)"
+    "effect": ["Action: if(TR-inc-gen) buy(TR,3)"],
+    "start":  ["40 megacredit"]
+  },
+  {
+    "id": 11,
+    "name": "TERACTOR",
+    "tags": ["earth"],
+    "effect": ["Discount: earth : 3"],
+    "start":  ["60 megacredit"]
+  },
+  {
+    "id": 12,
+    "name": "SATURN SYSTEMS",
+    "tags": ["jovian"],
+    "effect": ["Effect: play(jovian, any) : inc-megacredit-prod-1"],
+    "start":  ["1 titaniumprod, 42 megacredit, 1 megacreditprod"]
   }
 ]

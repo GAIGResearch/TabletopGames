@@ -4,7 +4,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-public class TagRequirement implements Requirement {
+public class TagRequirement implements Requirement<TMGameState> {
 
     TMTypes.Tag[] tags;
     int[] nMin;

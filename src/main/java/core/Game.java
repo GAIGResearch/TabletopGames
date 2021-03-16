@@ -50,6 +50,8 @@ public class Game {
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     private int gameID;
 
+    public boolean paused;
+
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
      * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
@@ -183,97 +185,100 @@ public class Game {
                 break;
             }
 
-            // Get player to ask for actions next
-            boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
-                    && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
-            int activePlayer = gameState.getCurrentPlayer();
-
-            // Check if this is the same player as last, count number of actions per turn
-            if (!reacting) {
-                if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
-                    nActionsPerTurn++;
-                } else {
-                    nActionsPerTurnSum += nActionsPerTurn;
-                    nActionsPerTurn = 1;
-                    nActionsPerTurnCount++;
-                }
-            }
-
-            // This is the next player to be asked for a decision
-            currentPlayer = players.get(activePlayer);
-
-            // Get player observation, and time how long it takes
-            double s = System.nanoTime();
-            AbstractGameState observation = gameState.copy(activePlayer);
-            copyTime += (System.nanoTime() - s);
-
-            // Get actions for the player
-            s = System.nanoTime();
-            List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-            actionComputeTime += (System.nanoTime() - s);
-            actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-
             // GUI update
             updateGUI(gui);
 
-            if (gameState.isNotTerminal()) {
-                if (VERBOSE) {
-                    System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-                }
+            if (!paused) {
 
-                if (observation instanceof IPrintable && VERBOSE) {
-                    ((IPrintable) observation).printToConsole();
-                }
+                // Get player to ask for actions next
+                boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
+                int activePlayer = gameState.getCurrentPlayer();
 
-                // Either ask player which action to use or, in case no actions are available, report the updated observation
-                AbstractAction action = null;
-                if (observedActions.size() > 0) {
-                    if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
-                        // Can only do 1 action, so do it.
-                        action = observedActions.get(0);
-                        currentPlayer.registerUpdatedObservation(observation);
+                // Check if this is the same player as last, count number of actions per turn
+                if (!reacting) {
+                    if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
+                        nActionsPerTurn++;
                     } else {
-                        if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
-                            while (action == null && gui.isWindowOpen()) {
-                                action = currentPlayer.getAction(observation, observedActions);
-                                updateGUI(gui);
-                            }
+                        nActionsPerTurnSum += nActionsPerTurn;
+                        nActionsPerTurn = 1;
+                        nActionsPerTurnCount++;
+                    }
+                }
+
+                // This is the next player to be asked for a decision
+                currentPlayer = players.get(activePlayer);
+
+                // Get player observation, and time how long it takes
+                double s = System.nanoTime();
+                AbstractGameState observation = gameState.copy(activePlayer);
+                copyTime += (System.nanoTime() - s);
+
+                // Get actions for the player
+                s = System.nanoTime();
+                List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+                actionComputeTime += (System.nanoTime() - s);
+                actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
+
+                if (gameState.isNotTerminal()) {
+                    if (VERBOSE) {
+                        System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+                    }
+
+                    if (observation instanceof IPrintable && VERBOSE) {
+                        ((IPrintable) observation).printToConsole();
+                    }
+
+                    // Either ask player which action to use or, in case no actions are available, report the updated observation
+                    AbstractAction action = null;
+                    if (observedActions.size() > 0) {
+                        if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
+                            // Can only do 1 action, so do it.
+                            action = observedActions.get(0);
+                            currentPlayer.registerUpdatedObservation(observation);
                         } else {
-                            // Get action from player, and time it
-                            s = System.nanoTime();
-                            action = currentPlayer.getAction(observation, observedActions);
-                            agentTime += (System.nanoTime() - s);
-                            nDecisions++;
+                            if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                                while (action == null && gui.isWindowOpen()) {
+                                    action = currentPlayer.getAction(observation, observedActions);
+                                    updateGUI(gui);
+                                }
+                            } else {
+                                // Get action from player, and time it
+                                s = System.nanoTime();
+                                action = currentPlayer.getAction(observation, observedActions);
+                                agentTime += (System.nanoTime() - s);
+                                nDecisions++;
+                            }
+                        }
+                        AbstractAction finalAction = action;
+                        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+                    } else {
+                        currentPlayer.registerUpdatedObservation(observation);
+                    }
+
+                    if (VERBOSE) {
+                        if (action != null) {
+                            System.out.println(action.toString());
+                        } else {
+                            System.out.println("NULL action (player " + activePlayer + ")");
                         }
                     }
-                    AbstractAction finalAction = action;
-                    listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+
+                    // Resolve action and game rules, time it
+                    s = System.nanoTime();
+                    forwardModel.next(gameState, action);
+                    nextTime += (System.nanoTime() - s);
                 } else {
-                    currentPlayer.registerUpdatedObservation(observation);
-                }
-
-                if (VERBOSE) {
-                    if (action != null) {
-                        System.out.println(action.toString());
-                    } else {
-                        System.out.println("NULL action (player " + activePlayer + ")");
+                    if (firstEnd) {
+                        if (VERBOSE) {
+                            System.out.println("Ended");
+                        }
+                        terminate();
+                        firstEnd = false;
                     }
                 }
-
-                // Resolve action and game rules, time it
-                s = System.nanoTime();
-                forwardModel.next(gameState, action);
-                nextTime += (System.nanoTime() - s);
-            } else {
-                if (firstEnd) {
-                    if (VERBOSE) {
-                        System.out.println("Ended");
-                    }
-                    terminate();
-                    firstEnd = false;
-                }
+                tick++;
             }
-            tick++;
         }
 
         if (gui == null) {
@@ -468,6 +473,13 @@ public class Game {
         return gameType.toString();
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void flipPaused() {
+        this.paused = !this.paused;
+    }
 
     /**
      * Runs one game.

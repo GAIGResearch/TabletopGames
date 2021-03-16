@@ -27,12 +27,17 @@ public class BuyCard extends TMAction {
             // 1 card chosen, the rest are discarded
             gs.getPlayerCorporations()[gs.getCurrentPlayer()] = card;
             gs.getPlayerCardChoice()[gs.getCurrentPlayer()].clear();
+
+            // Execute immediate effect of corporation (starting bonus)
+            for (AbstractAction aa: card.effects) {
+                aa.execute(gs);
+            }
+
             return super.execute(gs);
         } else {
-            if (gs.canPlayerPay(gp.getProjectPurchaseCost())) {
+            if (gs.canPlayerPay(null, null, gp.getProjectPurchaseCost())) {
                 gs.getPlayerHands()[gs.getCurrentPlayer()].add(card);
                 gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.MegaCredit).decrement(gp.getProjectPurchaseCost());
-                // TODO: pay with other resources
                 return super.execute(gs);
             } else {
                 // Can't pay for it, discard instead

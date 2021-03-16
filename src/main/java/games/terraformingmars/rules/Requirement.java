@@ -1,15 +1,14 @@
 package games.terraformingmars.rules;
 
-import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 
-public interface Requirement {
+public interface Requirement<T> {
     /*
      2 cases implemented:
         - counter: global parameter / player resource / player production min or max;
         - minimum N tags on cards played by player
      */
-    boolean testCondition(TMGameState gs);
+    boolean testCondition(T o);
 
     static Requirement stringToRequirement(String s) {
         String[] split = s.split(":");

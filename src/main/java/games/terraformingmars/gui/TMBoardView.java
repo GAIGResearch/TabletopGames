@@ -19,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import static core.AbstractGUI.defaultItemSize;
+import static games.terraformingmars.gui.TMDeckDisplay.drawResource;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMBoardView extends ComponentView {
@@ -301,15 +302,8 @@ public class TMBoardView extends ComponentView {
                             String resString = b.effectString.split("prod")[0];
                             TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
                             if (res != null) {
-                                boolean prod = b.effectString.contains("prod");
-                                imgPath = res.getImagePath();
-                                if (prod) {
-                                    drawImage(g, production, imgX, imgY, size);
-                                    int newSize = (int)(size * 0.8);
-                                    imgX += size/2 - newSize/2;
-                                    imgY += size/2 - newSize/2;
-                                    size = newSize;
-                                }
+                                Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
+                                drawResource(g, resImg, production, b.effectString.contains("prod"), imgX, imgY, size, 0.8);
                             } else {
                                 // A tile to place?
                                 TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, b.effectString);

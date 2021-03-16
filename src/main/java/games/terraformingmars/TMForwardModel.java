@@ -10,10 +10,8 @@ import core.components.Deck;
 import core.components.GridBoard;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
-import games.terraformingmars.rules.Award;
-import games.terraformingmars.rules.Bonus;
+import games.terraformingmars.rules.*;
 import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.rules.Milestone;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,8 +24,8 @@ import java.io.IOException;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
+import static games.terraformingmars.TMGameState.getEmptyTilesOfType;
 import static games.terraformingmars.TMGameState.stringToGPCounter;
-import static games.terraformingmars.TMTypes.neighbor_directions;
 
 public class TMForwardModel extends AbstractForwardModel {
 
@@ -44,6 +42,7 @@ public class TMForwardModel extends AbstractForwardModel {
 
         gs.playerResources = new HashMap[gs.getNPlayers()];
         gs.playerProduction = new HashMap[gs.getNPlayers()];
+        gs.playerResourceMap = new HashSet[gs.getNPlayers()];
 
         for (int i = 0; i < gs.getNPlayers(); i++) {
             gs.playerResources[i] = new HashMap<>();
@@ -52,6 +51,10 @@ public class TMForwardModel extends AbstractForwardModel {
                 gs.playerResources[i].put(res, new Counter(params.startingResources.get(res), 0, params.maxPoints, res.toString() + "-" + i));
                 gs.playerProduction[i].put(res, new Counter(params.startingProduction.get(res), params.minimumProduction.get(res), params.maxPoints, res.toString() + "-prod-" + i));
             }
+            gs.playerResourceMap[i] = new HashSet<>();
+            // By default, players can exchange steel for X MC and titanium for X MC. More may be added
+            gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit, params.nSteelMC, new TagOnCardRequirement(TMTypes.Tag.Building)));
+            gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit, params.nTitaniumMC, new TagOnCardRequirement(TMTypes.Tag.Space)));
         }
 
         gs.projectCards = new Deck<>("Projects", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -115,9 +118,6 @@ public class TMForwardModel extends AbstractForwardModel {
 
         // Execute action
         action.execute(currentState);
-
-        // Test
-        gs.milestones[2].claim(gs);
 
         if (gs.getGamePhase() == CorporationSelect) {
             boolean allChosen = true;
@@ -183,6 +183,7 @@ public class TMForwardModel extends AbstractForwardModel {
         // event cards are face-down after played, tags don't apply!
         ArrayList<AbstractAction> actions = new ArrayList<>();
         TMGameState gs = (TMGameState)gameState;
+        TMGameParameters params = (TMGameParameters) gs.getGameParameters();
 
         if (gs.getGamePhase() == CorporationSelect) {
             // Decide one card at a time, first one player, then the other
@@ -205,16 +206,56 @@ public class TMForwardModel extends AbstractForwardModel {
             }
         } else {
             actions.add(new TMAction());  // Can always just pass
-            for (int i = 0; i < gs.board.getHeight(); i++) {
-                for (int j = 0; j < gs.board.getWidth(); j++) {
-                    TMMapTile mt = gs.board.getElement(j, i);
-                    if (mt != null) {
-                        if (mt.getTileType() == TMTypes.MapTileType.Ground && mt.getTilePlaced() == null) {
-                            actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery, false));
-                        }
-                    }
+            // Play a card actions
+            for (int i = 0; i < gs.playerHands[gs.getCurrentPlayer()].getSize(); i++) {
+                TMCard card = gs.playerHands[gs.getCurrentPlayer()].get(i);
+                boolean canPlayerPay = gs.canPlayerPay(card, null, card.cost);
+                if (canPlayerPay && (card.requirement == null || card.requirement.testCondition(gs))) {
+                    actions.add(new PayForAction(new PlayCard(i, false), TMTypes.Resource.MegaCredit, card.cost, i));
                 }
             }
+
+            // Buy a standard project
+            // - Discard cards for MC
+            // - Increase energy production 1 step for 11 MC
+            // - Increase temperature 1 step for 14 MC
+            Counter temp = stringToGPCounter(gs, "temperature");  // TODO: check if already maxed
+            if (temp != null) {
+                actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
+                        TMTypes.Resource.MegaCredit, params.nCostSPTemp, -1));
+            }
+            // - Place ocean tile for 18 MC
+            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Ocean, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ocean), false),
+                    TMTypes.Resource.MegaCredit, params.nCostSPOcean, -1));
+            // - Place greenery tile for 23 MC TODO adjacency requirement
+            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.MegaCredit, params.nCostSPGreenery, -1));
+            // - Place city tile and increase MC prod by 1 for 25 MC TODO adjacency requirement + increase MC prod by 1
+            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.City, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
+
+            // Claim a milestone
+//            gs.milestones[2].claim(gs);
+            // Fund an award
+
+            // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation
+
+            // 8 plants into greenery tile TODO adjacency requirement
+            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.Plant, params.nCostGreeneryPlant, -1));
+            // 8 heat into temperature increase
+            if (temp != null) {  // TODO: check if already maxed
+                actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
+                        TMTypes.Resource.Heat, params.nCostTempHeat, -1));
+            }
+
+//            for (int i = 0; i < gs.board.getHeight(); i++) {
+//                for (int j = 0; j < gs.board.getWidth(); j++) {
+//                    TMMapTile mt = gs.board.getElement(j, i);
+//                    if (mt != null) {
+//                        if (mt.getTileType() == TMTypes.MapTileType.Ground && mt.getTilePlaced() == null) {
+//                            actions.add(new PlaceTile(j, i, TMTypes.Tile.Greenery, false));
+//                        }
+//                    }
+//                }
+//            }
         }
 
         return actions;
@@ -225,14 +266,8 @@ public class TMForwardModel extends AbstractForwardModel {
         return new TMForwardModel();
     }
 
-    List<Vector2D> getNeighbours(Vector2D cell) {
-        ArrayList<Vector2D> neighbors = new ArrayList<>();
-        int parity = cell.getY() % 2;
-        for (Vector2D v: neighbor_directions[parity]) {
-            neighbors.add(cell.add(v));
-        }
-        return neighbors;
-    }
+
+    /* custom loading info from json */
 
     private void loadBoard(TMGameState gs) {
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
@@ -250,7 +285,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 JSONArray row = (JSONArray) g;
                 int x = 0;
                 for (Object o1 : row) {
-                    gs.board.setElement(x, y, stringToMapTile((String) o1));
+                    gs.board.setElement(x, y, parseMapTile((String) o1));
                     x++;
                 }
                 y++;
@@ -260,14 +295,14 @@ public class TMForwardModel extends AbstractForwardModel {
             JSONArray extra = (JSONArray) data.get("extra");
             gs.extraTiles = new TMMapTile[extra.size()];
             for (int i = 0; i < extra.size(); i++) {
-                gs.extraTiles[i] = stringToMapTile((String)extra.get(i));
+                gs.extraTiles[i] = parseMapTile((String)extra.get(i));
             }
 
             // Process bonuses for this game when counters reach specific points
             JSONArray bonus = (JSONArray) data.get("bonus");
             gs.bonuses = new Bonus[bonus.size()];
             for (int i = 0; i < bonus.size(); i++) {
-                gs.bonuses[i] = stringToBonus(gs, (String)bonus.get(i));
+                gs.bonuses[i] = parseBonus(gs, (String)bonus.get(i));
             }
 
             // Process milestones and awards
@@ -289,7 +324,7 @@ public class TMForwardModel extends AbstractForwardModel {
         }
     }
 
-    private TMMapTile stringToMapTile(String s) {
+    private TMMapTile parseMapTile(String s) {
         if (s.equals("0")) return null;
 
         TMMapTile mt = new TMMapTile();
@@ -318,7 +353,7 @@ public class TMForwardModel extends AbstractForwardModel {
         return mt;
     }
 
-    private Bonus stringToBonus(TMGameState gs, String s) {
+    private Bonus parseBonus(TMGameState gs, String s) {
         /*
         Bonus options implemented:
             - Increase/Decrease counter (global parameter, player resource, or player production)
@@ -392,7 +427,7 @@ public class TMForwardModel extends AbstractForwardModel {
             for (Object o: data) {
                 TMCard card;
                 if (deck.getComponentName().equalsIgnoreCase("corporations")) {
-                    card = TMCard.loadCorporationHTML((JSONObject)o);
+                    card = TMCard.loadCorporation((JSONObject)o);
                 } else {
                     card = TMCard.loadCardHTML((JSONObject) o);
                 }  // TODO: other types of cards

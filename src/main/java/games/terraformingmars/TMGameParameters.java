@@ -23,7 +23,7 @@ public class TMGameParameters extends AbstractParameters {
             put(res, 0);
         }
         put(TMTypes.Resource.TR, 20);
-        put(TMTypes.Resource.MegaCredit, 500);  // TODO Test
+//        put(TMTypes.Resource.MegaCredit, 500);  // TODO Test
     }};
     HashMap<TMTypes.Resource, Integer> startingProduction = new HashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
@@ -41,6 +41,20 @@ public class TMGameParameters extends AbstractParameters {
     int nProjectsStart = 10;
     int nProjectsResearch = 4;
     int nActionsPerPlayer = 2;
+
+    // steel and titanium to MC rate
+    double nSteelMC = 2;
+    double nTitaniumMC = 3;
+
+    // standard projects
+    int nCostSPTemp = 14;
+    int nCostSPOcean = 18;
+    int nCostSPGreenery = 23;
+    int nCostSPCity = 25;
+
+    // Resource actions
+    int nCostGreeneryPlant = 8;
+    int nCostTempHeat = 8;
 
     public TMGameParameters(long seed) {
         super(seed);

@@ -1,8 +1,10 @@
 package games.terraformingmars.gui;
 
 import core.components.Deck;
+import core.actions.AbstractAction;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.components.TMCard;
 import utilities.ImageIO;
 import utilities.Vector2D;
@@ -15,6 +17,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import static core.AbstractGUI.defaultItemSize;
+import static games.terraformingmars.gui.TMGUI.focusPlayer;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMDeckDisplay extends JComponent {
@@ -26,6 +29,7 @@ public class TMDeckDisplay extends JComponent {
     ArrayList<Rectangle> highlight;
 
     Image background;
+    Image production;
 
     Image pointBg;
     Image projCardBg;
@@ -45,6 +49,7 @@ public class TMDeckDisplay extends JComponent {
 
         pointBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/card-point-bg.png");
         projCardBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/proj-card-bg.png");
+        production = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/production.png");
 
         Vector2D dim = scaleLargestDimImg(projCardBg, cardHeight);
         cardWidth = dim.getX();
@@ -103,7 +108,8 @@ public class TMDeckDisplay extends JComponent {
             // Draw name
             Font f = g.getFont();
             g.setFont(new Font("Arial", Font.BOLD, 14));
-            drawStringCentered(g, card.getComponentName(), new Rectangle2D.Double(x + 2, y + height/8. - 2, width - 4, height/8.), Color.black, 14);
+            Rectangle2D titleRect =  new Rectangle2D.Double(x + 2, y + height/8. - 2, width - 4, height/8.);
+            drawStringCentered(g, card.getComponentName(), titleRect, Color.black, 14);
             g.setFont(f);
             // Draw tags
             int tagSize = defaultItemSize/3;
@@ -114,6 +120,23 @@ public class TMDeckDisplay extends JComponent {
                 TMTypes.Tag tag = card.tags[i];
                 Image img2 = ImageIO.GetInstance().getImage(tag.getImagePath());
                 drawImage(g, img2, startX + i*tagSize, tagY, tagSize, tagSize);
+            }
+            // Draw starting resources
+            int k = 0;
+            for (AbstractAction aa: card.effects) {
+                if (aa instanceof PlaceholderModifyCounter) {
+                    TMTypes.Resource res = ((PlaceholderModifyCounter) aa).resource;
+                    int amount = ((PlaceholderModifyCounter) aa).change;
+                    boolean prod = ((PlaceholderModifyCounter) aa).production;
+                    Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
+
+                    int size = defaultItemSize/3;
+                    int xRes = width/2 - (size + defaultItemSize)/2;
+                    int yRes = (int)(titleRect.getY() + titleRect.getHeight() + k * size + k * spacing / 5);
+                    drawResource(g, resImg, production, prod, xRes, yRes, size, 0.6);
+                    drawShadowStringCentered(g, "" + amount, new Rectangle2D.Double(xRes + size, yRes, defaultItemSize, size));
+                    k++;
+                }
             }
         } else {
             // Draw background
@@ -149,6 +172,17 @@ public class TMDeckDisplay extends JComponent {
             }
             // Draw requirements TODO
         }
+    }
+
+    static void drawResource(Graphics2D g, Image resImg, Image production, boolean prod, int x, int y, int size, double scaleResIfProd) {
+        if (prod) {
+            drawImage(g, production, x, y, size);
+            int newSize = (int)(size * scaleResIfProd);
+            x += size/2 - newSize/2;
+            y += size/2 - newSize/2;
+            size = newSize;
+        }
+        drawImage(g, resImg, x, y, size);
     }
 
     public ArrayList<Rectangle> getHighlight() {
