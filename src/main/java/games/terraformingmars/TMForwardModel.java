@@ -4,7 +4,6 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.actions.ModifyCounter;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
@@ -12,6 +11,9 @@ import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.*;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.effects.Bonus;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.requirements.TagOnCardRequirement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,6 +28,7 @@ import java.util.*;
 import static games.terraformingmars.TMGameState.TMPhase.*;
 import static games.terraformingmars.TMGameState.getEmptyTilesOfType;
 import static games.terraformingmars.TMGameState.stringToGPCounter;
+import static games.terraformingmars.rules.effects.Bonus.parseBonus;
 
 public class TMForwardModel extends AbstractForwardModel {
 
@@ -95,6 +98,7 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.playerCardsPlayedTags = new HashMap[gs.getNPlayers()];
         gs.playerCardsPlayedActions = new HashSet[gs.getNPlayers()];
         gs.playerCardsPlayedEffects = new HashSet[gs.getNPlayers()];
+        gs.playerPersistingEffects = new HashSet[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
             gs.tilesPlaced[i] = new HashMap<>();
             for (TMTypes.Tile t: TMTypes.Tile.values()) {
@@ -110,6 +114,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             gs.playerCardsPlayedActions[i] = new HashSet<>();
             gs.playerCardsPlayedEffects[i] = new HashSet<>();
+            gs.playerPersistingEffects[i] = new HashSet<>();
         }
 
         gs.nAwardsFunded = new Counter(0,0, params.nCostAwards.length,"Awards funded");
@@ -134,6 +139,13 @@ public class TMForwardModel extends AbstractForwardModel {
 
         // Execute action
         action.execute(currentState);
+
+        // Check persisting effects for all players
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            for (Effect e: gs.playerPersistingEffects[i]) {
+                e.execute(gs, (TMAction) action, i);
+            }
+        }
 
         // Check if player has Card resources, transform those to cards into hand
         Counter c = gs.playerResources[player].get(TMTypes.Resource.Card);
@@ -445,72 +457,6 @@ public class TMForwardModel extends AbstractForwardModel {
         return mt;
     }
 
-    private Bonus parseBonus(TMGameState gs, String s) {
-        /*
-        Bonus options implemented:
-            - Increase/Decrease counter (global parameter, player resource, or player production)
-            - Place ocean tile
-         */
-        String[] split = s.split(":");
-
-        // First element is the counter
-        Counter c = stringToGPCounter(gs, split[0]);
-
-        // Second element is threshold, int
-        int threshold = Integer.parseInt(split[1]);
-
-        // Third element is effect
-        AbstractAction effect = null;
-        String effectString = "";
-
-        if (split[2].contains("inc") || split[2].contains("dec")) {
-            // Increase/Decrease counter action
-            String[] split2 = split[2].split("-");
-            // Find how much
-            int increment = Integer.parseInt(split2[2]);
-            if (split[2].contains("dec")) increment *= -1;
-
-            effectString = split2[1];
-
-            // Find which counter
-            Counter which = stringToGPCounter(gs, split2[1]);
-
-            if (which == null) {
-                // A resource or production instead
-                String resString = split2[1].split("prod")[0];
-                TMTypes.Resource res = TMTypes.Resource.valueOf(resString);
-                effect = new PlaceholderModifyCounter(increment, res, split2[1].contains("prod"), true);
-            } else {
-                // A global counter (temp, oxygen, oceantiles)
-                effect = new ModifyCounter(which.getComponentID(), increment);
-            }
-        } else if (split[2].contains("placetile")) {
-            // equals("placetile:ocean:ocean")
-            // PlaceTile action
-            String[] split2 = split[2].split("/");
-            // split2[1] is type of tile to place
-            TMTypes.Tile toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
-            // split2[2] is where to place it. can be a map tile, or a city name.
-            TMTypes.MapTileType where = Utils.searchEnum(TMTypes.MapTileType.class, split2[2]);
-            HashSet<Vector2D> legalPositions = new HashSet<>();
-            for (int i = 0; i < gs.board.getHeight(); i++) {
-                for (int j = 0; j < gs.board.getWidth(); j++) {
-                    TMMapTile mt = gs.board.getElement(j, i);
-                    if (mt != null) {
-                        if (where != null && mt.getTileType() == where || where == null && mt.getComponentName().equalsIgnoreCase(split2[2])) {
-                            legalPositions.add(new Vector2D(j, i));
-                        }
-                    }
-                }
-            }
-            effect = new PlaceTile(toPlace, legalPositions, true);  // Extended sequence, will ask player where to put it
-            effectString = split2[1];
-        }
-        if (c != null) {
-            return new Bonus(c.getComponentID(), threshold, effect, effectString);
-        }
-        return null;
-    }
 
     private void loadCards(String path, Deck<TMCard> deck) {
         JSONParser jsonParser = new JSONParser();

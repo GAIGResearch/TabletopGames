@@ -1,10 +1,22 @@
-package games.terraformingmars.rules;
+package games.terraformingmars.rules.effects;
 
 import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.PlaceTile;
+import games.terraformingmars.actions.PlaceholderModifyCounter;
+import games.terraformingmars.actions.TMAction;
+import games.terraformingmars.actions.TMModifyCounter;
+import games.terraformingmars.components.TMMapTile;
+import utilities.Pair;
+import utilities.Utils;
+import utilities.Vector2D;
 
+import java.util.HashSet;
 import java.util.Objects;
+
+import static games.terraformingmars.TMGameState.stringToGPCounter;
 
 public class Bonus {
     public final int counterID;
@@ -51,5 +63,26 @@ public class Bonus {
     @Override
     public int hashCode() {
         return Objects.hash(counterID, threshold, effect, effectString);
+    }
+
+    public static Bonus parseBonus(TMGameState gs, String s) {
+        /*
+        Bonus options implemented:
+            - Increase/Decrease counter (global parameter, player resource, or player production)
+            - Place ocean tile
+         */
+        String[] split = s.split(":");
+
+        // First element is the counter
+        Counter c = stringToGPCounter(gs, split[0]);
+
+        // Second element is threshold, int
+        int threshold = Integer.parseInt(split[1]);
+
+        Pair<TMAction, String> effect = TMAction.parseAction(gs, split[2]);
+        if (c != null) {
+            return new Bonus(c.getComponentID(), threshold, effect.a, effect.b);
+        }
+        return null;
     }
 }

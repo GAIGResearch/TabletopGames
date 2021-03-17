@@ -32,13 +32,16 @@ public class BuyCard extends TMAction {
             gs.getPlayerCardChoice()[player].clear();
 
             // Execute immediate effect of corporation (starting bonus)
-            for (AbstractAction aa: card.effects) {
+            for (AbstractAction aa: card.immediateEffects) {
                 aa.execute(gs);
             }
 
             // Add discountEffects to player's discounts
             gs.addDiscountEffects(card.discountEffects);
             gs.addResourceMappings(card.resourceMappings, true);
+
+            // Add persisting effects
+            gs.addPersistingEffects(card.persistingEffects);
 
             return super.execute(gs);
         } else {

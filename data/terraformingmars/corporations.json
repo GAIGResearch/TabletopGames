@@ -5,7 +5,7 @@
     "effect": [
       {
         "type": "effect",
-        "if": "payforaction(costTotal-min-21)",
+        "if": "payforaction(20)",
         "then": "inc-megacredit-4"
       }
     ],
@@ -18,7 +18,7 @@
     "effect" : [
       {
         "type": "action",
-        "action": "placetile-Greenery",
+        "action": "placetile(Greenery,)",
         "cost": "Plant/7"
       }
     ],
@@ -45,7 +45,7 @@
     "effect": [
       {
         "type": "effect",
-        "if": "placetile(gain steel-titanium)",
+        "if": "placetile(gain Steel/Titanium)",
         "then": "inc-steelprod-1"
       }
     ],
@@ -58,7 +58,7 @@
     "effect": [
       {
         "type": "effect",
-        "if": "playcard(tag-event)",
+        "if": "playcard(tag-Event)",
         "then": "inc-megacredit-2"
       }
     ],
@@ -105,12 +105,12 @@
     "effect": [
       {
         "type": "effect",
-        "if": "placetile(city,grid,any)",
+        "if": "placetile(City,onMars,any)",
         "then": "inc-megacreditprod-1"
       },
       {
         "type": "effect",
-        "if": "placetile(city)",
+        "if": "placetile(City,)",
         "then": "inc-megacredit-3"
       }
     ],
@@ -169,7 +169,7 @@
     "effect": [
       {
         "type": "effect",
-        "if": "playcard(tag-jovian-any)",
+        "if": "playcard(tag-Jovian-any)",
         "then": "inc-megacreditprod-1"
       }
     ],

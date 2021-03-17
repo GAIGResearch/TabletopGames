@@ -12,10 +12,12 @@ import java.util.*;
 
 public class PlayCard extends TMAction {
     final int cardIdx;
+    int cardID;
 
     public PlayCard(int cardIdx, boolean free) {
         super(free);
         this.cardIdx = cardIdx;
+        this.cardID = -1;
     }
 
     @Override
@@ -23,6 +25,7 @@ public class PlayCard extends TMAction {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
         TMCard card = gs.getPlayerHands()[gs.getCurrentPlayer()].get(cardIdx);
+        cardID = card.getComponentID();
         playCard(gs);
         return true;
     }
@@ -38,14 +41,15 @@ public class PlayCard extends TMAction {
         }
         gs.getPlayerCardsPlayedTypes()[player].get(card.cardType).increment(1);
         gs.getPlayerCardsPlayedActions()[player].addAll(Arrays.asList(card.actions));
-        gs.getPlayerCardsPlayedEffects()[player].addAll(Arrays.asList(card.rules));
 
         // Add discountEffects to player's discounts
         gs.addDiscountEffects(card.discountEffects);
         gs.addResourceMappings(card.resourceMappings, false);
+        // Add persisting effects
+        gs.addPersistingEffects(card.persistingEffects);
 
         // Execute on-play effects
-        for (AbstractAction aa: card.effects) {
+        for (AbstractAction aa: card.immediateEffects) {
             aa.execute(gs);
         }
 
@@ -79,5 +83,9 @@ public class PlayCard extends TMAction {
     @Override
     public String toString() {
         return "Play card idx " + cardIdx;
+    }
+
+    public int getCardID() {
+        return cardID;
     }
 }

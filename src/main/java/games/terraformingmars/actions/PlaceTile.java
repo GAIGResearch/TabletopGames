@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class PlaceTile extends TMAction implements IExtendedSequence {
+    // TODO: extend for outer locations (not on mars), x and y will be -1
+    public boolean onMars;  // TODO: initialize and work with this var
     public int x,y;
     public final TMTypes.Tile tile;
     public HashSet<Vector2D> legalPositions;

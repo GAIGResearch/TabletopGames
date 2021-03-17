@@ -8,6 +8,10 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.*;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.effects.Bonus;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.requirements.Requirement;
+import games.terraformingmars.rules.requirements.TagRequirement;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -36,10 +40,11 @@ public class TMGameState extends AbstractGameState {
     HashSet<TMAction>[] playerCardsPlayedEffects;
     HashSet<TMAction>[] playerCardsPlayedActions;
     HashSet<ResourceMapping>[] playerResourceMap;  // Effects for turning one resource into another
+    HashMap<Requirement, Integer>[] playerDiscountEffects;
+    HashSet<Effect>[] playerPersistingEffects;
 
     // Player-specific counters
     HashMap<TMTypes.Resource, Counter>[] playerResources;
-    HashMap<Requirement, Integer>[] playerDiscountEffects;
     HashMap<TMTypes.Resource, Boolean>[] playerResourceIncreaseGen;  // True if this resource was increased this gen
     HashMap<TMTypes.Resource, Counter>[] playerProduction;
     HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
@@ -244,6 +249,10 @@ public class TMGameState extends AbstractGameState {
         return playerResourceIncreaseGen;
     }
 
+    public HashSet<Effect>[] getPlayerPersistingEffects() {
+        return playerPersistingEffects;
+    }
+
     public HashMap<Requirement, Integer>[] getPlayerDiscountEffects() {
         return playerDiscountEffects;
     }
@@ -365,6 +374,11 @@ public class TMGameState extends AbstractGameState {
                 playerDiscountEffects[player].put(r, effects.get(r));
             }
         }
+    }
+
+    public void addPersistingEffects(Effect[] effects) {
+        int player = getCurrentPlayer();
+        playerPersistingEffects[player].addAll(Arrays.asList(effects));
     }
 
     // if add is false, replace instead

@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.rules.Requirement;
+import games.terraformingmars.rules.requirements.Requirement;
 
 import java.util.Objects;
 

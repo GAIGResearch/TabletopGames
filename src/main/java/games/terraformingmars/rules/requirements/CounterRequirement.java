@@ -1,4 +1,4 @@
-package games.terraformingmars.rules;
+package games.terraformingmars.rules.requirements;
 
 import core.components.Counter;
 import games.terraformingmars.TMGameState;

@@ -1,4 +1,4 @@
-package games.terraformingmars.rules;
+package games.terraformingmars.rules.requirements;
 
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;

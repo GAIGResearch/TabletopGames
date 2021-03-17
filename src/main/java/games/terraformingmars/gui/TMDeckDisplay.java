@@ -1,14 +1,13 @@
 package games.terraformingmars.gui;
 
-import core.components.Counter;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
-import games.terraformingmars.rules.CounterRequirement;
-import games.terraformingmars.rules.Requirement;
-import games.terraformingmars.rules.TagRequirement;
+import games.terraformingmars.rules.requirements.CounterRequirement;
+import games.terraformingmars.rules.requirements.Requirement;
+import games.terraformingmars.rules.requirements.TagRequirement;
 import utilities.ImageIO;
 import utilities.Vector2D;
 import utilities.Utils;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static core.AbstractGUI.defaultItemSize;
-import static games.terraformingmars.TMGameState.stringToGPCounter;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMDeckDisplay extends JComponent {
@@ -141,7 +139,7 @@ public class TMDeckDisplay extends JComponent {
             // Draw starting resources
             int size = defaultItemSize/3;
             int yRes = titleRect.y + titleRect.height;
-            for (TMAction aa: card.effects) {
+            for (TMAction aa: card.immediateEffects) {
                 if (aa instanceof PlaceholderModifyCounter) {
                     TMTypes.Resource res = ((PlaceholderModifyCounter) aa).resource;
                     int amount = ((PlaceholderModifyCounter) aa).change;

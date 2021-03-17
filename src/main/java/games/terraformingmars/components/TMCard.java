@@ -1,14 +1,17 @@
 package games.terraformingmars.components;
 
 import core.components.Card;
-import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
-import games.terraformingmars.rules.CounterRequirement;
-import games.terraformingmars.rules.Requirement;
-import games.terraformingmars.rules.ResourceIncGenRequirement;
-import games.terraformingmars.rules.TagRequirement;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.effects.PayForActionEffect;
+import games.terraformingmars.rules.effects.PlaceTileEffect;
+import games.terraformingmars.rules.effects.PlayCardEffect;
+import games.terraformingmars.rules.requirements.CounterRequirement;
+import games.terraformingmars.rules.requirements.Requirement;
+import games.terraformingmars.rules.requirements.ResourceIncGenRequirement;
+import games.terraformingmars.rules.requirements.TagRequirement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Utils;
@@ -27,10 +30,10 @@ public class TMCard extends Card {
     public HashMap<Requirement, Integer> discountEffects;
     public HashSet<TMGameState.ResourceMapping> resourceMappings;
 
+    public Effect[] persistingEffects;
     public TMAction firstAction;  // first action for the player is already decided to be this
-    public TMAction[] rules;  // long-lasting effects
     public TMAction[] actions;  // new actions available to the player
-    public TMAction[] effects; // effect of this card, executed immediately
+    public TMAction[] immediateEffects; // effect of this card, executed immediately
     public double nPoints;  // if tokens, number of points will be nPoints * tokens
 
     public TMTypes.TokenType pointsTokenType;  // Type of token placed on this card
@@ -39,9 +42,9 @@ public class TMCard extends Card {
     public TMCard() {
         tokensOnCard = new TMTypes.TokenType[TMTypes.TokenType.values().length];
         tags = new TMTypes.Tag[0];
-        rules = new TMAction[0];
         actions = new TMAction[0];
-        effects = new TMAction[0];
+        immediateEffects = new TMAction[0];
+        persistingEffects = new Effect[0];
         discountEffects = new HashMap<>();
         resourceMappings = new HashSet<>();
     }
@@ -124,8 +127,9 @@ public class TMCard extends Card {
             }
         }
 
-        JSONArray effects = (JSONArray) cardDef.get("effect");  // TODO
+        JSONArray effects = (JSONArray) cardDef.get("effect");
         ArrayList<TMAction> actions = new ArrayList<>();
+        ArrayList<Effect> persistingEffects = new ArrayList<>();
         for (Object o: effects) {
             JSONObject effect = (JSONObject) o;
             String type = (String) effect.get("type");
@@ -182,11 +186,43 @@ public class TMCard extends Card {
                 TMTypes.Resource to = TMTypes.Resource.valueOf((String)effect.get("to"));
                 double rate = (double) effect.get("rate");
                 card.resourceMappings.add(new TMGameState.ResourceMapping(from, to, rate,null));
+            } else if (type.equalsIgnoreCase("effect")) {
+                String condition = (String)effect.get("if");
+                String actionTypeCondition = condition.split("\\(")[0];
+                String result = (String)effect.get("then");  // TODO: this is placeholdercountermodify action
+                if (actionTypeCondition.equalsIgnoreCase("placetile")) {
+                    // Place tile effect
+                    String cond = condition.split("\\(")[1].replace(")", "");
+                    String[] split2 = cond.split(",");
+                    TMTypes.Tile tile = null;
+                    TMTypes.Resource[] resourcesGained = null;
+                    if (split2.length > 1) {
+                        tile = TMTypes.Tile.valueOf(split2[0]);
+                    } else {
+                        if (split2[0].contains("gain")) {
+                            String[] split3 = split2[0].replace("gain ", "").split("/");
+                            resourcesGained = new TMTypes.Resource[split3.length];
+                            for (int i = 0; i < split3.length; i++) {
+                                resourcesGained[i] = TMTypes.Resource.valueOf(split3[i]);
+                            }
+                        }
+                    }
+                    persistingEffects.add(new PlaceTileEffect(!condition.contains("any"), result, condition.contains("onMars"), tile, resourcesGained));
+                } else if (actionTypeCondition.equalsIgnoreCase("playcard")) {
+                    // Play card effect
+                    String[] cond = condition.split("\\(")[1].replace(")", "").split("-");
+                    persistingEffects.add(new PlayCardEffect(!condition.contains("any"), result, TMTypes.Tag.valueOf(cond[1])));
+                } else if (actionTypeCondition.equalsIgnoreCase("payforaction")) {
+                    // pay for action effect
+                    int minCost = Integer.parseInt(condition.split("\\(")[1].replace(")", ""));
+                    persistingEffects.add(new PayForActionEffect(!condition.contains("any"), result, minCost));
+                }
             }
         }
 
-        card.effects = immediateEffects.toArray(new TMAction[0]);
+        card.immediateEffects = immediateEffects.toArray(new TMAction[0]);
         card.actions = actions.toArray(new TMAction[0]);
+        card.persistingEffects = persistingEffects.toArray(new Effect[0]);
 
         return card;
     }

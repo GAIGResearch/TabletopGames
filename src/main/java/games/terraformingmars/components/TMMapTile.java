@@ -4,7 +4,7 @@ import core.components.Component;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.rules.Bonus;
+import games.terraformingmars.rules.effects.Bonus;
 
 import static utilities.Utils.ComponentType.BOARD_NODE;
 

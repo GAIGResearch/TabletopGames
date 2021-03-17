@@ -5,7 +5,7 @@ import core.components.GridBoard;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.rules.Bonus;
+import games.terraformingmars.rules.effects.Bonus;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 import utilities.Utils;
