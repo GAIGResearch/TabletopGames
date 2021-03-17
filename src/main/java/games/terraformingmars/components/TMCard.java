@@ -150,6 +150,7 @@ public class TMCard extends Card {
                     actions.add(a);
                 }
             } else if (type.equalsIgnoreCase("discount")) {
+                // Parse discounts
                 int amount = (int)(long)effect.get("amount");
                 Requirement r = null;
                 if (effect.get("counter") != null) {

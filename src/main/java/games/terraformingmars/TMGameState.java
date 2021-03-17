@@ -78,13 +78,15 @@ public class TMGameState extends AbstractGameState {
             this.addAll(Arrays.asList(globalParameters));
             this.addAll(Arrays.asList(playerHands));
             this.addAll(Arrays.asList(playerCardChoice));
-            this.addAll(Arrays.asList(playerCorporations));
             for (int i = 0; i < getNPlayers(); i++) {
                 addAll(playerResources[i].values());
                 addAll(playerProduction[i].values());
                 addAll(playerCardsPlayedTags[i].values());
                 addAll(tilesPlaced[i].values());
                 addAll(playerCardsPlayedTypes[i].values());
+                if (playerCorporations[i] != null) {
+                    add(playerCorporations[i]);
+                }
             }
         }};
     }
