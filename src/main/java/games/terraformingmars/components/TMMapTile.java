@@ -49,21 +49,24 @@ public class TMMapTile extends Component {
 
     private void setTilePlaced(TMTypes.Tile which, TMGameState gs) {
         tilePlaced = which;
+        int player = gs.getCurrentPlayer();
 
         // Owner is current player
         if (which != TMTypes.Tile.Ocean) {
-            owner = gs.getCurrentPlayer();
+            owner = player;
         }
 
-        gs.getTilesPlaced()[gs.getCurrentPlayer()].get(which).increment(1);
+        gs.getTilesPlaced()[player].get(which).increment(1);
 
         // Current player gets resources
         for (TMTypes.Resource res: resources) {
-            gs.getPlayerResources()[gs.getCurrentPlayer()].get(res).increment(1);
+            gs.getPlayerResources()[player].get(res).increment(1);
+            gs.getPlayerResourceIncreaseGen()[player].put(res, true);
         }
     }
 
     public boolean placeTile(TMTypes.Tile which, TMGameState gs) {
+        int player = gs.getCurrentPlayer();
         if (tilePlaced == null) {
             if (which == TMTypes.Tile.Ocean) {
                 // If ocean, decrease number of tiles available and increase TR
@@ -71,7 +74,8 @@ public class TMMapTile extends Component {
                 if (oceanTiles != null) {
                     boolean succeeded = oceanTiles.increment(1);
                     if (succeeded) {
-                        gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.TR).increment(1);
+                        gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
+                        gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
                         setTilePlaced(which, gs);
                     } else {
                         return false;
@@ -85,7 +89,8 @@ public class TMMapTile extends Component {
                 if (oxygen != null) {
                     boolean succeeded = oxygen.increment(1);
                     if (succeeded) {
-                        gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.TR).increment(1);
+                        gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
+                        gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
                     }
                 }
                 setTilePlaced(which, gs);

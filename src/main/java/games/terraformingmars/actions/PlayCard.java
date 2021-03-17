@@ -9,6 +9,7 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.*;
 
+
 public class PlayCard extends TMAction {
     final int cardIdx;
 
@@ -27,16 +28,20 @@ public class PlayCard extends TMAction {
     }
 
     private void playCard(TMGameState gs) {
+        int player = gs.getCurrentPlayer();
         // Second: remove from hand, resolve on-play effects and add tags etc. to cards played lists
-        TMCard card = gs.getPlayerHands()[gs.getCurrentPlayer()].pick(cardIdx);
+        TMCard card = gs.getPlayerHands()[player].pick(cardIdx);
 
         // Add info to played cards stats
         for (TMTypes.Tag t: card.tags) {
-            gs.getPlayerCardsPlayedTags()[gs.getCurrentPlayer()].get(t).increment(1);
+            gs.getPlayerCardsPlayedTags()[player].get(t).increment(1);
         }
-        gs.getPlayerCardsPlayedTypes()[gs.getCurrentPlayer()].get(card.cardType).increment(1);
-        gs.getPlayerCardsPlayedActions()[gs.getCurrentPlayer()].addAll(Arrays.asList(card.actions));
-        gs.getPlayerCardsPlayedEffects()[gs.getCurrentPlayer()].addAll(Arrays.asList(card.rules));
+        gs.getPlayerCardsPlayedTypes()[player].get(card.cardType).increment(1);
+        gs.getPlayerCardsPlayedActions()[player].addAll(Arrays.asList(card.actions));
+        gs.getPlayerCardsPlayedEffects()[player].addAll(Arrays.asList(card.rules));
+
+        // Add discountEffects to player's discounts
+        gs.addDiscountEffects(card.discountEffects);
 
         // Execute on-play effects
         for (AbstractAction aa: card.effects) {

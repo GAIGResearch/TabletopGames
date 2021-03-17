@@ -6,8 +6,8 @@ import games.terraformingmars.components.TMCard;
 
 public class TagRequirement implements Requirement<TMGameState> {
 
-    TMTypes.Tag[] tags;
-    int[] nMin;
+    public TMTypes.Tag[] tags;
+    public int[] nMin;
 
     public TagRequirement(TMTypes.Tag[] tag, int[] nMin) {
         this.tags = tag;

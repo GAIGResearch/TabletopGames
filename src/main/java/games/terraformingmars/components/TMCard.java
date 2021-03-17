@@ -5,13 +5,16 @@ import core.components.Card;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
+import games.terraformingmars.rules.CounterRequirement;
 import games.terraformingmars.rules.Requirement;
 import games.terraformingmars.rules.ResourceIncGenRequirement;
+import games.terraformingmars.rules.TagRequirement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TMCard extends Card {
     public int number;
@@ -20,6 +23,7 @@ public class TMCard extends Card {
     public Requirement<TMGameState> requirement;
     public TMTypes.Tag[] tags;
 
+    public HashMap<Requirement, Integer> discountEffects;
     public TMAction firstAction;  // first action for the player is already decided to be this
     public TMAction[] rules;  // long-lasting effects
     public TMAction[] actions;  // new actions available to the player
@@ -35,6 +39,7 @@ public class TMCard extends Card {
         rules = new TMAction[0];
         actions = new TMAction[0];
         effects = new TMAction[0];
+        discountEffects = new HashMap<>();
     }
 
     public static TMCard loadCard(JSONObject cardDef) {
@@ -77,8 +82,7 @@ public class TMCard extends Card {
         JSONArray start = (JSONArray) cardDef.get("start");
         String startResources = (String) start.get(0);
         String[] split = startResources.split(",");
-        card.effects = new TMAction[split.length];
-        int k = 0;
+        ArrayList<TMAction> immediateEffects = new ArrayList<>();
         for (String s: split) {
             s = s.trim();
             String[] split2 = s.split(" ");
@@ -87,8 +91,7 @@ public class TMCard extends Card {
             // Second is what resource
             String resString = split2[1].split("prod")[0];
             TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-            card.effects[k] = new PlaceholderModifyCounter(amount, res, split2[1].contains("prod"), true);
-            k++;
+            immediateEffects.add(new PlaceholderModifyCounter(amount, res, split2[1].contains("prod"), true));
         }
         for (int i = 1; i < start.size(); i++) {
             JSONObject other = (JSONObject) start.get(i);
@@ -118,11 +121,12 @@ public class TMCard extends Card {
         }
 
         JSONArray effects = (JSONArray) cardDef.get("effect");  // TODO
+        ArrayList<TMAction> actions = new ArrayList<>();
         for (Object o: effects) {
             JSONObject effect = (JSONObject) o;
             String type = (String) effect.get("type");
-            ArrayList<TMAction> actions = new ArrayList<>();
             if (type.equalsIgnoreCase("action")) {
+                // Parse actions
                 String[] action = ((String) effect.get("action")).split("-");
                 String[] costStr = ((String) effect.get("cost")).split("/");
                 TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
@@ -145,9 +149,31 @@ public class TMCard extends Card {
                     TMAction a = new PayForAction(new ResourceTransaction(r, amount, false, req), costResource, -cost, -1);
                     actions.add(a);
                 }
+            } else if (type.equalsIgnoreCase("discount")) {
+                int amount = (int)(long)effect.get("amount");
+                Requirement r = null;
+                if (effect.get("counter") != null) {
+                    // A discount for CounterRequirement
+                    for (Object o2: (JSONArray)effect.get("counter")) {
+                        r = new CounterRequirement((String)o2, -1, true);
+                    }
+                } else if (effect.get("tag") != null) {
+                    // A discount for tag requirements
+                    TMTypes.Tag t = TMTypes.Tag.valueOf((String) effect.get("tag"));
+                    r = new TagRequirement(new TMTypes.Tag[]{t}, null);
+                }
+                if (r != null) {
+                    if (card.discountEffects.containsKey(r)) {
+                        card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                    } else {
+                        card.discountEffects.put(r, amount);
+                    }
+                }
             }
-            card.actions = actions.toArray(new TMAction[0]);
         }
+
+        card.effects = immediateEffects.toArray(new TMAction[0]);
+        card.actions = actions.toArray(new TMAction[0]);
 
         return card;
     }

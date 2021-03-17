@@ -4,11 +4,13 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 
+import java.util.Map;
+
 import static games.terraformingmars.TMGameState.stringToGPCounter;
 
 public class CounterRequirement implements Requirement<TMGameState> {
 
-    String counterCode;
+    public String counterCode;
 
     int counterID = -1;
     int threshold;
@@ -28,8 +30,19 @@ public class CounterRequirement implements Requirement<TMGameState> {
         } else {
             c = (Counter) gs.getComponentById(counterID);
         }
-        if (max && c.getValue() <= threshold) return true;
-        return !max && c.getValue() >= threshold;
+
+        // Apply discounts for current player
+        int discount = 0;
+        int player = gs.getCurrentPlayer();
+        for (Map.Entry<Requirement, Integer> e : gs.getPlayerDiscountEffects()[player].entrySet()) {
+            if (e.getKey() instanceof CounterRequirement && ((CounterRequirement) e.getKey()).counterCode.equalsIgnoreCase(counterCode)) {
+                discount = e.getValue();
+                break;
+            }
+        }
+
+        if (max && c.getValue() - discount <= threshold) return true;
+        return !max && c.getValue() + discount >= threshold;
     }
 
     private Counter setCounter(TMGameState gs) {

@@ -2,16 +2,12 @@ package games.terraformingmars;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
-import games.terraformingmars.rules.Award;
-import games.terraformingmars.rules.Bonus;
+import games.terraformingmars.rules.*;
 import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.rules.Milestone;
-import games.terraformingmars.rules.Requirement;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -43,7 +39,8 @@ public class TMGameState extends AbstractGameState {
 
     // Player-specific counters
     HashMap<TMTypes.Resource, Counter>[] playerResources;
-    HashMap<TMTypes.Resource, Boolean>[] playerResourceIncreaseGen;  // True if this resource was increased this gen TODO initialize
+    HashMap<Requirement, Integer>[] playerDiscountEffects;
+    HashMap<TMTypes.Resource, Boolean>[] playerResourceIncreaseGen;  // True if this resource was increased this gen
     HashMap<TMTypes.Resource, Counter>[] playerProduction;
     HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
     HashMap<TMTypes.CardType, Counter>[] playerCardsPlayedTypes;
@@ -81,7 +78,7 @@ public class TMGameState extends AbstractGameState {
             this.addAll(Arrays.asList(globalParameters));
             this.addAll(Arrays.asList(playerHands));
             this.addAll(Arrays.asList(playerCardChoice));
-//            this.addAll(Arrays.asList(playerCorporations));
+            this.addAll(Arrays.asList(playerCorporations));
             for (int i = 0; i < getNPlayers(); i++) {
                 addAll(playerResources[i].values());
                 addAll(playerProduction[i].values());
@@ -213,15 +210,6 @@ public class TMGameState extends AbstractGameState {
         return playerCardChoice;
     }
 
-    public boolean isCardFree(TMCard card) {
-        return isCardFree(card, 0);
-    }
-
-    public boolean isCardFree(TMCard card, int amountPaid) {
-        // TODO: discount effects
-        return card.cost - amountPaid <= 0;
-    }
-
     public Deck<TMCard> getDiscardCards() {
         return discardCards;
     }
@@ -252,6 +240,37 @@ public class TMGameState extends AbstractGameState {
 
     public HashMap<TMTypes.Resource, Boolean>[] getPlayerResourceIncreaseGen() {
         return playerResourceIncreaseGen;
+    }
+
+    public HashMap<Requirement, Integer>[] getPlayerDiscountEffects() {
+        return playerDiscountEffects;
+    }
+
+    public boolean isCardFree(TMCard card) {
+        return isCardFree(card, 0);
+    }
+
+    public boolean isCardFree(TMCard card, int amountPaid) {
+        // Apply tag discount effects
+        int cost = card.cost;
+        int player = getCurrentPlayer();
+        for (TMTypes.Tag t: card.tags) {
+            for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
+                if (e.getKey() instanceof TagRequirement) {
+                    boolean found = false;
+                    for (TMTypes.Tag tt: ((TagRequirement) e.getKey()).tags) {
+                        if (tt == t) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        cost -= e.getValue();
+                    }
+                }
+            }
+        }
+        return cost - amountPaid <= 0;
     }
 
     public static Counter stringToGPCounter(TMGameState gs, String s) {
@@ -308,7 +327,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     public void playerPay(TMTypes.Resource resource, int amount) {
-        playerResources[getCurrentPlayer()].get(resource).decrement(amount);
+        playerResources[getCurrentPlayer()].get(resource).decrement(Math.abs(amount));
     }
 
     public double getResourceMapRate(TMTypes.Resource from, TMTypes.Resource to) {
@@ -333,6 +352,17 @@ public class TMGameState extends AbstractGameState {
             }
         }
         return pos;
+    }
+
+    public void addDiscountEffects(HashMap<Requirement, Integer> effects) {
+        int player = getCurrentPlayer();
+        for (Requirement r: effects.keySet()) {
+            if (playerDiscountEffects[player].containsKey(r)) {
+                playerDiscountEffects[player].put(r, playerDiscountEffects[player].get(r) + effects.get(r));
+            } else {
+                playerDiscountEffects[player].put(r, effects.get(r));
+            }
+        }
     }
 
     static List<Vector2D> getNeighbours(Vector2D cell) {

@@ -72,7 +72,7 @@
       {
         "type": "discount",
         "counter": ["temperature", "oxygen", "oceanTiles"],
-        "amount": [2,-2]
+        "amount": 2
       }
     ],
     "start": ["45 megacredit",
@@ -130,7 +130,6 @@
       {
         "type": "discount",
         "tag": "power",
-        "action": "powerplant",
         "amount": 3
       }
     ],

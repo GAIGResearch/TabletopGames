@@ -31,7 +31,11 @@ public class ResourceTransaction extends TMAction {
     public boolean execute(AbstractGameState gameState) {
         // Remove resource amount
         TMGameState gs = (TMGameState) gameState;
-        boolean success = gs.getPlayerResources()[gs.getCurrentPlayer()].get(res).increment(amount);  // Amount can be negative
+        int player = gs.getCurrentPlayer();
+        boolean success = gs.getPlayerResources()[player].get(res).increment(amount);  // Amount can be negative
+        if (amount > 0) {
+            gs.getPlayerResourceIncreaseGen()[player].put(res, true);
+        }
         if (success) {
             if (res == TMTypes.Resource.Card) {
                 // TODO: choose card to discard, extended sequence
