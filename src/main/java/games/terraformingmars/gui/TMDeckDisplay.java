@@ -1,10 +1,9 @@
 package games.terraformingmars.gui;
 
 import core.components.Deck;
-import core.actions.AbstractAction;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.actions.PlaceholderModifyCounter;
+import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
 import utilities.ImageIO;
 import utilities.Vector2D;
@@ -15,7 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import static core.AbstractGUI.defaultItemSize;
 import static games.terraformingmars.gui.Utils.*;
@@ -30,6 +28,7 @@ public class TMDeckDisplay extends JComponent {
 
     Image background;
     Image production;
+    Image actionArrow;
 
     Image pointBg;
     Image projCardBg;
@@ -50,6 +49,7 @@ public class TMDeckDisplay extends JComponent {
         pointBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/card-point-bg.png");
         projCardBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/proj-card-bg.png");
         production = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/production.png");
+        actionArrow = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/arrow.png");
 
         Vector2D dim = scaleLargestDimImg(projCardBg, cardHeight);
         cardWidth = dim.getX();
@@ -133,21 +133,72 @@ public class TMDeckDisplay extends JComponent {
                 drawImage(g, img2, startX + i*tagSize, tagY, tagSize, tagSize);
             }
             // Draw starting resources
-            int k = 0;
-            for (AbstractAction aa: card.effects) {
+            int size = defaultItemSize/3;
+            int yRes = titleRect.y + titleRect.height;
+            for (TMAction aa: card.effects) {
                 if (aa instanceof PlaceholderModifyCounter) {
                     TMTypes.Resource res = ((PlaceholderModifyCounter) aa).resource;
                     int amount = ((PlaceholderModifyCounter) aa).change;
                     boolean prod = ((PlaceholderModifyCounter) aa).production;
                     Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
 
-                    int size = defaultItemSize/3;
                     int xRes = width/2 - (size + defaultItemSize)/2;
-                    int yRes = (int)(titleRect.getY() + titleRect.getHeight() + k * size + k * spacing / 5);
                     drawResource(g, resImg, production, prod, xRes, yRes, size, 0.6);
                     drawShadowStringCentered(g, "" + amount, new Rectangle.Double(xRes + size, yRes, defaultItemSize, size));
-                    k++;
+                    yRes += size + spacing / 5;
                 }
+            }
+            // Draw actions
+            int p = 0;
+            for (TMAction a: card.actions) {
+                int leftNumber = -1;
+                String left = null;
+                String right = null;
+                int rightNumber = -1;
+                if (a instanceof PayForAction) {
+                    PayForAction aa = (PayForAction) a;
+                    TMTypes.Resource leftR = aa.resourceToPay;
+                    left = leftR.getImagePath();
+                    leftNumber = Math.abs(aa.costTotal);
+                    boolean played = aa.played;
+                    if (aa.action instanceof PlaceTile) {
+                        // get the tile image
+                        TMTypes.Tile t = ((PlaceTile)aa.action).tile;
+                        right = t.getImagePath();
+                    } else if (aa.action instanceof ResourceTransaction) {
+                        // get resource image
+                        TMTypes.Resource rightR = ((ResourceTransaction)aa.action).res;
+                        right = rightR.getImagePath();
+                    }
+                }
+                // Draw left + arrow + right
+                int xA = width/2 - defaultItemSize/2;
+                if (leftNumber != -1) xA -= size/2;
+                if (rightNumber != -1) xA -= size/2;
+                if (left != null) xA -= size/2;
+                if (right != null) xA -= size/2;
+
+                int yA = yRes + size + spacing + p * size + p * spacing / 5;
+                if (leftNumber != -1) {
+                    drawShadowStringCentered(g, "" + leftNumber, new Rectangle(xA, yA, size, size), Color.white, Color.black, 12);
+                    xA += size;
+                }
+                if (left != null) {
+                    Image image = ImageIO.GetInstance().getImage(left);
+                    drawImage(g, image, xA, yA, size, size);
+                    xA += size;
+                }
+                drawImage(g, actionArrow, xA, yA, defaultItemSize, size);
+                xA += defaultItemSize;
+                if (rightNumber != -1) {
+                    drawShadowStringCentered(g, "" + rightNumber, new Rectangle(xA, yA, size, size), Color.white, Color.black, 12);
+                    xA += size;
+                }
+                if (right != null) {
+                    Image image = ImageIO.GetInstance().getImage(right);
+                    drawImage(g, image, xA, yA, size, size);
+                }
+                p++;
             }
         } else {
             // Draw background

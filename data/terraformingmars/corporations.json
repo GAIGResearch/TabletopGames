@@ -2,84 +2,178 @@
   {
     "id": 1,
     "name": "credicor",
-    "effect": ["Effect: buy(card, standard project, cost > 20): gain 4 megacredit"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "action(payforaction,costTotal-min-21)",
+        "then": "resourcetransaction-megacredit/4"
+      }
+    ],
     "start": ["57 megacredit"]
   },
   {
     "id": 2,
     "name": "ecoline",
     "tags" : ["plant"],
-    "effect" : ["Action: buy(greenery, 7 plant)"],
+    "effect" : [
+      {
+        "type": "action",
+        "action": "placetile-Greenery",
+        "cost": "Plant/7"
+      }
+    ],
     "start": ["2 plantprod, 3 plant, 36 megacredit"]
   },
   {
     "id": 3,
     "name": "Helion",
     "tags": ["space"],
-    "effect" : ["Special: use(heat, megacredit)"],
+    "effect" : [
+      {
+        "type": "resourcemapping",
+        "from": "Heat",
+        "to": "MegaCredit",
+        "rate": 1
+      }
+    ],
     "start": ["3 heatprod, 42 megacredit"]
   },
   {
     "id": 4,
     "name": "Mining Guild",
     "tags": ["building", "building"],
-    "effect": ["Effect: gain(placetile, steel-titanium) : inc-steelprod-1"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "gain(placetile, steel-titanium)",
+        "then": "inc-steelprod-1"
+      }
+    ],
     "start": ["30 megacredit, 5 steel, 1 steelprod"]
   },
   {
     "id": 5,
     "name": "INTERPLANETARY CINEMATICS",
     "tags": ["building"],
-    "effect": ["Effect: play(event) : gain 2 megacredit"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "playcard-event",
+        "then": "inc-megacredit-2"
+      }
+    ],
     "start": ["20 steel, 30 megacredit"]
   },
   {
     "id": 6,
     "name": "Inventrix",
     "tags": ["science"],
-    "effect": ["Special: temperature, oxygen, ocean requirements are +2 or -2 steps"],
-    "start": ["45 megacredit", "first: draw 3"]
+    "effect": [
+      {
+        "type": "discount",
+        "counter": ["temperature", "oxygen", "oceanTiles"],
+        "amount": [2,-2]
+      }
+    ],
+    "start": ["45 megacredit",
+      {
+      "type": "first",
+      "action": "resourcetransaction",
+      "resource": "Card",
+      "amount": 3
+      }
+    ]
   },
   {
     "id": 7,
     "name": "Phoblog",
     "tags": ["space"],
-    "effect": ["Special: use(titanium, megacredit+1)"],
+    "effect": [
+      {
+        "type": "resourcemapping",
+        "from": "Titanium",
+        "to": "MegaCredit",
+        "rate": "+1"
+      }
+    ],
     "start": ["10 titanium, 23 megacredit"]
   },
   {
     "id": 8,
     "name": "Tharsis Republic",
     "tags": ["building"],
-    "effect": ["Effect: placetile(city, grid, any) : inc-megacreditprod-1", "Effect: placetile(city) : inc-megacredit-3"],
-    "start": ["40 megacredit", "first: placetile-city"]
+    "effect": [
+      {
+        "type": "effect",
+        "if": "placetile-city (grid,any)",
+        "then": "inc-megacreditprod-1"
+      },
+      {
+        "type": "effect",
+        "if": "placetile-city",
+        "then": "inc-megacredit-3"
+      }
+    ],
+    "start": ["40 megacredit",
+      {
+        "type": "first",
+        "action": "placetile",
+        "tile": "City"
+      }
+    ]
   },
   {
     "id": 9,
     "name": "Thorgate",
     "tags": ["power"],
-    "effect": ["Discount: power-powerplant : 3"],
+    "effect": [
+      {
+        "type": "discount",
+        "tag": "power",
+        "action": "powerplant",
+        "amount": 3
+      }
+    ],
     "start":  ["1 energyprod, 48 megacredit"]
   },
   {
     "id": 10,
     "name": "UNITED NATIONS MARS INITIATIVE",
     "tags": ["earth"],
-    "effect": ["Action: if(TR-inc-gen) buy(TR,3)"],
+    "effect": [
+      {
+        "type": "action",
+        "action": "resourcetransaction-TR-1",
+        "cost": "MegaCredit/3",
+        "if": "incgen-TR"
+      }
+    ],
     "start":  ["40 megacredit"]
   },
   {
     "id": 11,
     "name": "TERACTOR",
     "tags": ["earth"],
-    "effect": ["Discount: earth : 3"],
+    "effect": [
+      {
+        "type": "discount",
+        "tag": "earth",
+        "amount": 3
+      }
+    ],
     "start":  ["60 megacredit"]
   },
   {
     "id": 12,
     "name": "SATURN SYSTEMS",
     "tags": ["jovian"],
-    "effect": ["Effect: play(jovian, any) : inc-megacredit-prod-1"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "playcard-jovian-any",
+        "then": "inc-megacredit-prod-1"
+      }
+    ],
     "start":  ["1 titaniumprod, 42 megacredit, 1 megacreditprod"]
   }
 ]

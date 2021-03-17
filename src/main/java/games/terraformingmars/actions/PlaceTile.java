@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class PlaceTile extends TMAction implements IExtendedSequence {
-    int x,y;
-    final TMTypes.Tile tile;
-    HashSet<Vector2D> legalPositions;
+    public int x,y;
+    public final TMTypes.Tile tile;
+    public HashSet<Vector2D> legalPositions;
 
     boolean placed;
     boolean impossible;
@@ -43,6 +43,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     public boolean execute(AbstractGameState gs) {
         if (x != -1 && tile != null) {
             TMGameState ggs = (TMGameState) gs;
+            // TODO money earned from oceans
             return ggs.getBoard().getElement(x, y).placeTile(tile, ggs) && super.execute(gs);
         }
         player = gs.getCurrentPlayer();
@@ -55,9 +56,12 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         PlaceTile copy = new PlaceTile(x, y, tile, free);
         copy.impossible = impossible;
         copy.placed = placed;
-        HashSet<Vector2D> copyPos = new HashSet<>();
-        for (Vector2D pos: legalPositions) {
-            copyPos.add(pos.copy());
+        HashSet<Vector2D> copyPos = null;
+        if (legalPositions != null) {
+            copyPos = new HashSet<>();
+            for (Vector2D pos : legalPositions) {
+                copyPos.add(pos.copy());
+            }
         }
         copy.legalPositions = copyPos;
         copy.player = player;
@@ -69,11 +73,23 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (x == -1) {
             // Need to choose where to place it
+            // TODO adjacency rules
             TMGameState gs = (TMGameState) state;
-            for (Vector2D pos: legalPositions) {
-                TMMapTile mt = gs.getBoard().getElement(pos.getX(), pos.getY());
-                if (mt != null && mt.getTilePlaced() == null) {
-                    actions.add(new PlaceTile(pos.getX(), pos.getY(), tile, free));
+            if (legalPositions != null) {
+                for (Vector2D pos : legalPositions) {
+                    TMMapTile mt = gs.getBoard().getElement(pos.getX(), pos.getY());
+                    if (mt != null && mt.getTilePlaced() == null) {
+                        actions.add(new PlaceTile(pos.getX(), pos.getY(), tile, free));
+                    }
+                }
+            } else {
+                for (int i = 0; i < gs.getBoard().getHeight(); i++) {
+                    for (int j = 0; j < gs.getBoard().getWidth(); j++) {
+                        TMMapTile mt = gs.getBoard().getElement(j, i);
+                        if (mt != null && mt.getTilePlaced() == null && mt.getTileType() == tile.getRegularLegalTileType()) {
+                            actions.add(new PlaceTile(j, i, tile, free));
+                        }
+                    }
                 }
             }
             if (actions.size() == 0) {

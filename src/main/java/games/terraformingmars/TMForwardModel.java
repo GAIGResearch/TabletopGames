@@ -65,6 +65,10 @@ public class TMForwardModel extends AbstractForwardModel {
         loadCards(params.corpsPath, gs.corpCards);
         loadBoard(gs);
 
+        // Shuffle dekcs
+        gs.projectCards.shuffle(rnd);
+        gs.corpCards.shuffle(rnd);
+
         HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
         HashSet<AbstractAction>[] playerCardsPlayedEffects;
         HashSet<AbstractAction>[] playerCardsPlayedActions;
@@ -108,7 +112,7 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.setGamePhase(CorporationSelect);
         for (int i = 0; i < gs.getNPlayers(); i++) {
             for (int j = 0; j < params.nCorpChoiceStart; j++) {
-                gs.playerCardChoice[i].add(gs.corpCards.pick(rnd));
+                gs.playerCardChoice[i].add(gs.corpCards.pick(0));
             }
         }
 
@@ -119,10 +123,20 @@ public class TMForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         TMGameState gs = (TMGameState)currentState;
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
-        Random rnd = new Random(params.getRandomSeed());
+        int player = gs.getCurrentPlayer();
 
         // Execute action
         action.execute(currentState);
+
+        // Check if player has Card resources, transform those to cards into hand
+        Counter c = gs.playerResources[player].get(TMTypes.Resource.Card);
+        int nCards = c.getValue();
+        if (nCards > 0) {
+            for (int i = 0; i < nCards; i++) {
+                gs.playerHands[player].add(gs.projectCards.pick(0));
+            }
+            c.setValue(0);
+        }
 
         if (gs.getGamePhase() == CorporationSelect) {
             boolean allChosen = true;
@@ -137,7 +151,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 gs.getTurnOrder().endRound(gs);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsStart; j++) {
-                        gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
+                        gs.playerCardChoice[i].add(gs.projectCards.pick(0));
                     }
                 }
             }
@@ -162,7 +176,7 @@ public class TMForwardModel extends AbstractForwardModel {
                     gs.getPlayerResources()[i].get(TMTypes.Resource.Heat).increment(gs.getPlayerResources()[i].get(TMTypes.Resource.Energy).getValue());
                     gs.getPlayerResources()[i].get(TMTypes.Resource.Energy).setValue(0);
                     // Then, all production values are added to resources
-                    for (TMTypes.Resource res: TMTypes.Resource.values()) {
+                    for (TMTypes.Resource res : TMTypes.Resource.values()) {
                         gs.getPlayerResources()[i].get(res).increment(gs.getPlayerProduction()[i].get(res).getValue());
                     }
                     // TR also adds to mega credits
@@ -175,7 +189,12 @@ public class TMForwardModel extends AbstractForwardModel {
                 gs.setGamePhase(Research);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsResearch; j++) {
-                        gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
+                        gs.playerCardChoice[i].add(gs.projectCards.pick(0));
+                    }
+
+                    // Mark player actions unused
+                    for (TMAction a : gs.playerCardsPlayedActions[i]) {
+                        a.played = false;
                     }
                 }
 
@@ -192,10 +211,11 @@ public class TMForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         TMGameState gs = (TMGameState)gameState;
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
+        int player = gs.getCurrentPlayer();
 
         if (gs.getGamePhase() == CorporationSelect) {
             // Decide one card at a time, first one player, then the other
-            Deck<TMCard> cardChoice = gs.getPlayerCardChoice()[gs.getCurrentPlayer()];
+            Deck<TMCard> cardChoice = gs.getPlayerCardChoice()[player];
             if (cardChoice.getSize() == 0) {
                 actions.add(new TMAction());  // Pass
             } else {
@@ -205,7 +225,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
         } else if (gs.getGamePhase() == Research) {
             // Decide one card at a time, first one player, then the other
-            Deck<TMCard> cardChoice = gs.getPlayerCardChoice()[gs.getCurrentPlayer()];
+            Deck<TMCard> cardChoice = gs.getPlayerCardChoice()[player];
             if (cardChoice.getSize() == 0) {
                 actions.add(new TMAction());  // Pass
             } else {
@@ -213,10 +233,20 @@ public class TMForwardModel extends AbstractForwardModel {
                 actions.add(new DiscardCard(0, true));
             }
         } else {
+            if (gs.generation == 1) {
+                // Check if any players have decided first action from corporations
+                TMCard corpCard = gs.playerCorporations[player];
+                if (corpCard.firstAction != null) {
+                    actions.add(corpCard.firstAction);
+                    corpCard.firstAction = null;
+                    return actions;
+                }
+            }
+
             actions.add(new TMAction());  // Can always just pass
             // Play a card actions
-            for (int i = 0; i < gs.playerHands[gs.getCurrentPlayer()].getSize(); i++) {
-                TMCard card = gs.playerHands[gs.getCurrentPlayer()].get(i);
+            for (int i = 0; i < gs.playerHands[player].getSize(); i++) {
+                TMCard card = gs.playerHands[player].get(i);
                 boolean canPlayerPay = gs.canPlayerPay(card, null, TMTypes.Resource.MegaCredit, card.cost);
                 if (canPlayerPay && (card.requirement == null || card.requirement.testCondition(gs))) {
                     actions.add(new PayForAction(new PlayCard(i, false), TMTypes.Resource.MegaCredit, card.cost, i));
@@ -226,7 +256,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // Buy a standard project
             // - Discard cards for MC TODO
             // - Increase energy production 1 step for 11 MC
-            Counter c = gs.playerProduction[gs.getCurrentPlayer()].get(TMTypes.Resource.Energy);
+            Counter c = gs.playerProduction[player].get(TMTypes.Resource.Energy);
             if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPEnergy)) {
                 actions.add(new PayForAction(new PlaceholderModifyCounter(1, TMTypes.Resource.Energy, false, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
@@ -242,14 +272,14 @@ public class TMForwardModel extends AbstractForwardModel {
                 actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Ocean, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ocean), false),
                         TMTypes.Resource.MegaCredit, params.nCostSPOcean, -1));
             }
-            // - Place greenery tile for 23 MC TODO adjacency requirement
+            // - Place greenery tile for 23 MC
             if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPGreenery)) {
-                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false),
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, null, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPGreenery, -1));
             }
-            // - Place city tile and increase MC prod by 1 for 25 MC TODO adjacency requirement + increase MC prod by 1
+            // - Place city tile and increase MC prod by 1 for 25 MC TODO increase MC prod by 1
             if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPCity)) {
-                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.City, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false),
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.City, null, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
             }
 
@@ -272,11 +302,26 @@ public class TMForwardModel extends AbstractForwardModel {
                 }
             }
 
-            // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation TODO
+            // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation
+            for (TMAction a: gs.playerCardsPlayedActions[player]) {
+                if (!a.isPlayed() && (a.requirement == null || a.requirement.testCondition(gs))) {
+                    if (a instanceof PayForAction) {
+                        // Check if player can afford it
+                        PayForAction aa = (PayForAction) a;
+                        TMCard card = null;
+                        if (aa.cardIdx != -1) {
+                            card = gs.playerHands[player].get(aa.cardIdx);
+                        }
+                        if (gs.canPlayerPay(card, null, aa.resourceToPay, aa.costTotal)) {
+                            actions.add(a);
+                        }
+                    }
+                }
+            }
 
-            // 8 plants into greenery tile TODO adjacency requirement
+            // 8 plants into greenery tile
             if (gs.canPlayerPay(null, null, TMTypes.Resource.Plant, params.nCostGreeneryPlant)) {
-                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false),
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, null, false),
                         TMTypes.Resource.Plant, params.nCostGreeneryPlant, -1));
             }
             // 8 heat into temperature increase
@@ -467,7 +512,7 @@ public class TMForwardModel extends AbstractForwardModel {
                     card = TMCard.loadCorporation((JSONObject)o);
                 } else {
                     card = TMCard.loadCardHTML((JSONObject) o);
-                }  // TODO: other types of cards
+                }
                 deck.add(card);
             }
 

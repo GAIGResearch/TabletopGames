@@ -53,6 +53,11 @@ public class TMTypes {
         public String getImagePath() {
             return imagePath;
         }
+
+        public MapTileType getRegularLegalTileType() {
+            if (this == Ocean) return MapTileType.Ocean;
+            return MapTileType.Ground;
+        }
     }
 
     public enum Resource {

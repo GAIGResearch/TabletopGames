@@ -4,8 +4,9 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.actions.PlaceholderModifyCounter;
+import games.terraformingmars.actions.*;
 import games.terraformingmars.rules.Requirement;
+import games.terraformingmars.rules.ResourceIncGenRequirement;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Utils;
@@ -19,9 +20,10 @@ public class TMCard extends Card {
     public Requirement<TMGameState> requirement;
     public TMTypes.Tag[] tags;
 
-    public AbstractAction[] rules;  // long-lasting effects
-    public AbstractAction[] actions;  // new actions available to the player
-    public AbstractAction[] effects; // effect of this card, executed immediately
+    public TMAction firstAction;  // first action for the player is already decided to be this
+    public TMAction[] rules;  // long-lasting effects
+    public TMAction[] actions;  // new actions available to the player
+    public TMAction[] effects; // effect of this card, executed immediately
     public double nPoints;  // if tokens, number of points will be nPoints * tokens
 
     public TMTypes.TokenType pointsTokenType;  // Type of token placed on this card
@@ -30,9 +32,9 @@ public class TMCard extends Card {
     public TMCard() {
         tokensOnCard = new TMTypes.TokenType[TMTypes.TokenType.values().length];
         tags = new TMTypes.Tag[0];
-        rules = new AbstractAction[0];
-        actions = new AbstractAction[0];
-        effects = new AbstractAction[0];
+        rules = new TMAction[0];
+        actions = new TMAction[0];
+        effects = new TMAction[0];
     }
 
     public static TMCard loadCard(JSONObject cardDef) {
@@ -72,12 +74,10 @@ public class TMCard extends Card {
         card.number = (int)(long)cardDef.get("id");
         card.setComponentName((String)cardDef.get("name"));
 
-        JSONArray effect = (JSONArray) cardDef.get("effect");  // TODO
-
         JSONArray start = (JSONArray) cardDef.get("start");
         String startResources = (String) start.get(0);
         String[] split = startResources.split(",");
-        card.effects = new AbstractAction[split.length];
+        card.effects = new TMAction[split.length];
         int k = 0;
         for (String s: split) {
             s = s.trim();
@@ -90,7 +90,21 @@ public class TMCard extends Card {
             card.effects[k] = new PlaceholderModifyCounter(amount, res, split2[1].contains("prod"), true);
             k++;
         }
-        // TODO: other start, e.g. first action
+        for (int i = 1; i < start.size(); i++) {
+            JSONObject other = (JSONObject) start.get(i);
+            String type = (String) other.get("type");
+            if (type.equalsIgnoreCase("first")) {
+                // First action in action phase for the player is decided, not free
+                String action = (String) other.get("action");
+                if (action.equalsIgnoreCase("resourcetransaction")) {
+                    card.firstAction = new ResourceTransaction(TMTypes.Resource.valueOf((String) other.get("resource")), (int)(long)other.get("amount"), false);
+                } else if (action.equalsIgnoreCase("placetile")) {
+                    card.firstAction = new PlaceTile(TMTypes.Tile.valueOf((String) other.get("tile")), null, false);
+                }
+                // TODO: other actions?
+            }
+            // TODO: other options?
+        }
 
         if (cardDef.get("tags") != null) {
             JSONArray ts = (JSONArray) cardDef.get("tags");
@@ -101,6 +115,38 @@ public class TMCard extends Card {
                 card.tags[i] = t;
                 i++;
             }
+        }
+
+        JSONArray effects = (JSONArray) cardDef.get("effect");  // TODO
+        for (Object o: effects) {
+            JSONObject effect = (JSONObject) o;
+            String type = (String) effect.get("type");
+            ArrayList<TMAction> actions = new ArrayList<>();
+            if (type.equalsIgnoreCase("action")) {
+                String[] action = ((String) effect.get("action")).split("-");
+                String[] costStr = ((String) effect.get("cost")).split("/");
+                TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
+                int cost = Integer.parseInt(costStr[1]);
+                if (action[0].equalsIgnoreCase("placetile")) {
+                    TMAction a = new PayForAction(new PlaceTile(TMTypes.Tile.valueOf(action[1]), null, false),
+                            costResource, -cost, -1);
+                    actions.add(a);
+                } else if (action[0].equalsIgnoreCase("resourcetransaction")) {
+                    TMTypes.Resource r = TMTypes.Resource.valueOf(action[1]);
+                    int amount = Integer.parseInt(action[2]);
+                    Requirement req = null;
+                    if (effect.get("if") != null) {
+                        // parse requirement
+                        String reqStr = (String) effect.get("if");
+                        if (reqStr.contains("incgen")) {
+                            req = new ResourceIncGenRequirement(TMTypes.Resource.valueOf(reqStr.split("-")[1]));
+                        }
+                    }
+                    TMAction a = new PayForAction(new ResourceTransaction(r, amount, false, req), costResource, -cost, -1);
+                    actions.add(a);
+                }
+            }
+            card.actions = actions.toArray(new TMAction[0]);
         }
 
         return card;

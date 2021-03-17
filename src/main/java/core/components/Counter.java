@@ -55,11 +55,7 @@ public class Counter extends Component {
      */
     public boolean increment(int amount) {
         this.valueIdx += amount;
-        if (this.valueIdx > this.maximum) {
-            this.valueIdx = this.maximum;
-            return false;
-        }
-        return true;
+        return clamp();
     }
 
     /**
@@ -69,6 +65,14 @@ public class Counter extends Component {
      */
     public boolean decrement(int amount) {
         this.valueIdx -= amount;
+        return clamp();
+    }
+
+    private boolean clamp() {
+        if (this.valueIdx > this.maximum) {
+            this.valueIdx = this.maximum;
+            return false;
+        }
         if (this.valueIdx < this.minimum) {
             this.valueIdx = this.minimum;
             return false;

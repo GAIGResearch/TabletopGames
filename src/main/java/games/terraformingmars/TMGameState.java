@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
+import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.Award;
 import games.terraformingmars.rules.Bonus;
@@ -36,12 +37,13 @@ public class TMGameState extends AbstractGameState {
     Deck<TMCard> projectCards, corpCards, discardCards;  // Face-down decks
 
     // Effects and actions played
-    HashSet<AbstractAction>[] playerCardsPlayedEffects;
-    HashSet<AbstractAction>[] playerCardsPlayedActions;
-    HashSet<ResourceMapping>[] playerResourceMap;  // Effects for turning one resource into another TODO initialize
+    HashSet<TMAction>[] playerCardsPlayedEffects;
+    HashSet<TMAction>[] playerCardsPlayedActions;
+    HashSet<ResourceMapping>[] playerResourceMap;  // Effects for turning one resource into another
 
     // Player-specific counters
     HashMap<TMTypes.Resource, Counter>[] playerResources;
+    HashMap<TMTypes.Resource, Boolean>[] playerResourceIncreaseGen;  // True if this resource was increased this gen TODO initialize
     HashMap<TMTypes.Resource, Counter>[] playerProduction;
     HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
     HashMap<TMTypes.CardType, Counter>[] playerCardsPlayedTypes;
@@ -183,11 +185,11 @@ public class TMGameState extends AbstractGameState {
         return playerCardsPlayedTypes;
     }
 
-    public HashSet<AbstractAction>[] getPlayerCardsPlayedActions() {
+    public HashSet<TMAction>[] getPlayerCardsPlayedActions() {
         return playerCardsPlayedActions;
     }
 
-    public HashSet<AbstractAction>[] getPlayerCardsPlayedEffects() {
+    public HashSet<TMAction>[] getPlayerCardsPlayedEffects() {
         return playerCardsPlayedEffects;
     }
 
@@ -246,6 +248,10 @@ public class TMGameState extends AbstractGameState {
 
     public int getGeneration() {
         return generation;
+    }
+
+    public HashMap<TMTypes.Resource, Boolean>[] getPlayerResourceIncreaseGen() {
+        return playerResourceIncreaseGen;
     }
 
     public static Counter stringToGPCounter(TMGameState gs, String s) {

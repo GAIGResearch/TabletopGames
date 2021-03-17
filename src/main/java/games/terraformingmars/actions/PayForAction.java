@@ -12,10 +12,10 @@ import java.util.*;
 
 // Wrapper class for actions that need to be paid with resources before execution
 public class PayForAction extends TMAction implements IExtendedSequence {
-    final TMAction action;
-    final int costTotal;
-    final TMTypes.Resource resourceToPay;
-    final int cardIdx;
+    public final TMAction action;
+    public final int costTotal;
+    public final TMTypes.Resource resourceToPay;
+    public final int cardIdx;
 
     int player;
     int costPaid;
@@ -70,7 +70,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Can pay between min and max of this resource
         ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = min; i <= max; i++) {
-            actions.add(new PayResources(res, i));
+            actions.add(new ResourceTransaction(res, -i));
         }
         return actions;
     }
@@ -84,11 +84,11 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         TMGameState gs = (TMGameState) state;
         TMTypes.Resource res = resourcesToPayWith[stage];
-        costPaid += ((PayResources)action).amount * gs.getResourceMapRate(res, TMTypes.Resource.MegaCredit);
+        costPaid += Math.abs(((ResourceTransaction)action).amount) * gs.getResourceMapRate(res, TMTypes.Resource.MegaCredit);
         stage++;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || costPaid == costTotal) {
+        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || costPaid >= costTotal) {
             // Action paid for, execute
             this.action.execute(state);
         }

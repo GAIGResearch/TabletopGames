@@ -69,7 +69,7 @@ public class TMGUI extends AbstractGUI {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(Color.white);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
