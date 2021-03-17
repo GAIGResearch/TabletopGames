@@ -8,10 +8,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 // Wrapper class for actions that need to be paid with resources before execution
 public class PayForAction extends TMAction implements IExtendedSequence {
@@ -49,7 +46,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         player = gs.getCurrentPlayer();
         stage = 0;
         costPaid = 0;
-        gs.setActionInProgress(this);
+        gameState.setActionInProgress(this);
         return true;
     }
 
@@ -87,7 +84,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         stage++;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == resourcesToPayWith.length-1 || costPaid == costTotal) {
+        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || costPaid == costTotal) {
             // Action paid for, execute
             action.execute(state);
         }
@@ -95,6 +92,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
+        System.out.println("hi!");
         TMGameState gs = (TMGameState)state;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
@@ -112,7 +110,28 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PayForAction)) return false;
+        if (!super.equals(o)) return false;
+        PayForAction that = (PayForAction) o;
+        return costTotal == that.costTotal && cardIdx == that.cardIdx && player == that.player && costPaid == that.costPaid && stage == that.stage && Objects.equals(action, that.action) && resourceToPay == that.resourceToPay && Arrays.equals(resourcesToPayWith, that.resourcesToPayWith);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), action, costTotal, resourceToPay, cardIdx, player, costPaid, stage);
+        result = 31 * result + Arrays.hashCode(resourcesToPayWith);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "Pay " + costTotal + " " + resourceToPay + " for " + action.toString();
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Pay " + costTotal + " " + resourceToPay + " for " + action.getString(gameState);
     }
 }

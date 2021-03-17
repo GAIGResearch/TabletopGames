@@ -14,9 +14,9 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static core.AbstractGUI.defaultItemSize;
 import static games.terraformingmars.gui.TMDeckDisplay.drawResource;
@@ -26,7 +26,7 @@ public class TMBoardView extends ComponentView {
 
     TMGameState gs;
 
-    Rectangle[] rects;  // Used for highlights + action trimming
+    HashMap<Rectangle, String> rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
 
     Image background;
@@ -46,7 +46,7 @@ public class TMBoardView extends ComponentView {
         width = 500;
         height = 500;
 
-        rects = new Rectangle[gs.getBoard().getWidth() * gs.getBoard().getHeight()];
+        rects = new HashMap<>();
         highlight = new ArrayList<>();
         background = ImageIO.GetInstance().getImage("data/terraformingmars/images/mars.png");
         counterTop = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/meter-scale-top.png");
@@ -60,7 +60,7 @@ public class TMBoardView extends ComponentView {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     // Left click, highlight cell
-                    for (Rectangle r: rects) {
+                    for (Rectangle r: rects.keySet()) {
                         if (r != null && r.contains(e.getPoint())) {
                             highlight.clear();
                             highlight.add(r);
@@ -85,7 +85,7 @@ public class TMBoardView extends ComponentView {
         double height = 0;
         double width = 0;
         for (int i = 0; i < gs.getGlobalParameters().length; i++) {
-            Rectangle2D rect = drawCounter(g, offsetX + i * defaultItemSize * 2, 0, gs.getGlobalParameters()[i]);
+            Rectangle rect = drawCounter(g, offsetX + i * defaultItemSize * 2, 0, gs.getGlobalParameters()[i]);
             if (rect.getHeight() + rect.getY() > height) {
                 height = rect.getHeight() + rect.getY();
             }
@@ -94,7 +94,7 @@ public class TMBoardView extends ComponentView {
             }
         }
 
-        Rectangle2D rect = drawGridBoard(g, (GridBoard<TMMapTile>) component, offsetX + (gs.getGlobalParameters().length+1) * defaultItemSize + 10, defaultItemSize);
+        Rectangle rect = drawGridBoard(g, (GridBoard<TMMapTile>) component, offsetX + (gs.getGlobalParameters().length+1) * defaultItemSize + 10, defaultItemSize);
         if (rect.getHeight() + rect.getY() > height) {
             height = rect.getHeight() + rect.getY();
         }
@@ -106,9 +106,9 @@ public class TMBoardView extends ComponentView {
         int offsetY = (int)(height + spacing);
         int trWidth = 0;
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            Rectangle2D r = drawImage(g, tr, offsetX + i*defaultItemSize*3, offsetY, defaultItemSize);
+            Rectangle r = drawImage(g, tr, offsetX + i*defaultItemSize*3, offsetY, defaultItemSize);
             drawShadowStringCentered(g, "p" + i + ": " +gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue(),
-                    new Rectangle2D.Double(offsetX + i*defaultItemSize*3 + defaultItemSize, offsetY, defaultItemSize*2, r.getHeight()),
+                    new Rectangle.Double(offsetX + i*defaultItemSize*3 + defaultItemSize, offsetY, defaultItemSize*2, r.getHeight()),
                     playerColors[i], Color.darkGray);
             if (i == 0) {
                 height += spacing + r.getHeight() + spacing;
@@ -124,9 +124,19 @@ public class TMBoardView extends ComponentView {
             this.width = (int) width + offsetX;
             adjustedSize = true;
         }
+
+        if (highlight.size() > 0) {
+            g.setColor(Color.green);
+            Stroke s = g.getStroke();
+            g.setStroke(new BasicStroke(3));
+
+            Rectangle r = highlight.get(0);
+            g.drawRect(r.x, r.y, r.width, r.height);
+            g.setStroke(s);
+        }
     }
 
-    public Rectangle2D drawGridBoard(Graphics2D g, GridBoard<TMMapTile> gridBoard, int x, int y) {
+    public Rectangle drawGridBoard(Graphics2D g, GridBoard<TMMapTile> gridBoard, int x, int y) {
         int offsetY = defaultItemSize/2;
 
         // Board background
@@ -147,10 +157,7 @@ public class TMBoardView extends ComponentView {
                 drawCell(g, gridBoard.getElement(j, i), xC, yC);
 
                 // Save rect where cell is drawn
-                int idx = i * gridBoard.getWidth() + j;
-                if (rects[idx] == null) {
-                    rects[idx] = new Rectangle(xC, yC, defaultItemSize, defaultItemSize);
-                }
+                rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), "grid-" + i + "-" + j);
             }
         }
 
@@ -160,9 +167,10 @@ public class TMBoardView extends ComponentView {
             int xC = x + offsetX + width/2 - gs.getExtraTiles().length * defaultItemSize + i * defaultItemSize * 2;
             int yC = y + offsetY + spacing + height;
             drawCell(g, gs.getExtraTiles()[i], xC, yC);
+            rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), gs.getExtraTiles()[i].getComponentName());
         }
 
-        return new Rectangle2D.Double(x, y, width, height);
+        return new Rectangle(x, y, width, height);
     }
 
     private void drawCell(Graphics2D g, TMMapTile element, int x, int y) {
@@ -214,17 +222,17 @@ public class TMBoardView extends ComponentView {
         if (element.getTileType() == TMTypes.MapTileType.City) {
             // Draw city name
             drawShadowStringCentered(g, element.getComponentName(),
-                    new Rectangle2D.Double(x-defaultItemSize/2., y-defaultItemSize/2., defaultItemSize, defaultItemSize),
+                    new Rectangle.Double(x-defaultItemSize/2., y-defaultItemSize/2., defaultItemSize, defaultItemSize),
                     Color.lightGray, null, 10);
             return true;
         }
         return false;
     }
 
-    private Rectangle2D drawCounter(Graphics2D g, int x, int y, Counter c) {
+    private Rectangle drawCounter(Graphics2D g, int x, int y, Counter c) {
         int border = 3;
         int counterWidth = defaultItemSize;
-        Rectangle2D rect = new Rectangle2D.Double(x, y, 0, 0);
+        Rectangle rect = new Rectangle(x, y, 0, 0);
 
         TMTypes.GlobalParameter p = TMGameState.counterToGP(c);
         if (p != null) {
@@ -233,7 +241,7 @@ public class TMBoardView extends ComponentView {
                 // Draw symbol and value
                 drawImage(g, p.getImagePath(), x, y, counterWidth, counterWidth);
                 String text = "" + c.getValue() + "/" + c.getMaximum();
-                drawShadowStringCentered(g, text, new Rectangle2D.Double(x, y, counterWidth, counterWidth), Color.yellow);
+                drawShadowStringCentered(g, text, new Rectangle.Double(x, y, counterWidth, counterWidth), Color.yellow);
                 rect.setRect(x, y, counterWidth, counterWidth);
             } else {
                 // Some vars
@@ -256,7 +264,7 @@ public class TMBoardView extends ComponentView {
                     if (c.getValueIdx() >= i) {
                         // This step has been reached, paint background
                         BufferedImage bg = (BufferedImage) ImageIO.GetInstance().getImage(p.getImagePath().replace(".png", "-texture.png"));
-                        TexturePaint paint = new TexturePaint(bg, new Rectangle2D.Float(0,0, bg.getWidth(), bg.getHeight()));
+                        TexturePaint paint = new TexturePaint(bg, new Rectangle.Float(0,0, bg.getWidth(), bg.getHeight()));
                         g.setPaint(paint);
 //                        g.setColor(p.getColor());
                         g.fillRect(x + border, yStep, counterWidth - border*2 - 1, stepSize);
@@ -278,8 +286,12 @@ public class TMBoardView extends ComponentView {
                         scaledDim.getX(), scaledDim.getY(), null);
 
                 // Draw +/- action symbols
-                drawShadowStringCentered(g, "-", new Rectangle2D.Double(x + border, y + topHeight + midHeight + botHeight/2. + spacing/2., fontSize, fontSize), Color.red, null, 28);
-                drawShadowStringCentered(g, "+", new Rectangle2D.Double(x + counterWidth - border - fontSize, y + topHeight + midHeight + botHeight/2. + spacing/2., fontSize, fontSize), new Color(44, 150, 43), null, 28);
+                Rectangle rMinus = new Rectangle(x + border, y + topHeight + midHeight + botHeight/2 + spacing/2, fontSize, fontSize);
+                Rectangle rPlus = new Rectangle(x + counterWidth - border - fontSize, y + topHeight + midHeight + botHeight/2 + spacing/2, fontSize, fontSize);
+                drawShadowStringCentered(g, "-", rMinus, Color.red, null, 28);
+                drawShadowStringCentered(g, "+", rPlus, new Color(44, 150, 43), null, 28);
+                rects.put(rMinus, p.name() + "+");
+                rects.put(rPlus, p.name() + "-");
 
                 // Draw bonus related to this counter
                 for (Bonus b: gs.getBonuses()) {

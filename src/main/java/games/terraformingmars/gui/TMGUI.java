@@ -142,7 +142,7 @@ public class TMGUI extends AbstractGUI {
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         getContentPane().add(top);
         getContentPane().add(main);
-//        getContentPane().add(actionPanel);
+        getContentPane().add(actionPanel);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setFrameProperties();
@@ -153,29 +153,29 @@ public class TMGUI extends AbstractGUI {
      * @param player - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
-            ArrayList<Rectangle> highlight = view.getHighlight();
-
-            int start = actions.size();
-            if (highlight.size() > 0) {
-                Rectangle r = highlight.get(0);
-                for (AbstractAction abstractAction : actions) {
-                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
-                    if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
-                        actionButtons[0].setVisible(true);
-                        actionButtons[0].setButtonAction(action, "Play ");
-                        break;
-                    }
-                }
-            } else {
-                actionButtons[0].setVisible(false);
-                actionButtons[0].setButtonAction(null, "");
-            }
-        }
-    }
+//    @Override
+//    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+//        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+//            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+//            ArrayList<Rectangle> highlight = view.getHighlight();
+//
+//            int start = actions.size();
+//            if (highlight.size() > 0) {
+//                Rectangle r = highlight.get(0);
+//                for (AbstractAction abstractAction : actions) {
+//                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
+//                    if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
+//                        actionButtons[0].setVisible(true);
+//                        actionButtons[0].setButtonAction(action, "Play ");
+//                        break;
+//                    }
+//                }
+//            } else {
+//                actionButtons[0].setVisible(false);
+//                actionButtons[0].setButtonAction(null, "");
+//            }
+//        }
+//    }
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {

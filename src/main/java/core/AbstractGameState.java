@@ -192,6 +192,7 @@ public abstract class AbstractGameState {
             actionsInProgress.pop();
         else
             actionsInProgress.push(action);
+        int a = 0;
     }
 
     void checkActionsInProgress() {

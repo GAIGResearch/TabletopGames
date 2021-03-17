@@ -48,6 +48,6 @@ public class ModifyCounter extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Modify counter " + gameState.getComponentById(counterID).toString() + " by " + change;
+        return "Modify counter " + gameState.getComponentById(counterID).getComponentName() + " by " + change;
     }
 }

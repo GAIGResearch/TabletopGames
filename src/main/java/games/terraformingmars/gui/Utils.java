@@ -91,7 +91,7 @@ public class Utils {
         g.drawImage(img, x, y, (int) (w*scaleW), (int) (h*scaleH), null);
     }
 
-    public static Rectangle2D drawImage(Graphics2D g, Image img, int x, int y, int size) {
+    public static Rectangle drawImage(Graphics2D g, Image img, int x, int y, int size) {
         int w = img.getWidth(null);
         int h = img.getHeight(null);
         double scale;
@@ -99,7 +99,7 @@ public class Utils {
         else scale = size*1.0/h;
         g.drawImage(img, x, y, (int) (w*scale), (int) (h*scale), null);
 
-        return new Rectangle2D.Double(x, y, (int) (w*scale), (int) (h*scale));
+        return new Rectangle(x, y, (int) (w*scale), (int) (h*scale));
     }
 
     public static Vector2D scaleLargestDimImg(Image img, int size) {
