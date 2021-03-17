@@ -49,11 +49,11 @@ public class ClaimAwardMilestone extends TMAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Claim " + toClaim.name;
+        return (toClaim instanceof Milestone? "Claim milestone " + toClaim.name : "Fund award " + toClaim.name);
     }
 
     @Override
     public String toString() {
-        return "Claim " + toClaim.name;
+        return (toClaim instanceof Milestone? "Claim milestone " + toClaim.name : "Fund award " + toClaim.name);
     }
 }

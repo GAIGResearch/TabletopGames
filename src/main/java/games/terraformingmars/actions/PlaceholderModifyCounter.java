@@ -44,4 +44,14 @@ public class PlaceholderModifyCounter extends TMModifyCounter {
     public int hashCode() {
         return Objects.hash(super.hashCode(), resource, production);
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Modify player " + resource + (production? " production " : "") + " by " + change;
+    }
+
+    @Override
+    public String toString() {
+        return "Modify player " + resource + (production? " production " : "") + " by " + change;
+    }
 }

@@ -39,11 +39,14 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Pay for card with resources until all paid
         // Second: execute action
 
-        HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(null, null, resourceToPay);
+        player = gs.getCurrentPlayer();
+
+        TMCard card = null;
+        if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
+        HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(card, null, resourceToPay);
         resources.add(resourceToPay);  // Can always pay with itself
 
         resourcesToPayWith = resources.toArray(new TMTypes.Resource[0]);
-        player = gs.getCurrentPlayer();
         stage = 0;
         costPaid = 0;
         gameState.setActionInProgress(this);
@@ -60,8 +63,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
         int sum = gs.playerResourceSum(card, resourcesRemaining, TMTypes.Resource.MegaCredit);
-        int min = Math.max(0, (int)((costTotal - sum) * 1.0/gs.getResourceMapRate(res, resourceToPay)));  // TODO; discount effects
-        int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil(costTotal * 1.0/gs.getResourceMapRate(res, resourceToPay))));
+        int remaining = costTotal - costPaid - sum;
+        int min = Math.max(0, (int)(remaining/gs.getResourceMapRate(res, resourceToPay)));  // TODO; discount effects
+        int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((costTotal - costPaid)/gs.getResourceMapRate(res, resourceToPay))));
 
         // Can pay between min and max of this resource
         ArrayList<AbstractAction> actions = new ArrayList<>();

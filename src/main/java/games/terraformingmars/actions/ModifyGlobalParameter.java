@@ -24,4 +24,14 @@ public class ModifyGlobalParameter extends TMModifyCounter {
         }
         return super.execute(gs);
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Modify global parameter " + gameState.getComponentById(counterID).getComponentName() + " by " + change;
+    }
+
+    @Override
+    public String toString() {
+        return "Modify global parameter " + counterID + " by " + change;
+    }
 }

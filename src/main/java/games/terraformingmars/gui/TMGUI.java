@@ -1,16 +1,12 @@
 package games.terraformingmars.gui;
 
 import core.*;
-import core.actions.AbstractAction;
-import core.actions.SetGridValueAction;
 import core.components.Deck;
-import core.components.Token;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.TMCard;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
-import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,9 +14,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class TMGUI extends AbstractGUI {
 
@@ -34,7 +28,9 @@ public class TMGUI extends AbstractGUI {
     static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
     static int focusPlayer = 0;
 
+    int currentPlayerIdx = 0;
     boolean focusCurrentPlayer;
+    JButton focusPlayerButton;
 
     public TMGUI(Game game, ActionController ac) {
         super(ac, 500);
@@ -98,29 +94,31 @@ public class TMGUI extends AbstractGUI {
         jLabel1.setFont(defaultFont);
         jLabel1.setForeground(Color.white);
         playerFlipButtons.add(jLabel1);
-        for (int i = 0; i < gameState.getNPlayers() + 1; i++) {
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
             String text = "p" + i;
-            if (i == gameState.getNPlayers()) text = "Current player";
             JButton jb = new JButton(text);
             jb.setFont(defaultFont);
             jb.setForeground(Color.white);
             jb.setBackground(Color.darkGray);
             jb.addActionListener(e -> {
-                if (jb.getText().equalsIgnoreCase("current player")) {
-                    focusCurrentPlayer = true;
-                } else {
-                    focusPlayer = Integer.parseInt(jb.getText().replace("p",""));
-                    focusCurrentPlayer = false;
-                }
+                focusPlayer = Integer.parseInt(jb.getText().replace("p",""));
+                focusCurrentPlayer = false;
             });
             playerFlipButtons.add(jb);
         }
-        JButton jb = new JButton("Pause/Resume");
-        jb.setFont(defaultFont);
-        jb.setForeground(Color.white);
-        jb.setBackground(Color.gray);
-        jb.addActionListener(e -> game.flipPaused());
-        playerFlipButtons.add(jb);
+        focusPlayerButton = new JButton("Current player: " + currentPlayerIdx);
+        focusPlayerButton.setFont(defaultFont);
+        focusPlayerButton.setForeground(Color.white);
+        focusPlayerButton.setBackground(Color.darkGray);
+        focusPlayerButton.addActionListener(e -> focusCurrentPlayer = true);
+        playerFlipButtons.add(focusPlayerButton);
+
+        JButton jb2 = new JButton("Pause/Resume");
+        jb2.setFont(defaultFont);
+        jb2.setForeground(Color.white);
+        jb2.setBackground(Color.gray);
+        jb2.addActionListener(e -> game.flipPaused());
+        playerFlipButtons.add(jb2);
 
         top.setOpaque(false);
         playerMainWrap.setOpaque(false);
@@ -181,8 +179,10 @@ public class TMGUI extends AbstractGUI {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             TMGameState gs = ((TMGameState) gameState);
+            currentPlayerIdx = gs.getCurrentPlayer();
+            focusPlayerButton.setText("Current player: " + currentPlayerIdx);
             if (focusCurrentPlayer) {
-                focusPlayer = gs.getCurrentPlayer();
+                focusPlayer = currentPlayerIdx;
             }
 
             view.update(gs);

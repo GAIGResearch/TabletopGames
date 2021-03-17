@@ -203,13 +203,17 @@ public class TMGameState extends AbstractGameState {
     }
 
     public int playerResourceSum(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to) {
+        int player = getCurrentPlayer();
         int sum = 0;
+        if (from == null) {
+            sum = playerResources[player].get(to).getValue();
+        }
         // Add resources that this player can use as money for this card
-        for (ResourceMapping resMap : playerResourceMap[getCurrentPlayer()]) {
+        for (ResourceMapping resMap : playerResourceMap[player]) {
             if ((from == null || from.contains(resMap.from))
                     && resMap.to == to
                     && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
-                int n = playerResources[getCurrentPlayer()].get(resMap.from).getValue();
+                int n = playerResources[player].get(resMap.from).getValue();
                 sum += n * resMap.rate;
             }
         }

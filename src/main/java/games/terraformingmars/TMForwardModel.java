@@ -223,7 +223,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // - Increase energy production 1 step for 11 MC
             Counter c = gs.playerProduction[gs.getCurrentPlayer()].get(TMTypes.Resource.Energy);
             if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPEnergy)) {
-                actions.add(new PayForAction(new ModifyGlobalParameter(c.getComponentID(), 1, false),
+                actions.add(new PayForAction(new PlaceholderModifyCounter(1, TMTypes.Resource.Energy, false, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
             }
             // - Increase temperature 1 step for 14 MC

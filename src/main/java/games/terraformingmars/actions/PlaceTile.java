@@ -70,21 +70,19 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         if (x == -1) {
             // Need to choose where to place it
             TMGameState gs = (TMGameState) state;
-            for (int i = 0; i < gs.getBoard().getHeight(); i++) {
-                for (int j = 0; j < gs.getBoard().getWidth(); j++) {
-                    TMMapTile mt = gs.getBoard().getElement(j, i);
-                    if (mt.getTilePlaced() == null && legalPositions.contains(new Vector2D(j, i))) {
-                        actions.add(new PlaceTile(j, i, tile, free));
-                    }
+            for (Vector2D pos: legalPositions) {
+                TMMapTile mt = gs.getBoard().getElement(pos.getX(), pos.getY());
+                if (mt != null && mt.getTilePlaced() == null) {
+                    actions.add(new PlaceTile(pos.getX(), pos.getY(), tile, free));
                 }
             }
             if (actions.size() == 0) {
                 impossible = true;
-                actions.add(new DoNothing());
+                actions.add(new TMAction());
             }
         } else {
             impossible = true;
-            actions.add(new DoNothing());
+            actions.add(new TMAction());
         }
         return actions;
     }
@@ -126,6 +124,11 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return "Placing " + tile.name() + " at (" + x + "," + y + ")";
+    }
+
+    @Override
+    public String toString() {
         return "Placing " + tile.name() + " at (" + x + "," + y + ")";
     }
 }
