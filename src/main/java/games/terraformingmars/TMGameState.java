@@ -197,17 +197,17 @@ public class TMGameState extends AbstractGameState {
         return playerCardChoice;
     }
 
-    public boolean canPlayerPay(TMCard card, HashSet<TMTypes.Resource> from, int amount) {
-        int sum = playerResourceSum(card, from);
+    public boolean canPlayerPay(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount) {
+        int sum = playerResourceSum(card, from, to);
         return card != null? isCardFree(card, sum) : sum >= amount;
     }
 
-    public int playerResourceSum(TMCard card, HashSet<TMTypes.Resource> from) {
-        int sum = playerResources[getCurrentPlayer()].get(TMTypes.Resource.MegaCredit).getValue();
+    public int playerResourceSum(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to) {
+        int sum = playerResources[getCurrentPlayer()].get(to).getValue();
         // Add resources that this player can use as money for this card
         for (ResourceMapping resMap : playerResourceMap[getCurrentPlayer()]) {
             if ((from == null || from.contains(resMap.from))
-                    && resMap.to == TMTypes.Resource.MegaCredit
+                    && resMap.to == to
                     && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
                 int n = playerResources[getCurrentPlayer()].get(resMap.from).getValue();
                 sum += n * resMap.rate;

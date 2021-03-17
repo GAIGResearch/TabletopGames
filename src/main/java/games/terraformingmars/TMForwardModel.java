@@ -212,7 +212,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // Play a card actions
             for (int i = 0; i < gs.playerHands[gs.getCurrentPlayer()].getSize(); i++) {
                 TMCard card = gs.playerHands[gs.getCurrentPlayer()].get(i);
-                boolean canPlayerPay = gs.canPlayerPay(card, null, card.cost);
+                boolean canPlayerPay = gs.canPlayerPay(card, null, TMTypes.Resource.MegaCredit, card.cost);
                 if (canPlayerPay && (card.requirement == null || card.requirement.testCondition(gs))) {
                     actions.add(new PayForAction(new PlayCard(i, false), TMTypes.Resource.MegaCredit, card.cost, i));
                 }
@@ -222,35 +222,47 @@ public class TMForwardModel extends AbstractForwardModel {
             // - Discard cards for MC TODO
             // - Increase energy production 1 step for 11 MC
             Counter c = gs.playerProduction[gs.getCurrentPlayer()].get(TMTypes.Resource.Energy);
-            actions.add(new PayForAction(new ModifyGlobalParameter(c.getComponentID(), 1, false),
-                    TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
+            if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPEnergy)) {
+                actions.add(new PayForAction(new ModifyGlobalParameter(c.getComponentID(), 1, false),
+                        TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
+            }
             // - Increase temperature 1 step for 14 MC
             Counter temp = stringToGPCounter(gs, "temperature");
-            if (temp != null && !temp.isMaximum()) {
+            if (temp != null && !temp.isMaximum() && gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPTemp)) {
                 actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPTemp, -1));
             }
             // - Place ocean tile for 18 MC
-            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Ocean, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ocean), false),
-                    TMTypes.Resource.MegaCredit, params.nCostSPOcean, -1));
+            if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPOcean)) {
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Ocean, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ocean), false),
+                        TMTypes.Resource.MegaCredit, params.nCostSPOcean, -1));
+            }
             // - Place greenery tile for 23 MC TODO adjacency requirement
-            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.MegaCredit, params.nCostSPGreenery, -1));
+            if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPGreenery)) {
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false),
+                        TMTypes.Resource.MegaCredit, params.nCostSPGreenery, -1));
+            }
             // - Place city tile and increase MC prod by 1 for 25 MC TODO adjacency requirement + increase MC prod by 1
-            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.City, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
+            if (gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPCity)) {
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.City, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false),
+                        TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
+            }
 
             // Claim a milestone
             if (!gs.getnMilestonesClaimed().isMaximum()) {
+                int cost = params.nCostMilestone[gs.nMilestonesClaimed.getValue()];
                 for (Milestone m : gs.milestones) {
-                    if (m.canClaim(gs)) {
-                        actions.add(new PayForAction(new ClaimAwardMilestone(m), TMTypes.Resource.MegaCredit, params.nCostMilestone[gs.nMilestonesClaimed.getValue()], -1));
+                    if (m.canClaim(gs) && gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, cost)) {
+                        actions.add(new PayForAction(new ClaimAwardMilestone(m), TMTypes.Resource.MegaCredit, cost, -1));
                     }
                 }
             }
             // Fund an award
             if (!gs.getnAwardsFunded().isMaximum()) {
+                int cost = params.nCostAwards[gs.nAwardsFunded.getValue()];
                 for (Award a : gs.awards) {
-                    if (a.canClaim(gs)) {
-                        actions.add(new PayForAction(new ClaimAwardMilestone(a), TMTypes.Resource.MegaCredit, params.nCostAwards[gs.nAwardsFunded.getValue()], -1));
+                    if (a.canClaim(gs) && gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, cost)) {
+                        actions.add(new PayForAction(new ClaimAwardMilestone(a), TMTypes.Resource.MegaCredit, cost, -1));
                     }
                 }
             }
@@ -258,9 +270,12 @@ public class TMForwardModel extends AbstractForwardModel {
             // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation TODO
 
             // 8 plants into greenery tile TODO adjacency requirement
-            actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false), TMTypes.Resource.Plant, params.nCostGreeneryPlant, -1));
+            if (gs.canPlayerPay(null, null, TMTypes.Resource.Plant, params.nCostGreeneryPlant)) {
+                actions.add(new PayForAction(new PlaceTile(TMTypes.Tile.Greenery, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ground), false),
+                        TMTypes.Resource.Plant, params.nCostGreeneryPlant, -1));
+            }
             // 8 heat into temperature increase
-            if (temp != null && !temp.isMaximum()) {
+            if (temp != null && !temp.isMaximum() && gs.canPlayerPay(null, null, TMTypes.Resource.Heat, params.nCostTempHeat)) {
                 actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
                         TMTypes.Resource.Heat, params.nCostTempHeat, -1));
             }

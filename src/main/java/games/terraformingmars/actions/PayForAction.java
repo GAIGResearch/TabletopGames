@@ -59,7 +59,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        int sum = gs.playerResourceSum(card, resourcesRemaining);
+        int sum = gs.playerResourceSum(card, resourcesRemaining, TMTypes.Resource.MegaCredit);
         int min = Math.max(0, (int)((costTotal - sum) * 1.0/gs.getResourceMapRate(res, resourceToPay)));  // TODO; discount effects
         int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil(costTotal * 1.0/gs.getResourceMapRate(res, resourceToPay))));
 
