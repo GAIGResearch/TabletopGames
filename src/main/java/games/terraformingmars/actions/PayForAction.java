@@ -92,11 +92,10 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        System.out.println("hi!");
         TMGameState gs = (TMGameState)state;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        return card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == resourcesToPayWith.length-1 || costPaid == costTotal;
+        return card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == resourcesToPayWith.length || costPaid == costTotal;
     }
 
     @Override
