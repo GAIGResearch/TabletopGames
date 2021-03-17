@@ -86,7 +86,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
         if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || costPaid == costTotal) {
             // Action paid for, execute
-            action.execute(state);
+            this.action.execute(state);
         }
     }
 

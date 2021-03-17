@@ -11,6 +11,7 @@ public class PayResources extends TMAction {
     final TMTypes.Resource res;
     final int amount;
     public PayResources(TMTypes.Resource res, int amount) {
+        super(true);
         this.res = res;
         this.amount = amount;
     }
