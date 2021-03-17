@@ -367,6 +367,27 @@ public class TMGameState extends AbstractGameState {
         }
     }
 
+    // if add is false, replace instead
+    public void addResourceMappings(HashSet<ResourceMapping> maps, boolean add) {
+        int player = getCurrentPlayer();
+        HashSet<ResourceMapping> toRemove = new HashSet<>();
+        HashSet<ResourceMapping> toAdd = new HashSet<>();
+        for (ResourceMapping resMap : playerResourceMap[player]) {
+            for (ResourceMapping resMapNew : maps) {
+                if (resMap.equals(resMapNew)) {
+                    if (add) {
+                        resMap.rate += resMapNew.rate;
+                    } else {
+                        toRemove.add(resMap);
+                        toAdd.add(resMapNew);
+                    }
+                }
+            }
+        }
+        playerResourceMap[player].removeAll(toRemove);
+        playerResourceMap[player].addAll(toAdd);
+    }
+
     static List<Vector2D> getNeighbours(Vector2D cell) {
         ArrayList<Vector2D> neighbors = new ArrayList<>();
         int parity = cell.getY() % 2;
@@ -378,7 +399,7 @@ public class TMGameState extends AbstractGameState {
 
     public static class ResourceMapping {
         public TMTypes.Resource from;
-        TMTypes.Resource to;
+        public TMTypes.Resource to;
         public double rate;
         Requirement<TMCard> requirement;
         public ResourceMapping(TMTypes.Resource from, TMTypes.Resource to, double rate, Requirement<TMCard> requirement) {
@@ -394,15 +415,14 @@ public class TMGameState extends AbstractGameState {
             if (this == o) return true;
             if (!(o instanceof ResourceMapping)) return false;
             ResourceMapping that = (ResourceMapping) o;
-            return Double.compare(that.rate, rate) == 0 &&
-                    from == that.from &&
+            return from == that.from &&
                     to == that.to &&
                     Objects.equals(requirement, that.requirement);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(from, to, rate, requirement);
+            return Objects.hash(from, to, requirement);
         }
     }
 }

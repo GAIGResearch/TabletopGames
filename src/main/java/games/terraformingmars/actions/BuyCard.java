@@ -38,6 +38,7 @@ public class BuyCard extends TMAction {
 
             // Add discountEffects to player's discounts
             gs.addDiscountEffects(card.discountEffects);
+            gs.addResourceMappings(card.resourceMappings, true);
 
             return super.execute(gs);
         } else {

@@ -42,6 +42,7 @@ public class PlayCard extends TMAction {
 
         // Add discountEffects to player's discounts
         gs.addDiscountEffects(card.discountEffects);
+        gs.addResourceMappings(card.resourceMappings, false);
 
         // Execute on-play effects
         for (AbstractAction aa: card.effects) {

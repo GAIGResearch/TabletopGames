@@ -1,12 +1,17 @@
 package games.terraformingmars.gui;
 
+import core.components.Counter;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.CounterRequirement;
+import games.terraformingmars.rules.Requirement;
+import games.terraformingmars.rules.TagRequirement;
 import utilities.ImageIO;
 import utilities.Vector2D;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static core.AbstractGUI.defaultItemSize;
+import static games.terraformingmars.TMGameState.stringToGPCounter;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMDeckDisplay extends JComponent {
@@ -142,14 +148,14 @@ public class TMDeckDisplay extends JComponent {
                     boolean prod = ((PlaceholderModifyCounter) aa).production;
                     Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
 
-                    int xRes = width/2 - (size + defaultItemSize)/2;
+                    int xRes = x + width/2 - (size + defaultItemSize)/2;
                     drawResource(g, resImg, production, prod, xRes, yRes, size, 0.6);
                     drawShadowStringCentered(g, "" + amount, new Rectangle.Double(xRes + size, yRes, defaultItemSize, size));
                     yRes += size + spacing / 5;
                 }
             }
             // Draw actions
-            int p = 0;
+            int yA = yRes + spacing;
             for (TMAction a: card.actions) {
                 int leftNumber = -1;
                 String left = null;
@@ -172,13 +178,13 @@ public class TMDeckDisplay extends JComponent {
                     }
                 }
                 // Draw left + arrow + right
-                int xA = width/2 - defaultItemSize/2;
+                int xA = x + width/2 - defaultItemSize/4 - size;
                 if (leftNumber != -1) xA -= size/2;
                 if (rightNumber != -1) xA -= size/2;
                 if (left != null) xA -= size/2;
                 if (right != null) xA -= size/2;
 
-                int yA = yRes + size + spacing + p * size + p * spacing / 5;
+                yA += size + spacing / 5;
                 if (leftNumber != -1) {
                     drawShadowStringCentered(g, "" + leftNumber, new Rectangle(xA, yA, size, size), Color.white, Color.black, 12);
                     xA += size;
@@ -188,8 +194,8 @@ public class TMDeckDisplay extends JComponent {
                     drawImage(g, image, xA, yA, size, size);
                     xA += size;
                 }
-                drawImage(g, actionArrow, xA, yA, defaultItemSize, size);
-                xA += defaultItemSize;
+                drawImage(g, actionArrow, xA + size, yA, defaultItemSize/2, size);
+                xA += defaultItemSize/2 + size*2;
                 if (rightNumber != -1) {
                     drawShadowStringCentered(g, "" + rightNumber, new Rectangle(xA, yA, size, size), Color.white, Color.black, 12);
                     xA += size;
@@ -198,8 +204,48 @@ public class TMDeckDisplay extends JComponent {
                     Image image = ImageIO.GetInstance().getImage(right);
                     drawImage(g, image, xA, yA, size, size);
                 }
-                p++;
             }
+            // Draw discounts
+            int yD = yA + spacing;
+            for (Requirement r: card.discountEffects.keySet()) {
+                if (r instanceof TagRequirement) {
+                    int xD = x + width/2 - size*6/2;
+                    Image from = ImageIO.GetInstance().getImage(((TagRequirement)r).tags[0].getImagePath());  // TODO: more?
+                    Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
+                    int amount = card.discountEffects.get(r);
+                    drawImage(g, from, xD, yD, size, size);
+                    drawShadowStringCentered(g, ":", new Rectangle(xD + size, yD, size*2, size));
+                    drawShadowStringCentered(g, "-" + amount, new Rectangle(xD + size*3, yD, size*2, size));
+                    drawImage(g, to, xD + size * 5, yD, size, size);
+                } else if (r instanceof CounterRequirement) {
+                    int xD = x + width/2 - size*4/2;
+                    TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, ((CounterRequirement)r).counterCode);
+                    String imgStr;
+                    if (gp == null) {
+                        // A resource or production instead
+                        TMTypes.Resource res = TMTypes.Resource.valueOf(((CounterRequirement)r).counterCode.split("prod")[0]);
+                        imgStr = res.getImagePath();
+                    } else {
+                        imgStr = gp.getImagePath();
+                    }
+                    Image from = ImageIO.GetInstance().getImage(imgStr);
+                    drawImage(g, from, xD, yD, size);
+                    drawShadowStringCentered(g, ": +/-" + card.discountEffects.get(r), new Rectangle(xD + size, yD, size*3, size));
+                }
+                yD += size + spacing/2;
+            }
+            // Draw resource mappings
+            int yRM = yD + spacing;
+            int xRM = x + width/2 - size*7/2;
+            for (TMGameState.ResourceMapping rm: card.resourceMappings) {
+                Image from = ImageIO.GetInstance().getImage(rm.from.getImagePath());
+                Image to = ImageIO.GetInstance().getImage(rm.to.getImagePath());
+                drawImage(g, from, xRM, yRM, size, size);
+                drawImage(g, to, xRM + size * 5, yRM, size, size);
+                drawShadowStringCentered(g, ": " + rm.rate, new Rectangle(xRM + size, yRM, size*4, size));
+                yRM += size + spacing/2;
+            }
+            // Draw after-action effects TODO
         } else {
             // Draw background
             drawImage(g, projCardBg, x, y, height);

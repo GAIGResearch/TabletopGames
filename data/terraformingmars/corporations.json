@@ -5,8 +5,8 @@
     "effect": [
       {
         "type": "effect",
-        "if": "action(payforaction,costTotal-min-21)",
-        "then": "resourcetransaction-megacredit/4"
+        "if": "payforaction(costTotal-min-21)",
+        "then": "inc-megacredit-4"
       }
     ],
     "start": ["57 megacredit"]
@@ -33,7 +33,7 @@
         "type": "resourcemapping",
         "from": "Heat",
         "to": "MegaCredit",
-        "rate": 1
+        "rate": 1.0
       }
     ],
     "start": ["3 heatprod, 42 megacredit"]
@@ -45,7 +45,7 @@
     "effect": [
       {
         "type": "effect",
-        "if": "gain(placetile, steel-titanium)",
+        "if": "placetile(gain steel-titanium)",
         "then": "inc-steelprod-1"
       }
     ],
@@ -58,7 +58,7 @@
     "effect": [
       {
         "type": "effect",
-        "if": "playcard-event",
+        "if": "playcard(tag-event)",
         "then": "inc-megacredit-2"
       }
     ],
@@ -93,7 +93,7 @@
         "type": "resourcemapping",
         "from": "Titanium",
         "to": "MegaCredit",
-        "rate": "+1"
+        "rate": 1.0
       }
     ],
     "start": ["10 titanium, 23 megacredit"]
@@ -105,12 +105,12 @@
     "effect": [
       {
         "type": "effect",
-        "if": "placetile-city (grid,any)",
+        "if": "placetile(city,grid,any)",
         "then": "inc-megacreditprod-1"
       },
       {
         "type": "effect",
-        "if": "placetile-city",
+        "if": "placetile(city)",
         "then": "inc-megacredit-3"
       }
     ],
@@ -169,8 +169,8 @@
     "effect": [
       {
         "type": "effect",
-        "if": "playcard-jovian-any",
-        "then": "inc-megacredit-prod-1"
+        "if": "playcard(tag-jovian-any)",
+        "then": "inc-megacreditprod-1"
       }
     ],
     "start":  ["1 titaniumprod, 42 megacredit, 1 megacreditprod"]

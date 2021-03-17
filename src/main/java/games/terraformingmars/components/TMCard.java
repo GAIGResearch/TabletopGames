@@ -1,7 +1,7 @@
 package games.terraformingmars.components;
 
-import core.actions.AbstractAction;
 import core.components.Card;
+import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
@@ -15,6 +15,7 @@ import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class TMCard extends Card {
     public int number;
@@ -24,6 +25,8 @@ public class TMCard extends Card {
     public TMTypes.Tag[] tags;
 
     public HashMap<Requirement, Integer> discountEffects;
+    public HashSet<TMGameState.ResourceMapping> resourceMappings;
+
     public TMAction firstAction;  // first action for the player is already decided to be this
     public TMAction[] rules;  // long-lasting effects
     public TMAction[] actions;  // new actions available to the player
@@ -40,6 +43,7 @@ public class TMCard extends Card {
         actions = new TMAction[0];
         effects = new TMAction[0];
         discountEffects = new HashMap<>();
+        resourceMappings = new HashSet<>();
     }
 
     public static TMCard loadCard(JSONObject cardDef) {
@@ -152,24 +156,32 @@ public class TMCard extends Card {
             } else if (type.equalsIgnoreCase("discount")) {
                 // Parse discounts
                 int amount = (int)(long)effect.get("amount");
-                Requirement r = null;
+                Requirement r;
                 if (effect.get("counter") != null) {
                     // A discount for CounterRequirement
                     for (Object o2: (JSONArray)effect.get("counter")) {
                         r = new CounterRequirement((String)o2, -1, true);
+                        if (card.discountEffects.containsKey(r)) {
+                            card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                        } else {
+                            card.discountEffects.put(r, amount);
+                        }
                     }
                 } else if (effect.get("tag") != null) {
                     // A discount for tag requirements
                     TMTypes.Tag t = TMTypes.Tag.valueOf((String) effect.get("tag"));
                     r = new TagRequirement(new TMTypes.Tag[]{t}, null);
-                }
-                if (r != null) {
                     if (card.discountEffects.containsKey(r)) {
                         card.discountEffects.put(r, card.discountEffects.get(r) + amount);
                     } else {
                         card.discountEffects.put(r, amount);
                     }
                 }
+            } else if (type.equalsIgnoreCase("resourcemapping")) {
+                TMTypes.Resource from = TMTypes.Resource.valueOf((String)effect.get("from"));
+                TMTypes.Resource to = TMTypes.Resource.valueOf((String)effect.get("to"));
+                double rate = (double) effect.get("rate");
+                card.resourceMappings.add(new TMGameState.ResourceMapping(from, to, rate,null));
             }
         }
 
