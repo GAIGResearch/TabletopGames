@@ -77,7 +77,7 @@ public class PandemicGUI extends AbstractGUI {
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel(highlights, 300, 80);
+        JComponent actionPanel = createActionPanel(highlights, 300, 80, true);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(gameStateInfo);

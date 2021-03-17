@@ -94,12 +94,13 @@ public abstract class AbstractGUI extends JFrame {
      *                   highlights maintained by the GUI. Can be null if not used.
      * @param width - width of this panel.
      * @param height - height of this panel.
+     * @param opaque - true by default. if false, all panels created are not opaque (transparent).
      * @return - JComponent containing all action buttons.
      */
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
-        return createActionPanel(highlights, width, height, true);
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean opaque) {
+        return createActionPanel(highlights, width, height, true, opaque);
     }
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout, boolean opaque) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
             actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
@@ -121,6 +122,11 @@ public abstract class AbstractGUI extends JFrame {
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }
+
+        actionPanel.setOpaque(opaque);
+        pane.setOpaque(opaque);
+        pane.getViewport().setOpaque(opaque);
+
         return pane;
     }
 
@@ -151,11 +157,15 @@ public abstract class AbstractGUI extends JFrame {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
-        historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        createActionHistoryPanel(width/2 - 10, height);
         wrapper.add(historyContainer);
         return wrapper;
+    }
+
+    protected void createActionHistoryPanel(int width, int height) {
+        historyInfo.setPreferredSize(new Dimension(width, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setPreferredSize(new Dimension(width - 15, height));
     }
 
     /**

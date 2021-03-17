@@ -26,7 +26,7 @@ public class DBGUI extends AbstractGUI {
         view = new DBGridBoardView(((DBGameState)gameState));
 
         JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, true);
 
         getContentPane().add(view, BorderLayout.CENTER);
         getContentPane().add(infoPanel, BorderLayout.NORTH);

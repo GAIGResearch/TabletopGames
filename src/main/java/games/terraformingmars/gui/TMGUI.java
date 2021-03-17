@@ -23,6 +23,7 @@ public class TMGUI extends AbstractGUI {
     TMDeckDisplay playerHand, playerCardChoice, playerCorporation;
     JScrollPane paneHand, paneCardChoice;
     JPanel infoPanel;
+    JLabel generationCount;
 
     static int fontSize = 16;
     static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
@@ -53,8 +54,26 @@ public class TMGUI extends AbstractGUI {
             //Handle exception
         }
 
-        infoPanel = createGameStateInfoPanel("Terraforming Mars", gameState, defaultDisplayWidth, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth, defaultActionPanelHeight);
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight);
+        historyInfo.setFont(defaultFont);
+        historyInfo.setForeground(Color.white);
+        JPanel historyWrapper = new JPanel();
+        JLabel historyText = new JLabel("Action history:");
+        historyText.setFont(defaultFont);
+        historyText.setForeground(Color.white);
+        historyWrapper.add(historyText);
+        historyWrapper.add(historyContainer);
+        historyContainer.setBackground(Color.black);
+
+        JLabel actionLabel = new JLabel("Actions: ");
+        actionLabel.setFont(defaultFont);
+        actionLabel.setForeground(Color.white);
+        actionLabel.setOpaque(false);
+        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight, false);
+        JPanel actionWrapper = new JPanel();
+        actionWrapper.add(actionLabel);
+        actionWrapper.add(actionPanel);
+        actionWrapper.setOpaque(false);
 
         JPanel playerViewWrapper = new JPanel();
         playerViewWrapper.setLayout(new BoxLayout(playerViewWrapper, BoxLayout.Y_AXIS));
@@ -86,10 +105,17 @@ public class TMGUI extends AbstractGUI {
         main.add(view);
         main.add(playerViewWrapper);
 
-        JPanel top = new JPanel();
-        top.add(infoPanel);
+        generationCount = new JLabel("Generation: 1");
+        gamePhase.setFont(defaultFont);
+        generationCount.setFont(defaultFont);
+        gamePhase.setForeground(Color.white);
+        generationCount.setForeground(Color.white);
+        JPanel infoWrapper = new JPanel();
+        infoWrapper.setLayout(new BoxLayout(infoWrapper, BoxLayout.Y_AXIS));
+        infoWrapper.add(generationCount);
+        infoWrapper.add(gamePhase);
+
         JPanel playerFlipButtons = new JPanel();
-        top.add(playerFlipButtons);
         JLabel jLabel1 = new JLabel("Change player display:");
         jLabel1.setFont(defaultFont);
         jLabel1.setForeground(Color.white);
@@ -120,6 +146,11 @@ public class TMGUI extends AbstractGUI {
         jb2.addActionListener(e -> game.flipPaused());
         playerFlipButtons.add(jb2);
 
+        JPanel top = new JPanel();
+        top.add(historyWrapper);
+        top.add(playerFlipButtons);
+        top.add(infoWrapper);
+
         top.setOpaque(false);
         playerMainWrap.setOpaque(false);
         playerCorporation.setOpaque(false);
@@ -133,24 +164,29 @@ public class TMGUI extends AbstractGUI {
         playerView.setOpaque(false);
         playerViewWrapper.setOpaque(false);
         view.setOpaque(false);
-        infoPanel.setOpaque(false);
-        actionPanel.setOpaque(false);
         main.setOpaque(false);
+        historyInfo.setOpaque(false);
+        historyContainer.setOpaque(false);
+        historyContainer.getViewport().setOpaque(false);
+        historyWrapper.setOpaque(false);
+        infoWrapper.setOpaque(false);
+        gamePhase.setOpaque(false);
+        generationCount.setOpaque(false);
 
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         getContentPane().add(top);
         getContentPane().add(main);
-        getContentPane().add(actionPanel);
+        getContentPane().add(actionWrapper);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setFrameProperties();
     }
 
-    /**
-     * Only shows actions for highlighted cell.
-     * @param player - current player acting.
-     * @param gameState - current game state to be used in updating visuals.
-     */
+//    /**
+//     * Only shows actions for highlighted cell.
+//     * @param player - current player acting.
+//     * @param gameState - current game state to be used in updating visuals.
+//     */
 //    @Override
 //    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
 //        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
@@ -184,6 +220,7 @@ public class TMGUI extends AbstractGUI {
             if (focusCurrentPlayer) {
                 focusPlayer = currentPlayerIdx;
             }
+            generationCount.setText("Generation: " + gs.getGeneration());
 
             view.update(gs);
             playerView.update(gs);

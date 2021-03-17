@@ -28,6 +28,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     // General state info
+    int generation;
     GridBoard<TMMapTile> board;
     TMMapTile[] extraTiles;
     Counter[] globalParameters;
@@ -103,7 +104,7 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerResources[playerId].get(TMTypes.Resource.TR).getValue();
     }
 
     @Override
@@ -112,21 +113,34 @@ public class TMGameState extends AbstractGameState {
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        return false;
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TMGameState)) return false;
+        if (!super.equals(o)) return false;
+        TMGameState that = (TMGameState) o;
+        return generation == that.generation && Objects.equals(board, that.board) && Arrays.equals(extraTiles, that.extraTiles) && Arrays.equals(globalParameters, that.globalParameters) && Arrays.equals(bonuses, that.bonuses) && Objects.equals(projectCards, that.projectCards) && Objects.equals(corpCards, that.corpCards) && Objects.equals(discardCards, that.discardCards) && Arrays.equals(playerCardsPlayedEffects, that.playerCardsPlayedEffects) && Arrays.equals(playerCardsPlayedActions, that.playerCardsPlayedActions) && Arrays.equals(playerResourceMap, that.playerResourceMap) && Arrays.equals(playerResources, that.playerResources) && Arrays.equals(playerProduction, that.playerProduction) && Arrays.equals(playerCardsPlayedTags, that.playerCardsPlayedTags) && Arrays.equals(playerCardsPlayedTypes, that.playerCardsPlayedTypes) && Arrays.equals(tilesPlaced, that.tilesPlaced) && Arrays.equals(playerHands, that.playerHands) && Arrays.equals(playerCardChoice, that.playerCardChoice) && Arrays.equals(playerCorporations, that.playerCorporations) && Arrays.equals(milestones, that.milestones) && Arrays.equals(awards, that.awards) && Objects.equals(nMilestonesClaimed, that.nMilestonesClaimed) && Objects.equals(nAwardsFunded, that.nAwardsFunded);
     }
 
-    public static Counter stringToGPCounter(TMGameState gs, String s) {
-        for (Counter c: gs.globalParameters) {
-            if (c.getComponentName().equalsIgnoreCase(s)) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public static TMTypes.GlobalParameter counterToGP(Counter c) {
-        return Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), generation, board, projectCards, corpCards, discardCards, nMilestonesClaimed, nAwardsFunded);
+        result = 31 * result + Arrays.hashCode(extraTiles);
+        result = 31 * result + Arrays.hashCode(globalParameters);
+        result = 31 * result + Arrays.hashCode(bonuses);
+        result = 31 * result + Arrays.hashCode(playerCardsPlayedEffects);
+        result = 31 * result + Arrays.hashCode(playerCardsPlayedActions);
+        result = 31 * result + Arrays.hashCode(playerResourceMap);
+        result = 31 * result + Arrays.hashCode(playerResources);
+        result = 31 * result + Arrays.hashCode(playerProduction);
+        result = 31 * result + Arrays.hashCode(playerCardsPlayedTags);
+        result = 31 * result + Arrays.hashCode(playerCardsPlayedTypes);
+        result = 31 * result + Arrays.hashCode(tilesPlaced);
+        result = 31 * result + Arrays.hashCode(playerHands);
+        result = 31 * result + Arrays.hashCode(playerCardChoice);
+        result = 31 * result + Arrays.hashCode(playerCorporations);
+        result = 31 * result + Arrays.hashCode(milestones);
+        result = 31 * result + Arrays.hashCode(awards);
+        return result;
     }
 
     /*
@@ -197,6 +211,56 @@ public class TMGameState extends AbstractGameState {
         return playerCardChoice;
     }
 
+    public boolean isCardFree(TMCard card) {
+        return isCardFree(card, 0);
+    }
+
+    public boolean isCardFree(TMCard card, int amountPaid) {
+        // TODO: discount effects
+        return card.cost - amountPaid <= 0;
+    }
+
+    public Deck<TMCard> getDiscardCards() {
+        return discardCards;
+    }
+
+    public Deck<TMCard> getCorpCards() {
+        return corpCards;
+    }
+
+    public Deck<TMCard> getProjectCards() {
+        return projectCards;
+    }
+
+    public HashSet<ResourceMapping>[] getPlayerResourceMap() {
+        return playerResourceMap;
+    }
+
+    public Counter getnAwardsFunded() {
+        return nAwardsFunded;
+    }
+
+    public Counter getnMilestonesClaimed() {
+        return nMilestonesClaimed;
+    }
+
+    public int getGeneration() {
+        return generation;
+    }
+
+    public static Counter stringToGPCounter(TMGameState gs, String s) {
+        for (Counter c: gs.globalParameters) {
+            if (c.getComponentName().equalsIgnoreCase(s)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public static TMTypes.GlobalParameter counterToGP(Counter c) {
+        return Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
+    }
+
     public boolean canPlayerPay(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount) {
         int sum = playerResourceSum(card, from, to);
         return card != null? isCardFree(card, sum) : sum >= amount;
@@ -250,39 +314,6 @@ public class TMGameState extends AbstractGameState {
             }
         }
         return rate;
-    }
-
-    public boolean isCardFree(TMCard card) {
-        return isCardFree(card, 0);
-    }
-
-    public boolean isCardFree(TMCard card, int amountPaid) {
-        // TODO: discount effects
-        return card.cost - amountPaid <= 0;
-    }
-
-    public Deck<TMCard> getDiscardCards() {
-        return discardCards;
-    }
-
-    public Deck<TMCard> getCorpCards() {
-        return corpCards;
-    }
-
-    public Deck<TMCard> getProjectCards() {
-        return projectCards;
-    }
-
-    public HashSet<ResourceMapping>[] getPlayerResourceMap() {
-        return playerResourceMap;
-    }
-
-    public Counter getnAwardsFunded() {
-        return nAwardsFunded;
-    }
-
-    public Counter getnMilestonesClaimed() {
-        return nMilestonesClaimed;
     }
 
     static HashSet<Vector2D> getEmptyTilesOfType(TMGameState gs, TMTypes.MapTileType type) {

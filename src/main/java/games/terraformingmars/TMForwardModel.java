@@ -111,6 +111,8 @@ public class TMForwardModel extends AbstractForwardModel {
                 gs.playerCardChoice[i].add(gs.corpCards.pick(rnd));
             }
         }
+
+        gs.generation = 1;
     }
 
     @Override
@@ -176,6 +178,9 @@ public class TMForwardModel extends AbstractForwardModel {
                         gs.playerCardChoice[i].add(gs.projectCards.pick(rnd));
                     }
                 }
+
+                // Next generation
+                gs.generation++;
             }
         }
     }

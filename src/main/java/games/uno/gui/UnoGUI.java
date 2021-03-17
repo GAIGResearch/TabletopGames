@@ -110,7 +110,7 @@ public class UnoGUI extends AbstractGUI {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false, true);
 
                 // Add all views to frame
                 getContentPane().add(mainGameArea, BorderLayout.CENTER);

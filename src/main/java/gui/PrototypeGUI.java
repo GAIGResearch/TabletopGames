@@ -42,7 +42,7 @@ public class PrototypeGUI extends AbstractGUI {
         if (game != null && gameState != null) {
             infoPanel = createGameStateInfoPanel(game.name(), gameState, width, defaultInfoPanelHeight);
         }
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, true);
 
         JPanel deckView = new JPanel();
         componentViews = new ComponentView[maxComponentsInDeck];

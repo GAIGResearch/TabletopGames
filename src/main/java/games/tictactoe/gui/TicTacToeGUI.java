@@ -36,7 +36,7 @@ public class TicTacToeGUI extends AbstractGUI {
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()},
-                width, defaultActionPanelHeight);
+                width, defaultActionPanelHeight, true);
 
         getContentPane().add(view, BorderLayout.CENTER);
         getContentPane().add(infoPanel, BorderLayout.NORTH);
