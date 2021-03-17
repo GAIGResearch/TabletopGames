@@ -43,18 +43,25 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.playerResources = new HashMap[gs.getNPlayers()];
         gs.playerProduction = new HashMap[gs.getNPlayers()];
         gs.playerResourceMap = new HashSet[gs.getNPlayers()];
+        gs.playerDiscountEffects = new HashMap[gs.getNPlayers()];
+        gs.playerResourceIncreaseGen = new HashMap[gs.getNPlayers()];
 
         for (int i = 0; i < gs.getNPlayers(); i++) {
             gs.playerResources[i] = new HashMap<>();
             gs.playerProduction[i] = new HashMap<>();
+            gs.playerResourceIncreaseGen[i] = new HashMap<>();
             for (TMTypes.Resource res: TMTypes.Resource.values()) {
                 gs.playerResources[i].put(res, new Counter(params.startingResources.get(res), 0, params.maxPoints, res.toString() + "-" + i));
                 gs.playerProduction[i].put(res, new Counter(params.startingProduction.get(res), params.minimumProduction.get(res), params.maxPoints, res.toString() + "-prod-" + i));
+                gs.playerResourceIncreaseGen[i].put(res, false);
             }
             gs.playerResourceMap[i] = new HashSet<>();
             // By default, players can exchange steel for X MC and titanium for X MC. More may be added
             gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit, params.nSteelMC, new TagOnCardRequirement(TMTypes.Tag.Building)));
             gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit, params.nTitaniumMC, new TagOnCardRequirement(TMTypes.Tag.Space)));
+
+            // Set up player discount maps
+            gs.playerDiscountEffects[i] = new HashMap<>();
         }
 
         gs.projectCards = new Deck<>("Projects", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -191,10 +198,13 @@ public class TMForwardModel extends AbstractForwardModel {
                     for (int j = 0; j < params.nProjectsResearch; j++) {
                         gs.playerCardChoice[i].add(gs.projectCards.pick(0));
                     }
-
                     // Mark player actions unused
                     for (TMAction a : gs.playerCardsPlayedActions[i]) {
                         a.played = false;
+                    }
+                    // Reset resource increase
+                    for (TMTypes.Resource res: TMTypes.Resource.values()) {
+                        gs.playerResourceIncreaseGen[i].put(res, false);
                     }
                 }
 

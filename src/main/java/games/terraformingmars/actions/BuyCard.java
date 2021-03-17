@@ -10,6 +10,7 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.Objects;
 
+
 public class BuyCard extends TMAction {
     final int cardIdx;
 
@@ -22,24 +23,28 @@ public class BuyCard extends TMAction {
     public boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
+        int player = gs.getCurrentPlayer();
 
-        TMCard card = gs.getPlayerCardChoice()[gs.getCurrentPlayer()].pick(cardIdx);
+        TMCard card = gs.getPlayerCardChoice()[player].pick(cardIdx);
         if (card.cardType == TMTypes.CardType.Corporation) {
             // 1 card chosen, the rest are discarded
-            gs.getPlayerCorporations()[gs.getCurrentPlayer()] = card;
-            gs.getPlayerCardChoice()[gs.getCurrentPlayer()].clear();
+            gs.getPlayerCorporations()[player] = card;
+            gs.getPlayerCardChoice()[player].clear();
 
             // Execute immediate effect of corporation (starting bonus)
             for (AbstractAction aa: card.effects) {
                 aa.execute(gs);
             }
 
+            // Add discountEffects to player's discounts
+            gs.addDiscountEffects(card.discountEffects);
+
             return super.execute(gs);
         } else {
-            Counter c = gs.getPlayerResources()[gs.getCurrentPlayer()].get(TMTypes.Resource.MegaCredit);
+            Counter c = gs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit);
             // TODO: maybe allow use of other resources
             if (c.getValue() >= gp.getProjectPurchaseCost()) {
-                gs.getPlayerHands()[gs.getCurrentPlayer()].add(card);
+                gs.getPlayerHands()[player].add(card);
                 c.decrement(gp.getProjectPurchaseCost());
                 return super.execute(gs);
             } else {
