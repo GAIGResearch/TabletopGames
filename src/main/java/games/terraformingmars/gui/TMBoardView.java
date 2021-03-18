@@ -4,10 +4,12 @@ import core.components.Counter;
 import core.components.GridBoard;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Bonus;
 import gui.views.ComponentView;
 import utilities.ImageIO;
+import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -240,7 +242,7 @@ public class TMBoardView extends ComponentView {
         TMTypes.GlobalParameter p = TMGameState.counterToGP(c);
         if (p != null) {
             Image symbol = ImageIO.GetInstance().getImage(p.getImagePath());
-            if (c.getValues() == null) {
+            if (p == TMTypes.GlobalParameter.OceanTiles) {
                 // Draw symbol and value
                 drawImage(g, p.getImagePath(), x, y, counterWidth, counterWidth);
                 String text = "" + c.getValue() + "/" + c.getMaximum();
@@ -310,18 +312,19 @@ public class TMBoardView extends ComponentView {
                         int imgY = yDisplay + displayHeight/2 - size/2;
 
                         // Find image to display, for a global counter, resource/production, or tile
-                        TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, b.effectString);
+                        Pair<TMAction, String> effect = b.getEffect(gs);
+                        TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, effect.b);
                         String imgPath = null;
                         if (gp == null) {
                             // A resource or production?
-                            String resString = b.effectString.split("prod")[0];
+                            String resString = effect.b.split("prod")[0];
                             TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
                             if (res != null) {
                                 Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
-                                drawResource(g, resImg, production, b.effectString.contains("prod"), imgX, imgY, size, 0.8);
+                                drawResource(g, resImg, production, effect.b.contains("prod"), imgX, imgY, size, 0.8);
                             } else {
                                 // A tile to place?
-                                TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, b.effectString);
+                                TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, effect.b);
                                 if (t != null) {
                                     imgPath = t.getImagePath();
                                 }

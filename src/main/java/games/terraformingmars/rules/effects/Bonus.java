@@ -1,6 +1,5 @@
 package games.terraformingmars.rules.effects;
 
-import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -11,7 +10,7 @@ import java.util.Objects;
 public class Bonus {
     public final int threshold;
     public TMTypes.GlobalParameter param;
-    public AbstractAction effect;
+    public TMAction effect;
     public String effectString;
 
     public boolean executed;  // Can only execute once
@@ -22,10 +21,18 @@ public class Bonus {
         this.param = p;
     }
 
-    private Bonus(TMTypes.GlobalParameter p, int threshold, AbstractAction effect) {
+    private Bonus(TMTypes.GlobalParameter p, int threshold, TMAction effect) {
         this.param = p;
         this.effect = effect;
         this.threshold = threshold;
+    }
+
+    public Pair<TMAction, String> getEffect(TMGameState gs) {
+        if (effect == null) {
+            return TMAction.parseAction(gs, effectString);
+        } else {
+            return new Pair<>(effect, effectString);
+        }
     }
 
     public void checkBonus(TMGameState gs) {
@@ -34,6 +41,7 @@ public class Bonus {
             if (effect == null) {
                 Pair<TMAction, String> effect = TMAction.parseAction(gs, effectString);
                 this.effect = effect.a;
+                this.effectString = effect.b;
             }
 
             if (c.getValue() == threshold) {

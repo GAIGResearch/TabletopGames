@@ -302,12 +302,16 @@ public class TMTypes {
                     for (Object o : gps) {
                         JSONObject gp = (JSONObject) o;
                         GlobalParameter p = GlobalParameter.valueOf((String) gp.get("name"));
-                        int[] values = (int[]) gp.get("range");
+                        JSONArray valuesJSON = (JSONArray) gp.get("range");
+                        int[] values = new int[valuesJSON.size()];
+                        for (int i = 0; i < valuesJSON.size(); i++) {
+                            values[i] = (int)(long)valuesJSON.get(i);
+                        }
                         globalParameters.put(p, new Counter(values, p.name()));
 
                         // Process bonuses for this game when counters reach specific points
                         if (gp.get("bonus") != null) {
-                            JSONArray bonus = (JSONArray) data.get("bonus");
+                            JSONArray bonus = (JSONArray) gp.get("bonus");
                             for (Object o2 : bonus) {
                                 JSONObject b = (JSONObject) o2;
                                 String effectString = (String) b.get("effect");
