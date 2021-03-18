@@ -1,9 +1,27 @@
 package games.terraformingmars;
 
+import core.components.Deck;
+import core.components.GridBoard;
+import games.terraformingmars.components.TMCard;
+import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.Award;
+import games.terraformingmars.rules.Milestone;
+import games.terraformingmars.rules.effects.Bonus;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import static games.terraformingmars.components.TMMapTile.parseMapTile;
+import static games.terraformingmars.rules.effects.Bonus.parseBonus;
 
 public class TMTypes {
 
@@ -175,8 +193,7 @@ public class TMTypes {
     public enum GlobalParameter {
         Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true),
         Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white, true),
-        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true),
-        Venus ("data/terraformingmars/images/global-parameters/venus.png", Color.white, false);
+        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true);
 
         String imagePath;
         Color color;
@@ -198,6 +215,112 @@ public class TMTypes {
 
         public boolean countsForEndGame() {
             return countsForEndGame;
+        }
+
+        public static ArrayList<GlobalParameter> getDrawOrder() {
+            ArrayList<GlobalParameter> order = new ArrayList<>();
+            order.add(Temperature);
+            order.add(Oxygen);
+            order.add(OceanTiles);
+            return order;
+        }
+    }
+
+    public enum Expansion {
+        Base,
+        CorporateEra,
+        Prelude,
+        Venus,
+        Turmoil,
+        Colonies,
+        Promo;
+
+        public String getBoardPath() {
+            return "data/terraformingmars/boards/" + this.name().toLowerCase() + ".json";
+        }
+        public String getCorpCardsPath() {
+            return "data/terraformingmars/corporationCards/" + this.name().toLowerCase() + ".json";
+        }
+        public String getProjectCardsPath() {
+            return "data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
+        }
+        public String getOtherCardsPath() {
+            return "data/terraformingmars/otherCards/" + this.name().toLowerCase() + ".json";
+        }
+
+        /* custom loading info from json */
+
+        public void loadBoard(GridBoard<TMMapTile> board, HashSet<TMMapTile> extraTiles, HashSet<Bonus> bonuses, HashSet<Milestone> milestones, HashSet<Award> awards) {
+            JSONParser jsonParser = new JSONParser();
+            try (FileReader reader = new FileReader(getBoardPath())) {
+                JSONObject data = (JSONObject) jsonParser.parse(reader);
+
+                // Process main map
+                JSONArray b = (JSONArray) data.get("board");
+                int y = 0;
+                for (Object g : b) {
+                    JSONArray row = (JSONArray) g;
+                    int x = 0;
+                    for (Object o1 : row) {
+                        board.setElement(x, y, parseMapTile((String) o1));
+                        x++;
+                    }
+                    y++;
+                }
+
+                // Process extra tiles not on regular board
+                JSONArray extra = (JSONArray) data.get("extra");
+                for (Object o : extra) {
+                    extraTiles.add(parseMapTile((String) o));
+                }
+
+                // Process bonuses for this game when counters reach specific points
+                JSONArray bonus = (JSONArray) data.get("bonus");
+                for (Object o : bonus) {
+                    bonuses.add(parseBonus((String) o));
+                }
+
+                // Process milestones and awards
+                JSONArray milestonesStr = (JSONArray) data.get("milestones");
+                for (Object o : milestonesStr) {
+                    String[] split = ((String) o).split(":");
+                    milestones.add(new Milestone(split[0], Integer.parseInt(split[2]), split[1]));
+                }
+                JSONArray awardsStr = (JSONArray) data.get("awards");
+                for (Object o : awardsStr) {
+                    String[] split = ((String) o).split(":");
+                    awards.add(new Award(split[0], split[1]));
+                }
+
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void loadProjectCards(Deck<TMCard> deck) {
+            loadCards(deck, getProjectCardsPath());
+        }
+
+        public void loadCorpCards(Deck<TMCard> deck) {
+            loadCards(deck, getCorpCardsPath());
+        }
+
+        private void loadCards(Deck<TMCard> deck, String path) {
+            JSONParser jsonParser = new JSONParser();
+            try (FileReader reader = new FileReader(path)) {
+                JSONArray data = (JSONArray) jsonParser.parse(reader);
+                for (Object o: data) {
+                    TMCard card;
+                    if (deck.getComponentName().equalsIgnoreCase("corporations")) {
+                        card = TMCard.loadCorporation((JSONObject)o);
+                    } else {
+                        card = TMCard.loadCardHTML((JSONObject) o);
+                    }
+                    deck.add(card);
+                }
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 

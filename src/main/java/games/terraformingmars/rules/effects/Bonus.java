@@ -3,40 +3,47 @@ package games.terraformingmars.rules.effects;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.TMTypes;
-import games.terraformingmars.actions.PlaceTile;
-import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.actions.TMAction;
-import games.terraformingmars.actions.TMModifyCounter;
-import games.terraformingmars.components.TMMapTile;
 import utilities.Pair;
-import utilities.Utils;
-import utilities.Vector2D;
-
-import java.util.HashSet;
 import java.util.Objects;
 
-import static games.terraformingmars.TMGameState.stringToGPCounter;
-
 public class Bonus {
-    public final int counterID;
     public final int threshold;
-    public final AbstractAction effect;
-    public final String effectString;
+    public int counterID;
+    public String counterCode;
+    public AbstractAction effect;
+    public String effectString;
 
     public boolean executed;  // Can only execute once
 
-    public Bonus(int counter, int threshold, AbstractAction effect, String effectString) {
-        this.counterID = counter;
+    public Bonus(String counterCode, int threshold, String effect) {
+        this.counterCode = counterCode;
         this.threshold = threshold;
+        this.effectString = effect;
+        this.counterID = -1;
+    }
+
+    private Bonus(int counterID, int threshold, AbstractAction effect) {
+        this.counterID = counterID;
         this.effect = effect;
-        this.effectString = effectString;
+        this.threshold = threshold;
     }
 
     public void checkBonus(TMGameState gs) {
         if (!executed) {
-            Counter c = (Counter) gs.getComponentById(counterID);
-            if (c.getValue() == threshold) {
+            Counter c;
+            if (counterID == -1) {
+                c = gs.stringToGPOrPlayerResCounter(counterCode, -1);
+                counterID = c.getComponentID();
+            } else {
+                c = (Counter) gs.getComponentById(counterID);
+            }
+            if (effect == null) {
+                Pair<TMAction, String> effect = TMAction.parseAction(gs, effectString);
+                this.effect = effect.a;
+            }
+
+            if (c != null && c.getValue() == threshold) {
                 effect.execute(gs);
                 executed = true;
             }
@@ -44,7 +51,7 @@ public class Bonus {
     }
 
     public Bonus copy() {
-        Bonus b = new Bonus(counterID, threshold, effect, effectString);
+        Bonus b = new Bonus(counterID, threshold, effect);
         b.executed = executed;
         return b;
     }
@@ -54,18 +61,15 @@ public class Bonus {
         if (this == o) return true;
         if (!(o instanceof Bonus)) return false;
         Bonus bonus = (Bonus) o;
-        return counterID == bonus.counterID &&
-                threshold == bonus.threshold &&
-                Objects.equals(effect, bonus.effect) &&
-                Objects.equals(effectString, bonus.effectString);
+        return threshold == bonus.threshold && counterID == bonus.counterID && executed == bonus.executed && Objects.equals(counterCode, bonus.counterCode) && Objects.equals(effect, bonus.effect) && Objects.equals(effectString, bonus.effectString);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(counterID, threshold, effect, effectString);
+        return Objects.hash(threshold, counterID, counterCode, effect, effectString, executed);
     }
 
-    public static Bonus parseBonus(TMGameState gs, String s) {
+    public static Bonus parseBonus(String s) {
         /*
         Bonus options implemented:
             - Increase/Decrease counter (global parameter, player resource, or player production)
@@ -74,15 +78,8 @@ public class Bonus {
         String[] split = s.split(":");
 
         // First element is the counter
-        Counter c = stringToGPCounter(gs, split[0]);
-
         // Second element is threshold, int
-        int threshold = Integer.parseInt(split[1]);
-
-        Pair<TMAction, String> effect = TMAction.parseAction(gs, split[2]);
-        if (c != null) {
-            return new Bonus(c.getComponentID(), threshold, effect.a, effect.b);
-        }
-        return null;
+        // Third is effect
+        return new Bonus(split[0], Integer.parseInt(split[1]), split[2]);
     }
 }

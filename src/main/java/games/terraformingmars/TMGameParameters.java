@@ -4,13 +4,12 @@ import core.AbstractParameters;
 
 import java.util.HashMap;
 
+import static games.terraformingmars.TMTypes.Expansion.Base;
+
 public class TMGameParameters extends AbstractParameters {
 
     int boardSize = 9;
-    String boardPath = "data/terraformingmars/board.json";
-//    String projectsPath = "data/terraformingmars/projects.json";
-    String projectsPath = "data/terraformingmars/htmlproj.json";
-    String corpsPath = "data/terraformingmars/corporations.json";
+    TMTypes.Expansion[] expansions = new TMTypes.Expansion[] {Base};
 
     HashMap<TMTypes.Resource, Integer> minimumProduction = new HashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
@@ -116,23 +115,15 @@ public class TMGameParameters extends AbstractParameters {
         return temperatureScales;
     }
 
-    public String getBoardPath() {
-        return boardPath;
-    }
-
-    public String getCorpsPath() {
-        return corpsPath;
-    }
-
-    public String getProjectsPath() {
-        return projectsPath;
-    }
-
     public int getnProjectsResearch() {
         return nProjectsResearch;
     }
 
     public int getnProjectsStart() {
         return nProjectsStart;
+    }
+
+    public TMTypes.Expansion[] getExpansions() {
+        return expansions;
     }
 }

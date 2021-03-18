@@ -10,6 +10,7 @@ import java.util.Objects;
 public class PlaceholderModifyCounter extends TMModifyCounter {
     public TMTypes.Resource resource;
     public boolean production;
+    public int player;  // Can set player this action applies to, -1 for current (self?)
 
     public PlaceholderModifyCounter(int change, TMTypes.Resource resource, boolean production, boolean free) {
         super(-1, change, free);
@@ -19,13 +20,12 @@ public class PlaceholderModifyCounter extends TMModifyCounter {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // Find and set ID of counter for current player
         TMGameState ggs = (TMGameState)gs;
-        int activePlayer = gs.getCurrentPlayer();
+        if (player == -1) player = gs.getCurrentPlayer();
         if (production) {
-            counterID = ggs.getPlayerProduction()[activePlayer].get(resource).getComponentID();
+            counterID = ggs.getPlayerProduction()[player].get(resource).getComponentID();
         } else {
-            counterID = ggs.getPlayerResources()[activePlayer].get(resource).getComponentID();
+            counterID = ggs.getPlayerResources()[player].get(resource).getComponentID();
         }
         return super.execute(gs);
     }
@@ -36,13 +36,12 @@ public class PlaceholderModifyCounter extends TMModifyCounter {
         if (!(o instanceof PlaceholderModifyCounter)) return false;
         if (!super.equals(o)) return false;
         PlaceholderModifyCounter that = (PlaceholderModifyCounter) o;
-        return production == that.production &&
-                resource == that.resource;
+        return production == that.production && player == that.player && resource == that.resource;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource, production);
+        return Objects.hash(super.hashCode(), resource, production, player);
     }
 
     @Override

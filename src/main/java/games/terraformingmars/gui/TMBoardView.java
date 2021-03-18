@@ -84,8 +84,9 @@ public class TMBoardView extends ComponentView {
         // Draw global parameters
         double height = 0;
         double width = 0;
-        for (int i = 0; i < gs.getGlobalParameters().length; i++) {
-            Rectangle rect = drawCounter(g, offsetX + i * defaultItemSize * 2, 0, gs.getGlobalParameters()[i]);
+        for (int i = 0; i < TMTypes.GlobalParameter.getDrawOrder().size(); i++) {
+            TMTypes.GlobalParameter p = TMTypes.GlobalParameter.getDrawOrder().get(i);
+            Rectangle rect = drawCounter(g, offsetX + i * defaultItemSize * 2, 0, gs.getGlobalParameters().get(p));
             if (rect.getHeight() + rect.getY() > height) {
                 height = rect.getHeight() + rect.getY();
             }
@@ -94,7 +95,7 @@ public class TMBoardView extends ComponentView {
             }
         }
 
-        Rectangle rect = drawGridBoard(g, (GridBoard<TMMapTile>) component, offsetX + (gs.getGlobalParameters().length+1) * defaultItemSize + 10, defaultItemSize);
+        Rectangle rect = drawGridBoard(g, (GridBoard<TMMapTile>) component, offsetX + (gs.getGlobalParameters().size()+1) * defaultItemSize + 10, defaultItemSize);
         if (rect.getHeight() + rect.getY() > height) {
             height = rect.getHeight() + rect.getY();
         }
@@ -163,11 +164,13 @@ public class TMBoardView extends ComponentView {
 
         // Draw extra cells
         int offsetX = defaultItemSize;
-        for (int i = 0; i < gs.getExtraTiles().length; i++) {
-            int xC = x + offsetX + width/2 - gs.getExtraTiles().length * defaultItemSize + i * defaultItemSize * 2;
+        int i = 0;
+        for (TMMapTile mt: gs.getExtraTiles()) {
+            int xC = x + offsetX + width/2 - gs.getExtraTiles().size() * defaultItemSize + i * defaultItemSize * 2;
             int yC = y + offsetY + spacing + height;
-            drawCell(g, gs.getExtraTiles()[i], xC, yC);
-            rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), gs.getExtraTiles()[i].getComponentName());
+            drawCell(g, mt, xC, yC);
+            rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), mt.getComponentName());
+            i++;
         }
 
         return new Rectangle(x, y, width, height);

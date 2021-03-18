@@ -49,37 +49,6 @@ public class TMCard extends Card {
         resourceMappings = new HashSet<>();
     }
 
-    public static TMCard loadCard(JSONObject cardDef) {
-        TMCard card = new TMCard();
-        card.setComponentName((String)cardDef.get("name"));
-        card.cardType = TMTypes.CardType.valueOf((String)cardDef.get("type"));
-        if (cardDef.get("cost") != null) {
-            card.cost = ((Long) cardDef.get("cost")).intValue();
-        }
-        if (cardDef.get("requirement") != null) {
-            card.requirement = Requirement.stringToRequirement((String) cardDef.get("requirement"));
-        }
-
-        JSONArray tagDef = (JSONArray) cardDef.get("tags");
-        card.tags = new TMTypes.Tag[tagDef.size()];
-        for (int i = 0; i < tagDef.size(); i++) {
-            card.tags[i] = TMTypes.Tag.valueOf((String)tagDef.get(i));
-        }
-
-        // TODO: rules, actions, effects
-
-        card.nPoints = 0;
-        if (cardDef.get("points") != null) {
-            card.nPoints = (Double)cardDef.get("points");
-        }
-        card.tokensOnCard = new TMTypes.TokenType[TMTypes.TokenType.values().length];
-        if (cardDef.get("token-type") != null) {
-            card.pointsTokenType = TMTypes.TokenType.valueOf((String)cardDef.get("token-type"));
-        }
-
-        return card;
-    }
-
     public static TMCard loadCorporation(JSONObject cardDef) {
         TMCard card = new TMCard();
         card.cardType = TMTypes.CardType.Corporation;
@@ -189,7 +158,7 @@ public class TMCard extends Card {
             } else if (type.equalsIgnoreCase("effect")) {
                 String condition = (String)effect.get("if");
                 String actionTypeCondition = condition.split("\\(")[0];
-                String result = (String)effect.get("then");  // TODO: this is placeholdercountermodify action
+                String result = (String)effect.get("then");
                 if (actionTypeCondition.equalsIgnoreCase("placetile")) {
                     // Place tile effect
                     String cond = condition.split("\\(")[1].replace(")", "");

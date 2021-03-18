@@ -20,6 +20,7 @@ public class PlayCardEffect extends Effect {
 
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
+        if (!(actionTaken instanceof PlayCard)) return false;
         PlayCard action = (PlayCard) actionTaken;
         TMCard card = (TMCard) gameState.getComponentById(action.getCardID());
         for (TMTypes.Tag t: card.tags) {

@@ -1,14 +1,17 @@
 package games.terraformingmars.rules.effects;
 
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.actions.TMAction;
 
 import java.util.Objects;
 
 public abstract class Effect {
-    boolean mustBeCurrentPlayer;  // if true, only applies when player is current player
-    TMAction effectAction;
-    String effectEncoding;
+    public boolean mustBeCurrentPlayer;  // if true, only applies when player is current player
+//    public boolean appliesToPlayer;  // if true, applies to the player, otherwise can apply to any
+//    public boolean mustApply;  // "up to X" type effects don't have to apply
+    public TMAction effectAction;
+    public String effectEncoding;
 
     public Effect(boolean mustBeCurrentPlayer, TMAction effectAction) {
         this.mustBeCurrentPlayer = mustBeCurrentPlayer;
@@ -28,6 +31,9 @@ public abstract class Effect {
         if (canExecute(gs, actionTaken, player)) {
             if (effectAction == null) {
                 effectAction = TMAction.parseAction(gs, effectEncoding).a;
+            }
+            if (effectAction instanceof PlaceholderModifyCounter) {
+                ((PlaceholderModifyCounter) effectAction).player = player;
             }
             this.effectAction.execute(gs);
         }

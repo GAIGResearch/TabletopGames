@@ -10,25 +10,13 @@ import core.components.GridBoard;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.*;
-import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import utilities.Utils;
-import utilities.Vector2D;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
 import static games.terraformingmars.TMGameState.getEmptyTilesOfType;
-import static games.terraformingmars.TMGameState.stringToGPCounter;
-import static games.terraformingmars.rules.effects.Bonus.parseBonus;
 
 public class TMForwardModel extends AbstractForwardModel {
 
@@ -38,10 +26,10 @@ public class TMForwardModel extends AbstractForwardModel {
         TMGameParameters params = (TMGameParameters) firstState.getGameParameters();
         Random rnd = new Random(params.getRandomSeed());
 
-        gs.globalParameters = new Counter[3];  // hardcoded, read from json/params
-        gs.globalParameters[0] = new Counter(params.temperatureScales, "temperature");
-        gs.globalParameters[1] = new Counter(params.oxygenScales, "oxygen");
-        gs.globalParameters[2] = new Counter(0, 0, params.nOceanTiles, "oceanTiles");
+        gs.globalParameters = new HashMap<>();  // hardcoded, read from json/params TODO: expansions
+        gs.globalParameters.put(TMTypes.GlobalParameter.Temperature, new Counter(params.temperatureScales, "temperature"));
+        gs.globalParameters.put(TMTypes.GlobalParameter.Oxygen, new Counter(params.oxygenScales, "oxygen"));
+        gs.globalParameters.put(TMTypes.GlobalParameter.OceanTiles, new Counter(0, 0, params.nOceanTiles, "oceanTiles"));
 
         gs.playerResources = new HashMap[gs.getNPlayers()];
         gs.playerProduction = new HashMap[gs.getNPlayers()];
@@ -71,9 +59,17 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.corpCards = new Deck<>("Corporations", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         gs.discardCards = new Deck<>("Discard", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
-        loadCards(params.projectsPath, gs.projectCards);
-        loadCards(params.corpsPath, gs.corpCards);
-        loadBoard(gs);
+        // load cards from expansions (includes base)
+        gs.board = new GridBoard<>(params.boardSize, params.boardSize);
+        gs.extraTiles = new HashSet<>();
+        gs.bonuses = new HashSet<>();
+        gs.milestones = new HashSet<>();
+        gs.awards = new HashSet<>();
+        for (TMTypes.Expansion e: params.expansions) {
+            e.loadProjectCards(gs.projectCards);
+            e.loadCorpCards(gs.corpCards);
+            e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards);
+        }
 
         // Shuffle dekcs
         gs.projectCards.shuffle(rnd);
@@ -284,7 +280,7 @@ public class TMForwardModel extends AbstractForwardModel {
                         TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
             }
             // - Increase temperature 1 step for 14 MC
-            Counter temp = stringToGPCounter(gs, "temperature");
+            Counter temp = gs.globalParameters.get(TMTypes.GlobalParameter.Temperature);
             if (temp != null && !temp.isMaximum() && gs.canPlayerPay(null, null, TMTypes.Resource.MegaCredit, params.nCostSPTemp)) {
                 actions.add(new PayForAction(new ModifyGlobalParameter(temp.getComponentID(), 1, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPTemp, -1));
@@ -358,9 +354,8 @@ public class TMForwardModel extends AbstractForwardModel {
 
     private boolean checkGameEnd(TMGameState gs) {
         boolean ended = true;
-        for (Counter c: gs.globalParameters) {
-            TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
-            if (gp != null && gp.countsForEndGame() && !c.isMaximum()) ended = false;
+        for (TMTypes.GlobalParameter p: gs.globalParameters.keySet()) {
+            if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum()) ended = false;
         }
         return ended;
     }
@@ -370,110 +365,4 @@ public class TMForwardModel extends AbstractForwardModel {
         return new TMForwardModel();
     }
 
-
-    /* custom loading info from json */
-
-    private void loadBoard(TMGameState gs) {
-        TMGameParameters params = (TMGameParameters) gs.getGameParameters();
-
-        gs.board = new GridBoard<>(params.boardSize, params.boardSize);
-
-        JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader(params.boardPath)) {
-            JSONObject data = (JSONObject) jsonParser.parse(reader);
-
-            // Process main map
-            JSONArray b = (JSONArray) data.get("board");
-            int y = 0;
-            for (Object g : b) {
-                JSONArray row = (JSONArray) g;
-                int x = 0;
-                for (Object o1 : row) {
-                    gs.board.setElement(x, y, parseMapTile((String) o1));
-                    x++;
-                }
-                y++;
-            }
-
-            // Process extra tiles not on regular board
-            JSONArray extra = (JSONArray) data.get("extra");
-            gs.extraTiles = new TMMapTile[extra.size()];
-            for (int i = 0; i < extra.size(); i++) {
-                gs.extraTiles[i] = parseMapTile((String)extra.get(i));
-            }
-
-            // Process bonuses for this game when counters reach specific points
-            JSONArray bonus = (JSONArray) data.get("bonus");
-            gs.bonuses = new Bonus[bonus.size()];
-            for (int i = 0; i < bonus.size(); i++) {
-                gs.bonuses[i] = parseBonus(gs, (String)bonus.get(i));
-            }
-
-            // Process milestones and awards
-            JSONArray milestones = (JSONArray) data.get("milestones");
-            gs.milestones = new Milestone[milestones.size()];
-            for (int i = 0; i < milestones.size(); i++) {
-                String[] split = ((String)milestones.get(i)).split(":");
-                gs.milestones[i] = new Milestone(split[0], Integer.parseInt(split[2]), split[1]);
-            }
-            JSONArray awards = (JSONArray) data.get("awards");
-            gs.awards = new Award[awards.size()];
-            for (int i = 0; i < awards.size(); i++) {
-                String[] split = ((String)awards.get(i)).split(":");
-                gs.awards[i] = new Award(split[0], split[1]);
-            }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private TMMapTile parseMapTile(String s) {
-        if (s.equals("0")) return null;
-
-        TMMapTile mt = new TMMapTile();
-
-        String[] split = s.split("-");
-
-        // First element is tile type
-        TMTypes.MapTileType type = null;
-        try{
-            type = TMTypes.MapTileType.valueOf(split[0]);
-        } catch(Exception ignored) {}
-        if (type == null) {
-            type = TMTypes.MapTileType.City;
-            mt.setComponentName(split[0]); // Keep city name
-        }
-        mt.setType(type);
-
-        // The rest are resources existing here
-        int nResources = split.length-1;
-        TMTypes.Resource[] resources = new TMTypes.Resource[nResources];
-        for (int i = 1; i < split.length; i++) {
-            resources[i-1] = TMTypes.Resource.valueOf(split[i]);
-        }
-        mt.setResources(resources);
-
-        return mt;
-    }
-
-
-    private void loadCards(String path, Deck<TMCard> deck) {
-        JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader(path)) {
-            JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for (Object o: data) {
-                TMCard card;
-                if (deck.getComponentName().equalsIgnoreCase("corporations")) {
-                    card = TMCard.loadCorporation((JSONObject)o);
-                } else {
-                    card = TMCard.loadCardHTML((JSONObject) o);
-                }
-                deck.add(card);
-            }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-    }
 }

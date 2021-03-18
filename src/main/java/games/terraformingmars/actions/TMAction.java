@@ -15,8 +15,6 @@ import utilities.Vector2D;
 import java.util.HashSet;
 import java.util.Objects;
 
-import static games.terraformingmars.TMGameState.stringToGPCounter;
-
 public class TMAction extends AbstractAction {
     public Requirement<TMGameState> requirement;
     final boolean free;
@@ -100,13 +98,13 @@ public class TMAction extends AbstractAction {
             effectString = split2[1];
 
             // Find which counter
-            Counter which = stringToGPCounter(gameState, split2[1]);
+            Counter which = gameState.stringToGPCounter(split2[1]);
 
             if (which == null) {
                 // A resource or production instead
                 String resString = split2[1].split("prod")[0];
                 TMTypes.Resource res = TMTypes.Resource.valueOf(resString);
-                effect = new PlaceholderModifyCounter(increment, res, split2[1].contains("prod"), true);
+                effect = new PlaceholderModifyCounter(increment, res, split2[1].contains("prod"),true);
             } else {
                 // A global counter (temp, oxygen, oceantiles)
                 effect = new TMModifyCounter(which.getComponentID(), increment, true);

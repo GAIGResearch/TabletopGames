@@ -88,7 +88,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         stage++;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        if (card != null && ((TMGameState)state).isCardFree(card, costPaid) || costPaid >= costTotal) {
+        if (card != null && ((TMGameState)state).isCardFree(card, costPaid, player) || costPaid >= costTotal) {
             // Action paid for, execute
             this.action.execute(state);
         }
@@ -99,7 +99,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState)state;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        return card != null && ((TMGameState)state).isCardFree(card, costPaid) || stage == resourcesToPayWith.length || costPaid == costTotal;
+        return card != null && ((TMGameState)state).isCardFree(card, costPaid, player) || stage == resourcesToPayWith.length || costPaid == costTotal;
     }
 
     @Override

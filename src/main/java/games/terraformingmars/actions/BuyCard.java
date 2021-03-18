@@ -7,6 +7,7 @@ import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.effects.Effect;
 
 import java.util.Objects;
 
@@ -41,6 +42,11 @@ public class BuyCard extends TMAction {
             gs.addResourceMappings(card.resourceMappings, true);
 
             // Add persisting effects
+            for (Effect e: card.persistingEffects) {
+                if (e.effectAction instanceof PlaceholderModifyCounter) {
+                    ((PlaceholderModifyCounter)e.effectAction).player = player;
+                }
+            }
             gs.addPersistingEffects(card.persistingEffects);
 
             return super.execute(gs);

@@ -1,0 +1,2629 @@
+[
+  {
+    "@class": "filterDiv automated colonies reqs noneTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Airliners"
+      },
+      {
+        "@class": "price",
+        "#text": "11"
+      },
+      {
+        "@class": "number",
+        "#text": "#C01"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "requirements ",
+            "#text": "3 Floaters"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "moneyprod",
+              "#text": "2"
+            }
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "description",
+            "#text": "(Requires that you have 3 floaters. inc-MegaCreditprod-2 steps. Add 2 floaters to ANY card.)"
+          }
+        ],
+        "br": "",
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-event",
+        "#text": "Air Raid"
+      },
+      {
+        "@class": "price",
+        "#text": "0"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "@class": "number",
+        "#text": "#C02"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource floater",
+            "@style": "margin-right:20px;"
+          },
+          {
+            "@class": "resource money red-outline",
+            "#text": "5"
+          },
+          {
+            "@class": "description",
+            "#text": "(Requires that you lose 1 floater. Steal 5 MegaCredit from any player.)"
+          }
+        ],
+        "#text": "STEAL"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies noneTag",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Atmo Collectors"
+      },
+      {
+        "@class": "price",
+        "#text": "15"
+      },
+      {
+        "@class": "number",
+        "#text": "#C03"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource ",
+            "@style": "margin-left: -3px;"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "energy resource "
+          },
+          {
+            "@class": "heat resource "
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Add 1 floater here, or spend 1 floater here to gain 2 titanium, or 3 energy, or 4 heat.)"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Add 2 floaters to ANY card.)"
+          }
+        ],
+        "br": [
+          "",
+          ""
+        ],
+        "#text": [
+          "OR",
+          "2",
+          "/3",
+          "/4",
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated colonies noneTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Community Services"
+      },
+      {
+        "@class": "price",
+        "#text": "13"
+      },
+      {
+        "@class": "number",
+        "#text": "#C04"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "moneyprod",
+              "#text": "1"
+            }
+          },
+          {
+            "@class": "resource-tag",
+            "@style": "font-size: 42px; vertical-align: middle;background:white;font-family:Arial;",
+            "#text": "X"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-MegaCreditprod-1 step per CARD WITH NO TAGS, including this.)"
+          }
+        ],
+        "#text": [
+          "/",
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag earthTag colonies reqs",
+    "@data-earth": "2",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Conscription"
+      },
+      {
+        "@class": "price",
+        "#text": "5"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C05"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "-1"
+          },
+          {
+            "@class": "requirements",
+            "#text": "Earth Earth"
+          },
+          {
+            "@class": "resource money",
+            "#text": "-16"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 2 Earth tags. The next card you play this generation costs 16 MegaCredit less.)"
+          }
+        ],
+        "span": {
+          "@style": "font-size:14px;",
+          "#text": "NEXT CARD:"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated powerTag spaceTag colonies reqs",
+    "@data-science": "4",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Corona Extractor"
+      },
+      {
+        "@class": "price",
+        "#text": "10"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "@class": "number",
+        "#text": "#C06"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "#text": "4 Science"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": {
+              "@class": "energyprod"
+            },
+            "#text": "4"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 4 science tags. inc-energyprod-4 steps.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Cryo Sleep"
+      },
+      {
+        "@class": "price",
+        "#text": "10"
+      },
+      {
+        "@class": "tag tag1 tag-science"
+      },
+      {
+        "@class": "number",
+        "#text": "#C07"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "tile trade"
+          },
+          {
+            "@class": "resource ",
+            "@style": "background:white",
+            "#text": "-1"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Effect: When you trade, you pay 1 less resource for it.)"
+          }
+        ],
+        "#text": ":"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag earthTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-automated",
+        "#text": "Earth Elevator"
+      },
+      {
+        "@class": "price",
+        "#text": "43"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "@class": "number",
+        "#text": "#C08"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "4"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "production titanium"
+              },
+              {
+                "@class": "production titanium"
+              },
+              {
+                "@class": "production titanium"
+              }
+            ]
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-titaniumprod-3 steps.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated colonies scienceTag animalTag microbeTag plantTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Ecology Research"
+      },
+      {
+        "@class": "price",
+        "#text": "21"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "@class": "tag tag2 tag-microbe"
+      },
+      {
+        "@class": "tag tag3 tag-animal"
+      },
+      {
+        "@class": "tag tag-science",
+        "@style": "margin-left:56px;"
+      },
+      {
+        "@class": "number",
+        "#text": "#C09"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "tile colony"
+              }
+            ],
+            "#text": "/"
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "@class": "resource microbe",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-plantprod-1 step for each colony you own. Add 1 animal to ANOTHER card and 2 microbes to ANOTHER card.)"
+          }
+        ],
+        "br": "",
+        "#text": [
+          "*",
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated colonies noneTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Floater Leasing"
+      },
+      {
+        "@class": "price",
+        "#text": "3"
+      },
+      {
+        "@class": "number",
+        "#text": "#C10"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "moneyprod",
+              "#text": "1"
+            }
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-MegaCreditprod-1 step per 3 floaters you have.)"
+          }
+        ],
+        "#text": "/ 3"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag scienceTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Floater Prototypes"
+      },
+      {
+        "@class": "price",
+        "#text": "2"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C11"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Add two floaters to ANOTHER card.)"
+          }
+        ],
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag colonies ",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Floater Technology"
+      },
+      {
+        "@class": "price",
+        "#text": "7"
+      },
+      {
+        "@class": "tag tag1 tag-science"
+      },
+      {
+        "@class": "number",
+        "#text": "#C12"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Add 1 floater to ANOTHER card.)"
+          }
+        ],
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated colonies spaceTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Galilean Waystation"
+      },
+      {
+        "@class": "price",
+        "#text": "15"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "number",
+        "#text": "#C13"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "moneyprod",
+                "#text": "1"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-jovian red-outline"
+              }
+            ],
+            "#text": "/"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-MegaCreditprod-1 step for every Jovian tag in play.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated  earthTag colonies reqs",
+    "@data-earth": "2",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Heavy Taxation"
+      },
+      {
+        "@class": "price",
+        "#text": "3"
+      },
+      {
+        "@class": "tag tag1 tag-earth "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C14"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "-1"
+          },
+          {
+            "@class": "requirements",
+            "#text": "Earth Earth"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "2"
+            }
+          },
+          {
+            "@style": "margin-left:20px;",
+            "@class": "resource money",
+            "#text": "4"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 2 Earth tags. inc-MegaCreditprod-2 steps, and gain 4MegaCredit.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag  colonies ",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Ice Moon Colony"
+      },
+      {
+        "@class": "price",
+        "#text": "23"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C15"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile colony"
+          },
+          {
+            "@class": "tile ocean-tile",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "description",
+            "#text": "(Place 1 colony and 1 ocean tile.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag spaceTag colonies reqs",
+    "@data-jovian": "2",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Impactor Swarm"
+      },
+      {
+        "@class": "price",
+        "#text": "11"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C16"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "#text": "Jovian Jovian"
+          },
+          {
+            "@class": "resource heat"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 2 Jovian tags. Gain 12 heat. Remove up to 2 Plant from any player.)"
+          }
+        ],
+        "br": "",
+        "#text": "12"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag spaceTag earthTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Interplanetary Colony Ship"
+      },
+      {
+        "@class": "price",
+        "#text": "12"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-earth "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C17"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile colony"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Place a colony.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies jovianTag reqs",
+    "@data-jovian": "1",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Jovian Lanterns"
+      },
+      {
+        "@class": "price",
+        "#text": "20"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "@class": "number",
+        "#text": "#C18"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points",
+            "div": {
+              "@class": "resource floater"
+            },
+            "#text": "1/2"
+          },
+          {
+            "@class": "requirements",
+            "#text": "Jovian"
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Spend 1 titanium to add 2 floaters here.)"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "description ",
+            "@style": "margin-top:-5px;text-align:left;",
+            "br": "",
+            "#text": [
+              "(Requires 1 Jovian tag. inc-TR 1 step. Add 2 floaters to ANY",
+              "card. 1VP per 2 floaters.)"
+            ]
+          }
+        ],
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies jovianTag reqs",
+    "@data-science": "3",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Jupiter Floating Station"
+      },
+      {
+        "@class": "price",
+        "#text": "9"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "@class": "number",
+        "#text": "#C19"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "requirements",
+            "#text": "3 Science"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater",
+            "@style": "margin-right:10px;",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource money",
+            "#text": "1"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Add 1 floater to a JOVIAN CARD, or gain 1 MegaCredit for every floater here (MAX 4).)"
+          },
+          {
+            "@class": "description ",
+            "@style": "margin-left:-90px;",
+            "#text": "(Requires 3 Science tags.)"
+          }
+        ],
+        "br": [
+          "",
+          ""
+        ],
+        "#text": [
+          "OR",
+          "/",
+          "* (max 4)"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated earthTag colonies reqs",
+    "@data-earth": "3",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Luna Governor"
+      },
+      {
+        "@class": "price",
+        "#text": "4"
+      },
+      {
+        "@class": "tag tag1 tag-earth "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C20"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "#text": "Earth Earth Earth"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "2"
+            }
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 3 Earth tags. inc-MegaCreditprod-2 steps.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag earthTag colonies ",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Lunar Exports"
+      },
+      {
+        "@class": "price",
+        "#text": "19"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "tag tag2 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C21"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size4",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "moneyprod",
+                "#text": "5"
+              }
+            ],
+            "#text": "OR"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-plantprod-2 steps, or your MegaCreditprod-5 steps.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated earthTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Lunar Mining"
+      },
+      {
+        "@class": "price",
+        "#text": "11"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "number",
+        "#text": "#C22"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "titaniumprod"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-earth"
+              }
+            ],
+            "#text": "/ 2"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-titaniumprod-1 step for every 2 Earth tags you have in play, including this.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag  earthTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Market Manipulation"
+      },
+      {
+        "@class": "price",
+        "#text": "1"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "number",
+        "#text": "#C23"
+      },
+      {
+        "@class": "content",
+        "@style": "font-weight: normal;",
+        "br": "",
+        "#text": [
+          "INCREASE ONE COLONY TILE TRACK 1 STEP.",
+          "DECREASE ANOTHER COLONY TILE TRACK 1 STEP."
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active coloniess buildingTag animalTag reqs",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Martian Zoo"
+      },
+      {
+        "@class": "price",
+        "#text": "12"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-animal"
+      },
+      {
+        "@class": "number",
+        "#text": "#C24"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "requirements",
+            "#text": "2 Cities"
+          },
+          {
+            "@class": "resource-tag tag-earth"
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource money",
+            "#text": "1"
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "@class": "description",
+            "br": [
+              "",
+              "",
+              "",
+              ""
+            ],
+            "div": {
+              "@style": "margin-left:-75px;",
+              "br": "",
+              "#text": [
+                "(Requires 2 city",
+                "tiles in play.)"
+              ]
+            },
+            "#text": [
+              "(Effect: When you play an Earth tag, place an animal here.)",
+              "(Action: Gain 1MegaCredit per animal here.)"
+            ]
+          }
+        ],
+        "br": "",
+        "#text": [
+          ":",
+          "/"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag  colonies ",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Mining Colony"
+      },
+      {
+        "@class": "price",
+        "#text": "20"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C25"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production titanium"
+            }
+          },
+          {
+            "@class": "tile colony",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-titaniumprod-1 step. Place a colony.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag  colonies ",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Minority Refuge"
+      },
+      {
+        "@class": "price",
+        "#text": "5"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C26"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "-2"
+            }
+          },
+          {
+            "@class": "tile colony",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "description",
+            "#text": "(dec-MegaCreditprod-2 steps. Place a colony.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated scienceTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Molecular Printing"
+      },
+      {
+        "@class": "price",
+        "#text": "11"
+      },
+      {
+        "@class": "tag tag1 tag-science"
+      },
+      {
+        "@class": "number",
+        "#text": "#C27"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "resource money",
+            "#text": "1"
+          },
+          {
+            "@class": "tile city-tile red-outline"
+          },
+          {
+            "@class": "resource money",
+            "#text": "1"
+          },
+          {
+            "@class": "colony tile red-outline"
+          },
+          {
+            "@class": "description ",
+            "br": "",
+            "#text": [
+              "(Gain 1MegaCredit for each city tile in play.",
+              "Gain 1MegaCredit for each colony in play.)"
+            ]
+          }
+        ],
+        "br": "",
+        "#text": [
+          "/",
+          "/"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag jovianTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Nitrogen From Titan"
+      },
+      {
+        "@class": "price",
+        "#text": "25"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-jovian"
+      },
+      {
+        "@class": "number",
+        "#text": "#C28"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "description ",
+            "#text": "(Raise your TR 2 steps. Add 2 floaters to a JOVIAN CARD.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag  colonies reqs",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Pioneer Settlement"
+      },
+      {
+        "@class": "price",
+        "#text": "13"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C29"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "2"
+          },
+          {
+            "@class": "requirements requirements-max",
+            "#text": "max 1 Colony"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "-2"
+            }
+          },
+          {
+            "@class": "tile colony",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "description",
+            "#text": "(Requires that you have no more than 1 colony. dec-MegaCreditprod-2 steps. Place a colony.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated  colonies noneTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Productive Outpost"
+      },
+      {
+        "@class": "price",
+        "#text": "0"
+      },
+      {
+        "@class": "number",
+        "#text": "#C30"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "#text": "GAIN ALL YOUR COLONY BONUSES"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated colonies reqs noneTag",
+    "@data-science": "4",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Quantum Communications"
+      },
+      {
+        "@class": "price",
+        "#text": "8"
+      },
+      {
+        "@class": "number",
+        "#text": "#C31"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "1"
+          },
+          {
+            "@class": "requirements",
+            "#text": "4 Science"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "moneyprod",
+                "#text": "1"
+              },
+              {
+                "@class": "tile colony red-outline",
+                "@style": "    vertical-align: middle;\r\n                    width: 32px;\r\n                    height: 27px;\r\n                    background-size: 32px 27px;\r\n                    margin-bottom: 5px;\r\n                    margin-left: 0px;\r\n                "
+              }
+            ],
+            "#text": "/"
+          },
+          {
+            "@class": "description",
+            "#text": "(Requires 4 Science tags. inc-MegaCreditprod-1 step for each colony in play.)"
+          }
+        ],
+        "br": ""
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies jovianTag scienceTag reqs",
+    "@data-science": "3",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Red Spot Observatory"
+      },
+      {
+        "@class": "price",
+        "#text": "17"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "@class": "number",
+        "#text": "#C32"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "2"
+          },
+          {
+            "@class": "requirements",
+            "#text": "3 Science"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Add 1 floater to this card, or spend 1 floater here to draw a card.)"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "description ",
+            "@style": "margin-top:-5px;text-align:left;",
+            "br": "",
+            "#text": [
+              "(Requires 3 Science tags.",
+              "Draw 2 cards.)"
+            ]
+          }
+        ],
+        "#text": "OR"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active earthTag colonies ",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Refugee Camps"
+      },
+      {
+        "@class": "price",
+        "#text": "10"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "number",
+        "#text": "#C33"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "div": {
+              "@class": "resource camp",
+              "@style": "vertical-align:middle;"
+            },
+            "#text": "1/"
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "moneyprod-",
+                "#text": "1"
+              }
+            ]
+          },
+          {
+            "@class": "resource camp"
+          },
+          {
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ],
+            "#text": [
+              "(Action: dec-MegaCreditprod-1 step to add a camp resource to this card.)",
+              "(1 VP for each camp resource on this card.)"
+            ]
+          }
+        ],
+        "span": {
+          "@class": "red-arrow ",
+          "@style": "margin-left:5px; "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag scienceTag colonies ",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Research Colony"
+      },
+      {
+        "@class": "price",
+        "#text": "20"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "@class": "number",
+        "#text": "#C34"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile colony"
+          },
+          {
+            "@class": "resource card",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "description",
+            "#text": "(Place a colony. MAY BE PLACED WHERE YOU ALREADY HAVE A COLONY. Draw 2 cards.)"
+          }
+        ],
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Rim Freighters"
+      },
+      {
+        "@class": "price",
+        "#text": "4"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C35"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile trade"
+          },
+          {
+            "@class": "resource ",
+            "@style": "background:white",
+            "#text": "-1"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Effect: When you trade, you pay 1 less resource for it.)"
+          }
+        ],
+        "#text": ":"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active earthTag spaceTag colonies reqs",
+    "@data-earth": "2",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Sky Docks"
+      },
+      {
+        "@class": "price",
+        "#text": "18"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "@class": "number",
+        "#text": "#C36"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "2"
+          },
+          {
+            "@class": "requirements",
+            "#text": "Earth Earth"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Effect: When you play a card, you pay 1 MegaCredit less for it.)"
+          },
+          {
+            "@class": "tile fleet"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 2 Earth tags. Gain 1 Trade Fleet.)"
+          }
+        ],
+        "span": {
+          "@class": "money resource ",
+          "#text": "-1"
+        },
+        "#text": ":"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag scienceTag spaceTag colonies event ",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Solar Probe"
+      },
+      {
+        "@class": "price",
+        "#text": "9"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-science "
+      },
+      {
+        "@class": "number",
+        "#text": "#C37"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource-tag tag-science"
+          },
+          {
+            "@class": "resource-tag tag-science",
+            "@style": "margin-left:-10px"
+          },
+          {
+            "@class": "resource-tag tag-science",
+            "@style": "margin-left:-10px"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Draw 1 card for every 3 science tags you have, including this.)"
+          }
+        ],
+        "#text": "/"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag colonies ",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Solar Reflectors"
+      },
+      {
+        "@class": "price",
+        "#text": "23"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "number",
+        "#text": "#C38"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": {
+              "@class": "heatprod"
+            },
+            "#text": "5"
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-heatprod-5 steps.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag colonies reqs",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Space Port"
+      },
+      {
+        "@class": "price",
+        "#text": "22"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "@class": "number",
+        "#text": "#C39"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "#text": "Colony"
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "moneyprod-",
+                "#text": "4"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:10px "
+          },
+          {
+            "@class": "tile fleet"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 1 colony. dec-Energyprod-1 step and inc-MegaCreditprod-4 steps.\r\n                          Place a City tile. Gain 1 Trade Fleet.)"
+          }
+        ],
+        "br": ""
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag colonies reqs",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Space Port Colony"
+      },
+      {
+        "@class": "price",
+        "#text": "27"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "number",
+        "#text": "#C40"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points",
+            "div": {
+              "@class": "tile colony red-outline",
+              "@style": "vertical-align: middle;\r\n                      width: 26px;\r\n                      height: 23px;\r\n                      background-size: 26px;"
+            },
+            "#text": "1/2"
+          },
+          {
+            "@class": "requirements",
+            "#text": "Colony"
+          },
+          {
+            "@class": "tile colony"
+          },
+          {
+            "@class": "tile fleet",
+            "@style": "margin-left:20px "
+          },
+          {
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ],
+            "#text": [
+              "(Requires a colony. Place a colony.",
+              "MAY BE PLACED ON A COLONY TILE WHERE YOU ALREADY HAVE A COLONY.",
+              "Gain 1 Trade Fleet. 1VP per 2 colonies in play.)"
+            ]
+          }
+        ],
+        "br": "",
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag colonies ",
+    "div": [
+      {
+        "@class": "title background-color-active",
+        "#text": "Spin-off Department"
+      },
+      {
+        "@class": "price",
+        "#text": "10"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "number",
+        "#text": "#C41"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "resource money",
+            "#text": "20"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "description",
+            "#text": "(Effect: WHEN PLAYING A CARD WITH A BASIC COST OF 20MegaCredit OR MORE, draw a card.)"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "2"
+            }
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-MegaCreditprod-2 steps.)"
+          }
+        ],
+        "br": "",
+        "#text": "* :"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag colonies reqs",
+    "@data-temperature": "-6",
+    "div": [
+      {
+        "@class": "title background-color-active",
+        "#text": "Sub-Zero Salt Fish"
+      },
+      {
+        "@class": "price",
+        "#text": "5"
+      },
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "@class": "number",
+        "#text": "#C42"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "points",
+            "div": {
+              "@class": "animal resource"
+            },
+            "#text": "1/2"
+          },
+          {
+            "@class": "requirements",
+            "#text": "-6 C"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "@class": "description",
+            "@style": "margin-bottom:5px;",
+            "#text": "(Action: Add 1 Animal to this card.)"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod-red-outline"
+              }
+            ]
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:left;",
+            "br": "",
+            "#text": [
+              "(Requires -6 C. dec-Plantprod-1-any. 1 VP per",
+              "2 Animals on this card.)"
+            ]
+          }
+        ],
+        "span": {
+          "@class": "red-arrow"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies jovianTag ",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Titan Air-scrapping"
+      },
+      {
+        "@class": "price",
+        "#text": "21"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "@class": "number",
+        "#text": "#C43"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "2"
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Spend 1 titanium to add 2 floaters here, or spend 2 floaters here to inc-TR 1 step.)"
+          }
+        ],
+        "br": "",
+        "#text": "OR"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies jovianTag ",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Titan Floating Launch-Pad"
+      },
+      {
+        "@class": "price",
+        "#text": "18"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "@class": "number",
+        "#text": "#C44"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile trade"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Add 1 floater to ANY JOVIAN CARD, or spend 1 floater here to trade for free.)"
+          },
+          {
+            "@class": "resource floater",
+            "@style": "margin-left:-130px;margin-top:15px;",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "resource floater",
+            "@style": "margin-top: 15px;",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "position: absolute; margin-left: 87px; margin-top: -36px;",
+            "#text": "(Add two floaters to ANY JOVIAN CARD.)"
+          }
+        ],
+        "br": "",
+        "#text": "OR"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies jovianTag spaceTag ",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Titan Shuttles"
+      },
+      {
+        "@class": "price",
+        "#text": "23"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "@class": "number",
+        "#text": "#C45"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-jovian"
+            }
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Action: Add 2 floaters to ANY JOVIAN CARD, or spend any number of floaters here to gain the same number of titanium.)"
+          }
+        ],
+        "br": "",
+        "#text": [
+          "OR X",
+          "X"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active colonies noneTag",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Trade Envoys"
+      },
+      {
+        "@class": "price",
+        "#text": "6"
+      },
+      {
+        "@class": "number",
+        "#text": "#C46"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile trade"
+          },
+          {
+            "@class": "description ",
+            "@style": "margin-top:5px",
+            "#text": "(Effect: When you trade, you may first increase that Colony Tile track 1 step.)"
+          }
+        ],
+        "span": {
+          "@style": "font-family:Prototype;font-size:23px;font-weight:normal;vertical-align:middle",
+          "#text": "+1"
+        },
+        "#text": ":"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag colonies",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Trading Colony"
+      },
+      {
+        "@class": "price",
+        "#text": "18"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "number",
+        "#text": "#C47"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile trade"
+          },
+          {
+            "@class": "description ",
+            "@style": "margin-top:5px;margin-bottom:5px",
+            "#text": "(Effect: When you trade, you may first increase that Colony Tile track 1 step.)"
+          },
+          {
+            "@class": "tile colony"
+          },
+          {
+            "@class": "description ",
+            "@style": "margin-top:5px",
+            "#text": "(Place a colony.)"
+          }
+        ],
+        "span": {
+          "@style": "font-family:Prototype;font-size:23px;font-weight:normal;vertical-align:middle",
+          "#text": "+1"
+        },
+        "br": [
+          "",
+          ""
+        ],
+        "#text": ":"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated microbeTag colonies reqs",
+    "div": [
+      {
+        "@class": "title background-color-automated",
+        "#text": "Urban Decomposers"
+      },
+      {
+        "@class": "price",
+        "#text": "6"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "number",
+        "#text": "#C48"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "requirements",
+            "#text": "Colony City"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production plant"
+            }
+          },
+          {
+            "@class": "resource microbe",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "@class": "description",
+            "#text": "(Requires that you have 1 city tile and 1 colony in play. inc-plantprod-1 step, and add 2 microbes to ANOTHER card.)"
+          }
+        ],
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag colonies reqs",
+    "@data-science": "5",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "Warp Drive"
+      },
+      {
+        "@class": "price",
+        "#text": "14"
+      },
+      {
+        "@class": "tag tag1 tag-science"
+      },
+      {
+        "@class": "number",
+        "#text": "#C49"
+      },
+      {
+        "@class": "colonies-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big ",
+            "#text": "2"
+          },
+          {
+            "@class": "requirements",
+            "#text": "5 Science"
+          },
+          {
+            "@class": "resource-tag tag-space"
+          },
+          {
+            "@class": "money resource ",
+            "#text": "-4"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Effect: When you play a Space card, you pay 4 MegaCredit less for it.)"
+          },
+          {
+            "@class": "description ",
+            "#text": "(Requires 5 Science tags.)"
+          }
+        ],
+        "br": "",
+        "#text": ":"
+      }
+    ]
+  }
+]

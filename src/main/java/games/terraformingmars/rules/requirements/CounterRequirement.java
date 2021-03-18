@@ -2,11 +2,8 @@ package games.terraformingmars.rules.requirements;
 
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.TMTypes;
 
 import java.util.Map;
-
-import static games.terraformingmars.TMGameState.stringToGPCounter;
 
 public class CounterRequirement implements Requirement<TMGameState> {
 
@@ -46,18 +43,7 @@ public class CounterRequirement implements Requirement<TMGameState> {
     }
 
     private Counter setCounter(TMGameState gs) {
-        Counter which = stringToGPCounter(gs, counterCode);
-
-        if (which == null) {
-            // A resource or production instead
-            TMTypes.Resource res = TMTypes.Resource.valueOf(counterCode.split("prod")[0]);
-            if (counterCode.contains("prod")) {
-                which = gs.getPlayerProduction()[gs.getCurrentPlayer()].get(res);
-            } else {
-                which = gs.getPlayerResources()[gs.getCurrentPlayer()].get(res);
-            }
-        }
-
+        Counter which = gs.stringToGPOrPlayerResCounter(counterCode, -1);
         counterID = which.getComponentID();
         return which;
     }

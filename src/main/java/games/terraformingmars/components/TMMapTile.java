@@ -70,7 +70,7 @@ public class TMMapTile extends Component {
         if (tilePlaced == null) {
             if (which == TMTypes.Tile.Ocean) {
                 // If ocean, decrease number of tiles available and increase TR
-                Counter oceanTiles = TMGameState.stringToGPCounter(gs, "oceanTiles");
+                Counter oceanTiles = gs.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles);
                 if (oceanTiles != null) {
                     boolean succeeded = oceanTiles.increment(1);
                     if (succeeded) {
@@ -85,7 +85,7 @@ public class TMMapTile extends Component {
                 }
             } else if (which == TMTypes.Tile.Greenery) {
                 // If greenery, increase oxygen and TR
-                Counter oxygen = TMGameState.stringToGPCounter(gs, "oxygen");
+                Counter oxygen = gs.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen);
                 if (oxygen != null) {
                     boolean succeeded = oxygen.increment(1);
                     if (succeeded) {
@@ -117,5 +117,34 @@ public class TMMapTile extends Component {
     @Override
     public Component copy() {
         return new TMMapTile(componentID);
+    }
+
+    public static TMMapTile parseMapTile(String s) {
+        if (s.equals("0")) return null;
+
+        TMMapTile mt = new TMMapTile();
+
+        String[] split = s.split("-");
+
+        // First element is tile type
+        TMTypes.MapTileType type = null;
+        try{
+            type = TMTypes.MapTileType.valueOf(split[0]);
+        } catch(Exception ignored) {}
+        if (type == null) {
+            type = TMTypes.MapTileType.City;
+            mt.setComponentName(split[0]); // Keep city name
+        }
+        mt.setType(type);
+
+        // The rest are resources existing here
+        int nResources = split.length-1;
+        TMTypes.Resource[] resources = new TMTypes.Resource[nResources];
+        for (int i = 1; i < split.length; i++) {
+            resources[i-1] = TMTypes.Resource.valueOf(split[i]);
+        }
+        mt.setResources(resources);
+
+        return mt;
     }
 }

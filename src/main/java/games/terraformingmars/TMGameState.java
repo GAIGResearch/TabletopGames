@@ -31,9 +31,9 @@ public class TMGameState extends AbstractGameState {
     // General state info
     int generation;
     GridBoard<TMMapTile> board;
-    TMMapTile[] extraTiles;
-    Counter[] globalParameters;
-    Bonus[] bonuses;
+    HashSet<TMMapTile> extraTiles;
+    HashMap<TMTypes.GlobalParameter, Counter> globalParameters;
+    HashSet<Bonus> bonuses;
     Deck<TMCard> projectCards, corpCards, discardCards;  // Face-down decks
 
     // Effects and actions played
@@ -57,8 +57,8 @@ public class TMGameState extends AbstractGameState {
     TMCard[] playerCorporations;
 
     // Milestones and awards TODO: components?
-    Milestone[] milestones;
-    Award[] awards;
+    HashSet<Milestone> milestones;
+    HashSet<Award> awards;
     Counter nMilestonesClaimed;
     Counter nAwardsFunded;
 
@@ -79,8 +79,8 @@ public class TMGameState extends AbstractGameState {
             add(corpCards);
             add(nAwardsFunded);
             add(nMilestonesClaimed);
-            this.addAll(Arrays.asList(extraTiles));
-            this.addAll(Arrays.asList(globalParameters));
+            this.addAll(extraTiles);
+            this.addAll(globalParameters.values());
             this.addAll(Arrays.asList(playerHands));
             this.addAll(Arrays.asList(playerCardChoice));
             for (int i = 0; i < getNPlayers(); i++) {
@@ -124,19 +124,19 @@ public class TMGameState extends AbstractGameState {
         if (!(o instanceof TMGameState)) return false;
         if (!super.equals(o)) return false;
         TMGameState that = (TMGameState) o;
-        return generation == that.generation && Objects.equals(board, that.board) && Arrays.equals(extraTiles, that.extraTiles) && Arrays.equals(globalParameters, that.globalParameters) && Arrays.equals(bonuses, that.bonuses) && Objects.equals(projectCards, that.projectCards) && Objects.equals(corpCards, that.corpCards) && Objects.equals(discardCards, that.discardCards) && Arrays.equals(playerCardsPlayedEffects, that.playerCardsPlayedEffects) && Arrays.equals(playerCardsPlayedActions, that.playerCardsPlayedActions) && Arrays.equals(playerResourceMap, that.playerResourceMap) && Arrays.equals(playerResources, that.playerResources) && Arrays.equals(playerProduction, that.playerProduction) && Arrays.equals(playerCardsPlayedTags, that.playerCardsPlayedTags) && Arrays.equals(playerCardsPlayedTypes, that.playerCardsPlayedTypes) && Arrays.equals(tilesPlaced, that.tilesPlaced) && Arrays.equals(playerHands, that.playerHands) && Arrays.equals(playerCardChoice, that.playerCardChoice) && Arrays.equals(playerCorporations, that.playerCorporations) && Arrays.equals(milestones, that.milestones) && Arrays.equals(awards, that.awards) && Objects.equals(nMilestonesClaimed, that.nMilestonesClaimed) && Objects.equals(nAwardsFunded, that.nAwardsFunded);
+        return generation == that.generation && Objects.equals(board, that.board) && Objects.equals(extraTiles, that.extraTiles) && Objects.equals(globalParameters, that.globalParameters) && Objects.equals(bonuses, that.bonuses) && Objects.equals(projectCards, that.projectCards) && Objects.equals(corpCards, that.corpCards) && Objects.equals(discardCards, that.discardCards) && Arrays.equals(playerCardsPlayedEffects, that.playerCardsPlayedEffects) && Arrays.equals(playerCardsPlayedActions, that.playerCardsPlayedActions) && Arrays.equals(playerResourceMap, that.playerResourceMap) && Arrays.equals(playerDiscountEffects, that.playerDiscountEffects) && Arrays.equals(playerPersistingEffects, that.playerPersistingEffects) && Arrays.equals(playerResources, that.playerResources) && Arrays.equals(playerResourceIncreaseGen, that.playerResourceIncreaseGen) && Arrays.equals(playerProduction, that.playerProduction) && Arrays.equals(playerCardsPlayedTags, that.playerCardsPlayedTags) && Arrays.equals(playerCardsPlayedTypes, that.playerCardsPlayedTypes) && Arrays.equals(tilesPlaced, that.tilesPlaced) && Arrays.equals(playerHands, that.playerHands) && Arrays.equals(playerCardChoice, that.playerCardChoice) && Arrays.equals(playerCorporations, that.playerCorporations) && Objects.equals(milestones, that.milestones) && Objects.equals(awards, that.awards) && Objects.equals(nMilestonesClaimed, that.nMilestonesClaimed) && Objects.equals(nAwardsFunded, that.nAwardsFunded);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), generation, board, projectCards, corpCards, discardCards, nMilestonesClaimed, nAwardsFunded);
-        result = 31 * result + Arrays.hashCode(extraTiles);
-        result = 31 * result + Arrays.hashCode(globalParameters);
-        result = 31 * result + Arrays.hashCode(bonuses);
+        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses, projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
         result = 31 * result + Arrays.hashCode(playerCardsPlayedEffects);
         result = 31 * result + Arrays.hashCode(playerCardsPlayedActions);
         result = 31 * result + Arrays.hashCode(playerResourceMap);
+        result = 31 * result + Arrays.hashCode(playerDiscountEffects);
+        result = 31 * result + Arrays.hashCode(playerPersistingEffects);
         result = 31 * result + Arrays.hashCode(playerResources);
+        result = 31 * result + Arrays.hashCode(playerResourceIncreaseGen);
         result = 31 * result + Arrays.hashCode(playerProduction);
         result = 31 * result + Arrays.hashCode(playerCardsPlayedTags);
         result = 31 * result + Arrays.hashCode(playerCardsPlayedTypes);
@@ -144,8 +144,6 @@ public class TMGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerHands);
         result = 31 * result + Arrays.hashCode(playerCardChoice);
         result = 31 * result + Arrays.hashCode(playerCorporations);
-        result = 31 * result + Arrays.hashCode(milestones);
-        result = 31 * result + Arrays.hashCode(awards);
         return result;
     }
 
@@ -165,15 +163,15 @@ public class TMGameState extends AbstractGameState {
         return board;
     }
 
-    public Bonus[] getBonuses() {
+    public HashSet<Bonus> getBonuses() {
         return bonuses;
     }
 
-    public Counter[] getGlobalParameters() {
+    public HashMap<TMTypes.GlobalParameter, Counter> getGlobalParameters() {
         return globalParameters;
     }
 
-    public TMMapTile[] getExtraTiles() {
+    public HashSet<TMMapTile> getExtraTiles() {
         return extraTiles;
     }
 
@@ -201,11 +199,11 @@ public class TMGameState extends AbstractGameState {
         return tilesPlaced;
     }
 
-    public Milestone[] getMilestones() {
+    public HashSet<Milestone> getMilestones() {
         return milestones;
     }
 
-    public Award[] getAwards() {
+    public HashSet<Award> getAwards() {
         return awards;
     }
 
@@ -257,14 +255,14 @@ public class TMGameState extends AbstractGameState {
         return playerDiscountEffects;
     }
 
-    public boolean isCardFree(TMCard card) {
-        return isCardFree(card, 0);
+    public boolean isCardFree(TMCard card, int player) {
+        return isCardFree(card, 0, player);
     }
 
-    public boolean isCardFree(TMCard card, int amountPaid) {
+    public boolean isCardFree(TMCard card, int amountPaid, int player) {
         // Apply tag discount effects
         int cost = card.cost;
-        int player = getCurrentPlayer();
+        if (player == -1) player = getCurrentPlayer();
         for (TMTypes.Tag t: card.tags) {
             for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
                 if (e.getKey() instanceof TagRequirement) {
@@ -284,13 +282,26 @@ public class TMGameState extends AbstractGameState {
         return cost - amountPaid <= 0;
     }
 
-    public static Counter stringToGPCounter(TMGameState gs, String s) {
-        for (Counter c: gs.globalParameters) {
-            if (c.getComponentName().equalsIgnoreCase(s)) {
-                return c;
+    public Counter stringToGPCounter(String s) {
+        TMTypes.GlobalParameter p = Utils.searchEnum(TMTypes.GlobalParameter.class, s);
+        if (p != null) return globalParameters.get(p);
+        return null;
+    }
+
+    public Counter stringToGPOrPlayerResCounter(String s, int player) {
+        if (player == -1) player = getCurrentPlayer();
+        Counter which = stringToGPCounter(s);
+
+        if (which == null) {
+            // A resource or production instead
+            TMTypes.Resource res = TMTypes.Resource.valueOf(s.split("prod")[0]);
+            if (s.contains("prod")) {
+                which = playerProduction[player].get(res);
+            } else {
+                which = playerResources[player].get(res);
             }
         }
-        return null;
+        return which;
     }
 
     public static TMTypes.GlobalParameter counterToGP(Counter c) {
@@ -299,7 +310,7 @@ public class TMGameState extends AbstractGameState {
 
     public boolean canPlayerPay(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount) {
         int sum = playerResourceSum(card, from, to);
-        return card != null? isCardFree(card, sum) : sum >= amount;
+        return card != null? isCardFree(card, sum, -1) : sum >= amount;
     }
 
     public int playerResourceSum(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to) {

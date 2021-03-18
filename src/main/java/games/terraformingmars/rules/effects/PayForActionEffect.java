@@ -18,6 +18,7 @@ public class PayForActionEffect extends Effect {
 
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
+        if (!(actionTaken instanceof PayForAction)) return false;
         PayForAction action = (PayForAction) actionTaken;
         return super.canExecute(gameState, actionTaken, player) && action.costTotal > minCost;
     }

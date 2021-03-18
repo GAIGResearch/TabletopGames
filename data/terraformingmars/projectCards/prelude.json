@@ -1,0 +1,343 @@
+[
+
+  {
+    "@class": "filterDiv automated buildingTag prelude",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "House Printing"
+      },
+      {
+        "@class": "price",
+        "#text": "10"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "number",
+        "#text": "#P36"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production steel"
+            }
+          },
+          {
+            "@class": "description",
+            "#text": "(inc-steelprod-1 step.)"
+          }
+        ],
+        "br": ""
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag cityTag prelude",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Lava Tube Settlement"
+      },
+      {
+        "@class": "price",
+        "#text": "15"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-city"
+      },
+      {
+        "@class": "number",
+        "#text": "#P37"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "moneyprod-",
+                "#text": "2"
+              }
+            ],
+            "br": ""
+          },
+          {
+            "@class": "tile city-tile"
+          },
+          {
+            "@class": "description",
+            "#text": "(dec-energyprod-1 step and inc-MegaCreditprod-2 steps. Place a City Tile on a VOLCANIC AREA regardless of adjacent cities.)"
+          }
+        ],
+        "br": "",
+        "#text": "*"
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag scienceTag prelude reqs",
+    "@data-oxygen": "4",
+    "div": [
+      {
+        "@class": "title background-color-event ",
+        "#text": "Martian Survey"
+      },
+      {
+        "@class": "price",
+        "#text": "9"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "@class": "number",
+        "#text": "#P38"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "requirements requirements-max ",
+            "#text": "max 4% O2"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "description",
+            "#text": "(Oxygen must be 4% or lower. Draw two cards.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active microbeTag prelude reqs",
+    "@data-temperature": "-20",
+    "div": [
+      {
+        "@class": "title background-color-active ",
+        "#text": "PSYCHROPHILES"
+      },
+      {
+        "@class": "price",
+        "#text": "2"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "number",
+        "#text": "#P39"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements requirements-max ",
+            "#text": "max -20 C"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "resource-tag tag-plant"
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "money resource ",
+            "#text": "2"
+          },
+          {
+            "@class": "description",
+            "br": [
+              "",
+              "",
+              "",
+              ""
+            ],
+            "#text": [
+              "(Action: Add 1 microbe to this card.)",
+              "(Effect: When paying for a plant card, microbes here may be used as 2 MegaCredit each.)",
+              "(Temperature must be -20 C or lower.)"
+            ]
+          }
+        ],
+        "br": "",
+        "#text": [
+          ":",
+          "="
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated prelude wildTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "RESEARCH COORDINATION"
+      },
+      {
+        "@class": "price",
+        "#text": "4"
+      },
+      {
+        "@class": "tag tag1 tag-wild"
+      },
+      {
+        "@class": "number",
+        "#text": "#P40"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "#text": "After being played, when you perform an action, the wild tag counts as any tag of your choice."
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated prelude buildingTag",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "SF MEMORIAL"
+      },
+      {
+        "@class": "price",
+        "#text": "7"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "number",
+        "#text": "#P41"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "points points-big",
+            "#text": "1"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "description",
+            "#text": "(Draw 1 card.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated prelude earthTag spaceTag reqs",
+    "@data-earth": "2",
+    "div": [
+      {
+        "@class": "title background-color-automated ",
+        "#text": "Space hotels"
+      },
+      {
+        "@class": "price",
+        "#text": "12"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "@class": "number",
+        "#text": "#P42"
+      },
+      {
+        "@class": "prelude-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "#text": "Earth Earth"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "4"
+            }
+          },
+          {
+            "@class": "description",
+            "#text": "(Requires 2 Earth tags. Increase MegaCreditprod-4 steps.)"
+          }
+        ],
+        "br": ""
+      }
+    ]
+  }
+]

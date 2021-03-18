@@ -26,9 +26,10 @@ public class PlaceTileEffect extends Effect {
         this.resourceTypeGained = resourceGained;
     }
 
-
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
+        if (!(actionTaken instanceof PlaceTile)) return false;
+
         PlaceTile action = (PlaceTile) actionTaken;
         boolean marsCondition = !onMars || action.onMars;
         boolean tileCondition = tile == null || action.tile == tile;
