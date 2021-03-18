@@ -12,8 +12,8 @@ import java.util.Objects;
 public class DiscardCard extends TMAction {
     final int cardIdx;
 
-    public DiscardCard(int cardIdx, boolean free) {
-        super(free);
+    public DiscardCard(int player, int cardIdx, boolean free) {
+        super(player, free);
         this.cardIdx = cardIdx;
     }
 
@@ -21,8 +21,10 @@ public class DiscardCard extends TMAction {
     public boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        TMCard card = gs.getPlayerCardChoice()[gs.getCurrentPlayer()].pick(cardIdx);
-        if (card.cardType != TMTypes.CardType.Corporation) {
+        int player = this.player;
+        if (player == -1) player = gs.getCurrentPlayer();
+        TMCard card = gs.getPlayerCardChoice()[player].pick(cardIdx);
+        if (card != null && card.cardType != TMTypes.CardType.Corporation) {
             gs.getDiscardCards().add(card);
         }
         return super.execute(gs);

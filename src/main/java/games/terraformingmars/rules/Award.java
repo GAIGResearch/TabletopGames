@@ -50,9 +50,9 @@ public class Award {
         return sum;
     }
 
-    public boolean claim(TMGameState gs) {
-        if (canClaim(gs)) {
-            claimed = gs.getCurrentPlayer();
+    public boolean claim(TMGameState gs, int player) {
+        if (canClaim(gs, player)) {
+            claimed = player;
             return true;
         }
         return false;
@@ -62,7 +62,7 @@ public class Award {
         return claimed != -1;
     }
 
-    public boolean canClaim(TMGameState gs) {
+    public boolean canClaim(TMGameState gs, int player) {
         return claimed == -1;
     }
 

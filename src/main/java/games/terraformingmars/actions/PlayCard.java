@@ -14,8 +14,8 @@ public class PlayCard extends TMAction {
     final int cardIdx;
     int cardID;
 
-    public PlayCard(int cardIdx, boolean free) {
-        super(free);
+    public PlayCard(int player, int cardIdx, boolean free) {
+        super(player, free);
         this.cardIdx = cardIdx;
         this.cardID = -1;
     }
@@ -24,14 +24,15 @@ public class PlayCard extends TMAction {
     public boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        TMCard card = gs.getPlayerHands()[gs.getCurrentPlayer()].get(cardIdx);
+        int player = this.player;
+        if (player == -1) player = gs.getCurrentPlayer();
+        TMCard card = gs.getPlayerHands()[player].get(cardIdx);
         cardID = card.getComponentID();
-        playCard(gs);
+        playCard(gs, player);
         return true;
     }
 
-    private void playCard(TMGameState gs) {
-        int player = gs.getCurrentPlayer();
+    private void playCard(TMGameState gs, int player) {
         // Second: remove from hand, resolve on-play effects and add tags etc. to cards played lists
         TMCard card = gs.getPlayerHands()[player].pick(cardIdx);
 

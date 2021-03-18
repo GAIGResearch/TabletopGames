@@ -11,13 +11,16 @@ import java.util.Objects;
 public class ClaimAwardMilestone extends TMAction {
     final Award toClaim;
 
-    public ClaimAwardMilestone(Award toClaim) {
+    public ClaimAwardMilestone(int player, Award toClaim) {
+        super(player, false);
         this.toClaim = toClaim;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (toClaim.claim((TMGameState) gs)) {
+        int player = this.player;
+        if (player == -1) player = gs.getCurrentPlayer();
+        if (toClaim.claim((TMGameState) gs, player)) {
             if (toClaim instanceof Milestone) {
                 ((TMGameState)gs).getnMilestonesClaimed().increment(1);
             } else {
@@ -30,7 +33,7 @@ public class ClaimAwardMilestone extends TMAction {
 
     @Override
     public AbstractAction copy() {
-        return new ClaimAwardMilestone(toClaim.copy());
+        return new ClaimAwardMilestone(player, toClaim.copy());
     }
 
     @Override

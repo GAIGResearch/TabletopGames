@@ -10,10 +10,9 @@ import java.util.Objects;
 public class PlaceholderModifyCounter extends TMModifyCounter {
     public TMTypes.Resource resource;
     public boolean production;
-    public int player;  // Can set player this action applies to, -1 for current (self?)
 
-    public PlaceholderModifyCounter(int change, TMTypes.Resource resource, boolean production, boolean free) {
-        super(-1, change, free);
+    public PlaceholderModifyCounter(int player, int change, TMTypes.Resource resource, boolean production, boolean free) {
+        super(player,-1, change, free);
         this.resource = resource;
         this.production = production;
     }
@@ -21,6 +20,7 @@ public class PlaceholderModifyCounter extends TMModifyCounter {
     @Override
     public boolean execute(AbstractGameState gs) {
         TMGameState ggs = (TMGameState)gs;
+        int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
         if (production) {
             counterID = ggs.getPlayerProduction()[player].get(resource).getComponentID();

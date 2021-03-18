@@ -13,17 +13,16 @@ import java.util.*;
 // Wrapper class for actions that need to be paid with resources before execution
 public class PayForAction extends TMAction implements IExtendedSequence {
     public final TMAction action;
-    public final int costTotal;
+    public int costTotal;
     public final TMTypes.Resource resourceToPay;
     public final int cardIdx;
 
-    int player;
     int costPaid;
     int stage;
     TMTypes.Resource[] resourcesToPayWith;
 
-    public PayForAction(TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
-        super(true);
+    public PayForAction(int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
+        super(player, true);
         this.action = action;
         this.costTotal = costTotal;
         this.resourceToPay = resourceToPay;
@@ -39,11 +38,14 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Pay for card with resources until all paid
         // Second: execute action
 
-        player = gs.getCurrentPlayer();
+        if (this.player == -1) player = gs.getCurrentPlayer();
 
         TMCard card = null;
-        if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(card, null, resourceToPay);
+        if (cardIdx > -1) {
+            card = gs.getPlayerHands()[player].get(cardIdx);
+            costTotal = gs.discountCardCost(card, player);
+        }
+        HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(player, card, null, resourceToPay);
         resources.add(resourceToPay);  // Can always pay with itself
 
         resourcesToPayWith = resources.toArray(new TMTypes.Resource[0]);
@@ -62,15 +64,15 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        int sum = gs.playerResourceSum(card, resourcesRemaining, TMTypes.Resource.MegaCredit);
+        int sum = gs.playerResourceSum(player, card, resourcesRemaining, TMTypes.Resource.MegaCredit);
         int remaining = costTotal - costPaid - sum;
-        int min = Math.max(0, (int)(remaining/gs.getResourceMapRate(res, resourceToPay)));  // TODO; discount effects
+        int min = Math.max(0, (int)(Math.ceil(remaining/gs.getResourceMapRate(res, resourceToPay))));
         int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((costTotal - costPaid)/gs.getResourceMapRate(res, resourceToPay))));
 
         // Can pay between min and max of this resource
         ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = min; i <= max; i++) {
-            actions.add(new ResourceTransaction(res, -i));
+            actions.add(new ResourceTransaction(player, res, -i));
         }
         return actions;
     }
@@ -104,9 +106,8 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public PayForAction copy() {
-        PayForAction p = new PayForAction((TMAction) action.copy(), resourceToPay, costTotal, cardIdx);
+        PayForAction p = new PayForAction(player, (TMAction) action.copy(), resourceToPay, costTotal, cardIdx);
         p.costPaid = costPaid;
-        p.player = player;
         p.resourcesToPayWith = resourcesToPayWith.clone();
         p.stage = stage;
         return p;

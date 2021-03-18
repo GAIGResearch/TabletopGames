@@ -67,7 +67,7 @@ public class TMCard extends Card {
             // Second is what resource
             String resString = split2[1].split("prod")[0];
             TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-            immediateEffects.add(new PlaceholderModifyCounter(amount, res, split2[1].contains("prod"), true));
+            immediateEffects.add(new PlaceholderModifyCounter(-1, amount, res, split2[1].contains("prod"), true));
         }
         for (int i = 1; i < start.size(); i++) {
             JSONObject other = (JSONObject) start.get(i);
@@ -76,9 +76,9 @@ public class TMCard extends Card {
                 // First action in action phase for the player is decided, not free
                 String action = (String) other.get("action");
                 if (action.equalsIgnoreCase("resourcetransaction")) {
-                    card.firstAction = new ResourceTransaction(TMTypes.Resource.valueOf((String) other.get("resource")), (int)(long)other.get("amount"), false);
+                    card.firstAction = new ResourceTransaction(-1, TMTypes.Resource.valueOf((String) other.get("resource")), (int)(long)other.get("amount"), false);
                 } else if (action.equalsIgnoreCase("placetile")) {
-                    card.firstAction = new PlaceTile(TMTypes.Tile.valueOf((String) other.get("tile")), null, false);
+                    card.firstAction = new PlaceTile(-1, TMTypes.Tile.valueOf((String) other.get("tile")), null, false);
                 }
                 // TODO: other actions?
             }
@@ -109,7 +109,7 @@ public class TMCard extends Card {
                 TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
                 int cost = Integer.parseInt(costStr[1]);
                 if (action[0].equalsIgnoreCase("placetile")) {
-                    TMAction a = new PayForAction(new PlaceTile(TMTypes.Tile.valueOf(action[1]), null, false),
+                    TMAction a = new PayForAction(-1, new PlaceTile(-1, TMTypes.Tile.valueOf(action[1]), null, false),
                             costResource, -cost, -1);
                     actions.add(a);
                 } else if (action[0].equalsIgnoreCase("resourcetransaction")) {
@@ -123,7 +123,7 @@ public class TMCard extends Card {
                             req = new ResourceIncGenRequirement(TMTypes.Resource.valueOf(reqStr.split("-")[1]));
                         }
                     }
-                    TMAction a = new PayForAction(new ResourceTransaction(r, amount, false, req), costResource, -cost, -1);
+                    TMAction a = new PayForAction(-1, new ResourceTransaction(-1, r, amount, false, req), costResource, -cost, -1);
                     actions.add(a);
                 }
             } else if (type.equalsIgnoreCase("discount")) {

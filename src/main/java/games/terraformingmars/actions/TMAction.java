@@ -7,6 +7,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.Requirement;
 import utilities.Pair;
 import utilities.Utils;
@@ -16,33 +17,59 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class TMAction extends AbstractAction {
-    public Requirement<TMGameState> requirement;
-    final boolean free;
+    public final boolean free;
+    public int player;
     public final boolean pass;
+
+    public Requirement<TMGameState> requirement;
     public boolean played;
 
-    public TMAction(boolean free) {
+    public TMAction(int player, boolean free) {
+        this.player = player;
         this.free = free;
         this.pass = false;
     }
 
-    public TMAction() {
+    public TMAction(int player) {
+        this.player = player;
         this.free = false;
         this.pass = true;
     }
 
-    public TMAction(boolean free, Requirement requirement) {
+    public TMAction(int player, boolean free, Requirement requirement) {
+        this.player = player;
         this.free= free;
         this.pass = false;
         this.requirement = requirement;
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean execute(AbstractGameState gameState) {
+        TMGameState gs = (TMGameState) gameState;
+        int player = this.player;
+        if (player == -1) player = gs.getCurrentPlayer();
         if (!free) {
-            ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken((TMGameState) gs, this);
+            ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
         }
         played = true;
+
+        // Check persisting effects for all players
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            for (Effect e: gs.getPlayerPersistingEffects()[i]) {
+                e.execute(gs, this, i);
+            }
+        }
+
+        // Check if player has Card resources, transform those to cards into hand
+        Counter c = gs.getPlayerResources()[player].get(TMTypes.Resource.Card);
+        int nCards = c.getValue();
+        if (nCards > 0) {
+            for (int i = 0; i < nCards; i++) {
+                gs.getPlayerHands()[player].add(gs.getProjectCards().pick(0));
+            }
+            c.setValue(0);
+        }
+
         return true;
     }
 
@@ -56,12 +83,12 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return free == tmAction.free && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirement, tmAction.requirement);
+        return free == tmAction.free && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirement, tmAction.requirement);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requirement, free, pass, played);
+        return Objects.hash(free, player, pass, requirement, played);
     }
 
     @Override
@@ -74,19 +101,12 @@ public class TMAction extends AbstractAction {
         return "Pass";
     }
 
-    public void setPlayed(boolean played) {
-        this.played = played;
-    }
-
-    public boolean isPlayed() {
-        return played;
-    }
-
     public static Pair<TMAction, String> parseAction(TMGameState gameState, String encoding) {
 
         // Third element is effect
         TMAction effect = null;
         String effectString = "";
+        int player = gameState.getCurrentPlayer();
 
         if (encoding.contains("inc") || encoding.contains("dec")) {
             // Increase/Decrease counter action
@@ -103,11 +123,11 @@ public class TMAction extends AbstractAction {
             if (which == null) {
                 // A resource or production instead
                 String resString = split2[1].split("prod")[0];
-                TMTypes.Resource res = TMTypes.Resource.valueOf(resString);
-                effect = new PlaceholderModifyCounter(increment, res, split2[1].contains("prod"),true);
+                TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
+                effect = new PlaceholderModifyCounter(player, increment, res, split2[1].contains("prod"),true);
             } else {
                 // A global counter (temp, oxygen, oceantiles)
-                effect = new TMModifyCounter(which.getComponentID(), increment, true);
+                effect = new TMModifyCounter(player, which.getComponentID(), increment, true);
             }
         } else if (encoding.contains("placetile")) {
             // equals("placetile:ocean:ocean")
@@ -128,7 +148,7 @@ public class TMAction extends AbstractAction {
                     }
                 }
             }
-            effect = new PlaceTile(toPlace, legalPositions, true);  // Extended sequence, will ask player where to put it
+            effect = new PlaceTile(player, toPlace, legalPositions, true);  // Extended sequence, will ask player where to put it
             effectString = split2[1];
         }
         return new Pair<>(effect, effectString);

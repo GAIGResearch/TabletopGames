@@ -23,18 +23,17 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     boolean placed;
     boolean impossible;
-    int player;
 
-    public PlaceTile(int x, int y, TMTypes.Tile tile, boolean free) {
-        super(free);
+    public PlaceTile(int player, int x, int y, TMTypes.Tile tile, boolean free) {
+        super(player, free);
         this.x = x;
         this.y = y;
         this.tile = tile;
         this.legalPositions = new HashSet<>();
     }
 
-    public PlaceTile(TMTypes.Tile tile, HashSet<Vector2D> legalPositions, boolean free) {
-        super(free);
+    public PlaceTile(int player, TMTypes.Tile tile, HashSet<Vector2D> legalPositions, boolean free) {
+        super(player, free);
         this.x = -1;
         this.y = -1;
         this.tile = tile;
@@ -48,14 +47,14 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             // TODO money earned from oceans
             return ggs.getBoard().getElement(x, y).placeTile(tile, ggs) && super.execute(gs);
         }
-        player = gs.getCurrentPlayer();
+        if (player == -1) player = gs.getCurrentPlayer();
         gs.setActionInProgress(this);
         return true;
     }
 
     @Override
     public PlaceTile copy() {
-        PlaceTile copy = new PlaceTile(x, y, tile, free);
+        PlaceTile copy = new PlaceTile(player, x, y, tile, free);
         copy.impossible = impossible;
         copy.placed = placed;
         HashSet<Vector2D> copyPos = null;
@@ -66,7 +65,6 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             }
         }
         copy.legalPositions = copyPos;
-        copy.player = player;
         return copy;
     }
 
@@ -81,7 +79,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 for (Vector2D pos : legalPositions) {
                     TMMapTile mt = gs.getBoard().getElement(pos.getX(), pos.getY());
                     if (mt != null && mt.getTilePlaced() == null) {
-                        actions.add(new PlaceTile(pos.getX(), pos.getY(), tile, free));
+                        actions.add(new PlaceTile(player, pos.getX(), pos.getY(), tile, free));
                     }
                 }
             } else {
@@ -89,18 +87,18 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     for (int j = 0; j < gs.getBoard().getWidth(); j++) {
                         TMMapTile mt = gs.getBoard().getElement(j, i);
                         if (mt != null && mt.getTilePlaced() == null && mt.getTileType() == tile.getRegularLegalTileType()) {
-                            actions.add(new PlaceTile(j, i, tile, free));
+                            actions.add(new PlaceTile(player, j, i, tile, free));
                         }
                     }
                 }
             }
             if (actions.size() == 0) {
                 impossible = true;
-                actions.add(new TMAction());
+                actions.add(new TMAction(player));
             }
         } else {
             impossible = true;
-            actions.add(new TMAction());
+            actions.add(new TMAction(player));
         }
         return actions;
     }

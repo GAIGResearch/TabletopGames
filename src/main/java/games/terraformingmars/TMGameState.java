@@ -255,11 +255,7 @@ public class TMGameState extends AbstractGameState {
         return playerDiscountEffects;
     }
 
-    public boolean isCardFree(TMCard card, int player) {
-        return isCardFree(card, 0, player);
-    }
-
-    public boolean isCardFree(TMCard card, int amountPaid, int player) {
+    public int discountCardCost(TMCard card, int player) {
         // Apply tag discount effects
         int cost = card.cost;
         if (player == -1) player = getCurrentPlayer();
@@ -279,7 +275,15 @@ public class TMGameState extends AbstractGameState {
                 }
             }
         }
-        return cost - amountPaid <= 0;
+        return cost;
+    }
+
+    public boolean isCardFree(TMCard card, int player) {
+        return isCardFree(card, 0, player);
+    }
+
+    public boolean isCardFree(TMCard card, int amountPaid, int player) {
+        return discountCardCost(card, player) - amountPaid <= 0;
     }
 
     public Counter stringToGPCounter(String s) {
@@ -308,13 +312,12 @@ public class TMGameState extends AbstractGameState {
         return Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
     }
 
-    public boolean canPlayerPay(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount) {
-        int sum = playerResourceSum(card, from, to);
+    public boolean canPlayerPay(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount) {
+        int sum = playerResourceSum(player, card, from, to);
         return card != null? isCardFree(card, sum, -1) : sum >= amount;
     }
 
-    public int playerResourceSum(TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to) {
-        int player = getCurrentPlayer();
+    public int playerResourceSum(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to) {
         int sum = 0;
         if (from == null) {
             sum = playerResources[player].get(to).getValue();
@@ -338,18 +341,20 @@ public class TMGameState extends AbstractGameState {
      * @param to - resource to transform to
      * @return all resources that can be transformed into given res
      */
-    public HashSet<TMTypes.Resource> canPlayerTransform(TMCard card, TMTypes.Resource from, TMTypes.Resource to) {
+    public HashSet<TMTypes.Resource> canPlayerTransform(int player, TMCard card, TMTypes.Resource from, TMTypes.Resource to) {
         HashSet<TMTypes.Resource> resources = new HashSet<>();
-        for (ResourceMapping resMap : playerResourceMap[getCurrentPlayer()]) {
+        for (ResourceMapping resMap : playerResourceMap[player]) {
             if ((from == null || resMap.from == from) && resMap.to == to && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
-                resources.add(resMap.from);
+                if (playerResources[player].get(resMap.from).getValue() > 0) {
+                    resources.add(resMap.from);
+                }
             }
         }
         return resources;
     }
 
-    public void playerPay(TMTypes.Resource resource, int amount) {
-        playerResources[getCurrentPlayer()].get(resource).decrement(Math.abs(amount));
+    public void playerPay(int player, TMTypes.Resource resource, int amount) {
+        playerResources[player].get(resource).decrement(Math.abs(amount));
     }
 
     public double getResourceMapRate(TMTypes.Resource from, TMTypes.Resource to) {

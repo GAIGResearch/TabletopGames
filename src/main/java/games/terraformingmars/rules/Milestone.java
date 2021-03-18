@@ -13,8 +13,8 @@ public class Milestone extends Award {
     }
 
     @Override
-    public boolean canClaim(TMGameState gs) {
-        int count = checkProgress(gs, gs.getCurrentPlayer());
+    public boolean canClaim(TMGameState gs, int player) {
+        int count = checkProgress(gs, player);
         return claimed == -1 && count >= min;
     }
 

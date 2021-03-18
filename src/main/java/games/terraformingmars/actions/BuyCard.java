@@ -15,8 +15,8 @@ import java.util.Objects;
 public class BuyCard extends TMAction {
     final int cardIdx;
 
-    public BuyCard(int cardIdx, boolean free) {
-        super(free);
+    public BuyCard(int player, int cardIdx, boolean free) {
+        super(player, free);
         this.cardIdx = cardIdx;
     }
 
@@ -24,7 +24,8 @@ public class BuyCard extends TMAction {
     public boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        int player = gs.getCurrentPlayer();
+        int player = this.player;
+        if (player == -1) player = gs.getCurrentPlayer();
 
         TMCard card = gs.getPlayerCardChoice()[player].pick(cardIdx);
         if (card.cardType == TMTypes.CardType.Corporation) {
@@ -42,11 +43,6 @@ public class BuyCard extends TMAction {
             gs.addResourceMappings(card.resourceMappings, true);
 
             // Add persisting effects
-            for (Effect e: card.persistingEffects) {
-                if (e.effectAction instanceof PlaceholderModifyCounter) {
-                    ((PlaceholderModifyCounter)e.effectAction).player = player;
-                }
-            }
             gs.addPersistingEffects(card.persistingEffects);
 
             return super.execute(gs);

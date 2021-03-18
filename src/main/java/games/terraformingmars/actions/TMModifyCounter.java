@@ -10,8 +10,8 @@ public class TMModifyCounter extends TMAction {
     public int counterID;
     public final int change;
 
-    public TMModifyCounter(int counterID, int change, boolean free) {
-        super(free);
+    public TMModifyCounter(int player, int counterID, int change, boolean free) {
+        super(player, free);
         this.counterID = counterID;
         this.change = change;
     }
@@ -32,7 +32,7 @@ public class TMModifyCounter extends TMAction {
 
     @Override
     public AbstractAction copy() {
-        return new TMModifyCounter(counterID, change, free);
+        return new TMModifyCounter(player, counterID, change, free);
     }
 
     @Override

@@ -11,18 +11,18 @@ import java.util.Objects;
 public class ResourceTransaction extends TMAction {
     public final TMTypes.Resource res;
     public final int amount;
-    public ResourceTransaction(TMTypes.Resource res, int amount) {
-        super(true);
+    public ResourceTransaction(int player, TMTypes.Resource res, int amount) {
+        super(player, true);
         this.res = res;
         this.amount = amount;
     }
-    public ResourceTransaction(TMTypes.Resource res, int amount, boolean free) {
-        super(free);
+    public ResourceTransaction(int player, TMTypes.Resource res, int amount, boolean free) {
+        super(player, free);
         this.res = res;
         this.amount = amount;
     }
-    public ResourceTransaction(TMTypes.Resource res, int amount, boolean free, Requirement requirement) {
-        super(free, requirement);
+    public ResourceTransaction(int player, TMTypes.Resource res, int amount, boolean free, Requirement requirement) {
+        super(player, free, requirement);
         this.res = res;
         this.amount = amount;
     }
@@ -31,7 +31,8 @@ public class ResourceTransaction extends TMAction {
     public boolean execute(AbstractGameState gameState) {
         // Remove resource amount
         TMGameState gs = (TMGameState) gameState;
-        int player = gs.getCurrentPlayer();
+        int player = this.player;
+        if (player == -1) player = gs.getCurrentPlayer();
         boolean success = gs.getPlayerResources()[player].get(res).increment(amount);  // Amount can be negative
         if (amount > 0) {
             gs.getPlayerResourceIncreaseGen()[player].put(res, true);

@@ -61,14 +61,16 @@ public class TMTurnOrder extends AlternatingTurnOrder {
         nPassed = 0;
     }
 
-    public void registerActionTaken(TMGameState gameState, TMAction action) {
-        nActionsTaken++;
-        if (action.pass && nActionsTaken == 1) {
-            // First action is pass, player is out
-            passed[turnOwner] = true;
-            nPassed++;
+    public void registerActionTaken(TMGameState gameState, TMAction action, int player) {
+        if (player == turnOwner) {
+            nActionsTaken++;
+            if (action.pass && nActionsTaken == 1) {
+                // First action is pass, player is out
+                passed[turnOwner] = true;
+                nPassed++;
+            }
+            endPlayerTurn(gameState);
         }
-        endPlayerTurn(gameState);
     }
 
     @Override

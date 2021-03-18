@@ -32,9 +32,7 @@ public abstract class Effect {
             if (effectAction == null) {
                 effectAction = TMAction.parseAction(gs, effectEncoding).a;
             }
-            if (effectAction instanceof PlaceholderModifyCounter) {
-                ((PlaceholderModifyCounter) effectAction).player = player;
-            }
+            effectAction.player = player;
             this.effectAction.execute(gs);
         }
     }
