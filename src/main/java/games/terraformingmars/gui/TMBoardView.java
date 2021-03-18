@@ -298,7 +298,7 @@ public class TMBoardView extends ComponentView {
 
                 // Draw bonus related to this counter
                 for (Bonus b: gs.getBonuses()) {
-                    if (b.counterID == c.getComponentID()) {
+                    if (b.param == p) {
                         int yDisplay = y + topHeight + midHeight - stepSize * (b.threshold+1) + stepSize/2;
                         int displayHeight = 5;
                         int displayWidth = defaultItemSize/2 - spacing/2;

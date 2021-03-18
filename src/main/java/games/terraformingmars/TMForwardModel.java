@@ -26,11 +26,6 @@ public class TMForwardModel extends AbstractForwardModel {
         TMGameParameters params = (TMGameParameters) firstState.getGameParameters();
         Random rnd = new Random(params.getRandomSeed());
 
-        gs.globalParameters = new HashMap<>();  // hardcoded, read from json/params TODO: expansions
-        gs.globalParameters.put(TMTypes.GlobalParameter.Temperature, new Counter(params.temperatureScales, "temperature"));
-        gs.globalParameters.put(TMTypes.GlobalParameter.Oxygen, new Counter(params.oxygenScales, "oxygen"));
-        gs.globalParameters.put(TMTypes.GlobalParameter.OceanTiles, new Counter(0, 0, params.nOceanTiles, "oceanTiles"));
-
         gs.playerResources = new HashMap[gs.getNPlayers()];
         gs.playerProduction = new HashMap[gs.getNPlayers()];
         gs.playerResourceMap = new HashSet[gs.getNPlayers()];
@@ -59,16 +54,17 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.corpCards = new Deck<>("Corporations", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         gs.discardCards = new Deck<>("Discard", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
-        // load cards from expansions (includes base)
+        // Load info from expansions (includes base)
         gs.board = new GridBoard<>(params.boardSize, params.boardSize);
         gs.extraTiles = new HashSet<>();
         gs.bonuses = new HashSet<>();
         gs.milestones = new HashSet<>();
         gs.awards = new HashSet<>();
+        gs.globalParameters = new HashMap<>();
         for (TMTypes.Expansion e: params.expansions) {
             e.loadProjectCards(gs.projectCards);
             e.loadCorpCards(gs.corpCards);
-            e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards);
+            e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
         }
 
         // Shuffle dekcs

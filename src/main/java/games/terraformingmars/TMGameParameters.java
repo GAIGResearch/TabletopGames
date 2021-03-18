@@ -31,10 +31,6 @@ public class TMGameParameters extends AbstractParameters {
     }};
     int maxPoints = 500;
 
-    int[] temperatureScales = new int[] {-30, -28, -26, -24, -22, -20, -18, -16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8};
-    int[] oxygenScales = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-
-    int nOceanTiles = 9;
     int projectPurchaseCost = 3;
     int nCorpChoiceStart = 5;
     int nProjectsStart = 10;
@@ -99,20 +95,8 @@ public class TMGameParameters extends AbstractParameters {
         return nCorpChoiceStart;
     }
 
-    public int getnOceanTiles() {
-        return nOceanTiles;
-    }
-
     public int getProjectPurchaseCost() {
         return projectPurchaseCost;
-    }
-
-    public int[] getOxygenScales() {
-        return oxygenScales;
-    }
-
-    public int[] getTemperatureScales() {
-        return temperatureScales;
     }
 
     public int getnProjectsResearch() {

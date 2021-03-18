@@ -1,5 +1,6 @@
 package games.terraformingmars;
 
+import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
 import games.terraformingmars.components.TMCard;
@@ -18,10 +19,10 @@ import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import static games.terraformingmars.components.TMMapTile.parseMapTile;
-import static games.terraformingmars.rules.effects.Bonus.parseBonus;
 
 public class TMTypes {
 
@@ -250,46 +251,71 @@ public class TMTypes {
 
         /* custom loading info from json */
 
-        public void loadBoard(GridBoard<TMMapTile> board, HashSet<TMMapTile> extraTiles, HashSet<Bonus> bonuses, HashSet<Milestone> milestones, HashSet<Award> awards) {
+        public void loadBoard(GridBoard<TMMapTile> board, HashSet<TMMapTile> extraTiles, HashSet<Bonus> bonuses,
+                              HashSet<Milestone> milestones, HashSet<Award> awards, HashMap<GlobalParameter, Counter> globalParameters) {
             JSONParser jsonParser = new JSONParser();
             try (FileReader reader = new FileReader(getBoardPath())) {
                 JSONObject data = (JSONObject) jsonParser.parse(reader);
 
                 // Process main map
-                JSONArray b = (JSONArray) data.get("board");
-                int y = 0;
-                for (Object g : b) {
-                    JSONArray row = (JSONArray) g;
-                    int x = 0;
-                    for (Object o1 : row) {
-                        board.setElement(x, y, parseMapTile((String) o1));
-                        x++;
+                if (data.get("board") != null) {
+                    JSONArray b = (JSONArray) data.get("board");
+                    int y = 0;
+                    for (Object g : b) {
+                        JSONArray row = (JSONArray) g;
+                        int x = 0;
+                        for (Object o1 : row) {
+                            board.setElement(x, y, parseMapTile((String) o1));
+                            x++;
+                        }
+                        y++;
                     }
-                    y++;
                 }
 
                 // Process extra tiles not on regular board
-                JSONArray extra = (JSONArray) data.get("extra");
-                for (Object o : extra) {
-                    extraTiles.add(parseMapTile((String) o));
-                }
-
-                // Process bonuses for this game when counters reach specific points
-                JSONArray bonus = (JSONArray) data.get("bonus");
-                for (Object o : bonus) {
-                    bonuses.add(parseBonus((String) o));
+                if (data.get("extra") != null) {
+                    JSONArray extra = (JSONArray) data.get("extra");
+                    for (Object o : extra) {
+                        extraTiles.add(parseMapTile((String) o));
+                    }
                 }
 
                 // Process milestones and awards
-                JSONArray milestonesStr = (JSONArray) data.get("milestones");
-                for (Object o : milestonesStr) {
-                    String[] split = ((String) o).split(":");
-                    milestones.add(new Milestone(split[0], Integer.parseInt(split[2]), split[1]));
+                if (data.get("milestones") != null) {
+                    JSONArray milestonesStr = (JSONArray) data.get("milestones");
+                    for (Object o : milestonesStr) {
+                        String[] split = ((String) o).split(":");
+                        milestones.add(new Milestone(split[0], Integer.parseInt(split[2]), split[1]));
+                    }
                 }
-                JSONArray awardsStr = (JSONArray) data.get("awards");
-                for (Object o : awardsStr) {
-                    String[] split = ((String) o).split(":");
-                    awards.add(new Award(split[0], split[1]));
+                if (data.get("awards") != null) {
+                    JSONArray awardsStr = (JSONArray) data.get("awards");
+                    for (Object o : awardsStr) {
+                        String[] split = ((String) o).split(":");
+                        awards.add(new Award(split[0], split[1]));
+                    }
+                }
+
+                // Process global parameters enabled
+                if (data.get("globalParameters") != null) {
+                    JSONArray gps = (JSONArray) data.get("globalParameters");
+                    for (Object o : gps) {
+                        JSONObject gp = (JSONObject) o;
+                        GlobalParameter p = GlobalParameter.valueOf((String) gp.get("name"));
+                        int[] values = (int[]) gp.get("range");
+                        globalParameters.put(p, new Counter(values, p.name()));
+
+                        // Process bonuses for this game when counters reach specific points
+                        if (gp.get("bonus") != null) {
+                            JSONArray bonus = (JSONArray) data.get("bonus");
+                            for (Object o2 : bonus) {
+                                JSONObject b = (JSONObject) o2;
+                                String effectString = (String) b.get("effect");
+                                int threshold = (int)(long) b.get("threshold");
+                                bonuses.add(new Bonus(p, threshold, effectString));
+                            }
+                        }
+                    }
                 }
 
             } catch (IOException | ParseException e) {
