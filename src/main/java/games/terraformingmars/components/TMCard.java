@@ -110,7 +110,7 @@ public class TMCard extends Card {
                 int cost = Integer.parseInt(costStr[1]);
                 if (action[0].equalsIgnoreCase("placetile")) {
                     TMAction a = new PayForAction(-1, new PlaceTile(-1, TMTypes.Tile.valueOf(action[1]), null, false),
-                            costResource, -cost, -1);
+                            costResource, cost, -1);
                     actions.add(a);
                 } else if (action[0].equalsIgnoreCase("resourcetransaction")) {
                     TMTypes.Resource r = TMTypes.Resource.valueOf(action[1]);

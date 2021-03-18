@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class PlaceTileEffect extends Effect {
-    TMTypes.Tile tile;
-    TMTypes.Resource[] resourceTypeGained;
-    boolean onMars; // tile must've been placed on mars
+    public TMTypes.Tile tile;
+    public TMTypes.Resource[] resourceTypeGained;
+    public boolean onMars; // tile must've been placed on mars
 
     public PlaceTileEffect(boolean mustBeCurrentPlayer, TMAction effectAction, boolean onMars, TMTypes.Tile tile, TMTypes.Resource[] resourceGained) {
         super(mustBeCurrentPlayer, effectAction);

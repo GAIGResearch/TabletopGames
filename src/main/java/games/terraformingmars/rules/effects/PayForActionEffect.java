@@ -5,7 +5,7 @@ import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.TMAction;
 
 public class PayForActionEffect extends Effect {
-    int minCost;
+    public int minCost;
 
     public PayForActionEffect(boolean mustBeCurrentPlayer, TMAction effectAction, int minCost) {
         super(mustBeCurrentPlayer, effectAction);

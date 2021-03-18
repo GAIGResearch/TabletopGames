@@ -7,7 +7,7 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 
 public class PlayCardEffect extends Effect {
-    TMTypes.Tag tagOnCard;
+    public TMTypes.Tag tagOnCard;
 
     public PlayCardEffect(boolean mustBeCurrentPlayer, TMAction effectAction, TMTypes.Tag tag) {
         super(mustBeCurrentPlayer, effectAction);

@@ -18,7 +18,7 @@
     "effect" : [
       {
         "type": "action",
-        "action": "placetile(Greenery,)",
+        "action": "placetile-Greenery",
         "cost": "Plant/7"
       }
     ],

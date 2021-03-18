@@ -24,7 +24,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     public PayForAction(int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
         super(player, true);
         this.action = action;
-        this.costTotal = costTotal;
+        this.costTotal = Math.abs(costTotal);
         this.resourceToPay = resourceToPay;
         this.cardIdx = cardIdx;  // -1 if no card needed
     }

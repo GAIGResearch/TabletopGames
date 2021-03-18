@@ -5,6 +5,10 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.effects.PayForActionEffect;
+import games.terraformingmars.rules.effects.PlaceTileEffect;
+import games.terraformingmars.rules.effects.PlayCardEffect;
 import games.terraformingmars.rules.requirements.CounterRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
 import games.terraformingmars.rules.requirements.TagRequirement;
@@ -208,7 +212,7 @@ public class TMDeckDisplay extends JComponent {
             for (Requirement r: card.discountEffects.keySet()) {
                 if (r instanceof TagRequirement) {
                     int xD = x + width/2 - size*6/2;
-                    Image from = ImageIO.GetInstance().getImage(((TagRequirement)r).tags[0].getImagePath());  // TODO: more?
+                    Image from = ImageIO.GetInstance().getImage(((TagRequirement)r).tags[0].getImagePath());
                     Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
                     int amount = card.discountEffects.get(r);
                     drawImage(g, from, xD, yD, size, size);
@@ -243,7 +247,81 @@ public class TMDeckDisplay extends JComponent {
                 drawShadowStringCentered(g, ": " + rm.rate, new Rectangle(xRM + size, yRM, size*4, size));
                 yRM += size + spacing/2;
             }
-            // Draw after-action effects TODO
+            // Draw after-action effects
+            int yEF = yRM + spacing;
+            int xEF = x + width/2 - size*5/2;
+            for (Effect e: card.persistingEffects) {
+                int leftNumber = -1;
+                int rightNumber = -1;
+                Image from = null;
+                Image to = null;
+                if (e instanceof PayForActionEffect) {
+                    from = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
+                    leftNumber = ((PayForActionEffect) e).minCost;
+                } else if (e instanceof PlaceTileEffect) {
+                    if (((PlaceTileEffect) e).tile != null) {
+                        from = ImageIO.GetInstance().getImage(((PlaceTileEffect) e).tile.getImagePath());
+                    } else if (((PlaceTileEffect) e).resourceTypeGained != null) {
+                        // several images separated by slash
+                        int nRes = ((PlaceTileEffect) e).resourceTypeGained.length;
+                        int sectionSize = (nRes-1) * size * 2;
+                        int resX = xEF + size - sectionSize;
+                        int count = 0;
+                        for (TMTypes.Resource r: ((PlaceTileEffect) e).resourceTypeGained) {
+                            Image imgR = ImageIO.GetInstance().getImage(r.getImagePath());
+                            drawResource(g, imgR, production, false, resX, yEF, size, 0.6);
+                            resX += size;
+                            if (count != nRes-1) {
+                                drawShadowStringCentered(g, "/", new Rectangle(resX, yEF, size, size), Color.white, Color.black, 12);
+                                resX += size;
+                            }
+                            count++;
+                        }
+                    } else {
+                        from = ImageIO.GetInstance().getImage(TMTypes.Tile.City.getImagePath());
+                    }
+                } else if (e instanceof PlayCardEffect) {
+                    from = ImageIO.GetInstance().getImage(((PlayCardEffect) e).tagOnCard.getImagePath());
+                }
+                // "to" depends on the action applied as the effect
+                TMAction action = e.effectAction;
+                if (action == null) {
+                    action = TMAction.parseAction(gs, e.effectEncoding).a;
+                }
+                if (action instanceof PlaceholderModifyCounter) {
+                    Image resImg = ImageIO.GetInstance().getImage(((PlaceholderModifyCounter) action).resource.getImagePath());
+                    boolean prod = ((PlaceholderModifyCounter) action).production;
+                    rightNumber = ((PlaceholderModifyCounter) action).change;
+                    drawResource(g, resImg, production, prod, xEF + size * 4, yEF, size, 0.6);
+                }
+
+                if (!e.mustBeCurrentPlayer) {
+                    // draw red outline for the left part
+                    g.setColor(new Color(234, 38, 38, 168));
+                    int xRect = xEF;
+                    int widthRect = size * 2;
+                    if (leftNumber == -1) {
+                        xRect = xEF + size;
+                        widthRect = size;
+                    }
+                    g.fillRoundRect(xRect - 2, yEF - 2, widthRect + 4, size + 4, spacing, spacing);
+                }
+
+                if (leftNumber != -1) {
+                    drawShadowStringCentered(g, "" + leftNumber, new Rectangle(xEF, yEF, size, size), Color.white, Color.black, 12);
+                }
+                if (from != null) {
+                    drawImage(g, from, xEF + size, yEF, size, size);
+                }
+                drawShadowStringCentered(g, " : ", new Rectangle(xEF + size*2, yEF, size, size));
+                if (rightNumber != -1) {
+                    drawShadowStringCentered(g, "" + rightNumber, new Rectangle(xEF + size * 3, yEF, size, size), Color.white, Color.black, 12);
+                }
+                if (to != null) {
+                    drawImage(g, to, xEF + size * 4, yEF, size, size);
+                }
+                yEF += size + spacing/2;
+            }
         } else {
             // Draw background
             drawImage(g, projCardBg, x, y, height);
