@@ -1,23 +1,37 @@
 [
   {
-  "id": 13,
-  "name": "APHRODITE",
-  "tags": ["plant", "venus"],
-  "effect": "(Effect: Whenever Venus is terraformed 1 step, you gain 2 megacredit.)",
-  "start":  "(You start with 1 plantprod and 47 megacredit)"
+    "id": 13,
+    "name": "APHRODITE",
+    "tags": ["plant", "venus"],
+    "effect": "(Effect: Whenever Venus is terraformed 1 step, you gain 2 megacredit.)",
+    "start":  "(You start with 1 plantprod and 47 megacredit)"
   },
   {
-  "id": 14,
-  "name": "celestic",
-  "tags": ["venus"],
-  "effect": "(Action: Add a floater to ANY card. (1 VP per 3 floaters on this card.))",
-  "start":  "(You start with 42 megacredit. As your first action, reveal cards from the deck until you have revealed 2 cards with a floater icon on it. Take those 2 cards into hand and discard the rest.)"
+    "id": 14,
+    "name": "celestic",
+    "tags": ["venus"],
+    "effect": "(Action: Add a floater to ANY card. (1 VP per 3 floaters on this card.))",
+    "start":  "(You start with 42 megacredit. As your first action, reveal cards from the deck until you have revealed 2 cards with a floater icon on it. Take those 2 cards into hand and discard the rest.)"
   },
   {
-  "id": 15,
-  "name": "NUTECH",
-  "tags": ["building"],
-  "effect": "(Effect: For each step you increase theprod of a resource, including this, you also gain that resource.)",
-  "start":  "(You start with 1 steelprod, and 35 megacredit)"
+    "id": 15,
+    "name": "MANUTECH",
+    "tags": ["building"],
+    "effect": "(Effect: For each step you increase theprod of a resource, including this, you also gain that resource.)",
+    "start":  "(You start with 1 steelprod, and 35 megacredit)"
+  },
+  {
+    "id": 16,
+    "name": "MORNING STAR INC.",
+    "tags": ["venus"],
+    "effect": "(Effect: Your Venus requirements are +/- 2 steps, your choice in each case.)",
+    "start":  "(You start with 50 megacredit. As your first action, reveal cards from the deck until you have revealed 3 Venus-tag cards. Take those into hand and discard the rest.)"
+  },
+  {
+    "id": 17,
+    "name": "VIRON",
+    "tags": ["microbe"],
+    "effect": "(Action: Use a blue card action that has already been used this generation.)",
+    "start":  "(You start with 48 MC.)"
   }
 ]

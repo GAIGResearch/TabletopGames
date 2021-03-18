@@ -4,12 +4,12 @@ import core.AbstractParameters;
 
 import java.util.HashMap;
 
-import static games.terraformingmars.TMTypes.Expansion.Base;
+import static games.terraformingmars.TMTypes.Expansion.*;
 
 public class TMGameParameters extends AbstractParameters {
 
     int boardSize = 9;
-    TMTypes.Expansion[] expansions = new TMTypes.Expansion[] {Base};
+    TMTypes.Expansion[] expansions = new TMTypes.Expansion[] {Base, CorporateEra};
 
     HashMap<TMTypes.Resource, Integer> minimumProduction = new HashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {

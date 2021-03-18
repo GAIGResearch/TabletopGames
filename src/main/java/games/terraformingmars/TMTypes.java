@@ -321,8 +321,8 @@ public class TMTypes {
                         }
                     }
                 }
-
-            } catch (IOException | ParseException e) {
+            } catch (IOException ignored) {
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
@@ -348,7 +348,8 @@ public class TMTypes {
                     }
                     deck.add(card);
                 }
-            } catch (IOException | ParseException e) {
+            } catch (IOException ignored) {
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
         }

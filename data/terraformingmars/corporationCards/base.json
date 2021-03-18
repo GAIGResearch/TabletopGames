@@ -148,31 +148,5 @@
       }
     ],
     "start":  ["40 megacredit"]
-  },
-  {
-    "id": 11,
-    "name": "TERACTOR",
-    "tags": ["earth"],
-    "effect": [
-      {
-        "type": "discount",
-        "tag": "Earth",
-        "amount": 3
-      }
-    ],
-    "start":  ["60 megacredit"]
-  },
-  {
-    "id": 12,
-    "name": "SATURN SYSTEMS",
-    "tags": ["jovian"],
-    "effect": [
-      {
-        "type": "effect",
-        "if": "playcard(tag-Jovian-any)",
-        "then": "inc-megacreditprod-1"
-      }
-    ],
-    "start":  ["1 titaniumprod, 42 megacredit, 1 megacreditprod"]
   }
 ]
