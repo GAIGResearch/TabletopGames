@@ -29,7 +29,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "Titaniumprod"
+            "#text": "1 Titaniumprod"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -143,7 +143,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-titaniumprod-1 step.)"
+            "#text": "(inc-titaniumprod-1 .)"
           }
         ],
         "span": [
@@ -286,7 +286,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "5 Science"
+            "#text": "Science Science Science Science Science tags"
           }
         ]
       }
@@ -375,7 +375,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "3 Science"
+            "#text": "Science Science Science tags"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -391,7 +391,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 Science tags. inc-Energyprod-and your MegaCreditprod-up one step each.)"
+            "#text": "(Requires 3 Science tags. inc-Energyprod-1 and inc-MegaCreditprod-1 one  each.)"
           }
         ]
       }
@@ -548,7 +548,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1 step for each Earth tag you have.)"
+            "#text": "(inc-MegaCreditprod-1  for each Earth tag you have.)"
           }
         ]
       }
@@ -586,7 +586,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-steelprod-1 step.)"
+            "#text": "(inc-steelprod-1 .)"
           }
         ]
       }
@@ -631,7 +631,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-titaniumprod-1 step.)"
+            "#text": "(inc-titaniumprod-1 .)"
           }
         ]
       }
@@ -661,7 +661,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "Steelprod"
+            "#text": "1 Steelprod"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -773,7 +773,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase yourprod-of that resource 1 step.)"
+            "#text": "(Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase yourprod-of that resource 1 .)"
           }
         ],
         "br": "",
@@ -837,7 +837,7 @@
           },
           {
             "@class": "description",
-            "#text": "(dec-Energyprod-1 step and inc-steelprod-2 steps.)"
+            "#text": "(dec-Energyprod-1  and inc-steelprod-2 .)"
           }
         ]
       }
@@ -904,7 +904,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-2 steps.)"
+            "#text": "(inc-MegaCreditprod-2 .)"
           }
         ]
       }
@@ -941,7 +941,7 @@
           },
           {
             "@class": "requirements requirements-max",
-            "#text": "max 8% O2"
+            "#text": "max 8 Oxygen. 1 Energyprod"
           },
           {
             "@class": "resource plant"
@@ -978,7 +978,7 @@
           {
             "@class": "description",
             "@style": "text-align:left;",
-            "#text": "(Oxygen must be 8% or less. dec-energyprod-1 step.)"
+            "#text": "(Oxygen must be 8% or less. dec-energyprod-1 .)"
           }
         ],
         "br": "",
@@ -1224,7 +1224,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "4 Science"
+            "#text": "Science Science Science Science tags"
           },
           {
             "@class": "resource-tag tag-space"
@@ -1247,7 +1247,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 4 science tags. inc-energyprod-4 steps.)"
+            "#text": "(Requires 4 science tags. inc-energyprod-4 .)"
           }
         ],
         "#text": ":"
@@ -1294,7 +1294,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-MegaCreditprod-3 steps.)"
+            "#text": "(inc-MegaCreditprod-3 .)"
           }
         ]
       }
@@ -1389,9 +1389,13 @@
             ]
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description",
             "@style": "margin-top:-5px",
-            "#text": "(dec-energyprod-1 step and inc-MegaCreditprod-4 steps.)"
+            "#text": "(dec-energyprod-1  and inc-MegaCreditprod-4 .)"
           },
           {
             "@class": "tile special-tile",
@@ -1525,7 +1529,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "3 Science"
+            "#text": "Science Science Science tags"
           },
           {
             "@class": "production-box",
@@ -1536,7 +1540,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 science tags. inc-MegaCreditprod-2 steps.)"
+            "#text": "(Requires 3 science tags. inc-MegaCreditprod-2 .)"
           }
         ]
       }
@@ -1593,7 +1597,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-titaniumprod-2 steps and your MegaCreditprod-2 steps. 1 VP per Jovian tag you have.)"
+            "#text": "(inc-titaniumprod-2  and inc-MegaCreditprod-2 . 1 VP per Jovian tag you have.)"
           }
         ]
       }
@@ -1629,7 +1633,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "5 Science"
+            "#text": "Science Science Science Science Science tags"
           },
           {
             "@class": "resource-tag tag-space"
@@ -1652,7 +1656,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 5 science tags. inc-energyprod-6 steps.)"
+            "#text": "(Requires 5 science tags. inc-energyprod-6 .)"
           }
         ],
         "#text": ":"
@@ -1777,8 +1781,12 @@
             "br": ""
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Heatprod"
+          },
+          {
             "@class": "description",
-            "#text": "(Reduce your heatprod-2 steps and inc-MegaCreditprod-3 steps.)"
+            "#text": "(dec-heatprod-2  and inc-MegaCreditprod-3 .)"
           }
         ]
       }
@@ -1823,7 +1831,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1 step for each space tag your OPPONENTS have.)"
+            "#text": "(inc-MegaCreditprod-1  for each space tag your OPPONENTS have.)"
           }
         ]
       }
@@ -1902,7 +1910,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-3 steps.)"
+            "#text": "(inc-MegaCreditprod-3 .)"
           }
         ]
       }
@@ -2023,8 +2031,12 @@
             }
           },
           {
+            "@class": "requirements ",
+            "#text": "1 MegaCreditprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-MegaCreditprod-1 step.)"
+            "#text": "(dec-MegaCreditprod-1 .)"
           }
         ],
         "span": {
@@ -2110,7 +2122,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise your TR 2 steps.)"
+            "#text": "(inc-TR-2 .)"
           }
         ]
       }
@@ -2202,7 +2214,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 7 MegaCredit to inc-steelprod-1 step.)"
+            "#text": "(Action: Spend 7 MegaCredit to inc-steelprod-1 .)"
           },
           {
             "@class": "tile special-tile",
@@ -2317,8 +2329,16 @@
             ]
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Plantprod"
+          },
+          {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-energyprod-1 step and any MegaCreditprod-2 steps. inc-MegaCreditprod-2 steps."
+            "#text": "(dec-energyprod-1  and dec-MegaCreditprod-2-any. inc-MegaCreditprod-2 ."
           }
         ]
       }
@@ -2363,7 +2383,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1 step for each Earth tag you have, including this.)"
+            "#text": "(inc-MegaCreditprod-1  for each Earth tag you have, including this.)"
           }
         ]
       }
@@ -2401,7 +2421,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-titaniumprod-1 step.)"
+            "#text": "(inc-titaniumprod-1 .)"
           }
         ]
       }
@@ -2466,7 +2486,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "7 Science"
+            "#text": "Science Science Science Science Science Science Science tags"
           },
           {
             "@class": "description ",
@@ -2529,8 +2549,12 @@
             "#text": "10"
           },
           {
+            "@class": "requirements ",
+            "#text": "1 MegaCreditprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-MegaCreditprod-1 step. Gain 10 MegaCredit.)"
+            "#text": "(dec-MegaCreditprod-1 . Gain 10 MegaCredit.)"
           }
         ]
       }
@@ -2560,14 +2584,14 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "0 C"
+            "#text": "0 Temperature"
           },
           {
             "@class": "red-arrow "
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 8 heat to inc-terraform rating 1 step.)"
+            "#text": "(Action: Spend 8 heat to inc-terraform rating 1 .)"
           },
           {
             "@class": "description ",
@@ -2654,7 +2678,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "2 Power"
+            "#text": "Power Power tags"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -2763,7 +2787,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1 step for each space tag your have, including this one.)"
+            "#text": "(inc-MegaCreditprod-1  for each space tag your have, including this one.)"
           }
         ]
       }
@@ -2822,8 +2846,12 @@
             "br": ""
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1 step and inc-titanium and your MegaCreditprod-1 step each.)"
+            "#text": "(dec-Energyprod-1  and inc-titanium and inc-MegaCreditprod-1  each.)"
           }
         ]
       }
@@ -2889,8 +2917,12 @@
             "@style": "margin-left:20px "
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1 step and inc-MegaCreditprod-3 steps. Place a City tile.)"
+            "#text": "(dec-Energyprod-1  and inc-MegaCreditprod-3 . Place a City tile.)"
           }
         ],
         "br": ""
@@ -2983,7 +3015,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "2 Cities"
+            "#text": "City City tile any"
           },
           {
             "@class": "production-box",
@@ -2994,7 +3026,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires two cities in play. inc-MegaCredit up 1 step.)"
+            "#text": "(Requires two cities in play. inc-MegaCredit up 1 .)"
           }
         ]
       }
@@ -3202,7 +3234,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise your TR 1 step for each Jovian tag you have, including this.)"
+            "#text": "(inc-TR-1  for each Jovian tag you have, including this.)"
           }
         ],
         "#text": "/"
@@ -3410,7 +3442,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1 step for every 2 Building tags you have, including this.)"
+            "#text": "(inc-MegaCreditprod-1  for every 2 Building tags you have, including this.)"
           }
         ]
       }
@@ -3450,7 +3482,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "3 Science"
+            "#text": "Science Science Science tags. 1 Energyprod"
           },
           {
             "@class": "red-arrow "
@@ -3477,7 +3509,7 @@
           {
             "@class": "description",
             "@style": "position:absolute;text-align:left;margin-top:-53px;margin-left:85px;",
-            "#text": "(Requires 3 Science tags to play. dec-Energyprod-1 step.)"
+            "#text": "(Requires 3 Science tags to play. dec-Energyprod-1 .)"
           }
         ],
         "span": [

@@ -2,6 +2,7 @@ package games.terraformingmars.rules.requirements;
 
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
+import utilities.Utils;
 
 import java.util.Map;
 
@@ -24,6 +25,10 @@ public class CounterRequirement implements Requirement<TMGameState> {
         Counter c;
         if (counterID == -1) {
             c = setCounter(gs);
+            if (c.getComponentName().equalsIgnoreCase("temperature")) {
+                // Turn to index
+                threshold = Utils.indexOf(c.getValues(), threshold);
+            }
         } else {
             c = (Counter) gs.getComponentById(counterID);
         }

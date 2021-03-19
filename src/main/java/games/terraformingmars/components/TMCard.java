@@ -21,7 +21,7 @@ public class TMCard extends Card {
     public int number;
     public TMTypes.CardType cardType;
     public int cost;
-    public Requirement<TMGameState> requirement;
+    public HashSet<Requirement<TMGameState>> requirements;
     public TMTypes.Tag[] tags;
 
     public HashMap<Requirement, Integer> discountEffects;
@@ -44,6 +44,14 @@ public class TMCard extends Card {
         persistingEffects = new Effect[0];
         discountEffects = new HashMap<>();
         resourceMappings = new HashSet<>();
+        requirements = new HashSet<>();
+    }
+
+    public boolean meetsRequirements(TMGameState gs) {
+        for (Requirement r: requirements) {
+            if (!r.testCondition(gs)) return false;
+        }
+        return true;
     }
 
     public static TMCard loadCorporation(JSONObject cardDef) {
@@ -249,8 +257,43 @@ public class TMCard extends Card {
                                 // TODO more cases...
                             }
                         } else if (info2 != null && info2.contains("requirements")) {
-                            String reqs = (String) ob2.get("#text");
-                            // TODO parse...
+                            String[] reqStr = ((String) ob2.get("#text")).split("\\.");
+                            for (String s: reqStr) {
+                                s = s.trim();
+                                if (s.contains("tags")) {
+                                    // Tag requirement
+                                    s = s.replace("tags","").trim();
+                                    String[] split = s.split(" ");
+                                    HashMap<TMTypes.Tag, Integer> tagCount = new HashMap<>();
+                                    for (String s2: split) {
+                                        TMTypes.Tag t = TMTypes.Tag.valueOf(s2);
+                                        if (tagCount.containsKey(t)) {
+                                            tagCount.put(t, tagCount.get(t) + 1);
+                                        } else {
+                                            tagCount.put(t, 1);
+                                        }
+                                    }
+                                    TMTypes.Tag[] tags = new TMTypes.Tag[tagCount.size()];
+                                    int[] min = new int[tagCount.size()];
+                                    int i = 0;
+                                    for (TMTypes.Tag t: tagCount.keySet()) {
+                                        tags[i] = t;
+                                        min[i] = tagCount.get(t);
+                                        i++;
+                                    }
+                                    Requirement r = new TagRequirement(tags, min);
+                                    card.requirements.add(r);
+                                } else if (s.contains("tile")) {
+                                    // Tile count placed requirement TODO
+                                } else {
+                                    // Counter requirement
+                                    boolean max = s.contains("max");
+                                    s = s.replace("max", "").trim();
+                                    String[] split = s.split(" ");
+                                    // first is threshold, second is counter code
+                                    Requirement r = new CounterRequirement(split[1], Integer.parseInt(split[0]), max);
+                                }
+                            }
                         }
 
                         // "red arrow" is action, ":" is effect

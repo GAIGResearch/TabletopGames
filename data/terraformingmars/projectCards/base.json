@@ -30,11 +30,11 @@
           },
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 5% O2"
+            "#text": "max 5 Oxygen"
           },
           {
             "@class": "description ",
-            "#text": "(Oxygen must be 5% or less.)"
+            "#text": "Oxygen must be 5-max"
           }
         ]
       }
@@ -76,7 +76,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-Energyprod-1 step. Increase temperature 1 step.)"
+            "#text": "inc-Energyprod-1 . Increase temperature 1 "
           }
         ]
       }
@@ -103,7 +103,7 @@
         "div": [
           {
             "@class": "requirements ",
-            "#text": "3 Ocean"
+            "#text": "3 OceanTiles. 1 MegaCreditprod"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -138,7 +138,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 3 oceanTiles. dec-MegaCreditprod-1 step and any heatprod-1 step. inc-Plantprod-2 steps.)"
+            "#text": "Requires 3 oceanTiles. dec-MegaCreditprod-1  and any heatprod-1 . inc-Plantprod-2 "
           }
         ]
       }
@@ -175,7 +175,7 @@
           },
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 6% O2"
+            "#text": "max 6 Oxygen"
           },
           {
             "@class": " ",
@@ -205,8 +205,8 @@
               ""
             ],
             "#text": [
-              "(Action: Spend 1 MegaCredit to reveal the top card of the draw deck. If that card has a Microbe tag, add a Science resource here.)",
-              "(3 VPs if you have one or more Science resources here.)"
+              "Action: Spend 1 MegaCredit to reveal the top card of the draw deck. If that card has a Microbe tag, add a Science resource here",
+              "3 VPs if you have one or more Science resources here"
             ]
           }
         ]
@@ -248,11 +248,11 @@
           },
           {
             "@class": "tile city-tile-small",
-            "@style": "filter:brightness(0.8) drop-shadow(1px 0px 1px #c33) drop-shadow(-1px 0px 1px #c33) drop-shadow(0px 1px 1px #c33) drop-shadow(0px -1px 1px #c33)"
+            "@style": "filter:brightness0.8) drop-shadow1px 0px 1px #c33) drop-shadow-1px 0px 1px #c33) drop-shadow0px 1px 1px #c33) drop-shadow0px -1px 1px #c33)"
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 1 Energy to gain 1 MegaCredit for each City tile ON MARS.)"
+            "#text": "Action: Spend 1 Energy to gain 1 MegaCredit for each City tile ON MARS"
           }
         ],
         "#text": "/"
@@ -293,7 +293,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "4 Ocean"
+            "#text": "4 OceanTiles. 2 Energyprod"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -343,7 +343,7 @@
                 "TO THIS CITY TILE."
               ]
             },
-            "#text": "(Requires 4 oceanTiles. Place this tile. dec-Energyprod-2 steps and inc-MegaCreditprod-5 steps."
+            "#text": "Requires 4 oceanTiles. Place this tile. dec-Energyprod-2  and inc-MegaCreditprod-5 ."
           }
         ]
       }
@@ -396,7 +396,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise temperature 1 step and gain 2 titanium. Remove up to 3 Plant from any player.)"
+            "#text": "Raise temperature 1  and gain 2 titanium. Remove up to 3 Plant from any player"
           }
         ],
         "br": [
@@ -450,7 +450,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise temperature 1 step and place an ocean tile. Remove up to 3 Plant from any player.)"
+            "#text": "Raise temperature 1  and place an ocean tile. Remove up to 3 Plant from any player"
           }
         ],
         "br": ""
@@ -516,7 +516,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise temperature 2 steps and gain 4 titanium. Remove up to 4 Plant from any player.)"
+            "#text": "Raise temperature 2  and gain 4 titanium. Remove up to 4 Plant from any player"
           }
         ],
         "br": [
@@ -574,8 +574,8 @@
               ""
             ],
             "#text": [
-              "(Action: Pay 12 MegaCredit to place an ocean tile. TITANIUM MAY BE USED as if playing a Space card.)",
-              "(1 VP for each Jovian tag you have.)"
+              "Action: Pay 12 MegaCredit to place an ocean tile. TITANIUM MAY BE USED as if playing a Space card",
+              "1 VP for each Jovian tag you have"
             ]
           }
         ],
@@ -583,7 +583,7 @@
           "@class": "resource titanium"
         },
         "#text": [
-          "(",
+          "",
           ")"
         ]
       }
@@ -629,7 +629,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: dec-Energyprod-1 step to inc-terraform rating 1 step.)"
+            "#text": "Action: dec-Energyprod-1  to inc-terraform rating 1 "
           }
         ],
         "span": {
@@ -670,7 +670,7 @@
           },
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 7% O2"
+            "#text": "max 7 Oxygen. 1 Energyprod"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -718,12 +718,9 @@
               "",
               ""
             ],
-            "#text": [
-              "(Oxygen must be 7% or less. Gain 3 Plant. Place a City tile.\r\n                    Decrease",
-              "your Energyprod-1",
-              "step and increase your",
-              "MegaCreditprod-3 steps.)"
-            ]
+            "#text":
+              "Oxygen must be 7-max. Gain 3 Plant. Place a City tile. dec-Energyprod-1 and inc-MegaCreditprod-3 "
+
           }
         ],
         "br": ""
@@ -779,12 +776,16 @@
             ]
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "tile city-tile ",
             "@style": "margin-left:20px "
           },
           {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1 step and inc-MegaCreditprod-3 steps.\r\n                    Place a City ON THE RESERVED AREA, disregarding normal placement restrictions.)"
+            "#text": "dec-Energyprod-1  and inc-MegaCreditprod-3 .\r\n                    Place a City ON THE RESERVED AREA, disregarding normal placement restrictions"
           }
         ],
         "br": ""
@@ -822,7 +823,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "2% O2"
+            "#text": "2 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size2 ",
@@ -843,7 +844,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 2% oxygen. inc-heatprod-2 steps and your Plantprod-2 steps.)"
+            "#text": "Requires 2% oxygen. inc-heatprod-2  and inc-Plantprod-2 "
           }
         ]
       }
@@ -895,7 +896,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Gain 3 Plant, or add 3 Microbes or 2 Animals to ANOTHER card. Place an ocean tile.)"
+            "#text": "Gain 3 Plant, or add 3 Microbes or 2 Animals to ANOTHER card. Place an ocean tile"
           }
         ],
         "br": "",
@@ -940,14 +941,14 @@
         "div": [
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a card, you pay 1 MegaCredit less for it.)"
+            "#text": "Effect: When you play a card, you pay 1 MegaCredit less for it"
           },
           {
             "@class": "tile city-tile "
           },
           {
             "@class": "description ",
-            "#text": "(Place a city tile NEXT TO NO OTHER TILE.)"
+            "#text": "Place a city tile NEXT TO NO OTHER TILE"
           }
         ],
         "br": "",
@@ -995,7 +996,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-titaniumprod-1 step and place a City tile ON THE RESERVED AREA.)"
+            "#text": "inc-titaniumprod-1  and place a City tile ON THE RESERVED AREA"
           }
         ]
       }
@@ -1054,8 +1055,12 @@
             "@class": "tile ocean-tile "
           },
           {
+            "@class": "requirements ",
+            "#text": "2 MegaCreditprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(Place an ocean tile. dec-MegaCreditprod-2 steps and inc-heatprod-3 steps.)"
+            "#text": "Place an ocean tile. dec-MegaCreditprod-2  and inc-heatprod-3 "
           }
         ]
       }
@@ -1085,7 +1090,7 @@
         "div": [
           {
             "@class": "requirements requirements-max ",
-            "#text": "max -12 C"
+            "#text": "max -12 Temperature"
           },
           {
             "@class": "tile ocean-tile red-outline "
@@ -1098,14 +1103,14 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When anyone places an ocean tile, gain 2 Plant.)"
+            "#text": "Effect: When anyone places an ocean tile, gain 2 Plant"
           },
           {
             "@class": "resource plant "
           },
           {
             "@class": "description ",
-            "#text": "(It must be -12 C or colder to play. Gain 1 Plant.)"
+            "#text": "It must be -12 C or colder to play. Gain 1 Plant"
           }
         ],
         "br": "",
@@ -1144,7 +1149,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "11% O2"
+            "#text": "11 Oxygen"
           },
           {
             "@class": "resource animal red-outline "
@@ -1157,11 +1162,11 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Remove 1 Animal from any card and add it to this card.)"
+            "#text": "Action: Remove 1 Animal from any card and add it to this card"
           },
           {
             "@class": "description ",
-            "#text": "(Requires 11% oxygen. 1 VP per Animal on this card.)"
+            "#text": "Requires 11% oxygen. 1 VP per Animal on this card"
           }
         ],
         "br": ""
@@ -1199,7 +1204,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "-12 C"
+            "#text": "-12 Temperature"
           },
           {
             "@class": "resource animal "
@@ -1223,7 +1228,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires -12 C or warmer. Add 1 Animal TO ANY ANIMAL CARD. Gain 3 Plant. inc-MegaCreditprod-2 steps.)"
+            "#text": "Requires -12 C or warmer. Add 1 Animal TO ANY ANIMAL CARD. Gain 3 Plant. inc-MegaCreditprod-2 "
           }
         ],
         "br": "",
@@ -1258,7 +1263,7 @@
         "div": [
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 9% O2"
+            "#text": "max 9 Oxygen. 1 Energyprod"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -1290,7 +1295,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Oxygen must be 9% or less. Place a City tile. dec-Energyprod-1 step and inc-MegaCreditprod-3 steps.)"
+            "#text": "Oxygen must be 9-max. Place a City tile. dec-Energyprod-1  and inc-MegaCreditprod-3 "
           }
         ]
       }
@@ -1364,8 +1369,12 @@
             ]
           },
           {
+            "@class": "requirements ",
+            "#text": "2 MegaCreditprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-MegaCreditprod-2 steps and inc-heatprod-and Energyprod-2 steps each.)"
+            "#text": "dec-MegaCreditprod-2  and inc-heatprod-1 and Energyprod-2  each"
           }
         ]
       }
@@ -1415,7 +1424,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a Space Event, you gain 3 MegaCredit and 3 heat.)"
+            "#text": "Effect: When you play a Space Event, you gain 3 MegaCredit and 3 heat"
           }
         ],
         "#text": ":"
@@ -1481,7 +1490,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place a City tile. dec-Energyprod-2 steps and inc-steelprod-2 steps.)"
+            "#text": "Place a City tile. dec-Energyprod-2  and inc-steelprod-2 "
           }
         ]
       }
@@ -1531,7 +1540,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Add 1 Microbe to this card, or remove 2 Microbes from this card to raise oxygen level 1 step.)"
+            "#text": "Action: Add 1 Microbe to this card, or remove 2 Microbes from this card to raise oxygen level 1 "
           }
         ],
         "br": "",
@@ -1566,7 +1575,7 @@
         "div": [
           {
             "@class": "requirements ",
-            "#text": "4% O2"
+            "#text": "4 Oxygen"
           },
           {
             "@class": "red-arrow "
@@ -1593,8 +1602,8 @@
               ""
             ],
             "#text": [
-              "(Action: Add 1 Microbe to this card, or remove 2 Microbes to raise temperature 1 step.)",
-              "(Requires 4% oxygen.)"
+              "Action: Add 1 Microbe to this card, or remove 2 Microbes to raise temperature 1 ",
+              "Requires 4% oxygen"
             ]
           }
         ],
@@ -1634,7 +1643,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "4% O2"
+            "#text": "4 Oxygen"
           },
           {
             "@class": "microbe resource red-outline "
@@ -1652,8 +1661,8 @@
               ""
             ],
             "#text": [
-              "(Action: Remove 1 Microbe from any card to add 1 to this card.)",
-              "(Requires 4% oxygen. 1 VP per 2 Microbes on this card.)"
+              "Action: Remove 1 Microbe from any card to add 1 to this card",
+              "Requires 4% oxygen. 1 VP per 2 Microbes on this card"
             ]
           }
         ]
@@ -1689,7 +1698,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise your terraform rating 2 steps.)"
+            "#text": "inc-terraform rating 2 "
           }
         ]
       }
@@ -1751,7 +1760,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Raise your terraforming rating 2 steps and temperature 1 step. inc-Plantprod-1 step, or 4 steps if you have 3 Plant tags.)"
+            "#text": "inc-terraforming rating 2  and temperature 1 . inc-Plantprod-1 , or 4  if you have 3 Plant tags"
           }
         ],
         "br": [
@@ -1788,7 +1797,7 @@
           },
           {
             "@class": "tile city-tile",
-            "@style": "filter:brightness(0.8) drop-shadow(1px 0px 1px #c33) drop-shadow(-1px 0px 1px #c33) drop-shadow(0px 1px 1px #c33) drop-shadow(0px -1px 1px #c33)"
+            "@style": "filter:brightness0.8) drop-shadow1px 0px 1px #c33) drop-shadow-1px 0px 1px #c33) drop-shadow0px 1px 1px #c33) drop-shadow0px -1px 1px #c33)"
           },
           {
             "@class": "money resource",
@@ -1796,7 +1805,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Effect: When any City tile is placed, gain 2 MegaCredit.)"
+            "#text": "Effect: When any City tile is placed, gain 2 MegaCredit"
           }
         ],
         "#text": ":"
@@ -1856,7 +1865,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Raise temperature 3 steps and gain 4 steel. Remove up to 8 Plant from any player.)"
+            "#text": "Raise temperature 3  and gain 4 steel. Remove up to 8 Plant from any player"
           }
         ],
         "br": [
@@ -1908,7 +1917,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-titaniumprod-2 steps.)"
+            "#text": "inc-titaniumprod-2 "
           }
         ]
       }
@@ -1964,8 +1973,12 @@
             ]
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Plantprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-Plantprod-1 step and inc-MegaCreditprod-4 steps.)"
+            "#text": "dec-Plantprod-1  and inc-MegaCreditprod-4 "
           }
         ]
       }
@@ -1995,7 +2008,7 @@
         "div": [
           {
             "@class": "requirements requirements-max",
-            "#text": "max -18 C"
+            "#text": "max -18 Temperature"
           },
           {
             "@class": "production-box",
@@ -2005,7 +2018,7 @@
           },
           {
             "@class": "description",
-            "#text": "(It must be -18 C or colder. inc-Plantprod-1 step.)"
+            "#text": "It must be -18 C or colder. inc-Plantprod-1 "
           }
         ]
       }
@@ -2063,8 +2076,12 @@
             "br": ""
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-Energyprod-1 step and inc-heatprod-3 steps.)"
+            "#text": "dec-Energyprod-1  and inc-heatprod-3 "
           }
         ]
       }
@@ -2101,7 +2118,7 @@
           },
           {
             "@class": "requirements requirements-max",
-            "#text": "max 4% O2"
+            "#text": "max 4 Oxygen"
           },
           {
             "@class": "production-box",
@@ -2117,7 +2134,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Oxygen must be 4% or less. Place this tile NEXT TO NO OTHER TILE. inc-MegaCreditprod-1 step.)"
+            "#text": "Oxygen must be 4-max. Place this tile NEXT TO NO OTHER TILE. inc-MegaCreditprod-1 "
           }
         ],
         "#text": "*"
@@ -2180,8 +2197,12 @@
             "br": ""
           },
           {
+            "@class": "requirements ",
+            "#text": "2 MegaCreditprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-MegaCreditprod-2 steps and inc-Energyprod-3 steps.)"
+            "#text": "dec-MegaCreditprod-2  and inc-Energyprod-3 "
           }
         ]
       }
@@ -2211,7 +2232,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "5 Ocean"
+            "#text": "5 OceanTiles"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -2230,7 +2251,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 5 oceanTiles. Gain 1 Plant and inc-Plantprod-2 steps.)"
+            "#text": "Requires 5 oceanTiles. Gain 1 Plant and inc-Plantprod-2 "
           }
         ]
       }
@@ -2265,7 +2286,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-Plantprod-1 step.)"
+            "#text": "inc-Plantprod-1 "
           }
         ]
       }
@@ -2303,14 +2324,14 @@
           },
           {
             "@class": "requirements",
-            "#text": "+2 C"
+            "#text": "+2 Temperature"
           },
           {
             "@class": "animal resource"
           },
           {
             "@class": "description",
-            "#text": "(Action: Add 1 Animal to this card.)"
+            "#text": "Action: Add 1 Animal to this card"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -2334,11 +2355,8 @@
               "",
               ""
             ],
-            "#text": [
-              "(Requires +2 C or warmer. dec-Plantprod-1-any",
-              "1 VP for each Animal",
-              "on this card.)"
-            ]
+            "#text": "Requires +2 C or warmer. dec-Plantprod-1-any 1 VP for each Animal on this card"
+            
           }
         ],
         "span": {
@@ -2373,7 +2391,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "0 C"
+            "#text": "0 Temperature"
           },
           {
             "@class": "tile ocean-tile"
@@ -2383,7 +2401,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 0 C or warmer. Place 2 oceanTiles.)"
+            "#text": "Requires 0 C or warmer. Place 2 oceanTiles"
           }
         ],
         "br": ""
@@ -2421,7 +2439,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "6% O2"
+            "#text": "6 Oxygen"
           },
           {
             "@class": "animal resource"
@@ -2429,7 +2447,7 @@
           {
             "@class": "description",
             "@style": "margin-bottom:5px;",
-            "#text": "(Action: Add 1 Animal to this card.)"
+            "#text": "Action: Add 1 Animal to this card"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -2453,9 +2471,9 @@
               ""
             ],
             "#text": [
-              "(Requires 6% oxygen. prod- Plantprod-1 step.",
+              "Requires 6% oxygen. prod- Plantprod-1 .",
               "1 VP per 2 Animals",
-              "on this card.)"
+              "on this card"
             ]
           }
         ],
@@ -2493,7 +2511,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "6 Ocean"
+            "#text": "6 OceanTiles"
           },
           {
             "@class": "production-boxprod-box-size3",
@@ -2523,7 +2541,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 6 oceanTiles. inc-MegaCreditprod-2 steps and your Plantprod-3 steps. Gain 2 Plant.)"
+            "#text": "Requires 6 oceanTiles. inc-MegaCreditprod-2  and inc-Plantprod-3 . Gain 2 Plant"
           }
         ]
       }
@@ -2564,7 +2582,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "Jovian"
+            "#text": "Jovian tags"
           },
           {
             "@class": "production-boxprod-box-size3",
@@ -2592,7 +2610,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires a Jovian tag. inc-heatprod-and Energyprod-3 steps each.)"
+            "#text": "Requires a Jovian tag. inc-heatprod-and Energyprod-3  each"
           }
         ]
       }
@@ -2626,14 +2644,14 @@
           },
           {
             "@class": "requirements",
-            "#text": "+4 C"
+            "#text": "+4 Temperature"
           },
           {
             "@class": "tile greenery-tile"
           },
           {
             "@class": "description",
-            "#text": "(Requires +4 C or warmer. Place a greenery tile ON AN AREA RESERVED FOR OCEAN and raise oxygen 1 step. Disregard normal placement restrictions for this.)"
+            "#text": "Requires +4 C or warmer. Place a greenery tile ON AN AREA RESERVED FOR OCEAN and raise oxygen 1 . Disregard normal placement restrictions for this"
           }
         ]
       }
@@ -2667,7 +2685,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "-4 C"
+            "#text": "-4 Temperature"
           },
           {
             "@class": "production-boxprod-box-size3",
@@ -2689,7 +2707,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -4 C or warmer. inc-Plantprod-3 steps. Gain 1 Plant.)"
+            "#text": "Requires -4 C or warmer. inc-Plantprod-3 . Gain 1 Plant"
           }
         ]
       }
@@ -2733,7 +2751,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise oxygen 1 step. Remove 2 Plant from any player. Gain 2 steel.)"
+            "#text": "Raise oxygen 1 . Remove 2 Plant from any player. Gain 2 steel"
           }
         ],
         "br": ""
@@ -2779,7 +2797,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Place this tile on an area with a steel or titanium placement bonus. Increase thatprod-1 step.)"
+            "#text": "Place this tile on an area with a steel or titanium placement bonus. Increase thatprod-1 "
           }
         ],
         "br": "",
@@ -2822,7 +2840,7 @@
           {
             "@class": "requirements",
             "@style": "margin-bottom:5px;",
-            "#text": "13% O2"
+            "#text": "13 Oxygen. 2 Plantprod"
           },
           {
             "@class": "red-arrow "
@@ -2833,7 +2851,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:-5px;margin-bottom:5px;",
-            "#text": "(Action: Add an animal to this card.)"
+            "#text": "Action: Add an animal to this card"
           },
           {
             "@class": "production-boxprod-box-size2a",
@@ -2855,7 +2873,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px;",
-            "#text": "(Requires 13% oxygen. dec-Plantprod-2. 1 VP per Animal on this card.)"
+            "#text": "Requires 13% oxygen. dec-Plantprod-2. 1 VP per Animal on this card"
           }
         ]
       }
@@ -2899,7 +2917,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Gain 2 Plant. Raise oxygen level 1 step and place an ocean tile.)"
+            "#text": "Gain 2 Plant. Raise oxygen level 1  and place an ocean tile"
           }
         ],
         "br": ""
@@ -2945,7 +2963,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 7 MegaCredit to inc-energyprod-1 step.)"
+            "#text": "Action: Spend 7 MegaCredit to inc-energyprod-1 "
           }
         ]
       }
@@ -2992,7 +3010,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-energyprod-1 step and gain 2 titanium.)"
+            "#text": "inc-energyprod-1  and gain 2 titanium"
           }
         ],
         "br": ""
@@ -3031,7 +3049,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place 2 oceanTiles.)"
+            "#text": "Place 2 oceanTiles"
           }
         ]
       }
@@ -3081,7 +3099,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise temperature 2 steps and place 2 oceanTiles. Remove up to 6 Plant from any player.)"
+            "#text": "Raise temperature 2  and place 2 oceanTiles. Remove up to 6 Plant from any player"
           }
         ],
         "br": [
@@ -3131,7 +3149,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place a city tile ON THE RESERVED AREA. 1 VP per Jovian tag you have.)"
+            "#text": "Place a city tile ON THE RESERVED AREA. 1 VP per Jovian tag you have"
           }
         ],
         "#text": "*"
@@ -3178,7 +3196,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-energyprod-3 steps.)"
+            "#text": "inc-energyprod-3 "
           }
         ]
       }
@@ -3208,7 +3226,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "-16 C"
+            "#text": "-16 Temperature"
           },
           {
             "@class": "production-box",
@@ -3228,7 +3246,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -16 C or warmer. inc-plantprod-1 step. Gain 3 Plant.)"
+            "#text": "Requires -16 C or warmer. inc-plantprod-1 . Gain 3 Plant"
           }
         ]
       }
@@ -3258,7 +3276,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "-14 C"
+            "#text": "-14 Temperature"
           },
           {
             "@class": "production-box",
@@ -3272,7 +3290,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -14 C or warmer. inc-plantprod-1 step. Gain 1 plant.)"
+            "#text": "Requires -14 C or warmer. inc-plantprod-1 . Gain 1 plant"
           }
         ]
       }
@@ -3331,8 +3349,12 @@
             "br": ""
           },
           {
+            "@class": "requirements ",
+            "#text": "1 MegaCreditprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-MegaCreditprod-1 step and inc-Energyprod-2 steps.)"
+            "#text": "dec-MegaCreditprod-1  and inc-Energyprod-2 "
           }
         ]
       }
@@ -3362,7 +3384,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "-10 C"
+            "#text": "-10 Temperature"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -3384,7 +3406,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -10 C or warmer. inc-plantprod-2 steps. Gain 2 Plant.)"
+            "#text": "Requires -10 C or warmer. inc-plantprod-2 . Gain 2 Plant"
           }
         ]
       }
@@ -3422,7 +3444,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Gain 1 plant for each city tile in play.)"
+            "#text": "Gain 1 plant for each city tile in play"
           }
         ],
         "#text": "/"
@@ -3466,7 +3488,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Place this tile and raise temperature 2 steps.)"
+            "#text": "Place this tile and raise temperature 2 "
           }
         ],
         "br": ""
@@ -3523,8 +3545,12 @@
             "br": ""
           },
           {
+            "@class": "requirements ",
+            "#text": "1 MegaCreditprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-MegaCreditprod-1 step and inc-Energyprod-1 step.)"
+            "#text": "dec-MegaCreditprod-1  and inc-Energyprod-1 "
           }
         ]
       }
@@ -3565,7 +3591,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 4 energy to gain 1 steel and raise oxygen 1 step.)"
+            "#text": "Action: Spend 4 energy to gain 1 steel and raise oxygen 1 "
           }
         ],
         "#text": "4"
@@ -3607,7 +3633,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-Energyprod-step for each Power tag you have, including this.)"
+            "#text": "inc-Energyprod- for each Power tag you have, including this"
           }
         ]
       }
@@ -3652,7 +3678,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 4 energy to gain 2 steel and increase oxygen 1 step.)"
+            "#text": "Action: Spend 4 energy to gain 2 steel and increase oxygen 1 "
           }
         ],
         "#text": "4"
@@ -3694,7 +3720,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 4 energy to gain 1 titanium and increase oxygen 1 step.)"
+            "#text": "Action: Spend 4 energy to gain 1 titanium and increase oxygen 1 "
           }
         ],
         "#text": "4"
@@ -3732,7 +3758,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "12% O2"
+            "#text": "12 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -3777,12 +3803,9 @@
               "",
               ""
             ],
-            "#text": [
-              "(Requires 12% oxygen. Gain 2 Plant. Place a City tile.\r\n                    Decrease",
-              "your Energyprod-1",
-              "step and increase your",
-              "MegaCreditprod-4 steps.)"
-            ]
+            "#text":
+              "Requires 12% oxygen. Gain 2 Plant. Place a City tile. dec-Energyprod-1 and inc-MegaCreditprod-4 "
+
           }
         ],
         "br": ""
@@ -3825,7 +3848,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-energyprod-1 step.)"
+            "#text": "inc-energyprod-1 "
           }
         ]
       }
@@ -3859,11 +3882,11 @@
           },
           {
             "@class": "requirements",
-            "#text": "7% O2"
+            "#text": "7 Oxygen"
           },
           {
             "@class": "description ",
-            "#text": "(Requires 7% oxygen.)"
+            "#text": "Requires 7% oxygen"
           }
         ]
       }
@@ -3907,7 +3930,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-plantprod-1 step or your energyprod-2 steps.)"
+            "#text": "inc-plantprod-1  or inc-energyprod-2 "
           }
         ]
       }
@@ -3941,14 +3964,14 @@
           },
           {
             "@class": "requirements",
-            "#text": "-6 C"
+            "#text": "-6 Temperature"
           },
           {
             "@class": "tile ocean-tile"
           },
           {
             "@class": "description",
-            "#text": "(Requires -6 C or warmer. Place 1 ocean tile ON AN AREA NOT RESERVED FOR OCEAN.)"
+            "#text": "Requires -6 C or warmer. Place 1 ocean tile ON AN AREA NOT RESERVED FOR OCEAN"
           }
         ],
         "#text": "*"
@@ -3992,7 +4015,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-energyprod-2 step.)"
+            "#text": "inc-energyprod-2 "
           }
         ]
       }
@@ -4026,7 +4049,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "+4 C"
+            "#text": "+4 Temperature"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -4053,7 +4076,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires +4 C or warmer. inc-MegaCreditprod-2 steps and your plantprod-2 steps. Gain 2 Plant.)"
+            "#text": "Requires +4 C or warmer. inc-MegaCreditprod-2  and inc-plantprod-2 . Gain 2 Plant"
           }
         ]
       }
@@ -4084,11 +4107,11 @@
           },
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 3 Ocean"
+            "#text": "max 3 OceanTiles"
           },
           {
             "@class": "description ",
-            "#text": "(Requires 3 or less oceanTiles.)"
+            "#text": "Requires 3 or less oceanTiles"
           }
         ]
       }
@@ -4147,8 +4170,12 @@
             "@style": "margin-left:20px "
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-energyprod-1 step and inc-MegaCreditprod-2 steps.\r\n                    Place a city tile ADJACENT TO AT LEAST 2 OTHER CITY TILES.)"
+            "#text": "dec-energyprod-1  and inc-MegaCreditprod-2 .\r\n                    Place a city tile ADJACENT TO AT LEAST 2 OTHER CITY TILES"
           }
         ],
         "br": "",
@@ -4180,7 +4207,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "3 Ocean"
+            "#text": "3 OceanTiles"
           },
           {
             "@class": "production-box",
@@ -4193,7 +4220,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 oean tiles and that you lose 1 plant. inc-plantprod-1 step.)"
+            "#text": "Requires 3 oean tiles and that you lose 1 plant. inc-plantprod-1 "
           }
         ],
         "#text": "-"
@@ -4242,8 +4269,12 @@
             "#text": "4"
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-Energyprod-1 step and inc-heatprod-4 steps.)"
+            "#text": "dec-Energyprod-1  and inc-heatprod-4 "
           }
         ]
       }
@@ -4275,7 +4306,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place 1 ocean tile.)"
+            "#text": "Place 1 ocean tile"
           }
         ]
       }
@@ -4314,7 +4345,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "Forest"
+            "#text": "Greenery tile"
           },
           {
             "@class": "tag-animal resource-tag"
@@ -4327,7 +4358,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Effect: When you play an animal or plant tag (including these), add an animal to this card.)"
+            "#text": "Effect: When you play an animal or plant tag including these), add an animal to this card"
           },
           {
             "@class": "tile special-tile",
@@ -4337,22 +4368,7 @@
           {
             "@class": "description",
             "@style": "text-align:left;margin-top:-55px;",
-            "br": [
-              "",
-              "",
-              "",
-              "",
-              "",
-              ""
-            ],
-            "#text": [
-              "(Requires that you have a",
-              "greenery tile. Place this tile",
-              "adjacent to any greenery",
-              "tile.",
-              "1 VP per 2 Animals",
-              "on this card.)"
-            ]
+            "#text": "Requires that you have a greenery tile. Place this tile adjacent to any greenery tile. 1 VP per 2 Animal on this card"
           }
         ],
         "#text": [
@@ -4387,7 +4403,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "5% O2"
+            "#text": "5 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -4406,7 +4422,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 5% oxygen. inc-MegaCreditprod-1 step for each City tile ON MARS.)"
+            "#text": "Requires 5% oxygen. inc-MegaCreditprod-1  for each City tile ON MARS"
           }
         ]
       }
@@ -4436,7 +4452,7 @@
         "div": [
           {
             "@class": "requirements ",
-            "#text": "4% O2"
+            "#text": "4 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size3 ",
@@ -4453,7 +4469,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 4% oxygen. inc-Plantprod-1 step for every 2 Microbe tags you have, including this.)"
+            "#text": "Requires 4% oxygen. inc-Plantprod-1  for every 2 Microbe tags you have, including this"
           }
         ]
       }
@@ -4490,7 +4506,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "3% O2"
+            "#text": "3 Oxygen"
           },
           {
             "@class": "tag-animal resource-tag"
@@ -4506,12 +4522,12 @@
           },
           {
             "@class": "description",
-            "#text": "(Effect: When you play an Animal, Plant, or Microbe tag, including this, add a Microbe to this card.)"
+            "#text": "Effect: When you play an Animal, Plant, or Microbe tag, including this, add a Microbe to this card"
           },
           {
             "@class": "description",
             "@style": "margin-top:10px;",
-            "#text": "(Requires 3% oxygen. 1 VP per 3 Microbes on this card.)"
+            "#text": "Requires 3% oxygen. 1 VP per 3 Microbes on this card"
           }
         ],
         "#text": [
@@ -4551,7 +4567,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "2 Power"
+            "#text": "Power Power tags"
           },
           {
             "@class": "production-boxprod-box-size3",
@@ -4569,7 +4585,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 2 Power tags. inc-Energyprod-3 steps.)"
+            "#text": "Requires 2 Power tags. inc-Energyprod-3 "
           }
         ]
       }
@@ -4599,7 +4615,7 @@
         "div": [
           {
             "@class": "requirements ",
-            "#text": "-14 C"
+            "#text": "-14 Temperature"
           },
           {
             "@class": "red-arrow "
@@ -4614,8 +4630,8 @@
               ""
             ],
             "#text": [
-              "(Action: Add a microbe to ANOTHER card.)",
-              "(Requires -14 C or warmer.)"
+              "Action: Add a microbe to ANOTHER card",
+              "Requires -14 C or warmer"
             ]
           }
         ],
@@ -4647,7 +4663,7 @@
         "div": [
           {
             "@class": "requirements requirements-max",
-            "#text": "max -10 C"
+            "#text": "max -10 Temperature"
           },
           {
             "@class": "red-arrow ",
@@ -4672,8 +4688,8 @@
               ""
             ],
             "#text": [
-              "(Action: Gain 1 plant or add 2 microbes to ANOTHER card.)",
-              "(It must be -10 C or colder.)"
+              "Action: Gain 1 plant or add 2 microbes to ANOTHER card",
+              "It must be -10 C or colder"
             ]
           }
         ],
@@ -4718,11 +4734,11 @@
           },
           {
             "@class": "requirements",
-            "#text": "Plant Microbe Animal"
+            "#text": "Plant Microbe Animal tags"
           },
           {
             "@class": "description",
-            "#text": "(Requires a Plant tag, a Microbe tag, and an Animal tag.)"
+            "#text": "Requires a Plant tag, a Microbe tag, and an Animal tag"
           }
         ]
       }
@@ -4759,7 +4775,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "4 Ocean"
+            "#text": "4 OceanTiles"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -4774,7 +4790,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 4 oceanTiles. inc-Energyprod-2 steps.)"
+            "#text": "Requires 4 oceanTiles. inc-Energyprod-2 "
           }
         ]
       }
@@ -4841,8 +4857,12 @@
             "@class": "tile oxygen-tile "
           },
           {
+            "@class": "requirements ",
+            "#text": "2 Energyprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-Energyprod-2 steps. inc-steelprod-2 steps and your titaniumprod-1 step. Raise oxygen 2 steps.)"
+            "#text": "dec-Energyprod-2 . inc-steelprod-2  and inc-titaniumprod-1 . Raise oxygen 2 "
           }
         ],
         "br": ""
@@ -4877,7 +4897,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "3 Ocean"
+            "#text": "3 OceanTiles"
           },
           {
             "@class": "production-box",
@@ -4887,7 +4907,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 oceanTiles. inc-energyprod-1 step.)"
+            "#text": "Requires 3 oceanTiles. inc-energyprod-1 "
           }
         ]
       }
@@ -4927,7 +4947,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise temperature 2 steps and place this tile ON EITHER THARSIS THOLUS, ASCRAEUS MONS, PAVONIS MONS OR ARSIA MONS.)"
+            "#text": "Raise temperature 2  and place this tile ON EITHER THARSIS THOLUS, ASCRAEUS MONS, PAVONIS MONS OR ARSIA MONS"
           }
         ],
         "br": "",
@@ -4967,7 +4987,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-Energyprod-1 step.)"
+            "#text": "inc-Energyprod-1 "
           }
         ]
       }
@@ -5007,7 +5027,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-heatprod-4 steps. Place this tile ON AN AREA RESERVED FOR OCEAN.)"
+            "#text": "inc-heatprod-4 . Place this tile ON AN AREA RESERVED FOR OCEAN"
           }
         ],
         "br": "",
@@ -5063,7 +5083,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place an ocean tile and draw 2 cards. Gain 5 Plant or add 4 Animals to ANOTHER card.)"
+            "#text": "Place an ocean tile and draw 2 cards. Gain 5 Plant or add 4 Animals to ANOTHER card"
           }
         ],
         "br": "",
@@ -5106,7 +5126,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "2 Science"
+            "#text": "Science Science tags"
           },
           {
             "@class": "production-boxprod-box-size3",
@@ -5124,7 +5144,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 2 Science tags. inc-Energyprod-3 steps.)"
+            "#text": "Requires 2 Science tags. inc-Energyprod-3 "
           }
         ]
       }
@@ -5154,7 +5174,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "3 Ocean"
+            "#text": "3 OceanTiles. 2 Plantprod"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -5175,7 +5195,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 oceanTiles and that you lose 2 Plant. inc-plantprod-2 steps.)"
+            "#text": "Requires 3 oceanTiles and that you lose 2 Plant. inc-plantprod-2 "
           }
         ],
         "#text": "-"
@@ -5213,7 +5233,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "8% O2"
+            "#text": "8 Oxygen"
           },
           {
             "@class": "tile greenery-tile",
@@ -5225,7 +5245,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:-8px;",
-            "#text": "(Effect: When you place a greenery tile, add an Animal to this card.)"
+            "#text": "Effect: When you place a greenery tile, add an Animal to this card"
           },
           {
             "@class": "animal resource ",
@@ -5255,7 +5275,7 @@
               "",
               ""
             ],
-            "#text":  "(Requires 8% oxygen. Add 1 Animal to this card. dec-Plantprod-1-any. 1 VP per 2 Animals on this card.)"
+            "#text":  "Requires 8% oxygen. Add 1 Animal to this card. dec-Plantprod-1-any. 1 VP per 2 Animals on this card"
           }
         ],
         "#text": ":"
@@ -5286,7 +5306,7 @@
         "div": [
           {
             "@class": "requirements ",
-            "#text": "6% O2"
+            "#text": "6 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -5303,7 +5323,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 6% oxygen. inc-Plantprod-1 step for each plant tag you have.)"
+            "#text": "Requires 6% oxygen. inc-Plantprod-1  for each plant tag you have"
           }
         ]
       }
@@ -5345,7 +5365,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-heatprod-any number of steps and inc-MegaCreditprod-the same number of steps.)"
+            "#text": "dec-heatprod-x and inc-MegaCreditprod-x"
           }
         ]
       }
@@ -5378,11 +5398,11 @@
           },
           {
             "@class": "tile globals-box",
-            "#text": "Temp / O2 / Ocean"
+            "#text": "Temperature / Oxygen / OceanTiles"
           },
           {
             "@class": "description",
-            "#text": "(Effect: Your global requirements are +2 or -2 steps, your choice in each case.)"
+            "#text": "Effect: Your global requirements are +2 or -2 , your choice in each case"
           }
         ],
         "#text": ": +/- 2"
@@ -5416,7 +5436,7 @@
         "div": [
           {
             "@class": "requirements requirements-max",
-            "#text": "max -14 C"
+            "#text": "max -14 Temperature"
           },
           {
             "@class": "production-boxprod-box-size2 ",
@@ -5431,7 +5451,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(It must be -14 C or colder. inc-Plantprod-2 steps.)"
+            "#text": "It must be -14 C or colder. inc-Plantprod-2 "
           }
         ]
       }
@@ -5475,7 +5495,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Add 1 Microbe to this card, or remove 3 Microbes to inc-TR 1 step."
+            "#text": "Action: Add 1 Microbe to this card, or remove 3 Microbes to inc-TR-1 ."
           },
           {
             "@class": "microbe resource "
@@ -5488,7 +5508,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Add 3 Microbes to this card.)"
+            "#text": "Add 3 Microbes to this card"
           }
         ],
         "br": [
@@ -5536,7 +5556,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-Energyprod-and your steelprod-1 step each.)"
+            "#text": "inc-Energyprod-and inc-steelprod-1  each"
           }
         ]
       }
@@ -5566,7 +5586,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "-24 C"
+            "#text": "-24 Temperature"
           },
           {
             "@class": "production-box",
@@ -5576,7 +5596,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -24 C or warmer. inc-Plantprod-1 step.)"
+            "#text": "Requires -24 C or warmer. inc-Plantprod-1 "
           }
         ]
       }
@@ -5615,7 +5635,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place 1 ocean tile and draw 1 card.)"
+            "#text": "Place 1 ocean tile and draw 1 card"
           }
         ]
       }
@@ -5666,7 +5686,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-heatprod-1 step and gain 3 heat.)"
+            "#text": "inc-heatprod-1  and gain 3 heat"
           }
         ]
       }
@@ -5713,7 +5733,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Raise your TR 1 step and gain 4 Plant. Add 3 Microbes to ANOTHER card and 2 Animals to ANOTHER card.)"
+            "#text": "inc-TR-1  and gain 4 Plant. Add 3 Microbes to ANOTHER card and 2 Animals to ANOTHER card"
           }
         ],
         "#text": [
@@ -5751,7 +5771,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-heatprod-1 step.)"
+            "#text": "inc-heatprod-1 "
           }
         ],
         "br": ""
@@ -5817,8 +5837,12 @@
             "@class": "tile rating"
           },
           {
+            "@class": "requirements ",
+            "#text": "4 Energyprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-Energyprod-4 steps and inc-Plantprod-2 steps. Raise your TR 3 steps.)"
+            "#text": "dec-Energyprod-4  and inc-Plantprod-2 . inc-TR-3 "
           }
         ],
         "br": ""
@@ -5853,7 +5877,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "5% O2"
+            "#text": "5 Oxygen. 1 Energyprod"
           },
           {
             "@class": "resource-tag tag-space"
@@ -5864,7 +5888,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a Space card, you pay 2 MegaCredit less for it.)"
+            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -5894,7 +5918,7 @@
           {
             "@class": "description ",
             "@style": "position:absolute;margin-top:-90px;text-align:left;margin-left:86px;",
-            "#text": "(Requires 5% oxygen. dec-Energyprod-1 step and inc-MegaCreditprod-2 steps.)"
+            "#text": "Requires 5% oxygen. dec-Energyprod-1  and inc-MegaCreditprod-2 "
           }
         ],
         "#text": ":"
@@ -5941,7 +5965,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-heatprod-2 steps.)"
+            "#text": "inc-heatprod-2 "
           }
         ]
       }
@@ -5978,7 +6002,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "7% O2"
+            "#text": "7 Oxygen"
           },
           {
             "@class": "production-box ",
@@ -5988,7 +6012,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 7% oxygen. inc-Energyprod-1 step.)"
+            "#text": "Requires 7% oxygen. inc-Energyprod-1 "
           }
         ]
       }
@@ -6022,7 +6046,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "-6 C"
+            "#text": "-6 Temperature"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -6043,7 +6067,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -6 C or warmer. inc-Plantprod-1 step and your MegaCreditprod-2 steps. Gain 1 Plant.)"
+            "#text": "Requires -6 C or warmer. inc-Plantprod-1  and inc-MegaCreditprod-2 . Gain 1 Plant"
           }
         ]
       }
@@ -6099,7 +6123,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Add 2 Microbes to ANOTHER card. inc-heatprod-3 steps and your Plantprods 1 step.)"
+            "#text": "Add 2 Microbes to ANOTHER card. inc-heatprod-3  and inc-Plantprod-1 "
           }
         ],
         "br": "",
@@ -6159,8 +6183,12 @@
             "@class": "tile rating"
           },
           {
+            "@class": "requirements ",
+            "#text": "2 Energyprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-Energyprod-2 steps and inc-Plantprod-1 step. Raise your TR 1 step.)"
+            "#text": "dec-Energyprod-2 and inc-Plantprod-1. inc-TR-1)"
           }
         ]
       }
@@ -6206,7 +6234,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Effect: When any City tile is placed, add an Animal to this card.)"
+            "#text": "Effect: When any City tile is placed, add an Animal to this card"
           },
           {
             "@class": "animal resource"
@@ -6215,10 +6243,7 @@
             "@class": "description",
             "@style": "text-align:left;margin-top:10px;",
             "br": "",
-            "#text": [
-              "(Add 1 Animal to this card.",
-              "1 VP per 2 Animals here.)"
-            ]
+            "#text": "Add 1 Animal to this card. 1 VP per 2 Animals here"
           }
         ],
         "br": [
@@ -6269,7 +6294,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-MegaCreditprod-2 steps. Place on a greenery tile ON AN AREA RESERVED FOR OCEAN, disregarding normal placement restrictions, and increase oxygen 1 step.)"
+            "#text": "inc-MegaCreditprod-2 . Place on a greenery tile ON AN AREA RESERVED FOR OCEAN, disregarding normal placement restrictions, and increase oxygen 1 "
           }
         ],
         "#text": "*"
@@ -6307,7 +6332,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "-20 C"
+            "#text": "-20 Temperature"
           },
           {
             "@class": "production-box",
@@ -6325,7 +6350,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires -20 C or warmer. inc-MegaCreditprod-1 step and gain 2 Plant.)"
+            "#text": "Requires -20 C or warmer. inc-MegaCreditprod-1  and gain 2 Plant"
           }
         ]
       }
@@ -6355,7 +6380,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "2 Ocean"
+            "#text": "2 OceanTiles"
           },
           {
             "@class": "energy resource "
@@ -6381,8 +6406,8 @@
               ""
             ],
             "#text": [
-              "(Action: Spend 3 Energy to raise oxygen 1 step.)",
-              "(Requires 2 oceanTiles.)"
+              "Action: Spend 3 Energy to raise oxygen 1 ",
+              "Requires 2 oceanTiles"
             ]
           }
         ]
@@ -6445,7 +6470,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-heatprod-2-any and inc-Energyprod-1)"
+            "#text": "dec-heatprod-2-any and inc-Energyprod-1)"
           }
         ]
       }
@@ -6500,8 +6525,12 @@
             ]
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1 step and inc-Plantprod-1 step.)"
+            "#text": "dec-Energyprod-1  and inc-Plantprod-1 "
           }
         ]
       }
@@ -6531,14 +6560,14 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "+2 C"
+            "#text": "+2 Temperature"
           },
           {
             "@class": "tile ocean-tile "
           },
           {
             "@class": "description ",
-            "#text": "(Requires +2 C or warmer. Place 1 ocean tile.)"
+            "#text": "Requires +2 C or warmer. Place 1 ocean tile"
           }
         ]
       }
@@ -6575,7 +6604,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "6% O2"
+            "#text": "6 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size2a",
@@ -6606,7 +6635,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 6% oxygen. dec-Plantprod-1-any and inc-Energyprod-2)"
+            "#text": "Requires 6% oxygen. dec-Plantprod-1-any and inc-Energyprod-2)"
           }
         ]
       }
@@ -6643,7 +6672,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "9% O2"
+            "#text": "9 Oxygen. 1 Plantprod"
           },
           {
             "@class": "animal resource"
@@ -6651,7 +6680,7 @@
           {
             "@class": "description",
             "@style": "margin-bottom:5px;",
-            "#text": "(Action: Add 1 Animal to this card.)"
+            "#text": "Action: Add 1 Animal to this card"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -6681,7 +6710,7 @@
           {
             "@class": "description",
             "@style": "position:absolute;margin-top:-85px;text-align:left;margin-left:80px;font-size:10px;",
-            "#text": "(Requires 9% oxygen. dec-Plantprod-1 step and inc-MegaCreditprod-2 steps. 1 VP for each Animal on this card."
+            "#text": "Requires 9% oxygen. dec-Plantprod-1  and inc-MegaCreditprod-2 . 1 VP for each Animal on this card."
           }
         ],
         "span": {
@@ -6726,11 +6755,11 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 8 MegaCredit to place 1 ocean tile. STEEL MAY BE USED as if you were playing a Building card.)"
+            "#text": "Action: Spend 8 MegaCredit to place 1 ocean tile. STEEL MAY BE USED as if you were playing a Building card"
           }
         ],
         "#text": [
-          "(",
+          "",
           ")"
         ]
       }
@@ -6774,7 +6803,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place an ocean tile. IF THERE ARE TILES ADJACENT TO THIS OCEAN TILE, YOU MAY REMOVE 4 MegaCredit FROM THE OWNER OF ONE OF THOSE TILES.)"
+            "#text": "Place an ocean tile. IF THERE ARE TILES ADJACENT TO THIS OCEAN TILE, YOU MAY REMOVE 4 MegaCredit FROM THE OWNER OF ONE OF THOSE TILES"
           }
         ],
         "#text": "*"
@@ -6818,7 +6847,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-Energyprod-1 step for each City tile in play.)"
+            "#text": "inc-Energyprod-1  for each City tile in play"
           }
         ]
       }
@@ -6857,7 +6886,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Spend 5 heat to gain either 4 Plant, or to add 2 Animals to ANOTHER card.)"
+            "#text": "Spend 5 heat to gain either 4 Plant, or to add 2 Animals to ANOTHER card"
           }
         ],
         "#text": [
@@ -6893,14 +6922,14 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "-8 C"
+            "#text": "-8 Temperature"
           },
           {
             "@class": "tile ocean-tile "
           },
           {
             "@class": "description ",
-            "#text": "(Requires -8 C or warmer. Place 1 ocean tile.)"
+            "#text": "Requires -8 C or warmer. Place 1 ocean tile"
           }
         ]
       }
@@ -6930,14 +6959,14 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "2 Science"
+            "#text": "Science Science tags"
           },
           {
             "@class": "tile greenery-tile"
           },
           {
             "@class": "description",
-            "#text": "(Requires 2 Science tags. Place a greenery tile and raise oxygen 1 step.)"
+            "#text": "Requires 2 Science tags. Place a greenery tile and raise oxygen 1 "
           }
         ]
       }
@@ -6985,7 +7014,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px",
-            "#text": "(inc-MegaCreditprod-5 steps. 1 VP for every 3rd City in play.)"
+            "#text": "inc-MegaCreditprod-5 . 1 VP for every 3rd City in play"
           }
         ]
       }
@@ -7027,7 +7056,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When a City tile is placed, including this, inc-MegaCreditprod-1 step.)"
+            "#text": "Effect: When a City tile is placed, including this, inc-MegaCreditprod-1 "
           },
           {
             "@class": "production-boxprod-box-size2a",
@@ -7051,8 +7080,12 @@
             "@class": "tile city-tile "
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod. 2 MegaCreditprod"
+          },
+          {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1 step and dec-MegaCreditprod-2 steps. Place a City tile.)"
+            "#text": "dec-Energyprod-1  and dec-MegaCreditprod-2 . Place a City tile"
           }
         ],
         "br": "",
@@ -7102,7 +7135,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 10MegaCredit to inc-heatprod-2 steps.)"
+            "#text": "Action: Spend 10MegaCredit to inc-heatprod-2 "
           }
         ]
       }
@@ -7138,7 +7171,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-heatprod-7 steps.)"
+            "#text": "inc-heatprod-7 "
           }
         ]
       }
@@ -7187,8 +7220,12 @@
             "@class": "tile rating"
           },
           {
+            "@class": "requirements ",
+            "#text": "1 Energyprod"
+          },
+          {
             "@class": "description",
-            "#text": "(dec-Energyprod-1 step. Raise your TR 2 steps.)"
+            "#text": "dec-Energyprod-1 . inc-TR-2 "
           }
         ],
         "br": ""
@@ -7221,11 +7258,11 @@
         "div": [
           {
             "@class": "tile globals-box",
-            "#text": "Temp / O2 / Ocean"
+            "#text": "Temperature / Oxygen / OceanTiles"
           },
           {
             "@class": "description",
-            "#text": "(The next card you play this generation is +2 or -2 steps in global requirements, your choice.)"
+            "#text": "The next card you play this generation is +2 or -2  in global requirements, your choice"
           }
         ],
         "#text": ": +/- 2"

@@ -40,7 +40,9 @@ public class TMForwardModel extends AbstractForwardModel {
             gs.playerResourceIncreaseGen[i] = new HashMap<>();
             for (TMTypes.Resource res: TMTypes.Resource.values()) {
                 gs.playerResources[i].put(res, new Counter(params.startingResources.get(res), 0, params.maxPoints, res.toString() + "-" + i));
-                gs.playerProduction[i].put(res, new Counter(params.startingProduction.get(res), params.minimumProduction.get(res), params.maxPoints, res.toString() + "-prod-" + i));
+                if (params.startingProduction.containsKey(res)) {
+                    gs.playerProduction[i].put(res, new Counter(params.startingProduction.get(res), params.minimumProduction.get(res), params.maxPoints, res.toString() + "-prod-" + i));
+                }
                 gs.playerResourceIncreaseGen[i].put(res, false);
             }
             gs.playerResourceMap[i] = new HashSet<>();
@@ -173,7 +175,9 @@ public class TMForwardModel extends AbstractForwardModel {
                     gs.getPlayerResources()[i].get(TMTypes.Resource.Energy).setValue(0);
                     // Then, all production values are added to resources
                     for (TMTypes.Resource res : TMTypes.Resource.values()) {
-                        gs.getPlayerResources()[i].get(res).increment(gs.getPlayerProduction()[i].get(res).getValue());
+                        if (res.isPlayerBoardRes()) {
+                            gs.getPlayerResources()[i].get(res).increment(gs.getPlayerProduction()[i].get(res).getValue());
+                        }
                     }
                     // TR also adds to mega credits
                     gs.getPlayerResources()[i].get(TMTypes.Resource.MegaCredit).increment(gs.playerResources[i].get(TMTypes.Resource.TR).getValue());
@@ -275,7 +279,7 @@ public class TMForwardModel extends AbstractForwardModel {
             for (int i = 0; i < gs.playerHands[player].getSize(); i++) {
                 TMCard card = gs.playerHands[player].get(i);
                 boolean canPlayerPay = gs.canPlayerPay(player, card, null, TMTypes.Resource.MegaCredit, card.cost);
-                if (canPlayerPay && (card.requirement == null || card.requirement.testCondition(gs))) {
+                if (canPlayerPay && (card.requirements == null || card.meetsRequirements(gs))) {
                     actions.add(new PayForAction(PlayCard, player, new PlayCard(player, i, false), TMTypes.Resource.MegaCredit, card.cost, i));
                 }
             }
