@@ -21,6 +21,22 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     int stage;
     TMTypes.Resource[] resourcesToPayWith;
 
+    public PayForAction(TMTypes.ActionType type, int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
+        super(type, player, true);
+        this.action = action;
+        this.costTotal = Math.abs(costTotal);
+        this.resourceToPay = resourceToPay;
+        this.cardIdx = cardIdx;  // -1 if no card needed
+    }
+
+    public PayForAction(TMTypes.StandardProject project, int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
+        super(TMTypes.ActionType.StandardProject, player, true);
+        this.action = action;
+        this.costTotal = Math.abs(costTotal);
+        this.resourceToPay = resourceToPay;
+        this.cardIdx = cardIdx;  // -1 if no card needed
+    }
+
     public PayForAction(int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {
         super(player, true);
         this.action = action;
@@ -43,7 +59,10 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMCard card = null;
         if (cardIdx > -1) {
             card = gs.getPlayerHands()[player].get(cardIdx);
-            costTotal = gs.discountCardCost(card, player);
+            costTotal -= gs.discountCardCost(card, player);  // Apply card discount
+        } else {
+            // Check action type discounts
+            costTotal -= gs.discountActionTypeCost(this.action, player);
         }
         HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(player, card, null, resourceToPay);
         resources.add(resourceToPay);  // Can always pay with itself
@@ -93,15 +112,13 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         if (card != null && ((TMGameState)state).isCardFree(card, costPaid, player) || costPaid >= costTotal) {
             // Action paid for, execute
             this.action.execute(state);
+            stage = resourcesToPayWith.length;
         }
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        TMGameState gs = (TMGameState)state;
-        TMCard card = null;
-        if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        return card != null && ((TMGameState)state).isCardFree(card, costPaid, player) || stage == resourcesToPayWith.length || costPaid == costTotal;
+        return stage == resourcesToPayWith.length || costPaid == costTotal;
     }
 
     @Override

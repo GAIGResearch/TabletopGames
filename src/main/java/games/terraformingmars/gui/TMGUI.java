@@ -1,20 +1,28 @@
 package games.terraformingmars.gui;
 
 import core.*;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class TMGUI extends AbstractGUI {
 
@@ -33,6 +41,9 @@ public class TMGUI extends AbstractGUI {
     boolean focusCurrentPlayer;
     JButton focusPlayerButton;
 
+    boolean firstUpdate = true;
+    HashMap<TMTypes.ActionType, JMenu> actionMenus;
+
     public TMGUI(Game game, ActionController ac) {
         super(ac, 500);
         if (game == null) return;
@@ -45,6 +56,21 @@ public class TMGUI extends AbstractGUI {
 
         TMGameState gameState = (TMGameState) game.getGameState();
         view = new TMBoardView(gameState);
+
+        actionMenus = new HashMap<>();
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(Color.black);
+        int mnemonicStart = KeyEvent.VK_A;
+        for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
+            JMenu menu = new JMenu(t.name());
+            menu.setMnemonic(mnemonicStart++);
+            menu.getAccessibleContext().setAccessibleDescription("Choose an action of type " + t.name());
+            menuBar.add(menu);
+            menu.setForeground(Color.white);
+            menu.setFont(defaultFont);
+            actionMenus.put(t, menu);
+        }
+        this.setJMenuBar(menuBar);
 
         try {
             GraphicsEnvironment ge =
@@ -182,34 +208,60 @@ public class TMGUI extends AbstractGUI {
         setFrameProperties();
     }
 
-//    /**
-//     * Only shows actions for highlighted cell.
-//     * @param player - current player acting.
-//     * @param gameState - current game state to be used in updating visuals.
-//     */
-//    @Override
-//    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-//        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-//            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
-//            ArrayList<Rectangle> highlight = view.getHighlight();
-//
-//            int start = actions.size();
-//            if (highlight.size() > 0) {
-//                Rectangle r = highlight.get(0);
-//                for (AbstractAction abstractAction : actions) {
-//                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
-//                    if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
-//                        actionButtons[0].setVisible(true);
-//                        actionButtons[0].setButtonAction(action, "Play ");
-//                        break;
-//                    }
-//                }
-//            } else {
-//                actionButtons[0].setVisible(false);
-//                actionButtons[0].setButtonAction(null, "");
-//            }
-//        }
-//    }
+    private void createActionMenu(AbstractPlayer player, TMGameState gs) {
+        if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gs);
+            int mnemonicStart = KeyEvent.VK_A;
+            for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
+                if (t != TMTypes.ActionType.PlayCard) {
+                    JMenu menu = actionMenus.get(t);
+
+                    for (AbstractAction a : actions) {
+                        TMAction aa = (TMAction) a;
+                        if (aa.actionType != null && aa.actionType == t) {
+                            JMenuItem menuItem = new JMenuItem(aa.getString(gs));
+//                            menuItem = new JMenuItem("Both text and icon",
+//                                    new ImageIcon("images/middle.gif"));
+                            menuItem.setFont(defaultFont);
+                            menuItem.setForeground(Color.white);
+                            menuItem.setBackground(Color.black);
+                            menu.add(menuItem);
+                            menuItem.addActionListener(new javax.swing.AbstractAction() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    ac.addAction(aa);
+                                }
+                            });
+                        }
+                    }
+
+                    menu.revalidate();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        // TODO: playCard for cards selected only, named "Play"
+        // TODO: placetile for grid spot selected only, named "Place Tile"
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            int i = 0;
+            for (AbstractAction a: actions) {
+                TMAction aa = (TMAction) a;
+                if (aa.actionType == null || aa.actionType == TMTypes.ActionType.PlayCard) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setButtonAction(actions.get(i), gameState);
+                }
+                i++;
+            }
+            for (int k = i; k < actionButtons.length; k++) {
+                actionButtons[k].setVisible(false);
+                actionButtons[k].setButtonAction(null, "");
+            }
+        }
+    }
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
@@ -234,7 +286,16 @@ public class TMGUI extends AbstractGUI {
             playerCorporation.update(temp);
 
             if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
+                if (actionChosen) {
+                    resetActionButtons();
+                    firstUpdate = true;
+                } else {
+                    if (firstUpdate) {
+                        updateActionButtons(player, gameState);
+                        createActionMenu(player, gs);
+                        firstUpdate = false;
+                    }
+                }
             }
         }
         repaint();

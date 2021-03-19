@@ -15,7 +15,7 @@ public class PlayCard extends TMAction {
     int cardID;
 
     public PlayCard(int player, int cardIdx, boolean free) {
-        super(player, free);
+        super(TMTypes.ActionType.PlayCard, player, free);
         this.cardIdx = cardIdx;
         this.cardID = -1;
     }

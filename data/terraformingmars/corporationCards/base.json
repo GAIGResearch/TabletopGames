@@ -131,6 +131,11 @@
         "type": "discount",
         "tag": "Power",
         "amount": 3
+      },
+      {
+        "type": "discount",
+        "standardproject": "PowerPlant",
+        "amount": 3
       }
     ],
     "start":  ["1 energyprod, 48 megacredit"]

@@ -24,10 +24,22 @@ public class TMAction extends AbstractAction {
     public Requirement<TMGameState> requirement;
     public boolean played;
 
-    public TMAction(int player, boolean free) {
+    public TMTypes.ActionType actionType;
+    public TMTypes.StandardProject standardProject;
+
+    public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
         this.free = free;
         this.pass = false;
+        this.actionType = actionType;
+    }
+
+    public TMAction(TMTypes.StandardProject project, int player, boolean free) {
+        this.player = player;
+        this.free = free;
+        this.pass = false;
+        this.actionType = TMTypes.ActionType.StandardProject;
+        this.standardProject = project;
     }
 
     public TMAction(int player) {
@@ -36,11 +48,34 @@ public class TMAction extends AbstractAction {
         this.pass = true;
     }
 
+    public TMAction(int player, boolean free) {
+        this.player = player;
+        this.free = free;
+        this.pass = false;
+    }
+
     public TMAction(int player, boolean free, Requirement requirement) {
         this.player = player;
         this.free= free;
         this.pass = false;
         this.requirement = requirement;
+    }
+
+    public TMAction(TMTypes.ActionType actionType, int player, boolean free, Requirement requirement) {
+        this.player = player;
+        this.free= free;
+        this.pass = false;
+        this.requirement = requirement;
+        this.actionType = actionType;
+    }
+
+    public TMAction(TMTypes.StandardProject project, int player, boolean free, Requirement requirement) {
+        this.player = player;
+        this.free= free;
+        this.pass = false;
+        this.requirement = requirement;
+        this.actionType = TMTypes.ActionType.StandardProject;
+        this.standardProject = project;
     }
 
     @Override
@@ -75,7 +110,7 @@ public class TMAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return this;
+        return this; // TODO
     }
 
     @Override
@@ -83,22 +118,22 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return free == tmAction.free && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirement, tmAction.requirement);
+        return free == tmAction.free && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirement, tmAction.requirement) && actionType == tmAction.actionType && standardProject == tmAction.standardProject;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(free, player, pass, requirement, played);
+        return Objects.hash(free, player, pass, requirement, played, actionType, standardProject);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Pass";
+        return actionType != null? actionType.name() : "Pass";
     }
 
     @Override
     public String toString() {
-        return "Pass";
+        return actionType != null? actionType.name() : "Pass";
     }
 
     public static Pair<TMAction, String> parseAction(TMGameState gameState, String encoding) {

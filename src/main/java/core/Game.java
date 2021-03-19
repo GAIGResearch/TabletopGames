@@ -238,10 +238,12 @@ public class Game {
                             currentPlayer.registerUpdatedObservation(observation);
                         } else {
                             if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                                gui.actionChosen = false;
                                 while (action == null && gui.isWindowOpen()) {
                                     action = currentPlayer.getAction(observation, observedActions);
                                     updateGUI(gui);
                                 }
+                                gui.actionChosen = true;
                             } else {
                                 // Get action from player, and time it
                                 s = System.nanoTime();

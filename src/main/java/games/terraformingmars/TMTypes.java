@@ -34,6 +34,24 @@ public class TMTypes {
                     new Vector2D(0, -1), new Vector2D(-1, 0),
                     new Vector2D(0, 1), new Vector2D(1, 1)}};
 
+    public enum ActionType {
+        PlayCard,
+        StandardProject,
+        ClaimMilestone,
+        FundAward,
+        ActiveAction,
+        BasicResourceAction
+    }
+
+    public enum StandardProject {
+        SellPatents,
+        PowerPlant,
+        Asteroid,
+        Aquifer,
+        Greenery,
+        City
+    }
+
     public enum MapTileType {
         Ground (Color.lightGray),
         Ocean (Color.blue),

@@ -10,6 +10,7 @@ import games.terraformingmars.rules.*;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.requirements.ActionTypeRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
 import games.terraformingmars.rules.requirements.TagRequirement;
 import utilities.Utils;
@@ -255,9 +256,23 @@ public class TMGameState extends AbstractGameState {
         return playerDiscountEffects;
     }
 
+    public int discountActionTypeCost(TMAction action, int player) {
+        // Apply tag discount effects
+        int discount = 0;
+        if (player == -1) player = getCurrentPlayer();
+        for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
+            if (e.getKey() instanceof ActionTypeRequirement) {
+                if (e.getKey().testCondition(action)) {
+                    discount += e.getValue();
+                }
+            }
+        }
+        return discount;
+    }
+
     public int discountCardCost(TMCard card, int player) {
         // Apply tag discount effects
-        int cost = card.cost;
+        int discount = 0;
         if (player == -1) player = getCurrentPlayer();
         for (TMTypes.Tag t: card.tags) {
             for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
@@ -270,12 +285,12 @@ public class TMGameState extends AbstractGameState {
                         }
                     }
                     if (found) {
-                        cost -= e.getValue();
+                        discount += e.getValue();
                     }
                 }
             }
         }
-        return cost;
+        return discount;
     }
 
     public boolean isCardFree(TMCard card, int player) {
@@ -283,7 +298,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     public boolean isCardFree(TMCard card, int amountPaid, int player) {
-        return discountCardCost(card, player) - amountPaid <= 0;
+        return card.cost - discountCardCost(card, player) - amountPaid <= 0;
     }
 
     public Counter stringToGPCounter(String s) {

@@ -8,10 +8,7 @@ import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.effects.PayForActionEffect;
 import games.terraformingmars.rules.effects.PlaceTileEffect;
 import games.terraformingmars.rules.effects.PlayCardEffect;
-import games.terraformingmars.rules.requirements.CounterRequirement;
-import games.terraformingmars.rules.requirements.Requirement;
-import games.terraformingmars.rules.requirements.ResourceIncGenRequirement;
-import games.terraformingmars.rules.requirements.TagRequirement;
+import games.terraformingmars.rules.requirements.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Utils;
@@ -109,7 +106,7 @@ public class TMCard extends Card {
                 TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
                 int cost = Integer.parseInt(costStr[1]);
                 if (action[0].equalsIgnoreCase("placetile")) {
-                    TMAction a = new PayForAction(-1, new PlaceTile(-1, TMTypes.Tile.valueOf(action[1]), null, false),
+                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new PlaceTile(-1, TMTypes.Tile.valueOf(action[1]), null, false),
                             costResource, cost, -1);
                     actions.add(a);
                 } else if (action[0].equalsIgnoreCase("resourcetransaction")) {
@@ -123,7 +120,7 @@ public class TMCard extends Card {
                             req = new ResourceIncGenRequirement(TMTypes.Resource.valueOf(reqStr.split("-")[1]));
                         }
                     }
-                    TMAction a = new PayForAction(-1, new ResourceTransaction(-1, r, amount, false, req), costResource, -cost, -1);
+                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new ResourceTransaction(-1, r, amount, false, req), costResource, -cost, -1);
                     actions.add(a);
                 }
             } else if (type.equalsIgnoreCase("discount")) {
@@ -144,6 +141,15 @@ public class TMCard extends Card {
                     // A discount for tag requirements
                     TMTypes.Tag t = TMTypes.Tag.valueOf((String) effect.get("tag"));
                     r = new TagRequirement(new TMTypes.Tag[]{t}, null);
+                    if (card.discountEffects.containsKey(r)) {
+                        card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                    } else {
+                        card.discountEffects.put(r, amount);
+                    }
+                } else if (effect.get("standardproject") != null) {
+                    // A discount for buying standard projects
+                    TMTypes.StandardProject sp = TMTypes.StandardProject.valueOf((String) effect.get("standardproject"));
+                    r = new ActionTypeRequirement(TMTypes.ActionType.StandardProject, sp);
                     if (card.discountEffects.containsKey(r)) {
                         card.discountEffects.put(r, card.discountEffects.get(r) + amount);
                     } else {

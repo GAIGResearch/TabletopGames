@@ -7,8 +7,8 @@ import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
-import games.terraformingmars.rules.effects.Effect;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -37,6 +37,8 @@ public class BuyCard extends TMAction {
             for (AbstractAction aa: card.immediateEffects) {
                 aa.execute(gs);
             }
+            // Add actions
+            gs.getPlayerCardsPlayedActions()[player].addAll(Arrays.asList(card.actions));
 
             // Add discountEffects to player's discounts
             gs.addDiscountEffects(card.discountEffects);

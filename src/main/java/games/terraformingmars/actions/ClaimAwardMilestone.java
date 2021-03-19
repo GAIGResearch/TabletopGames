@@ -3,6 +3,7 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.Award;
 import games.terraformingmars.rules.Milestone;
 
@@ -12,7 +13,7 @@ public class ClaimAwardMilestone extends TMAction {
     final Award toClaim;
 
     public ClaimAwardMilestone(int player, Award toClaim) {
-        super(player, false);
+        super((toClaim instanceof Milestone? TMTypes.ActionType.ClaimMilestone : TMTypes.ActionType.FundAward), player, false);
         this.toClaim = toClaim;
     }
 
