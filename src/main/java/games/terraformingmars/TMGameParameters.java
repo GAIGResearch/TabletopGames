@@ -56,6 +56,9 @@ public class TMGameParameters extends AbstractParameters {
     // Milestones, awards
     int[] nCostMilestone = new int[] {8, 8, 8};
     int[] nCostAwards = new int[] {8, 14, 20};
+    int nPointsMilestone = 5;
+    int nPointsAwardFirst = 5;
+    int nPointsAwardSecond = 2;
 
     public TMGameParameters(long seed) {
         super(seed);

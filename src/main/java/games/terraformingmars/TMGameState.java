@@ -111,7 +111,7 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return playerResources[playerId].get(TMTypes.Resource.TR).getValue();
+        return countPoints(playerId);
     }
 
     @Override
@@ -431,6 +431,46 @@ public class TMGameState extends AbstractGameState {
         }
         playerResourceMap[player].removeAll(toRemove);
         playerResourceMap[player].addAll(toAdd);
+    }
+
+    public int countPoints(int player) {
+        int points = playerResources[player].get(TMTypes.Resource.TR).getValue();
+        TMGameParameters params = (TMGameParameters) gameParameters;
+        // Add milestones
+        for (Milestone m: milestones) {
+            if (m.isClaimed() && m.claimed == player) {
+                points += params.nPointsMilestone;
+            }
+        }
+        // Add awards
+        for (Award a: awards) {
+            if (a.isClaimed()) {
+                int best = -1;
+                HashSet<Integer> bestPlayer = new HashSet<>();
+                HashSet<Integer> secondBestPlayer = new HashSet<>();
+                for (int i = 0; i < getNPlayers(); i++) {
+                    int playerPoints = a.checkProgress(this, i);
+                    if (playerPoints > best) {
+                        secondBestPlayer = new HashSet<>(bestPlayer);
+                        bestPlayer.clear();
+                        bestPlayer.add(i);
+                        best = playerPoints;
+                    }
+                }
+                for (int i = 0; i < getNPlayers(); i++) {
+                    int playerPoints = a.checkProgress(this, i);
+                    if (playerPoints == best) {
+                        bestPlayer.add(i);
+                    }
+                }
+                if (bestPlayer.contains(player)) points += params.nPointsAwardFirst;
+                if (getNPlayers() > 2 && secondBestPlayer.contains(player) && bestPlayer.size() == 1) points += params.nPointsAwardSecond;
+            }
+        }
+        // Add greeneries on board  TODO
+        // Add cities on board TODO
+        // Add points on cards TODO
+        return points;
     }
 
     static List<Vector2D> getNeighbours(Vector2D cell) {

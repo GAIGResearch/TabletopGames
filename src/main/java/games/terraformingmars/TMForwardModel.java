@@ -11,6 +11,7 @@ import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.*;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -178,7 +179,35 @@ public class TMForwardModel extends AbstractForwardModel {
                     gs.getPlayerResources()[i].get(TMTypes.Resource.MegaCredit).increment(gs.playerResources[i].get(TMTypes.Resource.TR).getValue());
                 }
 
-                // TODO check game end before next research phase
+                // Check game end before next research phase
+                if (checkGameEnd(gs)) {
+                    gs.setGameStatus(Utils.GameResult.GAME_END);
+                    ArrayList<Integer> best = new ArrayList<>();
+                    int bestPoints = 0;
+                    for (int i = 0; i < gs.getNPlayers(); i++) {
+                        int points = gs.countPoints(i);
+                        if (points > bestPoints) {
+                            bestPoints = points;
+                        }
+                    }
+                    for (int i = 0; i < gs.getNPlayers(); i++) {
+                        int points = gs.countPoints(i);
+                        if (points == bestPoints) {
+                            best.add(i);
+                        }
+                    }
+                    // TODO tiebreaker
+                    int winner = best.get(0);
+                    for (int i = 0; i < gs.getNPlayers(); i++) {
+                        if (i == winner) {
+                            gs.setPlayerResult(Utils.GameResult.WIN, i);
+                        } else {
+                            gs.setPlayerResult(Utils.GameResult.LOSE, i);
+                        }
+                    }
+                    return;
+                }
+
                 // Move to research phase
                 gs.getTurnOrder().endRound(gs);
                 gs.setGamePhase(Research);
