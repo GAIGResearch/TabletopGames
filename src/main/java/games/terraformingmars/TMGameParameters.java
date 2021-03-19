@@ -34,7 +34,7 @@ public class TMGameParameters extends AbstractParameters {
     int maxPoints = 500;
 
     int projectPurchaseCost = 3;
-    int nCorpChoiceStart = 5;
+    int nCorpChoiceStart = 2;
     int nProjectsStart = 10;
     int nProjectsResearch = 4;
     int nActionsPerPlayer = 2;
