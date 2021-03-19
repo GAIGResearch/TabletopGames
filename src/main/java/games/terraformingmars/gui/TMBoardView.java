@@ -41,7 +41,7 @@ public class TMBoardView extends ComponentView {
 
     private boolean adjustedSize;
 
-    public TMBoardView(TMGameState gs) {
+    public TMBoardView(TMGUI gui, TMGameState gs) {
         super(gs.getBoard(), 0, 0);
         this.gs = gs;
 
@@ -73,6 +73,7 @@ public class TMBoardView extends ComponentView {
                     // Remove highlight
                     highlight.clear();
                 }
+                gui.updateButtons = true;
             }
         });
     }
@@ -160,7 +161,7 @@ public class TMBoardView extends ComponentView {
                 drawCell(g, gridBoard.getElement(j, i), xC, yC);
 
                 // Save rect where cell is drawn
-                rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), "grid-" + i + "-" + j);
+                rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), "grid-" + j + "-" + i);
             }
         }
 

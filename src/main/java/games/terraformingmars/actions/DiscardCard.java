@@ -51,7 +51,7 @@ public class DiscardCard extends TMAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Discard card idx " + cardIdx;
+        return "Discard card";
     }
 
     @Override

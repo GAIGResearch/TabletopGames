@@ -5,6 +5,8 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.PayForAction;
+import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import players.human.ActionController;
@@ -20,6 +22,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +45,7 @@ public class TMGUI extends AbstractGUI {
     JButton focusPlayerButton;
 
     boolean firstUpdate = true;
+    boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
     public TMGUI(Game game, ActionController ac) {
@@ -55,7 +59,7 @@ public class TMGUI extends AbstractGUI {
         setContentPane(backgroundImage);
 
         TMGameState gameState = (TMGameState) game.getGameState();
-        view = new TMBoardView(gameState);
+        view = new TMBoardView(this, gameState);
 
         actionMenus = new HashMap<>();
         JMenuBar menuBar = new JMenuBar();
@@ -91,30 +95,20 @@ public class TMGUI extends AbstractGUI {
         historyWrapper.add(historyContainer);
         historyContainer.setBackground(Color.black);
 
-        JLabel actionLabel = new JLabel("Actions: ");
-        actionLabel.setFont(defaultFont);
-        actionLabel.setForeground(Color.white);
-        actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
-        JPanel actionWrapper = new JPanel();
-        actionWrapper.add(actionLabel);
-        actionWrapper.add(actionPanel);
-        actionWrapper.setOpaque(false);
-
         JPanel playerViewWrapper = new JPanel();
         playerViewWrapper.setLayout(new BoxLayout(playerViewWrapper, BoxLayout.Y_AXIS));
         playerView = new TMPlayerView(gameState, focusPlayer);
 
-        playerHand = new TMDeckDisplay(gameState, gameState.getPlayerHands()[focusPlayer]);
+        playerHand = new TMDeckDisplay(this, gameState, gameState.getPlayerHands()[focusPlayer]);
         paneHand = new JScrollPane(playerHand);
         paneHand.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         paneHand.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
 
-        playerCorporation = new TMDeckDisplay(gameState, null);
+        playerCorporation = new TMDeckDisplay(this, gameState, null);
         playerCorporation.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth + TMDeckDisplay.offsetX * 2, TMDeckDisplay.cardHeight + TMDeckDisplay.offsetX * 2));
 
-        playerCardChoice = new TMDeckDisplay(gameState, gameState.getPlayerCardChoice()[focusPlayer]);
+        playerCardChoice = new TMDeckDisplay(this, gameState, gameState.getPlayerCardChoice()[focusPlayer]);
         paneCardChoice = new JScrollPane(playerCardChoice);
         paneCardChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -177,6 +171,16 @@ public class TMGUI extends AbstractGUI {
         top.add(playerFlipButtons);
         top.add(infoWrapper);
 
+        JLabel actionLabel = new JLabel("Actions: ");
+        actionLabel.setFont(defaultFont);
+        actionLabel.setForeground(Color.white);
+        actionLabel.setOpaque(false);
+        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight(), playerHand.getHighlight(), playerCardChoice.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
+        JPanel actionWrapper = new JPanel();
+        actionWrapper.add(actionLabel);
+        actionWrapper.add(actionPanel);
+        actionWrapper.setOpaque(false);
+
         top.setOpaque(false);
         playerMainWrap.setOpaque(false);
         playerCorporation.setOpaque(false);
@@ -215,6 +219,7 @@ public class TMGUI extends AbstractGUI {
             for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
                 if (t != TMTypes.ActionType.PlayCard) {
                     JMenu menu = actionMenus.get(t);
+                    menu.removeAll();
 
                     for (AbstractAction a : actions) {
                         TMAction aa = (TMAction) a;
@@ -243,19 +248,79 @@ public class TMGUI extends AbstractGUI {
 
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        // TODO: playCard for cards selected only, named "Play"
-        // TODO: placetile for grid spot selected only, named "Place Tile"
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            TMGameState gs = (TMGameState) gameState;
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             int i = 0;
+            TMAction passAction = null;
+            ArrayList<TMAction> playCardActions = new ArrayList<>();
+            ArrayList<TMAction> placeActions = new ArrayList<>();
+
             for (AbstractAction a: actions) {
                 TMAction aa = (TMAction) a;
-                if (aa.actionType == null || aa.actionType == TMTypes.ActionType.PlayCard) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setButtonAction(actions.get(i), gameState);
+                if (aa.actionType == null) {
+                    if (aa.pass) passAction = aa;
+                    else if (aa instanceof PlaceTile) {
+                        placeActions.add(aa);
+                    } else {
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setButtonAction(aa, gameState);
+                        i++;
+                    }
+                } else if (aa.actionType == TMTypes.ActionType.PlayCard) {
+                    playCardActions.add(aa);
                 }
+            }
+
+            if (playerHand.highlight.size() > 0) {
+                // A card to choose, check highlights
+                for (Rectangle r: playerHand.highlight) {
+                    String code = playerHand.rects.get(r);
+                    int idx = Integer.parseInt(code);
+                    // card idx can be played
+                    for (TMAction action: playCardActions) {
+                        if (action instanceof PayForAction) {
+                            if (((PayForAction) action).cardIdx == idx) {
+                                actionButtons[i].setVisible(true);
+                                actionButtons[i].setButtonAction(action, "Play");
+                                i++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (passAction != null) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setButtonAction(passAction, "Pass");
+                    i++;
+                }
+            }
+            if (view.highlight.size() > 0) {
+                for (Rectangle r: view.highlight) {
+                    String code = view.rects.get(r);
+                    if (code.contains("grid")) {
+                        // a grid location, trim actions to place tile here
+                        int x = Integer.parseInt(code.split("-")[1]);
+                        int y = Integer.parseInt(code.split("-")[2]);
+                        for (TMAction a: placeActions) {
+                            if (a instanceof PlaceTile) {
+                                if (((PlaceTile) a).x == x && ((PlaceTile) a).y == y) {
+                                    actionButtons[i].setVisible(true);
+                                    actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
+                                    i++;
+                                }
+                            }
+                        }
+                    } // TODO other options
+                }
+            } else if (i == 0) {
+                actionButtons[i].setVisible(true);
+                actionButtons[i].setButtonAction(null, "Choose a location to place tile");
                 i++;
             }
+
+            // Turn off the rest of the buttons
             for (int k = i; k < actionButtons.length; k++) {
                 actionButtons[k].setVisible(false);
                 actionButtons[k].setButtonAction(null, "");
@@ -291,9 +356,13 @@ public class TMGUI extends AbstractGUI {
                     firstUpdate = true;
                 } else {
                     if (firstUpdate) {
-                        updateActionButtons(player, gameState);
                         createActionMenu(player, gs);
+                        updateActionButtons(player, gameState);
                         firstUpdate = false;
+                    }
+                    if (updateButtons) {
+                        updateActionButtons(player, gameState);
+                        updateButtons = false;
                     }
                 }
             }

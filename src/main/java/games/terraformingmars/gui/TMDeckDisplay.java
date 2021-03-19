@@ -47,7 +47,7 @@ public class TMDeckDisplay extends JComponent {
     static int cardHeight = 200;
     static int cardWidth;
 
-    public TMDeckDisplay(TMGameState gs, Deck<TMCard> deck) {
+    public TMDeckDisplay(TMGUI gui, TMGameState gs, Deck<TMCard> deck) {
         this.gs = gs;
         this.deck = deck;
 
@@ -80,10 +80,12 @@ public class TMDeckDisplay extends JComponent {
                             break;
                         }
                     }
+                    gui.updateButtons = true;
                 } else {
                     // Remove highlight
                     highlight.clear();
                 }
+                gui.updateButtons = true;
             }
         });
     }
