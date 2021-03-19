@@ -26,7 +26,9 @@ public class TMGameParameters extends AbstractParameters {
     }};
     HashMap<TMTypes.Resource, Integer> startingProduction = new HashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
-            put(res, 1);
+            if (res.isPlayerBoardRes()) {
+                put(res, 1);
+            }
         }
     }};
     int maxPoints = 500;

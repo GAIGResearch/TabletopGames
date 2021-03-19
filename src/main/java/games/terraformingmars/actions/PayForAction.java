@@ -7,6 +7,7 @@ import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.requirements.Requirement;
 
 import java.util.*;
 
@@ -27,6 +28,15 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         this.costTotal = Math.abs(costTotal);
         this.resourceToPay = resourceToPay;
         this.cardIdx = cardIdx;  // -1 if no card needed
+    }
+
+    public PayForAction(TMTypes.ActionType type, int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx, Requirement req) {
+        super(type, player, true);
+        this.action = action;
+        this.costTotal = Math.abs(costTotal);
+        this.resourceToPay = resourceToPay;
+        this.cardIdx = cardIdx;  // -1 if no card needed
+        this.requirement = req;
     }
 
     public PayForAction(TMTypes.StandardProject project, int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardIdx) {

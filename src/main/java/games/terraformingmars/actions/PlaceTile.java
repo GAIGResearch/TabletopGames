@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -16,7 +15,7 @@ import java.util.Objects;
 
 public class PlaceTile extends TMAction implements IExtendedSequence {
     // TODO: extend for outer locations (not on mars), x and y will be -1
-    public boolean onMars;  // TODO: initialize and work with this var
+    public boolean onMars = true;  // TODO: initialize and work with this var
     public int x,y;
     public final TMTypes.Tile tile;
     public HashSet<Vector2D> legalPositions;
@@ -79,7 +78,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 for (Vector2D pos : legalPositions) {
                     TMMapTile mt = gs.getBoard().getElement(pos.getX(), pos.getY());
                     if (mt != null && mt.getTilePlaced() == null) {
-                        actions.add(new PlaceTile(player, pos.getX(), pos.getY(), tile, free));
+                        actions.add(new PlaceTile(player, pos.getX(), pos.getY(), tile, true));
                     }
                 }
             } else {
@@ -87,7 +86,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     for (int j = 0; j < gs.getBoard().getWidth(); j++) {
                         TMMapTile mt = gs.getBoard().getElement(j, i);
                         if (mt != null && mt.getTilePlaced() == null && mt.getTileType() == tile.getRegularLegalTileType()) {
-                            actions.add(new PlaceTile(player, j, i, tile, free));
+                            actions.add(new PlaceTile(player, j, i, tile, true));
                         }
                     }
                 }

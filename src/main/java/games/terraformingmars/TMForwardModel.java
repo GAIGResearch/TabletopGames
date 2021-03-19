@@ -118,6 +118,9 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.setGamePhase(CorporationSelect);
         for (int i = 0; i < gs.getNPlayers(); i++) {
             for (int j = 0; j < params.nCorpChoiceStart; j++) {
+                if (gs.corpCards.get(0).getComponentName().equalsIgnoreCase("Phoblog")) {
+                    gs.playerCardChoice[1].add(gs.corpCards.pick(0));
+                }
                 gs.playerCardChoice[i].add(gs.corpCards.pick(0));
             }
         }

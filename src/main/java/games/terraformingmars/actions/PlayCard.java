@@ -29,7 +29,7 @@ public class PlayCard extends TMAction {
         TMCard card = gs.getPlayerHands()[player].get(cardIdx);
         cardID = card.getComponentID();
         playCard(gs, player);
-        return true;
+        return super.execute(gs);
     }
 
     private void playCard(TMGameState gs, int player) {
@@ -53,8 +53,6 @@ public class PlayCard extends TMAction {
         for (AbstractAction aa: card.immediateEffects) {
             aa.execute(gs);
         }
-
-        super.execute(gs);
     }
 
     @Override

@@ -333,20 +333,21 @@ public class TMGameState extends AbstractGameState {
     }
 
     public int playerResourceSum(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to) {
-        int sum = 0;
-        if (from == null) {
-            sum = playerResources[player].get(to).getValue();
-        }
-        // Add resources that this player can use as money for this card
-        for (ResourceMapping resMap : playerResourceMap[player]) {
-            if ((from == null || from.contains(resMap.from))
-                    && resMap.to == to
-                    && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
-                int n = playerResources[player].get(resMap.from).getValue();
-                sum += n * resMap.rate;
+        if (from == null || from.size() > 0) {
+            int sum = playerResources[player].get(to).getValue();  // All resources can be exchanged for themselves at rate 1.0
+
+            // Add resources that this player can use as money for this card
+            for (ResourceMapping resMap : playerResourceMap[player]) {
+                if ((from == null || from.contains(resMap.from))
+                        && resMap.to == to
+                        && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
+                    int n = playerResources[player].get(resMap.from).getValue();
+                    sum += n * resMap.rate;
+                }
             }
+            return sum;
         }
-        return sum;
+        return 0;
     }
 
     /**
@@ -417,17 +418,22 @@ public class TMGameState extends AbstractGameState {
         int player = getCurrentPlayer();
         HashSet<ResourceMapping> toRemove = new HashSet<>();
         HashSet<ResourceMapping> toAdd = new HashSet<>();
-        for (ResourceMapping resMap : playerResourceMap[player]) {
-            for (ResourceMapping resMapNew : maps) {
-                if (resMap.equals(resMapNew)) {
-                    if (add) {
-                        resMap.rate += resMapNew.rate;
-                    } else {
-                        toRemove.add(resMap);
-                        toAdd.add(resMapNew);
+        for (ResourceMapping resMapNew : maps) {
+            boolean added = false;
+            for (ResourceMapping resMap : playerResourceMap[player]) {
+                if (resMap.from == resMapNew.from && resMap.to == resMapNew.to) {
+                    if (resMapNew.requirement == null || resMapNew.requirement.equals(resMap.requirement)) {
+                        if (add) {
+                            resMap.rate += resMapNew.rate;
+                        } else {
+                            toRemove.add(resMap);
+                            toAdd.add(resMapNew);
+                        }
+                        added = true;
                     }
                 }
             }
+            if (!added) toAdd.add(resMapNew);
         }
         playerResourceMap[player].removeAll(toRemove);
         playerResourceMap[player].addAll(toAdd);
@@ -502,7 +508,7 @@ public class TMGameState extends AbstractGameState {
             ResourceMapping that = (ResourceMapping) o;
             return from == that.from &&
                     to == that.to &&
-                    Objects.equals(requirement, that.requirement);
+                    (requirement == null && that.requirement == null || Objects.equals(requirement, that.requirement));
         }
 
         @Override

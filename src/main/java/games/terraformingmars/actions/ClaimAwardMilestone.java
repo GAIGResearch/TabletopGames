@@ -27,7 +27,7 @@ public class ClaimAwardMilestone extends TMAction {
             } else {
                 ((TMGameState)gs).getnAwardsFunded().increment(1);
             }
-            return true;
+            return super.execute(gs);
         }
         return false;
     }

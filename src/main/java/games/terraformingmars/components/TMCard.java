@@ -120,7 +120,7 @@ public class TMCard extends Card {
                             req = new ResourceIncGenRequirement(TMTypes.Resource.valueOf(reqStr.split("-")[1]));
                         }
                     }
-                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new ResourceTransaction(-1, r, amount, false, req), costResource, -cost, -1);
+                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new ResourceTransaction(-1, r, amount, false), costResource, -cost, -1, req);
                     actions.add(a);
                 }
             } else if (type.equalsIgnoreCase("discount")) {
