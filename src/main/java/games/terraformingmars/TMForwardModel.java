@@ -306,9 +306,11 @@ public class TMForwardModel extends AbstractForwardModel {
                 actions.add(new PayForAction(Greenery, player, new PlaceTile(player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPGreenery, -1));
             }
-            // - Place city tile and increase MC prod by 1 for 25 MC TODO increase MC prod by 1
+            // - Place city tile and increase MC prod by 1 for 25 MC
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPCity)) {
-                actions.add(new PayForAction(City, player, new PlaceTile(player, TMTypes.Tile.City, TMTypes.MapTileType.Ground, false),
+                TMAction a1 = new PlaceTile(player, TMTypes.Tile.City, TMTypes.MapTileType.Ground, false);
+                TMAction a2 = new TMModifyCounter(gs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).getComponentID(), params.nSPCityMCGain, true);
+                actions.add(new PayForAction(City, player, new CompoundAction(player, new TMAction[]{a1, a2}, true),
                         TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
             }
 

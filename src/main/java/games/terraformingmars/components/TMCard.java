@@ -309,12 +309,13 @@ public class TMCard extends Card {
                                 if (a != null) {
                                     immediateEffects.add(a);
                                 } else {
-                                    int b = 0;
+                                    int b = 0;  // action didn't parse, put a breakpoint here to see it
                                 }
+                                // TODO:
+                                // - compound actions
+                                // - action choice
                             }
                         }
-
-                        // "red arrow" is action, ":" is effect
                     }
                 }
             }

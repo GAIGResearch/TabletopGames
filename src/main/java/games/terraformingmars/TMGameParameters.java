@@ -51,6 +51,7 @@ public class TMGameParameters extends AbstractParameters {
     int nCostSPOcean = 18;
     int nCostSPGreenery = 23;
     int nCostSPCity = 25;
+    int nSPCityMCGain = 1;
 
     // Resource actions
     int nCostGreeneryPlant = 8;

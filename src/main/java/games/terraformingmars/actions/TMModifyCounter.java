@@ -10,8 +10,14 @@ public class TMModifyCounter extends TMAction {
     public int counterID;
     public final int change;
 
+    public TMModifyCounter(int counterID, int change, boolean free) {
+        super(-1, free);
+        this.counterID = counterID;
+        this.change = change;
+    }
+
     public TMModifyCounter(int player, int counterID, int change, boolean free) {
-        super(player, free);
+        super(-1, free);
         this.counterID = counterID;
         this.change = change;
     }
@@ -32,7 +38,7 @@ public class TMModifyCounter extends TMAction {
 
     @Override
     public AbstractAction copy() {
-        return new TMModifyCounter(player, counterID, change, free);
+        return new TMModifyCounter(counterID, change, free);
     }
 
     @Override
@@ -53,5 +59,10 @@ public class TMModifyCounter extends TMAction {
     @Override
     public String getString(AbstractGameState gameState) {
         return "Modify counter " + gameState.getComponentById(counterID).toString() + " by " + change;
+    }
+
+    @Override
+    public String toString() {
+        return "Modify counter " + counterID + " by " + change;
     }
 }

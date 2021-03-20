@@ -148,6 +148,8 @@ public class TMAction extends AbstractAction {
                 int increment = Integer.parseInt(split2[2]);
                 if (encoding.contains("dec")) increment *= -1;
 
+                // TODO: split2[3] could exist and be "any" -> action player's choice as to which player it applies to
+
                 effectString = split2[1];
 
                 // Find which counter
