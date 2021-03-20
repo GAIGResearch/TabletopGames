@@ -200,9 +200,8 @@ public class TMForwardModel extends AbstractForwardModel {
                         }
                     }
                     // TODO tiebreaker
-                    int winner = best.get(0);
                     for (int i = 0; i < gs.getNPlayers(); i++) {
-                        if (i == winner) {
+                        if (best.contains(i)) {
                             gs.setPlayerResult(Utils.GameResult.WIN, i);
                         } else {
                             gs.setPlayerResult(Utils.GameResult.LOSE, i);
