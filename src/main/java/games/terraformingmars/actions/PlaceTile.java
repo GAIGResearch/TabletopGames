@@ -113,8 +113,15 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                                 if (tile == TMTypes.Tile.Greenery && placedAnyTiles) {
                                     // Can only be placed adjacent to another tile owned by the player, if any
                                     boolean playerTileNeighbour = isAdjacentToPlayerOwnedTiles(gs, new Vector2D(j, i));
-                                    if (playerTileNeighbour)
+                                    if (playerTileNeighbour) {
                                         actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
+                                    }
+                                } else if (tile == TMTypes.Tile.City && !mt.getComponentName().equalsIgnoreCase(tileName)) {
+                                    // Cities can't be next to other cities, unless named locations
+                                    int nAdjacentCities = isAdjacentToCity(gs, new Vector2D(j, i));
+                                    if (nAdjacentCities > 0) {
+                                        actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
+                                    }
                                 } else {
                                     actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
                                 }
@@ -185,7 +192,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         boolean playerTileNeighbour = false;
         for (Vector2D n: neighbours) {
             TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
-            if (other.getOwner() == player) {
+            if (other != null && other.getOwner() == player) {
                 playerTileNeighbour = true;
                 break;
             }
@@ -198,7 +205,19 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         int count = 0;
         for (Vector2D n: neighbours) {
             TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
-            if (other.getTilePlaced() == TMTypes.Tile.Ocean) {
+            if (other != null && other.getTilePlaced() == TMTypes.Tile.Ocean) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int isAdjacentToCity(TMGameState gs, Vector2D cell) {
+        List<Vector2D> neighbours = getNeighbours(cell);
+        int count = 0;
+        for (Vector2D n: neighbours) {
+            TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+            if (other != null && other.getTilePlaced() == TMTypes.Tile.City) {
                 count++;
             }
         }
