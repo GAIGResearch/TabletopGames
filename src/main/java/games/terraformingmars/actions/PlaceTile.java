@@ -17,6 +17,7 @@ import java.util.Objects;
 import static games.terraformingmars.TMTypes.neighbor_directions;
 
 public class PlaceTile extends TMAction implements IExtendedSequence {
+    public boolean respectingAdjacency = true;
     public boolean onMars = true;
     public String tileName;  // to be used with locations not on mars
     public int mapTileID;
@@ -110,13 +111,13 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                                     ((tile != null && mt.getTileType() == tile.getRegularLegalTileType()) ||
                                     (mt.getComponentName().equalsIgnoreCase(tileName)))) {
                                 // Check adjacency rules
-                                if (tile == TMTypes.Tile.Greenery && placedAnyTiles) {
+                                if (respectingAdjacency && tile == TMTypes.Tile.Greenery && placedAnyTiles) {
                                     // Can only be placed adjacent to another tile owned by the player, if any
                                     boolean playerTileNeighbour = isAdjacentToPlayerOwnedTiles(gs, new Vector2D(j, i));
                                     if (playerTileNeighbour) {
                                         actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
                                     }
-                                } else if (tile == TMTypes.Tile.City && !mt.getComponentName().equalsIgnoreCase(tileName)) {
+                                } else if (respectingAdjacency && tile == TMTypes.Tile.City && !mt.getComponentName().equalsIgnoreCase(tileName)) {
                                     // Cities can't be next to other cities, unless named locations
                                     int nAdjacentCities = isAdjacentToCity(gs, new Vector2D(j, i));
                                     if (nAdjacentCities > 0) {
