@@ -4,6 +4,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
+import games.terraformingmars.components.TMMapTile;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,8 +36,9 @@ public class PlaceTileEffect extends Effect {
         boolean tileCondition = tile == null || action.tile == tile;
 
         HashSet<TMTypes.Resource> gained = new HashSet<>();
-        if (action.x != -1) {
-            gained.addAll(Arrays.asList(gameState.getBoard().getElement(action.x, action.y).getResources()));
+        if (action.mapTileID != -1 && action.onMars) {
+            TMMapTile mt = (TMMapTile) gameState.getComponentById(action.mapTileID);
+            gained.addAll(Arrays.asList(mt.getResources()));
         }
         boolean resourceTypeCondition = resourceTypeGained == null;
         if (resourceTypeGained != null) {

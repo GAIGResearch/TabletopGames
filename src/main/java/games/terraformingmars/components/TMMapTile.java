@@ -6,21 +6,29 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.effects.Bonus;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import static utilities.Utils.ComponentType.BOARD_NODE;
 
 public class TMMapTile extends Component {
     int owner = -1;
+    int x, y;
     TMTypes.Tile tilePlaced;
 
     TMTypes.MapTileType type;
     TMTypes.Resource[] resources;
 
-    public TMMapTile() {
+    public TMMapTile(int x, int y) {
         super(BOARD_NODE, "Tile");
+        this.x = x;
+        this.y = y;
     }
 
-    protected TMMapTile(int componentID) {
+    protected TMMapTile(int x, int y, int componentID) {
         super(BOARD_NODE, componentID);
+        this.x = x;
+        this.y = y;
     }
 
     public void setType(TMTypes.MapTileType type) {
@@ -41,6 +49,14 @@ public class TMMapTile extends Component {
 
     public TMTypes.Tile getTilePlaced() {
         return tilePlaced;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
     }
 
     public int getOwner() {
@@ -116,13 +132,17 @@ public class TMMapTile extends Component {
 
     @Override
     public Component copy() {
-        return new TMMapTile(componentID);
+        return new TMMapTile(x, y, componentID);
     }
 
     public static TMMapTile parseMapTile(String s) {
+        return parseMapTile(s, -1, -1);
+    }
+
+    public static TMMapTile parseMapTile(String s, int x, int y) {
         if (s.equals("0")) return null;
 
-        TMMapTile mt = new TMMapTile();
+        TMMapTile mt = new TMMapTile(x, y);
 
         String[] split = s.split("-");
 
@@ -146,5 +166,21 @@ public class TMMapTile extends Component {
         mt.setResources(resources);
 
         return mt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TMMapTile)) return false;
+        if (!super.equals(o)) return false;
+        TMMapTile tmMapTile = (TMMapTile) o;
+        return owner == tmMapTile.owner && x == tmMapTile.x && y == tmMapTile.y && tilePlaced == tmMapTile.tilePlaced && type == tmMapTile.type && Arrays.equals(resources, tmMapTile.resources);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), owner, x, y, tilePlaced, type);
+        result = 31 * result + Arrays.hashCode(resources);
+        return result;
     }
 }

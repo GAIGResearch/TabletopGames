@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import static games.terraformingmars.components.TMMapTile.parseMapTile;
 
@@ -33,6 +34,8 @@ public class TMTypes {
             {new Vector2D(1, 0), new Vector2D(1, -1),
                     new Vector2D(0, -1), new Vector2D(-1, 0),
                     new Vector2D(0, 1), new Vector2D(1, 1)}};
+
+    // Enums
 
     public enum ActionType {
         PlayCard,
@@ -283,7 +286,7 @@ public class TMTypes {
                         JSONArray row = (JSONArray) g;
                         int x = 0;
                         for (Object o1 : row) {
-                            board.setElement(x, y, parseMapTile((String) o1));
+                            board.setElement(x, y, parseMapTile((String) o1, x, y));
                             x++;
                         }
                         y++;

@@ -6,6 +6,10 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import static games.terraformingmars.TMTypes.neighbor_directions;
 
 public class Utils {
 

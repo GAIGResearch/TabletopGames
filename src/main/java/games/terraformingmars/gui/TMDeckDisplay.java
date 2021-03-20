@@ -42,7 +42,6 @@ public class TMDeckDisplay extends JComponent {
     Image projCardBg;
     int width, height;
 
-    static int offsetX = 10;
     static int spacing = 10;
     static int cardHeight = 200;
     static int cardWidth;
@@ -62,11 +61,11 @@ public class TMDeckDisplay extends JComponent {
         Vector2D dim = scaleLargestDimImg(projCardBg, cardHeight);
         cardWidth = dim.getX();
         if (deck != null) {
-            width = deck.getSize() * cardWidth + offsetX * 2;
+            width = deck.getSize() * cardWidth;
         } else {
-            width = cardWidth + offsetX * 2;
+            width = cardWidth;
         }
-        height = cardHeight + offsetX*2;
+        height = cardHeight;
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -101,8 +100,8 @@ public class TMDeckDisplay extends JComponent {
             for (int i = 0; i < deck.getSize(); i++) {
 //            if (playerHand.isComponentVisible(i, gs.getCurrentPlayer())) {
                 if (deck.get(i) != null) {
-                    int cardX = offsetX + i * cardWidth;
-                    int cardY = offsetX;
+                    int cardX = i * cardWidth;
+                    int cardY = 0;
                     drawCard(g, deck.get(i), cardX, cardY, cardWidth, cardHeight);
                     rects.put(new Rectangle(cardX, cardY, cardWidth, cardHeight), ""+i);
                 }
@@ -378,7 +377,7 @@ public class TMDeckDisplay extends JComponent {
     public void update(Deck<TMCard> deck) {
         this.deck = deck;
         if (deck != null) {
-            width = deck.getSize() * cardWidth + offsetX * 2;
+            width = deck.getSize() * cardWidth;
             revalidate();
         }
     }

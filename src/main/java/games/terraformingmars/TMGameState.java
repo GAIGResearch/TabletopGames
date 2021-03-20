@@ -384,19 +384,6 @@ public class TMGameState extends AbstractGameState {
         return rate;
     }
 
-    static HashSet<Vector2D> getEmptyTilesOfType(TMGameState gs, TMTypes.MapTileType type) {
-        HashSet<Vector2D> pos = new HashSet<>();
-        for (int i = 0; i < gs.board.getHeight(); i++) {
-            for (int j = 0; j < gs.board.getWidth(); j++) {
-                TMMapTile mt = gs.board.getElement(j, i);
-                if (mt != null && mt.getTilePlaced() == null && mt.getTileType() == type) {
-                    pos.add(new Vector2D(j, i));
-                }
-            }
-        }
-        return pos;
-    }
-
     public void addDiscountEffects(HashMap<Requirement, Integer> effects) {
         int player = getCurrentPlayer();
         for (Requirement r: effects.keySet()) {
@@ -439,6 +426,13 @@ public class TMGameState extends AbstractGameState {
         playerResourceMap[player].addAll(toAdd);
     }
 
+    public boolean hasPlacedTile(int player) {
+        for (Counter c: tilesPlaced[player].values()) {
+            if (c.getValue() > 0) return true;
+        }
+        return false;
+    }
+
     public int countPoints(int player) {
         int points = playerResources[player].get(TMTypes.Resource.TR).getValue();
         TMGameParameters params = (TMGameParameters) gameParameters;
@@ -477,15 +471,6 @@ public class TMGameState extends AbstractGameState {
         // Add cities on board TODO
         // Add points on cards TODO
         return points;
-    }
-
-    static List<Vector2D> getNeighbours(Vector2D cell) {
-        ArrayList<Vector2D> neighbors = new ArrayList<>();
-        int parity = cell.getY() % 2;
-        for (Vector2D v: neighbor_directions[parity]) {
-            neighbors.add(cell.add(v));
-        }
-        return neighbors;
     }
 
     public static class ResourceMapping {

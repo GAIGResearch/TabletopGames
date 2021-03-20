@@ -9,14 +9,15 @@ import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.components.TMMapTile;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -57,6 +58,9 @@ public class TMGUI extends AbstractGUI {
         TiledImage backgroundImage = new TiledImage(space);
         // Make backgroundImage the content pane.
         setContentPane(backgroundImage);
+        UIManager.put("TabbedPane.contentOpaque", false);
+        UIManager.put("TabbedPane.opaque", false);
+        UIManager.put("TabbedPane.tabsOpaque", false);
 
         TMGameState gameState = (TMGameState) game.getGameState();
         view = new TMBoardView(this, gameState);
@@ -69,10 +73,10 @@ public class TMGUI extends AbstractGUI {
             JMenu menu = new JMenu(t.name());
             menu.setMnemonic(mnemonicStart++);
             menu.getAccessibleContext().setAccessibleDescription("Choose an action of type " + t.name());
-            menuBar.add(menu);
             menu.setForeground(Color.white);
             menu.setFont(defaultFont);
             actionMenus.put(t, menu);
+            menuBar.add(menu);
         }
         this.setJMenuBar(menuBar);
 
@@ -84,7 +88,7 @@ public class TMGUI extends AbstractGUI {
             //Handle exception
         }
 
-        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight);
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2);
         historyInfo.setFont(defaultFont);
         historyInfo.setForeground(Color.white);
         JPanel historyWrapper = new JPanel();
@@ -102,16 +106,16 @@ public class TMGUI extends AbstractGUI {
         playerHand = new TMDeckDisplay(this, gameState, gameState.getPlayerHands()[focusPlayer]);
         paneHand = new JScrollPane(playerHand);
         paneHand.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneHand.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
 
         playerCorporation = new TMDeckDisplay(this, gameState, null);
-        playerCorporation.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth + TMDeckDisplay.offsetX * 2, TMDeckDisplay.cardHeight + TMDeckDisplay.offsetX * 2));
+        playerCorporation.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight + 20));
 
         playerCardChoice = new TMDeckDisplay(this, gameState, gameState.getPlayerCardChoice()[focusPlayer]);
         paneCardChoice = new JScrollPane(playerCardChoice);
         paneCardChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneCardChoice.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
 
         JPanel playerMainWrap = new JPanel();
@@ -119,6 +123,7 @@ public class TMGUI extends AbstractGUI {
         playerMainWrap.add(playerCorporation);
         playerViewWrapper.add(playerMainWrap);
         playerViewWrapper.add(paneHand);
+        playerViewWrapper.add(Box.createRigidArea(new Dimension(1, 10)));
         playerViewWrapper.add(paneCardChoice);
 
         JPanel main = new JPanel();
@@ -203,10 +208,46 @@ public class TMGUI extends AbstractGUI {
         gamePhase.setOpaque(false);
         generationCount.setOpaque(false);
 
-        getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        getContentPane().add(top);
-        getContentPane().add(main);
-        getContentPane().add(actionWrapper);
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.setForeground(Color.white);
+        tabs.setFont(defaultFont);
+
+        JPanel gamePanel = new JPanel();
+        gamePanel.setOpaque(false);
+        gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
+        gamePanel.add(top);
+        gamePanel.add(main);
+        gamePanel.add(actionWrapper);
+        tabs.add("Game", gamePanel);
+
+        JPanel instructionsPanel = new JPanel();
+        instructionsPanel.setBackground(Color.black);
+        instructionsPanel.setLayout(new BoxLayout(instructionsPanel, BoxLayout.Y_AXIS));
+        JTextPane textPane = new JTextPane();
+        textPane.setOpaque(false);
+        textPane.setBorder(new EmptyBorder(20, 20, 20, 20));
+        textPane.setFont(new Font("Prototype", Font.BOLD, 22));
+        textPane.setForeground(Color.lightGray);
+        textPane.setEditable(false);
+        textPane.setFocusable(false);
+        textPane.setPreferredSize(new Dimension(defaultDisplayWidth*2,defaultDisplayHeight*2));
+        textPane.setText("Hi there! This is Terraforming Mars: increase temperature and oxygen to max, and place all the ocean tiles to " +
+                "end the game. Earn the most points to win! \n\n\n" +
+                "We distinguish 3 phases here: Corporation Select (only once in the beginning), and Research and Actions (+ production) repeating every generation.\n\n" +
+                "\t- In Corporation Select: you'll be given X corporation cards to choose from. Select the button in the actions list at the bottom corresponding to the card you want.\n\n" +
+                "\t- In Research: you'll be given X project cards to potentially buy in your hand (for Y MegaCredits). You'll make this decision one card at a time, choosing for the first card in the list whether you want to buy it or discard it.\n\n" +
+                "\t- In Actions: perform actions by either selecting a card in hand to play it (if legal), or choosing another possible action from the menu at the top.\n\n\n" +
+                "At the end of the actions phase, all resource production will be turned into resources. Then a new generation begins, with Research + Actions phases.\n\n\n" +
+                "Good luck! :)");
+        instructionsPanel.add(textPane);
+
+        tabs.add("Help", instructionsPanel);
+        Image qmark = ImageIO.GetInstance().getImage("data/terraformingmars/images/resources/wild.png");
+        qmark = getScaledImage(qmark, 20, 20);
+        tabs.setIconAt(1, new ImageIcon(qmark));
+//        menuBar.add(Box.createHorizontalGlue());
+
+        getContentPane().add(tabs);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setFrameProperties();
@@ -225,18 +266,11 @@ public class TMGUI extends AbstractGUI {
                         TMAction aa = (TMAction) a;
                         if (aa.actionType != null && aa.actionType == t) {
                             JMenuItem menuItem = new JMenuItem(aa.getString(gs));
-//                            menuItem = new JMenuItem("Both text and icon",
-//                                    new ImageIcon("images/middle.gif"));
                             menuItem.setFont(defaultFont);
                             menuItem.setForeground(Color.white);
                             menuItem.setBackground(Color.black);
                             menu.add(menuItem);
-                            menuItem.addActionListener(new javax.swing.AbstractAction() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    ac.addAction(aa);
-                                }
-                            });
+                            menuItem.addActionListener(e -> ac.addAction(aa));
                         }
                     }
 
@@ -299,20 +333,21 @@ public class TMGUI extends AbstractGUI {
             if (view.highlight.size() > 0) {
                 for (Rectangle r: view.highlight) {
                     String code = view.rects.get(r);
-                    if (code.contains("grid")) {
-                        // a grid location, trim actions to place tile here
-                        int x = Integer.parseInt(code.split("-")[1]);
-                        int y = Integer.parseInt(code.split("-")[2]);
-                        for (TMAction a: placeActions) {
-                            if (a instanceof PlaceTile) {
-                                if (((PlaceTile) a).x == x && ((PlaceTile) a).y == y) {
+                    for (TMAction a: placeActions) {
+                        if (a instanceof PlaceTile) {
+                            TMMapTile mt = (TMMapTile) gs.getComponentById(((PlaceTile) a).mapTileID);
+                            if (code.contains("grid")) {
+                                // a grid location, trim actions to place tile here
+                                int x = Integer.parseInt(code.split("-")[1]);
+                                int y = Integer.parseInt(code.split("-")[2]);
+                                if (mt.getX() == x && mt.getY() == y) {
                                     actionButtons[i].setVisible(true);
                                     actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
                                     i++;
                                 }
-                            }
+                            } // TODO other options
                         }
-                    } // TODO other options
+                    }
                 }
             } else if (i == 0) {
                 actionButtons[i].setVisible(true);
@@ -368,5 +403,16 @@ public class TMGUI extends AbstractGUI {
             }
         }
         repaint();
+    }
+
+    private Image getScaledImage(Image srcImg, int w, int h){
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
     }
 }

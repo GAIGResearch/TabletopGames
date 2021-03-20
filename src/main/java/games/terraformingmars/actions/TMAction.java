@@ -11,7 +11,6 @@ import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.Requirement;
 import utilities.Pair;
 import utilities.Utils;
-import utilities.Vector2D;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -172,18 +171,30 @@ public class TMAction extends AbstractAction {
             TMTypes.Tile toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
             // split2[2] is where to place it. can be a map tile, or a city name.
             TMTypes.MapTileType where = Utils.searchEnum(TMTypes.MapTileType.class, split2[2]);
-            HashSet<Vector2D> legalPositions = new HashSet<>();
+            HashSet<Integer> legalPositions = new HashSet<>();
             for (int i = 0; i < gameState.getBoard().getHeight(); i++) {
                 for (int j = 0; j < gameState.getBoard().getWidth(); j++) {
                     TMMapTile mt = gameState.getBoard().getElement(j, i);
                     if (mt != null) {
                         if (where != null && mt.getTileType() == where || where == null && mt.getComponentName().equalsIgnoreCase(split2[2])) {
-                            legalPositions.add(new Vector2D(j, i));
+                            legalPositions.add(mt.getComponentID());
                         }
                     }
                 }
             }
+            boolean onMars = true;
+            if (legalPositions.size() == 0 && where == null) {
+                // An extra tile, named
+                for (TMMapTile mt: gameState.getExtraTiles()) {
+                    if (mt.getComponentName().equalsIgnoreCase(split2[2])) {
+                        legalPositions.add(mt.getComponentID());
+                        onMars = false;
+                        break;
+                    }
+                }
+            }
             effect = new PlaceTile(player, toPlace, legalPositions, true);  // Extended sequence, will ask player where to put it
+            ((PlaceTile) effect).onMars = onMars;
             effectString = split2[1];
         }
         return new Pair<>(effect, effectString);

@@ -38,6 +38,7 @@ public class TMGameParameters extends AbstractParameters {
     int nProjectsStart = 10;
     int nProjectsResearch = 4;
     int nActionsPerPlayer = 2;
+    int nMCGainedOcean = 2;
 
     // steel and titanium to MC rate
     double nSteelMC = 2;
@@ -114,5 +115,9 @@ public class TMGameParameters extends AbstractParameters {
 
     public TMTypes.Expansion[] getExpansions() {
         return expansions;
+    }
+
+    public int getnMCGainedOcean() {
+        return nMCGainedOcean;
     }
 }

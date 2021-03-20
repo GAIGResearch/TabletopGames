@@ -16,7 +16,6 @@ import utilities.Utils;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
-import static games.terraformingmars.TMGameState.getEmptyTilesOfType;
 import static games.terraformingmars.TMTypes.StandardProject.*;
 import static games.terraformingmars.TMTypes.ActionType.*;
 
@@ -300,7 +299,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             // - Place ocean tile for 18 MC
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPOcean)) {
-                actions.add(new PayForAction(Aquifer, player, new PlaceTile(player, TMTypes.Tile.Ocean, getEmptyTilesOfType(gs, TMTypes.MapTileType.Ocean), false),
+                actions.add(new PayForAction(Aquifer, player, new PlaceTile(player, TMTypes.Tile.Ocean, null, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPOcean, -1));
             }
             // - Place greenery tile for 23 MC
