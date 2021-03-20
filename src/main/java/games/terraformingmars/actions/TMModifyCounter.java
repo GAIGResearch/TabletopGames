@@ -58,7 +58,7 @@ public class TMModifyCounter extends TMAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Modify counter " + gameState.getComponentById(counterID).toString() + " by " + change;
+        return "Modify counter " + gameState.getComponentById(counterID).getComponentName() + " by " + change;
     }
 
     @Override

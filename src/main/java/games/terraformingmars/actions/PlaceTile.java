@@ -31,6 +31,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         super(player, free);
         this.tile = tile;
         this.legalPositions = new HashSet<>();
+        this.mapTileID = mapTileID;
     }
 
     public PlaceTile(int player, TMTypes.Tile tile, HashSet<Integer> legalPositions, boolean free) {
@@ -51,6 +52,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         super(player, free);
         this.tileName = tileName;
         this.onMars = onMars;
+        this.mapTileID = -1;
     }
 
     @Override
