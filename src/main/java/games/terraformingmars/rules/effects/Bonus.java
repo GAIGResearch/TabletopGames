@@ -27,9 +27,9 @@ public class Bonus {
         this.threshold = threshold;
     }
 
-    public Pair<TMAction, String> getEffect(TMGameState gs) {
+    public Pair<TMAction, String> getEffect() {
         if (effect == null) {
-            return TMAction.parseAction(gs, effectString);
+            return TMAction.parseAction(effectString);
         } else {
             return new Pair<>(effect, effectString);
         }
@@ -39,8 +39,9 @@ public class Bonus {
         if (!executed) {
             Counter c = gs.getGlobalParameters().get(param);
             if (effect == null) {
-                Pair<TMAction, String> effect = TMAction.parseAction(gs, effectString);
+                Pair<TMAction, String> effect = TMAction.parseAction(effectString);
                 this.effect = effect.a;
+                this.effect.player = gs.getCurrentPlayer();
                 this.effectString = effect.b;
             }
 

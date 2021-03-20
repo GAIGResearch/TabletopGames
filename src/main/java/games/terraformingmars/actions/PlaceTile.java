@@ -21,6 +21,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     public String tileName;  // to be used with locations not on mars
     public int mapTileID;
     public TMTypes.Tile tile;
+    public TMTypes.MapTileType mapType;
     public HashSet<Integer> legalPositions;  // IDs for TMMapTile components
 
     boolean placed;
@@ -36,6 +37,13 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         super(player, free);
         this.tile = tile;
         this.legalPositions = legalPositions;
+        this.mapTileID = -1;
+    }
+
+    public PlaceTile(int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile, boolean free) {
+        super(player, free);
+        this.tile = tile;
+        this.mapType = mapTile;
         this.mapTileID = -1;
     }
 

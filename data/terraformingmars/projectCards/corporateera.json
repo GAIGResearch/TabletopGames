@@ -58,7 +58,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:0px;",
-            "#text": "(Requires that you have titaniumprod. dec-titaniumprod-1-any and inc-titaniumprod-1)"
+            "#text": "Requires that you have titaniumprod. dec-titaniumprod-1-any . inc-titaniumprod-1)"
           }
         ]
       }
@@ -133,7 +133,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 1 steel to gain 5 MegaCredit.)"
+            "#text": "Action: dec-steel-1 to inc-MegaCredit-5"
           },
           {
             "@class": "production-box ",
@@ -143,7 +143,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-titaniumprod-1 .)"
+            "#text": "inc-titaniumprod-1 "
           }
         ],
         "span": [
@@ -199,7 +199,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 1 Energy to draw a card.)"
+            "#text": "Action: dec-Energy-1 to inc-Card-1"
           }
         ]
       }
@@ -242,7 +242,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a Space card, you pay 2 MegaCredit less for it.)"
+            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
           }
         ],
         "#text": ":"
@@ -334,11 +334,11 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 1 titanium to add 1 fighter resource to this card.)"
+            "#text": "Action: dec-titanium-1 to add 1 fighter resource to this card"
           },
           {
             "@class": "description ",
-            "#text": "(1 VP for each fighter resource on this card.)"
+            "#text": "1 VP for each fighter resource on this card"
           }
         ]
       }
@@ -391,7 +391,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 Science tags. inc-Energyprod-1 and inc-MegaCreditprod-1 one  each.)"
+            "#text": "Requires 3 Science tags. inc-Energyprod-1 . inc-MegaCreditprod-1"
           }
         ]
       }
@@ -440,10 +440,8 @@
               "",
               ""
             ],
-            "#text": [
-              "(Action: Add 1 Microbe to this card.)",
-              "(1 VP per 4 Microbes on this card.)"
-            ]
+            "#text":  "Action: Add 1 Microbe to this card . 1 VP per 4 Microbes on this card"
+
           }
         ],
         "br": ""
@@ -491,7 +489,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Remove up to 2 Animals or 5 Plant from any player.)"
+            "#text": "dec-Animal-2-any or dec-Plant-5-any"
           }
         ],
         "#text": [
@@ -548,7 +546,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1  for each Earth tag you have.)"
+            "#text": "inc-MegaCreditprod-1  for each Earth tag you have"
           }
         ]
       }
@@ -586,7 +584,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-steelprod-1 .)"
+            "#text": "inc-steelprod-1 "
           }
         ]
       }
@@ -631,7 +629,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-titaniumprod-1 .)"
+            "#text": "inc-titaniumprod-1 "
           }
         ]
       }
@@ -689,7 +687,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires steelprod-1. dec-steelprod-1-any and inc-steelprod-1)"
+            "#text": "Requires steelprod-1. dec-steelprod-1-any . inc-steelprod-1)"
           }
         ]
       }
@@ -724,7 +722,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Gain 5 steel.)"
+            "#text": "inc-steel-5"
           }
         ],
         "#text": "5"
@@ -773,7 +771,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase yourprod-of that resource 1 .)"
+            "#text": "Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase yourprod-of that resource 1 "
           }
         ],
         "br": "",
@@ -837,7 +835,7 @@
           },
           {
             "@class": "description",
-            "#text": "(dec-Energyprod-1  and inc-steelprod-2 .)"
+            "#text": "dec-Energyprod-1  . inc-steelprod-2 "
           }
         ]
       }
@@ -904,7 +902,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-2 .)"
+            "#text": "inc-MegaCreditprod-2 "
           }
         ]
       }
@@ -959,7 +957,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px;margin-bottom:2px;",
-            "#text": "(Action: Spend 1 plant or 1 steel to gain 7MegaCredit.)"
+            "#text": "Action: dec-Plant-1 or dec-Steel-1 to inc-MegaCreidt-7"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -978,7 +976,7 @@
           {
             "@class": "description",
             "@style": "text-align:left;",
-            "#text": "(Oxygen must be 8% or less. dec-energyprod-1 .)"
+            "#text": "Oxygen must be 8% or less. dec-energyprod-1 "
           }
         ],
         "br": "",
@@ -1016,7 +1014,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a card, you pay 2 MegaCredit less for it.)"
+            "#text": "Effect: When you play a card, you pay 2 MegaCredit less for it"
           }
         ],
         "span": {
@@ -1067,7 +1065,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Effect: Each titanium you have is worth 1 MegaCredit extra. Each steel you have is worth 1 MegaCredit extra. )"
+            "#text": "Effect: Each titanium you have is worth 1 MegaCredit extra. Each steel you have is worth 1 MegaCredit extra. )"
           }
         ],
         "br": "",
@@ -1114,7 +1112,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a Science tag, including this, you may discard a card from hand to draw a card.)"
+            "#text": "Effect: When you play a Science tag, including this, you may discard a card from hand to inc-card-1"
           }
         ],
         "span": [
@@ -1179,7 +1177,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a  plant, microbe, or an animal tag, including this, gain 1 plant or add 1 resource to THAT CARD.)"
+            "#text": "Effect: When you play a  plant, microbe, or an animal tag, including this, inc-Plant-1 or add 1 resource to THAT CARD"
           }
         ],
         "br": "",
@@ -1235,7 +1233,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a Space card, you pay 2 MegaCredit less for it.)"
+            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -1247,7 +1245,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 4 science tags. inc-energyprod-4 .)"
+            "#text": "Requires 4 science tags. inc-energyprod-4 "
           }
         ],
         "#text": ":"
@@ -1294,7 +1292,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-MegaCreditprod-3 .)"
+            "#text": "inc-MegaCreditprod-3 "
           }
         ]
       }
@@ -1395,7 +1393,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px",
-            "#text": "(dec-energyprod-1  and inc-MegaCreditprod-4 .)"
+            "#text": "dec-energyprod-1  . inc-MegaCreditprod-4 "
           },
           {
             "@class": "tile special-tile",
@@ -1405,10 +1403,8 @@
             "@class": "description",
             "@style": "text-align:left",
             "br": "",
-            "#text": [
-              "(Place this tile. 1 VP PER",
-              "ADJACENT CITY TILE.)"
-            ]
+            "#text": "placetile/CommercialBuilding/ground/true . 1 VP PER ADJACENT CITY TILE"
+
           }
         ]
       }
@@ -1446,7 +1442,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Duplicate only theprod-box of one of your building cards.)"
+            "#text": "Duplicate only theprod-box of one of your building cards"
           }
         ],
         "#text": "COPY A"
@@ -1492,7 +1488,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Counts as playing 2 science cards. Draw 2 cards.)"
+            "#text": "Counts as playing 2 science cards. inc-Card-2"
           }
         ]
       }
@@ -1540,7 +1536,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 3 science tags. inc-MegaCreditprod-2 .)"
+            "#text": "Requires 3 science tags. inc-MegaCreditprod-2 "
           }
         ]
       }
@@ -1597,7 +1593,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-titaniumprod-2  and inc-MegaCreditprod-2 . 1 VP per Jovian tag you have.)"
+            "#text": "inc-titaniumprod-2  . inc-MegaCreditprod-2 . 1 VP per Jovian tag you have"
           }
         ]
       }
@@ -1644,7 +1640,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a Space card, you pay 2 MegaCredit less for it.)"
+            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -1656,7 +1652,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Requires 5 science tags. inc-energyprod-6 .)"
+            "#text": "Requires 5 science tags. inc-energyprod-6 "
           }
         ],
         "#text": ":"
@@ -1708,11 +1704,11 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 6 Energy to add a science resource to this card.)"
+            "#text": "Action: dec-Energy-6 to add a science resource to this card"
           },
           {
             "@class": "description ",
-            "#text": "(2 VP for each science resource on this card.)"
+            "#text": "2 VP for each science resource on this card"
           }
         ],
         "br": [
@@ -1786,7 +1782,7 @@
           },
           {
             "@class": "description",
-            "#text": "(dec-heatprod-2  and inc-MegaCreditprod-3 .)"
+            "#text": "dec-heatprod-2  . inc-MegaCreditprod-3 "
           }
         ]
       }
@@ -1831,7 +1827,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1  for each space tag your OPPONENTS have.)"
+            "#text": "inc-MegaCreditprod-1  for each space tag your OPPONENTS have"
           }
         ]
       }
@@ -1870,7 +1866,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play an Earth card, you pay 3 MegaCredit less for it.)"
+            "#text": "Effect: When you play an Earth card, you pay 3 MegaCredit less for it"
           }
         ],
         "#text": ":"
@@ -1910,7 +1906,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-3 .)"
+            "#text": "inc-MegaCreditprod-3 "
           }
         ]
       }
@@ -1949,7 +1945,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Gain 1 MegaCredit for each event EVER PLAYED by all players.)"
+            "#text": "inc-MegaCredit-X for X event EVER PLAYED by all players"
           }
         ],
         "#text": "/"
@@ -1989,7 +1985,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: After you play an event card, you gain 3MegaCredit.)"
+            "#text": "Effect: After you play an event card, inc-MegaCredit-3"
           }
         ],
         "#text": ":"
@@ -2036,7 +2032,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-MegaCreditprod-1 .)"
+            "#text": "dec-MegaCreditprod-1 "
           }
         ],
         "span": {
@@ -2122,7 +2118,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-TR-2 .)"
+            "#text": "inc-TR-2 "
           }
         ]
       }
@@ -2164,7 +2160,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Remove up to 3 titanium from any player, or 4 steel, or 7 MegaCredit.)"
+            "#text": "dec-titanium-3-any or dec-steel-4-any or dec-MegaCredit-7-any"
           }
         ],
         "#text": [
@@ -2214,7 +2210,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 7 MegaCredit to inc-steelprod-1 .)"
+            "#text": "Action: dec-MegaCredit-7 to inc-steelprod-1 "
           },
           {
             "@class": "tile special-tile",
@@ -2223,7 +2219,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place this tile adjacent to a city tile.)"
+            "#text": "placetile/Industrial/ground/true adjacent to a city tile"
           }
         ],
         "br": "",
@@ -2264,7 +2260,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Steal up to 2 steel, or 3 MegaCredit from any player.)"
+            "#text": "dec-steel-2-any and inc-steel-2 or dec-MegaCredit-3-any and inc-MegaCredit-3"
           }
         ],
         "br": "",
@@ -2338,7 +2334,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-energyprod-1  and dec-MegaCreditprod-2-any. inc-MegaCreditprod-2 ."
+            "#text": "dec-energyprod-1  . dec-MegaCreditprod-2-any. inc-MegaCreditprod-2 ."
           }
         ]
       }
@@ -2383,7 +2379,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1  for each Earth tag you have, including this.)"
+            "#text": "inc-MegaCreditprod-1  for each Earth tag you have, including this"
           }
         ]
       }
@@ -2421,7 +2417,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-titaniumprod-1 .)"
+            "#text": "inc-titaniumprod-1 "
           }
         ]
       }
@@ -2490,11 +2486,11 @@
           },
           {
             "@class": "description ",
-            "#text": "(Effect: When you play a card, you pay 2 MegaCredit less for it.)"
+            "#text": "Effect: When you play a card, you pay 2 MegaCredit less for it"
           },
           {
             "@class": "description ",
-            "#text": "(Requires 7 science tags.)"
+            "#text": "Requires 7 science tags"
           }
         ],
         "span": {
@@ -2554,7 +2550,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-MegaCreditprod-1 . Gain 10 MegaCredit.)"
+            "#text": "dec-MegaCreditprod-1 . inc-MegaCredit-10"
           }
         ]
       }
@@ -2591,11 +2587,11 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 8 heat to inc-terraform rating 1 .)"
+            "#text": "Action: dec-Heat-8 to inc-TR-1 "
           },
           {
             "@class": "description ",
-            "#text": "(Requires 0 C or warmer.)"
+            "#text": "Requires 0 C or warmer"
           }
         ],
         "span": [
@@ -2645,7 +2641,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Effect: After you pay for a standard project, except selling patents, you gain 3 MegaCredit.)"
+            "#text": "Effect: After you pay for a standard project, except selling patents, inc-MegaCredit-3"
           }
         ],
         "#text": ":"
@@ -2705,7 +2701,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires 2 Power tags. dec-Energyprod-1-any and inc-Energyprod-1)"
+            "#text": "Requires 2 Power tags. dec-Energyprod-1-any . inc-Energyprod-1)"
           }
         ]
       }
@@ -2787,7 +2783,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1  for each space tag your have, including this one.)"
+            "#text": "inc-MegaCreditprod-1  for each space tag your have, including this one"
           }
         ]
       }
@@ -2851,7 +2847,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1  and inc-titanium and inc-MegaCreditprod-1  each.)"
+            "#text": "dec-Energyprod-1  . inc-titanium-1 . inc-MegaCreditprod-1 "
           }
         ]
       }
@@ -2922,7 +2918,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(dec-Energyprod-1  and inc-MegaCreditprod-3 . Place a City tile.)"
+            "#text": "dec-Energyprod-1  . inc-MegaCreditprod-3 . placetile/city/ground/true"
           }
         ],
         "br": ""
@@ -2977,7 +2973,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(When you play a Science tag, including this, either add a Science resource to this card, or remove a Science resource from this card to draw a card.)"
+            "#text": "When you play a Science tag, including this, either add a Science resource to this card, or remove a Science resource from this card to inc-Card-1"
           }
         ],
         "#text": [
@@ -3026,7 +3022,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Requires two cities in play. inc-MegaCredit up 1 .)"
+            "#text": "Requires two cities in play. inc-MegaCredit-1 "
           }
         ]
       }
@@ -3102,7 +3098,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend any amount of Energy and gain that amount of MegaCredit.)"
+            "#text": "Action: dec-Energy-X to inc-MegaCredit-X"
           }
         ],
         "#text": "X"
@@ -3143,7 +3139,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(The next card you play this generation costs 8 MegaCredit less.)"
+            "#text": "The next card you play this generation costs 8 MegaCredit less"
           }
         ],
         "span": {
@@ -3189,7 +3185,7 @@
           },
           {
             "@class": "description",
-            "#text": "(Draw 1 card.)"
+            "#text": "inc-Card-1"
           }
         ]
       }
@@ -3234,7 +3230,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(inc-TR-1  for each Jovian tag you have, including this.)"
+            "#text": "inc-TR-1  for each Jovian tag you have, including this"
           }
         ],
         "#text": "/"
@@ -3277,7 +3273,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Spend 2 MegaCredit to draw a card.)"
+            "#text": "Action: dec-MegaCredit-2 to inc-Card-1"
           },
           {
             "@class": "tile special-tile",
@@ -3286,7 +3282,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Place this tile.)"
+            "#text": "placetile/Restricted/ground/true"
           }
         ],
         "br": ""
@@ -3346,7 +3342,7 @@
           },
           {
             "@class": "description",
-            "#text": "(dec-Energyprod-1-any and inc-Energyprod-1)"
+            "#text": "dec-Energyprod-1-any . inc-Energyprod-1)"
           }
         ]
       }
@@ -3390,7 +3386,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Draw two cards.)"
+            "#text": "inc-card-2"
           }
         ]
       }
@@ -3442,7 +3438,7 @@
           },
           {
             "@class": "description",
-            "#text": "(inc-MegaCreditprod-1  for every 2 Building tags you have, including this.)"
+            "#text": "inc-MegaCreditprod-1  for every 2 Building tags you have, including this"
           }
         ]
       }
@@ -3489,7 +3485,7 @@
           },
           {
             "@class": "description ",
-            "#text": "(Action: Draw 2 cards.)"
+            "#text": "Action: inc-card-2"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -3509,7 +3505,7 @@
           {
             "@class": "description",
             "@style": "position:absolute;text-align:left;margin-top:-53px;margin-left:85px;",
-            "#text": "(Requires 3 Science tags to play. dec-Energyprod-1 .)"
+            "#text": "Requires 3 Science tags to play. dec-Energyprod-1 "
           }
         ],
         "span": [

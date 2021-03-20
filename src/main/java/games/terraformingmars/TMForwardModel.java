@@ -298,17 +298,17 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             // - Place ocean tile for 18 MC
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPOcean)) {
-                actions.add(new PayForAction(Aquifer, player, new PlaceTile(player, TMTypes.Tile.Ocean, null, false),
+                actions.add(new PayForAction(Aquifer, player, new PlaceTile(player, TMTypes.Tile.Ocean, TMTypes.MapTileType.Ocean, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPOcean, -1));
             }
             // - Place greenery tile for 23 MC
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPGreenery)) {
-                actions.add(new PayForAction(Greenery, player, new PlaceTile(player, TMTypes.Tile.Greenery, null, false),
+                actions.add(new PayForAction(Greenery, player, new PlaceTile(player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPGreenery, -1));
             }
             // - Place city tile and increase MC prod by 1 for 25 MC TODO increase MC prod by 1
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPCity)) {
-                actions.add(new PayForAction(City, player, new PlaceTile(player, TMTypes.Tile.City, null, false),
+                actions.add(new PayForAction(City, player, new PlaceTile(player, TMTypes.Tile.City, TMTypes.MapTileType.Ground, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
             }
 
@@ -350,7 +350,7 @@ public class TMForwardModel extends AbstractForwardModel {
 
             // 8 plants into greenery tile
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.Plant, params.nCostGreeneryPlant)) {
-                actions.add(new PayForAction(TMTypes.ActionType.BasicResourceAction, player, new PlaceTile(player, TMTypes.Tile.Greenery, null, false),
+                actions.add(new PayForAction(TMTypes.ActionType.BasicResourceAction, player, new PlaceTile(player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground, false),
                         TMTypes.Resource.Plant, params.nCostGreeneryPlant, -1));
             }
             // 8 heat into temperature increase

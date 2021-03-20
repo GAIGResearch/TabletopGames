@@ -83,7 +83,8 @@ public class TMCard extends Card {
                 if (action.equalsIgnoreCase("resourcetransaction")) {
                     card.firstAction = new ResourceTransaction(-1, TMTypes.Resource.valueOf((String) other.get("resource")), (int)(long)other.get("amount"), false);
                 } else if (action.equalsIgnoreCase("placetile")) {
-                    card.firstAction = new PlaceTile(-1, TMTypes.Tile.valueOf((String) other.get("tile")), null, false);
+                    TMTypes.Tile t = TMTypes.Tile.valueOf((String) other.get("tile"));
+                    card.firstAction = new PlaceTile(-1, t, t.getRegularLegalTileType(), false);
                 }
                 // TODO: other actions?
             }
@@ -114,7 +115,8 @@ public class TMCard extends Card {
                 TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
                 int cost = Integer.parseInt(costStr[1]);
                 if (action[0].equalsIgnoreCase("placetile")) {
-                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new PlaceTile(-1, TMTypes.Tile.valueOf(action[1]), null, false),
+                    TMTypes.Tile t = TMTypes.Tile.valueOf(action[1]);
+                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new PlaceTile(-1, t, t.getRegularLegalTileType(), false),
                             costResource, cost, -1);
                     actions.add(a);
                 } else if (action[0].equalsIgnoreCase("resourcetransaction")) {
@@ -217,6 +219,7 @@ public class TMCard extends Card {
         JSONArray div1 = (JSONArray) cardDef.get("div");
         ArrayList<TMTypes.Tag> tempTags = new ArrayList<>();
 
+        ArrayList<TMAction> immediateEffects = new ArrayList<>();
         for (Object o: div1) {
             JSONObject ob = (JSONObject)o;
             String info = (String)ob.get("@class");
@@ -294,6 +297,21 @@ public class TMCard extends Card {
                                     Requirement r = new CounterRequirement(split[1], Integer.parseInt(split[0]), max);
                                 }
                             }
+                        } else if (info2 != null && info2.contains("description")) {
+                            String ps = (String) ob2.get("#text");
+                            if (ps.contains("Action")) continue;  // TODO
+                            if (ps.contains("Effect")) continue;  // TODO
+                            String[] split = ps.split("\\.");  // Dot separates multiple effects
+                            for (String s: split) {
+                                if (s.contains("Requires") || s.contains("must")) continue;  // Already parsed requirements
+                                s = s.trim();
+                                TMAction a = TMAction.parseAction(s).a;
+                                if (a != null) {
+                                    immediateEffects.add(a);
+                                } else {
+                                    int b = 0;
+                                }
+                            }
                         }
 
                         // "red arrow" is action, ":" is effect
@@ -302,6 +320,7 @@ public class TMCard extends Card {
             }
         }
 
+        card.immediateEffects = immediateEffects.toArray(new TMAction[0]);
         card.tags = tempTags.toArray(new TMTypes.Tag[0]);
 
         return card;

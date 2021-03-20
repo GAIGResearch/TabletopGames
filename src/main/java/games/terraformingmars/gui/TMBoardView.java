@@ -313,7 +313,7 @@ public class TMBoardView extends ComponentView {
                         int imgY = yDisplay + displayHeight/2 - size/2;
 
                         // Find image to display, for a global counter, resource/production, or tile
-                        Pair<TMAction, String> effect = b.getEffect(gs);
+                        Pair<TMAction, String> effect = b.getEffect();
                         TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, effect.b);
                         String imgPath = null;
                         if (gp == null) {

@@ -30,7 +30,7 @@ public abstract class Effect {
     public void execute(TMGameState gs, TMAction actionTaken, int player) {
         if (canExecute(gs, actionTaken, player)) {
             if (effectAction == null) {
-                effectAction = TMAction.parseAction(gs, effectEncoding).a;
+                effectAction = TMAction.parseAction(effectEncoding).a;
             }
             effectAction.player = player;
             this.effectAction.execute(gs);

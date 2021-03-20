@@ -287,7 +287,7 @@ public class TMDeckDisplay extends JComponent {
                 // "to" depends on the action applied as the effect
                 TMAction action = e.effectAction;
                 if (action == null) {
-                    action = TMAction.parseAction(gs, e.effectEncoding).a;
+                    action = TMAction.parseAction(e.effectEncoding).a;
                 }
                 if (action instanceof PlaceholderModifyCounter) {
                     Image resImg = ImageIO.GetInstance().getImage(((PlaceholderModifyCounter) action).resource.getImagePath());

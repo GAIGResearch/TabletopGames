@@ -6,13 +6,11 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.Requirement;
 import utilities.Pair;
 import utilities.Utils;
 
-import java.util.HashSet;
 import java.util.Objects;
 
 public class TMAction extends AbstractAction {
@@ -135,66 +133,51 @@ public class TMAction extends AbstractAction {
         return actionType != null? actionType.name() : "Pass";
     }
 
-    public static Pair<TMAction, String> parseAction(TMGameState gameState, String encoding) {
+    public static Pair<TMAction, String> parseAction(String encoding) {
 
         // Third element is effect
         TMAction effect = null;
         String effectString = "";
-        int player = gameState.getCurrentPlayer();
+        int player = -1;
 
         if (encoding.contains("inc") || encoding.contains("dec")) {
             // Increase/Decrease counter action
             String[] split2 = encoding.split("-");
-            // Find how much
-            int increment = Integer.parseInt(split2[2]);
-            if (encoding.contains("dec")) increment *= -1;
+            try {
+                // Find how much
+                int increment = Integer.parseInt(split2[2]);
+                if (encoding.contains("dec")) increment *= -1;
 
-            effectString = split2[1];
+                effectString = split2[1];
 
-            // Find which counter
-            Counter which = gameState.stringToGPCounter(split2[1]);
+                // Find which counter
+                TMTypes.GlobalParameter which = Utils.searchEnum(TMTypes.GlobalParameter.class, split2[1]);
 
-            if (which == null) {
-                // A resource or production instead
-                String resString = split2[1].split("prod")[0];
-                TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-                effect = new PlaceholderModifyCounter(player, increment, res, split2[1].contains("prod"),true);
-            } else {
-                // A global counter (temp, oxygen, oceantiles)
-                effect = new TMModifyCounter(player, which.getComponentID(), increment, true);
-            }
+                if (which == null) {
+                    // A resource or production instead
+                    String resString = split2[1].split("prod")[0];
+                    TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
+                    effect = new PlaceholderModifyCounter(player, increment, res, split2[1].contains("prod"), true);
+                } else {
+                    // A global counter (temp, oxygen, oceantiles)
+                    effect = new ModifyGlobalParameter(player, which, increment, true);
+                }
+            } catch (Exception ignored) {}
         } else if (encoding.contains("placetile")) {
-            // equals("placetile:ocean:ocean")
             // PlaceTile action
             String[] split2 = encoding.split("/");
             // split2[1] is type of tile to place
             TMTypes.Tile toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
             // split2[2] is where to place it. can be a map tile, or a city name.
             TMTypes.MapTileType where = Utils.searchEnum(TMTypes.MapTileType.class, split2[2]);
-            HashSet<Integer> legalPositions = new HashSet<>();
-            for (int i = 0; i < gameState.getBoard().getHeight(); i++) {
-                for (int j = 0; j < gameState.getBoard().getWidth(); j++) {
-                    TMMapTile mt = gameState.getBoard().getElement(j, i);
-                    if (mt != null) {
-                        if (where != null && mt.getTileType() == where || where == null && mt.getComponentName().equalsIgnoreCase(split2[2])) {
-                            legalPositions.add(mt.getComponentID());
-                        }
-                    }
-                }
+            boolean onMars = Boolean.parseBoolean(split2[3]);
+            if (where == null) {
+                // A named tile
+                effect = new PlaceTile(player, split2[2], onMars, true);
+            } else {
+                effect = new PlaceTile(player, toPlace, where, true);  // Extended sequence, will ask player where to put it
+                // TODO set map tile type instead of null legal positions
             }
-            boolean onMars = true;
-            if (legalPositions.size() == 0 && where == null) {
-                // An extra tile, named
-                for (TMMapTile mt: gameState.getExtraTiles()) {
-                    if (mt.getComponentName().equalsIgnoreCase(split2[2])) {
-                        legalPositions.add(mt.getComponentID());
-                        onMars = false;
-                        break;
-                    }
-                }
-            }
-            effect = new PlaceTile(player, toPlace, legalPositions, true);  // Extended sequence, will ask player where to put it
-            ((PlaceTile) effect).onMars = onMars;
             effectString = split2[1];
         }
         return new Pair<>(effect, effectString);

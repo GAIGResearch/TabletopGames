@@ -34,7 +34,7 @@
         },
         {
           "threshold": 16,
-          "effect": "placetile/ocean/ocean"
+          "effect": "placetile/ocean/ocean/true"
         }
       ]
     },
