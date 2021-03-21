@@ -21,6 +21,7 @@ public class TMMapTile extends Component {
     TMTypes.Resource[] resources;
 
     boolean volcanic;
+    int reserved;
 
     public TMMapTile(int x, int y) {
         super(BOARD_NODE, "Tile");
@@ -32,6 +33,18 @@ public class TMMapTile extends Component {
         super(BOARD_NODE, componentID);
         this.x = x;
         this.y = y;
+    }
+
+    public boolean isReserved() {
+        return reserved != -1;
+    }
+
+    public int getReserved() {
+        return reserved;
+    }
+
+    public void setReserved(int reserved) {
+        this.reserved = reserved;
     }
 
     public boolean isVolcanic() {
@@ -143,7 +156,7 @@ public class TMMapTile extends Component {
 
     @Override
     public Component copy() {
-        return new TMMapTile(x, y, componentID);
+        return new TMMapTile(x, y, componentID); // TODO
     }
 
     public static TMMapTile parseMapTile(String s) {
@@ -185,12 +198,12 @@ public class TMMapTile extends Component {
         if (!(o instanceof TMMapTile)) return false;
         if (!super.equals(o)) return false;
         TMMapTile tmMapTile = (TMMapTile) o;
-        return owner == tmMapTile.owner && x == tmMapTile.x && y == tmMapTile.y && tilePlaced == tmMapTile.tilePlaced && type == tmMapTile.type && Arrays.equals(resources, tmMapTile.resources);
+        return owner == tmMapTile.owner && x == tmMapTile.x && y == tmMapTile.y && volcanic == tmMapTile.volcanic && reserved == tmMapTile.reserved && tilePlaced == tmMapTile.tilePlaced && type == tmMapTile.type && Arrays.equals(resources, tmMapTile.resources);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), owner, x, y, tilePlaced, type);
+        int result = Objects.hash(super.hashCode(), owner, x, y, tilePlaced, type, volcanic, reserved);
         result = 31 * result + Arrays.hashCode(resources);
         return result;
     }

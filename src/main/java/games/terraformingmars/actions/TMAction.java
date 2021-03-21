@@ -230,7 +230,11 @@ public class TMAction extends AbstractAction {
                 ((PlaceTile) effect).adjacencyRequirement = req;
             }
         } else if (encoding.contains("reserve")) {
-            // TODO reserve tile action, places Reserve token and gets resources? only that player can place a tile there
+            // Reserve tile action, places Reserve token and gets resources, only that player can place a tile there
+            String[] split2 = encoding.split("/");
+            // split2[1] is map type where this can be placed
+            TMTypes.MapTileType toPlace = TMTypes.MapTileType.valueOf(split2[1]);
+            effect = new ReserveTile(-1, toPlace, true);
         }
         return new Pair<>(effect, effectString);
     }
