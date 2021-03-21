@@ -19,7 +19,9 @@ public class CompoundAction extends TMAction{
 
     @Override
     public boolean execute(AbstractGameState gameState) {
+        if (player == -1) player = gameState.getCurrentPlayer();
         for (TMAction a: actions) {
+            a.player = player;
             a.execute(gameState);
         }
         return super.execute(gameState);

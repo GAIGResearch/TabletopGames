@@ -4982,7 +4982,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-heatprod-4 . placetile/Mohole/ocean/true"
+            "#text": "inc-heatprod-4 . placetile/Moonhole/ocean/true"
           }
         ],
         "br": "",
@@ -5688,7 +5688,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-TR-1 . inc-Plant-4. Add 3 Microbe to ANOTHER card and 2 Animal to ANOTHER card"
+            "#text": "inc-TR-1 . inc-Plant-4. Add 3 Microbe to ANOTHER card and add 2 Animal to ANOTHER card"
           }
         ],
         "#text": [

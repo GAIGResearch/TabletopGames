@@ -2219,7 +2219,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/Industrial/ground/true/City "
+            "#text": "placetile/IndustrialBuilding/ground/true/City "
           }
         ],
         "br": "",

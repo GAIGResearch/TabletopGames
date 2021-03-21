@@ -199,6 +199,7 @@ public class TMAction extends AbstractAction {
                     }
                 }
             } else {
+                // TODO handle "Capital" tile type as City, but special rules
                 int a = 0; // TODO this shouldn't happen
             }
             effectString = split2[1];
@@ -227,8 +228,6 @@ public class TMAction extends AbstractAction {
                     req = new AdjacencyRequirement(types);
                 }
                 ((PlaceTile) effect).adjacencyRequirement = req;
-            } else {
-                int a = 0;  // TODO shouldn't happen
             }
         } else if (encoding.contains("reserve")) {
             // TODO reserve tile action, places Reserve token and gets resources? only that player can place a tile there

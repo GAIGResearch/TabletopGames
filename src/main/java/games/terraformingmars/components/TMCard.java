@@ -305,15 +305,44 @@ public class TMCard extends Card {
                             for (String s: split) {
                                 if (s.contains("Requires") || s.contains("must")) continue;  // Already parsed requirements
                                 s = s.trim();
-                                TMAction a = TMAction.parseAction(s).a;
-                                if (a != null) {
-                                    immediateEffects.add(a);
+                                String[] orSplit = s.split("or");
+                                if (orSplit.length == 1) {
+                                    TMAction a = TMAction.parseAction(s).a;
+                                    if (a != null) {
+                                        immediateEffects.add(a);
+                                    } else {
+                                        int b = 0;  // action didn't parse, put a breakpoint here to see it
+                                    }
                                 } else {
-                                    int b = 0;  // action didn't parse, put a breakpoint here to see it
+                                    // Action choice
+                                    TMAction[] actionChoice = new TMAction[orSplit.length];
+                                    int i = 0;
+                                    for (String s2: orSplit) {
+                                        s2 = s2.trim();
+                                        String[] andSplit = s2.split("and");
+                                        if (andSplit.length == 1) {
+                                            TMAction a = TMAction.parseAction(s2).a;
+                                            if (a != null) {
+                                                actionChoice[i] = a;
+                                            }
+                                        } else {
+                                            // Compound action
+                                            TMAction[] compound = new TMAction[andSplit.length];
+                                            int j = 0;
+                                            for (String s3: andSplit) {
+                                                s3 = s3.trim();
+                                                TMAction a = TMAction.parseAction(s3).a;
+                                                if (a != null) {
+                                                    compound[j] = a;
+                                                }
+                                                j++;
+                                            }
+                                            actionChoice[i] = new CompoundAction(-1, compound, true);
+                                        }
+                                        i++;
+                                    }
+                                    immediateEffects.add(new ActionChoice(-1, actionChoice, true));
                                 }
-                                // TODO:
-                                // - compound actions
-                                // - action choice
                             }
                         }
                     }
