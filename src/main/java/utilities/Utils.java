@@ -9,9 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.function.Function;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public abstract class Utils {

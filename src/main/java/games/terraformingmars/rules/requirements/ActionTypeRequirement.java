@@ -1,8 +1,10 @@
 package games.terraformingmars.rules.requirements;
 
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.TMAction;
 
+import java.awt.*;
 import java.util.Objects;
 
 public class ActionTypeRequirement implements Requirement<TMAction> {
@@ -22,6 +24,26 @@ public class ActionTypeRequirement implements Requirement<TMAction> {
     @Override
     public boolean testCondition(TMAction o) {
         return o.actionType == actionType && (o.standardProject == null || (project == null || o.standardProject == project));
+    }
+
+    @Override
+    public boolean isMax() {
+        return false;
+    }
+
+    @Override
+    public boolean appliesWhenAnyPlayer() {
+        return false;
+    }
+
+    @Override
+    public String getDisplayText(TMGameState gs) {
+        return null;
+    }
+
+    @Override
+    public Image[] getDisplayImages() {
+        return null;
     }
 
     @Override

@@ -2097,7 +2097,7 @@
           },
           {
             "@class": "description",
-            "#text": "Oxygen must be 4-max. placetile/NaturalPreserve/ground/true .  NEXT TO NO OTHER TILE. inc-MegaCreditprod-1 "
+            "#text": "Oxygen must be 4-max. placetile/Park/ground/true/None . inc-MegaCreditprod-1 "
           }
         ],
         "#text": "*"
@@ -2611,7 +2611,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires +4 C or warmer. placetile/greenery/ocean/true . Disregard normal placement restrictions for this"
+            "#text": "Requires +4 C or warmer. placetile/greenery/ocean/true "
           }
         ]
       }
@@ -2757,7 +2757,7 @@
           },
           {
             "@class": "description",
-            "#text": "Place this tile on an area with a steel or titanium placement bonus. Increase thatprod-1 "
+            "#text": "placetile/Mine/Steel-Titanium/true "
           }
         ],
         "br": "",
@@ -3448,7 +3448,7 @@
           },
           {
             "@class": "description",
-            "#text": "placetile/NuclearZone/ground/true . inc-temperature-2 "
+            "#text": "placetile/NuclearExplosion/ground/true . inc-temperature-2 "
           }
         ],
         "br": ""
@@ -4135,7 +4135,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-energyprod-1  . inc-MegaCreditprod-2 . Place a city tile ADJACENT TO AT LEAST 2 OTHER CITY TILES"
+            "#text": "dec-energyprod-1  . inc-MegaCreditprod-2 . placetile/City/Ground/true/City-City "
           }
         ],
         "br": "",
@@ -4328,7 +4328,7 @@
           {
             "@class": "description",
             "@style": "text-align:left;margin-top:-55px;",
-            "#text": "Requires that you have a greenery tile. Place this tile adjacent to any greenery tile. 1 VP per 2 Animal on this card"
+            "#text": "Requires that you have a greenery tile. placetile/Nature/Ground/true/Greenery . 1 VP per 2 Animal on this card"
           }
         ],
         "#text": [
@@ -4902,7 +4902,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-temperature-2  . place this tile ON EITHER THARSIS THOLUS, ASCRAEUS MONS, PAVONIS MONS OR ARSIA MONS"
+            "#text": "inc-temperature-2  . placetile/Volcano/Volcanic/true "
           }
         ],
         "br": "",
@@ -5200,7 +5200,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:-8px;",
-            "#text": "Effect: When you place a greenery tile, add an Animal to this card"
+            "#text": "Effect: When placetile/Greenery/Ground/true , add an Animal to this card"
           },
           {
             "@class": "animal resource ",

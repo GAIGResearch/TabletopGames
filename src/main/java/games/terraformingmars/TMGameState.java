@@ -12,13 +12,10 @@ import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.ActionTypeRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
-import games.terraformingmars.rules.requirements.TagRequirement;
+import games.terraformingmars.rules.requirements.TagsPlayedRequirement;
 import utilities.Utils;
-import utilities.Vector2D;
 
 import java.util.*;
-
-import static games.terraformingmars.TMTypes.neighbor_directions;
 
 public class TMGameState extends AbstractGameState {
 
@@ -276,9 +273,9 @@ public class TMGameState extends AbstractGameState {
         if (player == -1) player = getCurrentPlayer();
         for (TMTypes.Tag t: card.tags) {
             for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
-                if (e.getKey() instanceof TagRequirement) {
+                if (e.getKey() instanceof TagsPlayedRequirement) {
                     boolean found = false;
-                    for (TMTypes.Tag tt: ((TagRequirement) e.getKey()).tags) {
+                    for (TMTypes.Tag tt: ((TagsPlayedRequirement) e.getKey()).tags) {
                         if (tt == t) {
                             found = true;
                             break;

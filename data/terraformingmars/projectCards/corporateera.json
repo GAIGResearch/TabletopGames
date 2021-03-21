@@ -771,7 +771,7 @@
           },
           {
             "@class": "description",
-            "#text": "Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase yourprod-of that resource 1 "
+            "#text": "placetile/Mine/Steel-Titanium/true/Owned "
           }
         ],
         "br": "",
@@ -865,7 +865,7 @@
       {
         "@class": "content ",
         "@style": "font-size:14px;font-weight: normal;",
-        "#text": "PLACE YOUR MARKER ON A NON-RESERVED AREA. ONLY YOU MAY PLACE A TILE HERE."
+        "#text": "reserve/Ground"
       }
     ]
   },
@@ -2219,7 +2219,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/Industrial/ground/true adjacent to a city tile"
+            "#text": "placetile/Industrial/ground/true/City "
           }
         ],
         "br": "",

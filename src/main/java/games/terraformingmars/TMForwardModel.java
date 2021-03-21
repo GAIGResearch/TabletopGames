@@ -293,7 +293,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // - Increase temperature 1 step for 14 MC
             Counter temp = gs.globalParameters.get(TMTypes.GlobalParameter.Temperature);
             if (temp != null && !temp.isMaximum() && gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPTemp)) {
-                actions.add(new PayForAction(Asteroid, player, new ModifyGlobalParameter(player, TMTypes.GlobalParameter.Temperature, 1, false),
+                actions.add(new PayForAction(Asteroid, player, new ModifyGlobalParameter(TMTypes.GlobalParameter.Temperature, 1, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPTemp, -1));
             }
             // - Place ocean tile for 18 MC
@@ -357,7 +357,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             // 8 heat into temperature increase
             if (temp != null && !temp.isMaximum() && gs.canPlayerPay(player, null, null, TMTypes.Resource.Heat, params.nCostTempHeat)) {
-                actions.add(new PayForAction(TMTypes.ActionType.BasicResourceAction, player, new ModifyGlobalParameter(player, TMTypes.GlobalParameter.Temperature, 1, false),
+                actions.add(new PayForAction(TMTypes.ActionType.BasicResourceAction, player, new ModifyGlobalParameter(TMTypes.GlobalParameter.Temperature, 1, false),
                         TMTypes.Resource.Heat, params.nCostTempHeat, -1));
             }
         }

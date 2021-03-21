@@ -1,14 +1,12 @@
 package games.terraformingmars.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -34,11 +32,15 @@ public class BuyCard extends TMAction {
             gs.getPlayerCardChoice()[player].clear();
 
             // Execute immediate effect of corporation (starting bonus)
-            for (AbstractAction aa: card.immediateEffects) {
+            for (TMAction aa: card.immediateEffects) {
+                aa.player = player;
                 aa.execute(gs);
             }
             // Add actions
-            gs.getPlayerCardsPlayedActions()[player].addAll(Arrays.asList(card.actions));
+            for (TMAction a: card.actions) {
+                a.player = player;
+                gs.getPlayerCardsPlayedActions()[player].add(a);
+            }
 
             // Add discountEffects to player's discounts
             gs.addDiscountEffects(card.discountEffects);
@@ -65,7 +67,7 @@ public class BuyCard extends TMAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public TMAction copy() {
         return this;
     }
 

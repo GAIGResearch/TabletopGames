@@ -1,8 +1,10 @@
 package games.terraformingmars.rules.requirements;
 
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
+import java.awt.*;
 import java.util.Objects;
 
 public class TagOnCardRequirement implements Requirement<TMCard> {
@@ -20,6 +22,26 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
             if (t == tag) return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean isMax() {
+        return false;
+    }
+
+    @Override
+    public boolean appliesWhenAnyPlayer() {
+        return false;
+    }
+
+    @Override
+    public String getDisplayText(TMGameState gs) {
+        return null;
+    }
+
+    @Override
+    public Image[] getDisplayImages() {
+        return null;
     }
 
     public TagOnCardRequirement copy() {

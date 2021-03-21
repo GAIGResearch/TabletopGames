@@ -7,10 +7,12 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.requirements.AdjacencyRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
 import utilities.Pair;
 import utilities.Utils;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class TMAction extends AbstractAction {
@@ -148,8 +150,6 @@ public class TMAction extends AbstractAction {
                 int increment = Integer.parseInt(split2[2]);
                 if (encoding.contains("dec")) increment *= -1;
 
-                // TODO: split2[3] could exist and be "any" -> action player's choice as to which player it applies to
-
                 effectString = split2[1];
 
                 // Find which counter
@@ -159,10 +159,12 @@ public class TMAction extends AbstractAction {
                     // A resource or production instead
                     String resString = split2[1].split("prod")[0];
                     TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-                    effect = new PlaceholderModifyCounter(player, increment, res, split2[1].contains("prod"), true);
+                    int targetPlayer = player;
+                    if (split2.length > 3 && split2[3].equalsIgnoreCase("any")) targetPlayer = -2;
+                    effect = new PlaceholderModifyCounter(player, targetPlayer, increment, res, split2[1].contains("prod"), true);
                 } else {
                     // A global counter (temp, oxygen, oceantiles)
-                    effect = new ModifyGlobalParameter(player, which, increment, true);
+                    effect = new ModifyGlobalParameter(which, increment, true);
                 }
             } catch (Exception ignored) {}
         } else if (encoding.contains("placetile")) {
@@ -170,17 +172,66 @@ public class TMAction extends AbstractAction {
             String[] split2 = encoding.split("/");
             // split2[1] is type of tile to place
             TMTypes.Tile toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
-            // split2[2] is where to place it. can be a map tile, or a city name.
-            TMTypes.MapTileType where = Utils.searchEnum(TMTypes.MapTileType.class, split2[2]);
-            boolean onMars = Boolean.parseBoolean(split2[3]);
-            if (where == null) {
-                // A named tile
-                effect = new PlaceTile(player, split2[2], onMars, true);
+            if (toPlace != null) {
+                // split2[2] is where to place it. can be a map tile, or a city name, or volcanic or resources gained.
+                if (split2[2].equalsIgnoreCase("volcanic")) {
+                    // Volcanic restriction
+                    effect = new PlaceTile(player, toPlace, true, true);
+                } else if (split2[2].contains("-")) {
+                    String[] split3 = split2[2].split("-");
+                    TMTypes.Resource[] resources = new TMTypes.Resource[split3.length];
+                    for (int i = 0; i < split3.length; i++) {
+                        resources[i] = TMTypes.Resource.valueOf(split3[i]);
+                    }
+                    // Resource gained restriction
+                    effect = new PlaceTile(player, toPlace, resources, true);
+                } else {
+                    // Map tile restriction
+                    TMTypes.MapTileType where = Utils.searchEnum(TMTypes.MapTileType.class, split2[2]);
+                    boolean onMars = Boolean.parseBoolean(split2[3]);
+                    if (where == null) {
+                        // A named tile
+                        effect = new PlaceTile(player, toPlace, split2[2], onMars, true);
+                    } else {
+                        boolean respectAdjacency = where == toPlace.getRegularLegalTileType();
+                        effect = new PlaceTile(player, toPlace, where, true);  // Extended sequence, will ask player where to put it
+                        ((PlaceTile) effect).respectingAdjacency = respectAdjacency;
+                    }
+                }
             } else {
-                effect = new PlaceTile(player, toPlace, where, true);  // Extended sequence, will ask player where to put it
-                // TODO set map tile type instead of null legal positions
+                int a = 0; // TODO this shouldn't happen
             }
             effectString = split2[1];
+            if (effect != null && split2.length > 4) {
+                // split2[4] = adjacency rule: X tile types separated by -, Owned, None (not placed)
+                // Adjacency rules
+                AdjacencyRequirement req;
+                if (split2[4].equalsIgnoreCase("Owned")) {
+                    req = new AdjacencyRequirement();
+                    req.owned = true;
+                } else if (split2[4].equalsIgnoreCase("None")) {
+                    req = new AdjacencyRequirement();
+                    req.noneAdjacent = true;
+                } else {
+                    // Adjacent to some types, make hashmap
+                    HashMap<TMTypes.Tile, Integer> types = new HashMap<>();
+                    String[] split3 = split2[4].split("-");
+                    for (String s: split3) {
+                        TMTypes.Tile t = TMTypes.Tile.valueOf(s);
+                        if (types.containsKey(t)) {
+                            types.put(t, types.get(t)+1);
+                        } else {
+                            types.put(t, 1);
+                        }
+                    }
+                    req = new AdjacencyRequirement(types);
+                }
+                ((PlaceTile) effect).adjacencyRequirement = req;
+            } else {
+                int a = 0;  // TODO shouldn't happen
+            }
+        } else if (encoding.contains("reserve")) {
+            // TODO reserve tile action, places Reserve token and gets resources? only that player can place a tile there
         }
         return new Pair<>(effect, effectString);
     }

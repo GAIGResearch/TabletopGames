@@ -103,6 +103,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         for (int i = min; i <= max; i++) {
             actions.add(new ResourceTransaction(player, res, -i));
         }
+        if (actions.size() == 0) {
+            actions.add(new TMAction(player));  // TODO: bad, this shouldn't happen
+        }
         return actions;
     }
 

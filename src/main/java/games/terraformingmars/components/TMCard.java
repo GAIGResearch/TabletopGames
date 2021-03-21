@@ -150,7 +150,7 @@ public class TMCard extends Card {
                 } else if (effect.get("tag") != null) {
                     // A discount for tag requirements
                     TMTypes.Tag t = TMTypes.Tag.valueOf((String) effect.get("tag"));
-                    r = new TagRequirement(new TMTypes.Tag[]{t}, null);
+                    r = new TagsPlayedRequirement(new TMTypes.Tag[]{t}, null);
                     if (card.discountEffects.containsKey(r)) {
                         card.discountEffects.put(r, card.discountEffects.get(r) + amount);
                     } else {
@@ -284,7 +284,7 @@ public class TMCard extends Card {
                                         min[i] = tagCount.get(t);
                                         i++;
                                     }
-                                    Requirement r = new TagRequirement(tags, min);
+                                    Requirement r = new TagsPlayedRequirement(tags, min);
                                     card.requirements.add(r);
                                 } else if (s.contains("tile")) {
                                     // Tile count placed requirement TODO

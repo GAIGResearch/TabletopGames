@@ -58,7 +58,8 @@ public class TMTypes {
     public enum MapTileType {
         Ground (Color.lightGray),
         Ocean (Color.blue),
-        City (Utils.stringToColor("purple"));
+        City (Utils.stringToColor("purple")),
+        Volcanic (Color.red);
 
         Color outline;
         MapTileType(Color outline) {
@@ -213,18 +214,20 @@ public class TMTypes {
     }
 
     public enum GlobalParameter {
-        Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true),
-        Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white, true),
-        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true);
+        Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true, "O2"),
+        Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white, true, "°C"),
+        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true, "Ocean");
 
         String imagePath;
+        String shortString;
         Color color;
         boolean countsForEndGame;
 
-        GlobalParameter(String imagePath, Color color, boolean countsForEndGame) {
+        GlobalParameter(String imagePath, Color color, boolean countsForEndGame, String shortString) {
             this.imagePath = imagePath;
             this.color = color;
             this.countsForEndGame = countsForEndGame;
+            this.shortString = shortString;
         }
 
         public String getImagePath() {
@@ -237,6 +240,10 @@ public class TMTypes {
 
         public boolean countsForEndGame() {
             return countsForEndGame;
+        }
+
+        public String getShortString() {
+            return shortString;
         }
 
         public static ArrayList<GlobalParameter> getDrawOrder() {

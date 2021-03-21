@@ -5,6 +5,7 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.effects.Bonus;
+import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -19,6 +20,8 @@ public class TMMapTile extends Component {
     TMTypes.MapTileType type;
     TMTypes.Resource[] resources;
 
+    boolean volcanic;
+
     public TMMapTile(int x, int y) {
         super(BOARD_NODE, "Tile");
         this.x = x;
@@ -29,6 +32,14 @@ public class TMMapTile extends Component {
         super(BOARD_NODE, componentID);
         this.x = x;
         this.y = y;
+    }
+
+    public boolean isVolcanic() {
+        return volcanic;
+    }
+
+    public void setVolcanic(boolean volcanic) {
+        this.volcanic = volcanic;
     }
 
     public void setType(TMTypes.MapTileType type) {
@@ -147,13 +158,13 @@ public class TMMapTile extends Component {
         String[] split = s.split("-");
 
         // First element is tile type
-        TMTypes.MapTileType type = null;
-        try{
-            type = TMTypes.MapTileType.valueOf(split[0]);
-        } catch(Exception ignored) {}
+        TMTypes.MapTileType type = Utils.searchEnum(TMTypes.MapTileType.class, split[0]);
         if (type == null) {
             type = TMTypes.MapTileType.City;
             mt.setComponentName(split[0]); // Keep city name
+        } else if (type == TMTypes.MapTileType.Volcanic) {
+            type = TMTypes.MapTileType.Ground;
+            mt.setVolcanic(true);
         }
         mt.setType(type);
 

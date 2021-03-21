@@ -41,7 +41,11 @@ public class PlayCard extends TMAction {
             gs.getPlayerCardsPlayedTags()[player].get(t).increment(1);
         }
         gs.getPlayerCardsPlayedTypes()[player].get(card.cardType).increment(1);
-        gs.getPlayerCardsPlayedActions()[player].addAll(Arrays.asList(card.actions));
+        // Add actions
+        for (TMAction a: card.actions) {
+            a.player = player;
+            gs.getPlayerCardsPlayedActions()[player].add(a);
+        }
 
         // Add discountEffects to player's discounts
         gs.addDiscountEffects(card.discountEffects);
@@ -50,7 +54,8 @@ public class PlayCard extends TMAction {
         gs.addPersistingEffects(card.persistingEffects);
 
         // Execute on-play effects
-        for (AbstractAction aa: card.immediateEffects) {
+        for (TMAction aa: card.immediateEffects) {
+            aa.player = player;
             aa.execute(gs);
         }
     }

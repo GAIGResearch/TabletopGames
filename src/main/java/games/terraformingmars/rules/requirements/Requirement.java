@@ -1,6 +1,9 @@
 package games.terraformingmars.rules.requirements;
 
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+
+import java.awt.*;
 
 public interface Requirement<T> {
     /*
@@ -9,6 +12,10 @@ public interface Requirement<T> {
         - minimum N tags on cards played by player
      */
     boolean testCondition(T o);
+    boolean isMax();
+    boolean appliesWhenAnyPlayer();
+    String getDisplayText(TMGameState gs);
+    Image[] getDisplayImages();
 
     static Requirement stringToRequirement(String s) {
         String[] split = s.split(":");
@@ -24,7 +31,7 @@ public interface Requirement<T> {
                 tags[i] = TMTypes.Tag.valueOf(tagDef[i]);
                 minValues[i] = Integer.parseInt(minDef[i]);
             }
-            return new TagRequirement(tags, minValues);
+            return new TagsPlayedRequirement(tags, minValues);
         } else {
             return new CounterRequirement(split[0], Integer.parseInt(split[1]), split[2].equalsIgnoreCase("max"));
         }
