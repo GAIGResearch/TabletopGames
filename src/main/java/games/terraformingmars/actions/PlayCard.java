@@ -1,7 +1,6 @@
 package games.terraformingmars.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -41,10 +40,18 @@ public class PlayCard extends TMAction {
             gs.getPlayerCardsPlayedTags()[player].get(t).increment(1);
         }
         gs.getPlayerCardsPlayedTypes()[player].get(card.cardType).increment(1);
+        if (card.shouldSaveCard()) {
+            gs.getPlayerComplicatedPointCards()[player].add(card);
+        } else {
+            if (card.nPoints != 0) {
+                gs.getPlayerCardPoints()[player].increment((int) card.nPoints);
+            }
+        }
+
         // Add actions
         for (TMAction a: card.actions) {
             a.player = player;
-            gs.getPlayerCardsPlayedActions()[player].add(a);
+            gs.getPlayerExtraActions()[player].add(a);
         }
 
         // Add discountEffects to player's discounts

@@ -6,6 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.AdjacencyRequirement;
 import utilities.Group;
@@ -30,6 +31,8 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     public boolean volcanicRestriction;
 
     public AdjacencyRequirement adjacencyRequirement;
+
+    public int cardID = -1;  // Card used to place this tile
 
     boolean placed;
     boolean impossible;
@@ -99,17 +102,22 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             // Add money earned from adjacent oceans
             if (success && onMars) {
                 int nOceans = isAdjacentToTile(ggs, mt, TMTypes.Tile.Ocean);
-                ggs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).increment(nOceans * ((TMGameParameters)gs.getGameParameters()).getnMCGainedOcean());
-            }
-            if (resourcesGainedRestriction != null) {
-                // Production of each resource type gained increased by 1
-                TMTypes.Resource[] gained = mt.getResources();
-                HashSet<TMTypes.Resource> typesAdded = new HashSet<>();
-                for (TMTypes.Resource r: gained) {
-                    if (contains(resourcesGainedRestriction, r) && !typesAdded.contains(r)) {
-                        ggs.getPlayerProduction()[player].get(r).increment(1);
-                        typesAdded.add(r);
+                ggs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).increment(nOceans * ((TMGameParameters) gs.getGameParameters()).getnMCGainedOcean());
+                if (resourcesGainedRestriction != null) {
+                    // Production of each resource type gained increased by 1
+                    TMTypes.Resource[] gained = mt.getResources();
+                    HashSet<TMTypes.Resource> typesAdded = new HashSet<>();
+                    for (TMTypes.Resource r : gained) {
+                        if (contains(resourcesGainedRestriction, r) && !typesAdded.contains(r)) {
+                            ggs.getPlayerProduction()[player].get(r).increment(1);
+                            typesAdded.add(r);
+                        }
                     }
+                }
+                if (cardID != -1) {
+                    // Save location of tile placed on card
+                    TMCard card = (TMCard) gs.getComponentById(cardID);
+                    card.mapTileIDTilePlaced = mt.getComponentID();
                 }
             }
             return success;

@@ -24,7 +24,7 @@ public class Award {
             // Try tile
             TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, s);
             if (t != null) {
-                sum += gs.getTilesPlaced()[player].get(t).getValue();
+                sum += gs.getPlayerTilesPlaced()[player].get(t).getValue();
             } else {
                 // Try resource
                 TMTypes.Resource r = Utils.searchEnum(TMTypes.Resource.class, s.replace("prod", ""));

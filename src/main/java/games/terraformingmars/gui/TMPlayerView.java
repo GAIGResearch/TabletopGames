@@ -135,7 +135,7 @@ public class TMPlayerView extends ComponentView {
         drawShadowStringCentered(g, "Tiles placed:", new Rectangle2D.Double(startX, startY, defaultItemSize*2, defaultItemSize/3.), null, null, 12);
         startX += defaultItemSize*2;
         for (TMTypes.Tile t: TMTypes.Tile.values()) {
-            int nTiles = gs.getTilesPlaced()[focusPlayer].get(t).getValue();
+            int nTiles = gs.getPlayerTilesPlaced()[focusPlayer].get(t).getValue();
             Image img = ImageIO.GetInstance().getImage(t.getImagePath());
             drawImage(g, img, startX + k*spacing/2 + k*2*defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3);
             drawShadowStringCentered(g, "" + nTiles,

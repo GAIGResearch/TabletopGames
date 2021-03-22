@@ -96,7 +96,7 @@ public class TMMapTile extends Component {
             owner = player;
         }
 
-        gs.getTilesPlaced()[player].get(which).increment(1);
+        gs.getPlayerTilesPlaced()[player].get(which).increment(1);
 
         // Current player gets resources
         for (TMTypes.Resource res: resources) {

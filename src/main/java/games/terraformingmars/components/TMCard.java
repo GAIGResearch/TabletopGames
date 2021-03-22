@@ -31,13 +31,24 @@ public class TMCard extends Card {
     public TMAction firstAction;  // first action for the player is already decided to be this
     public TMAction[] actions;  // new actions available to the player
     public TMAction[] immediateEffects; // effect of this card, executed immediately
-    public double nPoints;  // if tokens, number of points will be nPoints * tokens
 
-    public TMTypes.TokenType pointsTokenType;  // Type of token placed on this card
-    public TMTypes.TokenType[] tokensOnCard;  // One count for each type of token
+    public int mapTileIDTilePlaced;  // Location where tile was placed, ID of grid cell
+
+    public double nPoints;
+    public TMTypes.Resource pointsResource;  // Type of resource placed on this card earning points, number of points will be nPoints * nResources
+    public Integer pointsThreshold;  // Points awarded if more than this resources on card, not multiplied
+    public TMTypes.Tag pointsTag;  // Type of tags played earning points
+    public TMTypes.Tile pointsTile;  // Type of tiles placed earning points
+    public boolean pointsTileAdjacent;  // If true, only count tiles of type adjacent to tile placed by card
+    public HashMap<TMTypes.Resource, Integer> resourceOnCard;  // One count for each type of token
 
     public TMCard() {
-        tokensOnCard = new TMTypes.TokenType[TMTypes.TokenType.values().length];
+        resourceOnCard = new HashMap<>();
+        for (TMTypes.Resource t: TMTypes.Resource.values()) {
+            if (t.canGoOnCard()) {
+                resourceOnCard.put(t, 0);
+            }
+        }
         tags = new TMTypes.Tag[0];
         actions = new TMAction[0];
         immediateEffects = new TMAction[0];
@@ -52,6 +63,10 @@ public class TMCard extends Card {
             if (!r.testCondition(gs)) return false;
         }
         return true;
+    }
+
+    public boolean shouldSaveCard() {
+        return pointsResource != null || pointsTag != null || pointsTile != null;
     }
 
     public static TMCard loadCorporation(JSONObject cardDef) {
@@ -86,9 +101,7 @@ public class TMCard extends Card {
                     TMTypes.Tile t = TMTypes.Tile.valueOf((String) other.get("tile"));
                     card.firstAction = new PlaceTile(-1, t, t.getRegularLegalTileType(), false);
                 }
-                // TODO: other actions?
             }
-            // TODO: other options?
         }
 
         if (cardDef.get("tags") != null) {
@@ -250,15 +263,7 @@ public class TMCard extends Card {
                         if (info2 != null && info2.contains("points")) {
                             // Points for this card
                             String ps = (String) ob2.get("#text");
-                            card.nPoints = Double.parseDouble(ps.replace("/", ""));
-                            if (ob2.get("div") != null) {
-                                String[] pointCondition = ((String) ((JSONObject) ob2.get("div")).get("@class")).split(" ");
-                                if (pointCondition[0].equalsIgnoreCase("resource")) {
-                                    // Find resource that earns points on this card
-                                    card.pointsTokenType = Utils.searchEnum(TMTypes.TokenType.class, pointCondition[1]);
-                                }
-                                // TODO more cases...
-                            }
+                            card.nPoints = Double.parseDouble(ps.split("/")[0]);
                         } else if (info2 != null && info2.contains("requirements")) {
                             String[] reqStr = ((String) ob2.get("#text")).split("\\.");
                             for (String s: reqStr) {
@@ -288,6 +293,7 @@ public class TMCard extends Card {
                                     card.requirements.add(r);
                                 } else if (s.contains("tile")) {
                                     // Tile count placed requirement TODO
+//                                    Requirement r = new TilePlacedRequirement()
                                 } else {
                                     // Counter requirement
                                     boolean max = s.contains("max");
@@ -299,49 +305,82 @@ public class TMCard extends Card {
                             }
                         } else if (info2 != null && info2.contains("description")) {
                             String ps = (String) ob2.get("#text");
-                            if (ps.contains("Action")) continue;  // TODO
-                            if (ps.contains("Effect")) continue;  // TODO
                             String[] split = ps.split("\\.");  // Dot separates multiple effects
                             for (String s: split) {
-                                if (s.contains("Requires") || s.contains("must")) continue;  // Already parsed requirements
+                                if (s.contains("Requires") || s.contains("must"))
+                                    continue;  // Already parsed requirements
+                                if (s.contains("Action")) continue;  // TODO
+                                if (s.contains("Effect")) continue;  // TODO
                                 s = s.trim();
-                                String[] orSplit = s.split("or");
-                                if (orSplit.length == 1) {
-                                    TMAction a = TMAction.parseAction(s).a;
-                                    if (a != null) {
-                                        immediateEffects.add(a);
+                                if (s.contains("VP")) {
+                                    // This card has special rules for awarding victory points
+                                    String[] pointCondition = s.split(" ");
+                                    int nVP = Integer.parseInt(pointCondition[0]);
+                                    int nOther = Integer.parseInt(pointCondition[3]);
+                                    card.nPoints = 1.*nVP / nOther;
+                                    String other = pointCondition[4];
+                                    if (other.contains("tag")) {
+                                        // Find resource that earns points on this card
+                                        card.pointsTag = TMTypes.Tag.valueOf(other);
                                     } else {
-                                        int b = 0;  // action didn't parse, put a breakpoint here to see it
+                                        // Maybe a resource?
+                                        TMTypes.Resource r = Utils.searchEnum(TMTypes.Resource.class, other);
+                                        if (r != null) {
+                                            card.pointsResource = r;
+                                        } else {
+                                            // A tile
+                                            card.pointsTile = TMTypes.Tile.valueOf(other);
+                                            if (pointCondition.length > 5 && pointCondition[5].equalsIgnoreCase("adjacent")) {
+                                                // Only count tiles adjacent to tile placed by card
+                                                card.pointsTileAdjacent = true;
+                                            }
+                                        }
+                                    }
+                                    if (pointCondition[2].equalsIgnoreCase("if")) {
+                                        card.pointsThreshold = nOther;
                                     }
                                 } else {
-                                    // Action choice
-                                    TMAction[] actionChoice = new TMAction[orSplit.length];
-                                    int i = 0;
-                                    for (String s2: orSplit) {
-                                        s2 = s2.trim();
-                                        String[] andSplit = s2.split("and");
-                                        if (andSplit.length == 1) {
-                                            TMAction a = TMAction.parseAction(s2).a;
-                                            if (a != null) {
-                                                actionChoice[i] = a;
+                                    String[] orSplit = s.split("or");
+                                    if (orSplit.length == 1) {
+                                        TMAction a = TMAction.parseAction(s).a;
+                                        if (a != null) {
+                                            immediateEffects.add(a);
+                                            if (a instanceof PlaceTile) {
+                                                ((PlaceTile) a).cardID = card.getComponentID();
                                             }
                                         } else {
-                                            // Compound action
-                                            TMAction[] compound = new TMAction[andSplit.length];
-                                            int j = 0;
-                                            for (String s3: andSplit) {
-                                                s3 = s3.trim();
-                                                TMAction a = TMAction.parseAction(s3).a;
-                                                if (a != null) {
-                                                    compound[j] = a;
-                                                }
-                                                j++;
-                                            }
-                                            actionChoice[i] = new CompoundAction(-1, compound, true);
+                                            int b = 0;  // action didn't parse, put a breakpoint here to see it
                                         }
-                                        i++;
+                                    } else {
+                                        // Action choice
+                                        TMAction[] actionChoice = new TMAction[orSplit.length];
+                                        int i = 0;
+                                        for (String s2 : orSplit) {
+                                            s2 = s2.trim();
+                                            String[] andSplit = s2.split("and");
+                                            if (andSplit.length == 1) {
+                                                TMAction a = TMAction.parseAction(s2).a;
+                                                if (a != null) {
+                                                    actionChoice[i] = a;
+                                                }
+                                            } else {
+                                                // Compound action
+                                                TMAction[] compound = new TMAction[andSplit.length];
+                                                int j = 0;
+                                                for (String s3 : andSplit) {
+                                                    s3 = s3.trim();
+                                                    TMAction a = TMAction.parseAction(s3).a;
+                                                    if (a != null) {
+                                                        compound[j] = a;
+                                                    }
+                                                    j++;
+                                                }
+                                                actionChoice[i] = new CompoundAction(-1, compound, true);
+                                            }
+                                            i++;
+                                        }
+                                        immediateEffects.add(new ActionChoice(-1, actionChoice, true));
                                     }
-                                    immediateEffects.add(new ActionChoice(-1, actionChoice, true));
                                 }
                             }
                         }

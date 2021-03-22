@@ -205,7 +205,7 @@
               ""
             ],
             "#text":
-              "Action: dec-MegaCredit-1 to reveal the top card of the draw deck. If that card has a Microbe tag, add a Science resource here 3 VPs if you have one or more Science resources here"
+              "Action: dec-MegaCredit-1 and reveal the top card of the draw deck. If that card has a Microbe tag, add-1-Science . 3 VP if 1 Science "
 
           }
         ]
@@ -328,7 +328,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 4 oceanTiles. placetile/Capital/ground/true . dec-Energyprod-2 . inc-MegaCreditprod-5 . 1 ADDITIONAL VP FOR EACH OCEAN TILE ADJACENT TO THIS CITY TILE."
+            "#text": "Requires 4 oceanTiles. placetile/Capital/ground/true . dec-Energyprod-2 . inc-MegaCreditprod-5 . 1 VP per 1 Ocean Adjacent "
           }
         ]
       }
@@ -558,7 +558,7 @@
               "",
               ""
             ],
-            "#text": "Action: dec-MegaCredit-12 to placetile/ocean/ocean/true . TITANIUM MAY BE USED as if playing a Space card 1 VP for each Jovian tag you have"
+            "#text": "Action: dec-MegaCredit-12 to placetile/ocean/ocean/true . TITANIUM MAY BE USED as if playing a Space card . 1 VP per 1 Jovian tag "
           }
         ],
         "span": {
@@ -874,7 +874,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-Plant-3 or add 3 Microbes or 2 Animal to ANOTHER card. placetile/ocean/ocean/true "
+            "#text": "inc-Plant-3 or add-3-Microbe-another or add-2-Animal-another . placetile/ocean/ocean/true "
           }
         ],
         "br": ""
@@ -1135,11 +1135,11 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: Remove 1 Animal from any card and add it to this card"
+            "#text": "Action: rem-1-Animal and add-1-Animal "
           },
           {
             "@class": "description ",
-            "#text": "Requires 11% oxygen. 1 VP per Animal on this card"
+            "#text": "Requires 11% oxygen. 1 VP per 1 Animal "
           }
         ],
         "br": ""
@@ -1201,7 +1201,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires -12 C or warmer. Add 1 Animal TO ANY ANIMAL CARD. inc-Plant-3. inc-MegaCreditprod-2 "
+            "#text": "Requires -12 C or warmer. add-1-Animal-Animal . inc-Plant-3. inc-MegaCreditprod-2 "
           }
         ],
         "br": "",
@@ -1513,7 +1513,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: Add 1 Microbe to this card, or remove 2 Microbe from this card to inc-oxygen-1 "
+            "#text": "Action: add-1-Microbe . Action: rem-2-Microbe and inc-oxygen-1 "
           }
         ],
         "br": "",
@@ -1574,7 +1574,7 @@
               "",
               ""
             ],
-            "#text": "Action: Add 1 Microbe to this card, or remove 2 Microbes to inc-Temperature-1"
+            "#text": "Action: add-1-Microbe . Action: rem-2-Microbe and inc-Temperature-1"
           }
         ],
         "br": "",
@@ -1631,7 +1631,7 @@
               ""
             ],
             "#text":
-              "Action: Remove 1 Microbe from any card to add 1 to this card. 1 VP per 2 Microbes on this card"
+              "Action: rem-1-Microbe-any and add-1-Microbe . 1 VP per 2 Microbe "
 
           }
         ]
@@ -2294,7 +2294,7 @@
           },
           {
             "@class": "description",
-            "#text": "Action: Add 1 Animal to this card"
+            "#text": "Action: add-1-Animal "
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -2318,7 +2318,7 @@
               "",
               ""
             ],
-            "#text": "Requires +2 C or warmer. dec-Plantprod-1-any 1 VP for each Animal on this card"
+            "#text": "Requires +2 C or warmer. dec-Plantprod-1-any . 1 VP per 1 Animal "
             
           }
         ],
@@ -2410,7 +2410,7 @@
           {
             "@class": "description",
             "@style": "margin-bottom:5px;",
-            "#text": "Action: Add 1 Animal to this card"
+            "#text": "Action: add-1-Animal "
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -2433,7 +2433,7 @@
               "",
               ""
             ],
-            "#text": " inc-Plantprod-1 . 1 VP per 2 Animal on this card"
+            "#text": " inc-Plantprod-1 . 1 VP per 2 Animal "
 
           }
         ],
@@ -2811,7 +2811,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:-5px;margin-bottom:5px;",
-            "#text": "Action: Add an animal to this card"
+            "#text": "Action: add-1-Animal "
           },
           {
             "@class": "production-boxprod-box-size2a",
@@ -2833,7 +2833,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px;",
-            "#text": "Requires 13% oxygen. dec-Plantprod-2. 1 VP per Animal on this card"
+            "#text": "Requires 13% oxygen. dec-Plantprod-2. 1 VP per 1 Animal "
           }
         ]
       }
@@ -3109,7 +3109,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/city/Ganymede/false . 1 VP per Jovian tag you have"
+            "#text": "placetile/city/Ganymede/false . 1 VP per 1 Jovian tag "
           }
         ],
         "#text": "*"
@@ -4318,7 +4318,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: When you play an animal or plant tag including these, add an animal to this card"
+            "#text": "Effect: playcard(tag-Animal-Plant) : add-1-Animal "
           },
           {
             "@class": "tile special-tile",
@@ -4328,7 +4328,7 @@
           {
             "@class": "description",
             "@style": "text-align:left;margin-top:-55px;",
-            "#text": "Requires that you have a greenery tile. placetile/Nature/Ground/true/Greenery . 1 VP per 2 Animal on this card"
+            "#text": "Requires that you have a greenery tile. placetile/Nature/Ground/true/Greenery .  add-2-Animal . 1 VP per 2 Animal "
           }
         ],
         "#text": [
@@ -4482,12 +4482,12 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: When you play an Animal, Plant, or Microbe tag, including this, add a Microbe to this card"
+            "#text": "Effect: playcard(tag-Animal-Plant-Microbe) :  add-3-Microbe .  add-3-Microbe  "
           },
           {
             "@class": "description",
             "@style": "margin-top:10px;",
-            "#text": "Requires 3% oxygen. 1 VP per 3 Microbes on this card"
+            "#text": "Requires 3% oxygen. 1 VP per 3 Microbe "
           }
         ],
         "#text": [
@@ -4589,7 +4589,7 @@
               "",
               ""
             ],
-            "#text": "Action: Add a microbe to ANOTHER card Requires -14 C or warmer"
+            "#text": "Action: add-1-Microbe-another . Requires -14 C or warmer"
           }
         ],
         "#text": "*"
@@ -4644,7 +4644,7 @@
               "",
               ""
             ],
-            "#text": "Action: inc-plant-1 or add 2 microbes to ANOTHER card. It must be -10 C or colder"
+            "#text": "Action: inc-plant-1 or add-2-Microbe-another . It must be -10 C or colder"
 
           }
         ],
@@ -5038,7 +5038,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true . inc-Card-2. inc-Plant-5 or add 4 Animal to ANOTHER card"
+            "#text": "placetile/ocean/ocean/true . inc-Card-2. inc-Plant-5 or add-4-Animal-another "
           }
         ],
         "br": "",
@@ -5200,7 +5200,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:-8px;",
-            "#text": "Effect: When placetile/Greenery/Ground/true , add an Animal to this card"
+            "#text": "Effect: placetile/Greenery/Ground/true : add-1-Animal "
           },
           {
             "@class": "animal resource ",
@@ -5230,7 +5230,7 @@
               "",
               ""
             ],
-            "#text":  "Requires 8% oxygen. Add 1 Animal to this card. dec-Plantprod-1-any. 1 VP per 2 Animal on this card"
+            "#text":  "Requires 8% oxygen. add-1-Animal . dec-Plantprod-1-any. 1 VP per 2 Animal "
           }
         ],
         "#text": ":"
@@ -5450,7 +5450,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: Add 1 Microbe to this card, or remove 3 Microbes to inc-TR-1 ."
+            "#text": "Action: add-1-Microbe . Action: rem-3-Microbe and inc-TR-1 ."
           },
           {
             "@class": "microbe resource "
@@ -5463,7 +5463,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Add 3 Microbes to this card"
+            "#text": "add-3-Microbe "
           }
         ],
         "br": [
@@ -5688,7 +5688,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-TR-1 . inc-Plant-4. Add 3 Microbe to ANOTHER card and add 2 Animal to ANOTHER card"
+            "#text": "inc-TR-1 . inc-Plant-4. add-3-Microbe-another and add-2-Animal-another "
           }
         ],
         "#text": [
@@ -6078,7 +6078,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Add 2 Microbes to ANOTHER card. inc-heatprod-3  . inc-Plantprod-1 "
+            "#text": "add-2-Microbe-another . inc-heatprod-3  . inc-Plantprod-1 "
           }
         ],
         "br": "",
@@ -6189,7 +6189,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: When any City tile is placed, add an Animal to this card"
+            "#text": "Effect: placetile/City/any/any : add-1-Animal "
           },
           {
             "@class": "animal resource"
@@ -6198,7 +6198,7 @@
             "@class": "description",
             "@style": "text-align:left;margin-top:10px;",
             "br": "",
-            "#text": "Add 1 Animal to this card. 1 VP per 2 Animal here. Animal may not be removed from this card."
+            "#text": "add-1-animal. 1 VP per 2 Animal . Animal may not be removed from this card."
           }
         ],
         "br": [
@@ -6632,7 +6632,7 @@
           {
             "@class": "description",
             "@style": "margin-bottom:5px;",
-            "#text": "Action: Add 1 Animal to this card"
+            "#text": "Action: add-1-animal "
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -6662,7 +6662,7 @@
           {
             "@class": "description",
             "@style": "position:absolute;margin-top:-85px;text-align:left;margin-left:80px;font-size:10px;",
-            "#text": "Requires 9% oxygen. dec-Plantprod-1  . inc-MegaCreditprod-2 . 1 VP per 1 Animal on this card."
+            "#text": "Requires 9% oxygen. dec-Plantprod-1  . inc-MegaCreditprod-2 . 1 VP per 1 Animal ."
           }
         ],
         "span": {
@@ -6838,7 +6838,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-Heat-5 to inc-Plant-4 or add 2 Animal to ANOTHER card"
+            "#text": "dec-Heat-5 and inc-Plant-4 or add-2-Animal-another "
           }
         ],
         "#text": [
@@ -6966,7 +6966,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px",
-            "#text": "inc-MegaCreditprod-5 . 1 VP for every 3rd City in play"
+            "#text": "inc-MegaCreditprod-5 . 1 VP per 3 City "
           }
         ]
       }

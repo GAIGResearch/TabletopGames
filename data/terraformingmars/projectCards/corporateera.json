@@ -133,7 +133,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-steel-1 to inc-MegaCredit-5"
+            "#text": "Action: dec-steel-1 and inc-MegaCredit-5"
           },
           {
             "@class": "production-box ",
@@ -199,7 +199,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-1 to inc-Card-1"
+            "#text": "Action: dec-Energy-1 and inc-Card-1"
           }
         ]
       }
@@ -334,11 +334,11 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-titanium-1 to add 1 fighter resource to this card"
+            "#text": "Action: dec-titanium-1 and add-1-Fighter "
           },
           {
             "@class": "description ",
-            "#text": "1 VP for each fighter resource on this card"
+            "#text": "1 VP per 1 Fighter "
           }
         ]
       }
@@ -440,7 +440,7 @@
               "",
               ""
             ],
-            "#text":  "Action: Add 1 Microbe to this card . 1 VP per 4 Microbes on this card"
+            "#text":  "Action: add-1-Microbe . 1 VP per 4 Microbe "
 
           }
         ],
@@ -957,7 +957,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px;margin-bottom:2px;",
-            "#text": "Action: dec-Plant-1 or dec-Steel-1 to inc-MegaCreidt-7"
+            "#text": "Action: dec-Plant-1 and inc-MegaCreidt-7 . Action: dec-Steel-1 and inc-MegaCreidt-7"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -1112,7 +1112,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a Science tag, including this, you may discard a card from hand to inc-card-1"
+            "#text": "Effect: playcard(tag-Science) : dec-card-1 and inc-card-1 . dec-card-1 and inc-card-1"
           }
         ],
         "span": [
@@ -1177,7 +1177,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a  plant, microbe, or an animal tag, including this, inc-Plant-1 or add 1 resource to THAT CARD"
+            "#text": "Effect: When you play a  plant, microbe, or an animal tag, including this, inc-Plant-1 or add-1-resource-that"
           }
         ],
         "br": "",
@@ -1403,7 +1403,7 @@
             "@class": "description",
             "@style": "text-align:left",
             "br": "",
-            "#text": "placetile/CommercialBuilding/ground/true . 1 VP PER ADJACENT CITY TILE"
+            "#text": "placetile/CommercialBuilding/ground/true . 1 VP per 1 City Adjacent "
 
           }
         ]
@@ -1593,7 +1593,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-titaniumprod-2  . inc-MegaCreditprod-2 . 1 VP per Jovian tag you have"
+            "#text": "inc-titaniumprod-2  . inc-MegaCreditprod-2 . 1 VP per 1 Jovian tag "
           }
         ]
       }
@@ -1704,11 +1704,11 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-6 to add a science resource to this card"
+            "#text": "Action: dec-Energy-6 and add-1-Science "
           },
           {
             "@class": "description ",
-            "#text": "2 VP for each science resource on this card"
+            "#text": "2 VP per 1 Science "
           }
         ],
         "br": [
@@ -2210,7 +2210,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-MegaCredit-7 to inc-steelprod-1 "
+            "#text": "Action: dec-MegaCredit-7 and inc-steelprod-1 "
           },
           {
             "@class": "tile special-tile",
@@ -2447,7 +2447,7 @@
       {
         "@class": "content ",
         "@style": "font-size:14px;font-weight: normal;",
-        "#text": "ADD 1 RESOURCE TO A CARD WITH AT LEAST 1 RESOURCE ON IT"
+        "#text": "add-1-resource-min1"
       }
     ]
   },
@@ -2587,7 +2587,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Heat-8 to inc-TR-1 "
+            "#text": "Action: dec-Heat-8 and inc-TR-1 "
           },
           {
             "@class": "description ",
@@ -2973,7 +2973,7 @@
           },
           {
             "@class": "description ",
-            "#text": "When you play a Science tag, including this, either add a Science resource to this card, or remove a Science resource from this card to inc-Card-1"
+            "#text": "Effect: playcard(tag-Science) : add-1-Science or use-1-Science and inc-Card-1. add-1-Science "
           }
         ],
         "#text": [
@@ -3098,7 +3098,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-X to inc-MegaCredit-X"
+            "#text": "Action: dec-Energy-X and inc-MegaCredit-X"
           }
         ],
         "#text": "X"
@@ -3273,7 +3273,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-MegaCredit-2 to inc-Card-1"
+            "#text": "Action: dec-MegaCredit-2 and inc-Card-1"
           },
           {
             "@class": "tile special-tile",

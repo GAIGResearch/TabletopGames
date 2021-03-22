@@ -77,6 +77,10 @@ public class TMAction extends AbstractAction {
         this.standardProject = project;
     }
 
+    public boolean canBePlayed(TMGameState gs) {  // TODO: overwrite in subclasses and simplify code
+        return !played && (requirement == null || requirement.testCondition(gs));
+    }
+
     @Override
     public boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;

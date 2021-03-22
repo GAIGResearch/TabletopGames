@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import static games.terraformingmars.components.TMMapTile.parseMapTile;
 
@@ -102,20 +101,25 @@ public class TMTypes {
     }
 
     public enum Resource {
-        MegaCredit("data/terraformingmars/images/megacredits/megacredit.png", true),
-        Steel("data/terraformingmars/images/resources/steel.png", true),
-        Titanium("data/terraformingmars/images/resources/titanium.png", true),
-        Plant("data/terraformingmars/images/resources/plant.png", true),
-        Energy("data/terraformingmars/images/resources/power.png", true),
-        Heat("data/terraformingmars/images/resources/heat.png", true),
-        Card("data/terraformingmars/images/resources/card.png", false),
-        TR("data/terraformingmars/images/resources/TR.png", false);
+        MegaCredit("data/terraformingmars/images/megacredits/megacredit.png", true, false),
+        Steel("data/terraformingmars/images/resources/steel.png", true, false),
+        Titanium("data/terraformingmars/images/resources/titanium.png", true, false),
+        Plant("data/terraformingmars/images/resources/plant.png", true, false),
+        Energy("data/terraformingmars/images/resources/power.png", true, false),
+        Heat("data/terraformingmars/images/resources/heat.png", true, false),
+        Card("data/terraformingmars/images/resources/card.png", false, false),
+        TR("data/terraformingmars/images/resources/TR.png", false, false),
+        Microbe("data/terraformingmars/images/resources/microbe.png", false, true),
+        Animal("data/terraformingmars/images/resources/animal.png", false, true),
+        Science("data/terraformingmars/images/resources/science.png", false, true),
+        Fighter("data/terraformingmars/images/resources/fighter.png", false, true);
 
         String imagePath;
         boolean playerBoardRes;
+        boolean canGoOnCard;
         static int nPlayerBoardRes = -1;
 
-        Resource(String imagePath, boolean playerBoardRes) {
+        Resource(String imagePath, boolean playerBoardRes, boolean canGoOnCard) {
             this.imagePath = imagePath;
             this.playerBoardRes = playerBoardRes;
         }
@@ -137,6 +141,10 @@ public class TMTypes {
             }
             return nPlayerBoardRes;
         }
+
+        public boolean canGoOnCard() {
+            return canGoOnCard;
+        }
     }
 
     public enum Tag {
@@ -157,22 +165,6 @@ public class TMTypes {
         String imagePath;
 
         Tag(String imagePath) {
-            this.imagePath = imagePath;
-        }
-
-        public String getImagePath() {
-            return imagePath;
-        }
-    }
-
-    public enum TokenType {
-        Microbe("data/terraformingmars/images/tags/microbe.png"),
-        Animal("data/terraformingmars/images/tags/animal.png"),
-        Science("data/terraformingmars/images/tags/science.png");
-
-        String imagePath;
-
-        TokenType(String imagePath) {
             this.imagePath = imagePath;
         }
 

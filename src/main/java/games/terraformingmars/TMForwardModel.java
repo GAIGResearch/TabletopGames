@@ -83,21 +83,24 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.playerCorporations = new TMCard[gs.getNPlayers()];
         gs.playerCardChoice = new Deck[gs.getNPlayers()];
         gs.playerHands = new Deck[gs.getNPlayers()];
+        gs.playerComplicatedPointCards = new Deck[gs.getNPlayers()];
+        gs.playerCardPoints = new Counter[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            gs.playerHands[i] = new Deck<>("Hand Player " + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            gs.playerCardChoice[i] = new Deck<>("Card Choice Player " + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+            gs.playerHands[i] = new Deck<>("Hand of p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+            gs.playerCardChoice[i] = new Deck<>("Card Choice for p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+            gs.playerComplicatedPointCards[i] = new Deck<>("Resource Cards Played by p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+            gs.playerCardPoints[i] = new Counter(0, 0, params.maxPoints, "Points of p" + i);
         }
 
-        gs.tilesPlaced = new HashMap[gs.getNPlayers()];
+        gs.playerTilesPlaced = new HashMap[gs.getNPlayers()];
         gs.playerCardsPlayedTypes = new HashMap[gs.getNPlayers()];
         gs.playerCardsPlayedTags = new HashMap[gs.getNPlayers()];
-        gs.playerCardsPlayedActions = new HashSet[gs.getNPlayers()];
-        gs.playerCardsPlayedEffects = new HashSet[gs.getNPlayers()];
+        gs.playerExtraActions = new HashSet[gs.getNPlayers()];
         gs.playerPersistingEffects = new HashSet[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            gs.tilesPlaced[i] = new HashMap<>();
+            gs.playerTilesPlaced[i] = new HashMap<>();
             for (TMTypes.Tile t: TMTypes.Tile.values()) {
-                gs.tilesPlaced[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " tiles placed player " + i));
+                gs.playerTilesPlaced[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " tiles placed player " + i));
             }
             gs.playerCardsPlayedTypes[i] = new HashMap<>();
             for (TMTypes.CardType t: TMTypes.CardType.values()) {
@@ -107,8 +110,7 @@ public class TMForwardModel extends AbstractForwardModel {
             for (TMTypes.Tag t: TMTypes.Tag.values()) {
                 gs.playerCardsPlayedTags[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " cards played player " + i));
             }
-            gs.playerCardsPlayedActions[i] = new HashSet<>();
-            gs.playerCardsPlayedEffects[i] = new HashSet<>();
+            gs.playerExtraActions[i] = new HashSet<>();
             gs.playerPersistingEffects[i] = new HashSet<>();
         }
 
@@ -218,7 +220,7 @@ public class TMForwardModel extends AbstractForwardModel {
                         gs.playerCardChoice[i].add(gs.projectCards.pick(0));
                     }
                     // Mark player actions unused
-                    for (TMAction a : gs.playerCardsPlayedActions[i]) {
+                    for (TMAction a : gs.playerExtraActions[i]) {
                         a.played = false;
                     }
                     // Reset resource increase
@@ -334,7 +336,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
 
             // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation
-            for (TMAction a: gs.playerCardsPlayedActions[player]) {
+            for (TMAction a: gs.playerExtraActions[player]) {
                 if (!a.played && (a.requirement == null || a.requirement.testCondition(gs))) {
                     if (a instanceof PayForAction) {
                         // Check if player can afford it
