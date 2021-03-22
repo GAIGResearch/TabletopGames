@@ -321,8 +321,8 @@ public class TMCard extends Card {
                                     int nOther = Integer.parseInt(pointCondition[3]);
                                     card.nPoints = 1.*nVP / nOther;
                                     String other = pointCondition[4];
-                                    if (other.contains("tag")) {
-                                        // Find resource that earns points on this card
+                                    if (s.contains("tag")) {
+                                        // Find tag that earns points on this card
                                         card.pointsTag = TMTypes.Tag.valueOf(other);
                                     } else {
                                         // Maybe a resource?

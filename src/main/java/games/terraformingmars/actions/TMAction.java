@@ -256,27 +256,29 @@ public class TMAction extends AbstractAction {
             // Add resource to card
             int sign = encoding.contains("rem") ? -1 : 1;
             String[] split2 = encoding.split("-");
-            int amount = Integer.parseInt(split2[1]);
-            TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, split2[2]);
-            effect = new AddResourceOnCard(-1, cardID, res, amount*sign, free);
+            try {
+                int amount = Integer.parseInt(split2[1]);
+                TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, split2[2]);
+                effect = new AddResourceOnCard(-1, cardID, res, amount * sign, free);
 
-            if (split2.length > 3) {
-                if (split2[3].equalsIgnoreCase("another")) {
-                    ((AddResourceOnCard) effect).cardID = -1;
-                } else if (split2[3].equalsIgnoreCase("any")) {
-                    ((AddResourceOnCard) effect).cardID = -1;
-                    ((AddResourceOnCard) effect).chooseAny = true;
-                }
-                if (split2.length > 4) {
-                    if (split2[4].contains("min")) {
-                        // min resources on target card required
-                        ((AddResourceOnCard) effect).minResRequirement = Integer.parseInt(split2[4].replace("min", ""));
-                    } else {
-                        // maybe a tag required;
-                        ((AddResourceOnCard) effect).tagRequirement = Utils.searchEnum(TMTypes.Tag.class, split2[4]);
+                if (split2.length > 3) {
+                    if (split2[3].equalsIgnoreCase("another")) {
+                        ((AddResourceOnCard) effect).cardID = -1;
+                    } else if (split2[3].equalsIgnoreCase("any")) {
+                        ((AddResourceOnCard) effect).cardID = -1;
+                        ((AddResourceOnCard) effect).chooseAny = true;
+                    }
+                    if (split2.length > 4) {
+                        if (split2[4].contains("min")) {
+                            // min resources on target card required
+                            ((AddResourceOnCard) effect).minResRequirement = Integer.parseInt(split2[4].replace("min", ""));
+                        } else {
+                            // maybe a tag required;
+                            ((AddResourceOnCard) effect).tagRequirement = Utils.searchEnum(TMTypes.Tag.class, split2[4]);
+                        }
                     }
                 }
-            }
+            } catch (Exception ignored) {}
         }
         return new Pair<>(effect, effectString);
     }

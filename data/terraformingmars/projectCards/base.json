@@ -6198,7 +6198,7 @@
             "@class": "description",
             "@style": "text-align:left;margin-top:10px;",
             "br": "",
-            "#text": "add-1-animal. 1 VP per 2 Animal . Animal may not be removed from this card."
+            "#text": "add-1-animal. 1 VP per 2 Animal . Animal stays on this card."
           }
         ],
         "br": [
