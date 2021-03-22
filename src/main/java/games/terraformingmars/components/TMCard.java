@@ -40,13 +40,15 @@ public class TMCard extends Card {
     public TMTypes.Tag pointsTag;  // Type of tags played earning points
     public TMTypes.Tile pointsTile;  // Type of tiles placed earning points
     public boolean pointsTileAdjacent;  // If true, only count tiles of type adjacent to tile placed by card
-    public HashMap<TMTypes.Resource, Integer> resourceOnCard;  // One count for each type of token
+
+    public TMTypes.Resource resourceOnCard; // TODO
+    public HashMap<TMTypes.Resource, Integer> resourcesOnCard;  // One count for each type of token
 
     public TMCard() {
-        resourceOnCard = new HashMap<>();
+        resourcesOnCard = new HashMap<>();
         for (TMTypes.Resource t: TMTypes.Resource.values()) {
             if (t.canGoOnCard()) {
-                resourceOnCard.put(t, 0);
+                resourcesOnCard.put(t, 0);
             }
         }
         tags = new TMTypes.Tag[0];
@@ -309,7 +311,7 @@ public class TMCard extends Card {
                             for (String s: split) {
                                 if (s.contains("Requires") || s.contains("must"))
                                     continue;  // Already parsed requirements
-                                if (s.contains("Action")) continue;  // TODO
+                                if (s.contains("Action")) continue;  // TODO if add resource action, mark card.resourceOnCard property
                                 if (s.contains("Effect")) continue;  // TODO
                                 s = s.trim();
                                 if (s.contains("VP")) {
@@ -327,6 +329,7 @@ public class TMCard extends Card {
                                         TMTypes.Resource r = Utils.searchEnum(TMTypes.Resource.class, other);
                                         if (r != null) {
                                             card.pointsResource = r;
+                                            card.resourceOnCard = r;
                                         } else {
                                             // A tile
                                             card.pointsTile = TMTypes.Tile.valueOf(other);
@@ -342,7 +345,7 @@ public class TMCard extends Card {
                                 } else {
                                     String[] orSplit = s.split("or");
                                     if (orSplit.length == 1) {
-                                        TMAction a = TMAction.parseAction(s).a;
+                                        TMAction a = TMAction.parseAction(s, true, card.getComponentID()).a;
                                         if (a != null) {
                                             immediateEffects.add(a);
                                             if (a instanceof PlaceTile) {
@@ -359,7 +362,7 @@ public class TMCard extends Card {
                                             s2 = s2.trim();
                                             String[] andSplit = s2.split("and");
                                             if (andSplit.length == 1) {
-                                                TMAction a = TMAction.parseAction(s2).a;
+                                                TMAction a = TMAction.parseAction(s2, true, card.getComponentID()).a;
                                                 if (a != null) {
                                                     actionChoice[i] = a;
                                                 }
@@ -369,7 +372,7 @@ public class TMCard extends Card {
                                                 int j = 0;
                                                 for (String s3 : andSplit) {
                                                     s3 = s3.trim();
-                                                    TMAction a = TMAction.parseAction(s3).a;
+                                                    TMAction a = TMAction.parseAction(s3, true, card.getComponentID()).a;
                                                     if (a != null) {
                                                         compound[j] = a;
                                                     }

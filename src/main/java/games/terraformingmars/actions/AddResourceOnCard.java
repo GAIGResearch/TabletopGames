@@ -1,18 +1,23 @@
 package games.terraformingmars.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-import java.util.Objects;
+import java.util.*;
 
-// TODO: extended, "another" = yours, "any" = any player's
-public class AddResourceOnCard extends TMAction {
-    final int cardID;
+public class AddResourceOnCard extends TMAction implements IExtendedSequence {
+    int cardID;
     final TMTypes.Resource resource;
-    final int amount;
+    final int amount;  // Can be negative for removing resources
+
+    public boolean chooseAny;  // if true, can choose cards that take resources from any player, otherwise own ones
+    public TMTypes.Tag tagRequirement;  // tag target card must have
+    public int minResRequirement;
 
     public AddResourceOnCard(int player, int cardID, TMTypes.Resource resource, int amount, boolean free) {
         super(TMTypes.ActionType.PlayCard, player, free);
@@ -23,11 +28,70 @@ public class AddResourceOnCard extends TMAction {
 
     @Override
     public boolean execute(AbstractGameState gameState) {
-        TMGameState gs = (TMGameState) gameState;
-        TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        TMCard card = (TMCard) gs.getComponentById(cardID);
-        card.resourceOnCard.put(resource, card.resourceOnCard.get(resource) + amount);
-        return super.execute(gs);
+        if (cardID != -1) {
+            TMGameState gs = (TMGameState) gameState;
+            TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
+            TMCard card = (TMCard) gs.getComponentById(cardID);
+            card.resourcesOnCard.put(resource, card.resourcesOnCard.get(resource) + amount);
+            return super.execute(gs);
+        }
+        gameState.setActionInProgress(this);
+        if (player == -1) player = gameState.getCurrentPlayer();
+        return true;
+    }
+
+    @Override
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+        List<AbstractAction> actions = new ArrayList<>();
+        TMGameState gs = (TMGameState) state;
+        if (chooseAny) {
+            for (int i = 0; i < state.getNPlayers(); i++) {
+                addDeckActions(actions, gs, i);
+            }
+        } else {
+            addDeckActions(actions, gs, player);
+        }
+        if (actions.size() == 0) {
+            actions.add(new TMAction(player));  // Pass, shouldn't happen
+        }
+        return actions;
+    }
+
+    private void addDeckActions(List<AbstractAction> actions, TMGameState gs, int player) {
+        for (TMCard card: gs.getPlayerComplicatedPointCards()[player].getComponents()) {
+            if (card.resourceOnCard != null) {
+                if (resource != null && card.resourceOnCard == resource ||
+                    resource == null && card.resourcesOnCard.get(card.resourceOnCard) > minResRequirement) {
+                    if (amount > 0 || amount < 0 && card.resourcesOnCard.get(card.resourceOnCard) > amount) {
+                        if (tagRequirement == null || contains(card.tags, tagRequirement)) {
+                            actions.add(new AddResourceOnCard(player, card.getComponentID(), resource, amount, true));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean contains(TMTypes.Tag[] array, TMTypes.Tag object) {
+        for (TMTypes.Tag t: array) {
+            if (object == t) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        return player;
+    }
+
+    @Override
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        cardID = ((AddResourceOnCard)action).cardID;
+    }
+
+    @Override
+    public boolean executionComplete(AbstractGameState state) {
+        return cardID != -1;
     }
 
     @Override

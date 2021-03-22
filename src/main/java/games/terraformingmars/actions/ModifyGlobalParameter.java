@@ -11,7 +11,7 @@ import java.util.Objects;
 public class ModifyGlobalParameter extends TMModifyCounter {
     TMTypes.GlobalParameter param;
 
-    public ModifyGlobalParameter(TMTypes.GlobalParameter param, int change, boolean free) {
+    public ModifyGlobalParameter(TMTypes.GlobalParameter param, Integer change, boolean free) {
         super(-1, -1, change, free);
         this.param = param;
     }

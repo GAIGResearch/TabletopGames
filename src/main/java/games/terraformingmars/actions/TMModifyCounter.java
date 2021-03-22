@@ -8,15 +8,15 @@ import java.util.Objects;
 
 public class TMModifyCounter extends TMAction {
     public int counterID;
-    public final int change;
+    public Integer change;
 
-    public TMModifyCounter(int counterID, int change, boolean free) {
+    public TMModifyCounter(int counterID, Integer change, boolean free) {
         super(-1, free);
         this.counterID = counterID;
         this.change = change;
     }
 
-    public TMModifyCounter(int player, int counterID, int change, boolean free) {
+    public TMModifyCounter(int player, int counterID, Integer change, boolean free) {
         super(-1, free);
         this.counterID = counterID;
         this.change = change;

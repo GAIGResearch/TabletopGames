@@ -23,7 +23,7 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
         this.targetPlayer = player;
     }
 
-    public PlaceholderModifyCounter(int player, int targetPlayer, int change, TMTypes.Resource resource, boolean production, boolean free) {
+    public PlaceholderModifyCounter(int player, int targetPlayer, Integer change, TMTypes.Resource resource, boolean production, boolean free) {
         super(player,-1, change, free);
         this.resource = resource;
         this.production = production;

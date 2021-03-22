@@ -485,13 +485,13 @@ public class TMGameState extends AbstractGameState {
         for (TMCard card: playerComplicatedPointCards[player].getComponents()) {
             if (card.pointsThreshold != null) {
                 if (card.pointsResource != null) {
-                    if (card.resourceOnCard.get(card.pointsResource) >= card.pointsThreshold) {
+                    if (card.resourcesOnCard.get(card.pointsResource) >= card.pointsThreshold) {
                         points += card.nPoints;
                     }
                 }
             } else {
                 if (card.pointsResource != null) {
-                    points += card.nPoints * card.resourceOnCard.get(card.pointsResource);
+                    points += card.nPoints * card.resourcesOnCard.get(card.pointsResource);
                 } else if (card.pointsTag != null) {
                     points += card.nPoints * playerCardsPlayedTags[player].get(card.pointsTag).getValue();
                 } else if (card.pointsTile != null) {

@@ -1201,7 +1201,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires -12 C or warmer. add-1-Animal-Animal . inc-Plant-3. inc-MegaCreditprod-2 "
+            "#text": "Requires -12 C or warmer. add-1-Animal-another-Animal . inc-Plant-3. inc-MegaCreditprod-2 "
           }
         ],
         "br": "",
@@ -6838,7 +6838,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-Heat-5 and inc-Plant-4 or add-2-Animal-another "
+            "#text": "dec-Heat-5 and inc-Plant-4 or dec-Heat-5 and add-2-Animal-another "
           }
         ],
         "#text": [

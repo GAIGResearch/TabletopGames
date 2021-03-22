@@ -139,7 +139,11 @@ public class TMAction extends AbstractAction {
         return actionType != null? actionType.name() : "Pass";
     }
 
-    public static Pair<TMAction, String> parseAction(String encoding) {
+    public static Pair<TMAction, String> parseAction(String encoding, boolean free) {
+        return parseAction(encoding, free, -1);
+    }
+
+    public static Pair<TMAction, String> parseAction(String encoding, boolean free, int cardID) {
 
         // Third element is effect
         TMAction effect = null;
@@ -151,7 +155,10 @@ public class TMAction extends AbstractAction {
             String[] split2 = encoding.split("-");
             try {
                 // Find how much
-                int increment = Integer.parseInt(split2[2]);
+                Integer increment = null;
+                if (!split2[2].equalsIgnoreCase("x")) {
+                    increment = Integer.parseInt(split2[2]);
+                }
                 if (encoding.contains("dec")) increment *= -1;
 
                 effectString = split2[1];
@@ -159,16 +166,20 @@ public class TMAction extends AbstractAction {
                 // Find which counter
                 TMTypes.GlobalParameter which = Utils.searchEnum(TMTypes.GlobalParameter.class, split2[1]);
 
-                if (which == null) {
-                    // A resource or production instead
-                    String resString = split2[1].split("prod")[0];
-                    TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-                    int targetPlayer = player;
-                    if (split2.length > 3 && split2[3].equalsIgnoreCase("any")) targetPlayer = -2;
-                    effect = new PlaceholderModifyCounter(player, targetPlayer, increment, res, split2[1].contains("prod"), true);
+                if (increment == null) {
+                    // TODO: handle "dec X to increase X", sub action to be done only when first is done and X decided
                 } else {
-                    // A global counter (temp, oxygen, oceantiles)
-                    effect = new ModifyGlobalParameter(which, increment, true);
+                    if (which == null) {
+                        // A resource or production instead
+                        String resString = split2[1].split("prod")[0];
+                        TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
+                        int targetPlayer = player;
+                        if (split2.length > 3 && split2[3].equalsIgnoreCase("any")) targetPlayer = -2;
+                        effect = new PlaceholderModifyCounter(player, targetPlayer, increment, res, split2[1].contains("prod"), free);
+                    } else {
+                        // A global counter (temp, oxygen, oceantiles)
+                        effect = new ModifyGlobalParameter(which, increment, free);
+                    }
                 }
             } catch (Exception ignored) {}
         } else if (encoding.contains("placetile")) {
@@ -180,7 +191,7 @@ public class TMAction extends AbstractAction {
                 // split2[2] is where to place it. can be a map tile, or a city name, or volcanic or resources gained.
                 if (split2[2].equalsIgnoreCase("volcanic")) {
                     // Volcanic restriction
-                    effect = new PlaceTile(player, toPlace, true, true);
+                    effect = new PlaceTile(player, toPlace, true, free);
                 } else if (split2[2].contains("-")) {
                     String[] split3 = split2[2].split("-");
                     TMTypes.Resource[] resources = new TMTypes.Resource[split3.length];
@@ -188,17 +199,17 @@ public class TMAction extends AbstractAction {
                         resources[i] = TMTypes.Resource.valueOf(split3[i]);
                     }
                     // Resource gained restriction
-                    effect = new PlaceTile(player, toPlace, resources, true);
+                    effect = new PlaceTile(player, toPlace, resources, free);
                 } else {
                     // Map tile restriction
                     TMTypes.MapTileType where = Utils.searchEnum(TMTypes.MapTileType.class, split2[2]);
                     boolean onMars = Boolean.parseBoolean(split2[3]);
                     if (where == null) {
                         // A named tile
-                        effect = new PlaceTile(player, toPlace, split2[2], onMars, true);
+                        effect = new PlaceTile(player, toPlace, split2[2], onMars, free);
                     } else {
                         boolean respectAdjacency = where == toPlace.getRegularLegalTileType();
-                        effect = new PlaceTile(player, toPlace, where, true);  // Extended sequence, will ask player where to put it
+                        effect = new PlaceTile(player, toPlace, where, free);  // Extended sequence, will ask player where to put it
                         ((PlaceTile) effect).respectingAdjacency = respectAdjacency;
                     }
                 }
@@ -238,7 +249,32 @@ public class TMAction extends AbstractAction {
             String[] split2 = encoding.split("/");
             // split2[1] is map type where this can be placed
             TMTypes.MapTileType toPlace = TMTypes.MapTileType.valueOf(split2[1]);
-            effect = new ReserveTile(-1, toPlace, true);
+            effect = new ReserveTile(-1, toPlace, free);
+        } else if (encoding.contains("add") || encoding.contains("rem")) {
+            // Add resource to card
+            int sign = encoding.contains("rem") ? -1 : 1;
+            String[] split2 = encoding.split("-");
+            int amount = Integer.parseInt(split2[1]);
+            TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, split2[2]);
+            effect = new AddResourceOnCard(-1, cardID, res, amount*sign, free);
+
+            if (split2.length > 3) {
+                if (split2[3].equalsIgnoreCase("another")) {
+                    ((AddResourceOnCard) effect).cardID = -1;
+                } else if (split2[3].equalsIgnoreCase("any")) {
+                    ((AddResourceOnCard) effect).cardID = -1;
+                    ((AddResourceOnCard) effect).chooseAny = true;
+                }
+                if (split2.length > 4) {
+                    if (split2[4].contains("min")) {
+                        // min resources on target card required
+                        ((AddResourceOnCard) effect).minResRequirement = Integer.parseInt(split2[4].replace("min", ""));
+                    } else {
+                        // maybe a tag required;
+                        ((AddResourceOnCard) effect).tagRequirement = Utils.searchEnum(TMTypes.Tag.class, split2[4]);
+                    }
+                }
+            }
         }
         return new Pair<>(effect, effectString);
     }

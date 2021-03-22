@@ -240,7 +240,7 @@ public class TMDeckDisplay extends JComponent {
                 // "to" depends on the action applied as the effect
                 TMAction action = e.effectAction;
                 if (action == null) {
-                    action = TMAction.parseAction(e.effectEncoding).a;
+                    action = TMAction.parseAction(e.effectEncoding, true).a;
                 }
                 if (action instanceof PlaceholderModifyCounter) {
                     drawPlaceHolderCounterActionMiddle(g, (PlaceholderModifyCounter) action, xEF + size * 4, yEF, size);
