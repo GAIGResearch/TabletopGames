@@ -106,6 +106,8 @@ public class TMAction extends AbstractAction {
                 gs.getPlayerHands()[player].add(gs.getProjectCards().pick(0));
             }
             c.setValue(0);
+        } else if (nCards < 0) {
+            // TODO player needs to discard nCards
         }
 
         return true;
