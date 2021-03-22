@@ -113,7 +113,8 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return countPoints(playerId);
+        return playerResources[playerId].get(TMTypes.Resource.TR).getValue();
+//        return countPoints(playerId);
     }
 
     @Override
@@ -483,6 +484,9 @@ public class TMGameState extends AbstractGameState {
         points += playerCardPoints[player].getValue();
 
         for (TMCard card: playerComplicatedPointCards[player].getComponents()) {
+            if (card == null) {
+                continue;  // TODO: shouldn't happen
+            }
             if (card.pointsThreshold != null) {
                 if (card.pointsResource != null) {
                     if (card.resourcesOnCard.get(card.pointsResource) >= card.pointsThreshold) {

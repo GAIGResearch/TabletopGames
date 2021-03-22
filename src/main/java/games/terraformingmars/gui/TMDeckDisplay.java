@@ -290,10 +290,33 @@ public class TMDeckDisplay extends JComponent {
             if (card.nPoints != 0) {
                 Vector2D dim = scaleLargestDimImg(pointBg, defaultItemSize);
                 drawImage(g, pointBg, x + width - dim.getX() - 2, y + height - dim.getY() - 2, dim.getX(), dim.getY());
-                drawShadowStringCentered(g, "" + card.nPoints,
-                        new Rectangle(x + width - dim.getX() - 2, y + height - dim.getY() - 2, dim.getX(), dim.getY()),
-                        Color.orange);
-                // Draw different for points per resource TODO
+                Rectangle contentRect = new Rectangle(x + width - dim.getX() - 2, y + height - dim.getY() - 2, dim.getX(), dim.getY());
+                int size = contentRect.width/3;
+                int nOther = (int)(1/card.nPoints);
+                if (card.pointsResource != null) {
+                    drawShadowStringCentered(g, "1/" + (nOther != 1? nOther : ""),
+                            new Rectangle(contentRect.x, contentRect.y, contentRect.width/2, contentRect.height),
+                            Color.orange, Color.black, 14);
+                    drawImage(g, ImageIO.GetInstance().getImage(card.pointsResource.getImagePath()),
+                            contentRect.x + contentRect.width/2 + contentRect.width/4 - size/2, contentRect.y + contentRect.height/2 - size/2,
+                            size, size);
+                } else if (card.pointsTile != null) {
+                    drawShadowStringCentered(g, "1/" + (nOther != 1? nOther : ""),
+                            new Rectangle(contentRect.x, contentRect.y, contentRect.width/2, contentRect.height),
+                            Color.orange, Color.black, 14);
+                    drawImage(g, ImageIO.GetInstance().getImage(card.pointsTile.getImagePath()),
+                            contentRect.x + contentRect.width/2 + contentRect.width/4 - size/2, contentRect.y + contentRect.height/2 - size/2,
+                            size, size);
+                } else if (card.pointsTag != null) {
+                    drawShadowStringCentered(g, "1/" + (nOther != 1? nOther : ""),
+                            new Rectangle(contentRect.x, contentRect.y, contentRect.width/2, contentRect.height),
+                            Color.orange, Color.black, 14);
+                    drawImage(g, ImageIO.GetInstance().getImage(card.pointsTag.getImagePath()),
+                            contentRect.x + contentRect.width/2 + contentRect.width/4 - size/2, contentRect.y + contentRect.height/2 - size/2,
+                            size, size);
+                } else {
+                    drawShadowStringCentered(g, "" + (int)card.nPoints, contentRect, Color.orange);
+                }
             }
             // Draw tags
             int tagSize = defaultItemSize/3;
@@ -346,7 +369,9 @@ public class TMDeckDisplay extends JComponent {
                     } else if (a instanceof PlaceTile) {
                         drawPlaceTileAction(g, (PlaceTile) a, xE, yE, defaultItemSize/2);
                         yE += defaultItemSize/2 + spacing/5;
-                    }
+                    } else if (a instanceof AddResourceOnCard) {
+                        // TODO
+                    } // TODO combo and choice actions
                 }
             }
         }

@@ -116,6 +116,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        if (! (action instanceof ResourceTransaction)) {
+            stage = resourcesToPayWith.length;  // TODO: bad, this shouldn't happen
+        }
         TMGameState gs = (TMGameState) state;
         TMTypes.Resource res = resourcesToPayWith[stage];
         costPaid += Math.abs(((ResourceTransaction)action).amount) * gs.getResourceMapRate(res, TMTypes.Resource.MegaCredit);

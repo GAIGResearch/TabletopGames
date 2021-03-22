@@ -74,15 +74,15 @@ public class TMTypes {
         Ocean ("data/terraformingmars/images/tiles/ocean.png"),
         Greenery ("data/terraformingmars/images/tiles/greenery_no_O2.png"),
         City ("data/terraformingmars/images/tiles/city.png"),
-        CommercialBuilding ("data/terraformingmars/images/tiles/special.png"),
-        NuclearExplosion ("data/terraformingmars/images/tiles/special.png"),
-        IndustrialBuilding ("data/terraformingmars/images/tiles/special.png"),
-        Mine ("data/terraformingmars/images/tiles/special.png"),
-        Moonhole ("data/terraformingmars/images/tiles/special.png"),
-        Nature ("data/terraformingmars/images/tiles/special.png"),
-        Park ("data/terraformingmars/images/tiles/special.png"),
-        Restricted ("data/terraformingmars/images/tiles/special.png"),
-        Volcano ("data/terraformingmars/images/tiles/special.png");
+        CommercialBuilding ("data/terraformingmars/images/tiles/CommercialBuilding.png"),
+        NuclearExplosion ("data/terraformingmars/images/tiles/NuclearExplosion.png"),
+        IndustrialBuilding ("data/terraformingmars/images/tiles/IndustrialBuilding.png"),
+        Mine ("data/terraformingmars/images/tiles/mine.png"),
+        Moonhole ("data/terraformingmars/images/tiles/Moonhole.png"),
+        Nature ("data/terraformingmars/images/tiles/Nature.png"),
+        Park ("data/terraformingmars/images/tiles/park.png"),
+        Restricted ("data/terraformingmars/images/tiles/Restricted.png"),
+        Volcano ("data/terraformingmars/images/tiles/Volcano.png");
 
         String imagePath;
 
