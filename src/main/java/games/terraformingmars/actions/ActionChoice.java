@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ActionChoice extends TMAction implements IExtendedSequence {
-    TMAction[] actions;
+    public TMAction[] actions;
     boolean finished;
 
     public ActionChoice(int player, TMAction[] actions, boolean free) {

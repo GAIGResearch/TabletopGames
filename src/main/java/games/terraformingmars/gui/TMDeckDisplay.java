@@ -365,16 +365,7 @@ public class TMDeckDisplay extends JComponent {
                 int yE = ribbonRect.y + ribbonRect.height + spacing;
                 int xE = x + width/2;
                 for (TMAction a: card.immediateEffects) {
-                    if (a instanceof PlaceholderModifyCounter) {
-                        drawPlaceHolderCounterActionMiddle(g, (PlaceholderModifyCounter) a, xE, yE, defaultItemSize/3);
-                        yE += defaultItemSize/3 + spacing/5;
-                    } else if (a instanceof PlaceTile) {
-                        drawPlaceTileAction(g, (PlaceTile) a, xE, yE, defaultItemSize/2);
-                        yE += defaultItemSize/2 + spacing/5;
-                    } else if (a instanceof AddResourceOnCard) {
-                        drawAddResourceAction(g, (AddResourceOnCard) a, xE, yE, defaultItemSize/3);
-                        yE += defaultItemSize/3 + spacing/5;
-                    } // TODO combo and choice actions
+                    yE = drawCardEffect(g, a, xE, yE);
                 }
             }
         }
@@ -389,6 +380,45 @@ public class TMDeckDisplay extends JComponent {
             size = newSize;
         }
         drawImage(g, resImg, x, y, size);
+    }
+
+    private int drawCardEffect(Graphics2D g, TMAction a, int xE, int yE) {
+        // xE is the middle
+
+        if (a instanceof PlaceholderModifyCounter) {
+            drawPlaceHolderCounterActionMiddle(g, (PlaceholderModifyCounter) a, xE, yE, defaultItemSize/3);
+            yE += defaultItemSize/3 + spacing/5;
+        } else if (a instanceof PlaceTile) {
+            drawPlaceTileAction(g, (PlaceTile) a, xE, yE, defaultItemSize/2);
+            yE += defaultItemSize/2 + spacing/5;
+        } else if (a instanceof AddResourceOnCard) {
+            drawAddResourceAction(g, (AddResourceOnCard) a, xE, yE, defaultItemSize/3);
+            yE += defaultItemSize/3 + spacing/5;
+        } else if (a instanceof ActionChoice) {
+            // Horizontal display, each action next to each other, separated by /
+            int nActions = ((ActionChoice) a).actions.length;
+            int sepWidth = g.getFontMetrics().stringWidth(" / ");
+            int widthOne = (cardWidth - sepWidth*(nActions-1))/nActions;
+            xE = xE - cardWidth/2 + widthOne/2;
+            for (int i = 0; i < nActions; i++) {
+                drawCardEffect(g, ((ActionChoice) a).actions[i], xE, yE);
+                xE += widthOne;
+                if (i != nActions-1) {
+                    drawShadowStringCentered(g, " / ", new Rectangle(xE - widthOne/2, yE, sepWidth, defaultItemSize / 2));
+                    xE += sepWidth;
+                }
+            }
+            yE += defaultItemSize/2 + spacing/5;
+        } else if (a instanceof CompoundAction) {
+            // Vertical display, one action under the other
+            int nActions = ((CompoundAction) a).actions.length;
+            for (int i = 0; i < nActions; i++) {
+                yE = drawCardEffect(g, ((CompoundAction) a).actions[i], xE, yE);
+            }
+        } else {
+            int b = 0;
+        }
+        return yE;
     }
 
     private void drawAddResourceAction(Graphics2D g, AddResourceOnCard a, int x, int y, int size) {

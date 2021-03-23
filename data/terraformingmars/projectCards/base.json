@@ -1723,7 +1723,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-TR-2  . inc-temperature-1 . inc-Plantprod-1 , or inc-Plantprod-4  if you have 3 Plant tags"
+            "#text": "inc-TR-2  . inc-temperature-1 . inc-Plantprod-1 , but inc-Plantprod-4  if you have 3 Plant tags"
           }
         ],
         "br": [
@@ -5357,7 +5357,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: Your global requirements are +2 or -2 , your choice in each case"
+            "#text": "Effect: global parameter discount 2"
           }
         ],
         "#text": ": +/- 2"
@@ -7214,7 +7214,7 @@
           },
           {
             "@class": "description",
-            "#text": "The next card you play this generation is +2 or -2  in global requirements, your choice"
+            "#text": "The next card you play this generation is global parameter discount 2"
           }
         ],
         "#text": ": +/- 2"

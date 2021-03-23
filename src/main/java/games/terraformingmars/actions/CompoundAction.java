@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import games.terraformingmars.rules.requirements.Requirement;
 
 public class CompoundAction extends TMAction{
-    TMAction[] actions;
+    public TMAction[] actions;
 
     public CompoundAction(int player, TMAction[] actions, boolean free) {
         super(player, free);

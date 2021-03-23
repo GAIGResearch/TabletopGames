@@ -118,6 +118,8 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (! (action instanceof ResourceTransaction)) {
             stage = resourcesToPayWith.length;  // TODO: bad, this shouldn't happen
+            this.action.execute(state);
+            return;
         }
         TMGameState gs = (TMGameState) state;
         TMTypes.Resource res = resourcesToPayWith[stage];

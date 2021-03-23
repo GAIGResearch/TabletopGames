@@ -343,7 +343,7 @@ public class TMCard extends Card {
                                         card.pointsThreshold = nOther;
                                     }
                                 } else {
-                                    String[] orSplit = s.split("or");
+                                    String[] orSplit = s.split(" or ");
                                     if (orSplit.length == 1) {
                                         TMAction a = TMAction.parseAction(s, true, card.getComponentID()).a;
                                         if (a != null) {
@@ -360,7 +360,7 @@ public class TMCard extends Card {
                                         int i = 0;
                                         for (String s2 : orSplit) {
                                             s2 = s2.trim();
-                                            String[] andSplit = s2.split("and");
+                                            String[] andSplit = s2.split(" and ");
                                             if (andSplit.length == 1) {
                                                 TMAction a = TMAction.parseAction(s2, true, card.getComponentID()).a;
                                                 if (a != null) {
@@ -381,6 +381,11 @@ public class TMCard extends Card {
                                                 actionChoice[i] = new CompoundAction(-1, compound, true);
                                             }
                                             i++;
+                                        }
+                                        for (int k = 0; k < actionChoice.length; k++) {
+                                            if (actionChoice[k] == null) {
+                                                int p = 0;
+                                            }
                                         }
                                         immediateEffects.add(new ActionChoice(-1, actionChoice, true));
                                     }
