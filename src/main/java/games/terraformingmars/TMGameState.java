@@ -54,6 +54,7 @@ public class TMGameState extends AbstractGameState {
     // Player cards
     Deck<TMCard>[] playerHands;
     Deck<TMCard>[] playerComplicatedPointCards;  // Cards played that can gather resources
+    Deck<TMCard>[] playedCards;  // Cards played that can gather resources
     Deck<TMCard>[] playerCardChoice;
     TMCard[] playerCorporations;
 
@@ -85,6 +86,7 @@ public class TMGameState extends AbstractGameState {
             this.addAll(Arrays.asList(playerHands));
             this.addAll(Arrays.asList(playerCardChoice));
             this.addAll(Arrays.asList(playerComplicatedPointCards));
+            this.addAll(Arrays.asList(playedCards));
             this.addAll(Arrays.asList(playerCardPoints));
             for (int i = 0; i < getNPlayers(); i++) {
                 addAll(playerResources[i].values());
@@ -262,6 +264,10 @@ public class TMGameState extends AbstractGameState {
 
     public Counter[] getPlayerCardPoints() {
         return playerCardPoints;
+    }
+
+    public Deck<TMCard>[] getPlayedCards() {
+        return playedCards;
     }
 
     public int discountActionTypeCost(TMAction action, int player) {
@@ -489,13 +495,13 @@ public class TMGameState extends AbstractGameState {
             }
             if (card.pointsThreshold != null) {
                 if (card.pointsResource != null) {
-                    if (card.resourcesOnCard.get(card.pointsResource) >= card.pointsThreshold) {
+                    if (card.nResourcesOnCard >= card.pointsThreshold) {
                         points += card.nPoints;
                     }
                 }
             } else {
                 if (card.pointsResource != null) {
-                    points += card.nPoints * card.resourcesOnCard.get(card.pointsResource);
+                    points += card.nPoints * card.nResourcesOnCard;
                 } else if (card.pointsTag != null) {
                     points += card.nPoints * playerCardsPlayedTags[player].get(card.pointsTag).getValue();
                 } else if (card.pointsTile != null) {

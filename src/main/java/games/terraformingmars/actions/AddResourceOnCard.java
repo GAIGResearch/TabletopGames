@@ -32,7 +32,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             TMGameState gs = (TMGameState) gameState;
             TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
             TMCard card = (TMCard) gs.getComponentById(cardID);
-            card.resourcesOnCard.put(resource, card.resourcesOnCard.get(resource) + amount);
+            card.nResourcesOnCard += amount;
             return super.execute(gs);
         }
         gameState.setActionInProgress(this);
@@ -61,8 +61,8 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         for (TMCard card: gs.getPlayerComplicatedPointCards()[player].getComponents()) {
             if (card.resourceOnCard != null) {
                 if (resource != null && card.resourceOnCard == resource ||
-                    resource == null && card.resourcesOnCard.get(card.resourceOnCard) > minResRequirement) {
-                    if (amount > 0 || amount < 0 && card.resourcesOnCard.get(card.resourceOnCard) > amount) {
+                    resource == null && card.nResourcesOnCard > minResRequirement) {
+                    if (amount > 0 || amount < 0 && card.nResourcesOnCard > amount) {
                         if (tagRequirement == null || contains(card.tags, tagRequirement)) {
                             actions.add(new AddResourceOnCard(player, card.getComponentID(), resource, amount, true));
                         }

@@ -43,6 +43,7 @@ public class PlayCard extends TMAction {
         if (card.shouldSaveCard()) {
             gs.getPlayerComplicatedPointCards()[player].add(card);
         } else {
+            gs.getPlayedCards()[player].add(card);
             if (card.nPoints != 0) {
                 gs.getPlayerCardPoints()[player].increment((int) card.nPoints);
             }
@@ -59,6 +60,9 @@ public class PlayCard extends TMAction {
         gs.addResourceMappings(card.resourceMappings, false);
         // Add persisting effects
         gs.addPersistingEffects(card.persistingEffects);
+
+        // Force an update of components before executing the effects, they might need something just added
+        gs.getAllComponents();
 
         // Execute on-play effects
         for (TMAction aa: card.immediateEffects) {

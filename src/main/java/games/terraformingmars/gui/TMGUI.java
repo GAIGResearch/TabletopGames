@@ -33,7 +33,8 @@ public class TMGUI extends AbstractGUI {
     TMBoardView view;
     TMPlayerView playerView;
     TMDeckDisplay playerHand, playerCardChoice, playerCorporation;
-    JScrollPane paneHand, paneCardChoice;
+    TMDeckDisplay2 playerCardsPlayed;
+    JScrollPane paneHand, paneCardChoice, paneCardsPlayed;
     JPanel infoPanel;
     JLabel generationCount;
 
@@ -99,15 +100,13 @@ public class TMGUI extends AbstractGUI {
         historyWrapper.add(historyContainer);
         historyContainer.setBackground(Color.black);
 
-        JPanel playerViewWrapper = new JPanel();
-        playerViewWrapper.setLayout(new BoxLayout(playerViewWrapper, BoxLayout.Y_AXIS));
         playerView = new TMPlayerView(gameState, focusPlayer);
 
         playerHand = new TMDeckDisplay(this, gameState, gameState.getPlayerHands()[focusPlayer]);
         paneHand = new JScrollPane(playerHand);
         paneHand.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        paneHand.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
+        paneHand.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
 
         playerCorporation = new TMDeckDisplay(this, gameState, null);
         playerCorporation.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight + 20));
@@ -116,13 +115,20 @@ public class TMGUI extends AbstractGUI {
         paneCardChoice = new JScrollPane(playerCardChoice);
         paneCardChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        paneCardChoice.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
+        paneCardChoice.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
 
-        // TODO list of complicated cards and how many resources on them
+        playerCardsPlayed = new TMDeckDisplay2(this, gameState, gameState.getPlayerComplicatedPointCards()[focusPlayer]);
+        paneCardsPlayed = new JScrollPane(playerCardsPlayed);
+        paneCardsPlayed.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        paneCardsPlayed.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        paneCardsPlayed.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth + 20, TMDeckDisplay.cardHeight * 4));
 
         JPanel playerMainWrap = new JPanel();
         playerMainWrap.add(playerView);
         playerMainWrap.add(playerCorporation);
+
+        JPanel playerViewWrapper = new JPanel();
+        playerViewWrapper.setLayout(new BoxLayout(playerViewWrapper, BoxLayout.Y_AXIS));
         playerViewWrapper.add(playerMainWrap);
         playerViewWrapper.add(paneHand);
         playerViewWrapper.add(Box.createRigidArea(new Dimension(1, 10)));
@@ -196,7 +202,9 @@ public class TMGUI extends AbstractGUI {
         paneHand.getViewport().setOpaque(false);
         playerCardChoice.setOpaque(false);
         paneCardChoice.setOpaque(false);
+        paneCardsPlayed.setOpaque(false);
         paneCardChoice.getViewport().setOpaque(false);
+        paneCardsPlayed.getViewport().setOpaque(false);
         playerHand.setOpaque(false);
         playerView.setOpaque(false);
         playerViewWrapper.setOpaque(false);
@@ -214,13 +222,17 @@ public class TMGUI extends AbstractGUI {
         tabs.setForeground(Color.white);
         tabs.setFont(defaultFont);
 
+        JPanel gameWrap = new JPanel();
+        gameWrap.setOpaque(false);
         JPanel gamePanel = new JPanel();
         gamePanel.setOpaque(false);
         gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
         gamePanel.add(top);
         gamePanel.add(main);
         gamePanel.add(actionWrapper);
-        tabs.add("Game", gamePanel);
+        gameWrap.add(gamePanel);
+        gameWrap.add(paneCardsPlayed);
+        tabs.add("Game", gameWrap);
 
         JPanel instructionsPanel = new JPanel();
         instructionsPanel.setBackground(Color.black);
@@ -380,6 +392,7 @@ public class TMGUI extends AbstractGUI {
             playerView.update(gs);
             playerHand.update(gs.getPlayerHands()[focusPlayer]);
             playerCardChoice.update(gs.getPlayerCardChoice()[focusPlayer]);
+            playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer]);
             Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
             if (corp != null) {

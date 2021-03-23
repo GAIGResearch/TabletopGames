@@ -84,11 +84,13 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.playerCardChoice = new Deck[gs.getNPlayers()];
         gs.playerHands = new Deck[gs.getNPlayers()];
         gs.playerComplicatedPointCards = new Deck[gs.getNPlayers()];
+        gs.playedCards = new Deck[gs.getNPlayers()];
         gs.playerCardPoints = new Counter[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
             gs.playerHands[i] = new Deck<>("Hand of p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
             gs.playerCardChoice[i] = new Deck<>("Card Choice for p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            gs.playerComplicatedPointCards[i] = new Deck<>("Resource Cards Played by p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+            gs.playerComplicatedPointCards[i] = new Deck<>("Resource or Points Cards Played by p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+            gs.playedCards[i] = new Deck<>("Other Cards Played by p" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
             gs.playerCardPoints[i] = new Counter(0, 0, params.maxPoints, "Points of p" + i);
         }
 

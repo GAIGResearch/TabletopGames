@@ -42,15 +42,10 @@ public class TMCard extends Card {
     public boolean pointsTileAdjacent;  // If true, only count tiles of type adjacent to tile placed by card
 
     public TMTypes.Resource resourceOnCard; // TODO
-    public HashMap<TMTypes.Resource, Integer> resourcesOnCard;  // One count for each type of token
+    public int nResourcesOnCard;  // One count for each type of token
 
     public TMCard() {
-        resourcesOnCard = new HashMap<>();
-        for (TMTypes.Resource t: TMTypes.Resource.values()) {
-            if (t.canGoOnCard()) {
-                resourcesOnCard.put(t, 0);
-            }
-        }
+        nResourcesOnCard = 0;
         tags = new TMTypes.Tag[0];
         actions = new TMAction[0];
         immediateEffects = new TMAction[0];
@@ -68,7 +63,7 @@ public class TMCard extends Card {
     }
 
     public boolean shouldSaveCard() {
-        return pointsResource != null || pointsTag != null || pointsTile != null;
+        return pointsResource != null || pointsTag != null || pointsTile != null || resourceOnCard != null;
     }
 
     public static TMCard loadCorporation(JSONObject cardDef) {
@@ -351,6 +346,7 @@ public class TMCard extends Card {
                                             if (a instanceof PlaceTile) {
                                                 ((PlaceTile) a).cardID = card.getComponentID();
                                             }
+                                            // TODO if add resource on card (not other), set resource on this card
                                         } else {
                                             int b = 0;  // action didn't parse, put a breakpoint here to see it
                                         }

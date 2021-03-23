@@ -296,7 +296,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     public static List<Vector2D> getNeighbours(Vector2D cell) {
         ArrayList<Vector2D> neighbors = new ArrayList<>();
-        int parity = cell.getY() % 2;
+        int parity = Math.abs(cell.getY() % 2);
         for (Vector2D v: neighbor_directions[parity]) {
             neighbors.add(cell.add(v));
         }
