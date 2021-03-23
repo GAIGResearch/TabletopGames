@@ -546,7 +546,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-MegaCreditprod-1  for each Earth tag you have"
+            "#text": "inc-MegaCreditprod-1-Earth "
           }
         ]
       }
@@ -1827,7 +1827,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-MegaCreditprod-1  for each space tag your OPPONENTS have"
+            "#text": "inc-MegaCreditprod-1-Space-opp "
           }
         ]
       }
@@ -2379,7 +2379,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-MegaCreditprod-1  for each Earth tag you have, including this"
+            "#text": "inc-MegaCreditprod-1-Earth "
           }
         ]
       }
@@ -2783,7 +2783,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-MegaCreditprod-1  for each space tag your have, including this one"
+            "#text": "inc-MegaCreditprod-1-Space "
           }
         ]
       }
@@ -3230,7 +3230,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-TR-1  for each Jovian tag you have, including this"
+            "#text": "inc-TR-1-Jovian "
           }
         ],
         "#text": "/"

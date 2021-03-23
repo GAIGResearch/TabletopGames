@@ -2,10 +2,10 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.ModifyCounter;
 import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.TMMapTile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,12 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
     public TMTypes.Resource resource;
     public boolean production;
     public int targetPlayer;
+
+    public TMTypes.Tag tagToCount;  // change = number of these tags played by the player instead
+    public TMTypes.Tile tileToCount;  // change = number of these tiles placed instead
+    public boolean any;  // tiles or tags by all players (if false, own cards only)
+    public boolean opponents;  // tiles or tags by opponent players (if false, own cards only)
+    public boolean onMars;  // tiles placed on mars only?
 
     public PlaceholderModifyCounter(int player, int change, TMTypes.Resource resource, boolean production, boolean free) {
         super(player,-1, change, free);
@@ -49,6 +55,43 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
                 counterID = ggs.getPlayerProduction()[targetPlayer].get(resource).getComponentID();
             } else {
                 counterID = ggs.getPlayerResources()[targetPlayer].get(resource).getComponentID();
+            }
+            if (tagToCount != null) {
+                if (any || opponents) {
+                    int count = 0;
+                    for (int i = 0; i < gs.getNPlayers(); i++) {
+                        if (opponents && i == player) continue;
+                        count += ggs.getPlayerCardsPlayedTags()[i].get(tagToCount).getValue();
+                    }
+                    change *= count;
+                } else {
+                    change *= ggs.getPlayerCardsPlayedTags()[player].get(tagToCount).getValue();
+                }
+            } else if (tileToCount != null) {
+                if (onMars) {
+                    int count = 0;
+                    for (int i = 0; i < ggs.getBoard().getHeight(); i++) {
+                        for (int j = 0; j < ggs.getBoard().getHeight(); j++) {
+                            TMMapTile mt = ggs.getBoard().getElement(j, i);
+                            if (mt != null && mt.getTilePlaced() == tileToCount) {
+                                if (any) count ++;
+                                else if (opponents && mt.getOwner() != player || !opponents && mt.getOwner() == player) count ++;
+                            }
+                        }
+                    }
+                    change *= count;
+                } else {
+                    if (any || opponents) {
+                        int count = 0;
+                        for (int i = 0; i < gs.getNPlayers(); i++) {
+                            if (opponents && i == player) continue;
+                            count += ggs.getPlayerTilesPlaced()[i].get(tileToCount).getValue();
+                        }
+                        change *= count;
+                    } else {
+                        change *= ggs.getPlayerTilesPlaced()[player].get(tileToCount).getValue();
+                    }
+                }
             }
             return super.execute(gs);
         }

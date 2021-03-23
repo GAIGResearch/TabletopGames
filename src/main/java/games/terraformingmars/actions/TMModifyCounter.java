@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class TMModifyCounter extends TMAction {
     public int counterID;
-    public Integer change;
+    public int change;
 
     public TMModifyCounter(int counterID, Integer change, boolean free) {
         super(-1, free);

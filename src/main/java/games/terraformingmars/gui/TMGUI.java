@@ -118,6 +118,8 @@ public class TMGUI extends AbstractGUI {
         paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneCardChoice.setPreferredSize(new Dimension(playerView.getPreferredSize().width, TMDeckDisplay.cardHeight + 20));
 
+        // TODO list of complicated cards and how many resources on them
+
         JPanel playerMainWrap = new JPanel();
         playerMainWrap.add(playerView);
         playerMainWrap.add(playerCorporation);

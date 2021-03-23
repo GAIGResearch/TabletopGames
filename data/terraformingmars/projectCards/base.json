@@ -251,7 +251,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-1 to inc-MegaCredit-1 for each City tile ON MARS"
+            "#text": "Action: dec-Energy-1 to inc-MegaCredit-1-City-true-any "
           }
         ],
         "#text": "/"
@@ -3404,7 +3404,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-plant-1 for each city tile in play"
+            "#text": "inc-plant-1-City-false-any"
           }
         ],
         "#text": "/"
@@ -4382,7 +4382,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 5% oxygen. inc-MegaCreditprod-1  for each City tile ON MARS"
+            "#text": "Requires 5% oxygen. inc-MegaCreditprod-1-City-true-any "
           }
         ]
       }
@@ -5278,7 +5278,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 6% oxygen. inc-Plantprod-1  for each plant tag you have"
+            "#text": "Requires 6% oxygen. inc-Plantprod-1-Plant "
           }
         ]
       }
@@ -6799,7 +6799,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-Energyprod-1  for each City tile in play"
+            "#text": "inc-Energyprod-1-City-false-any "
           }
         ]
       }
