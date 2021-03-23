@@ -93,7 +93,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);
-        int sum = gs.playerResourceSum(player, card, resourcesRemaining, TMTypes.Resource.MegaCredit);
+        int sum = gs.playerResourceSum(player, card, resourcesRemaining, resourceToPay);
         int remaining = costTotal - costPaid - sum;
         int min = Math.max(0, (int)(Math.ceil(remaining/gs.getResourceMapRate(res, resourceToPay))));
         int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((costTotal - costPaid)/gs.getResourceMapRate(res, resourceToPay))));
@@ -123,7 +123,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         }
         TMGameState gs = (TMGameState) state;
         TMTypes.Resource res = resourcesToPayWith[stage];
-        costPaid += Math.abs(((ResourceTransaction)action).amount) * gs.getResourceMapRate(res, TMTypes.Resource.MegaCredit);
+        costPaid += Math.abs(((ResourceTransaction)action).amount) * gs.getResourceMapRate(res, resourceToPay);
         stage++;
         TMCard card = null;
         if (cardIdx > -1) card = gs.getPlayerHands()[player].get(cardIdx);

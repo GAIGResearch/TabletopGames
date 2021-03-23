@@ -350,7 +350,7 @@ public class TMGameState extends AbstractGameState {
         if (from == null || from.size() > 0) {
             int sum = playerResources[player].get(to).getValue();  // All resources can be exchanged for themselves at rate 1.0
 
-            // Add resources that this player can use as money for this card
+            // Add resources that this player can use as the "to" resource for this action
             for (ResourceMapping resMap : playerResourceMap[player]) {
                 if ((from == null || from.contains(resMap.from))
                         && resMap.to == to

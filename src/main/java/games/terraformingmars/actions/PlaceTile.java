@@ -166,7 +166,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                             TMMapTile mt = gs.getBoard().getElement(j, i);
                             // Check if we can place tile here
                             if (mt != null && mt.getTilePlaced() == null && (!mt.isReserved() || mt.getReserved() == player) &&
-                                    ((mapType == null || mt.getTileType() == mapType) ||
+                                    (tileName == null && (mapType == null || mt.getTileType() == mapType) ||
                                     (mt.getComponentName().equalsIgnoreCase(tileName))) &&
                                     (!volcanicRestriction || mt.isVolcanic()) &&
                                     (resourcesGainedRestriction == null || contains(mt.getResources(), resourcesGainedRestriction))) {

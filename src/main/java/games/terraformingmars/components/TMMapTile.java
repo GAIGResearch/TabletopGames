@@ -21,7 +21,7 @@ public class TMMapTile extends Component {
     TMTypes.Resource[] resources;
 
     boolean volcanic;
-    int reserved;
+    int reserved = -1;
 
     public TMMapTile(int x, int y) {
         super(BOARD_NODE, "Tile");

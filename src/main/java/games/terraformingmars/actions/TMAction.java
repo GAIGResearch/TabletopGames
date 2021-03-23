@@ -242,6 +242,7 @@ public class TMAction extends AbstractAction {
                     if (where == null) {
                         // A named tile
                         effect = new PlaceTile(player, toPlace, split2[2], onMars, free);
+                        ((PlaceTile) effect).respectingAdjacency = false;
                     } else {
                         boolean respectAdjacency = where == toPlace.getRegularLegalTileType();
                         effect = new PlaceTile(player, toPlace, where, free);  // Extended sequence, will ask player where to put it

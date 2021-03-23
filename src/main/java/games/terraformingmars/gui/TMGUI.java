@@ -359,7 +359,18 @@ public class TMGUI extends AbstractGUI {
                                     actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
                                     i++;
                                 }
-                            } // TODO other options
+                            } else if (code.contains("+") || code.contains("-")) {
+                                // ?
+                            } else {
+                                // An extra tile
+                                for (TMMapTile mt2: gs.getExtraTiles()) {
+                                    if (mt2 != null && mt2.getComponentName().equalsIgnoreCase(code)) {
+                                        actionButtons[i].setVisible(true);
+                                        actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
+                                        i++;
+                                    }
+                                }
+                            }
                         }
                     }
                 }

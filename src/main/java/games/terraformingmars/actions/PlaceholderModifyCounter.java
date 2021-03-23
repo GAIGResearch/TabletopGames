@@ -113,12 +113,12 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Modify player " + resource + (production? " production " : "") + " by " + change;
+        return "Modify p" + targetPlayer + " " + resource + (production? " production " : "") + " by " + change;
     }
 
     @Override
     public String toString() {
-        return "Modify player " + resource + (production? " production " : "") + " by " + change;
+        return "Modify p" + targetPlayer + " " + resource + (production? " production " : "") + " by " + change;
     }
 
     @Override
