@@ -11,9 +11,9 @@ import games.terraformingmars.components.TMCard;
 import java.util.*;
 
 public class AddResourceOnCard extends TMAction implements IExtendedSequence {
-    int cardID;
-    final TMTypes.Resource resource;
-    final int amount;  // Can be negative for removing resources
+    public int cardID;
+    public final TMTypes.Resource resource;
+    public final int amount;  // Can be negative for removing resources
 
     public boolean chooseAny;  // if true, can choose cards that take resources from any player, otherwise own ones
     public TMTypes.Tag tagRequirement;  // tag target card must have

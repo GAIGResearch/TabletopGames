@@ -3551,7 +3551,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-4 to inc-steel-1 and inc-oxygen-1 "
+            "#text": "Action: dec-Energy-4 and inc-steel-1 and inc-oxygen-1 "
           }
         ],
         "#text": "4"
@@ -3638,7 +3638,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-4 to inc-steel-2 and inc-oxygen-1 "
+            "#text": "Action: dec-Energy-4 and inc-steel-2 and inc-oxygen-1 "
           }
         ],
         "#text": "4"
@@ -3680,7 +3680,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-4 to inc-titanium-1 and inc-oxygen-1 "
+            "#text": "Action: dec-Energy-4 and inc-titanium-1 and inc-oxygen-1 "
           }
         ],
         "#text": "4"
@@ -5688,7 +5688,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-TR-1 . inc-Plant-4. add-3-Microbe-another and add-2-Animal-another "
+            "#text": "inc-TR-1 . inc-Plant-4. add-3-Microbe-another . add-2-Animal-another "
           }
         ],
         "#text": [

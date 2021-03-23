@@ -43,6 +43,8 @@ public class TMDeckDisplay extends JComponent {
     Image projCardBg;
     int width, height;
 
+    Color anyPlayerColor = new Color(234, 38, 38, 168);
+
     static int spacing = 10;
     static int cardHeight = 200;
     static int cardWidth;
@@ -248,7 +250,7 @@ public class TMDeckDisplay extends JComponent {
 
                 if (!e.mustBeCurrentPlayer) {
                     // draw red outline for the left part
-                    g.setColor(new Color(234, 38, 38, 168));
+                    g.setColor(anyPlayerColor);
                     int xRect = xEF;
                     int widthRect = size * 2;
                     if (leftNumber == -1) {
@@ -370,7 +372,8 @@ public class TMDeckDisplay extends JComponent {
                         drawPlaceTileAction(g, (PlaceTile) a, xE, yE, defaultItemSize/2);
                         yE += defaultItemSize/2 + spacing/5;
                     } else if (a instanceof AddResourceOnCard) {
-                        // TODO
+                        drawAddResourceAction(g, (AddResourceOnCard) a, xE, yE, defaultItemSize/3);
+                        yE += defaultItemSize/3 + spacing/5;
                     } // TODO combo and choice actions
                 }
             }
@@ -388,13 +391,84 @@ public class TMDeckDisplay extends JComponent {
         drawImage(g, resImg, x, y, size);
     }
 
+    private void drawAddResourceAction(Graphics2D g, AddResourceOnCard a, int x, int y, int size) {
+        // x is the middle
+
+        String amount = "" + a.amount;
+        TMTypes.Resource res = a.resource;
+        boolean any = a.chooseAny;
+        boolean another = a.cardID == -1;
+        TMTypes.Tag tagRequired = a.tagRequirement;
+        int minResRequired = a.minResRequirement;
+
+        // Calculate width of display
+        FontMetrics fm = g.getFontMetrics();
+        int w = fm.stringWidth(amount) + size + 4;
+        if (another) {
+            if (!any) {
+                // *
+                w += fm.stringWidth("* ");
+            }
+            if (tagRequired != null || minResRequired > 0) {
+                w += fm.stringWidth("()");
+                if (tagRequired != null) {
+                    // (tag)
+                    w += size;
+                }
+                if (minResRequired > 0) {
+                    // (min: X)
+                    w += fm.stringWidth("min: " + minResRequired);
+                }
+            }
+        }
+        x -= w/2;
+
+        // Draw amount
+        drawShadowStringCentered(g, amount, new Rectangle(x, y, fm.stringWidth(amount), size));
+        x += fm.stringWidth(amount);
+        if (any) {
+            // red background
+            g.setColor(anyPlayerColor);
+            g.fillRoundRect(x, y - 2, size + 4, size + 4, spacing, spacing);
+        }
+        // Draw res
+        drawImage(g, ImageIO.GetInstance().getImage(res.getImagePath()), x + 2, y, size, size);
+        x += size + 4;
+        // Draw other decorators
+        if (another) {
+            if (!any) {
+                // *
+                drawShadowStringCentered(g, "* ", new Rectangle(x, y, fm.stringWidth("* "), size));
+                x += fm.stringWidth("* ");
+            }
+            if (tagRequired != null || minResRequired > 0) {
+                // (something)
+                drawShadowStringCentered(g, "(", new Rectangle(x, y, fm.stringWidth("("), size));
+                x += fm.stringWidth("(");
+
+                if (tagRequired != null) {
+                    drawImage(g, ImageIO.GetInstance().getImage(tagRequired.getImagePath()), x, y, size, size);
+                    x += size;
+                }
+                if (minResRequired > 0) {
+                    // (min: X)
+                    String minText = "min: " + minResRequired;
+                    drawStringCentered(g, minText, new Rectangle(x, y, fm.stringWidth(minText), size), Color.gray);
+                    x += fm.stringWidth(minText);
+                }
+
+                drawShadowStringCentered(g, ")", new Rectangle(x, y, fm.stringWidth(")"), size));
+            }
+        }
+    }
+
     private void drawPlaceTileAction(Graphics2D g, PlaceTile a, int x, int y, int size) {
         // x is the middle
 
         TMTypes.Tile t = a.tile;
         TMTypes.MapTileType mt = a.mapType;
         String name = a.tileName;
-        int w = defaultItemSize/2;
+        int w = size;
         String sep = " -> ";
         FontMetrics fm = g.getFontMetrics();
         int sepW = fm.stringWidth(sep);
@@ -413,11 +487,13 @@ public class TMDeckDisplay extends JComponent {
         drawImage(g, t.getImagePath(), xE2, y, size, size);
         if (mt != null && t.getRegularLegalTileType() != mt) {
             // Draw special placement requirement
-            drawShadowString(g, " -> " + mt.name(), xE2 + size, y, Color.gray, Color.black);
+            drawStringCentered(g, " -> " + mt.name(),
+                    new Rectangle(xE2 + size, y, sepW + fm.stringWidth(mt.name()), size), Color.gray);
         }
         if (name != null) {
             // Draw location name
-            drawShadowString(g, " -> " + name, xE2 + size, y, Color.gray, Color.black);
+            drawStringCentered(g, " -> " + name,
+                    new Rectangle(xE2 + size, y, sepW + fm.stringWidth(name), size), Color.gray);
         }
     }
 

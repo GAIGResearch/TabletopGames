@@ -48,6 +48,10 @@ public class Utils {
         g.setFont(f);
     }
 
+    public static void drawStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color) {
+        drawStringCentered(g, text, rectToCenterIn, color, -1);
+    }
+
     public static void drawStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color, int size) {
         Font f = g.getFont();
 
