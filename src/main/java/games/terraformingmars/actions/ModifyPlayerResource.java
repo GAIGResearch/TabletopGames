@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class PlaceholderModifyCounter extends TMModifyCounter implements IExtendedSequence {
+public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSequence {
     public TMTypes.Resource resource;
     public boolean production;
     public int targetPlayer;
@@ -22,14 +22,14 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
     public boolean opponents;  // tiles or tags by opponent players (if false, own cards only)
     public boolean onMars;  // tiles placed on mars only?
 
-    public PlaceholderModifyCounter(int player, int change, TMTypes.Resource resource, boolean production, boolean free) {
+    public ModifyPlayerResource(int player, int change, TMTypes.Resource resource, boolean production, boolean free) {
         super(player,-1, change, free);
         this.resource = resource;
         this.production = production;
         this.targetPlayer = player;
     }
 
-    public PlaceholderModifyCounter(int player, int targetPlayer, Integer change, TMTypes.Resource resource, boolean production, boolean free) {
+    public ModifyPlayerResource(int player, int targetPlayer, Integer change, TMTypes.Resource resource, boolean production, boolean free) {
         super(player,-1, change, free);
         this.resource = resource;
         this.production = production;
@@ -100,9 +100,9 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PlaceholderModifyCounter)) return false;
+        if (!(o instanceof ModifyPlayerResource)) return false;
         if (!super.equals(o)) return false;
-        PlaceholderModifyCounter that = (PlaceholderModifyCounter) o;
+        ModifyPlayerResource that = (ModifyPlayerResource) o;
         return production == that.production && player == that.player && resource == that.resource;
     }
 
@@ -122,8 +122,8 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
     }
 
     @Override
-    public PlaceholderModifyCounter copy() {
-        return new PlaceholderModifyCounter(player, targetPlayer, change, resource, production, free);
+    public ModifyPlayerResource copy() {
+        return new ModifyPlayerResource(player, targetPlayer, change, resource, production, free);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
         ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
             // TODO: check if can be done for player
-            actions.add(new PlaceholderModifyCounter(player, i, change, resource, production, true));
+            actions.add(new ModifyPlayerResource(player, i, change, resource, production, true));
         }
         if (actions.size() == 0) {
             actions.add(new TMAction(player));  // TODO: this should not happen
@@ -146,7 +146,7 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        PlaceholderModifyCounter a = (PlaceholderModifyCounter) action;
+        ModifyPlayerResource a = (ModifyPlayerResource) action;
         targetPlayer = a.targetPlayer;
     }
 

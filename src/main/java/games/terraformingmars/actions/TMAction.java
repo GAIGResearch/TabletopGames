@@ -181,30 +181,30 @@ public class TMAction extends AbstractAction {
                                 targetPlayer = -2;
                             }
                         }
-                        effect = new PlaceholderModifyCounter(player, targetPlayer, increment, res, split2[1].contains("prod"), free);
+                        effect = new ModifyPlayerResource(player, targetPlayer, increment, res, split2[1].contains("prod"), free);
                         if (split2.length > 3) {
                             if (!split2[3].equalsIgnoreCase("any")) {
                                 TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3]);
                                 if (tag != null) {
-                                    ((PlaceholderModifyCounter) effect).tagToCount = tag;
+                                    ((ModifyPlayerResource) effect).tagToCount = tag;
                                     if (split2.length > 4) {
                                         if (split2[4].equalsIgnoreCase("any")) {
-                                            ((PlaceholderModifyCounter) effect).any = true;
+                                            ((ModifyPlayerResource) effect).any = true;
                                         } else if (split2[4].equalsIgnoreCase("opp")) {
-                                            ((PlaceholderModifyCounter) effect).opponents = true;
+                                            ((ModifyPlayerResource) effect).opponents = true;
                                         }
                                     }
                                 } else {
                                     // A tile
                                     TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, split2[3]);
                                     if (t != null) {
-                                        ((PlaceholderModifyCounter) effect).tileToCount = t;
-                                        ((PlaceholderModifyCounter) effect).onMars = Boolean.parseBoolean(split2[4]);
+                                        ((ModifyPlayerResource) effect).tileToCount = t;
+                                        ((ModifyPlayerResource) effect).onMars = Boolean.parseBoolean(split2[4]);
                                         if (split2.length > 5) {
                                             if (split2[5].equalsIgnoreCase("any")) {
-                                                ((PlaceholderModifyCounter) effect).any = true;
+                                                ((ModifyPlayerResource) effect).any = true;
                                             } else if (split2[5].equalsIgnoreCase("opp")) {
-                                                ((PlaceholderModifyCounter) effect).opponents = true;
+                                                ((ModifyPlayerResource) effect).opponents = true;
                                             }
                                         }
                                     }

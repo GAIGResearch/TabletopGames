@@ -159,9 +159,9 @@ public class TMDeckDisplay extends JComponent {
             int size = defaultItemSize/3;
             int yRes = titleRect.y + titleRect.height;
             for (TMAction aa: card.immediateEffects) {
-                if (aa instanceof PlaceholderModifyCounter) {
+                if (aa instanceof ModifyPlayerResource) {
                     int xRes = x + width/2;
-                    drawPlaceHolderCounterActionMiddle(g, (PlaceholderModifyCounter) aa, xRes, yRes, size);
+                    drawModifyPlayerResourceAction(g, (ModifyPlayerResource) aa, xRes, yRes, size);
                     yRes += size + spacing / 5;
                 }
             }
@@ -253,8 +253,8 @@ public class TMDeckDisplay extends JComponent {
                 if (action == null) {
                     action = TMAction.parseAction(e.effectEncoding, true).a;
                 }
-                if (action instanceof PlaceholderModifyCounter) {
-                    drawPlaceHolderCounterActionMiddle(g, (PlaceholderModifyCounter) action, xEF + size * 4, yEF, size);
+                if (action instanceof ModifyPlayerResource) {
+                    drawModifyPlayerResourceAction(g, (ModifyPlayerResource) action, xEF + size * 4, yEF, size);
                 }
 
                 if (!e.mustBeCurrentPlayer) {
@@ -394,8 +394,8 @@ public class TMDeckDisplay extends JComponent {
     private int drawCardEffect(Graphics2D g, TMAction a, int xE, int yE) {
         // xE is the middle
 
-        if (a instanceof PlaceholderModifyCounter) {
-            drawPlaceHolderCounterActionMiddle(g, (PlaceholderModifyCounter) a, xE, yE, defaultItemSize/3);
+        if (a instanceof ModifyPlayerResource) {
+            drawModifyPlayerResourceAction(g, (ModifyPlayerResource) a, xE, yE, defaultItemSize/3);
             yE += defaultItemSize/3 + spacing/5;
         } else if (a instanceof PlaceTile) {
             drawPlaceTileAction(g, (PlaceTile) a, xE, yE, defaultItemSize/2);
@@ -536,21 +536,7 @@ public class TMDeckDisplay extends JComponent {
         }
     }
 
-    private void drawPlaceHolderCounterAction(Graphics2D g, PlaceholderModifyCounter aa, int x, int y, int size) {
-        // x is the left of this rectangle
-
-        TMTypes.Resource res = aa.resource;
-        String amount = "" + aa.change;
-        boolean prod = aa.production;
-        Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
-        FontMetrics fm = g.getFontMetrics();
-        int textWidth = fm.stringWidth(amount);
-
-        drawResource(g, resImg, production, prod, x, y, size, 0.6);
-        drawShadowStringCentered(g, amount, new Rectangle(x + size + spacing/5, y, textWidth, size));
-    }
-
-    private void drawPlaceHolderCounterActionMiddle(Graphics2D g, PlaceholderModifyCounter aa, int x, int y, int size) {
+    private void drawModifyPlayerResourceAction(Graphics2D g, ModifyPlayerResource aa, int x, int y, int size) {
         // x is the middle of this rectangle
         String amount = "" + aa.change;
         FontMetrics fm = g.getFontMetrics();
@@ -558,7 +544,21 @@ public class TMDeckDisplay extends JComponent {
         int totalWidth = size + spacing/5 + textWidth;
         x -= totalWidth/2;
 
-        drawPlaceHolderCounterAction(g, aa, x, y, size);
+        TMTypes.Resource res = aa.resource;
+        boolean prod = aa.production;
+        Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
+
+        if (aa.targetPlayer == -2) {
+            g.setColor(anyPlayerColor);
+            g.fillRoundRect(x - 2, y - 2, size + 4, size + 4, spacing, spacing);
+        }
+
+        drawResource(g, resImg, production, prod, x, y, size, 0.6);
+        if (aa.opponents) {
+            drawShadowStringCentered(g, "*", new Rectangle(x + size + 2, y, fm.stringWidth("*"), size));
+            x += fm.stringWidth("*");
+        }
+        drawShadowStringCentered(g, amount, new Rectangle(x + size + spacing/5, y, textWidth, size));
     }
 
     private void drawAction(Graphics2D g, TMAction a, int x, int y, int size) {

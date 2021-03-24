@@ -1,7 +1,6 @@
 package games.terraformingmars.rules.effects;
 
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.actions.PlaceholderModifyCounter;
 import games.terraformingmars.actions.TMAction;
 
 import java.util.Objects;

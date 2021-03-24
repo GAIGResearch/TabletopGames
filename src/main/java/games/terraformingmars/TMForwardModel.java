@@ -291,7 +291,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // - Increase energy production 1 step for 11 MC
             Counter c = gs.playerProduction[player].get(TMTypes.Resource.Energy);
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPEnergy)) {
-                actions.add(new PayForAction(PowerPlant, player, new PlaceholderModifyCounter(player, 1, TMTypes.Resource.Energy, true, false),
+                actions.add(new PayForAction(PowerPlant, player, new ModifyPlayerResource(player, 1, TMTypes.Resource.Energy, true, false),
                         TMTypes.Resource.MegaCredit, params.nCostSPEnergy, -1));
             }
             // - Increase temperature 1 step for 14 MC
@@ -313,7 +313,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // - Place city tile and increase MC prod by 1 for 25 MC
             if (gs.canPlayerPay(player, null, null, TMTypes.Resource.MegaCredit, params.nCostSPCity)) {
                 TMAction a1 = new PlaceTile(player, TMTypes.Tile.City, TMTypes.MapTileType.Ground, false);
-                TMAction a2 = new PlaceholderModifyCounter(player, params.nSPCityMCGain, TMTypes.Resource.MegaCredit,true, true);
+                TMAction a2 = new ModifyPlayerResource(player, params.nSPCityMCGain, TMTypes.Resource.MegaCredit,true, true);
                 actions.add(new PayForAction(City, player, new CompoundAction(player, new TMAction[]{a1, a2}, true),
                         TMTypes.Resource.MegaCredit, params.nCostSPCity, -1));
             }

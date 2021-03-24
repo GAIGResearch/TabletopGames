@@ -84,7 +84,7 @@ public class TMCard extends Card {
             // Second is what resource
             String resString = split2[1].split("prod")[0];
             TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-            immediateEffects.add(new PlaceholderModifyCounter(-1, amount, res, split2[1].contains("prod"), true));
+            immediateEffects.add(new ModifyPlayerResource(-1, amount, res, split2[1].contains("prod"), true));
         }
         for (int i = 1; i < start.size(); i++) {
             JSONObject other = (JSONObject) start.get(i);
