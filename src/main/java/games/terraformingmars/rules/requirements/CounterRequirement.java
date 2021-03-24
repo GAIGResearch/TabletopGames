@@ -36,6 +36,10 @@ public class CounterRequirement implements Requirement<TMGameState> {
             c = (Counter) gs.getComponentById(counterID);
         }
 
+        if (max && threshold == -1) {
+            threshold = c.getMaximum();
+        }
+
         // Apply discounts for current player
         int discount = 0;
         int player = gs.getCurrentPlayer();

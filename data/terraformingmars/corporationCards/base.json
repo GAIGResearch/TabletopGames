@@ -18,7 +18,7 @@
     "effect" : [
       {
         "type": "action",
-        "action": "placetile-Greenery",
+        "action": "placetile/Greenery/Ground/true",
         "cost": "Plant/7"
       }
     ],
@@ -78,9 +78,7 @@
     "start": ["45 megacredit",
       {
       "type": "first",
-      "action": "resourcetransaction",
-      "resource": "Card",
-      "amount": 3
+      "action": "inc-Card-3"
       }
     ]
   },
@@ -117,8 +115,7 @@
     "start": ["40 megacredit",
       {
         "type": "first",
-        "action": "placetile",
-        "tile": "City"
+        "action": "placetile/City/Ground/true"
       }
     ]
   },
@@ -147,7 +144,7 @@
     "effect": [
       {
         "type": "action",
-        "action": "resourcetransaction-TR-1",
+        "action": "inc-TR-1",
         "cost": "MegaCredit/3",
         "if": "incgen-TR"
       }

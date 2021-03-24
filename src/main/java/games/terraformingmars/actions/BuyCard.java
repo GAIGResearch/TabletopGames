@@ -11,11 +11,11 @@ import java.util.Objects;
 
 
 public class BuyCard extends TMAction {
-    final int cardIdx;
 
-    public BuyCard(int player, int cardIdx, boolean free) {
-        super(player, free);
-        this.cardIdx = cardIdx;
+    public BuyCard(int player, int cardID) {
+        super(player, true);
+        this.cardID = cardID;
+        this.costResource = TMTypes.Resource.MegaCredit;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class BuyCard extends TMAction {
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
 
-        TMCard card = gs.getPlayerCardChoice()[player].pick(cardIdx);
+        TMCard card = (TMCard) gs.getComponentById(cardID);
         if (card.cardType == TMTypes.CardType.Corporation) {
             // 1 card chosen, the rest are discarded
             gs.getPlayerCorporations()[player] = card;
@@ -48,22 +48,13 @@ public class BuyCard extends TMAction {
 
             // Add persisting effects
             gs.addPersistingEffects(card.persistingEffects);
-
-            return super.execute(gs);
         } else {
             Counter c = gs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit);
-            // TODO: maybe allow use of other resources
-            if (c.getValue() >= gp.getProjectPurchaseCost()) {
-                gs.getPlayerHands()[player].add(card);
-                c.decrement(gp.getProjectPurchaseCost());
-                return super.execute(gs);
-            } else {
-                // Can't pay for it, discard instead
-                gs.getDiscardCards().add(card);
-                super.execute(gs);
-                return false;
-            }
+            gs.getPlayerHands()[player].add(card);
+            c.decrement(gp.getProjectPurchaseCost());
         }
+        gs.getPlayerCardChoice()[player].remove(card);
+        return super.execute(gs);
     }
 
     @Override
@@ -77,21 +68,26 @@ public class BuyCard extends TMAction {
         if (!(o instanceof BuyCard)) return false;
         if (!super.equals(o)) return false;
         BuyCard buyCard = (BuyCard) o;
-        return cardIdx == buyCard.cardIdx;
+        return cardID == buyCard.cardID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardIdx);
+        return Objects.hash(super.hashCode(), cardID);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Buy card idx " + cardIdx;
+        return "Buy " + gameState.getComponentById(cardID).getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Buy card idx " + cardIdx;
+        return "Buy card id " + cardID;
+    }
+
+    @Override
+    public int getCost(TMGameState gs) {
+        return ((TMGameParameters)gs.getGameParameters()).getProjectPurchaseCost();
     }
 }

@@ -10,13 +10,11 @@ import java.util.*;
 
 
 public class PlayCard extends TMAction {
-    final int cardIdx;
-    int cardID;
 
-    public PlayCard(int player, int cardIdx, boolean free) {
+    public PlayCard(int player, int cardId, boolean free) {
         super(TMTypes.ActionType.PlayCard, player, free);
-        this.cardIdx = cardIdx;
-        this.cardID = -1;
+        this.cardID = cardId;
+        costResource = TMTypes.Resource.MegaCredit;
     }
 
     @Override
@@ -25,15 +23,14 @@ public class PlayCard extends TMAction {
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
-        TMCard card = gs.getPlayerHands()[player].get(cardIdx);
-        cardID = card.getComponentID();
-        playCard(gs, player);
+        TMCard card = (TMCard) gs.getComponentById(cardID);
+        playCard(gs, player, card);
         return super.execute(gs);
     }
 
-    private void playCard(TMGameState gs, int player) {
+    private void playCard(TMGameState gs, int player, TMCard card) {
         // Second: remove from hand, resolve on-play effects and add tags etc. to cards played lists
-        TMCard card = gs.getPlayerHands()[player].pick(cardIdx);
+        gs.getPlayerHands()[player].remove(card);
 
         // Add info to played cards stats
         for (TMTypes.Tag t: card.tags) {
@@ -82,25 +79,39 @@ public class PlayCard extends TMAction {
         if (!(o instanceof PlayCard)) return false;
         if (!super.equals(o)) return false;
         PlayCard playCard = (PlayCard) o;
-        return cardIdx == playCard.cardIdx;
+        return cardID == playCard.cardID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardIdx);
+        return Objects.hash(super.hashCode(), cardID);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Play card idx " + cardIdx;
+        TMCard card = (TMCard) gameState.getComponentById(cardID);
+        return "Play card " + card.getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Play card idx " + cardIdx;
+        return "Play card id " + cardID;
     }
 
-    public int getCardID() {
-        return cardID;
+    @Override
+    public int getCost(TMGameState gs) {
+        TMCard card = (TMCard) gs.getComponentById(cardID);
+        return card.cost;
+    }
+
+    @Override
+    public boolean canBePlayed(TMGameState gs) {
+        if (!super.canBePlayed(gs)) return false;
+        // Immediate effects must also be playable for the card to be playable
+        TMCard card = (TMCard) gs.getComponentById(cardID);
+        for (TMAction aa : card.immediateEffects) {
+            if (!aa.canBePlayed(gs)) return false;
+        }
+        return true;
     }
 }

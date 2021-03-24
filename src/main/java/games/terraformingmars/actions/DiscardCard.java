@@ -10,11 +10,10 @@ import games.terraformingmars.components.TMCard;
 import java.util.Objects;
 
 public class DiscardCard extends TMAction {
-    final int cardIdx;
 
-    public DiscardCard(int player, int cardIdx, boolean free) {
-        super(player, free);
-        this.cardIdx = cardIdx;
+    public DiscardCard(int player, int cardID) {
+        super(player, true);
+        this.cardID = cardID;
     }
 
     @Override
@@ -23,9 +22,12 @@ public class DiscardCard extends TMAction {
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
-        TMCard card = gs.getPlayerCardChoice()[player].pick(cardIdx);
-        if (card != null && card.cardType != TMTypes.CardType.Corporation) {
-            gs.getDiscardCards().add(card);
+        TMCard card = (TMCard) gs.getComponentById(cardID);
+        if (card != null) {
+            if (card.cardType != TMTypes.CardType.Corporation) {
+                gs.getDiscardCards().add(card);
+            }
+            gs.getPlayerCardChoice()[player].remove(card);
         }
         return super.execute(gs);
     }
@@ -36,26 +38,13 @@ public class DiscardCard extends TMAction {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DiscardCard)) return false;
-        if (!super.equals(o)) return false;
-        DiscardCard that = (DiscardCard) o;
-        return cardIdx == that.cardIdx;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), cardIdx);
-    }
-
-    @Override
     public String getString(AbstractGameState gameState) {
-        return "Discard card";
+        return "Discard " + gameState.getComponentById(cardID).getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Discard card idx " + cardIdx;
+        return "Discard card id " + cardID;
     }
+
 }

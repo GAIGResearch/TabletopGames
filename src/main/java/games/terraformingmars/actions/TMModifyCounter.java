@@ -3,6 +3,7 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import games.terraformingmars.TMTypes;
 
 import java.util.Objects;
 
@@ -10,14 +11,20 @@ public class TMModifyCounter extends TMAction {
     public int counterID;
     public int change;
 
-    public TMModifyCounter(int counterID, Integer change, boolean free) {
+    public TMModifyCounter(int counterID, int change, boolean free) {
         super(-1, free);
         this.counterID = counterID;
         this.change = change;
     }
 
-    public TMModifyCounter(int player, int counterID, Integer change, boolean free) {
-        super(-1, free);
+    public TMModifyCounter(TMTypes.ActionType actionType, int counterID, int change, boolean free) {
+        super(actionType, -1, free);
+        this.counterID = counterID;
+        this.change = change;
+    }
+
+    public TMModifyCounter(TMTypes.StandardProject standardProject, int counterID, int change, boolean free) {
+        super(standardProject, -1, free);
         this.counterID = counterID;
         this.change = change;
     }

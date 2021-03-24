@@ -348,7 +348,18 @@ public class TMGameState extends AbstractGameState {
         return Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
     }
 
+    public boolean canPlayerPay(int player, TMTypes.Resource res, int amount) {
+        // Production check
+        return canPlayerPay(player, null, null, res, amount, true);
+    }
+
     public boolean canPlayerPay(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount) {
+        return canPlayerPay(player, card, from, to, amount, false);
+    }
+
+    public boolean canPlayerPay(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount, boolean production) {
+        if (production) return playerProduction[player].get(to).getValue() >= amount;
+
         int sum = playerResourceSum(player, card, from, to);
         return card != null? isCardFree(card, sum, -1) : sum >= amount;
     }

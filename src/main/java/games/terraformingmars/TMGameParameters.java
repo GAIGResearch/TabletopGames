@@ -121,4 +121,72 @@ public class TMGameParameters extends AbstractParameters {
     public int getnMCGainedOcean() {
         return nMCGainedOcean;
     }
+
+    public int[] getnCostMilestone() {
+        return nCostMilestone;
+    }
+
+    public int[] getnCostAwards() {
+        return nCostAwards;
+    }
+
+    public double getnSteelMC() {
+        return nSteelMC;
+    }
+
+    public double getnTitaniumMC() {
+        return nTitaniumMC;
+    }
+
+    public int getnActionsPerPlayer() {
+        return nActionsPerPlayer;
+    }
+
+    public int getnCostGreeneryPlant() {
+        return nCostGreeneryPlant;
+    }
+
+    public int getnCostSPCity() {
+        return nCostSPCity;
+    }
+
+    public int getnCostSPEnergy() {
+        return nCostSPEnergy;
+    }
+
+    public int getnCostSPGreenery() {
+        return nCostSPGreenery;
+    }
+
+    public int getnCostSPOcean() {
+        return nCostSPOcean;
+    }
+
+    public int getnCostSPTemp() {
+        return nCostSPTemp;
+    }
+
+    public int getnCostTempHeat() {
+        return nCostTempHeat;
+    }
+
+    public int getnGainCardDiscard() {
+        return nGainCardDiscard;
+    }
+
+    public int getnPointsAwardFirst() {
+        return nPointsAwardFirst;
+    }
+
+    public int getnPointsAwardSecond() {
+        return nPointsAwardSecond;
+    }
+
+    public int getnPointsMilestone() {
+        return nPointsMilestone;
+    }
+
+    public int getnSPCityMCGain() {
+        return nSPCityMCGain;
+    }
 }

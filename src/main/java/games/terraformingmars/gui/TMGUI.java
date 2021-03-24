@@ -331,7 +331,7 @@ public class TMGUI extends AbstractGUI {
                     // card idx can be played
                     for (TMAction action: playCardActions) {
                         if (action instanceof PayForAction) {
-                            if (((PayForAction) action).cardIdx == idx) {
+                            if (((PayForAction) action).cardID == idx) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setButtonAction(action, "Play");
                                 i++;
@@ -361,7 +361,7 @@ public class TMGUI extends AbstractGUI {
                     // card idx can be played
                     for (TMAction action: playCardActions) {
                         if (action instanceof PayForAction) {
-                            if (((PayForAction) action).cardIdx == idx) {
+                            if (((PayForAction) action).cardID == idx) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setButtonAction(action, "Play");
                                 i++;

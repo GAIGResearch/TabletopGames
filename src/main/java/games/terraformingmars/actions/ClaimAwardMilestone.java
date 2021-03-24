@@ -2,6 +2,7 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.Award;
@@ -15,6 +16,7 @@ public class ClaimAwardMilestone extends TMAction {
     public ClaimAwardMilestone(int player, Award toClaim) {
         super((toClaim instanceof Milestone? TMTypes.ActionType.ClaimMilestone : TMTypes.ActionType.FundAward), player, false);
         this.toClaim = toClaim;
+        this.costResource = TMTypes.Resource.MegaCredit;
     }
 
     @Override
@@ -59,5 +61,25 @@ public class ClaimAwardMilestone extends TMAction {
     @Override
     public String toString() {
         return (toClaim instanceof Milestone? "Claim milestone " + toClaim.name : "Fund award " + toClaim.name);
+    }
+
+    public int getCost(TMGameState gs) {
+        TMGameParameters gp = (TMGameParameters)gs.getGameParameters();
+        if (toClaim instanceof Milestone) {
+            return gp.getnCostMilestone()[gs.getnMilestonesClaimed().getValue()];
+        }
+        return gp.getnCostAwards()[gs.getnAwardsFunded().getValue()];
+    }
+
+    @Override
+    public boolean canBePlayed(TMGameState gs) {
+        if (!super.canBePlayed(gs)) return false;
+        int p = player;
+        if (p == -1) {
+            // Can current player pay?
+            p = gs.getCurrentPlayer();
+        }
+        if (toClaim instanceof Milestone) return !gs.getnMilestonesClaimed().isMaximum() && toClaim.canClaim(gs, p);
+        return !gs.getnAwardsFunded().isMaximum() && toClaim.canClaim(gs, p);
     }
 }

@@ -42,7 +42,13 @@ public class TMTypes {
         ClaimMilestone,
         FundAward,
         ActiveAction,
-        BasicResourceAction
+        BasicResourceAction,
+        BuyProject  // TODO ignore in GUI
+    }
+
+    public enum BasicResourceAction {
+        HeatToTemp,
+        PlantToGreenery
     }
 
     public enum StandardProject {

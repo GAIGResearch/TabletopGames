@@ -3,22 +3,25 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.rules.requirements.Requirement;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
-public class ActionChoice extends TMAction implements IExtendedSequence {
+public class ChoiceAction extends TMAction implements IExtendedSequence {
     public TMAction[] actions;
     boolean finished;
 
-    public ActionChoice(int player, TMAction[] actions, boolean free) {
-        super(player, free);
+    public ChoiceAction(int player, TMAction[] actions) {
+        super(player, true);
         this.actions = actions;
     }
 
-    public ActionChoice(int player, TMAction[] actions, boolean free, Requirement requirement) {
-        super(player, free, requirement);
+    public ChoiceAction(int player, TMAction[] actions, boolean free, HashSet<Requirement<TMGameState>> requirements) {
+        super(player, free, requirements);
         this.actions = actions;
     }
 
@@ -28,6 +31,14 @@ public class ActionChoice extends TMAction implements IExtendedSequence {
         for (TMAction a: actions) a.player = player;
         gameState.setActionInProgress(this);
         return true;
+    }
+
+    @Override
+    public boolean canBePlayed(TMGameState gs) {
+        for (TMAction a: actions) {
+            if (a.canBePlayed(gs)) return true;
+        }
+        return false;
     }
 
     @Override
@@ -51,12 +62,8 @@ public class ActionChoice extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public ActionChoice copy() {
-        TMAction[] copy = new TMAction[actions.length];
-        for (int i = 0; i < actions.length; i++) {
-            copy[i] = (TMAction) actions[i].copy();
-        }
-        return new ActionChoice(player, copy, free, requirement);
+    public ChoiceAction copy() {
+        return this;
     }
 
     @Override
@@ -75,5 +82,21 @@ public class ActionChoice extends TMAction implements IExtendedSequence {
             s.append(action.toString()).append(" or ");
         }
         return s.substring(0, s.length()-4);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChoiceAction)) return false;
+        if (!super.equals(o)) return false;
+        ChoiceAction that = (ChoiceAction) o;
+        return finished == that.finished && Arrays.equals(actions, that.actions);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), finished);
+        result = 31 * result + Arrays.hashCode(actions);
+        return result;
     }
 }

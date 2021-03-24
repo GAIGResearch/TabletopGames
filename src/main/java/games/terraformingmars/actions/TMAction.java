@@ -6,6 +6,7 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.AdjacencyRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
@@ -13,6 +14,7 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class TMAction extends AbstractAction {
@@ -20,17 +22,23 @@ public class TMAction extends AbstractAction {
     public int player;
     public final boolean pass;
 
-    public Requirement<TMGameState> requirement;
+    public HashSet<Requirement<TMGameState>> requirements;
     public boolean played;
 
     public TMTypes.ActionType actionType;
     public TMTypes.StandardProject standardProject;
+    public TMTypes.BasicResourceAction basicResourceAction;
+
+    public int cost = 0;
+    public TMTypes.Resource costResource;
+    public int cardID = -1;
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
         this.free = free;
         this.pass = false;
         this.actionType = actionType;
+        this.requirements = new HashSet<>();
     }
 
     public TMAction(TMTypes.StandardProject project, int player, boolean free) {
@@ -39,46 +47,92 @@ public class TMAction extends AbstractAction {
         this.pass = false;
         this.actionType = TMTypes.ActionType.StandardProject;
         this.standardProject = project;
+        this.requirements = new HashSet<>();
+    }
+
+    public TMAction(TMTypes.BasicResourceAction basicResourceAction, int player, boolean free) {
+        this.player = player;
+        this.free = free;
+        this.pass = false;
+        this.actionType = TMTypes.ActionType.BasicResourceAction;
+        this.basicResourceAction = basicResourceAction;
+        this.requirements = new HashSet<>();
     }
 
     public TMAction(int player) {
         this.player = player;
         this.free = false;
         this.pass = true;
+        this.requirements = new HashSet<>();
     }
 
     public TMAction(int player, boolean free) {
         this.player = player;
         this.free = free;
         this.pass = false;
+        this.requirements = new HashSet<>();
     }
 
-    public TMAction(int player, boolean free, Requirement requirement) {
+    public TMAction(int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
         this.free= free;
         this.pass = false;
-        this.requirement = requirement;
+        this.requirements = new HashSet<>(requirement);
     }
 
-    public TMAction(TMTypes.ActionType actionType, int player, boolean free, Requirement requirement) {
+    public TMAction(TMTypes.ActionType actionType, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
         this.free= free;
         this.pass = false;
-        this.requirement = requirement;
+        this.requirements = new HashSet<>(requirement);
         this.actionType = actionType;
     }
 
-    public TMAction(TMTypes.StandardProject project, int player, boolean free, Requirement requirement) {
+    public TMAction(TMTypes.StandardProject project, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
         this.free= free;
         this.pass = false;
-        this.requirement = requirement;
+        this.requirements = new HashSet<>(requirement);
         this.actionType = TMTypes.ActionType.StandardProject;
         this.standardProject = project;
     }
 
-    public boolean canBePlayed(TMGameState gs) {  // TODO: overwrite in subclasses and simplify code
-        return !played && (requirement == null || requirement.testCondition(gs));
+    public TMAction(TMTypes.BasicResourceAction basicResourceAction, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
+        this.player = player;
+        this.free= free;
+        this.pass = false;
+        this.requirements = new HashSet<>(requirement);
+        this.actionType = TMTypes.ActionType.BasicResourceAction;
+        this.basicResourceAction = basicResourceAction;
+    }
+
+    public boolean canBePlayed(TMGameState gs) {
+        if (played && standardProject == null && basicResourceAction == null) return false;
+        if (!canPay(gs)) return false;
+        if (requirements != null) {
+            for (Requirement r: requirements) {
+                if (!r.testCondition(gs)) return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean canPay(TMGameState gs) {
+        if (getCost(gs) == 0) return true;
+        TMCard card = (TMCard) gs.getComponentById(getCardID());
+
+        int p = player;
+        if (p == -1) {
+            // Can current player pay?
+            p = gs.getCurrentPlayer();
+        } else if (p == -2) {
+            // Can any player pay?
+            for (int i = 0; i < gs.getNPlayers(); i++) {
+                if (gs.canPlayerPay(i, card, null, getResource(), getCost(gs))) return true;
+            }
+            return false;
+        }
+        return gs.canPlayerPay(p, card, null, getResource(), getCost(gs));
     }
 
     @Override
@@ -123,12 +177,12 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return free == tmAction.free && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirement, tmAction.requirement) && actionType == tmAction.actionType && standardProject == tmAction.standardProject;
+        return free == tmAction.free && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(free, player, pass, requirement, played, actionType, standardProject);
+        return Objects.hash(free, player, pass, requirements, played, actionType, standardProject);
     }
 
     @Override
@@ -153,7 +207,7 @@ public class TMAction extends AbstractAction {
         int player = -1;
 
         if (encoding.contains("inc") || encoding.contains("dec")) {
-            // Increase/Decrease counter action
+            // Increase/Decrease counter action, format: "inc-Res-Amount(-Any)" or "inc-Res-Amount-Tag(-Any)" or "inc-Res-Amount-Tile(-Any)" or "dec-Res-Amount..."
             String[] split2 = encoding.split("-");
             try {
                 // Find how much
@@ -218,7 +272,7 @@ public class TMAction extends AbstractAction {
                 }
             } catch (Exception ignored) {}
         } else if (encoding.contains("placetile")) {
-            // PlaceTile action
+            // PlaceTile action, format: "placetile/Tile/{Where = map type or name or Volcanic or resources sep by -}/{true or false for OnMars}/{Adjacency: Owned or None or tile names sep by -}"
             String[] split2 = encoding.split("/");
             // split2[1] is type of tile to place
             TMTypes.Tile toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
@@ -297,9 +351,9 @@ public class TMAction extends AbstractAction {
 
                 if (split2.length > 3) {
                     if (split2[3].equalsIgnoreCase("another")) {
-                        ((AddResourceOnCard) effect).cardID = -1;
+                        effect.cardID = -1;
                     } else if (split2[3].equalsIgnoreCase("any")) {
-                        ((AddResourceOnCard) effect).cardID = -1;
+                        effect.cardID = -1;
                         ((AddResourceOnCard) effect).chooseAny = true;
                     }
                     if (split2.length > 4) {
@@ -315,5 +369,17 @@ public class TMAction extends AbstractAction {
             } catch (Exception ignored) {}
         }
         return new Pair<>(effect, effectString);
+    }
+
+    public int getCost(TMGameState gs) {
+        return cost;  // 0 by default, the cost in resources this action takes to perform
+    }
+
+    public TMTypes.Resource getResource() {
+        return costResource;  // none by default, the resource to be paid for this action
+    }
+
+    public int getCardID() {
+        return cardID;  // none by default, the component ID of card used for this action
     }
 }

@@ -32,26 +32,31 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     public AdjacencyRequirement adjacencyRequirement;
 
-    public int cardID = -1;  // Card used to place this tile
-
     boolean placed;
     boolean impossible;
 
-    public PlaceTile(int player, int mapTileID, TMTypes.Tile tile, boolean free) {
+    public PlaceTile(int player, int mapTileID, TMTypes.Tile tile,
+                     boolean respectingAdjacency, boolean onMars, String tileName, TMTypes.MapTileType mapType,
+                     HashSet<Integer> legalPositions,
+                     TMTypes.Resource[] resourcesGainedRestriction, boolean volcanicRestriction,
+                     AdjacencyRequirement adjacencyRequirement, boolean free) {
+        // Copy constructor, in extended sequence too
         super(player, free);
-        setTile(tile, null);
-        this.legalPositions = new HashSet<>();
+        this.respectingAdjacency = respectingAdjacency;
+        this.onMars = onMars;
+        this.tileName = tileName;
         this.mapTileID = mapTileID;
-    }
-
-    public PlaceTile(int player, TMTypes.Tile tile, HashSet<Integer> legalPositions, boolean free) {
-        super(player, free);
-        setTile(tile, null);
+        this.tile = tile;
+        this.mapType = mapType;
         this.legalPositions = legalPositions;
-        this.mapTileID = -1;
+        this.resourcesGainedRestriction = resourcesGainedRestriction;
+        this.volcanicRestriction = volcanicRestriction;
+        this.adjacencyRequirement = adjacencyRequirement;
+        setTile(tile, tileName);
     }
 
     public PlaceTile(int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile, boolean free) {
+        // Used in parsing
         super(player, free);
         setTile(tile, null);
         this.mapType = mapTile;
@@ -59,25 +64,42 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     }
 
     public PlaceTile(int player, TMTypes.Tile tile, TMTypes.Resource[] resourcesGainedRestriction, boolean free) {
+        // used in parsing
         super(player, free);
         setTile(tile, null);
         this.resourcesGainedRestriction = resourcesGainedRestriction;
         this.mapTileID = -1;
     }
-
     public PlaceTile(int player, TMTypes.Tile tile, boolean volcanicRestriction, boolean free) {
+        // Used in parsing
         super(player, free);
         setTile(tile, null);
         this.volcanicRestriction = volcanicRestriction;
         this.mapTileID = -1;
     }
-
     public PlaceTile(int player, TMTypes.Tile tile, String tileName, boolean onMars, boolean free) {  // Place a named tile
+        // Used in parsing
         super(player, free);
         setTile(tile, tileName);
         this.tileName = tileName;
         this.onMars = onMars;
         this.mapTileID = -1;
+    }
+
+    public PlaceTile(TMTypes.StandardProject standardProject, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
+        super(standardProject, player, false);
+        setTile(tile, null);
+        this.mapType = mapTile;
+        this.mapTileID = -1;
+        costResource = TMTypes.Resource.MegaCredit;
+    }
+
+    public PlaceTile(TMTypes.BasicResourceAction basicResourceAction, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
+        super(basicResourceAction, player, false);
+        setTile(tile, null);
+        this.mapType = mapTile;
+        this.mapTileID = -1;
+        costResource = TMTypes.Resource.Plant;
     }
 
     private void setTile(TMTypes.Tile tile, String name) {
@@ -129,15 +151,10 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     @Override
     public PlaceTile copy() {
-        PlaceTile copy = new PlaceTile(player, mapTileID, tile, free);
+        PlaceTile copy = new PlaceTile(player, mapTileID, tile, respectingAdjacency, onMars, tileName, mapType,
+                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, free);
         copy.impossible = impossible;
         copy.placed = placed;
-        copy.resourcesGainedRestriction = resourcesGainedRestriction.clone();
-        copy.volcanicRestriction = volcanicRestriction;
-        copy.tileName = tileName;
-        copy.onMars = onMars;
-        copy.mapType = mapType;
-        copy.respectingAdjacency = respectingAdjacency;
         HashSet<Integer> copyPos = null;
         if (legalPositions != null) {
             copyPos = new HashSet<>(legalPositions);
@@ -156,7 +173,8 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 for (Integer pos : legalPositions) {
                     TMMapTile mt = (TMMapTile) gs.getComponentById(pos);
                     if (mt != null && mt.getTilePlaced() == null) {
-                        actions.add(new PlaceTile(player, pos, tile, true));
+                        actions.add(new PlaceTile(player, pos, tile, respectingAdjacency, onMars, tileName, mapType,
+                                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
                     }
                 }
             } else {
@@ -173,10 +191,12 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                                 // Check placement rules
                                 if (respectingAdjacency && adjacencyRequirement != null) {
                                     if (adjacencyRequirement.testCondition(new Group<>(gs, mt, player))) {
-                                        actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
+                                        actions.add(new PlaceTile(player, mt.getComponentID(), tile, respectingAdjacency, onMars, tileName, mapType,
+                                                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
                                     }
                                 } else {
-                                    actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
+                                    actions.add(new PlaceTile(player, mt.getComponentID(), tile, respectingAdjacency, onMars, tileName, mapType,
+                                            legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
                                 }
                             }
                         }
@@ -184,7 +204,8 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 } else {
                     for (TMMapTile mt: gs.getExtraTiles()) {
                         if (mt.getComponentName().equalsIgnoreCase(tileName)) {
-                            actions.add(new PlaceTile(player, mt.getComponentID(), tile, true));
+                            actions.add(new PlaceTile(player, mt.getComponentID(), tile, respectingAdjacency, onMars, tileName, mapType,
+                                    legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
                             break;
                         }
                     }
@@ -222,19 +243,20 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         if (!(o instanceof PlaceTile)) return false;
         if (!super.equals(o)) return false;
         PlaceTile placeTile = (PlaceTile) o;
-        return respectingAdjacency == placeTile.respectingAdjacency && onMars == placeTile.onMars && mapTileID == placeTile.mapTileID && volcanicRestriction == placeTile.volcanicRestriction && placed == placeTile.placed && impossible == placeTile.impossible && Objects.equals(tileName, placeTile.tileName) && tile == placeTile.tile && mapType == placeTile.mapType && Objects.equals(legalPositions, placeTile.legalPositions) && Arrays.equals(resourcesGainedRestriction, placeTile.resourcesGainedRestriction);
+        return respectingAdjacency == placeTile.respectingAdjacency && onMars == placeTile.onMars && mapTileID == placeTile.mapTileID && volcanicRestriction == placeTile.volcanicRestriction && placed == placeTile.placed && impossible == placeTile.impossible && Objects.equals(tileName, placeTile.tileName) && tile == placeTile.tile && mapType == placeTile.mapType && Objects.equals(legalPositions, placeTile.legalPositions) && Arrays.equals(resourcesGainedRestriction, placeTile.resourcesGainedRestriction) && Objects.equals(adjacencyRequirement, placeTile.adjacencyRequirement);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), respectingAdjacency, onMars, tileName, mapTileID, tile, mapType, legalPositions, volcanicRestriction, placed, impossible);
+        int result = Objects.hash(super.hashCode(), respectingAdjacency, onMars, tileName, mapTileID, tile, mapType, legalPositions, volcanicRestriction, adjacencyRequirement, placed, impossible);
         result = 31 * result + Arrays.hashCode(resourcesGainedRestriction);
         return result;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Placing " + tile.name();
+        TMMapTile mt = (TMMapTile) gameState.getComponentById(mapTileID);
+        return "Placing " + tile.name() + " on " + mt.getTileType();  // TODO restrictions and stuff
     }
 
     @Override
@@ -319,4 +341,21 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         }
         return false;
     }
+
+    @Override
+    public int getCost(TMGameState gs) {
+        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
+        // not 0 if SP greenery or SP ocean or Basic resource plant
+        if (standardProject == TMTypes.StandardProject.Greenery) {
+            return gp.getnCostSPGreenery();
+        }
+        if (standardProject == TMTypes.StandardProject.Aquifer) {
+            return gp.getnCostSPOcean();
+        }
+        if (basicResourceAction == TMTypes.BasicResourceAction.PlantToGreenery) {
+            return gp.getnCostGreeneryPlant();
+        }
+        return super.getCost(gs);
+    }
+
 }

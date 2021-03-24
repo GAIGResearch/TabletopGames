@@ -84,7 +84,7 @@ public class TMCard extends Card {
             // Second is what resource
             String resString = split2[1].split("prod")[0];
             TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-            immediateEffects.add(new ModifyPlayerResource(-1, amount, res, split2[1].contains("prod"), true));
+            immediateEffects.add(new ModifyPlayerResource(-1, amount, res, split2[1].contains("prod")));
         }
         for (int i = 1; i < start.size(); i++) {
             JSONObject other = (JSONObject) start.get(i);
@@ -92,12 +92,7 @@ public class TMCard extends Card {
             if (type.equalsIgnoreCase("first")) {
                 // First action in action phase for the player is decided, not free
                 String action = (String) other.get("action");
-                if (action.equalsIgnoreCase("resourcetransaction")) {
-                    card.firstAction = new ResourceTransaction(-1, TMTypes.Resource.valueOf((String) other.get("resource")), (int)(long)other.get("amount"), false);
-                } else if (action.equalsIgnoreCase("placetile")) {
-                    TMTypes.Tile t = TMTypes.Tile.valueOf((String) other.get("tile"));
-                    card.firstAction = new PlaceTile(-1, t, t.getRegularLegalTileType(), false);
-                }
+                card.firstAction = TMAction.parseAction(action, false, card.getComponentID()).a;
             }
         }
 
@@ -120,29 +115,15 @@ public class TMCard extends Card {
             String type = (String) effect.get("type");
             if (type.equalsIgnoreCase("action")) {
                 // Parse actions
-                String[] action = ((String) effect.get("action")).split("-");
+                String action = (String) effect.get("action");
                 String[] costStr = ((String) effect.get("cost")).split("/");
                 TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
                 int cost = Integer.parseInt(costStr[1]);
-                if (action[0].equalsIgnoreCase("placetile")) {
-                    TMTypes.Tile t = TMTypes.Tile.valueOf(action[1]);
-                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new PlaceTile(-1, t, t.getRegularLegalTileType(), false),
-                            costResource, cost, -1);
-                    actions.add(a);
-                } else if (action[0].equalsIgnoreCase("resourcetransaction")) {
-                    TMTypes.Resource r = TMTypes.Resource.valueOf(action[1]);
-                    int amount = Integer.parseInt(action[2]);
-                    Requirement req = null;
-                    if (effect.get("if") != null) {
-                        // parse requirement
-                        String reqStr = (String) effect.get("if");
-                        if (reqStr.contains("incgen")) {
-                            req = new ResourceIncGenRequirement(TMTypes.Resource.valueOf(reqStr.split("-")[1]));
-                        }
-                    }
-                    TMAction a = new PayForAction(TMTypes.ActionType.ActiveAction, -1, new ResourceTransaction(-1, r, amount, false), costResource, -cost, -1, req);
-                    actions.add(a);
-                }
+                TMAction a = TMAction.parseAction(action, false, card.componentID).a;
+                actions.add(a);
+                a.actionType = TMTypes.ActionType.ActiveAction;
+                a.cost = cost;
+                a.costResource = costResource;
             } else if (type.equalsIgnoreCase("discount")) {
                 // Parse discounts
                 int amount = (int)(long)effect.get("amount");
@@ -374,7 +355,7 @@ public class TMCard extends Card {
                                                     }
                                                     j++;
                                                 }
-                                                actionChoice[i] = new CompoundAction(-1, compound, true);
+                                                actionChoice[i] = new CompoundAction(-1, compound);
                                             }
                                             i++;
                                         }
@@ -383,7 +364,7 @@ public class TMCard extends Card {
                                                 int p = 0;
                                             }
                                         }
-                                        immediateEffects.add(new ActionChoice(-1, actionChoice, true));
+                                        immediateEffects.add(new ChoiceAction(-1, actionChoice));
                                     }
                                 }
                             }

@@ -2,19 +2,30 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.terraformingmars.rules.requirements.Requirement;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTypes;
 
 public class CompoundAction extends TMAction{
     public TMAction[] actions;
 
-    public CompoundAction(int player, TMAction[] actions, boolean free) {
-        super(player, free);
+    public CompoundAction(int player, TMAction[] actions) {
+        super(player, true);
         this.actions = actions;
     }
 
-    public CompoundAction(int player, TMAction[] actions, boolean free, Requirement requirement) {
-        super(player, free, requirement);
+    public CompoundAction(TMTypes.ActionType actionType, int player, TMAction[] actions, int cost) {
+        super(actionType, player, false);
         this.actions = actions;
+        this.costResource = TMTypes.Resource.MegaCredit;
+        this.cost = cost;
+    }
+
+    @Override
+    public boolean canBePlayed(TMGameState gs) {
+        for (TMAction a: actions) {
+            if (!a.canBePlayed(gs)) return false;
+        }
+        return true;
     }
 
     @Override
@@ -29,16 +40,12 @@ public class CompoundAction extends TMAction{
 
     @Override
     public AbstractAction copy() {
-        TMAction[] copy = new TMAction[actions.length];
-        for (int i = 0; i < actions.length; i++) {
-            copy[i] = (TMAction) actions[i].copy();
-        }
-        return new CompoundAction(player, copy, free, requirement);
+        return this;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        StringBuilder s = new StringBuilder("");
+        StringBuilder s = new StringBuilder();
         for (TMAction action: actions) {
             s.append(action.getString(gameState)).append(" and ");
         }
@@ -47,7 +54,7 @@ public class CompoundAction extends TMAction{
 
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder("");
+        StringBuilder s = new StringBuilder();
         for (TMAction action: actions) {
             s.append(action.toString()).append(" and ");
         }

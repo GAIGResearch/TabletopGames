@@ -11,7 +11,6 @@ import games.terraformingmars.components.TMCard;
 import java.util.*;
 
 public class AddResourceOnCard extends TMAction implements IExtendedSequence {
-    public int cardID;
     public final TMTypes.Resource resource;
     public final int amount;  // Can be negative for removing resources
 
@@ -24,6 +23,11 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         this.cardID = cardID;
         this.resource = resource;
         this.amount = amount;
+
+        if (amount < 0) {
+            this.costResource = resource;
+            this.cost = Math.abs(amount);
+        }
     }
 
     @Override
@@ -52,7 +56,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             addDeckActions(actions, gs, player);
         }
         if (actions.size() == 0) {
-            actions.add(new TMAction(player));  // Pass, shouldn't happen
+            actions.add(new TMAction(player));  // Pass, can't do any legal actions
         }
         return actions;
     }
@@ -109,12 +113,12 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         if (!(o instanceof AddResourceOnCard)) return false;
         if (!super.equals(o)) return false;
         AddResourceOnCard that = (AddResourceOnCard) o;
-        return cardID == that.cardID && amount == that.amount && resource == that.resource;
+        return amount == that.amount && chooseAny == that.chooseAny && minResRequirement == that.minResRequirement && resource == that.resource && tagRequirement == that.tagRequirement;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardID, resource, amount);
+        return Objects.hash(super.hashCode(), resource, amount, chooseAny, tagRequirement, minResRequirement);
     }
 
     @Override
@@ -131,7 +135,4 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         return "Add " + amount + " " + resource + " on card";
     }
 
-    public int getCardID() {
-        return cardID;
-    }
 }

@@ -403,14 +403,14 @@ public class TMDeckDisplay extends JComponent {
         } else if (a instanceof AddResourceOnCard) {
             drawAddResourceAction(g, (AddResourceOnCard) a, xE, yE, defaultItemSize/3);
             yE += defaultItemSize/3 + spacing/5;
-        } else if (a instanceof ActionChoice) {
+        } else if (a instanceof ChoiceAction) {
             // Horizontal display, each action next to each other, separated by /
-            int nActions = ((ActionChoice) a).actions.length;
+            int nActions = ((ChoiceAction) a).actions.length;
             int sepWidth = g.getFontMetrics().stringWidth(" / ");
             int widthOne = (cardWidth - sepWidth*(nActions-1))/nActions;
             xE = xE - cardWidth/2 + widthOne/2;
             for (int i = 0; i < nActions; i++) {
-                drawCardEffect(g, ((ActionChoice) a).actions[i], xE, yE);
+                drawCardEffect(g, ((ChoiceAction) a).actions[i], xE, yE);
                 xE += widthOne;
                 if (i != nActions-1) {
                     drawShadowStringCentered(g, " / ", new Rectangle(xE - widthOne/2, yE, sepWidth, defaultItemSize / 2));
@@ -568,17 +568,17 @@ public class TMDeckDisplay extends JComponent {
         int rightNumber = -1;
         if (a instanceof PayForAction) {
             PayForAction aa = (PayForAction) a;
-            TMTypes.Resource leftR = aa.resourceToPay;
+            TMTypes.Resource leftR = aa.costResource;
             left = leftR.getImagePath();
-            leftNumber = Math.abs(aa.costTotal);
+            leftNumber = Math.abs(aa.cost);
             boolean played = aa.played;
             if (aa.action instanceof PlaceTile) {
                 // get the tile image
                 TMTypes.Tile t = ((PlaceTile)aa.action).tile;
                 right = t.getImagePath();
-            } else if (aa.action instanceof ResourceTransaction) {
+            } else if (aa.action instanceof ModifyPlayerResource) {
                 // get resource image
-                TMTypes.Resource rightR = ((ResourceTransaction)aa.action).res;
+                TMTypes.Resource rightR = ((ModifyPlayerResource)aa.action).resource;
                 right = rightR.getImagePath();
             }
         }
