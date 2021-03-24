@@ -25,6 +25,7 @@ public class GameEvaluator implements SolutionEvaluator {
     int nEvals = 0;
     Random rnd;
     boolean avoidOppDupes;
+    boolean fullyCoop;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
 
@@ -56,6 +57,7 @@ public class GameEvaluator implements SolutionEvaluator {
         this.avoidOppDupes = avoidOpponentDuplicates;
         if (avoidOppDupes && opponents.size() < nPlayers - 1)
             throw new AssertionError("Insufficient Opponents to avoid duplicates");
+        if (opponents.isEmpty()) fullyCoop = true;
     }
 
     @Override
@@ -97,13 +99,13 @@ public class GameEvaluator implements SolutionEvaluator {
         Collections.shuffle(opponentOrdering);
         int count = 0;
         for (int i = 0; i < nPlayers; i++) {
-            if (i != playerIndex) {
+            if (!fullyCoop && i != playerIndex) {
                 int oppIndex = (avoidOppDupes) ? count++ : rnd.nextInt(opponents.size());
                 if (count >= opponents.size())
                     throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
                 allPlayers.add(opponents.get(oppIndex));
             } else {
-                AbstractPlayer tunedPlayer = (AbstractPlayer) configuredThing;
+                AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
                 if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
                 allPlayers.add(tunedPlayer);
             }

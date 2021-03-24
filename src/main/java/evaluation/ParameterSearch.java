@@ -37,9 +37,10 @@ public class ParameterSearch {
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\topponent=      The agent used as opponent. Default is a Random player. \n" +
                         "\t               This can either be a json-format file detailing the parameters, or\n" +
-                        "\t               one of mcts|rmhc|random|osla|<className>  \n" +
+                        "\t               one of coop|mcts|rmhc|random|osla|<className>  \n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
                         "\t               with a no-argument constructor\n" +
+                        "\t               'coop' means that the agent being tuned is used for all agents (i.e. if co-operative)\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
                         "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
@@ -105,8 +106,8 @@ public class ParameterSearch {
         int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
         boolean useThreeTuples = Arrays.asList(args).contains("useThreeTuples");
 
-        System.out.println(String.format("Search space consists of %d states and %d possible 2-Tuples%s",
-                searchSpaceSize, twoTupleSize, useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : ""));
+        System.out.printf("Search space consists of %d states and %d possible 2-Tuples%s%n",
+                searchSpaceSize, twoTupleSize, useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : "");
 
         for (int i = 0; i < searchSpace.nDims(); i++) {
             int finalI = i;
@@ -125,9 +126,12 @@ public class ParameterSearch {
 
         // Set up opponents
         List<AbstractPlayer> opponents = new ArrayList<>();
-        for (int i = 0; i < nPlayers; i++) {
-            AbstractPlayer opponent = opponentDescriptor.isEmpty() ? new RandomPlayer() : PlayerFactory.createPlayer(opponentDescriptor);
-            opponents.add(opponent);
+        // if we are in coop mode, then we have no opponents. This is indicated by leaving the list empty.
+        if (!opponentDescriptor.equals("coop")) {
+            for (int i = 0; i < nPlayers; i++) {
+                AbstractPlayer opponent = opponentDescriptor.isEmpty() ? new RandomPlayer() : PlayerFactory.createPlayer(opponentDescriptor);
+                opponents.add(opponent);
+            }
         }
 
         // TODO: At some later point we also need to allow different evaluation functions to be used. Win/Lose / Score / Ordinal position

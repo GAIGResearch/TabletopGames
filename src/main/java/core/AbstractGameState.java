@@ -224,7 +224,7 @@ public abstract class AbstractGameState {
     protected abstract double _getHeuristicScore(int playerId);
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
