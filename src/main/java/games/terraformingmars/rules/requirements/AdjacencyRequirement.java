@@ -26,13 +26,13 @@ public class AdjacencyRequirement implements Requirement<Group<TMGameState, TMMa
     public boolean testCondition(Group<TMGameState, TMMapTile, Integer> o) {
         if (owned) return isAdjacentToPlayerOwnedTiles(o.a, o.b, o.c);
         if (noneAdjacent) {
-            int nAdjacent = isAdjacentToAny(o.a, o.b);
-            if (reversed) return nAdjacent > 0;
-            else return nAdjacent == 0;
+            boolean isAdjacent = isAdjacentToAny(o.a, o.b);
+            if (reversed) return isAdjacent;
+            else return !isAdjacent;
         }
         if (tileTypes != null) {
             for (TMTypes.Tile t: tileTypes.keySet()) {
-                int count = isAdjacentToTile(o.a, o.b, t);
+                int count = nAdjacentTiles(o.a, o.b, t);
                 if (!reversed && count < tileTypes.get(t)) return false;
                 if (reversed && count >= tileTypes.get(t)) return false;
             }

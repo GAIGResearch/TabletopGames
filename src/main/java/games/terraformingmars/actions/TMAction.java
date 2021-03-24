@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class TMAction extends AbstractAction {
-    public final boolean free;
+    public final boolean freeActionPoint;
     public int player;
     public final boolean pass;
 
@@ -35,7 +35,7 @@ public class TMAction extends AbstractAction {
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
-        this.free = free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.actionType = actionType;
         this.requirements = new HashSet<>();
@@ -43,7 +43,7 @@ public class TMAction extends AbstractAction {
 
     public TMAction(TMTypes.StandardProject project, int player, boolean free) {
         this.player = player;
-        this.free = free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.actionType = TMTypes.ActionType.StandardProject;
         this.standardProject = project;
@@ -52,7 +52,7 @@ public class TMAction extends AbstractAction {
 
     public TMAction(TMTypes.BasicResourceAction basicResourceAction, int player, boolean free) {
         this.player = player;
-        this.free = free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.actionType = TMTypes.ActionType.BasicResourceAction;
         this.basicResourceAction = basicResourceAction;
@@ -61,28 +61,28 @@ public class TMAction extends AbstractAction {
 
     public TMAction(int player) {
         this.player = player;
-        this.free = false;
+        this.freeActionPoint = false;
         this.pass = true;
         this.requirements = new HashSet<>();
     }
 
     public TMAction(int player, boolean free) {
         this.player = player;
-        this.free = free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.requirements = new HashSet<>();
     }
 
     public TMAction(int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
-        this.free= free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.requirements = new HashSet<>(requirement);
     }
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
-        this.free= free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.requirements = new HashSet<>(requirement);
         this.actionType = actionType;
@@ -90,7 +90,7 @@ public class TMAction extends AbstractAction {
 
     public TMAction(TMTypes.StandardProject project, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
-        this.free= free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.requirements = new HashSet<>(requirement);
         this.actionType = TMTypes.ActionType.StandardProject;
@@ -99,7 +99,7 @@ public class TMAction extends AbstractAction {
 
     public TMAction(TMTypes.BasicResourceAction basicResourceAction, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
-        this.free= free;
+        this.freeActionPoint = free;
         this.pass = false;
         this.requirements = new HashSet<>(requirement);
         this.actionType = TMTypes.ActionType.BasicResourceAction;
@@ -108,13 +108,12 @@ public class TMAction extends AbstractAction {
 
     public boolean canBePlayed(TMGameState gs) {
         if (played && standardProject == null && basicResourceAction == null) return false;
-        if (!canPay(gs)) return false;
         if (requirements != null) {
             for (Requirement r: requirements) {
                 if (!r.testCondition(gs)) return false;
             }
         }
-        return true;
+        return canPay(gs);
     }
 
     public boolean canPay(TMGameState gs) {
@@ -140,7 +139,7 @@ public class TMAction extends AbstractAction {
         TMGameState gs = (TMGameState) gameState;
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
-        if (!free) {
+        if (!freeActionPoint) {
             ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
         }
         played = true;
@@ -177,12 +176,12 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return free == tmAction.free && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject;
+        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(free, player, pass, requirements, played, actionType, standardProject);
+        return Objects.hash(freeActionPoint, player, pass, requirements, played, actionType, standardProject);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class ReserveTile extends TMAction implements IExtendedSequence {
 
     @Override
     public ReserveTile copy() {
-        ReserveTile copy = new ReserveTile(player, mapTileID, free);
+        ReserveTile copy = new ReserveTile(player, mapTileID, freeActionPoint);
         copy.impossible = impossible;
         copy.placed = placed;
         copy.mapType = mapType;

@@ -217,6 +217,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         for (Requirement r : requirements) {
             if (!r.testCondition(gs)) return false;
         }
+        if (standardProject != null && !canPay(gs)) return false;
         if (change < 0) {  // TODO: "up to"
             if (!production && !canPay(gs)) return false;
             if (requirements != null) {

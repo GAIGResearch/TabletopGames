@@ -289,8 +289,9 @@ public class TMForwardModel extends AbstractForwardModel {
                     int cardID = a.getCardID();  // -1 if no card
                     if (cost > 0) {
                         actions.add(new PayForAction(a.actionType, player, a, a.getResource(), cost, cardID));
+                    } else {
+                        actions.add(a);
                     }
-                    actions.add(a);
                 }
             }
         }

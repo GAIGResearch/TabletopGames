@@ -25,7 +25,7 @@ public class CompoundAction extends TMAction{
         for (TMAction a: actions) {
             if (!a.canBePlayed(gs)) return false;
         }
-        return true;
+        return super.canBePlayed(gs);
     }
 
     @Override

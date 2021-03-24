@@ -123,7 +123,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             boolean success = mt.placeTile(tile, ggs) && super.execute(gs);
             // Add money earned from adjacent oceans
             if (success && onMars) {
-                int nOceans = isAdjacentToTile(ggs, mt, TMTypes.Tile.Ocean);
+                int nOceans = nAdjacentTiles(ggs, mt, TMTypes.Tile.Ocean);
                 ggs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).increment(nOceans * ((TMGameParameters) gs.getGameParameters()).getnMCGainedOcean());
                 if (resourcesGainedRestriction != null) {
                     // Production of each resource type gained increased by 1
@@ -152,7 +152,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     @Override
     public PlaceTile copy() {
         PlaceTile copy = new PlaceTile(player, mapTileID, tile, respectingAdjacency, onMars, tileName, mapType,
-                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, free);
+                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, freeActionPoint);
         copy.impossible = impossible;
         copy.placed = placed;
         HashSet<Integer> copyPos = null;
@@ -256,12 +256,16 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     @Override
     public String getString(AbstractGameState gameState) {
         TMMapTile mt = (TMMapTile) gameState.getComponentById(mapTileID);
-        return "Placing " + tile.name() + " on " + mt.getTileType();  // TODO restrictions and stuff
+        if (mt != null) {
+            return "Place " + tile.name() + " on " + mt.getTileType();  // TODO restrictions and stuff
+        } else {
+            return "Place " + tile.name();
+        }
     }
 
     @Override
     public String toString() {
-        return "Placing " + tile.name();
+        return "Place " + tile.name();
     }
 
     public static boolean isAdjacentToPlayerOwnedTiles(TMGameState gs, TMMapTile mt, int player) {
@@ -281,7 +285,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         return true;
     }
 
-    public static int isAdjacentToAny(TMGameState gs, TMMapTile mt) {
+    public static boolean isAdjacentToAny(TMGameState gs, TMMapTile mt) {
         boolean placedAnyTiles = gs.anyTilesPlaced();
         if (placedAnyTiles) {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
@@ -289,15 +293,30 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             for (Vector2D n : neighbours) {
                 TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() != null) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public static int nAdjacentTiles(TMGameState gs, TMMapTile mt) {
+        boolean placedAnyTiles = gs.anyTilesPlaced();
+        int count = 0;
+        if (placedAnyTiles) {
+            List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
+            for (Vector2D n : neighbours) {
+                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                if (other != null && other.getTilePlaced() != null) {
                     count++;
                 }
             }
-            return count;
         }
-        return 1;
+        return count;
     }
 
-    public static int isAdjacentToTile(TMGameState gs, TMMapTile mt, TMTypes.Tile t) {
+    public static boolean isAdjacentToTile(TMGameState gs, TMMapTile mt, TMTypes.Tile t) {
         boolean placedAnyTiles = gs.anyTilesPlaced();
         if (placedAnyTiles) {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
@@ -305,12 +324,27 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             for (Vector2D n : neighbours) {
                 TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() == t) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public static int nAdjacentTiles(TMGameState gs, TMMapTile mt, TMTypes.Tile t) {
+        boolean placedAnyTiles = gs.anyTilesPlaced();
+        int count = 0;
+        if (placedAnyTiles) {
+            List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
+            for (Vector2D n : neighbours) {
+                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                if (other != null && other.getTilePlaced() == t) {
                     count++;
                 }
             }
-            return count;
         }
-        return 1;
+        return count;
     }
 
     public static List<Vector2D> getNeighbours(Vector2D cell) {

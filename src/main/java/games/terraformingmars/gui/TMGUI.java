@@ -331,7 +331,7 @@ public class TMGUI extends AbstractGUI {
                     // card idx can be played
                     for (TMAction action: playCardActions) {
                         if (action instanceof PayForAction) {
-                            if (((PayForAction) action).cardID == idx) {
+                            if (action.cardID == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setButtonAction(action, "Play");
                                 i++;
@@ -353,24 +353,21 @@ public class TMGUI extends AbstractGUI {
                     i++;
                 }
             }
-            if (playerCardsPlayed.highlight.size() > 0) {
-                // A card to choose, check highlights
-                for (Rectangle r: playerCardsPlayed.highlight) {
-                    String code = playerCardsPlayed.rects.get(r);
-                    int idx = Integer.parseInt(code);
-                    // card idx can be played
-                    for (TMAction action: playCardActions) {
-                        if (action instanceof PayForAction) {
-                            if (((PayForAction) action).cardID == idx) {
-                                actionButtons[i].setVisible(true);
-                                actionButtons[i].setButtonAction(action, "Play");
-                                i++;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+//            if (playerCardsPlayed.highlight.size() > 0) {
+//                for (Rectangle r: playerCardsPlayed.highlight) {
+//                    String code = playerCardsPlayed.rects.get(r);
+//                    int idx = Integer.parseInt(code);
+//                    // card idx can be played
+//                    for (TMAction action: playCardActions) {
+//                        if (action.cardID == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
+//                            actionButtons[i].setVisible(true);
+//                            actionButtons[i].setButtonAction(action, "Choose");
+//                            i++;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
             if (view.highlight.size() > 0) {
                 for (Rectangle r: view.highlight) {
                     String code = view.rects.get(r);
@@ -432,14 +429,13 @@ public class TMGUI extends AbstractGUI {
             playerCardChoice.update(gs.getPlayerCardChoice()[focusPlayer]);
             playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer]);
 
-            if (!gs.allCorpChosen()) {
-                Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-                TMCard corp = gs.getPlayerCorporations()[focusPlayer];
-                if (corp != null) {
-                    temp.add(corp);
-                }
-                playerCorporation.update(temp);
+            Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+            TMCard corp = gs.getPlayerCorporations()[focusPlayer];
+            if (corp != null) {
+                temp.add(corp);
             }
+            playerCorporation.update(temp);
+
             if (gs.allCorpChosen() && gs.getPlayerCardChoice()[focusPlayer].getSize() > 0) {
                 playerCardChoice.drawHighlights = false;
             } else {

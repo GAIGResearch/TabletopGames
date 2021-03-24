@@ -45,7 +45,7 @@ public class TMModifyCounter extends TMAction {
 
     @Override
     public AbstractAction copy() {
-        return new TMModifyCounter(counterID, change, free);
+        return new TMModifyCounter(counterID, change, freeActionPoint);
     }
 
     @Override

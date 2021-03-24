@@ -90,4 +90,20 @@ public class BuyCard extends TMAction {
     public int getCost(TMGameState gs) {
         return ((TMGameParameters)gs.getGameParameters()).getProjectPurchaseCost();
     }
+
+    @Override
+    public boolean canPay(TMGameState gs) {
+        int p = player;
+        if (p == -1) {
+            // Can current player pay?
+            p = gs.getCurrentPlayer();
+        } else if (p == -2) {
+            // Can any player pay?
+            for (int i = 0; i < gs.getNPlayers(); i++) {
+                if (gs.playerResourceSum(i, null, null, getResource()) >= getCost(gs)) return true;
+            }
+            return false;
+        }
+        return gs.playerResourceSum(p, null, null, getResource()) >= getCost(gs);
+    }
 }
