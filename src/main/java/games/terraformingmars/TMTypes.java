@@ -98,6 +98,16 @@ public class TMTypes {
             if (this == Ocean) return MapTileType.Ocean;
             return MapTileType.Ground;
         }
+
+        public boolean canBeOwned() {
+            return this != Ocean;
+        }
+
+        public GlobalParameter getGlobalParameterToIncrease() {
+            if (this == Ocean) return GlobalParameter.OceanTiles;
+            if (this == Greenery) return GlobalParameter.Oxygen;
+            return null;
+        }
     }
 
     public enum Resource {

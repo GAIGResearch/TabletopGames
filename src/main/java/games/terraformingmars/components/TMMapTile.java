@@ -92,7 +92,7 @@ public class TMMapTile extends Component {
         int player = gs.getCurrentPlayer();
 
         // Owner is current player
-        if (which != TMTypes.Tile.Ocean) {
+        if (which.canBeOwned()) {
             owner = player;
         }
 
@@ -108,42 +108,27 @@ public class TMMapTile extends Component {
     public boolean placeTile(TMTypes.Tile which, TMGameState gs) {
         int player = gs.getCurrentPlayer();
         if (tilePlaced == null) {
-            if (which == TMTypes.Tile.Ocean) {
-                // If ocean, decrease number of tiles available and increase TR
-                Counter oceanTiles = gs.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles);
-                if (oceanTiles != null) {
-                    boolean succeeded = oceanTiles.increment(1);
-                    if (succeeded) {
-                        gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
-                        gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
-                        setTilePlaced(which, gs);
-                    } else {
-                        return false;
-                    }
+            TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
+            if (gp != null) {
+                // increase counter and TR
+                Counter counter = gs.getGlobalParameters().get(gp);
+                boolean succeeded = counter.increment(1);
+                if (succeeded) {
+                    gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
+                    gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
+                    setTilePlaced(which, gs);
                 } else {
                     return false;
                 }
-            } else if (which == TMTypes.Tile.Greenery) {
-                // If greenery, increase oxygen and TR
-                Counter oxygen = gs.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen);
-                if (oxygen != null) {
-                    boolean succeeded = oxygen.increment(1);
-                    if (succeeded) {
-                        gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
-                        gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
-                    }
+
+                // Params might have increased, check bonuses
+                for (Bonus b: gs.getBonuses()) {
+                    b.checkBonus(gs);
                 }
-                setTilePlaced(which, gs);
             } else {
                 // Just place
                 setTilePlaced(which, gs);
             }
-
-            // Params might have increased, check bonuses
-            for (Bonus b: gs.getBonuses()) {
-                b.checkBonus(gs);
-            }
-
             return true;
         }
         return false;

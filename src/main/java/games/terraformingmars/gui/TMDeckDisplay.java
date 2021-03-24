@@ -45,6 +45,8 @@ public class TMDeckDisplay extends JComponent {
 
     Color anyPlayerColor = new Color(234, 38, 38, 168);
 
+    boolean drawHighlights = true;
+
     static int spacing = 10;
     static int cardHeight = 200;
     static int cardWidth;
@@ -75,21 +77,23 @@ public class TMDeckDisplay extends JComponent {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    // Left click, highlight cell
-                    for (Rectangle r: rects.keySet()) {
-                        if (r != null && r.contains(e.getPoint())) {
-                            highlight.clear();
-                            highlight.add(r);
-                            break;
+                if (drawHighlights) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        // Left click, highlight cell
+                        for (Rectangle r : rects.keySet()) {
+                            if (r != null && r.contains(e.getPoint())) {
+                                highlight.clear();
+                                highlight.add(r);
+                                break;
+                            }
                         }
+                        gui.updateButtons = true;
+                    } else {
+                        // Remove highlight
+                        highlight.clear();
                     }
                     gui.updateButtons = true;
-                } else {
-                    // Remove highlight
-                    highlight.clear();
                 }
-                gui.updateButtons = true;
             }
         });
     }
@@ -108,7 +112,12 @@ public class TMDeckDisplay extends JComponent {
                     int cardX = i * cardWidth;
                     int cardY = 0;
                     drawCard(g, deck.get(i), cardX, cardY, cardWidth, cardHeight);
-                    rects.put(new Rectangle(cardX, cardY, cardWidth, cardHeight), ""+i);
+
+                    Rectangle rect = new Rectangle(cardX, cardY, cardWidth, cardHeight);
+                    rects.put(rect, "" + i);
+                    if (!drawHighlights && i == 0) {
+                        highlight.add(rect);
+                    }
                 }
 //            }
             }

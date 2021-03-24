@@ -265,6 +265,8 @@ public class TMGUI extends AbstractGUI {
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setFrameProperties();
+
+        // TODO: display end of game scoring and winner (separate window?)
     }
 
     private void createActionMenu(AbstractPlayer player, TMGameState gs) {
@@ -322,8 +324,39 @@ public class TMGUI extends AbstractGUI {
 
             if (playerHand.highlight.size() > 0) {
                 // A card to choose, check highlights
+                boolean playableCard = false;
                 for (Rectangle r: playerHand.highlight) {
                     String code = playerHand.rects.get(r);
+                    int idx = Integer.parseInt(code);
+                    // card idx can be played
+                    for (TMAction action: playCardActions) {
+                        if (action instanceof PayForAction) {
+                            if (((PayForAction) action).cardIdx == idx) {
+                                actionButtons[i].setVisible(true);
+                                actionButtons[i].setButtonAction(action, "Play");
+                                i++;
+                                playableCard = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!playableCard) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setButtonAction(null, "Card can't be played");
+                    i++;
+                }
+            } else {
+                if (passAction != null) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setButtonAction(passAction, "Pass");
+                    i++;
+                }
+            }
+            if (playerCardsPlayed.highlight.size() > 0) {
+                // A card to choose, check highlights
+                for (Rectangle r: playerCardsPlayed.highlight) {
+                    String code = playerCardsPlayed.rects.get(r);
                     int idx = Integer.parseInt(code);
                     // card idx can be played
                     for (TMAction action: playCardActions) {
@@ -336,12 +369,6 @@ public class TMGUI extends AbstractGUI {
                             }
                         }
                     }
-                }
-            } else {
-                if (passAction != null) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setButtonAction(passAction, "Pass");
-                    i++;
                 }
             }
             if (view.highlight.size() > 0) {
@@ -404,12 +431,21 @@ public class TMGUI extends AbstractGUI {
             playerHand.update(gs.getPlayerHands()[focusPlayer]);
             playerCardChoice.update(gs.getPlayerCardChoice()[focusPlayer]);
             playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer]);
-            Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-            TMCard corp = gs.getPlayerCorporations()[focusPlayer];
-            if (corp != null) {
-                temp.add(corp);
+
+            if (!gs.allCorpChosen()) {
+                Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+                TMCard corp = gs.getPlayerCorporations()[focusPlayer];
+                if (corp != null) {
+                    temp.add(corp);
+                }
+                playerCorporation.update(temp);
             }
-            playerCorporation.update(temp);
+            if (gs.allCorpChosen() && gs.getPlayerCardChoice()[focusPlayer].getSize() > 0) {
+                playerCardChoice.drawHighlights = false;
+            } else {
+                playerCardChoice.drawHighlights = true;
+                playerCardChoice.highlight.clear();
+            }
 
             if (player instanceof HumanGUIPlayer) {
                 if (actionChosen) {

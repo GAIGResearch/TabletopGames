@@ -20,7 +20,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     public int minResRequirement;
 
     public AddResourceOnCard(int player, int cardID, TMTypes.Resource resource, int amount, boolean free) {
-        super(TMTypes.ActionType.PlayCard, player, free);
+        super(player, free);
         this.cardID = cardID;
         this.resource = resource;
         this.amount = amount;
@@ -86,7 +86,11 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        cardID = ((AddResourceOnCard)action).cardID;
+        if (action instanceof AddResourceOnCard) {
+            cardID = ((AddResourceOnCard) action).cardID;
+        } else {
+            cardID = 0;  // No cards to add resource to
+        }
     }
 
     @Override
@@ -115,8 +119,11 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        TMCard card = (TMCard) gameState.getComponentById(cardID);
-        return "Add " + amount + " " + resource + " on card " + card.getComponentName();
+        if (cardID != -1) {
+            TMCard card = (TMCard) gameState.getComponentById(cardID);
+            return "Add " + amount + " " + resource + " on card " + card.getComponentName();
+        }
+        return "Add " + amount + " " + resource + " on card";
     }
 
     @Override

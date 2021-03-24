@@ -214,6 +214,13 @@ public class TMGameState extends AbstractGameState {
         return playerCorporations;
     }
 
+    public boolean allCorpChosen() {
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (playerCorporations[i] == null) return false;
+        }
+        return true;
+    }
+
     public Deck<TMCard>[] getPlayerCardChoice() {
         return playerCardChoice;
     }
@@ -441,8 +448,24 @@ public class TMGameState extends AbstractGameState {
     }
 
     public boolean hasPlacedTile(int player) {
-        for (Counter c: playerTilesPlaced[player].values()) {
-            if (c.getValue() > 0) return true;
+        for (TMTypes.Tile t: playerTilesPlaced[player].keySet()) {
+            if (t.canBeOwned() && playerTilesPlaced[player].get(t).getValue() > 0) return true;
+        }
+        return false;
+    }
+
+    public boolean anyTilesPlaced() {
+        for (int i = 0; i < getNPlayers(); i++) {
+            for (Counter c : playerTilesPlaced[i].values()) {
+                if (c.getValue() > 0) return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean anyTilesPlaced(TMTypes.Tile type) {
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (playerTilesPlaced[i].get(type).getValue() > 0) return true;
         }
         return false;
     }

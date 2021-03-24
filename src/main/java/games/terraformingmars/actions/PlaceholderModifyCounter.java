@@ -131,7 +131,7 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
         ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
             // TODO: check if can be done for player
-            actions.add(new PlaceholderModifyCounter(player, targetPlayer, change, resource, production, true));
+            actions.add(new PlaceholderModifyCounter(player, i, change, resource, production, true));
         }
         if (actions.size() == 0) {
             actions.add(new TMAction(player));  // TODO: this should not happen
@@ -152,6 +152,6 @@ public class PlaceholderModifyCounter extends TMModifyCounter implements IExtend
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return targetPlayer != -1;
+        return targetPlayer != -2;
     }
 }

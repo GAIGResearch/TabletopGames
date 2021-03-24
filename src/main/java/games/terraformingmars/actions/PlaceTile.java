@@ -243,9 +243,9 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     }
 
     public static boolean isAdjacentToPlayerOwnedTiles(TMGameState gs, TMMapTile mt, int player) {
-        boolean playerTileNeighbour = false;
         boolean placedAnyTiles = gs.hasPlacedTile(player);
         if (placedAnyTiles) {
+            boolean playerTileNeighbour = false;
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
                 TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
@@ -254,44 +254,41 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     break;
                 }
             }
+            return playerTileNeighbour;
         }
-        return playerTileNeighbour;
+        return true;
     }
 
     public static int isAdjacentToAny(TMGameState gs, TMMapTile mt) {
-        List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
-        int count = 0;
-        for (Vector2D n: neighbours) {
-            TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
-            if (other != null && other.getTilePlaced() != null) {
-                count++;
+        boolean placedAnyTiles = gs.anyTilesPlaced();
+        if (placedAnyTiles) {
+            List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
+            int count = 0;
+            for (Vector2D n : neighbours) {
+                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                if (other != null && other.getTilePlaced() != null) {
+                    count++;
+                }
             }
+            return count;
         }
-        return count;
+        return 1;
     }
 
     public static int isAdjacentToTile(TMGameState gs, TMMapTile mt, TMTypes.Tile t) {
-        List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
-        int count = 0;
-        for (Vector2D n: neighbours) {
-            TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
-            if (other != null && other.getTilePlaced() == t) {
-                count++;
+        boolean placedAnyTiles = gs.anyTilesPlaced();
+        if (placedAnyTiles) {
+            List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
+            int count = 0;
+            for (Vector2D n : neighbours) {
+                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                if (other != null && other.getTilePlaced() == t) {
+                    count++;
+                }
             }
+            return count;
         }
-        return count;
-    }
-
-    public static int isAdjacentToCity(TMGameState gs, TMMapTile mt) {
-        List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
-        int count = 0;
-        for (Vector2D n: neighbours) {
-            TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
-            if (other != null && other.getTilePlaced() == City) {
-                count++;
-            }
-        }
-        return count;
+        return 1;
     }
 
     public static List<Vector2D> getNeighbours(Vector2D cell) {
