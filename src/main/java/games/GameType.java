@@ -114,7 +114,10 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    Catan (2, 5,
+            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
+            new ArrayList<Mechanic>() {{ add(Influence); }})
     ;
 
 //    Carcassonne (2, 5,
@@ -154,6 +157,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements" :
                 return DominionImprovements;
+            case "catan":
+                return Catan;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -224,6 +229,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case Catan:
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -257,6 +266,8 @@ public enum GameType {
                 return DominionParameters.sizeDistortion(seed);
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
+            case Catan:
+                return new CatanParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -321,6 +332,9 @@ public enum GameType {
             case DominionSizeDistortion:
                 gui = new DominionGUI(game, ac, human);
                 break;
+            case Catan:
+                gui = new CatanGUI(game, ac);
+
             // TODO: Diamant GUI
         }
 

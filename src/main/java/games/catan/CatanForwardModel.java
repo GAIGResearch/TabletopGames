@@ -2,6 +2,7 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.PropertyString;
@@ -43,11 +44,11 @@ public class CatanForwardModel extends AbstractForwardModel {
         // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = new Area(i, "Player Area");
-            Deck<Card> playerHand = new Deck<>("Player Resource Deck");
+            Deck<Card> playerHand = new Deck<>("Player Resource Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
             playerHand.setOwnerId(i);
             playerArea.putComponent(playerHandHash, playerHand);
 
-            Deck<Card> playerDevDeck = new Deck<>("Player Development Deck");
+            Deck<Card> playerDevDeck = new Deck<>("Player Development Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
             playerDevDeck.setOwnerId(i);
             playerArea.putComponent(developmentDeckHash, playerDevDeck);
 
@@ -65,7 +66,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         state.areas.put(-1, gameArea);
 
         // create resource deck
-        Deck<Card> resourceDeck = new Deck("resourceDeck");
+        Deck<Card> resourceDeck = new Deck("resourceDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         for (CatanParameters.Resources res: CatanParameters.Resources.values()) {
             for (int i = 0; i < params.n_resource_cards; i++) {
                 Card c = new Card();
@@ -75,7 +76,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // create and shuffle developmentDeck
-        Deck<Card> developmentDeck = new Deck("developmentDeck");
+        Deck<Card> developmentDeck = new Deck("developmentDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         for (Map.Entry<CatanParameters.CardTypes, Integer> entry: params.developmentCardCount.entrySet()){
             for (int i = 0; i < entry.getValue(); i++){
                 Card card = new Card();
@@ -87,7 +88,7 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         gameArea.putComponent(resourceDeckHash, resourceDeck);
         gameArea.putComponent(developmentDeckHash, developmentDeck);
-        gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck"));
+        gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
 
         state.addComponents();
         state.setGamePhase(CatanGameState.CatanGamePhase.Setup);
@@ -136,7 +137,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // win condition
-        if (gs.getScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
+        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
             gs.setGameStatus(Utils.GameResult.GAME_END);
             System.out.println("Game over! winner = " + gs.getCurrentPlayer());
         }

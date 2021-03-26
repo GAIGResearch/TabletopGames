@@ -9,6 +9,7 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
+import games.GameType;
 import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
@@ -53,7 +54,7 @@ public class CatanGameState extends AbstractGameState {
     HashMap<Integer, Area> areas;
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn));
+        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn), GameType.Catan);
         scores = new int[((CatanParameters) pp).n_players];
         knights = new int[((CatanParameters) pp).n_players];
         exchangeRates = new int[((CatanParameters) pp).n_players][CatanParameters.Resources.values().length];
@@ -92,11 +93,6 @@ public class CatanGameState extends AbstractGameState {
     @Override
     protected boolean _equals(Object o) {
         return false;
-    }
-
-    @Override
-    protected double _getScore(int playerID) {
-        return scores[playerID];
     }
 
     public void setBoard(CatanTile[][] board){
@@ -262,7 +258,6 @@ public class CatanGameState extends AbstractGameState {
         roadSet = expandRoad(this, roadSet, new ArrayList<>(dir1), new ArrayList<>(dir2));
         roadSet.addAll(expandRoad(this, roadSet2, new ArrayList<>(dir2), new ArrayList<>(dir1)));
 
-        // todo unexpanded reached size 3
         return roadSet.size();
     }
 
@@ -323,7 +318,7 @@ public class CatanGameState extends AbstractGameState {
                 }
             }
         }
-        // todo only gets here when explored a single one
+        // only gets here when explored a single road
         return expandRoad(gs, roadSet, unexpanded, expanded);
     }
 
@@ -506,7 +501,6 @@ public class CatanGameState extends AbstractGameState {
         copy.victoryPoints = victoryPoints.clone();
         copy.longestRoadLength = longestRoad;
         copy.rollValue = rollValue;
-        copy.availableActions = new ArrayList<>(availableActions);
         if (currentTradeOffer == null){
             copy.currentTradeOffer = null;
         } else {
@@ -515,16 +509,26 @@ public class CatanGameState extends AbstractGameState {
         return copy;
     }
 
+    @Override
+    protected double _getHeuristicScore(int playerId) {
+        return 0;
+    }
+
+    @Override
+    public double getGameScore(int playerId) {
+        return scores[playerId];
+    }
+
     private HashMap<Integer, Area> copyAreas(){
         HashMap<Integer, Area> copy = new HashMap<>();
         for(int key : areas.keySet()) {
             Area a = areas.get(key);
             if (PARTIAL_OBSERVABLE && key != -1) {
-                HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
+                List<Component> oldComponents = areas.get(key).getComponents();
                 // todo need to handle PO
                 // todo create a cardpool that players may have, shuffle and distribute them
-                for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
-                    a.putComponent(e.getKey(), e.getValue().copy());
+                for (Component comp: oldComponents) {
+                    a.putComponent(comp.copy());
                 }
             }
             copy.put(key, a.copy());
