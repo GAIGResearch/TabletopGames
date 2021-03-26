@@ -2,6 +2,7 @@ package players;
 
 import core.AbstractPlayer;
 import evaluation.TunableParameters;
+import org.apache.commons.math3.analysis.function.Abs;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -20,13 +21,14 @@ import java.lang.reflect.Constructor;
  * All three methods return an AbstractPlayer, with the configuration defined in a JSON file, a JSONObject
  * or a JSON-format String respectively.
  * <p>
- * The crucial property in the JSON file is algorithm:
- * "algorithm" : "mcts"
+ * The crucial property in the JSON file is class:
+ * "class" : "players.mcts.MCTSParams"
+ * "class" : "players.simple.RandomPlayer"
+ * "class" : "players.simple.OSLAPlayer"
  * <p>
- * This can take any value for which PlayerParams exists that can be instantiated from a JSON file, plus:
- * - "random"
- * - "osla"
- * - "heuristic"
+ * This must either be the class name of an AbstractPlayer implementation which has a no-argument constructor
+ * (OSLAPlayer and RandomPlayer in the example above)
+ * or the class name of a TunableParameters implementation which returns an AbstractPlayer from instantiate()
  * <p>
  * "random" and "osla" require no further properties.
  * "heuristic" requires a further property of:
@@ -39,7 +41,9 @@ public class PlayerFactory {
     private static AbstractPlayer fromJSONFile(FileReader reader, String fileName) {
         try {
             JSONObject json = (JSONObject) parser.parse(reader);
-            return fromJSONObject(json);
+            AbstractPlayer retValue = fromJSONObject(json);
+            retValue.setName(fileName.substring(0, fileName.indexOf(".")));
+            return retValue;
         } catch (IOException | ParseException e) {
             throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage());
         }
@@ -55,38 +59,28 @@ public class PlayerFactory {
 
     public static AbstractPlayer fromJSONObject(JSONObject json) {
         // first of all we check for algorithm
-        Object algo = json.get("algorithm");
+        Object algo = json.get("class");
         if (!(algo instanceof String))
-            throw new AssertionError("No valid algorithm property in JSON file");
+            throw new AssertionError("No valid class property in JSON file");
 
-        String playerType = (String) algo;
+        String className = (String) algo;
 
-        switch (playerType.toLowerCase()) {
-            case "random":
-                return new RandomPlayer();
-            case "osla":
-                return new OSLAPlayer();
-            case "mcts":
-                MCTSParams params = new MCTSParams(System.currentTimeMillis());
-                TunableParameters.loadFromJSON(params, json);
-                return new MCTSPlayer(params);
-            case "rmhc":
-                throw new AssertionError("RMHC from JSON Not yet implemented");
-            case "heuristic":
-                String className = (String) json.get("class");
-                if (className == null)
-                    throw new AssertionError("No class name specified for heuristic agent");
-                try {
-                    Class<?> clazz = Class.forName(className);
-                    Constructor<?> constructor = clazz.getConstructor();
-                    return (AbstractPlayer) constructor.newInstance();
-                } catch (Exception e) {
-                    System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
-                    throw new AssertionError("Error loading Class");
-                }
-            default:
-                throw new AssertionError("Abstract Player type not supported from JSON : " + playerType);
+        Object instantiatedObject;
+        try {
+            Class<?> clazz = Class.forName(className);
+            Constructor<?> constructor = clazz.getConstructor();
+            instantiatedObject = constructor.newInstance();
+        } catch (Exception e) {
+            System.out.println("Error loading class " + className + " : " + e.getMessage());
+            throw new AssertionError("Error loading Class");
         }
+
+        if (instantiatedObject instanceof TunableParameters) {
+            TunableParameters params = (TunableParameters) instantiatedObject;
+            TunableParameters.loadFromJSON(params, json);
+            return (AbstractPlayer) params.instantiate();
+        }
+        return (AbstractPlayer) instantiatedObject;
     }
 
     /**
@@ -125,14 +119,7 @@ public class PlayerFactory {
             case "rmhc":
                 return new RMHCPlayer(new RMHCParams(System.currentTimeMillis()));
             default:
-                try {
-                    Class<?> clazz = Class.forName(data);
-                    Constructor<?> constructor = clazz.getConstructor();
-                    return (AbstractPlayer) constructor.newInstance();
-                } catch (Exception e) {
-                    System.out.println("Error loading heuristic class " + data + " : " + e.getMessage());
-                    throw new AssertionError("Error loading Class");
-                }
+                throw new AssertionError("Unknown player key : " + input);
         }
     }
 

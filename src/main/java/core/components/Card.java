@@ -27,6 +27,12 @@ public class Card extends Component {
 
     @Override
     public String toString() {
-        return ((PropertyString)getProperty(nameHash)).value;
+        PropertyString hashName =  (PropertyString)getProperty(nameHash);
+        return hashName != null ? hashName.value : componentName;
+    }
+
+    @Override
+    public final int hashCode() {
+        return super.hashCode();
     }
 }

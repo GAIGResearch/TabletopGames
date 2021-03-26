@@ -10,6 +10,10 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.*;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractGUI extends JFrame {
@@ -23,18 +27,25 @@ public abstract class AbstractGUI extends JFrame {
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
-    protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase;
+    protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase, playerScores;
+    protected JTextPane historyInfo;
+    protected JScrollPane historyContainer;
+    private int actionsAtLastUpdate;
     private WindowInput wi;
+
+    protected int width, height;
 
     public AbstractGUI(ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
         gameStatus = new JLabel();
         playerStatus = new JLabel();
+        playerScores = new JLabel();
         gamePhase = new JLabel();
         turnOwner = new JLabel();
         turn = new JLabel();
         currentPlayer = new JLabel();
+        historyInfo = new JTextPane();
 
         this.wi = new WindowInput();
         addWindowListener(wi);
@@ -66,7 +77,7 @@ public abstract class AbstractGUI extends JFrame {
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.gameStatus == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = gameState.getActions();
+            List<AbstractAction> actions = player.forwardModel.computeAvailableActions(gameState);
             for (int i = 0; i < actions.size(); i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
@@ -129,16 +140,22 @@ public abstract class AbstractGUI extends JFrame {
 
         gameInfo.add(gameStatus);
         gameInfo.add(playerStatus);
+        gameInfo.add(playerScores);
         gameInfo.add(gamePhase);
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
 
-        gameInfo.setPreferredSize(new Dimension(width, height));
+        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
 
         JPanel wrapper = new JPanel();
+        wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
-        wrapper.setLayout(new GridBagLayout());
+
+        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        wrapper.add(historyContainer);
         return wrapper;
     }
 
@@ -147,8 +164,18 @@ public abstract class AbstractGUI extends JFrame {
      * @param gameState - current game state to be used for the update.
      */
     protected void updateGameStateInfo(AbstractGameState gameState) {
+        List<String> history = gameState.getHistoryAsText();
+        if (history.size() > actionsAtLastUpdate) {
+            // this is to stop the panel updating on every tick during one's own turn
+            actionsAtLastUpdate = history.size();
+            historyInfo.setText(String.join("\n", history));
+            historyInfo.setCaretPosition(historyInfo.getDocument().getLength());
+        }
         gameStatus.setText("Game status: " + gameState.getGameStatus());
         playerStatus.setText(Arrays.toString(gameState.getPlayerResults()));
+        playerScores.setText("Player Scores: " + IntStream.range(0, gameState.getNPlayers())
+                .mapToObj(p -> String.format("%.0f", gameState.getGameScore(p)))
+                .collect(joining(", ")));
         gamePhase.setText("Game phase: " + gameState.getGamePhase());
         turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
         turn.setText("Turn: " + gameState.getTurnOrder().getTurnCounter() +
@@ -233,5 +260,10 @@ public abstract class AbstractGUI extends JFrame {
                 actionButton.setButtonAction(null, "");
             }
         }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
     }
 }

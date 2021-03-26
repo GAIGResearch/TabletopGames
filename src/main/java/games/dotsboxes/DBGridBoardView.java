@@ -1,13 +1,14 @@
 package games.dotsboxes;
 
-import core.components.GridBoard;
-import gui.views.ComponentView;
-
+import javax.swing.*;
 import java.awt.*;
 
 import static core.AbstractGUI.defaultItemSize;
 
-public class DBGridBoardView extends ComponentView {
+public class DBGridBoardView extends JComponent {
+
+    DBGameState dbgs;
+    int width, height;
 
     int dotSize = 6;
     Color[] colors = new Color[] {
@@ -25,32 +26,46 @@ public class DBGridBoardView extends ComponentView {
             new Color(103, 50, 155)
     };
 
-    public DBGridBoardView(GridBoard<DBCell> gridBoard) {
-        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
+    public DBGridBoardView(DBGameState dbgs) {
+        this.dbgs = dbgs;
+        DBParameters dbp = (DBParameters) dbgs.getGameParameters();
+        this.width = dbp.gridWidth * defaultItemSize;
+        this.height = dbp.gridHeight * defaultItemSize;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<DBCell>) component, dotSize/2, dotSize/2);
+        drawGridBoard((Graphics2D)g, dotSize/2, dotSize/2);
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<DBCell> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, int x, int y) {
         // Draw cells
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
-                int xC = x + j * defaultItemSize;
-                int yC = y + i * defaultItemSize;
-                drawCell(g, gridBoard.getElement(j, i), xC, yC, x, y);
+        for (DBCell c: dbgs.cells) {
+            int xC = x + c.position.getX() * defaultItemSize;
+            int yC = y + c.position.getY() * defaultItemSize;
+            int owner = -1;
+            if (dbgs.cellToOwnerMap.containsKey(c)) {
+                owner = dbgs.cellToOwnerMap.get(c);
             }
+            drawCell(g, c, owner, xC, yC, x, y);
         }
+        // Draw edges
+        Stroke s = g.getStroke();
+        g.setStroke(new BasicStroke(3));
+        for (DBEdge e: dbgs.edgeToOwnerMap.keySet()) {
+            g.setColor(edgeColors[dbgs.edgeToOwnerMap.get(e)]);
+            g.drawLine(e.from.getX() * defaultItemSize + x, e.from.getY() * defaultItemSize + y,
+                    e.to.getX() * defaultItemSize + x, e.to.getY() * defaultItemSize + y);
+        }
+        g.setStroke(s);
     }
 
-    private void drawCell(Graphics2D g, DBCell element, int x, int y, int offsetX, int offsetY) {
+    private void drawCell(Graphics2D g, DBCell element, int owner, int x, int y, int offsetX, int offsetY) {
         // Paint cell background, according to cell owner
-        if (element.owner == -1) {
+        if (owner == -1) {
             g.setColor(new Color(228, 228, 228));
         } else {
-            g.setColor(colors[element.owner]);
+            g.setColor(colors[owner]);
         }
         g.fillRect(x, y, defaultItemSize, defaultItemSize);
 
@@ -62,20 +77,15 @@ public class DBGridBoardView extends ComponentView {
         g.fillOval(x+defaultItemSize-dotSize/2, y+defaultItemSize-dotSize/2, dotSize, dotSize);
 
         // Draw cell owner
-        g.drawString(element.toString(), x+defaultItemSize/2, y+defaultItemSize/2);
-
-        // Draw cell edges
-        Stroke s = g.getStroke();
-        g.setStroke(new BasicStroke(3));
-        for (DBEdge e: element.edges) {
-            if (e.owner != -1) {
-                // This edge exists, draw it!
-                g.setColor(edgeColors[e.owner]);
-                g.drawLine(e.from.getX() * defaultItemSize + offsetX, e.from.getY() * defaultItemSize + offsetY,
-                        e.to.getX() * defaultItemSize + offsetX, e.to.getY() * defaultItemSize + offsetY);
-            }
-        }
-        g.setStroke(s);
+        g.drawString("" + owner, x+defaultItemSize/2, y+defaultItemSize/2);
     }
 
+    public void updateGameState(DBGameState dbgs) {
+        this.dbgs = dbgs;
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height);
+    }
 }

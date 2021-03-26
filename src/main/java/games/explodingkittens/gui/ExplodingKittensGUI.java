@@ -22,12 +22,10 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 public class ExplodingKittensGUI extends AbstractGUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 100;
+    final static int playerAreaHeight = 135;
     final static int ekCardWidth = 90;
     final static int ekCardHeight = 110;
 
-    // Width and height of total window
-    int width, height;
     // List of player hand views
     ExplodingKittensDeckView[] playerHands;
     // Discard pile view
@@ -44,7 +42,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
     Border[] playerViewBorders;
 
     public ExplodingKittensGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 15);
+        super(ac, 25);
         this.humanID = humanID;
 
         if (game != null) {
@@ -58,7 +56,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
                 int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
                 double nVertAreas = 5;
                 this.width = playerAreaWidth * nHorizAreas;
-                this.height = (int) (playerAreaHeight * nVertAreas);
+                this.height = (int) (playerAreaHeight * nVertAreas) + 20;
 
                 ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
                 ExplodingKittensParameters ekgp = (ExplodingKittensParameters) gameState.getGameParameters();
@@ -74,11 +72,11 @@ public class ExplodingKittensGUI extends AbstractGUI {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
+                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(humanID, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length-1];
+                    String agentName = split[split.length - 1];
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -99,7 +97,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 discardPile = new ExplodingKittensDiscardView(ekgs.getDiscardPile(), ekgs.getActionStack(), true, ekgp.getDataPath());
-                drawPile = new ExplodingKittensDeckView(ekgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ekgp.getDataPath());
+                drawPile = new ExplodingKittensDeckView(-1, ekgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ekgp.getDataPath());
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 JPanel jp = new JPanel();
@@ -131,7 +129,7 @@ public class ExplodingKittensGUI extends AbstractGUI {
             }
 
             // Update decks and visibility
-            ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gameState;
+            ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
                 if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
@@ -155,10 +153,8 @@ public class ExplodingKittensGUI extends AbstractGUI {
             discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ekgs.getDrawPile());
-            drawPile.informActivePlayer(player.getPlayerID());
-            if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+            if (activePlayer == humanID || ALWAYS_DISPLAY_FULL_OBSERVABLE)
                 drawPile.setFront(true);
-            }
 
             // Update actions
             if (player instanceof HumanGUIPlayer) {
@@ -168,8 +164,4 @@ public class ExplodingKittensGUI extends AbstractGUI {
         repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight);
-    }
 }

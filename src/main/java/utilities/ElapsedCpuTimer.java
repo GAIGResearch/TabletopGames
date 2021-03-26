@@ -10,27 +10,21 @@ import java.lang.management.ThreadMXBean;
 
 public class ElapsedCpuTimer {
 
-    private static final boolean OS_WIN = System.getProperty("os.name").contains("Windows");
+    protected static final boolean OS_WIN = System.getProperty("os.name").contains("Windows");
 
     // allows for easy reporting of elapsed time
-    private ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-    private long oldTime;
-    private long maxTime;
-    private int nIters;
+    protected ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    protected long oldTime;
+    protected long maxTime;
+    protected int nIters;
 
     public ElapsedCpuTimer() {
-        oldTime = getTime();
-        nIters = 0;
+        reset();
     }
 
-    public ElapsedCpuTimer copy()
-    {
-        ElapsedCpuTimer newCpuTimer = new ElapsedCpuTimer();
-        newCpuTimer.maxTime = this.maxTime;
-        newCpuTimer.oldTime = this.oldTime;
-        newCpuTimer.bean = this.bean;
-        newCpuTimer.nIters = this.nIters;
-        return newCpuTimer;
+    public void reset() {
+        oldTime = getTime();
+        nIters = 0;
     }
 
     public long elapsed() {
@@ -57,39 +51,11 @@ public class ElapsedCpuTimer {
         return elapsedMinutes()/60.0;
     }
 
-
-    @Override
-    public String toString() {
-        // now resets the timer...
-        String ret = elapsed() / 1000000.0 + " ms elapsed";
-        //reset();
-        return ret;
-    }
-
-    private long getTime() {
-        return getCpuTime();
-    }
-
-    private long getCpuTime() {
-
-        if(OS_WIN)
-            return System.nanoTime();
-
-        if (bean.isCurrentThreadCpuTimeSupported()) {
-            return bean.getCurrentThreadCpuTime();
-        } else {
-            throw new RuntimeException("CpuTime NOT Supported");
-        }
-
-    }
-
     public void setMaxTimeMillis(long time) {
         maxTime = time * 1000000;
-
     }
 
-    public long remainingTimeMillis()
-    {
+    public long remainingTimeMillis() {
         long diff = maxTime - elapsed();
         return (long) (diff / 1000000.0);
     }
@@ -116,4 +82,38 @@ public class ElapsedCpuTimer {
     public void endIteration() {
         nIters++;
     }
+
+    public ElapsedCpuTimer copy()
+    {
+        ElapsedCpuTimer newCpuTimer = new ElapsedCpuTimer();
+        newCpuTimer.maxTime = this.maxTime;
+        newCpuTimer.oldTime = this.oldTime;
+        newCpuTimer.bean = this.bean;
+        newCpuTimer.nIters = this.nIters;
+        return newCpuTimer;
+    }
+
+    @Override
+    public String toString() {
+        // now resets the timer...
+        String ret = elapsed() / 1000000.0 + " ms elapsed";
+        //reset();
+        return ret;
+    }
+
+    protected long getTime() {
+        return getCpuTime();
+    }
+
+    protected long getCpuTime() {
+        if(OS_WIN)
+            return System.nanoTime();
+
+        if (bean.isCurrentThreadCpuTimeSupported()) {
+            return bean.getCurrentThreadCpuTime();
+        } else {
+            throw new RuntimeException("CpuTime NOT Supported");
+        }
+    }
+
 }

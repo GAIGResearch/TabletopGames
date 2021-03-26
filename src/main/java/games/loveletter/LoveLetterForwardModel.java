@@ -1,10 +1,10 @@
 package games.loveletter;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.AbstractForwardModel;
-import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.loveletter.actions.*;
@@ -13,9 +13,8 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.*;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
-import static core.CoreConstants.VERBOSE;
 
 
 public class LoveLetterForwardModel extends AbstractForwardModel {
@@ -80,26 +79,36 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         // Set up player hands and discards
-        llgs.playerHandCards.clear();
-        llgs.playerDiscardCards.clear();
-        for (int i = 0; i < llgs.getNPlayers(); i++) {
-            boolean[] visible = new boolean[llgs.getNPlayers()];
-            if (PARTIAL_OBSERVABLE) {
-                visible[i] = true;
-            } else {
-                Arrays.fill(visible, true);
-            }
+        if (llgs.getPlayerHandCards().isEmpty()) {
+            // new game set up
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                boolean[] visible = new boolean[llgs.getNPlayers()];
+                if (PARTIAL_OBSERVABLE) {
+                    visible[i] = true;
+                } else {
+                    Arrays.fill(visible, true);
+                }
 
-            // add random cards to the player's hand
-            PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>("playerHand" + i, i, visible);
-            for (int j = 0; j < llp.nCardsPerPlayer; j++) {
-                playerCards.add(llgs.drawPile.draw());
-            }
-            llgs.playerHandCards.add(playerCards);
+                // add random cards to the player's hand
+                PartialObservableDeck<LoveLetterCard> playerCards = new PartialObservableDeck<>("playerHand" + i, i, visible);
+                for (int j = 0; j < llp.nCardsPerPlayer; j++) {
+                    playerCards.add(llgs.drawPile.draw());
+                }
+                llgs.playerHandCards.add(playerCards);
 
-            // create a player's discard pile, which is visible to all players
-            Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i, i);
-            llgs.playerDiscardCards.add(discardCards);
+                // create a player's discard pile, which is visible to all players
+                Deck<LoveLetterCard> discardCards = new Deck<>("discardPlayer" + i, i, VisibilityMode.VISIBLE_TO_ALL);
+                llgs.playerDiscardCards.add(discardCards);
+            }
+        } else {
+            llgs.playerHandCards.forEach(PartialObservableDeck::clear);
+            llgs.playerDiscardCards.forEach(Deck::clear);
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                // add random cards to the player's hand
+                for (int j = 0; j < llp.nCardsPerPlayer; j++) {
+                    llgs.playerHandCards.get(i).add(llgs.drawPile.draw());
+                }
+            }
         }
 
         // Game starts with drawing cards

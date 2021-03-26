@@ -1,48 +1,52 @@
 package core.components;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-
+import core.interfaces.IComponentContainer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import utilities.Utils.ComponentType;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+
+import static core.CoreConstants.VisibilityMode;
 
 /**
  * Class for a deck of components.
  * A deck is defined as a "group of components". Examples of decks are:
- *   * A hand of components
- *   * A deck to draw from
- *   * components played on the player's area
- *   * Discomponent pile
+ * * A hand of components
+ * * A deck to draw from
+ * * components played on the player's area
+ * * Discomponent pile
  */
-public class Deck<T extends Component> extends Component {
+public class Deck<T extends Component> extends Component implements IComponentContainer<T> {
 
     protected int capacity;  // Capacity of the deck (maximum number of elements)
     protected ArrayList<T> components;  // List of components in this deck
+    protected VisibilityMode visibility;
 
-    public Deck(String name) {
-        this(name, -1);
+    public Deck(String name, VisibilityMode visibility) {
+        this(name, -1, visibility);
     }
 
-    public Deck(String name, int ownerId)
-    {
+    public Deck(String name, int ownerId, VisibilityMode visibility) {
         super(ComponentType.DECK, name);
         this.components = new ArrayList<>();
         this.ownerId = ownerId;
         this.capacity = -1;
+        this.visibility = visibility;
     }
 
-    protected Deck(String name, int ownerId, int ID)
-    {
+    protected Deck(String name, int ownerId, int ID, VisibilityMode visibility) {
         super(ComponentType.DECK, name, ID);
         this.components = new ArrayList<>();
         this.capacity = -1;
+        this.ownerId = ownerId;
+        this.visibility = visibility;
     }
-    
+
     /**
      * Draws the first component of the deck
      * @return the first component of the deck
@@ -93,18 +97,17 @@ public class Deck<T extends Component> extends Component {
     /**
      * Peeks (without drawing) amount components of the deck starting from component idx
      * @return The components peeked, following the order of the deck. If there are not
-     * enough components to be picked, the array will only contain those available. If no
-     * components are available, returns an empty array.
+     * enough components to be picked, the List will only contain those available. If no
+     * components are available, returns an empty List.
      */
-    public T[] peek(int idx, int amount) {
+    public List<T> peek(int idx, int amount) {
         ArrayList<T> components = new ArrayList<>();
-        for(int i = idx; i < idx+amount; ++i)
-        {
+        for (int i = idx; i < idx + amount; ++i) {
             T c = peek(i);
-            if(c != null)
+            if (c != null)
                 components.add(c);
         }
-        return (T[]) components.toArray();
+        return components;
     }
 
     /**
@@ -152,11 +155,7 @@ public class Deck<T extends Component> extends Component {
      * @return true if not over capacity, false otherwise.
      */
     public boolean add(Deck<T> d){
-        components.addAll(d.components);
-        for (T comp: d.components) {
-            comp.setOwnerId(ownerId);
-        }
-        return capacity == -1 || components.size() <= capacity;
+        return this.add(d, 0);
     }
 
     /**
@@ -239,15 +238,9 @@ public class Deck<T extends Component> extends Component {
     /**
      * @return all the components in this deck.
      */
+    @Override
     public List<T> getComponents() {
         return components;
-    }
-
-    /**
-     * @return the size of this deck (number of components in it).
-     */
-    public int getSize() {
-        return components.size();
     }
     
     /**
@@ -302,13 +295,22 @@ public class Deck<T extends Component> extends Component {
         return components.get(idx);
     }
 
+    @Override
+    public VisibilityMode getVisibilityMode() {
+        return visibility;
+    }
+
+    public void setVisibility(VisibilityMode mode) {
+        visibility = mode;
+    }
+
     /**
      * Creates a copy of this deck.
+     *
      * @return - a new Deck with the same properties.
      */
-    public Deck<T> copy()
-    {
-        Deck<T> dp = new Deck<>(componentName, ownerId, componentID);
+    public Deck<T> copy() {
+        Deck<T> dp = new Deck<>(componentName, ownerId, componentID, visibility);
         copyTo(dp);
         return dp;
     }
@@ -356,11 +358,11 @@ public class Deck<T extends Component> extends Component {
      * @param deck - deck to load in JSON format
      */
     public static Deck<Card> loadDeckOfCards(JSONObject deck) {
-        Deck<Card> newDeck = new Deck<>((String) ( (JSONArray) deck.get("name")).get(1), -1);
+        Deck<Card> newDeck = new Deck<>((String) ((JSONArray) deck.get("name")).get(1), VisibilityMode.HIDDEN_TO_ALL);
+        newDeck.setVisibility(VisibilityMode.valueOf((String) deck.get("visibility")));
         JSONArray deckcards = (JSONArray) deck.get("cards");
 
-        for(Object o : deckcards)
-        {
+        for (Object o : deckcards) {
             // Add nodes to board nodes
             JSONObject jsoncard = (JSONObject) o;
             Card newcard = (Card) parseComponent(new Card(), jsoncard);
@@ -393,6 +395,11 @@ public class Deck<T extends Component> extends Component {
         Deck<?> deck = (Deck<?>) o;
         return capacity == deck.capacity &&
                 Objects.equals(components, deck.components);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(capacity, ownerId, componentID, components);
     }
 
 }

@@ -1,9 +1,14 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.interfaces.IStatisticLogger;
+import utilities.SummaryLogger;
+
+import java.util.List;
 
 public abstract class AbstractPlayer {
 
+    protected IStatisticLogger statsLogger = new SummaryLogger();
     // ID of this player, assigned by the game
     int playerID;
     // Forward model for the game
@@ -35,7 +40,7 @@ public abstract class AbstractPlayer {
      * AbstractGameState.getActions()
      * @param gameState observation of the current game state
      */
-    public abstract AbstractAction getAction(AbstractGameState gameState);
+    public abstract AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
 
     /* Methods that can be implemented in subclass */
 
@@ -64,5 +69,13 @@ public abstract class AbstractPlayer {
     @Override
     public String toString() {
         return name;
+    }
+
+    public IStatisticLogger getStatsLogger() {
+        return statsLogger;
+    }
+
+    public void setStatsLogger(IStatisticLogger logger) {
+        this.statsLogger = logger;
     }
 }

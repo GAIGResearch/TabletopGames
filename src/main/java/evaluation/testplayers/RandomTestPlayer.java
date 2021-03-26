@@ -3,7 +3,7 @@ package evaluation.testplayers;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import utilities.StatSummary;
+import utilities.TAGStatSummary;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,9 +19,9 @@ public class RandomTestPlayer extends AbstractPlayer {
     // Random generator for action selection
     private Random random;
     // Record of branching factor
-    private StatSummary bf;
+    private TAGStatSummary bf;
     // Scores observed during the game
-    private StatSummary scores;
+    private TAGStatSummary scores;
 
     public RandomTestPlayer() {
         this(new Random());
@@ -29,14 +29,12 @@ public class RandomTestPlayer extends AbstractPlayer {
 
     public RandomTestPlayer(Random random) {
         this.random = random;
-        scores = new StatSummary();
-        bf = new StatSummary();
+        scores = new TAGStatSummary();
+        bf = new TAGStatSummary();
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gs ) {
-        List<AbstractAction> actions = gs.getActions();
-
+    public AbstractAction getAction(AbstractGameState gs, List<AbstractAction> actions ) {
         // Iterate through all actions available to gather statistics
         HashSet<AbstractGameState> states = new HashSet<>();
         states.add(gs.copy());
@@ -44,19 +42,19 @@ public class RandomTestPlayer extends AbstractPlayer {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);
             states.add(gsCopy);
-            scores.add(gsCopy.getScore(getPlayerID()));
+            scores.add(gsCopy.getHeuristicScore(getPlayerID()));
         }
         bf.add(states.size());
-        scores.add(gs.getScore(getPlayerID()));
+        scores.add(gs.getHeuristicScore(getPlayerID()));
 
         return actions.get(random.nextInt(actions.size()));
     }
 
-    public StatSummary getBranchingFactor() {
+    public TAGStatSummary getBranchingFactor() {
         return bf;
     }
 
-    public StatSummary getScores() {
+    public TAGStatSummary getScores() {
         return scores;
     }
 }

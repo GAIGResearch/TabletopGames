@@ -1,6 +1,7 @@
  [
    {
      "name": ["String","Cities"],
+     "visibility" : "HIDDEN_TO_ALL",
      "cards":
      [
       {
@@ -343,6 +344,7 @@
    },
    {
      "name": ["String", "Infections"],
+     "visibility" : "HIDDEN_TO_ALL",
      "cards":
      [
        {
@@ -588,8 +590,9 @@
      ]
    },
    {
-      "name": ["String","Events"],
-      "cards":
+     "name": ["String","Events"],
+     "visibility" : "HIDDEN_TO_ALL",
+     "cards":
       [
        {
        "name": ["String","Resilient Population"],
@@ -615,6 +618,7 @@
    },
    {
      "name": ["String", "Player Roles"],
+     "visibility" : "VISIBLE_TO_ALL",
      "cards":
      [
        {

@@ -9,9 +9,7 @@ public abstract class PlayerParameters extends TunableParameters {
 
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;
-    public int iterationsBudget = 200;
-    public int fmCallsBudget = 4000;
-    public int timeBudget = 100; //milliseconds
+    public int budget = 4000;
     public int breakMS = 10;
 
     // Heuristic
@@ -20,17 +18,13 @@ public abstract class PlayerParameters extends TunableParameters {
     public PlayerParameters(long seed) {
         super(seed);
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS);
-        addTunableParameter("iterationsBudget", 200);
-        addTunableParameter("fmCallsBudget", 4000);
-        addTunableParameter("timeBudget", 100);
+        addTunableParameter("budget", 4000);
         addTunableParameter("breakMS", 10);
     }
 
     @Override
     public void _reset() {
-        iterationsBudget = (int) getParameterValue("iterationsBudget");
-        fmCallsBudget = (int) getParameterValue("fmCallsBudget");
-        timeBudget = (int) getParameterValue("timeBudget");
+        budget = (int) getParameterValue("budget");
         breakMS = (int) getParameterValue("breakMS");
         budgetType = (PlayerConstants) getParameterValue("budgetType");
     }
@@ -43,7 +37,7 @@ public abstract class PlayerParameters extends TunableParameters {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), budgetType, iterationsBudget, fmCallsBudget, timeBudget, gameHeuristic);
+        return Objects.hash(super.hashCode(), budgetType, budget, gameHeuristic);
     }
 
 }

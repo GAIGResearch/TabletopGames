@@ -6,7 +6,6 @@ import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.virus.VirusGameParameters;
-import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
 import java.util.Objects;
@@ -17,23 +16,23 @@ public class PlayLatexGlove extends PlayVirusCard implements IPrintable {
 
     public PlayLatexGlove(int deckFrom, int deckTo, int fromIndex, int bodyId, int otherPlayerId, int otherPlayerHandId) {
         super(deckFrom, deckTo, fromIndex, bodyId);
-        this.otherPlayerId     = otherPlayerId;
+        this.otherPlayerId = otherPlayerId;
         this.otherPlayerHandId = otherPlayerHandId;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        VirusGameState vgs = (VirusGameState) gs;
         super.execute(gs);
 
         // Discard three card on other player hand
-        Deck<Card> to              = (Deck<Card>) gs.getComponentById(deckTo);
+        Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
         Deck<Card> otherPlayerHand = (Deck<Card>) gs.getComponentById(otherPlayerHandId);
 
-        int nCards = ((VirusGameParameters)gs.getGameParameters()).nCardsDiscardLatexGlove;
-        for (int i=0; i<nCards; i++) {
+        int nCards = ((VirusGameParameters) gs.getGameParameters()).nCardsDiscardLatexGlove;
+        for (int i = 0; i < nCards; i++) {
             VirusCard card = (VirusCard) otherPlayerHand.draw();
-            to.add(card, toIndex);
+            if (card != null)
+                to.add(card, toIndex);
         }
         return true;
     }

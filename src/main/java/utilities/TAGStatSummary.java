@@ -1,14 +1,15 @@
 package utilities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
- This class is used to model the statistics of several numbers.  For the statistics
- we choose here it is not necessary to store all the numbers - just keeping a running total
- of how many, the sum and the sum of the squares is sufficient (plus max and min, for max and min).
+ * This class is used to model the statistics of several numbers.  For the statistics
+ * we choose here it is not necessary to store all the numbers - just keeping a running total
+ * of how many, the sum and the sum of the squares is sufficient (plus max and min, for max and min).
  */
 
-public class StatSummary {
+public class TAGStatSummary {
 
     public String name; // defaults to ""
 
@@ -22,11 +23,11 @@ public class StatSummary {
 
     private ArrayList<Double> elements;
 
-    public StatSummary() {
+    public TAGStatSummary() {
         this("");
     }
 
-    public StatSummary(String name) {
+    public TAGStatSummary(String name) {
         this.name = name;
         reset();
     }
@@ -43,10 +44,14 @@ public class StatSummary {
     }
 
     public double max() {
+        if (!valid)
+            computeStats();
         return max;
     }
 
     public double min() {
+        if (!valid)
+            computeStats();
         return min;
     }
 
@@ -54,6 +59,28 @@ public class StatSummary {
         if (!valid)
             computeStats();
         return mean;
+    }
+
+    public double median() {
+        if (!valid)
+            computeStats();
+        return median;
+    }
+
+    public double kurtosis() {
+        if (n < 4 || sd < 0.001) return 0.0;
+        if (!valid)
+            computeStats();
+        double sumQuarticDiffs = elements.stream().mapToDouble(d -> Math.pow(d - mean, 4)).sum();
+        return sumQuarticDiffs / Math.pow(sd, 4) * n * (n + 1) / (n - 1) / (n - 2) / (n - 3);
+    }
+
+    public double skew() {
+        if (n < 3 || sd < 0.001) return 0.0;
+        if (!valid)
+            computeStats();
+        double sumCubeDiffs = elements.stream().mapToDouble(d -> Math.pow(d - mean, 3)).sum();
+        return sumCubeDiffs / Math.pow(sd, 3) * n / (n - 1) / (n - 2);
     }
 
     /**
@@ -65,6 +92,10 @@ public class StatSummary {
 
     private void computeStats() {
         if (!valid) {
+            if (!elements.isEmpty()) {
+                max = elements.stream().mapToDouble(i -> i).max().getAsDouble();
+                min = elements.stream().mapToDouble(i -> i).min().getAsDouble();
+            }
             mean = sum / n;
             double num = sumsq - (n * mean * mean);
             if (num < 0) {
@@ -72,6 +103,8 @@ public class StatSummary {
                 num = 0;
             }
             sd = Math.sqrt(num / (n - 1));
+            Collections.sort(elements);
+            median = elements.get(elements.size() / 2);
             valid = true;
         }
     }
@@ -90,12 +123,10 @@ public class StatSummary {
         return sd() / Math.sqrt(n);
     }
 
-    public void add(StatSummary ss) {
+    public void add(TAGStatSummary ss) {
         n += ss.n;
         sum += ss.sum;
         sumsq += ss.sumsq;
-        max = Math.max(max, ss.max);
-        min = Math.min(min, ss.min);
         lastAdded = ss.lastAdded;
         valid = false;
         elements.addAll(ss.getElements());
@@ -105,8 +136,6 @@ public class StatSummary {
         n++;
         sum += d;
         sumsq += d * d;
-        min = Math.min(min, d);
-        max = Math.max(max, d);
         lastAdded = d;
         valid = false;
         elements.add(d);
@@ -122,7 +151,7 @@ public class StatSummary {
         }
     }
 
-    public double sum(){
+    public double sum() {
         return sum;
     }
 
@@ -135,9 +164,9 @@ public class StatSummary {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
         String s = (name == null) ? "" : (name + "\n");
-        s +=    " min   = " + min() + "\n" +
+        s += " min   = " + min() + "\n" +
                 " max   = " + max() + "\n" +
                 " ave   = " + mean() + "\n" +
                 " sd    = " + sd() + "\n" +
@@ -154,9 +183,9 @@ public class StatSummary {
 
     public String shortString(boolean scientificNotation) {
         return (name == null) ? "[" : (name + ": [") + min() + ", " + max() + "]"
-                + " avg=" + (scientificNotation? String.format("%6.3e", (mean())) : String.format("%.2f", mean()))
-                + "; sd=" + (scientificNotation? String.format("%6.3e", (sd())) : String.format("%.2f", sd()))
-                + "; se=" + (scientificNotation? String.format("%6.3e", (stdErr())) : String.format("%.2f", stdErr()))
+                + " avg=" + (scientificNotation ? String.format("%6.3e", (mean())) : String.format("%.2f", mean()))
+                + "; sd=" + (scientificNotation ? String.format("%6.3e", (sd())) : String.format("%.2f", sd()))
+                + "; se=" + (scientificNotation ? String.format("%6.3e", (stdErr())) : String.format("%.2f", stdErr()))
                 ;
     }
 
@@ -164,9 +193,8 @@ public class StatSummary {
         return elements;
     }
 
-    public StatSummary copy()
-    {
-        StatSummary ss = new StatSummary();
+    public TAGStatSummary copy() {
+        TAGStatSummary ss = new TAGStatSummary();
 
         ss.name = this.name;
         ss.sum = this.sum;

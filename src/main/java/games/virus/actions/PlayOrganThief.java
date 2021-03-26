@@ -7,7 +7,6 @@ import core.interfaces.IPrintable;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 import games.virus.components.VirusBody;
-import games.virus.components.VirusOrgan;
 
 import java.util.Objects;
 

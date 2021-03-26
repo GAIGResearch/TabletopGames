@@ -167,4 +167,9 @@ public class Counter extends Component {
 
         parseComponent(this, counter);
     }
+
+    @Override
+    public final int hashCode() {
+        return componentID;
+    }
 }

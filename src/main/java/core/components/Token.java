@@ -12,16 +12,17 @@ import utilities.Utils.ComponentType;
 
 import java.util.List;
 
-
 public class Token extends Component {
     protected String tokenType;
 
     public Token(String name){
         super(ComponentType.TOKEN, name);
+        this.tokenType = name;
     }
 
     public Token(String name, int ID){
         super(ComponentType.TOKEN, name, ID);
+        this.tokenType = name;
     }
 
     @Override
@@ -82,5 +83,15 @@ public class Token extends Component {
         this.tokenType = (String) ( (JSONArray) token.get("type")).get(1);
         this.componentName = (String) token.get("id");
         parseComponent(this, token);
+    }
+
+    @Override
+    public final int hashCode() {
+        return componentID;
+    }
+
+    @Override
+    public String toString() {
+        return tokenType;
     }
 }

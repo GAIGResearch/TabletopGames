@@ -3,8 +3,6 @@ package games.explodingkittens.actions;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
-import core.components.Card;
-import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensTurnOrder;

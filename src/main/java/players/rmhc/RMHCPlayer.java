@@ -21,6 +21,7 @@ public class RMHCPlayer extends AbstractPlayer {
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
     private int fmCalls = 0;
+    private int copyCalls =0;
 
     public RMHCPlayer() {
         this(System.currentTimeMillis());
@@ -29,11 +30,11 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer(RMHCParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
+        setName("RMHC");
     }
 
     public RMHCPlayer(long seed) {
-        randomGenerator = new Random(seed);
-        params = new RMHCParams(seed);
+        this(new RMHCParams(seed));
     }
 
     public RMHCPlayer(IStateHeuristic heuristic) {
@@ -42,24 +43,23 @@ public class RMHCPlayer extends AbstractPlayer {
     }
 
     public RMHCPlayer(RMHCParams params, IStateHeuristic heuristic) {
-        randomGenerator = new Random(params.getRandomSeed());
-        this.params = params;
+        this(params);
         this.heuristic = heuristic;
     }
 
     public RMHCPlayer(long seed, IStateHeuristic heuristic) {
-        randomGenerator = new Random(seed);
-        params = new RMHCParams(seed);
+        this(new RMHCParams(seed));
         this.heuristic = heuristic;
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState stateObs){
+    public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions){
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         avgTimeTaken = 0;
         acumTimeTaken = 0;
         numIters = 0;
         fmCalls = 0;
+        copyCalls = 0;
 
         // Initialise individual
         bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic);
@@ -75,9 +75,13 @@ public class RMHCPlayer extends AbstractPlayer {
                 long remaining = timer.remainingTimeMillis();
                 keepIterating = remaining > avgTimeTaken && remaining > params.breakMS;
             } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
-                keepIterating = fmCalls < params.fmCallsBudget;
+                keepIterating = fmCalls < params.budget;
+            } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
+                keepIterating = copyCalls < params.budget && numIters < params.budget;
+            } else if (params.budgetType == PlayerConstants.BUDGET_FMANDCOPY_CALLS) {
+                keepIterating = (fmCalls + copyCalls) < params.budget;
             } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
-                keepIterating = numIters < params.iterationsBudget;
+                keepIterating = numIters < params.budget;
             }
         }
 
@@ -94,7 +98,10 @@ public class RMHCPlayer extends AbstractPlayer {
 
         // Create new individual through mutation
         Individual newIndividual = new Individual(bestIndividual);
-        fmCalls += newIndividual.mutate(getForwardModel(), getPlayerID());
+        copyCalls += newIndividual.length;
+        int statesUpdated = newIndividual.mutate(getForwardModel(), getPlayerID());
+        fmCalls += statesUpdated;
+        copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
 
         // Keep new individual if better than current
         if (newIndividual.value > bestIndividual.value)
@@ -128,4 +135,5 @@ public class RMHCPlayer extends AbstractPlayer {
 //        }
 //        System.out.println(wonGames);
 //    }
+
 }

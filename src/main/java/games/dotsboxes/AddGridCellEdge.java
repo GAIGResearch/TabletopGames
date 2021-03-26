@@ -17,22 +17,22 @@ public class AddGridCellEdge extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         // Find neighbouring cells
         DBGameState dbgs = (DBGameState) gs;
-        HashSet<DBCell> cells = dbgs.edgeToCellMap.get(edge);
 
-        // For each cell, mark this edge as complete by current player and check if whole cell is complete to set owner
-        for (DBCell c: cells) {
-            c.nEdgesComplete++;
-            for (DBEdge e: c.edges) {
-                if (e.equals(edge)) {
-                    e.owner = gs.getCurrentPlayer();
-                    break;  // Only 1 edge would match
+        // Mark this edge as complete by current player and check if connected cells are complete too
+        dbgs.edgeToOwnerMap.put(edge, gs.getCurrentPlayer());
+
+        HashSet<DBCell> cells = dbgs.edgeToCellMap.get(edge);
+        for (DBCell c : cells) {
+            int nEdgesComplete = 0;
+            for (DBEdge e: dbgs.cellToEdgesMap.get(c)) {
+                if (dbgs.edgeToOwnerMap.containsKey(e)) {
+                    nEdgesComplete++;
                 }
             }
-            if (c.nEdgesComplete == 4) {  // A cell has 4 sides
+            if (nEdgesComplete == 4) {  // A cell has 4 sides
                 // All edges complete, this box complete
-                dbgs.nCellsComplete++;
+                dbgs.cellToOwnerMap.put(c, gs.getCurrentPlayer());
                 dbgs.nCellsPerPlayer[gs.getCurrentPlayer()]++;
-                c.owner = gs.getCurrentPlayer();
             }
         }
 
@@ -59,6 +59,11 @@ public class AddGridCellEdge extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return edge.from.toString() + " -> " + edge.to.toString();
     }
 }

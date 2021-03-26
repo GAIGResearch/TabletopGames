@@ -3,20 +3,29 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
-import core.components.GridBoard;
+import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
 
 import java.util.*;
 
 public class DBGameState extends AbstractGameState {
 
-    // Only component needed
-    GridBoard<DBCell> grid;
+    IStateHeuristic heuristic = new DotsAndBoxesHeuristic();
 
-    // Variables for speeding up computations
-    int nCellsComplete;
+    // List of all edges possible
+    HashSet<DBEdge> edges;
+    // List of all cells possible
+    HashSet<DBCell> cells;
+    // Mapping from each edge to the cells it neighbours
+    HashMap<DBEdge, HashSet<DBCell>> edgeToCellMap;
+    // Mapping from each cell to its edges
+    HashMap<DBCell, HashSet<DBEdge>> cellToEdgesMap;
+
+    // Mutable state:
     int[] nCellsPerPlayer;
-    HashMap<DBEdge, HashSet<DBCell>> edgeToCellMap;  // Mapping from each edge to the cells it neighbours
+    HashMap<DBCell, Integer> cellToOwnerMap;  // Mapping from each cell to its owner, if complete
+    HashMap<DBEdge, Integer> edgeToOwnerMap;  // Mapping from each edge to its owner, if placed
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -25,66 +34,51 @@ public class DBGameState extends AbstractGameState {
      * @param nPlayers      - number of players.
      */
     public DBGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.DotsAndBoxes);
     }
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{ add(grid); }};
+        return new ArrayList<Component>() {{ addAll(edges); addAll(cells); }};
     }
 
     @Override
     protected AbstractGameState _copy(int playerId) {
         DBGameState dbgs = new DBGameState(gameParameters, getNPlayers());
-        dbgs.grid = deepCopyGrid();
+        dbgs.edges = edges;
+        dbgs.cells = cells;
+        dbgs.edgeToCellMap = edgeToCellMap;
+        dbgs.cellToEdgesMap = cellToEdgesMap;
+
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
-        dbgs.nCellsComplete = nCellsComplete;
-        dbgs.edgeToCellMap = generateEdgeToCellMap(dbgs.grid);  // Re-generate this mapping from the copied grid
+        dbgs.cellToOwnerMap = (HashMap<DBCell, Integer>) cellToOwnerMap.clone();
+        dbgs.edgeToOwnerMap = (HashMap<DBEdge, Integer>) edgeToOwnerMap.clone();
         return dbgs;
     }
 
-    private GridBoard<DBCell> deepCopyGrid() {
-        GridBoard<DBCell> gridCopy = grid.copy();
-        for (int i = 0; i < grid.getHeight(); i++) {
-            for (int j = 0; j < grid.getWidth(); j++) {
-                gridCopy.setElement(j, i, grid.getElement(j, i).copy());
-            }
-        }
-        return gridCopy;
-    }
-
-    private HashMap<DBEdge, HashSet<DBCell>> generateEdgeToCellMap(GridBoard<DBCell> g) {
-        HashMap<DBEdge, HashSet<DBCell>> copy = new HashMap<>();
-        for (int i = 0; i < g.getHeight(); i++) {
-            for (int j = 0; j < g.getWidth(); j++) {
-                DBCell c = g.getElement(j, i);
-                for (DBEdge edge: c.edges) {
-                    if (!copy.containsKey(edge)) {
-                        copy.put(edge, new HashSet<>());
-                    }
-                    copy.get(edge).add(c);
-                }
-            }
-        }
-        return copy;
-    }
-
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
+        return heuristic.evaluateState(this, playerId);
+    }
+
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
+    @Override
+    public double getGameScore(int playerId) {
         return nCellsPerPlayer[playerId];
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<>();  // fully observable at all times
-    }
-
-    @Override
     protected void _reset() {
-        grid = null;
-        nCellsComplete = 0;
         nCellsPerPlayer = null;
-        edgeToCellMap = null;
+        cellToOwnerMap = null;
+        edgeToOwnerMap = null;
     }
 
     @Override
@@ -93,15 +87,14 @@ public class DBGameState extends AbstractGameState {
         if (!(o instanceof DBGameState)) return false;
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
-        return nCellsComplete == that.nCellsComplete &&
-                Objects.equals(grid, that.grid) &&
-                Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
-                Objects.equals(edgeToCellMap, that.edgeToCellMap);
+        return Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
+                Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap) &&
+                Objects.equals(cellToOwnerMap, that.cellToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), grid, nCellsComplete, edgeToCellMap);
+        int result = Objects.hash(super.hashCode(), cellToOwnerMap, edgeToOwnerMap);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }

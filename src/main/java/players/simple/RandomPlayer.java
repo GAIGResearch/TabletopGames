@@ -1,5 +1,6 @@
 package players.simple;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -14,8 +15,7 @@ public class RandomPlayer extends AbstractPlayer {
      */
     private final Random rnd;
 
-    public RandomPlayer(Random rnd)
-    {
+    public RandomPlayer(Random rnd) {
         this.rnd = rnd;
     }
 
@@ -25,9 +25,13 @@ public class RandomPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState observation) {
-        int randomAction = rnd.nextInt(observation.getActions().size());
-        List<AbstractAction> actions = observation.getActions();
+    public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
+        int randomAction = rnd.nextInt(actions.size());
         return actions.get(randomAction);
+    }
+
+    @Override
+    public String toString() {
+        return "Random";
     }
 }
