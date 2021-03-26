@@ -1,10 +1,13 @@
 package evaluation;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.ITunableParameters;
-import evodef.*;
+import evodef.EvoAlg;
+import evodef.SearchSpace;
 import games.GameType;
-import ntbea.*;
+import ntbea.NTupleBanditEA;
+import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
@@ -16,7 +19,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,9 +46,9 @@ public class ParameterSearch {
                         "\t               This can either be a json-format file detailing the parameters, or\n" +
                         "\t               one of coop|mcts|rmhc|random|osla|<className>  \n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
-                        "\t               with a no-argument constructor\n" +
-                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising. Defaults to Win.\n" +
+                        "\t               with a no-argument constructor.\n" +
                         "\t               'coop' means that the agent being tuned is used for all agents (i.e. if co-operative)\n" +
+                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising. Defaults to Win.\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
                         "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
