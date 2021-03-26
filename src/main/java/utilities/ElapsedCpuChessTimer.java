@@ -3,10 +3,10 @@ package utilities;
 public class ElapsedCpuChessTimer extends ElapsedCpuTimer {
 
     private long timeRemaining;
-    private final long incrementAction, incrementTurn, incrementRound, incrementMilestone;
+    private final double incrementAction, incrementTurn, incrementRound, incrementMilestone;
 
-    public ElapsedCpuChessTimer(long maxTimeMinutes, long incrementAction, long incrementTurn, long incrementRound,
-                                long incrementMilestone) {
+    public ElapsedCpuChessTimer(long maxTimeMinutes, double incrementAction, double incrementTurn, double incrementRound,
+                                double incrementMilestone) {
         setMaxTimeMillis(maxTimeMinutes * 60000);
         this.incrementAction = incrementAction * 1000000000;
         this.incrementTurn = incrementTurn * 1000000000;
