@@ -7,6 +7,7 @@ import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
@@ -41,7 +42,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     int[] affectionTokens;
 
     public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new LoveLetterTurnOrder(nPlayers));
+        super(gameParameters, new LoveLetterTurnOrder(nPlayers), GameType.LoveLetter);
         gamePhase = Draw;
     }
 

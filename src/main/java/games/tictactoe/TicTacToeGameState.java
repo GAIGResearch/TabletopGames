@@ -8,6 +8,7 @@ import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
+import games.GameType;
 import utilities.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 
@@ -21,7 +22,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers){
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.TicTacToe);
     }
 
     @Override

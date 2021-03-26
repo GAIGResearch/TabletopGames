@@ -7,6 +7,7 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
+import games.GameType;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -154,7 +155,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      * @param nPlayers - number of players.
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
+        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn), GameType.Pandemic);
         data = new PandemicData();
         data.load(((PandemicParameters)gameParameters).getDataPath());
     }
