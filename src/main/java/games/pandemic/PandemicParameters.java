@@ -16,7 +16,7 @@ public class PandemicParameters extends AbstractParameters {
 
     int n_city_cards = 48;
     int n_event_cards = 5;
-    int n_epidemic_cards = 2;
+    int n_epidemic_cards = 4;
     int n_cubes_epidemic = 3;
 
     int[] infection_rate = new int[]{2, 2, 2, 3, 3, 4, 4};  // How many cards are drawn for each counter
