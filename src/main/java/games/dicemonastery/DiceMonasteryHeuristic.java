@@ -9,7 +9,8 @@ import java.util.Arrays;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.*;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 
 public class DiceMonasteryHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -64,13 +65,23 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
                 + Math.abs(VP[year]) + Math.abs(FOOD_SUFFICIENCY[season]);
         if (totalCoeff == 0.0) return 0.0;
 
-        double monks = Math.min(1.0, state.monksIn(null, playerId).size() / 10.0);
-        double piety = Math.min(1.0, state.monksIn(null, playerId).stream().mapToInt(Monk::getPiety).sum() / 50.0);
-        double score = Math.min(1.0, state.getGameScore(playerId) / 80.0);
-        double vp = Math.min(1.0, state.getVictoryPoints(playerId) / 40.0);
-        double food = state.getResource(playerId, BREAD, STOREROOM) + state.getResource(playerId, BERRIES, STOREROOM) +
-                state.getResource(playerId, HONEY, STOREROOM);
-        food = monks == 0.0 ? 1.0 : Math.min(1.0, food / monks);
+        double monks = 0.0;
+        if (MONKS[year] != 0.0) monks = Math.min(1.0, state.monksIn(null, playerId).size() / 10.0);
+        double piety = 0.0;
+        if (PIETY[year] != 0.0)
+            piety = Math.min(1.0, state.monksIn(null, playerId).stream().mapToInt(Monk::getPiety).sum() / 50.0);
+        double score = 0.0;
+        if (SCORE[year] != 0.0) score = Math.min(1.0, state.getGameScore(playerId) / 80.0);
+        double vp = 0.0;
+        if (VP[year] != 0.0) vp = Math.min(1.0, state.getVictoryPoints(playerId) / 40.0);
+        double food = 0.0;
+        if (FOOD_SUFFICIENCY[season] != 0.0) {
+            food = state.getResource(playerId, BREAD, STOREROOM) +
+                    state.getResource(playerId, BERRIES, STOREROOM) +
+                    state.getResource(playerId, HONEY, STOREROOM);
+            int numberMonks = state.monksIn(null, playerId).size();
+            food = numberMonks == 0 ? 1.0 : Math.min(1.0, food / numberMonks);
+        }
 
         return (monks * MONKS[year] + piety * PIETY[year] + score * SCORE[year] + vp * VP[year]
                 + food * FOOD_SUFFICIENCY[season]) / totalCoeff;
