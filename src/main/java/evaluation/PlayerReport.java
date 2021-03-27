@@ -1,20 +1,19 @@
 package evaluation;
 
 import core.AbstractPlayer;
-import core.*;
+import core.Game;
 import core.interfaces.IStatisticLogger;
-import games.*;
+import games.GameType;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
-import utilities.SummaryLogger;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static java.util.stream.Collectors.*;
-import static utilities.Utils.*;
+import static java.util.stream.Collectors.toList;
+import static utilities.Utils.getArg;
 
 public class PlayerReport {
 
@@ -33,7 +32,7 @@ public class PlayerReport {
                         "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
                         "\t               one of mcts|rmhc|random|osla|<className>.\n" +
                         "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
-                        "\t               Defaults to SummaryLogger. \n" +
+                        "\t               Defaults to utilities.SummaryLogger. \n" +
                         "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
