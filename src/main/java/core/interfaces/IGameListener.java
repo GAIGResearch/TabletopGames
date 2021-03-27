@@ -29,6 +29,16 @@ public interface IGameListener {
     // for all other event types
     void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action);
 
+    /**
+     * This is called when all processing is finished, for example after running a sequence of games
+     * As such, no state is provided.
+     *
+     * This is useful for Listeners that are just interested in aggregate data across many runs
+     */
+    default void allGamesFinished() {
+        // default is to do nothing
+    }
+
 
     static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
         IGameListener listener = new GameReportListener(logger);

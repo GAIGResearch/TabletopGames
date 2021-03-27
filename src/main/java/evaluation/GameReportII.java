@@ -1,7 +1,6 @@
 package evaluation;
 
 import core.AbstractPlayer;
-import core.CoreConstants;
 import core.Game;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
@@ -128,7 +127,7 @@ public class GameReportII {
                 }
                 // Once all games are complete, let the gameTracker know
                 for (IGameListener gameTracker : gameTrackers) {
-                    gameTracker.onGameEvent(CoreConstants.GameEvents.GAME_SEQUENCE_OVER, game);
+                    gameTracker.allGamesFinished();
                 }
             }
         }
