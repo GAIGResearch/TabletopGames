@@ -25,6 +25,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     List<EnumMap<Resource, Integer>> playerTreasuries = new ArrayList<>();
     Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
+    Map<ILLUMINATED_TEXT, Integer> textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
     int[] victoryPoints;
     Random rnd;
 
@@ -168,6 +169,15 @@ public class DiceMonasteryGameState extends AbstractGameState {
         victoryPoints[player] += amount;
         if (victoryPoints[player] < 0)
             victoryPoints[player] = 0;
+    }
+
+    public void writeText(int player, ILLUMINATED_TEXT textType) {
+        int currentNumber = textsWritten.get(textType);
+        if (currentNumber >= textType.rewards.length) {
+            throw new AssertionError("Cannot write any more " + textType);
+        }
+        addVP(player, textType.rewards[currentNumber]);
+        textsWritten.put(textType, currentNumber + 1);
     }
 
     public void useAP(int actionPointsSpent) {

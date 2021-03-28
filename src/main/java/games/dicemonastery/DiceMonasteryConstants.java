@@ -6,6 +6,7 @@ import java.awt.*;
 import java.util.Arrays;
 
 import static games.dicemonastery.DiceMonasteryConstants.InkColour.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
 public class DiceMonasteryConstants {
 
@@ -111,10 +112,16 @@ public class DiceMonasteryConstants {
                     throw new AssertionError("Should not be processing " + this);
             }
         }
-
     }
 
     public final static int[] RETIREMENT_REWARDS = {5, 4, 4, 3, 3, 2, 2, 2};
+
+    public final static Resource[][] gospelInks = {
+            {VIVID_GREEN_INK, VIVID_BLUE_INK},
+            {VIVID_RED_INK, VIVID_BLUE_INK},
+            {VIVID_RED_INK, VIVID_PURPLE_INK},
+            {VIVID_GREEN_INK, VIVID_PURPLE_INK}
+    };
 
     // rows are number of players; columns are ordinal position in bidding
     public final static int[][] VIKING_REWARDS = {
@@ -132,8 +139,40 @@ public class DiceMonasteryConstants {
         BONUS_TOKEN(int number) {
             this.number = number;
         }
+
         public double getChance() {
-            return number / (double)Arrays.stream(BONUS_TOKEN.values()).mapToInt(t -> t.number).sum();
+            return number / (double) Arrays.stream(BONUS_TOKEN.values()).mapToInt(t -> t.number).sum();
+        }
+    }
+
+    public final static int[] PSALM_REWARDS = {4, 3, 3, 2, 2, 2};
+    public final static int[] EPISTLE_REWARDS = {5, 4, 4, 3, 3};
+    public final static int[] LITURGY_REWARDS = {6, 5, 5, 4};
+    public final static int GOSPEL_REWARD = 8;
+
+    public enum ILLUMINATED_TEXT {
+        PSALM(3, 1, 1, 1, new Resource[]{}, PSALM_REWARDS),
+        EPISTLE(4, 2, 1, 2, new Resource[]{}, EPISTLE_REWARDS),
+        LITURGY(5, 3, 2, 2, new Resource[]{}, LITURGY_REWARDS),
+        GOSPEL_MARK(6, 2, 2, 2, new Resource[]{VIVID_GREEN_INK, VIVID_BLUE_INK}, new int[]{GOSPEL_REWARD}),
+        GOSPEL_LUKE(6, 2, 2, 2, new Resource[]{VIVID_RED_INK, VIVID_BLUE_INK}, new int[]{GOSPEL_REWARD}),
+        GOSPEL_JOHN(6, 2, 2, 2, new Resource[]{VIVID_RED_INK, VIVID_PURPLE_INK}, new int[]{GOSPEL_REWARD}),
+        GOSPEL_MATHEW(6, 2, 2, 2, new Resource[]{VIVID_GREEN_INK, VIVID_PURPLE_INK}, new int[]{GOSPEL_REWARD});
+
+        public final int ap;
+        public final int differentInks;
+        public final int vellum;
+        public final int candles;
+        public final Resource[] specialInks;
+        public final int[] rewards;
+
+        ILLUMINATED_TEXT(int ap, int inks, int vellum, int candles, Resource[] specialInks, int[] rewards) {
+            this.ap = ap;
+            this.differentInks = inks;
+            this.vellum = vellum;
+            this.candles = candles;
+            this.specialInks = specialInks;
+            this.rewards = rewards;
         }
     }
 

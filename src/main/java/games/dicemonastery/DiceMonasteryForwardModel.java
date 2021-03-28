@@ -177,17 +177,18 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             // TODO: Buying Treasures not yet implemented
                             break;
                         case LIBRARY:
-                            // TODO: "Write Text" not yet implemented
+                            for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values()) {
+                                // do we meet the minimum requirements
+                                if (text.ap > turnOrder.getActionPointsLeft()) // enough AP
+                                    continue;
+                                if (state.textsWritten.get(text) == text.rewards.length)  // have they all been written
+                                    continue;
+                                if (!WriteText.meetsRequirements(text, state.playerTreasuries.get(currentPlayer)))  // vellum, candles and inks
+                                    continue;
+                                retValue.add(new WriteText(text));
+                            }
                             break;
                         case CHAPEL:
-                            // No actions required....we just auto-pip up every Monk in the Chapel
-/*                           This was the old code when the rule said that you could pip up one monk. Now they all pip up!
-                             Left as cruft in case we want to tune this.
-                              retValue.addAll(state.monksIn(CHAPEL, state.getCurrentPlayer()).stream()
-                                    .mapToInt(Monk::getPiety)
-                                    .distinct()
-                                    .mapToObj(piety -> new PromoteMonk(piety, CHAPEL, false))
-                                    .collect(toList())); */
                             retValue.remove(0); // remove Pass
                             retValue.add(new PromoteAllMonks(CHAPEL));
                             break;
