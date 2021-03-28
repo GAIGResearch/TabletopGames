@@ -140,15 +140,17 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState state) {
+    public void endRound(AbstractGameState gs) {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
         roundCounter++;
         season = season.next();
         if (getYear() > nMaxRounds) {
-            ((DiceMonasteryGameState) state).endGame();
+            state.endGame();
         }
         abbot = (abbot + 1 + nPlayers) % nPlayers;
-        turnOwner = firstPlayerWithMonks((DiceMonasteryGameState) state);
+        turnOwner = firstPlayerWithMonks(state);
+        state.checkAtLeastOneMonk();
     }
 
     private int firstPlayerWithMonks(DiceMonasteryGameState state) {

@@ -22,11 +22,10 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         return 0;
     }),
     LOCATION((s, a) -> {
-        if (a == null) return "";
         if (a instanceof PlaceMonk) return ((PlaceMonk) a).destination.name();
         if (a instanceof ChooseMonk) return ((ChooseMonk) a).destination.name();
         if (a instanceof PromoteMonk) return ((PromoteMonk) a).location.name();
-        return "";
+        return ((DiceMonasteryTurnOrder) s.getTurnOrder()).currentAreaBeingExecuted.name();
     }),
     RESOURCE((s, a) -> {
         if (a == null) return "";

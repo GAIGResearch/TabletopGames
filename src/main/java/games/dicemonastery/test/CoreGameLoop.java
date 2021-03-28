@@ -519,7 +519,7 @@ public class CoreGameLoop {
     }
 
     @Test
-    public void gainAFreeNoviceIfNoMonksLeftAtEndOfTurn() {
+    public void gainAFreeNoviceIfLastMonkIsPromoted() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         advanceToJustBeforeStartofWinterandRemoveFood();
@@ -529,14 +529,22 @@ public class CoreGameLoop {
         } while (turnOrder.getSeason() != WINTER);
 
         assertEquals(0, state.getCurrentPlayer());
-        state.monksIn(DORMITORY, 1).forEach(state::retireMonk);  // retire all of P1's monks so that their turn will be skipped, and they gain a novice
-        assertEquals(0, state.monksIn(DORMITORY, 1).size());
+        state.monksIn(DORMITORY, 1).forEach(state::retireMonk);  // retire all of P1's monks
+        state.createMonk(6, 1); // and give them a P6 monk to retire
+        assertEquals(1, state.monksIn(DORMITORY, 1).size());
         fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(1, fm.computeAvailableActions(state).size());
-        assertEquals(new HireNovice(0), fm.computeAvailableActions(state).get(0));
-        fm.next(state, new HireNovice(0));
+        assertEquals(new PromoteMonk(6, DORMITORY), fm.computeAvailableActions(state).get(0));
+        fm.next(state, new PromoteMonk(6, DORMITORY));
         assertEquals(2, state.getCurrentPlayer());
+        assertEquals(0, state.monksIn(DORMITORY, 1).size());
+
+        do {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        } while (turnOrder.getSeason() != SPRING);
+
+        // and check that a free monk has been assigned
         assertEquals(1, state.monksIn(DORMITORY, 1).size());
         assertEquals(1, state.monksIn(DORMITORY, 1).get(0).getPiety());
     }

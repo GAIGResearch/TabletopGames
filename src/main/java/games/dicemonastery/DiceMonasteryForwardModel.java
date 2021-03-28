@@ -3,6 +3,7 @@ package games.dicemonastery;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import games.dicemonastery.actions.*;
 import utilities.Pair;
 
@@ -210,7 +211,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         .mapToObj(piety -> new PromoteMonk(piety, DORMITORY))
                         .collect(toList());
                 if (retValue.isEmpty())
-                    retValue.add(new HireNovice(0)); // hire a free novice if no monks left (careless!)
+                    retValue.add(new DoNothing());
                 return retValue;
         }
         throw new AssertionError("Not yet implemented combination " + turnOrder.season + " : " + state.getGamePhase());
