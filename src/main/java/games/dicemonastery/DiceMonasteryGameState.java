@@ -50,6 +50,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
             playerTreasuries.add(new EnumMap<>(Resource.class));
         }
         nextRetirementReward = 0;
+        textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
+        for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values())
+            textsWritten.put(text, 0);
     }
 
     public Monk createMonk(int piety, int player) {
@@ -176,7 +179,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (currentNumber >= textType.rewards.length) {
             throw new AssertionError("Cannot write any more " + textType);
         }
-        addVP(player, textType.rewards[currentNumber]);
+        addVP(textType.rewards[currentNumber], player);
         textsWritten.put(textType, currentNumber + 1);
     }
 
@@ -222,6 +225,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public boolean allBidsIn() {
         return IntStream.range(0, getNPlayers()).allMatch(playerBids::containsKey);
+    }
+
+    public int getNumberWritten(ILLUMINATED_TEXT textType) {
+        return textsWritten.get(textType);
     }
 
     void springAutumnHousekeeping() {
@@ -381,6 +388,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 retValue.playerBids.put(p, new HashMap<>(playerBids.get(p)));
         }
         retValue.nextRetirementReward = nextRetirementReward;
+        retValue.textsWritten.putAll(textsWritten);
 
         retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
 
@@ -413,13 +421,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
                  other.playerBids.equals(playerBids) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
+                other.textsWritten.equals(textsWritten) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward, playerBids) +
+                gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

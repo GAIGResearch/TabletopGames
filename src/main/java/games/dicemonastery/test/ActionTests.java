@@ -11,13 +11,13 @@ import players.simple.RandomPlayer;
 
 import java.util.*;
 
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
+import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.*;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
@@ -571,6 +571,51 @@ public class ActionTests {
     }
 
     @Test
+    public void libraryActionsCorrect() {
+        startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING);
+
+        state.useAP(turnOrder.getActionPointsLeft() - 1);
+        assertEquals(1, turnOrder.getActionPointsLeft());
+        int player = state.getCurrentPlayer();
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new Pass(), fm.computeAvailableActions(state).get(0));
+
+        // first we clear out any items the player may have acquired to date
+        state.addResource(player, VELLUM, -state.getResource(player, VELLUM, STOREROOM));
+        state.addResource(player, CANDLE, -state.getResource(player, VELLUM, STOREROOM));
+        for (Resource ink : Resource.values()) {
+            if (ink.isInk)
+                state.addResource(player, ink, -state.getResource(player, ink, STOREROOM));
+        }
+
+        state.useAP( -4);
+        assertEquals(5, turnOrder.getActionPointsLeft());
+        assertEquals(1, fm.computeAvailableActions(state).size());
+
+        state.addResource(player, VELLUM, 2);
+        state.addResource(player, CANDLE, 2);
+        state.addResource(player, PALE_RED_INK, 3);
+
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM)));
+
+        state.addResource(player, VIVID_RED_INK, 1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE)));
+
+        state.addResource(player, PALE_GREEN_INK, 1);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(LITURGY)));
+
+        state.addResource(player, VIVID_BLUE_INK, 2);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+
+        state.useAP( -1);
+        assertEquals(5, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(GOSPEL_LUKE)));
+    }
+
+    @Test
     public void chapelActionsCorrect() {
         startOfUseMonkPhaseForAreaAfterBonusToken(CHAPEL, SPRING);
 
@@ -580,7 +625,6 @@ public class ActionTests {
 
         assertTrue(pietyOfMonks.size() > 0);
         int player = state.getCurrentPlayer();
-        int vp = state.getVictoryPoints(player);
 
         // NEW RULE (v1.8) with all monks auto-promoted
         Map<Integer, Integer> startingPieties = state.monksIn(CHAPEL, player).stream()
@@ -718,5 +762,80 @@ public class ActionTests {
         fm.next(state, new PromoteMonk(1, DORMITORY));
         assertFalse(state.isActionInProgress());
         assertEquals(14, state.monksIn(DORMITORY, 3).stream().mapToInt(Monk::getPiety).sum());
+    }
+
+    @Test
+    public void writePsalm() {
+        state.addActionPoints(10);
+        WriteText action = new WriteText(PSALM);
+        try {
+            fm.next(state, action);
+            fail("Should throw exception as not enough materials");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        int player = state.getCurrentPlayer();
+        state.addResource(player, VELLUM, 2);
+        state.addResource(player, CANDLE, 2);
+        state.addResource(player, PALE_RED_INK, 2);
+
+        assertEquals(0, state.getNumberWritten(PSALM));
+        fm.next(state, action);
+        assertEquals(1, state.getResource(player, VELLUM, STOREROOM));
+        assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
+        assertEquals(1, state.getResource(player, PALE_RED_INK, STOREROOM));
+        assertEquals(PSALM_REWARDS[0], state.getVictoryPoints(player));
+        assertEquals(1, state.getNumberWritten(PSALM));
+    }
+
+    @Test
+    public void writeGospel() {
+        state.addActionPoints(10);
+        WriteText action = new WriteText(GOSPEL_MATHEW);
+
+        int player = state.getCurrentPlayer();
+        state.addResource(player, VELLUM, 2);
+        state.addResource(player, CANDLE, 2);
+        state.addResource(player, PALE_RED_INK, 2);
+
+        assertFalse(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+        state.addResource(player, VIVID_PURPLE_INK, 1);
+        state.addResource(player, VIVID_GREEN_INK, 1);
+        assertFalse(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+        state.addResource(player, VIVID_PURPLE_INK, 1);
+        assertTrue(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+
+        assertEquals(0, state.getNumberWritten(GOSPEL_MATHEW));
+        fm.next(state, action);
+        assertEquals(0, state.getResource(player, VELLUM, STOREROOM));
+        assertEquals(0, state.getResource(player, CANDLE, STOREROOM));
+        assertEquals(1, state.getResource(player, PALE_RED_INK, STOREROOM));
+        assertEquals(0, state.getResource(player, VIVID_PURPLE_INK, STOREROOM));
+        assertEquals(0, state.getResource(player, VIVID_GREEN_INK, STOREROOM));
+        assertEquals(GOSPEL_REWARD, state.getVictoryPoints(player));
+        assertEquals(1, state.getNumberWritten(GOSPEL_MATHEW));
+    }
+
+    @Test
+    public void cannotWriteTextIfAllWritten() {
+        state.addActionPoints(12);
+        WriteText action = new WriteText(GOSPEL_MATHEW);
+        int player = state.getCurrentPlayer();
+        state.addResource(player, VELLUM, 4);
+        state.addResource(player, CANDLE, 4);
+        state.addResource(player, PALE_RED_INK, 4);
+        state.addResource(player, VIVID_PURPLE_INK, 4);
+        state.addResource(player, VIVID_GREEN_INK, 4);
+        fm.next(state, action);
+        assertEquals(1, state.getNumberWritten(GOSPEL_MATHEW));
+        assertTrue(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+
+        try {
+            fm.next(state, action);
+            fail("Should throw exception as already written");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 }

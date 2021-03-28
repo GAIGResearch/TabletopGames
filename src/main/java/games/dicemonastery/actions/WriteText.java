@@ -79,21 +79,22 @@ public class WriteText extends UseMonk {
 
 
     public static boolean meetsRequirements(ILLUMINATED_TEXT text, Map<Resource, Integer> resources) {
-        if (text.vellum > resources.get(VELLUM))
+        if (text.vellum > resources.getOrDefault(VELLUM, 0))
             return false;
-        if (text.candles > resources.get(CANDLE))
+        if (text.candles > resources.getOrDefault(CANDLE, 0))
             return false;
 
         Map<Resource, Integer> afterSupplyingSpecials = new EnumMap<>(resources);
         for (Resource specialInk : text.specialInks) {
-            if (!resources.containsKey(specialInk))
+            if (!(resources.getOrDefault(specialInk, 0) > 0))
                 return false;
             afterSupplyingSpecials.merge(specialInk, -1, Integer::sum);
             if (afterSupplyingSpecials.get(specialInk) == 0)
                 afterSupplyingSpecials.remove(specialInk);
         }
 
-        if (text.differentInks > afterSupplyingSpecials.size())
+        if (text.differentInks > afterSupplyingSpecials.keySet().stream()
+                .filter(r -> r.isInk && afterSupplyingSpecials.get(r) > 0).count())
             return false;
 
         return true;
