@@ -5,6 +5,8 @@ import core.interfaces.IGamePhase;
 import java.awt.*;
 import java.util.Arrays;
 
+import static games.dicemonastery.DiceMonasteryConstants.InkColour.*;
+
 public class DiceMonasteryConstants {
 
     public static Color[] playerColours = {Color.GREEN, Color.RED, Color.BLUE, Color.ORANGE};
@@ -41,9 +43,51 @@ public class DiceMonasteryConstants {
         }
     }
 
+    public enum InkColour {
+        GREEN, BLUE, RED, PURPLE, NONE;
+    }
+
     public enum Resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD, SHILLINGS, PRAYER, PIGMENT, INK, CALF_SKIN, VELLUM,
-        BEER, PROTO_BEER_1, PROTO_BEER_2, MEAD, PROTO_MEAD_1, PROTO_MEAD_2, CANDLE, BERRIES
+        GRAIN, HONEY, WAX, SKEP, BREAD, CALF_SKIN, VELLUM, CANDLE, BERRIES,
+        SHILLINGS, PRAYER,
+        BEER, PROTO_BEER_1, PROTO_BEER_2, MEAD, PROTO_MEAD_1, PROTO_MEAD_2,
+        PALE_GREEN_INK(GREEN, false), PALE_BLUE_INK(BLUE,  false), PALE_RED_INK(RED,  false),
+        PALE_GREEN_PIGMENT(GREEN, false, PALE_GREEN_INK),
+        PALE_BLUE_PIGMENT(BLUE, false, PALE_BLUE_INK),
+        PALE_RED_PIGMENT(RED, false, PALE_RED_INK),
+        VIVID_GREEN_INK(GREEN, true), VIVID_BLUE_INK(BLUE, true),
+        VIVID_RED_INK(RED, true), VIVID_PURPLE_INK(PURPLE, true),
+        VIVID_GREEN_PIGMENT(GREEN, true, VIVID_GREEN_INK),
+        VIVID_BLUE_PIGMENT(BLUE, true, VIVID_BLUE_INK),
+        VIVID_RED_PIGMENT(RED, true, VIVID_RED_INK),
+        VIVID_PURPLE_PIGMENT(PURPLE, true, VIVID_PURPLE_INK);
+
+
+        public final boolean isInk;
+        public final boolean isPigment;
+        public final boolean isVivid;
+        public final InkColour colour;
+        public final Resource processedTo;
+
+        Resource() {
+            this(false, false, NONE, false, null);
+        }
+
+        Resource(InkColour colour, boolean vivid) {
+            this(true, false, colour, vivid, null);
+        }
+
+        Resource(InkColour colour, boolean vivid, Resource processedTo) {
+            this(false, true, colour, vivid, processedTo);
+        }
+
+        Resource(boolean ink, boolean pigment, InkColour colour, boolean vivid, Resource processedTo) {
+            isInk = ink;
+            isPigment = pigment;
+            this.colour = colour;
+            isVivid = vivid;
+            this.processedTo = processedTo;
+        }
     }
 
     public enum Phase implements IGamePhase {

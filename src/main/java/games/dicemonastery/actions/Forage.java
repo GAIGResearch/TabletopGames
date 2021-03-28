@@ -22,10 +22,23 @@ public class Forage extends UseMonk {
             case 1:
                 break;
             case 2:
+                r = Resource.PALE_BLUE_PIGMENT;
+                break;
             case 3:
+                r = Resource.PALE_GREEN_PIGMENT;
+                break;
             case 4:
+                r = Resource.PALE_RED_PIGMENT;
+                break;
             case 5:
-                r = Resource.PIGMENT;
+                // TODO: This is actually a choice, requiring FORAGE to be turned into an Extended Sequence
+                int rndPigment = rnd.nextInt(3);
+                if (rndPigment == 0)
+                    r = Resource.PALE_BLUE_PIGMENT;
+                if (rndPigment == 1)
+                    r = Resource.PALE_GREEN_PIGMENT;
+                if (rndPigment == 2)
+                    r = Resource.PALE_RED_PIGMENT;
                 break;
             case 6:
                 r = Resource.BERRIES;

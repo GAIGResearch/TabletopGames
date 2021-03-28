@@ -4,6 +4,7 @@ package games.dicemonastery.test;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
+import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -232,11 +233,15 @@ public class ActionTests {
     @Test
     public void forage() {
         state.useAP(-100);
-        assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
+        int player = state.getCurrentPlayer();
+        assertEquals(0, state.getStores(player, r -> r.isPigment).size());
         for (int i = 0; i < 100; i++)
             (new Forage()).execute(state);
-        assertEquals(67, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM), 10);
-        assertEquals(17, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
+        assertEquals(3, state.getStores(player, r -> r.isPigment).size()); // all three basic types
+        assertEquals(200.0/9.0, state.getResource(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, STOREROOM), 10);
+        assertEquals(200.0/9.0, state.getResource(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, STOREROOM), 10);
+        assertEquals(200.0/9.0, state.getResource(state.getCurrentPlayer(), PALE_RED_PIGMENT, STOREROOM), 10);
+        assertEquals(100.0/6.0, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
     }
 
     @Test
@@ -247,8 +252,9 @@ public class ActionTests {
             state.moveCube(state.getCurrentPlayer(), GRAIN, STOREROOM, SUPPLY);
         while (state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM) > 0)
             state.moveCube(state.getCurrentPlayer(), HONEY, STOREROOM, SUPPLY);
-        while (state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM) > 0)
-            state.moveCube(state.getCurrentPlayer(), PIGMENT, STOREROOM, SUPPLY);
+        Set<Resource> allPigments = state.getStores(state.getCurrentPlayer(), r -> r.isPigment).keySet();
+        for (Resource r : allPigments)
+            state.addResource(state.getCurrentPlayer(), r, -state.getResource(state.getCurrentPlayer(), r, STOREROOM));
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
 
@@ -268,9 +274,17 @@ public class ActionTests {
         assertEquals(4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new BrewMead()));
 
-        state.moveCube(state.getCurrentPlayer(), PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, SUPPLY, STOREROOM);
         assertEquals(5, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk()));
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk(PALE_BLUE_PIGMENT)));
+
+        state.moveCube(state.getCurrentPlayer(), PALE_RED_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), VIVID_BLUE_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), VIVID_GREEN_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), VIVID_PURPLE_PIGMENT, SUPPLY, STOREROOM);
+        assertEquals(7, fm.computeAvailableActions(state).size());
 
         state.useAP(1);
         assertEquals(2, fm.computeAvailableActions(state).size());
@@ -324,16 +338,16 @@ public class ActionTests {
     public void prepareInk() {
         state.useAP(-1);
         try {
-            (new PrepareInk()).execute(state);
+            (new PrepareInk(PALE_GREEN_PIGMENT)).execute(state);
             fail("Should throw exception");
         } catch (IllegalArgumentException error) {
            // expected!
         }
         state.useAP(-1);
-        state.moveCube(state.getCurrentPlayer(), PIGMENT, SUPPLY, STOREROOM);
-        (new PrepareInk()).execute(state);
-        assertEquals(0, state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM));
-        assertEquals(1, state.getResource(state.getCurrentPlayer(), INK, STOREROOM));
+        state.moveCube(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, SUPPLY, STOREROOM);
+        (new PrepareInk(PALE_GREEN_PIGMENT)).execute(state);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, STOREROOM));
+        assertEquals(1, state.getResource(state.getCurrentPlayer(), PALE_GREEN_INK, STOREROOM));
     }
 
     @Test
@@ -366,20 +380,24 @@ public class ActionTests {
 
         state.useAP(turnOrder.getActionPointsLeft() - 1);
 
-        while (state.getResource(state.getCurrentPlayer(), PIGMENT, STOREROOM) > 0)
-            state.moveCube(state.getCurrentPlayer(), PIGMENT, STOREROOM, SUPPLY);
+        Set<Resource> allPigments = state.getStores(state.getCurrentPlayer(), r -> r.isPigment).keySet();
+        for (Resource r : allPigments)
+            state.addResource(state.getCurrentPlayer(), r, -state.getResource(state.getCurrentPlayer(), r, STOREROOM));
         while (state.getResource(state.getCurrentPlayer(), WAX, STOREROOM) > 0)
             state.moveCube(state.getCurrentPlayer(), WAX, STOREROOM, SUPPLY);
         assertEquals(2, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new WeaveSkep()));
 
-        state.moveCube(state.getCurrentPlayer(), PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), PALE_RED_PIGMENT, SUPPLY, STOREROOM);
         assertEquals(2, fm.computeAvailableActions(state).size());
 
         state.useAP(-1);
+        assertEquals(2, fm.computeAvailableActions(state).size());
+
+        state.moveCube(state.getCurrentPlayer(), VIVID_BLUE_PIGMENT, SUPPLY, STOREROOM);
         assertEquals(3, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk()));
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk(VIVID_BLUE_PIGMENT)));
 
         state.moveCube(state.getCurrentPlayer(), WAX, SUPPLY, STOREROOM);
         assertEquals(4, fm.computeAvailableActions(state).size());
@@ -388,6 +406,11 @@ public class ActionTests {
         state.moveCube(state.getCurrentPlayer(), CALF_SKIN, SUPPLY, STOREROOM);
         assertEquals(5, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new PrepareVellum()));
+
+        state.moveCube(state.getCurrentPlayer(), VIVID_RED_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), VIVID_PURPLE_PIGMENT, SUPPLY, STOREROOM);
+        state.moveCube(state.getCurrentPlayer(), VIVID_GREEN_PIGMENT, SUPPLY, STOREROOM);
+        assertEquals(8, fm.computeAvailableActions(state).size());
 
         state.useAP(1);
         assertEquals(2, fm.computeAvailableActions(state).size());

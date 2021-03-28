@@ -2,19 +2,25 @@ package games.dicemonastery.actions;
 
 import games.dicemonastery.DiceMonasteryGameState;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.SUPPLY;
+import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
 public class PrepareInk extends UseMonk {
 
-    public PrepareInk() {
+    public final Resource pigment;
+
+    public PrepareInk(Resource pigment) {
         super(2);
+        this.pigment = pigment;
     }
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
-        state.moveCube(state.getCurrentPlayer(), Resource.PIGMENT, STOREROOM, SUPPLY);
-        state.moveCube(state.getCurrentPlayer(), Resource.INK, SUPPLY, STOREROOM);
+        int player = state.getCurrentPlayer();
+        Resource ink = pigment.processedTo;
+        state.moveCube(player, pigment, STOREROOM, SUPPLY);
+        state.moveCube(player, ink, SUPPLY, STOREROOM);
         return true;
     }
 

@@ -7,6 +7,7 @@ import core.components.Token;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
@@ -14,13 +15,14 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public class DiceMonasteryGameState extends AbstractGameState {
 
     Map<ActionArea, DMArea> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
     Map<Integer, ActionArea> monkLocations = new HashMap<>();
-    List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
+    List<EnumMap<Resource, Integer>> playerTreasuries = new ArrayList<>();
     Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
     int[] victoryPoints;
@@ -44,7 +46,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         playerTreasuries = new ArrayList<>();
         playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
-            playerTreasuries.add(new HashMap<>());
+            playerTreasuries.add(new EnumMap<>(Resource.class));
         }
         nextRetirementReward = 0;
     }
@@ -185,6 +187,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
             return playerTreasuries.get(player).getOrDefault(resource, 0);
         }
         return actionAreas.get(location).count(resource, player);
+    }
+
+    public Map<Resource, Integer> getStores(int player, Predicate<Resource> predicate) {
+        return playerTreasuries.get(player).entrySet().stream()
+                .filter(e -> e.getValue() > 0 && predicate.test(e.getKey()))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum, () -> new EnumMap<>(Resource.class)));
     }
 
     public List<Monk> monksIn(ActionArea region, int player) {
@@ -358,7 +366,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         retValue.playerTreasuries = new ArrayList<>();
         retValue.playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
-            retValue.playerTreasuries.add(new HashMap<>(playerTreasuries.get(p)));
+            retValue.playerTreasuries.add(new EnumMap<>(playerTreasuries.get(p)));
             if (playerBids.containsKey(p))
                 retValue.playerBids.put(p, new HashMap<>(playerBids.get(p)));
         }

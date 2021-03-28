@@ -10,11 +10,11 @@ import utilities.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Phase;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
 import static java.util.stream.Collectors.toList;
@@ -28,7 +28,6 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     public final AbstractAction COLLECT_SKEP = new CollectSkep();
     public final AbstractAction PASS = new Pass();
     public final AbstractAction BAKE_BREAD = new BakeBread();
-    public final AbstractAction PREPARE_INK = new PrepareInk();
     public final AbstractAction BREW_BEER = new BrewBeer();
     public final AbstractAction BREW_MEAD = new BrewMead();
     public final AbstractAction WEAVE_SKEP = new WeaveSkep();
@@ -147,8 +146,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0)
                                 retValue.add(BAKE_BREAD);
                             if (turnOrder.getActionPointsLeft() > 1) {
-                                if (state.getResource(currentPlayer, PIGMENT, STOREROOM) > 0)
-                                    retValue.add(PREPARE_INK);
+                                Map<Resource, Integer> allPalePigments = state.getStores(currentPlayer, r -> r.isPigment && !r.isVivid);
+                                for (Resource pigment : allPalePigments.keySet())
+                                    retValue.add(new PrepareInk(pigment));
                                 if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0)
                                     retValue.add(BREW_BEER);
                                 if (state.getResource(currentPlayer, HONEY, STOREROOM) > 0)
@@ -158,8 +158,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         case WORKSHOP:
                             retValue.add(WEAVE_SKEP);
                             if (turnOrder.getActionPointsLeft() > 1) {
-                                if (state.getResource(currentPlayer, PIGMENT, STOREROOM) > 0)
-                                    retValue.add(PREPARE_INK);
+                                Map<Resource, Integer> allVividPigments = state.getStores(currentPlayer, r -> r.isPigment && r.isVivid);
+                                for (Resource pigment : allVividPigments.keySet())
+                                    retValue.add(new PrepareInk(pigment));
                                 if (state.getResource(currentPlayer, WAX, STOREROOM) > 0)
                                     retValue.add(MAKE_CANDLE);
                                 if (state.getResource(currentPlayer, CALF_SKIN, STOREROOM) > 0)
