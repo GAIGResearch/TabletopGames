@@ -9,6 +9,7 @@ import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class DMSeasonListener implements IGameListener {
             for (int p = 0; p < state.getNPlayers(); p++) {
                 int finalP = p;
                 Map<String, Object> data = Arrays.stream(DiceMonasteryStateAttributes.values())
-                        .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, finalP)));
+                        .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, finalP), (a, b) -> a, LinkedHashMap::new));
                 logger.record(data);
             }
         }

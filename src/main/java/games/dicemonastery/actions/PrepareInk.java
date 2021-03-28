@@ -1,5 +1,6 @@
 package games.dicemonastery.actions;
 
+import core.AbstractGameState;
 import games.dicemonastery.DiceMonasteryGameState;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
@@ -27,17 +28,26 @@ public class PrepareInk extends UseMonk {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PrepareInk;
+        if (obj instanceof PrepareInk) {
+            PrepareInk other = (PrepareInk) obj;
+            return other.pigment == pigment;
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 1913;
+        return pigment.hashCode();
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 
     @Override
     public String toString() {
-        return "Prepare Ink";
+        return "Prepare Ink using " + pigment;
     }
 }
 
