@@ -12,6 +12,7 @@ import java.util.List;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
+import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.PSALM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
@@ -479,6 +480,35 @@ public class CopyTests {
         assertFalse(midHash == startHash);
 
         fm.next(state, new Pray(2));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+
+    @Test
+    public void writePsalm() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        state.addActionPoints(10);
+        WriteText action = new WriteText(PSALM);
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        int player = state.getCurrentPlayer();
+        state.addResource(player, VELLUM, 2);
+        state.addResource(player, CANDLE, 2);
+        state.addResource(player, PALE_RED_INK, 2);
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, action);
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
