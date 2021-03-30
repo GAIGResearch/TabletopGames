@@ -16,6 +16,7 @@ import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.PSALM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
+import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
 import static org.junit.Assert.*;
 
 
@@ -515,4 +516,53 @@ public class CopyTests {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == state.hashCode());
     }
+
+    @Test
+    public void gatehouseActionsCorrect() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        state.buyTreasure(DiceMonasteryConstants.TREASURE.CAPE);
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, 8);
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
+    @Test
+    public void buyTreasure() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        int player = state.getCurrentPlayer();
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        state.addActionPoints(3);
+        state.addResource(player, SHILLINGS, 4);
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new BuyTreasure(ROBE));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+    }
+
 }

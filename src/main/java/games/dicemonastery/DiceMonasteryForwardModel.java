@@ -170,11 +170,17 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         case GATEHOUSE:
                             retValue.add(BEG);
                             retValue.add(new VisitMarket());
+                            if (turnOrder.getActionPointsLeft() > 1) {
+                                int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
+                                for (TREASURE item : TREASURE.values()) {
+                                    if (item.cost <= shillings && state.getNumberCommissioned(item) < item.limit)
+                                        retValue.add(new BuyTreasure(item));
+                                }
+                            }
                             if (turnOrder.getActionPointsLeft() > 2 &&
                                     state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
                                 retValue.add(HIRE_NOVICE);
                             // TODO: "Go on pilgrimage" not yet implemented
-                            // TODO: Buying Treasures not yet implemented
                             break;
                         case LIBRARY:
                             for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values()) {

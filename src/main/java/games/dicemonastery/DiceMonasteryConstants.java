@@ -176,4 +176,26 @@ public class DiceMonasteryConstants {
         }
     }
 
+    public enum TREASURE {
+        CAPE(4, 1, 1),
+        ROBE(8, 2, 1),
+        CANDLESTICK(12, 3, 1),
+        LECTERN(16, 4, 1),
+        CHALICE(20, 5, 1),
+        MITRE(24, 6, 1),
+        PLATE(28, 7, 1),
+        ALTAR_CROSS(32, 8, 1);
+
+        public final int cost;
+        public final int vp;
+        public final int limit;
+
+        TREASURE(int cost, int vp, int limit) {
+            this.cost = cost;
+            this.vp = vp;
+            this.limit  = limit;
+        }
+
+    }
+
 }

@@ -27,35 +27,25 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         if (a instanceof PromoteMonk) return ((PromoteMonk) a).location.name();
         return ((DiceMonasteryTurnOrder) s.getTurnOrder()).currentAreaBeingExecuted.name();
     }),
-    RESOURCE((s, a) -> {
+    THING((s, a) -> {
         if (a == null) return "";
         if (a instanceof Buy) return ((Buy) a).resource.name();
         if (a instanceof Sell) return ((Sell) a).resource.name();
-        return "";
-    }),
-    PRICE((s, a) -> {
-        if (a == null) return 0;
-        if (a instanceof Buy) return ((Buy) a).cost;
-        if (a instanceof Sell) return ((Sell) a).price;
-        return 0;
-    }),
-    BID_VALUE((s, a) -> {
-        if (a == null) return 0;
-        if (a instanceof SummerBid)
-            return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
-        return 0;
-    }),
-    ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft()),
-    TOKEN_TAKEN((s, a) -> {
-        if (a == null) return "";
+        if (a instanceof BuyTreasure) return ((BuyTreasure) a).treasure.name();
+        if (a instanceof WriteText) return ((WriteText) a).textType.name();
         if (a instanceof TakeToken) return ((TakeToken) a).token.name();
         return "";
     }),
-    AMOUNT((s, a) -> {
+    VALUE((s, a) -> {
         if (a == null) return 0;
+        if (a instanceof Buy) return ((Buy) a).cost;
+        if (a instanceof Sell) return ((Sell) a).price;
+        if (a instanceof SummerBid)
+            return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
         if (a instanceof Pray) return ((Pray) a).prayerCount;
         return 0;
-    })
+    }),
+    ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft())
     ;
 
     private final BiFunction<DiceMonasteryGameState, AbstractAction, Object> lambda;

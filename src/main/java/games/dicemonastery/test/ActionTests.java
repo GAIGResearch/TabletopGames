@@ -19,6 +19,8 @@ import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
+import static games.dicemonastery.DiceMonasteryConstants.TREASURE.CAPE;
+import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
@@ -473,11 +475,33 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).contains(new VisitMarket()));
 
         state.useAP(-1);
+        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
+
+        state.buyTreasure(TREASURE.CAPE);
         assertEquals(3, fm.computeAvailableActions(state).size());
+        assertFalse(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
+
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, 8);
+        assertEquals(5, fm.computeAvailableActions(state).size());  // Two more Treasures in price range
 
         state.useAP(-1);
-        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertEquals(6, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new HireNovice()));
+    }
+
+    @Test
+    public void buyTreasure() {
+        int player = state.getCurrentPlayer();
+        state.addActionPoints(3);
+        state.addResource(player, SHILLINGS, 4);
+
+        fm.next(state, new BuyTreasure(ROBE));
+        assertEquals(1, turnOrder.getActionPointsLeft());
+        assertEquals(2, state.getResource(player, SHILLINGS, STOREROOM));
+        assertEquals(2, state.getVictoryPoints(player));
+        assertEquals(1, state.getNumberCommissioned(ROBE));
+        assertEquals(0, state.getNumberCommissioned(CAPE));
     }
 
     @Test

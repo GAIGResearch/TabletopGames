@@ -26,6 +26,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
     Map<ILLUMINATED_TEXT, Integer> textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
+    Map<TREASURE, Integer> treasuresCommissioned = new EnumMap<>(TREASURE.class);
     int[] victoryPoints;
     Random rnd;
 
@@ -53,6 +54,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
         textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
         for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values())
             textsWritten.put(text, 0);
+        treasuresCommissioned = new EnumMap<>(TREASURE.class);
+        for (TREASURE item : TREASURE.values())
+            treasuresCommissioned.put(item, 0);
     }
 
     public Monk createMonk(int piety, int player) {
@@ -174,13 +178,27 @@ public class DiceMonasteryGameState extends AbstractGameState {
             victoryPoints[player] = 0;
     }
 
-    public void writeText(int player, ILLUMINATED_TEXT textType) {
+    public void writeText(ILLUMINATED_TEXT textType) {
         int currentNumber = textsWritten.get(textType);
         if (currentNumber >= textType.rewards.length) {
             throw new AssertionError("Cannot write any more " + textType);
         }
-        addVP(textType.rewards[currentNumber], player);
         textsWritten.put(textType, currentNumber + 1);
+    }
+
+    public int getNumberWritten(ILLUMINATED_TEXT textType) {
+        return textsWritten.get(textType);
+    }
+
+    public void buyTreasure(TREASURE item) {
+        if (treasuresCommissioned.get(item) < item.limit)
+            treasuresCommissioned.put(item, treasuresCommissioned.get(item) + 1);
+        else
+            throw new AssertionError("Cannot buy treasure as none left: " + item);
+    }
+
+    public int getNumberCommissioned(TREASURE item) {
+        return treasuresCommissioned.get(item);
     }
 
     public void useAP(int actionPointsSpent) {
@@ -225,10 +243,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public boolean allBidsIn() {
         return IntStream.range(0, getNPlayers()).allMatch(playerBids::containsKey);
-    }
-
-    public int getNumberWritten(ILLUMINATED_TEXT textType) {
-        return textsWritten.get(textType);
     }
 
     void springAutumnHousekeeping() {
@@ -389,6 +403,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         }
         retValue.nextRetirementReward = nextRetirementReward;
         retValue.textsWritten.putAll(textsWritten);
+        retValue.treasuresCommissioned.putAll(treasuresCommissioned);
 
         retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
 
@@ -421,14 +436,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
                  other.playerBids.equals(playerBids) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
-                other.textsWritten.equals(textsWritten) &&
+                other.textsWritten.equals(textsWritten) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten) +
+                gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten, treasuresCommissioned) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

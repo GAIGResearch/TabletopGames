@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.toList;
 
 public class WriteText extends UseMonk {
 
-    final ILLUMINATED_TEXT textType;
+    public final ILLUMINATED_TEXT textType;
 
     public WriteText(ILLUMINATED_TEXT type) {
         super(type.ap);
@@ -43,7 +43,8 @@ public class WriteText extends UseMonk {
         for (int i = 0; i < textType.differentInks; i++)
             state.addResource(player, inksInOrder.get(i), -1);
 
-        state.writeText(player, textType); // this does the VP rewards based on how many have been written so far
+        state.addVP(textType.rewards[state.getNumberWritten(textType)], player);
+        state.writeText(textType);
         return true;
     }
 
