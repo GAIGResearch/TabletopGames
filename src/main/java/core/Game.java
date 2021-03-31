@@ -190,8 +190,6 @@ public class Game {
 
             if (!paused) {
 
-                gameState.checkActionsInProgress();
-
                 // Get player to ask for actions next
                 boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
                         && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);

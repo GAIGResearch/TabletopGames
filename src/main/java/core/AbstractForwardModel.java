@@ -127,6 +127,8 @@ public abstract class AbstractForwardModel {
             }
             illegalActionPlayed(currentState, action);
         }
+
+        currentState.checkActionsInProgress();
     }
 
     /**
