@@ -350,6 +350,11 @@ public class TMForwardModel extends AbstractForwardModel {
         return possibleActions;
     }
 
+    @Override
+    protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
+        next(gameState, new TMAction(gameState.getCurrentPlayer()));
+    }
+
     private boolean checkGameEnd(TMGameState gs) {
         boolean ended = true;
         for (TMTypes.GlobalParameter p: gs.globalParameters.keySet()) {

@@ -358,7 +358,11 @@ public class TMGameState extends AbstractGameState {
     }
 
     public boolean canPlayerPay(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount, boolean production) {
-        if (production) return playerProduction[player].get(to).getValue() >= amount;
+        if (production) {
+            Counter c = playerProduction[player].get(to);
+            if (c.getMinimum() < 0) return c.getValue() + Math.abs(c.getMinimum()) >= amount;
+            return c.getValue() >= amount;
+        }
 
         int sum = playerResourceSum(player, card, from, to);
         return card != null? isCardFree(card, sum, -1) : sum >= amount;

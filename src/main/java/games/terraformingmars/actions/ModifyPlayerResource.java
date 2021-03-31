@@ -31,10 +31,6 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.production = production;
         this.targetPlayer = player;
         this.player = player;
-        if (!production) {
-            costResource = resource;
-            cost = Math.abs(change);
-        }
     }
 
     public ModifyPlayerResource(TMTypes.StandardProject standardProject, int player, int change, TMTypes.Resource resource) {
@@ -61,10 +57,6 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.any = any;
         this.opponents = opponents;
         this.onMars = onMars;
-        if (!production) {
-            costResource = resource;
-            cost = Math.abs(change);
-        }
     }
 
     public ModifyPlayerResource(int player, int targetPlayer, int change, TMTypes.Resource resource, boolean production,
@@ -75,10 +67,6 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.production = production;
         this.targetPlayer = targetPlayer;
         this.player = player;
-        if (!production) {
-            costResource = resource;
-            cost = Math.abs(change);
-        }
     }
 
     @Override
@@ -219,23 +207,17 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         }
         if (standardProject != null && !canPay(gs)) return false;
         if (change < 0) {  // TODO: "up to"
-            if (!production && !canPay(gs)) return false;
-            if (requirements != null) {
-                if (production) {
-                    if (getCost(gs) == 0) return true;
-                    int p = player;
-                    if (p == -1) {
-                        // Can current player pay?
-                        p = gs.getCurrentPlayer();
-                    } else if (p == -2) {
-                        // Can any player pay?
-                        for (int i = 0; i < gs.getNPlayers(); i++) {
-                            if (gs.canPlayerPay(i, getResource(), getCost(gs))) return true;
-                        }
-                        return false;
-                    }
-                    return gs.canPlayerPay(p, getResource(), getCost(gs));
+            int p = player;
+            if (p == -1) {
+                // Can current player pay?
+                p = gs.getCurrentPlayer();
+                return gs.canPlayerPay(p, null, null, resource, Math.abs(change), production);
+            } else if (p == -2) {
+                // Can any player pay?
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    if (gs.canPlayerPay(i, null, null, resource, Math.abs(change), production)) return true;
                 }
+                return false;
             }
         }
         return true;

@@ -141,7 +141,7 @@ public class TMCard extends Card {
                 } else if (effect.get("tag") != null) {
                     // A discount for tag requirements
                     TMTypes.Tag t = TMTypes.Tag.valueOf((String) effect.get("tag"));
-                    r = new TagsPlayedRequirement(new TMTypes.Tag[]{t}, null);
+                    r = new TagsPlayedRequirement(new TMTypes.Tag[]{t}, new int[1]);
                     if (card.discountEffects.containsKey(r)) {
                         card.discountEffects.put(r, card.discountEffects.get(r) + amount);
                     } else {
