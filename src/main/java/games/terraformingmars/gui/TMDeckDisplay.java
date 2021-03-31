@@ -562,26 +562,25 @@ public class TMDeckDisplay extends JComponent {
     }
 
     private void drawAction(Graphics2D g, TMAction a, int x, int y, int size) {
-        int leftNumber = -1;
-        String left = null;
         String right = null;
         int rightNumber = -1;
-        if (a instanceof PayForAction) {
-            PayForAction aa = (PayForAction) a;
-            TMTypes.Resource leftR = aa.costResource;
-            left = leftR.getImagePath();
-            leftNumber = Math.abs(aa.cost);
-            boolean played = aa.played;
-            if (aa.action instanceof PlaceTile) {
-                // get the tile image
-                TMTypes.Tile t = ((PlaceTile)aa.action).tile;
-                right = t.getImagePath();
-            } else if (aa.action instanceof ModifyPlayerResource) {
-                // get resource image
-                TMTypes.Resource rightR = ((ModifyPlayerResource)aa.action).resource;
-                right = rightR.getImagePath();
-            }
+
+        TMTypes.Resource leftR = a.costResource;
+        String left = leftR.getImagePath();
+        int leftNumber = Math.abs(a.cost);
+        boolean played = a.played;
+        if (a instanceof PlaceTile) {
+            // get the tile image
+            TMTypes.Tile t = ((PlaceTile)a).tile;
+            right = t.getImagePath();
+        } else if (a instanceof ModifyPlayerResource) {
+            // get resource image
+            TMTypes.Resource rightR = ((ModifyPlayerResource)a).resource;
+            right = rightR.getImagePath();
+        } else {
+            int b = 0;
         }
+
         // Draw left + arrow + right
         if (leftNumber != -1) x -= size/2;
         if (rightNumber != -1) x -= size/2;

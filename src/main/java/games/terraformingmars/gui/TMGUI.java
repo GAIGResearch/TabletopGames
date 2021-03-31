@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
@@ -330,14 +329,12 @@ public class TMGUI extends AbstractGUI {
                     int idx = Integer.parseInt(code);
                     // card idx can be played
                     for (TMAction action: playCardActions) {
-                        if (action instanceof PayForAction) {
-                            if (action.cardID == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
-                                actionButtons[i].setVisible(true);
-                                actionButtons[i].setButtonAction(action, "Play");
-                                i++;
-                                playableCard = true;
-                                break;
-                            }
+                        if (action.cardID == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
+                            actionButtons[i].setVisible(true);
+                            actionButtons[i].setButtonAction(action, "Play");
+                            i++;
+                            playableCard = true;
+                            break;
                         }
                     }
                 }
