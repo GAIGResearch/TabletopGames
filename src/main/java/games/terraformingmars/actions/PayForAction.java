@@ -31,6 +31,8 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
 
+        // TODO if only one option to pay left, just do it, don't ask again
+
         // Do extended sequence
         // Pay for card with resources until all paid
         // Second: execute action
@@ -51,8 +53,24 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         resourcesToPayWith = resources.toArray(new TMTypes.Resource[0]);
         stage = 0;
         costPaid = 0;
-        gameState.setActionInProgress(this);
-        return true;
+
+        if (stage == resourcesToPayWith.length-1) {
+            List<AbstractAction> actions = _computeAvailableActions(gs);
+            if (actions.size() == 1) {
+                // If only 1 option, just do it
+                TMAction a = (TMAction) actions.get(0);
+                boolean s1 = a.execute(gs);
+                boolean s2 = this.action.execute(gs);
+                stage = resourcesToPayWith.length;
+                return s1 && s2;
+            } else {
+                gameState.setActionInProgress(this);
+                return true;
+            }
+        } else {
+            gameState.setActionInProgress(this);
+            return true;
+        }
     }
 
     @Override
@@ -74,7 +92,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
             actions.add(new ModifyPlayerResource(player, -i, res, false));
         }
         if (actions.size() == 0) {
-            actions.add(new TMAction(player));  // TODO: bad, this shouldn't happen
+            int a = 0;  // TODO: bad, this shouldn't happen
         }
         return actions;
     }
@@ -95,11 +113,19 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMTypes.Resource res = resourcesToPayWith[stage];
         costPaid += Math.abs(((ModifyPlayerResource)action).change) * gs.getResourceMapRate(res, costResource);
         stage++;
-        TMCard card = (TMCard) gs.getComponentById(cardID);
-        if (card != null && ((TMGameState)state).isCardFree(card, costPaid, player) || costPaid >= cost) {
+        if (costPaid >= cost) {
             // Action paid for, execute
             this.action.execute(state);
             stage = resourcesToPayWith.length;
+        } else if (stage == resourcesToPayWith.length-1) {
+            List<AbstractAction> actions = _computeAvailableActions(gs);
+            if (actions.size() == 1) {
+                // If only 1 option left, just do it
+                TMAction a = (TMAction) actions.get(0);
+                a.execute(gs);
+                this.action.execute(state);
+                stage = resourcesToPayWith.length;
+            }
         }
     }
 
