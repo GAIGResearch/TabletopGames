@@ -5,15 +5,22 @@ import games.terraformingmars.TMTypes;
 import utilities.ImageIO;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public class TagsPlayedRequirement implements Requirement<TMGameState> {
 
     public TMTypes.Tag[] tags;
     public int[] nMin;
+    int nTags;
 
     public TagsPlayedRequirement(TMTypes.Tag[] tag, int[] nMin) {
         this.tags = tag;
         this.nMin = nMin;
+
+        nTags = 0;
+        for (int k = 0; k < tags.length; k++) {
+            nTags += nMin[k];
+        }
     }
 
     @Override
@@ -37,16 +44,27 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
 
     @Override
     public String getDisplayText(TMGameState gs) {
+        if (nTags > 4) return ""+nMin[0];
         return null;
     }
 
     @Override
     public Image[] getDisplayImages() {
-        Image[] imgs = new Image[tags.length];
+        int n = nTags;
+        if (n > 4) n = tags.length;
+        Image[] imgs = new Image[n];
         int i = 0;
-        for (TMTypes.Tag t: tags) {
-            imgs[i] = ImageIO.GetInstance().getImage(t.getImagePath());
-            i++;
+        for (int k = 0; k < tags.length; k++) {
+            String path = tags[k].getImagePath();
+            if (n == nTags) {
+                for (int j = 0; j < nMin[k]; j++) {
+                    imgs[i] = ImageIO.GetInstance().getImage(path);
+                    i++;
+                }
+            } else {
+                imgs[i] = ImageIO.GetInstance().getImage(path);
+                i++;
+            }
         }
         return imgs;
     }

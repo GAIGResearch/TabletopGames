@@ -308,7 +308,7 @@ public class TMForwardModel extends AbstractForwardModel {
 
         // Play a card actions
         for (int i = 0; i < gs.playerHands[player].getSize(); i++) {
-            possibleActions.add(new PlayCard(player, gs.playerHands[player].get(i).getComponentID(), false));
+            possibleActions.add(new PlayCard(player, gs.playerHands[player].get(i), false));
         }
 
         // Buy a standard project

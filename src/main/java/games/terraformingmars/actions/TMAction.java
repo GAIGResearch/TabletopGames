@@ -108,7 +108,7 @@ public class TMAction extends AbstractAction {
 
     public boolean canBePlayed(TMGameState gs) {
         if (played && standardProject == null && basicResourceAction == null) return false;
-        if (requirements != null) {
+        if (requirements != null && requirements.size() > 0) {
             for (Requirement r: requirements) {
                 if (!r.testCondition(gs)) return false;
             }

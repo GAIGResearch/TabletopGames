@@ -2,6 +2,7 @@ package games.terraformingmars.rules.effects;
 
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMMapTile;
@@ -29,9 +30,13 @@ public class PlaceTileEffect extends Effect {
 
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
-        if (!(actionTaken instanceof PlaceTile)) return false;
+        if (!(actionTaken instanceof PlaceTile) &&
+                !(actionTaken instanceof PayForAction && (((PayForAction) actionTaken).action instanceof PlaceTile))) return false;
 
-        PlaceTile action = (PlaceTile) actionTaken;
+        PlaceTile action;
+        if (actionTaken instanceof PayForAction) action = (PlaceTile) ((PayForAction) actionTaken).action;
+        else action = (PlaceTile) actionTaken;
+
         boolean marsCondition = !onMars || action.onMars;
         boolean tileCondition = tile == null || action.tile == tile;
 

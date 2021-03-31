@@ -183,7 +183,6 @@ public abstract class AbstractGameState {
     }
 
     public boolean isActionInProgress() {
-        checkActionsInProgress();
         return !actionsInProgress.empty();
     }
 

@@ -11,10 +11,11 @@ import java.util.*;
 
 public class PlayCard extends TMAction {
 
-    public PlayCard(int player, int cardId, boolean free) {
+    public PlayCard(int player, TMCard card, boolean free) {
         super(TMTypes.ActionType.PlayCard, player, free);
-        this.cardID = cardId;
-        costResource = TMTypes.Resource.MegaCredit;
+        this.cardID = card.getComponentID();
+        this.costResource = TMTypes.Resource.MegaCredit;
+        this.requirements.addAll(card.requirements);
     }
 
     @Override
@@ -33,8 +34,10 @@ public class PlayCard extends TMAction {
         gs.getPlayerHands()[player].remove(card);
 
         // Add info to played cards stats
-        for (TMTypes.Tag t: card.tags) {
-            gs.getPlayerCardsPlayedTags()[player].get(t).increment(1);
+        if (card.cardType != TMTypes.CardType.Event) {  // Event tags don't count for regular tag counts
+            for (TMTypes.Tag t : card.tags) {
+                gs.getPlayerCardsPlayedTags()[player].get(t).increment(1);
+            }
         }
         gs.getPlayerCardsPlayedTypes()[player].get(card.cardType).increment(1);
         if (card.shouldSaveCard()) {
