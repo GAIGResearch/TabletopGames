@@ -61,6 +61,7 @@ public enum DiceMonasteryStateAttributes implements IGameAttribute {
     MONKS((s,p) -> s.monksIn(null, p).size()),
     PIETY((s, p) -> s.monksIn(null, p).stream().mapToInt(Monk::getPiety).sum()),
     RETIRED((s, p) -> s.monksIn(DiceMonasteryConstants.ActionArea.RETIRED, p).size()),
+    PILGRIMS((s, p) -> s.monksIn(PILGRIMAGE, p).size()),
     DEAD((s, p) -> s.monksIn(GRAVEYARD, p).size()),
     VP(DiceMonasteryGameState::getVictoryPoints)
     ;

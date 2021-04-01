@@ -2,7 +2,9 @@ package games.dicemonastery;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
+import core.components.Deck;
 import core.components.Token;
 import utilities.Utils;
 
@@ -27,6 +29,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
     int nextRetirementReward = 0;
     Map<ILLUMINATED_TEXT, Integer> textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
     Map<TREASURE, Integer> treasuresCommissioned = new EnumMap<>(TREASURE.class);
+    Map<Pilgrimage.DESTINATION, Deck<Pilgrimage>> pilgrimageDecks = new HashMap<>(4);
+    List<Pilgrimage> pilgrimagesStarted = new ArrayList<>();
     int[] victoryPoints;
     Random rnd;
 
@@ -57,6 +61,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
         treasuresCommissioned = new EnumMap<>(TREASURE.class);
         for (TREASURE item : TREASURE.values())
             treasuresCommissioned.put(item, 0);
+        pilgrimageDecks = new HashMap<>();
+        for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values())
+            pilgrimageDecks.put(destination, new Deck<>("Pilgrimages to "+destination.name(), CoreConstants.VisibilityMode.FIRST_VISIBLE_TO_ALL));
+        pilgrimagesStarted = new ArrayList<>();
     }
 
     public Monk createMonk(int piety, int player) {
@@ -259,6 +267,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             addResource(player, Resource.PROTO_MEAD_2, notMead - almostMead);
             addResource(player, Resource.PROTO_MEAD_1, -notMead);
         }
+        advancePilgrims();
         checkAtLeastOneMonk();
         drawBonusTokens();
     }
@@ -272,6 +281,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
             if (monksIn(null, player).isEmpty()) {
                 // Hire a free novice!
                 createMonk(1, player);
+            }
+        }
+    }
+
+    void advancePilgrims() {
+        for (Pilgrimage p : pilgrimagesStarted) {
+            if (p.active) {
+                p.advance(this);
             }
         }
     }
@@ -328,7 +345,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     void winterHousekeeping() {
         for (int player = 0; player < turnOrder.nPlayers(); player++) {
             // for each player feed monks, and then discard perishables
-            List<Monk> monks = monksIn(null, player);
+            List<Monk> monks = monksIn(DORMITORY, player);
             int requiredFood = monks.size();
             requiredFood -= getResource(player, Resource.BERRIES, STOREROOM);
             requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
@@ -373,7 +390,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<>(allMonks.values());
+        List<Component> retValue = new ArrayList<>(allMonks.values());
+        retValue.addAll(pilgrimagesStarted);
+        for (Deck<Pilgrimage> pdeck : pilgrimageDecks.values())
+            retValue.addAll(pdeck.getComponents());
+        return retValue;
     }
 
     /*
@@ -404,6 +425,17 @@ public class DiceMonasteryGameState extends AbstractGameState {
         retValue.nextRetirementReward = nextRetirementReward;
         retValue.textsWritten.putAll(textsWritten);
         retValue.treasuresCommissioned.putAll(treasuresCommissioned);
+
+        for (Pilgrimage p : pilgrimagesStarted)
+            retValue.pilgrimagesStarted.add(p.copy());
+
+        for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
+            Deck<Pilgrimage> thisDeck = pilgrimageDecks.get(destination);
+            Deck<Pilgrimage> copyDeck = thisDeck.copy();
+            if (playerId != -1) // only top card is visible, so shuffle if copied from any player's perspective
+                copyDeck.shuffle(rnd);
+            retValue.pilgrimageDecks.put(destination, copyDeck);
+        }
 
         retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
 
@@ -437,13 +469,15 @@ public class DiceMonasteryGameState extends AbstractGameState {
                  other.playerBids.equals(playerBids) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
                 other.textsWritten.equals(textsWritten) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
+                other.pilgrimagesStarted.equals(pilgrimagesStarted) && other.pilgrimageDecks.equals(pilgrimageDecks) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten, treasuresCommissioned) +
+                gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten, treasuresCommissioned,
+                pilgrimageDecks, pilgrimagesStarted) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

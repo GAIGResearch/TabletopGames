@@ -16,7 +16,7 @@ public class DiceMonasteryConstants {
         MEADOW(1), KITCHEN(2), WORKSHOP(3),
         GATEHOUSE(1), LIBRARY(4), CHAPEL(1),
         DORMITORY(0), STOREROOM(0), SUPPLY(0),
-        RETIRED(0), GRAVEYARD(0);
+        PILGRIMAGE(0), RETIRED(0), GRAVEYARD(0);
 
         public final int dieMinimum;
 

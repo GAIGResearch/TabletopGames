@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.Deck;
 import games.dicemonastery.actions.*;
 import utilities.Pair;
 
@@ -56,6 +57,17 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
             state.addResource(p, SHILLINGS, 6);
             state.addResource(p, PRAYER, 1);
+        }
+
+        for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
+            Deck<Pilgrimage> deck = state.pilgrimageDecks.get(destination);
+            deck.clear();
+            // add all four cards
+            for (int i = 0; i < 3; i++) {
+                deck.add(new Pilgrimage(destination, false));
+            }
+            deck.add(new Pilgrimage(destination, true));
+            deck.shuffle(state.rnd);
         }
 
         state.drawBonusTokens();
