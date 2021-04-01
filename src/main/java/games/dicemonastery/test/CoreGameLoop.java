@@ -431,6 +431,8 @@ public class CoreGameLoop {
         advanceToJustBeforeStartofWinterandRemoveFood();
 
         state.addVP(10 - state.getVictoryPoints(1), 1);
+        state.putToken(CHAPEL, DiceMonasteryConstants.BONUS_TOKEN.DEVOTION, 0);
+        state.putToken(CHAPEL, DiceMonasteryConstants.BONUS_TOKEN.DEVOTION, 1);
 
         state.createMonk(1, 1);  // ensure we have at least one Piety 1 monk
         List<Monk> monksP1 = state.monksIn(null, 1);
@@ -438,6 +440,7 @@ public class CoreGameLoop {
         int totalOners = (int) monksP1.stream().filter(m -> m.getPiety() == 1).count();
         assertTrue(totalOners > 0);
         int monksInChapelWhoWillPipUp = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() < 6).count();
+        int monksInChapelWhoWillRetire = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 6).count();
         int pietyOneMonksInChapel =  (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
         totalOners -= pietyOneMonksInChapel; // they won't be oners when they get to feeding time
 
@@ -447,7 +450,7 @@ public class CoreGameLoop {
         assertEquals(WINTER, turnOrder.getSeason());
 
         int newPips = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).sum();
-        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp, newPips);
+        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp - monksInChapelWhoWillRetire * 6, newPips);
         assertEquals(10 - monksP1.size(), state.getVictoryPoints(1));
     }
 

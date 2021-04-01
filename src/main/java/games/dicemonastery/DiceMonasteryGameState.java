@@ -245,6 +245,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 .collect(toList());
     }
 
+    public Monk getMonkById(int id) {
+        return allMonks.get(id);
+    }
+
     public ActionArea getMonkLocation(int id) {
         return monkLocations.get(id);
     }
@@ -283,6 +287,17 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 createMonk(1, player);
             }
         }
+    }
+
+    public Pilgrimage peekAtNextPilgrimageTo(Pilgrimage.DESTINATION destination) {
+        return pilgrimageDecks.get(destination).peek();
+    }
+
+    public Pilgrimage startPilgrimage(Pilgrimage.DESTINATION destination, Monk monk) {
+        Pilgrimage retValue = pilgrimageDecks.get(destination).draw();
+        retValue.startPilgrimage(monk, this);
+        pilgrimagesStarted.add(retValue);
+        return retValue;
     }
 
     void advancePilgrims() {

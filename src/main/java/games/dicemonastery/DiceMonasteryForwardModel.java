@@ -8,17 +8,16 @@ import core.components.Deck;
 import games.dicemonastery.actions.*;
 import utilities.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
@@ -192,7 +191,24 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             if (turnOrder.getActionPointsLeft() > 2 &&
                                     state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
                                 retValue.add(HIRE_NOVICE);
-                            // TODO: "Go on pilgrimage" not yet implemented
+                            List<Monk> eligibleMonks = state.monksIn(GATEHOUSE, currentPlayer);
+                            int highestPiety = eligibleMonks.stream()
+                                    .max(comparingInt(Monk::getPiety))
+                                    .orElseThrow(() -> new AssertionError("No Monks in Gatehouse?"))
+                                    .piety;
+                            for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
+                                if (turnOrder.getActionPointsLeft() >= destination.minPiety && highestPiety >= destination.minPiety
+                                        && state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= destination.cost) {
+                                    Set<Integer> validPieties = eligibleMonks.stream()
+                                            .map(Monk::getPiety)
+                                            .filter(piety -> piety >= destination.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+
+                                    Pilgrimage topCard = state.peekAtNextPilgrimageTo(destination);
+                                    if (topCard != null) {
+                                        validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(destination, p)));
+                                    }
+                                }
+                            }
                             break;
                         case LIBRARY:
                             for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values()) {

@@ -94,16 +94,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                             initialiseUseMonkBooleans(state);
                         } else {
                             // we have completed this phase
-                            state.springAutumnHousekeeping();
-                            listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
-                            season = season.next();
-                            if (season == SUMMER && getYear() == 1)
-                                season = season.next(); // we skip Summer in the first year
-                            if (season == WINTER)
-                                state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
-                            // and set the player back to the abbot
-                            turnOwner = abbot;
-                            state.setGamePhase(Phase.PLACE_MONKS);
+                            endRound(state);
                         }
                     }
                 }
@@ -113,15 +104,12 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 if (state.allBidsIn()) {
                     // we have completed SUMMER bidding
                     state.executeBids();
-                    state.summerHousekeeping();
-                    listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
-                    season = season.next();
-                    turnOwner = firstPlayerWithMonks(state);
+                    endRound(state);
                 }
                 break;
             case WINTER:
                 turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
-                // and then increment year
+                // round over if we get back to abbot as first player
                 if (turnOwner == abbot)
                     endRound(state);
                 break;
@@ -143,14 +131,30 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     public void endRound(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
-        roundCounter++;
-        season = season.next();
-        if (getYear() > nMaxRounds) {
-            state.endGame();
+        switch (season) {
+            case SPRING:
+            case AUTUMN:
+                state.springAutumnHousekeeping();
+                break;
+            case SUMMER:
+                state.summerHousekeeping();
+                break;
+            case WINTER:
+                abbot = (abbot + 1 + nPlayers) % nPlayers;
+                roundCounter++;  // increment year
+                if (getYear() > nMaxRounds) {
+                    state.endGame();
+                }
+                break;
         }
-        abbot = (abbot + 1 + nPlayers) % nPlayers;
-        turnOwner = firstPlayerWithMonks(state);
+        season = season.next();
+        if (season == SUMMER && getYear() == 1)
+            season = season.next(); // we skip Summer in the first year
+        if (season == WINTER)
+            state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
         state.checkAtLeastOneMonk();
+        state.setGamePhase(Phase.PLACE_MONKS);
+        turnOwner = firstPlayerWithMonks(state);
     }
 
     private int firstPlayerWithMonks(DiceMonasteryGameState state) {

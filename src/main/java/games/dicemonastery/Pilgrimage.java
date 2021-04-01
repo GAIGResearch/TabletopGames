@@ -65,7 +65,7 @@ public class Pilgrimage extends Component {
     public void startPilgrimage(Monk monk, DiceMonasteryGameState state) {
         pilgrimId = monk.getComponentID();
         player = monk.getOwnerId();
-        state.addResource(player, SHILLINGS, destination.cost);
+        state.addResource(player, SHILLINGS, -destination.cost);
         state.moveMonk(pilgrimId, GATEHOUSE, PILGRIMAGE);
         progress = 0;
         state.addVP(destination.vpPerStep[0], player);
@@ -80,18 +80,22 @@ public class Pilgrimage extends Component {
         }
         progress++;
         state.addVP(destination.vpPerStep[progress], player);
-        if (progress == destination.vpPerStep.length) {
+        if (progress == destination.vpPerStep.length - 1) {
             // we have finished
             if (isRelic) {
                 state.addVP(RELIC_VP, player);
             } else {
                 state.addResource(player, destination.finalReward, 1);
             }
-            Monk pilgrim  = (Monk) state.getComponentById(pilgrimId);
+            Monk pilgrim  = state.getMonkById(pilgrimId);
             state.moveMonk(pilgrimId, PILGRIMAGE, DORMITORY);
             pilgrim.promote(state);
             active = false;
         }
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     @Override

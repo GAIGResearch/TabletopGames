@@ -475,6 +475,7 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).contains(new VisitMarket()));
 
         state.useAP(-1);
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, 6 - state.getResource(state.getCurrentPlayer(), SHILLINGS, STOREROOM));
         assertEquals(4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
 
