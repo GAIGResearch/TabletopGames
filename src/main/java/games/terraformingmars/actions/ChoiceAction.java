@@ -30,8 +30,7 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        if (player == -1) player = gameState.getCurrentPlayer();
+    public boolean _execute(TMGameState gameState) {
         for (TMAction a: actions) a.player = player;
         gameState.setActionInProgress(this);
         return true;

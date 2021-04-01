@@ -30,16 +30,14 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
+    public boolean _execute(TMGameState gs) {
         if (getCardID() != -1) {
-            TMGameState gs = (TMGameState) gameState;
-            TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
+            TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
             TMCard card = (TMCard) gs.getComponentById(getCardID());
             card.nResourcesOnCard += amount;
-            return super.execute(gs);
+            return true;
         }
-        gameState.setActionInProgress(this);
-        if (player == -1) player = gameState.getCurrentPlayer();
+        gs.setActionInProgress(this);
         return true;
     }
 

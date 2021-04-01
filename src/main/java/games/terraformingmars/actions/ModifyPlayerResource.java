@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
-import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
@@ -82,42 +81,43 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        TMGameState ggs = (TMGameState)gs;
+    public boolean _execute(TMGameState gs) {
         if (targetPlayer == -2) {
             // Player chooses who this applies to
             gs.setActionInProgress(this);
             return true;
         } else {
-            if (targetPlayer == -1 && player != -1) {
-                targetPlayer = player;
-            } else {
-                // current player
-                targetPlayer = gs.getCurrentPlayer();
-                player = targetPlayer;
+            if (targetPlayer == -1) {
+                if (player != -1) {
+                    targetPlayer = player;
+                } else {
+                    // current player
+                    targetPlayer = gs.getCurrentPlayer();
+                    player = targetPlayer;
+                }
             }
             if (production) {
-                counterID = ggs.getPlayerProduction()[targetPlayer].get(resource).getComponentID();
+                counterID = gs.getPlayerProduction()[targetPlayer].get(resource).getComponentID();
             } else {
-                counterID = ggs.getPlayerResources()[targetPlayer].get(resource).getComponentID();
+                counterID = gs.getPlayerResources()[targetPlayer].get(resource).getComponentID();
             }
             if (tagToCount != null) {
                 if (any || opponents) {
                     int count = 0;
                     for (int i = 0; i < gs.getNPlayers(); i++) {
                         if (opponents && i == player) continue;
-                        count += ggs.getPlayerCardsPlayedTags()[i].get(tagToCount).getValue();
+                        count += gs.getPlayerCardsPlayedTags()[i].get(tagToCount).getValue();
                     }
                     change *= count;
                 } else {
-                    change *= ggs.getPlayerCardsPlayedTags()[player].get(tagToCount).getValue();
+                    change *= gs.getPlayerCardsPlayedTags()[player].get(tagToCount).getValue();
                 }
             } else if (tileToCount != null) {
                 if (onMars) {
                     int count = 0;
-                    for (int i = 0; i < ggs.getBoard().getHeight(); i++) {
-                        for (int j = 0; j < ggs.getBoard().getHeight(); j++) {
-                            TMMapTile mt = ggs.getBoard().getElement(j, i);
+                    for (int i = 0; i < gs.getBoard().getHeight(); i++) {
+                        for (int j = 0; j < gs.getBoard().getHeight(); j++) {
+                            TMMapTile mt = gs.getBoard().getElement(j, i);
                             if (mt != null && mt.getTilePlaced() == tileToCount) {
                                 if (any) count ++;
                                 else if (opponents && mt.getOwner() != player || !opponents && mt.getOwner() == player) count ++;
@@ -130,18 +130,18 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                         int count = 0;
                         for (int i = 0; i < gs.getNPlayers(); i++) {
                             if (opponents && i == player) continue;
-                            count += ggs.getPlayerTilesPlaced()[i].get(tileToCount).getValue();
+                            count += gs.getPlayerTilesPlaced()[i].get(tileToCount).getValue();
                         }
                         change *= count;
                     } else {
-                        change *= ggs.getPlayerTilesPlaced()[player].get(tileToCount).getValue();
+                        change *= gs.getPlayerTilesPlaced()[player].get(tileToCount).getValue();
                     }
                 }
             }
             if (change > 0) {
-                ggs.getPlayerResourceIncreaseGen()[targetPlayer].put(resource, true);
+                gs.getPlayerResourceIncreaseGen()[targetPlayer].put(resource, true);
             }
-            return super.execute(gs);
+            return super._execute(gs);
         }
     }
 

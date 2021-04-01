@@ -16,11 +16,8 @@ public class BuyCard extends TMAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        TMGameState gs = (TMGameState) gameState;
-        TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        int player = this.player;
-        if (player == -1) player = gs.getCurrentPlayer();
+    public boolean _execute(TMGameState gs) {
+        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
 
         TMCard card = (TMCard) gs.getComponentById(getCardID());
         if (card.cardType == TMTypes.CardType.Corporation) {
@@ -51,7 +48,7 @@ public class BuyCard extends TMAction {
             c.decrement(gp.getProjectPurchaseCost());
         }
         gs.getPlayerCardChoice()[player].remove(card);
-        return super.execute(gs);
+        return true;
     }
 
     @Override

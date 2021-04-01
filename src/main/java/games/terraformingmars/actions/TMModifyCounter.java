@@ -3,6 +3,7 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 
 import java.util.Objects;
@@ -30,16 +31,15 @@ public class TMModifyCounter extends TMAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(TMGameState gs) {
         Counter c = (Counter)gs.getComponentById(counterID);
         if (change > 0 && !c.isMaximum()) {
             c.increment(change);
-            return super.execute(gs);
+            return true;
         } else if (change < 0 && !c.isMinimum()) {
             c.increment(change);
-            return super.execute(gs);
+            return true;
         }
-        super.execute(gs);
         return false;
     }
 

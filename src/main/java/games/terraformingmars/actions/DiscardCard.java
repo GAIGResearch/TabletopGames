@@ -7,8 +7,6 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-import java.util.Objects;
-
 public class DiscardCard extends TMAction {
 
     public DiscardCard(int player, int cardID) {
@@ -17,19 +15,17 @@ public class DiscardCard extends TMAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        TMGameState gs = (TMGameState) gameState;
-        TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        int player = this.player;
-        if (player == -1) player = gs.getCurrentPlayer();
+    public boolean _execute(TMGameState gs) {
+        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
         TMCard card = (TMCard) gs.getComponentById(getCardID());
         if (card != null) {
             if (card.cardType != TMTypes.CardType.Corporation) {
                 gs.getDiscardCards().add(card);
             }
             gs.getPlayerCardChoice()[player].remove(card);
+            return true;
         }
-        return super.execute(gs);
+        return false;
     }
 
     @Override

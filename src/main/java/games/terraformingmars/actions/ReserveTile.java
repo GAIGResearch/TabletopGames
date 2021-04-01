@@ -28,14 +28,12 @@ public class ReserveTile extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(TMGameState gs) {
         if (mapTileID != -1) {
-            TMGameState ggs = (TMGameState) gs;
-            TMMapTile mt = (TMMapTile)ggs.getComponentById(mapTileID);
+            TMMapTile mt = (TMMapTile)gs.getComponentById(mapTileID);
             mt.setReserved(player);
-            return super.execute(gs);
+            return true;
         }
-        if (player == -1) player = gs.getCurrentPlayer();
         gs.setActionInProgress(this);
         return true;
     }

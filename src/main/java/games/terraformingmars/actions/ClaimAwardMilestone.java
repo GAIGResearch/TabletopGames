@@ -28,18 +28,18 @@ public class ClaimAwardMilestone extends TMAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(TMGameState gs) {
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
 
         Award toClaim = (Award) gs.getComponentById(toClaimID);
-        if (toClaim.claim((TMGameState) gs, player)) {
+        if (toClaim.claim(gs, player)) {
             if (toClaim instanceof Milestone) {
-                ((TMGameState)gs).getnMilestonesClaimed().increment(1);
+                gs.getnMilestonesClaimed().increment(1);
             } else {
-                ((TMGameState)gs).getnAwardsFunded().increment(1);
+                gs.getnAwardsFunded().increment(1);
             }
-            return super.execute(gs);
+            return true;
         }
         return false;
     }

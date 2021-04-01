@@ -127,11 +127,19 @@ public class TMAction extends AbstractAction {
         return true;
     }
 
-    @Override
-    public boolean execute(AbstractGameState gameState) {
-        if (!canBePlayed((TMGameState) gameState)) return false;
+    public boolean _execute(TMGameState gameState) { return true; }
 
+    @Override
+    public final boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
+        if (player == -1) player = gameState.getCurrentPlayer();
+        if (!canBePlayed(gs)) return false;
+        boolean s = _execute(gs);
+        postExecute(gs);
+        return s;
+    }
+
+    public void postExecute(TMGameState gs) {
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
         if (!freeActionPoint) {
@@ -157,8 +165,6 @@ public class TMAction extends AbstractAction {
         } else if (nCards < 0) {
             // TODO player needs to discard nCards
         }
-
-        return true;
     }
 
     @Override

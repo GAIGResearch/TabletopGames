@@ -22,17 +22,14 @@ public class PlayCard extends TMAction {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        TMGameState gs = (TMGameState) gameState;
-        TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-        int player = this.player;
-        if (player == -1) player = gs.getCurrentPlayer();
+    public boolean _execute(TMGameState gs) {
+        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
         TMCard card = (TMCard) gs.getComponentById(getCardID());
-        playCard(gs, player, card);
-        return super.execute(gs);
+        playCard(gs, card);
+        return true;
     }
 
-    private void playCard(TMGameState gs, int player, TMCard card) {
+    private void playCard(TMGameState gs, TMCard card) {
         // Second: remove from hand, resolve on-play effects and add tags etc. to cards played lists
         gs.getPlayerHands()[player].remove(card);
 

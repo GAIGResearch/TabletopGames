@@ -116,22 +116,21 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(TMGameState gs) {
         if (mapTileID != -1 && tile != null) {
-            TMGameState ggs = (TMGameState) gs;
-            TMMapTile mt = (TMMapTile)ggs.getComponentById(mapTileID);
-            boolean success = mt.placeTile(tile, ggs) && super.execute(gs);
+            TMMapTile mt = (TMMapTile)gs.getComponentById(mapTileID);
+            boolean success = mt.placeTile(tile, gs);
             // Add money earned from adjacent oceans
             if (success && onMars) {
-                int nOceans = nAdjacentTiles(ggs, mt, TMTypes.Tile.Ocean);
-                ggs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).increment(nOceans * ((TMGameParameters) gs.getGameParameters()).getnMCGainedOcean());
+                int nOceans = nAdjacentTiles(gs, mt, TMTypes.Tile.Ocean);
+                gs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).increment(nOceans * ((TMGameParameters) gs.getGameParameters()).getnMCGainedOcean());
                 if (resourcesGainedRestriction != null) {
                     // Production of each resource type gained increased by 1
                     TMTypes.Resource[] gained = mt.getResources();
                     HashSet<TMTypes.Resource> typesAdded = new HashSet<>();
                     for (TMTypes.Resource r : gained) {
                         if (contains(resourcesGainedRestriction, r) && !typesAdded.contains(r)) {
-                            ggs.getPlayerProduction()[player].get(r).increment(1);
+                            gs.getPlayerProduction()[player].get(r).increment(1);
                             typesAdded.add(r);
                         }
                     }
@@ -144,7 +143,6 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             }
             return success;
         }
-        if (player == -1) player = gs.getCurrentPlayer();
         gs.setActionInProgress(this);
         return true;
     }

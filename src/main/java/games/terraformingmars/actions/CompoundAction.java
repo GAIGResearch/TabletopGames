@@ -2,6 +2,7 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 
@@ -26,13 +27,13 @@ public class CompoundAction extends TMAction{
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        if (player == -1) player = gameState.getCurrentPlayer();
+    public boolean _execute(TMGameState gameState) {
+        boolean s = true;
         for (TMAction a: actions) {
             a.player = player;
-            a.execute(gameState);
+            s &= a.execute(gameState);
         }
-        return super.execute(gameState);
+        return s;
     }
 
     @Override

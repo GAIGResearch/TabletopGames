@@ -25,9 +25,8 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
-        TMGameState gs = (TMGameState) gameState;
-        TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
+    public boolean _execute(TMGameState gs) {
+        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
 
         // if only one option to pay left, just do it, don't ask again
 
@@ -62,11 +61,11 @@ public class PayForAction extends TMAction implements IExtendedSequence {
                 stage = resourcesToPayWith.length;
                 return s1 && s2;
             } else {
-                gameState.setActionInProgress(this);
+                gs.setActionInProgress(this);
                 return true;
             }
         } else {
-            gameState.setActionInProgress(this);
+            gs.setActionInProgress(this);
             return true;
         }
     }

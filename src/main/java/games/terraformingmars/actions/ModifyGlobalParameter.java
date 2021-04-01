@@ -25,18 +25,15 @@ public class ModifyGlobalParameter extends TMModifyCounter {
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState) {
+    public boolean _execute(TMGameState gs) {
         // When global parameters change, TR is increased
-        TMGameState gs = (TMGameState) gameState;
-        int player = this.player;
-        if (player == -1) player = gs.getCurrentPlayer();
         Counter c = gs.getGlobalParameters().get(param);
         if (counterID == -1) counterID = c.getComponentID();
         if (change > 0 && !c.isMaximum() || change < 0 && !c.isMinimum()) {
             gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
             gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
         }
-        return super.execute(gs);
+        return super._execute(gs);
     }
 
     @Override
