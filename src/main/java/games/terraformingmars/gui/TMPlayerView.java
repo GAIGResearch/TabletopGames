@@ -2,8 +2,8 @@ package games.terraformingmars.gui;
 
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.rules.Award;
-import games.terraformingmars.rules.Milestone;
+import games.terraformingmars.components.Award;
+import games.terraformingmars.components.Milestone;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 
@@ -155,7 +155,7 @@ public class TMPlayerView extends ComponentView {
             if (m.isClaimed()) color = playerColors[m.claimed];
 
             int progress = m.checkProgress(gs, focusPlayer);
-            text = m.name + ": " + progress + "/" + m.min;
+            text = m.getComponentName() + ": " + progress + "/" + m.min;
             drawShadowStringCentered(g, text,
                     new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), color, null, 12);
             startX += metrics.stringWidth(text) + spacing;
@@ -174,7 +174,7 @@ public class TMPlayerView extends ComponentView {
             if (a.isClaimed()) color = playerColors[a.claimed];
 
             int progress = a.checkProgress(gs, focusPlayer);
-            text = a.name + ": " + progress;
+            text = a.getComponentName() + ": " + progress;
             drawShadowStringCentered(g, text,
                     new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), color, null, 12);
             startX += metrics.stringWidth(text) + spacing;

@@ -1,4 +1,4 @@
-package games.terraformingmars.rules;
+package games.terraformingmars.components;
 
 import games.terraformingmars.TMGameState;
 
@@ -12,14 +12,19 @@ public class Milestone extends Award {
         this.min = min;
     }
 
+    protected Milestone(String name, int min, String counterID, int componentID) {
+        super(name, counterID, componentID);
+        this.min = min;
+    }
+
     @Override
     public boolean canClaim(TMGameState gs, int player) {
         int count = checkProgress(gs, player);
-        return claimed == -1 && count >= min;
+        return !gs.getnMilestonesClaimed().isMaximum() && claimed == -1 && count >= min;
     }
 
     public Milestone copy() {
-        Milestone copy = new Milestone(name, min, counterID);
+        Milestone copy = new Milestone(componentName, min, counterID);
         copy.claimed = claimed;
         return copy;
     }
@@ -28,16 +33,14 @@ public class Milestone extends Award {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Milestone)) return false;
+        if (!super.equals(o)) return false;
         Milestone milestone = (Milestone) o;
-        return min == milestone.min &&
-                claimed == milestone.claimed &&
-                Objects.equals(name, milestone.name) &&
-                Objects.equals(counterID, milestone.counterID);
+        return min == milestone.min;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, min, counterID, claimed);
+        return Objects.hash(super.hashCode(), min);
     }
 }
 

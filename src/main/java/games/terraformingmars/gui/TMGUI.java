@@ -329,7 +329,7 @@ public class TMGUI extends AbstractGUI {
                     int idx = Integer.parseInt(code);
                     // card idx can be played
                     for (TMAction action: playCardActions) {
-                        if (action.cardID == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
+                        if (action.getCardID() == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
                             actionButtons[i].setVisible(true);
                             actionButtons[i].setButtonAction(action, "Play");
                             i++;

@@ -122,8 +122,8 @@ public class TMCard extends Card {
                 TMAction a = TMAction.parseAction(action, false, card.componentID).a;
                 actions.add(a);
                 a.actionType = TMTypes.ActionType.ActiveAction;
-                a.cost = cost;
-                a.costResource = costResource;
+                a.setActionCost(costResource, cost, -1);
+                a.setCardID(card.getComponentID());
             } else if (type.equalsIgnoreCase("discount")) {
                 // Parse discounts
                 int amount = (int)(long)effect.get("amount");
@@ -325,7 +325,7 @@ public class TMCard extends Card {
                                         if (a != null) {
                                             immediateEffects.add(a);
                                             if (a instanceof PlaceTile) {
-                                                ((PlaceTile) a).cardID = card.getComponentID();
+                                                a.setCardID(card.getComponentID());
                                             }
                                             // TODO if add resource on card (not other), set resource on this card
                                         } else {

@@ -7,7 +7,7 @@ import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.rules.requirements.Requirement;
+import games.terraformingmars.rules.requirements.ResourceRequirement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,16 +31,22 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.production = production;
         this.targetPlayer = player;
         this.player = player;
+        if (change < 0) {
+            this.requirements.add(new ResourceRequirement(resource, Math.abs(change), production, player, -1));
+        }
     }
 
-    public ModifyPlayerResource(TMTypes.StandardProject standardProject, int player, int change, TMTypes.Resource resource) {
+    public ModifyPlayerResource(TMTypes.StandardProject standardProject, int cost, int player, int change, TMTypes.Resource resource) {
         // Used for standard project definition
         super(standardProject, -1, change, false);
         this.resource = resource;
         this.production = true;
         this.targetPlayer = player;
         this.player = player;
-        costResource = TMTypes.Resource.MegaCredit;
+        this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
+        if (change < 0) {
+            this.requirements.add(new ResourceRequirement(resource, Math.abs(change), true, player, -1));
+        }
     }
 
     public ModifyPlayerResource(int player, int targetPlayer, int change, TMTypes.Resource resource, boolean production,
@@ -57,6 +63,9 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.any = any;
         this.opponents = opponents;
         this.onMars = onMars;
+        if (change < 0) {
+            this.requirements.add(new ResourceRequirement(resource, Math.abs(change), production, targetPlayer, -1));
+        }
     }
 
     public ModifyPlayerResource(int player, int targetPlayer, int change, TMTypes.Resource resource, boolean production,
@@ -67,6 +76,9 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.production = production;
         this.targetPlayer = targetPlayer;
         this.player = player;
+        if (change < 0) {
+            this.requirements.add(new ResourceRequirement(resource, Math.abs(change), production, targetPlayer, -1));
+        }
     }
 
     @Override
@@ -193,33 +205,4 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         return targetPlayer != -2;
     }
 
-    @Override
-    public int getCost(TMGameState gs) {
-        if (standardProject == TMTypes.StandardProject.PowerPlant) return ((TMGameParameters)gs.getGameParameters()).getnCostSPEnergy();
-        return super.getCost(gs);
-    }
-
-    @Override
-    public boolean canBePlayed(TMGameState gs) {
-        if (played && standardProject == null && basicResourceAction == null) return false;
-        for (Requirement r : requirements) {
-            if (!r.testCondition(gs)) return false;
-        }
-        if (standardProject != null && !canPay(gs)) return false;
-        if (change < 0) {  // TODO: "up to"
-            int p = player;
-            if (p == -1) {
-                // Can current player pay?
-                p = gs.getCurrentPlayer();
-                return gs.canPlayerPay(p, null, null, resource, Math.abs(change), production);
-            } else if (p == -2) {
-                // Can any player pay?
-                for (int i = 0; i < gs.getNPlayers(); i++) {
-                    if (gs.canPlayerPay(i, null, null, resource, Math.abs(change), production)) return true;
-                }
-                return false;
-            }
-        }
-        return true;
-    }
 }

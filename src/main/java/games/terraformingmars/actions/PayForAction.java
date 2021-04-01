@@ -21,9 +21,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     public PayForAction(TMTypes.ActionType type, int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardID) {
         super(type, player, true);
         this.action = action;
-        this.cost = Math.abs(costTotal);
-        this.costResource = resourceToPay;
-        this.cardID = cardID;  // -1 if no card needed
+        this.setActionCost(resourceToPay, Math.abs(costTotal), cardID);
     }
 
     @Override
@@ -31,7 +29,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
 
-        // TODO if only one option to pay left, just do it, don't ask again
+        // if only one option to pay left, just do it, don't ask again
 
         // Do extended sequence
         // Pay for card with resources until all paid
@@ -40,15 +38,15 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         if (this.player == -1) player = gs.getCurrentPlayer();
 
         TMCard card = null;
-        if (cardID > -1) {
-            card = (TMCard) gs.getComponentById(cardID);
-            cost -= gs.discountCardCost(card, player);  // Apply card discount
+        if (getCardID() > -1) {
+            card = (TMCard) gs.getComponentById(getCardID());
+            setCost(getCost() - gs.discountCardCost(card, player));  // Apply card discount
         } else {
             // Check action type discounts
-            cost -= gs.discountActionTypeCost(this.action, player);
+            setCost(getCost() - gs.discountActionTypeCost(this.action, player));
         }
-        HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(player, card, null, costResource);
-        resources.add(costResource);  // Can always pay with itself
+        HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(player, card, null, getCostResource());
+        resources.add(getCostResource());  // Can always pay with itself
 
         resourcesToPayWith = resources.toArray(new TMTypes.Resource[0]);
         stage = 0;
@@ -80,11 +78,11 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Find minimum that must be spent of this resource so that the card is still payable with remaining resources
         HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
 
-        TMCard card = (TMCard) gs.getComponentById(cardID);
-        int sum = gs.playerResourceSum(player, card, resourcesRemaining, costResource);
-        int remaining = cost - costPaid - sum;
-        int min = Math.max(0, (int)(Math.ceil(remaining/gs.getResourceMapRate(res, costResource))));
-        int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((cost - costPaid)/gs.getResourceMapRate(res, costResource))));
+        TMCard card = (TMCard) gs.getComponentById(getCardID());
+        int sum = gs.playerResourceSum(player, card, resourcesRemaining, getCostResource());
+        int remaining = getCost() - costPaid - sum;
+        int min = Math.max(0, (int)(Math.ceil(remaining/gs.getResourceMapRate(res, getCostResource()))));
+        int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((getCost() - costPaid)/gs.getResourceMapRate(res, getCostResource()))));
 
         // Can pay between min and max of this resource
         ArrayList<AbstractAction> actions = new ArrayList<>();
@@ -111,9 +109,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         }
         TMGameState gs = (TMGameState) state;
         TMTypes.Resource res = resourcesToPayWith[stage];
-        costPaid += Math.abs(((ModifyPlayerResource)action).change) * gs.getResourceMapRate(res, costResource);
+        costPaid += Math.abs(((ModifyPlayerResource)action).change) * gs.getResourceMapRate(res, getCostResource());
         stage++;
-        if (costPaid >= cost) {
+        if (costPaid >= getCost()) {
             // Action paid for, execute
             this.action.execute(state);
             stage = resourcesToPayWith.length;
@@ -131,7 +129,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return stage == resourcesToPayWith.length || costPaid == cost;
+        return stage == resourcesToPayWith.length || costPaid == getCost();
     }
 
     @Override
@@ -157,11 +155,11 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "Pay " + cost + " " + costResource + " for " + action.toString();
+        return "Pay " + getCost() + " " + getCostResource() + " for " + action.toString();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Pay " + cost + " " + costResource + " for " + action.getString(gameState);
+        return "Pay " + getCost() + " " + getCostResource() + " for " + action.getString(gameState);
     }
 }

@@ -13,7 +13,7 @@ public class DiscardCard extends TMAction {
 
     public DiscardCard(int player, int cardID) {
         super(player, true);
-        this.cardID = cardID;
+        setCardID(cardID);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class DiscardCard extends TMAction {
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
-        TMCard card = (TMCard) gs.getComponentById(cardID);
+        TMCard card = (TMCard) gs.getComponentById(getCardID());
         if (card != null) {
             if (card.cardType != TMTypes.CardType.Corporation) {
                 gs.getDiscardCards().add(card);
@@ -39,12 +39,12 @@ public class DiscardCard extends TMAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Discard " + gameState.getComponentById(cardID).getComponentName();
+        return "Discard " + gameState.getComponentById(getCardID()).getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Discard card id " + cardID;
+        return "Discard card id " + getCardID();
     }
 
 }

@@ -5,17 +5,20 @@ import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
-
-import java.util.*;
+import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 
 
 public class PlayCard extends TMAction {
 
     public PlayCard(int player, TMCard card, boolean free) {
         super(TMTypes.ActionType.PlayCard, player, free);
-        this.cardID = card.getComponentID();
-        this.costResource = TMTypes.Resource.MegaCredit;
+        this.setActionCost(TMTypes.Resource.MegaCredit, card.cost, card.getComponentID());
+
         this.requirements.addAll(card.requirements);
+        for (TMAction aa : card.immediateEffects) {
+            // All immediate effects must also be playable in order for this card to be playable
+            this.requirements.add(new PlayableActionRequirement(aa));
+        }
     }
 
     @Override
@@ -24,7 +27,7 @@ public class PlayCard extends TMAction {
         TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
-        TMCard card = (TMCard) gs.getComponentById(cardID);
+        TMCard card = (TMCard) gs.getComponentById(getCardID());
         playCard(gs, player, card);
         return super.execute(gs);
     }
@@ -77,44 +80,13 @@ public class PlayCard extends TMAction {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PlayCard)) return false;
-        if (!super.equals(o)) return false;
-        PlayCard playCard = (PlayCard) o;
-        return cardID == playCard.cardID;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), cardID);
-    }
-
-    @Override
     public String getString(AbstractGameState gameState) {
-        TMCard card = (TMCard) gameState.getComponentById(cardID);
+        TMCard card = (TMCard) gameState.getComponentById(getCardID());
         return "Play card " + card.getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Play card id " + cardID;
-    }
-
-    @Override
-    public int getCost(TMGameState gs) {
-        TMCard card = (TMCard) gs.getComponentById(cardID);
-        return card.cost;
-    }
-
-    @Override
-    public boolean canBePlayed(TMGameState gs) {
-        if (!super.canBePlayed(gs)) return false;
-        // Immediate effects must also be playable for the card to be playable
-        TMCard card = (TMCard) gs.getComponentById(cardID);
-        for (TMAction aa : card.immediateEffects) {
-            if (!aa.canBePlayed(gs)) return false;
-        }
-        return true;
+        return "Play card id " + getCardID();
     }
 }

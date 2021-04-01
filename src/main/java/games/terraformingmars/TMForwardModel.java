@@ -8,8 +8,9 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
 import games.terraformingmars.actions.*;
+import games.terraformingmars.components.Award;
+import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
-import games.terraformingmars.rules.*;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
 import utilities.Utils;
 
@@ -253,7 +254,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 actions.add(new TMAction(player));  // Pass
             } else {
                 for (int i = 0; i < cardChoice.getSize(); i++) {
-                    actions.add(new BuyCard(player, cardChoice.get(i).getComponentID()));
+                    actions.add(new BuyCard(player, cardChoice.get(i).getComponentID(), params.getProjectPurchaseCost()));
                 }
             }
         } else if (gs.getGamePhase() == Research) {
@@ -262,7 +263,7 @@ public class TMForwardModel extends AbstractForwardModel {
             if (cardChoice.getSize() == 0) {
                 actions.add(new TMAction(player));  // Pass
             } else {
-                BuyCard a = new BuyCard(player, cardChoice.get(0).getComponentID());
+                BuyCard a = new BuyCard(player, cardChoice.get(0).getComponentID(), params.getProjectPurchaseCost());
                 if (a.canBePlayed(gs)) {
                     actions.add(a);
                 }
@@ -285,10 +286,10 @@ public class TMForwardModel extends AbstractForwardModel {
             // Wrap actions that can actually be played and must be paid for
             for (TMAction a: possibleActions) {
                 if (a.canBePlayed(gs)) {
-                    int cost = a.getCost(gs);
+                    int cost = a.getCost();
                     int cardID = a.getCardID();  // -1 if no card
                     if (cost > 0) {
-                        actions.add(new PayForAction(a.actionType, player, a, a.getResource(), cost, cardID));
+                        actions.add(new PayForAction(a.actionType, player, a, a.getCostResource(), cost, cardID));
                     } else {
                         actions.add(a);
                     }
@@ -314,16 +315,16 @@ public class TMForwardModel extends AbstractForwardModel {
         // Buy a standard project
         // - Discard cards for MC TODO
         // - Increase energy production 1 step for 11 MC
-        possibleActions.add(new ModifyPlayerResource(PowerPlant, player, 1, TMTypes.Resource.Energy));
+        possibleActions.add(new ModifyPlayerResource(PowerPlant, params.getnCostSPEnergy(), player, 1, TMTypes.Resource.Energy));
 
         // - Increase temperature 1 step for 14 MC
-        possibleActions.add(new ModifyGlobalParameter(StandardProject, TMTypes.GlobalParameter.Temperature, 1, false));
+        possibleActions.add(new ModifyGlobalParameter(StandardProject, TMTypes.Resource.MegaCredit, params.getnCostSPTemp(), TMTypes.GlobalParameter.Temperature, 1, false));
 
         // - Place ocean tile for 18 MC
-        possibleActions.add(new PlaceTile(Aquifer, player, TMTypes.Tile.Ocean, TMTypes.MapTileType.Ocean));
+        possibleActions.add(new PlaceTile(Aquifer, params.getnCostSPOcean(), player, TMTypes.Tile.Ocean, TMTypes.MapTileType.Ocean));
 
         // - Place greenery tile for 23 MC
-        possibleActions.add(new PlaceTile(Greenery, player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground));
+        possibleActions.add(new PlaceTile(Greenery, params.getnCostSPGreenery(), player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground));
 
         // - Place city tile and increase MC prod by 1 for 25 MC
         TMAction a1 = new PlaceTile(player, TMTypes.Tile.City, TMTypes.MapTileType.Ground, true);
@@ -331,21 +332,23 @@ public class TMForwardModel extends AbstractForwardModel {
         possibleActions.add(new CompoundAction(StandardProject, player, new TMAction[]{a1, a2}, params.nCostSPCity));
 
         // Claim a milestone
+        int milestoneCost = params.getnCostMilestone()[gs.getnMilestonesClaimed().getValue()];
         for (Milestone m : gs.milestones) {
-            possibleActions.add(new ClaimAwardMilestone(player, m));
+            possibleActions.add(new ClaimAwardMilestone(player, m, milestoneCost));
         }
         // Fund an award
+        int awardCost = params.getnCostAwards()[gs.getnAwardsFunded().getValue()];
         for (Award a : gs.awards) {
-            possibleActions.add(new ClaimAwardMilestone(player, a));
+            possibleActions.add(new ClaimAwardMilestone(player, a, awardCost));
         }
 
         // Use an active card action  - only 1, mark as used, then mark unused at the beginning of next generation
         possibleActions.addAll(gs.playerExtraActions[player]);
 
         // 8 plants into greenery tile
-        possibleActions.add(new PlaceTile(TMTypes.BasicResourceAction.PlantToGreenery, player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground));
+        possibleActions.add(new PlaceTile(TMTypes.BasicResourceAction.PlantToGreenery, params.getnCostGreeneryPlant(), player, TMTypes.Tile.Greenery, TMTypes.MapTileType.Ground));
         // 8 heat into temperature increase
-        possibleActions.add(new ModifyGlobalParameter(BasicResourceAction, TMTypes.GlobalParameter.Temperature, 1, false));
+        possibleActions.add(new ModifyGlobalParameter(BasicResourceAction, TMTypes.Resource.Heat, params.getnCostTempHeat(), TMTypes.GlobalParameter.Temperature, 1, false));
 
         return possibleActions;
     }

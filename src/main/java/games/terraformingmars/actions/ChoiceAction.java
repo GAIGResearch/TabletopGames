@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
 
 import java.util.Arrays;
@@ -18,6 +19,9 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
     public ChoiceAction(int player, TMAction[] actions) {
         super(player, true);
         this.actions = actions;
+        for (TMAction a: actions) {
+            this.requirements.add(new PlayableActionRequirement(a));
+        }
     }
 
     public ChoiceAction(int player, TMAction[] actions, boolean free, HashSet<Requirement<TMGameState>> requirements) {
@@ -35,8 +39,12 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
 
     @Override
     public boolean canBePlayed(TMGameState gs) {
-        for (TMAction a: actions) {
-            if (a.canBePlayed(gs)) return true;
+        // "OR" behaviour on requirements instead of default "AND"
+        if (played && standardProject == null && basicResourceAction == null) return false;
+        if (requirements != null && requirements.size() > 0) {
+            for (Requirement r: requirements) {
+                if (r.testCondition(gs)) return true;
+            }
         }
         return false;
     }

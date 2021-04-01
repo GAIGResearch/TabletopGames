@@ -7,15 +7,12 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-import java.util.Objects;
-
-
 public class BuyCard extends TMAction {
 
-    public BuyCard(int player, int cardID) {
+    public BuyCard(int player, int cardID, int cost) {
         super(player, true);
-        this.cardID = cardID;
-        this.costResource = TMTypes.Resource.MegaCredit;
+        this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
+        this.setCardID(cardID);
     }
 
     @Override
@@ -25,7 +22,7 @@ public class BuyCard extends TMAction {
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
 
-        TMCard card = (TMCard) gs.getComponentById(cardID);
+        TMCard card = (TMCard) gs.getComponentById(getCardID());
         if (card.cardType == TMTypes.CardType.Corporation) {
             // 1 card chosen, the rest are discarded
             gs.getPlayerCorporations()[player] = card;
@@ -63,47 +60,13 @@ public class BuyCard extends TMAction {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BuyCard)) return false;
-        if (!super.equals(o)) return false;
-        BuyCard buyCard = (BuyCard) o;
-        return cardID == buyCard.cardID;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), cardID);
-    }
-
-    @Override
     public String getString(AbstractGameState gameState) {
-        return "Buy " + gameState.getComponentById(cardID).getComponentName();
+        return "Buy " + gameState.getComponentById(getCardID()).getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Buy card id " + cardID;
+        return "Buy card id " + getCardID();
     }
 
-    @Override
-    public int getCost(TMGameState gs) {
-        return ((TMGameParameters)gs.getGameParameters()).getProjectPurchaseCost();
-    }
-
-    @Override
-    public boolean canPay(TMGameState gs) {
-        int p = player;
-        if (p == -1) {
-            // Can current player pay?
-            p = gs.getCurrentPlayer();
-        } else if (p == -2) {
-            // Can any player pay?
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (gs.playerResourceSum(i, null, null, getResource()) >= getCost(gs)) return true;
-            }
-            return false;
-        }
-        return gs.playerResourceSum(p, null, null, getResource()) >= getCost(gs);
-    }
 }

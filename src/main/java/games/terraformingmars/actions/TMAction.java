@@ -6,10 +6,10 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.AdjacencyRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
+import games.terraformingmars.rules.requirements.ResourceRequirement;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -29,9 +29,9 @@ public class TMAction extends AbstractAction {
     public TMTypes.StandardProject standardProject;
     public TMTypes.BasicResourceAction basicResourceAction;
 
-    public int cost = 0;
-    public TMTypes.Resource costResource;
-    public int cardID = -1;
+    private int cost = 0;
+    private TMTypes.Resource costResource;
+    private int cardID = -1;
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
@@ -106,6 +106,17 @@ public class TMAction extends AbstractAction {
         this.basicResourceAction = basicResourceAction;
     }
 
+    public void setActionCost(TMTypes.Resource resource, int cost, int cardID) {
+        this.costResource = resource;
+        this.cost = cost;
+        this.cardID = cardID;
+        this.requirements.add(new ResourceRequirement(resource, Math.abs(cost), false, player, cardID));
+    }
+
+    public void setCardID(int cardID) {
+        this.cardID = cardID;
+    }
+
     public boolean canBePlayed(TMGameState gs) {
         if (played && standardProject == null && basicResourceAction == null) return false;
         if (requirements != null && requirements.size() > 0) {
@@ -113,25 +124,7 @@ public class TMAction extends AbstractAction {
                 if (!r.testCondition(gs)) return false;
             }
         }
-        return canPay(gs);
-    }
-
-    public boolean canPay(TMGameState gs) {
-        if (getCost(gs) == 0) return true;
-        TMCard card = (TMCard) gs.getComponentById(getCardID());
-
-        int p = player;
-        if (p == -1) {
-            // Can current player pay?
-            p = gs.getCurrentPlayer();
-        } else if (p == -2) {
-            // Can any player pay?
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (gs.canPlayerPay(i, card, null, getResource(), getCost(gs))) return true;
-            }
-            return false;
-        }
-        return gs.canPlayerPay(p, card, null, getResource(), getCost(gs));
+        return true;
     }
 
     @Override
@@ -372,11 +365,15 @@ public class TMAction extends AbstractAction {
         return new Pair<>(effect, effectString);
     }
 
-    public int getCost(TMGameState gs) {
+    public int getCost() {
         return cost;  // 0 by default, the cost in resources this action takes to perform
     }
 
-    public TMTypes.Resource getResource() {
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
+
+    public TMTypes.Resource getCostResource() {
         return costResource;  // none by default, the resource to be paid for this action
     }
 

@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.components.Counter;
-import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.requirements.CounterRequirement;
@@ -18,17 +17,11 @@ public class ModifyGlobalParameter extends TMModifyCounter {
         requirements.add(new CounterRequirement(param.name(), -1, true));
     }
 
-    public ModifyGlobalParameter(TMTypes.ActionType actionType, TMTypes.GlobalParameter param, int change, boolean free) {
+    public ModifyGlobalParameter(TMTypes.ActionType actionType, TMTypes.Resource costResource, int cost, TMTypes.GlobalParameter param, int change, boolean free) {
         super(actionType, -1, change, free);
         this.param = param;
         requirements.add(new CounterRequirement(param.name(), -1, true));
-        if (actionType == TMTypes.ActionType.BasicResourceAction && param == TMTypes.GlobalParameter.Temperature) {
-            // Turn heat into temperature
-            costResource = TMTypes.Resource.Heat;
-        } else if (actionType == TMTypes.ActionType.StandardProject && param == TMTypes.GlobalParameter.Temperature) {
-            // Buy it
-            costResource = TMTypes.Resource.MegaCredit;
-        }
+        setActionCost(costResource, cost, -1);
     }
 
     @Override
@@ -70,16 +63,4 @@ public class ModifyGlobalParameter extends TMModifyCounter {
         return Objects.hash(super.hashCode(), param);
     }
 
-    @Override
-    public int getCost(TMGameState gs) {
-        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
-        if (actionType == TMTypes.ActionType.BasicResourceAction && param == TMTypes.GlobalParameter.Temperature) {
-            // Turn heat into temperature
-            return gp.getnCostTempHeat();
-        } else if (actionType == TMTypes.ActionType.StandardProject && param == TMTypes.GlobalParameter.Temperature) {
-            // Buy it
-            return gp.getnCostSPTemp();
-        }
-        return super.getCost(gs);
-    }
 }

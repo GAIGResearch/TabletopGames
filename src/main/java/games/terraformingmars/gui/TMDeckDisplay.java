@@ -436,7 +436,7 @@ public class TMDeckDisplay extends JComponent {
         String amount = "" + a.amount;
         TMTypes.Resource res = a.resource;
         boolean any = a.chooseAny;
-        boolean another = a.cardID == -1;
+        boolean another = a.getCardID() == -1;
         TMTypes.Tag tagRequired = a.tagRequirement;
         int minResRequired = a.minResRequirement;
 
@@ -565,9 +565,9 @@ public class TMDeckDisplay extends JComponent {
         String right = null;
         int rightNumber = -1;
 
-        TMTypes.Resource leftR = a.costResource;
+        TMTypes.Resource leftR = a.getCostResource();
         String left = leftR.getImagePath();
-        int leftNumber = Math.abs(a.cost);
+        int leftNumber = Math.abs(a.getCost());
         boolean played = a.played;
         if (a instanceof PlaceTile) {
             // get the tile image

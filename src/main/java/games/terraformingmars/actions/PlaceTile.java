@@ -86,20 +86,20 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         this.mapTileID = -1;
     }
 
-    public PlaceTile(TMTypes.StandardProject standardProject, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
+    public PlaceTile(TMTypes.StandardProject standardProject, int cost, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
         super(standardProject, player, false);
         setTile(tile, null);
         this.mapType = mapTile;
         this.mapTileID = -1;
-        costResource = TMTypes.Resource.MegaCredit;
+        this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
     }
 
-    public PlaceTile(TMTypes.BasicResourceAction basicResourceAction, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
+    public PlaceTile(TMTypes.BasicResourceAction basicResourceAction, int cost, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
         super(basicResourceAction, player, false);
         setTile(tile, null);
         this.mapType = mapTile;
         this.mapTileID = -1;
-        costResource = TMTypes.Resource.Plant;
+        this.setActionCost(TMTypes.Resource.Plant, cost, -1);
     }
 
     private void setTile(TMTypes.Tile tile, String name) {
@@ -136,9 +136,9 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                         }
                     }
                 }
-                if (cardID != -1) {
+                if (getCardID() != -1) {
                     // Save location of tile placed on card
-                    TMCard card = (TMCard) gs.getComponentById(cardID);
+                    TMCard card = (TMCard) gs.getComponentById(getCardID());
                     card.mapTileIDTilePlaced = mt.getComponentID();
                 }
             }
@@ -374,22 +374,6 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             }
         }
         return false;
-    }
-
-    @Override
-    public int getCost(TMGameState gs) {
-        TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
-        // not 0 if SP greenery or SP ocean or Basic resource plant
-        if (standardProject == TMTypes.StandardProject.Greenery) {
-            return gp.getnCostSPGreenery();
-        }
-        if (standardProject == TMTypes.StandardProject.Aquifer) {
-            return gp.getnCostSPOcean();
-        }
-        if (basicResourceAction == TMTypes.BasicResourceAction.PlantToGreenery) {
-            return gp.getnCostGreeneryPlant();
-        }
-        return super.getCost(gs);
     }
 
 }

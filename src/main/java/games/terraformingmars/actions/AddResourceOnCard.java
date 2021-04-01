@@ -20,22 +20,21 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     public AddResourceOnCard(int player, int cardID, TMTypes.Resource resource, int amount, boolean free) {
         super(player, free);
-        this.cardID = cardID;
         this.resource = resource;
         this.amount = amount;
+        this.setCardID(cardID);
 
         if (amount < 0) {
-            this.costResource = resource;
-            this.cost = Math.abs(amount);
+            this.setActionCost(resource, Math.abs(amount), -1);
         }
     }
 
     @Override
     public boolean execute(AbstractGameState gameState) {
-        if (cardID != -1) {
+        if (getCardID() != -1) {
             TMGameState gs = (TMGameState) gameState;
             TMGameParameters gp = (TMGameParameters) gameState.getGameParameters();
-            TMCard card = (TMCard) gs.getComponentById(cardID);
+            TMCard card = (TMCard) gs.getComponentById(getCardID());
             card.nResourcesOnCard += amount;
             return super.execute(gs);
         }
@@ -91,15 +90,15 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof AddResourceOnCard) {
-            cardID = ((AddResourceOnCard) action).cardID;
+            setCardID(((AddResourceOnCard) action).getCardID());
         } else {
-            cardID = 0;  // No cards to add resource to
+            setCardID(0);  // No cards to add resource to
         }
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return cardID != -1;
+        return getCardID() != -1;
     }
 
     @Override
@@ -123,8 +122,8 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        if (cardID != -1) {
-            TMCard card = (TMCard) gameState.getComponentById(cardID);
+        if (getCardID() != -1) {
+            TMCard card = (TMCard) gameState.getComponentById(getCardID());
             return "Add " + amount + " " + resource + " on card " + card.getComponentName();
         }
         return "Add " + amount + " " + resource + " on card";

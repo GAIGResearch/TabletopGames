@@ -2,8 +2,8 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 
 public class CompoundAction extends TMAction{
     public TMAction[] actions;
@@ -11,21 +11,18 @@ public class CompoundAction extends TMAction{
     public CompoundAction(int player, TMAction[] actions) {
         super(player, true);
         this.actions = actions;
+        for (TMAction a: actions) {
+            this.requirements.add(new PlayableActionRequirement(a));
+        }
     }
 
     public CompoundAction(TMTypes.ActionType actionType, int player, TMAction[] actions, int cost) {
         super(actionType, player, false);
         this.actions = actions;
-        this.costResource = TMTypes.Resource.MegaCredit;
-        this.cost = cost;
-    }
-
-    @Override
-    public boolean canBePlayed(TMGameState gs) {
+        this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
         for (TMAction a: actions) {
-            if (!a.canBePlayed(gs)) return false;
+            this.requirements.add(new PlayableActionRequirement(a));
         }
-        return super.canBePlayed(gs);
     }
 
     @Override

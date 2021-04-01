@@ -2,27 +2,37 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.rules.Award;
-import games.terraformingmars.rules.Milestone;
+import games.terraformingmars.components.Award;
+import games.terraformingmars.components.Milestone;
+import games.terraformingmars.rules.requirements.ClaimableAwardMilestoneRequirement;
 
 import java.util.Objects;
 
 public class ClaimAwardMilestone extends TMAction {
-    final Award toClaim;
+    final int toClaimID;
 
-    public ClaimAwardMilestone(int player, Award toClaim) {
+    public ClaimAwardMilestone(int player, Award toClaim, int cost) {
         super((toClaim instanceof Milestone? TMTypes.ActionType.ClaimMilestone : TMTypes.ActionType.FundAward), player, false);
-        this.toClaim = toClaim;
-        this.costResource = TMTypes.Resource.MegaCredit;
+        this.toClaimID = toClaim.getComponentID();
+        this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
+        this.requirements.add(new ClaimableAwardMilestoneRequirement(toClaimID, player));
+    }
+
+    public ClaimAwardMilestone(int player, int toClaimID, TMTypes.ActionType at, int cost) {
+        super(at, player, false);
+        this.toClaimID = toClaimID;
+        this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
+        this.requirements.add(new ClaimableAwardMilestoneRequirement(toClaimID, player));
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
+
+        Award toClaim = (Award) gs.getComponentById(toClaimID);
         if (toClaim.claim((TMGameState) gs, player)) {
             if (toClaim instanceof Milestone) {
                 ((TMGameState)gs).getnMilestonesClaimed().increment(1);
@@ -36,7 +46,7 @@ public class ClaimAwardMilestone extends TMAction {
 
     @Override
     public AbstractAction copy() {
-        return new ClaimAwardMilestone(player, toClaim.copy());
+        return new ClaimAwardMilestone(player, toClaimID, actionType, getCost());
     }
 
     @Override
@@ -45,41 +55,22 @@ public class ClaimAwardMilestone extends TMAction {
         if (!(o instanceof ClaimAwardMilestone)) return false;
         if (!super.equals(o)) return false;
         ClaimAwardMilestone that = (ClaimAwardMilestone) o;
-        return Objects.equals(toClaim, that.toClaim);
+        return toClaimID == that.toClaimID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), toClaim);
+        return Objects.hash(super.hashCode(), toClaimID);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return (toClaim instanceof Milestone? "Claim milestone " + toClaim.name : "Fund award " + toClaim.name);
+        Award toClaim = (Award) gameState.getComponentById(toClaimID);
+        return (toClaim instanceof Milestone? "Claim milestone " + toClaim.getComponentName() : "Fund award " + toClaim.getComponentName());
     }
 
     @Override
     public String toString() {
-        return (toClaim instanceof Milestone? "Claim milestone " + toClaim.name : "Fund award " + toClaim.name);
-    }
-
-    public int getCost(TMGameState gs) {
-        TMGameParameters gp = (TMGameParameters)gs.getGameParameters();
-        if (toClaim instanceof Milestone) {
-            return gp.getnCostMilestone()[gs.getnMilestonesClaimed().getValue()];
-        }
-        return gp.getnCostAwards()[gs.getnAwardsFunded().getValue()];
-    }
-
-    @Override
-    public boolean canBePlayed(TMGameState gs) {
-        if (!super.canBePlayed(gs)) return false;
-        int p = player;
-        if (p == -1) {
-            // Can current player pay?
-            p = gs.getCurrentPlayer();
-        }
-        if (toClaim instanceof Milestone) return !gs.getnMilestonesClaimed().isMaximum() && toClaim.canClaim(gs, p);
-        return !gs.getnAwardsFunded().isMaximum() && toClaim.canClaim(gs, p);
+        return (actionType == TMTypes.ActionType.ClaimMilestone ? "Claim milestone " + toClaimID : "Fund award " + toClaimID);
     }
 }

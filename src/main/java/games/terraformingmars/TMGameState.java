@@ -6,8 +6,9 @@ import core.components.*;
 import core.interfaces.IGamePhase;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
+import games.terraformingmars.components.Award;
+import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
-import games.terraformingmars.rules.*;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.effects.Effect;
@@ -58,7 +59,7 @@ public class TMGameState extends AbstractGameState {
     Deck<TMCard>[] playerCardChoice;
     TMCard[] playerCorporations;
 
-    // Milestones and awards TODO: components?
+    // Milestones and awards
     HashSet<Milestone> milestones;
     HashSet<Award> awards;
     Counter nMilestonesClaimed;
@@ -82,6 +83,8 @@ public class TMGameState extends AbstractGameState {
             add(nAwardsFunded);
             add(nMilestonesClaimed);
             this.addAll(extraTiles);
+            this.addAll(milestones);
+            this.addAll(awards);
             this.addAll(globalParameters.values());
             this.addAll(Arrays.asList(playerHands));
             this.addAll(Arrays.asList(playerCardChoice));
