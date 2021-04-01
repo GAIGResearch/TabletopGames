@@ -43,7 +43,17 @@ public class TilePlacedRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        return "";  // TODO
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return new Image[] {ImageIO.GetInstance().getImage(tile.getImagePath())};
+    }
+
+    @Override
+    public String toString() {
+        return "Tile Placed";
     }
 }

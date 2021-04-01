@@ -25,6 +25,14 @@ public class CounterRequirement implements Requirement<TMGameState> {
 
     @Override
     public boolean testCondition(TMGameState gs) {
+        int value = calculate(gs);
+        int discount = discount(gs);
+
+        if (max && (value - discount <= threshold)) return true;
+        return !max && (value + discount >= threshold);
+    }
+
+    private int calculate(TMGameState gs) {
         Counter c;
         if (counterID == -1) {
             c = setCounter(gs);
@@ -40,6 +48,10 @@ public class CounterRequirement implements Requirement<TMGameState> {
             threshold = c.getMaximum();
         }
 
+        return c.getValue();
+    }
+
+    private int discount(TMGameState gs) {
         // Apply discounts for current player
         int discount = 0;
         int player = gs.getCurrentPlayer();
@@ -49,9 +61,7 @@ public class CounterRequirement implements Requirement<TMGameState> {
                 break;
             }
         }
-
-        if (max && c.getValue() - discount <= threshold) return true;
-        return !max && c.getValue() + discount >= threshold;
+        return discount;
     }
 
     @Override
@@ -77,14 +87,26 @@ public class CounterRequirement implements Requirement<TMGameState> {
                 t = c.getValues()[threshold];
             }
         }
-        String text = "";
+        String text;
         TMTypes.GlobalParameter p = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
         if (p != null) {
-            text = max? "max " : "" + t + " " + p.getShortString();
+            text = max? "max " : "min " + t + " " + p.getShortString();
         } else {
-            text = max? "max " : "" + t + " " + c.getComponentName();
+            text = max? "max " : "min " + t + " " + c.getComponentName();
         }
         return text;
+    }
+
+    @Override
+    public String getReasonForFailure(TMGameState gs) {
+        int value = calculate(gs);
+        int discount = discount(gs);
+
+        if (max) {
+            return "value " + (value - discount) + " when " + getDisplayText(gs);
+        } else {
+            return "value " + (value + discount) + " when " + getDisplayText(gs);
+        }
     }
 
     @Override
@@ -96,5 +118,10 @@ public class CounterRequirement implements Requirement<TMGameState> {
         Counter which = gs.stringToGPOrPlayerResCounter(counterCode, -1);
         counterID = which.getComponentID();
         return which;
+    }
+
+    @Override
+    public String toString() {
+        return "Counter Value";
     }
 }

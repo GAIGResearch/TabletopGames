@@ -30,11 +30,26 @@ public class PlayableActionRequirement implements Requirement<TMGameState> {
 
     @Override
     public String getDisplayText(TMGameState gs) {
-        return null;
+        return "Playable action";
+    }
+
+    @Override
+    public String getReasonForFailure(TMGameState gs) {
+        String reasons = "";
+        for (Requirement<TMGameState> req: action.requirements) {
+            if (req.testCondition(gs)) reasons += "OK: " + req.toString() + "\n";
+            else reasons += "FAIL: " + req.toString() + " \\\\ " + req.getReasonForFailure(gs) + "\n";
+        }
+        return reasons;
     }
 
     @Override
     public Image[] getDisplayImages() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Playable Action";
     }
 }

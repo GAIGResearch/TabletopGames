@@ -42,6 +42,11 @@ public class ActionTypeRequirement implements Requirement<TMAction> {
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        return null;
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return null;
     }
@@ -57,5 +62,10 @@ public class ActionTypeRequirement implements Requirement<TMAction> {
     @Override
     public int hashCode() {
         return Objects.hash(actionType, project);
+    }
+
+    @Override
+    public String toString() {
+        return "Action Type";
     }
 }

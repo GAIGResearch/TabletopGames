@@ -40,6 +40,11 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        return null;
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return null;
     }
@@ -59,5 +64,10 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
     @Override
     public int hashCode() {
         return Objects.hash(tag);
+    }
+
+    @Override
+    public String toString() {
+        return "Tag On Card";
     }
 }

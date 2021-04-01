@@ -36,6 +36,11 @@ public class ResourceIncGenRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        return resource + " not increased this generation";
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return null;
     }
@@ -55,5 +60,10 @@ public class ResourceIncGenRequirement implements Requirement<TMGameState> {
 
     public ResourceIncGenRequirement copy() {
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Resource Increased This Generation";
     }
 }

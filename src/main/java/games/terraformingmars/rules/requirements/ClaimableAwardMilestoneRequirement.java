@@ -2,6 +2,7 @@ package games.terraformingmars.rules.requirements;
 
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.Award;
+import games.terraformingmars.components.Milestone;
 
 import java.awt.*;
 
@@ -40,7 +41,24 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        Award am = (Award) gs.getComponentById(amID);
+        String reasons = "";
+        if (am.isClaimed()) reasons += "Already claimed. ";
+        else if ((am instanceof Milestone && gs.getnMilestonesClaimed().isMaximum()) || (!(am instanceof Milestone) && gs.getnAwardsFunded().isMaximum())) {
+            reasons += "Max claimed. ";
+        }
+        else if (am instanceof Milestone) reasons += "Not enough: " + am.checkProgress(gs, player) + " / " + ((Milestone) am).min;
+        return reasons;
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Award/Milestone";
     }
 }

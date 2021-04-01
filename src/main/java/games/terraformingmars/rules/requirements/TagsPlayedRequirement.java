@@ -49,6 +49,20 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        String reasons = "";
+        for (int i = 0; i < nMin.length; i++) {
+            TMTypes.Tag tag = tags[i];
+            if (gs.getPlayerCardsPlayedTags()[gs.getCurrentPlayer()].get(tag).getValue() < nMin[i]) {
+                reasons += "Need " + nMin[i] + " " + tag + " tags. ";
+            } else {
+                reasons += "Enough " + tag + " tags. ";
+            }
+        }
+        return reasons;
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         int n = nTags;
         if (n > 4) n = tags.length;
@@ -67,5 +81,10 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
             }
         }
         return imgs;
+    }
+
+    @Override
+    public String toString() {
+        return "Tags Played";
     }
 }

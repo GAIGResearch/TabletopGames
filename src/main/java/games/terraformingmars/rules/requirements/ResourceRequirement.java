@@ -59,7 +59,17 @@ public class ResourceRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        return "Need " + amount + " " + resource + (production ? " production" : "");
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Resource" + (production? " production" : "");
     }
 }

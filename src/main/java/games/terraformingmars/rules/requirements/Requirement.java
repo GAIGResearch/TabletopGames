@@ -15,6 +15,7 @@ public interface Requirement<T> {
     boolean isMax();
     boolean appliesWhenAnyPlayer();
     String getDisplayText(TMGameState gs);
+    String getReasonForFailure(TMGameState gs);
     Image[] getDisplayImages();
 
     static Requirement stringToRequirement(String s) {

@@ -3,12 +3,14 @@ package games.terraformingmars.gui;
 import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.requirements.Requirement;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -270,22 +272,30 @@ public class TMGUI extends AbstractGUI {
 
     private void createActionMenu(AbstractPlayer player, TMGameState gs) {
         if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gs);
+            TMForwardModel fm = (TMForwardModel) player.getForwardModel();
+            List<TMAction> actions = fm.getAllActions(gs);
+
             int mnemonicStart = KeyEvent.VK_A;
             for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
                 if (t != TMTypes.ActionType.PlayCard) {
                     JMenu menu = actionMenus.get(t);
                     menu.removeAll();
 
-                    for (AbstractAction a : actions) {
-                        TMAction aa = (TMAction) a;
-                        if (aa.actionType != null && aa.actionType == t) {
-                            JMenuItem menuItem = new JMenuItem(aa.getString(gs));
+                    for (TMAction a : actions) {
+                        if (a.actionType != null && a.actionType == t) {
+                            JMenuItem menuItem;
+                            if (a.canBePlayed(gs)) {
+                                menuItem = new JMenuItem(a.getString(gs));
+                                menuItem.setForeground(Color.white);
+                                menuItem.addActionListener(e -> ac.addAction(a));
+                            } else {
+                                menuItem = new JMenuItem("<html><strike>" + a.getString(gs) + "</strike><html>");
+                                menuItem.setForeground(Color.darkGray);
+                                menuItem.setToolTipText(getInvalidActionReason(a, gs));
+                            }
                             menuItem.setFont(defaultFont);
-                            menuItem.setForeground(Color.white);
                             menuItem.setBackground(Color.black);
                             menu.add(menuItem);
-                            menuItem.addActionListener(e -> ac.addAction(aa));
                         }
                     }
 
@@ -298,32 +308,46 @@ public class TMGUI extends AbstractGUI {
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+
+            // Reset buttons
+            for (ActionButton actionButton : actionButtons) {
+                actionButton.setVisible(false);
+                actionButton.setButtonAction(null, "");
+                actionButton.setEnabled(true);
+                actionButton.setToolTipText("");
+            }
+
             TMGameState gs = (TMGameState) gameState;
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            TMForwardModel fm = (TMForwardModel) player.getForwardModel();
+            List<TMAction> actions = fm.getAllActions(gs);
             int i = 0;
             TMAction passAction = null;
             ArrayList<TMAction> playCardActions = new ArrayList<>();
             ArrayList<TMAction> placeActions = new ArrayList<>();
 
-            for (AbstractAction a: actions) {
-                TMAction aa = (TMAction) a;
-                if (aa.actionType == null) {
-                    if (aa.pass) passAction = aa;
-                    else if (aa instanceof PlaceTile) {
-                        placeActions.add(aa);
+            for (TMAction a: actions) {
+                if (a.actionType == null) {
+                    if (a.pass) passAction = a;
+                    else if (a instanceof PlaceTile) {
+                        placeActions.add(a);
                     } else {
                         actionButtons[i].setVisible(true);
-                        actionButtons[i].setButtonAction(aa, gameState);
+                        if (a.canBePlayed(gs)) {
+                            actionButtons[i].setButtonAction(a, gameState);
+                        } else {
+                            actionButtons[i].setText(a.getString(gs));
+                            actionButtons[i].setEnabled(false);
+                            actionButtons[i].setToolTipText(getInvalidActionReason(a, gs));
+                        }
                         i++;
                     }
-                } else if (aa.actionType == TMTypes.ActionType.PlayCard) {
-                    playCardActions.add(aa);
+                } else if (a.actionType == TMTypes.ActionType.PlayCard) {
+                    playCardActions.add(a);
                 }
             }
 
             if (playerHand.highlight.size() > 0) {
                 // A card to choose, check highlights
-                boolean playableCard = false;
                 for (Rectangle r: playerHand.highlight) {
                     String code = playerHand.rects.get(r);
                     int idx = Integer.parseInt(code);
@@ -331,17 +355,17 @@ public class TMGUI extends AbstractGUI {
                     for (TMAction action: playCardActions) {
                         if (action.getCardID() == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
                             actionButtons[i].setVisible(true);
-                            actionButtons[i].setButtonAction(action, "Play");
+                            if (action.canBePlayed(gs)) {
+                                actionButtons[i].setButtonAction(action, "Play");
+                            } else {
+                                actionButtons[i].setText(action.getString(gs));
+                                actionButtons[i].setEnabled(false);
+                                actionButtons[i].setToolTipText(getInvalidActionReason(action, gs));
+                            }
                             i++;
-                            playableCard = true;
                             break;
                         }
                     }
-                }
-                if (!playableCard) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setButtonAction(null, "Card can't be played");
-                    i++;
                 }
             } else {
                 if (passAction != null) {
@@ -398,15 +422,18 @@ public class TMGUI extends AbstractGUI {
             } else if (i == 0) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(null, "Choose a location to place tile");
-                i++;
-            }
-
-            // Turn off the rest of the buttons
-            for (int k = i; k < actionButtons.length; k++) {
-                actionButtons[k].setVisible(false);
-                actionButtons[k].setButtonAction(null, "");
             }
         }
+    }
+
+    private String getInvalidActionReason(TMAction action, TMGameState gs) {
+        String reason = "<html>Reasons:<br/>";
+        for (Requirement<TMGameState> req: action.requirements) {
+            if (req.testCondition(gs)) reason += "OK: " + req.toString() + "<br/>";
+            else reason += "FAIL: " + req.getReasonForFailure(gs).replace("\n", "<br/>") + "<br/>";
+        }
+        reason += "</html>";
+        return reason;
     }
 
     @Override

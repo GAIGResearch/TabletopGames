@@ -56,7 +56,17 @@ public class AdjacencyRequirement implements Requirement<Group<TMGameState, TMMa
     }
 
     @Override
+    public String getReasonForFailure(TMGameState gs) {
+        return null;
+    }
+
+    @Override
     public Image[] getDisplayImages() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Adjacency";
     }
 }
