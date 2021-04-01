@@ -254,7 +254,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 actions.add(new TMAction(player));  // Pass
             } else {
                 for (int i = 0; i < cardChoice.getSize(); i++) {
-                    actions.add(new BuyCard(player, cardChoice.get(i).getComponentID(), params.getProjectPurchaseCost()));
+                    actions.add(new BuyCard(player, cardChoice.get(i).getComponentID(), 0));
                 }
             }
         } else if (gs.getGamePhase() == Research) {

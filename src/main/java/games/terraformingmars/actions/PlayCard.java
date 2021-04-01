@@ -61,9 +61,6 @@ public class PlayCard extends TMAction {
         // Add persisting effects
         gs.addPersistingEffects(card.persistingEffects);
 
-        // Force an update of components before executing the effects, they might need something just added
-        gs.getAllComponents();
-
         // Execute on-play effects
         for (TMAction aa: card.immediateEffects) {
             aa.player = player;

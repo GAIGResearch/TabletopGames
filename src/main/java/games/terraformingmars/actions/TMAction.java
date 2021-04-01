@@ -132,6 +132,7 @@ public class TMAction extends AbstractAction {
     @Override
     public final boolean execute(AbstractGameState gameState) {
         TMGameState gs = (TMGameState) gameState;
+        gs.getAllComponents();  // Force recalculate components
         if (player == -1) player = gameState.getCurrentPlayer();
         if (!canBePlayed(gs)) return false;
         boolean s = _execute(gs);
