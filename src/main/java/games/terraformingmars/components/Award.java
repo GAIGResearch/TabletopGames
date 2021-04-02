@@ -5,6 +5,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import utilities.Utils;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Award extends Token {
@@ -26,9 +27,9 @@ public class Award extends Token {
     }
 
     public int checkProgress(TMGameState gs, int player) {
-        String[] split = counterID.split("-");
         int sum = 0;
-        for (String s: split) {
+        String[] split = counterID.split("-");
+        for (String s : split) {
             // Try tile
             TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, s);
             if (t != null) {
@@ -92,6 +93,11 @@ public class Award extends Token {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), counterID, claimed);
+    }
+
+    @Override
+    public String toString() {
+        return "Award{" + counterID + "}";
     }
 }
 

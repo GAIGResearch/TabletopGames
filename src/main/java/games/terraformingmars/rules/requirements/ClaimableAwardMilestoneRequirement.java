@@ -48,7 +48,7 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
         else if ((am instanceof Milestone && gs.getnMilestonesClaimed().isMaximum()) || (!(am instanceof Milestone) && gs.getnAwardsFunded().isMaximum())) {
             reasons += "Max claimed. ";
         }
-        else if (am instanceof Milestone) reasons += "Not enough: " + am.checkProgress(gs, player) + " / " + ((Milestone) am).min;
+        else if (am instanceof Milestone) reasons += "Not enough: " + am.checkProgress(gs, player) + " / " + ((Milestone) am).min + " " + am.counterID;
         return reasons;
     }
 

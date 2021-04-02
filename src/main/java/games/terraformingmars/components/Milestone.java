@@ -42,5 +42,10 @@ public class Milestone extends Award {
     public int hashCode() {
         return Objects.hash(super.hashCode(), min);
     }
+
+    @Override
+    public String toString() {
+        return "Milestone{" + counterID + "}";
+    }
 }
 
