@@ -1,31 +1,23 @@
 package games.dicemonastery.actions;
 
-import com.google.common.collect.ImmutableMap;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.MarketCard;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
-import static games.dicemonastery.DiceMonasteryConstants.Resource;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static java.util.stream.Collectors.toList;
 
 public class VisitMarket extends UseMonk implements IExtendedSequence {
 
-    ImmutableMap<Resource, Integer> buyPrices;
-    ImmutableMap<Resource, Integer> sellPrices;
     int player = -1;
     boolean traded = false;
-
-    {
-        buyPrices = ImmutableMap.of(GRAIN, 2, CALF_SKIN, 3);
-        sellPrices = ImmutableMap.of(CANDLE, 3, BEER, 1, MEAD, 2);
-    }
 
     public VisitMarket() {
         super(1);
@@ -41,16 +33,23 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        List<AbstractAction> retValue = buyPrices.entrySet().stream()
-                .filter(entry -> state.getResource(state.getCurrentPlayer(), SHILLINGS, STOREROOM) >= entry.getValue())
-                .map(entry -> new Buy(entry.getKey(), entry.getValue()))
-                .collect(toList());
-        retValue.addAll(
-                sellPrices.entrySet().stream()
-                        .filter(entry -> state.getResource(state.getCurrentPlayer(), entry.getKey(), STOREROOM) >= 1)
-                        .map(entry -> new Sell(entry.getKey(), entry.getValue()))
-                        .collect(toList())
-        );
+        MarketCard market = state.getCurrentMarket();
+
+        List<AbstractAction> retValue = new ArrayList<>();
+        int money = state.getResource(player, SHILLINGS, STOREROOM);
+        if (money >= market.calf_skin)
+            retValue.add(new Buy(CALF_SKIN, market.calf_skin));
+        if (money >= market.grain)
+            retValue.add(new Buy(GRAIN, market.grain));
+        if (market.pigmentType != null && money >= market.pigmentPrice)
+            retValue.add(new Buy(market.pigmentType, market.pigmentPrice));
+        if (state.getResource(player, BEER, STOREROOM) > 0)
+            retValue.add(new Sell(BEER, market.beer));
+        if (state.getResource(player, MEAD, STOREROOM) > 0)
+            retValue.add(new Sell(MEAD, market.mead));
+        if (state.getResource(player, CANDLE, STOREROOM) > 0)
+            retValue.add(new Sell(CANDLE, market.candle));
+
         if (retValue.isEmpty())
             retValue.add(new DoNothing());
         return retValue;
@@ -77,8 +76,6 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
         VisitMarket retValue = new VisitMarket();
         retValue.traded = traded;
         retValue.player = player;
-        retValue.buyPrices = buyPrices;  // immutable Map
-        retValue.sellPrices = sellPrices; // immutable Map
         return retValue;
     }
 
@@ -87,17 +84,14 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
         if (obj == this) return true;
         if (obj instanceof VisitMarket) {
             VisitMarket other = (VisitMarket) obj;
-            return other.traded == traded && other.player == player &&
-                    other.sellPrices.equals(sellPrices) &&
-                    other.buyPrices.equals(buyPrices);
-
+            return other.traded == traded && other.player == player;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(traded, player, buyPrices, sellPrices);
+        return Objects.hash(traded, player);
     }
 
     @Override

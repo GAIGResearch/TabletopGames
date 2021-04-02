@@ -610,21 +610,26 @@ public class ActionTests {
     @Test
     public void visitMarketToBuy() {
         state.addResource(state.getCurrentPlayer(), BREAD, -2);
-        state.addResource(state.getCurrentPlayer(), SHILLINGS, -4); // should leave 2 over
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, -3); // should leave 3 over
         VisitMarket visit = new VisitMarket();
+        MarketCard market = state.getCurrentMarket();
+
         visit._execute(state);
         assertEquals(visit, state.currentActionInProgress());
-        assertEquals(1, fm.computeAvailableActions(state).size());
-        assertEquals(new Buy(GRAIN, 2), fm.computeAvailableActions(state).get(0));
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Buy(GRAIN, market.grain)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Buy(CALF_SKIN, market.calf_skin)));
 
         int player = state.getCurrentPlayer();
-        state.addResource(state.getCurrentPlayer(), SHILLINGS, 1);
-        assertEquals(2, fm.computeAvailableActions(state).size());
+        state.addResource(state.getCurrentPlayer(), SHILLINGS, 3);
+        assertTrue(fm.computeAvailableActions(state).contains(new Buy(market.pigmentType, market.pigmentPrice)));
 
-        fm.next(state, (new Buy(CALF_SKIN, 3)));
+        assertEquals(3, fm.computeAvailableActions(state).size());
+
+        fm.next(state, (new Buy(CALF_SKIN, market.calf_skin)));
         assertTrue(visit.executionComplete(state));
         assertEquals(1, state.getResource(player, CALF_SKIN, STOREROOM));
-        assertEquals(0, state.getResource(player, SHILLINGS, STOREROOM));
+        assertEquals(6 - market.calf_skin, state.getResource(player, SHILLINGS, STOREROOM));
         assertFalse(state.isActionInProgress());
     }
 
@@ -633,6 +638,7 @@ public class ActionTests {
         state.addResource(state.getCurrentPlayer(), SHILLINGS, -5); // 1 left - not enough to buy anything
         state.useAP(-1);
         VisitMarket visit = new VisitMarket();
+        MarketCard market = state.getCurrentMarket();
         int player = state.getCurrentPlayer();
         fm.next(state, visit);
         assertEquals(1, fm.computeAvailableActions(state).size());
@@ -641,9 +647,13 @@ public class ActionTests {
         state.addResource(player, BEER, 1);
         state.addResource(player, MEAD, 1);
         assertEquals(2, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new Sell(BEER, 1)));
-        assertTrue(fm.computeAvailableActions(state).contains(new Sell(MEAD, 2)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Sell(BEER, market.beer)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Sell(MEAD, market.mead)));
         Sell action = (Sell) fm.computeAvailableActions(state).get(1);
+
+        state.addResource(player, CANDLE, 1);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Sell(CANDLE, market.candle)));
 
         fm.next(state, action);
         assertTrue(visit.executionComplete(state));
