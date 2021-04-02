@@ -212,6 +212,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     public void acquireTreasure(TREASURE item, int player) {
         if (treasuresCommissioned.get(item) < item.limit) {
             treasuresCommissioned.put(item, treasuresCommissioned.get(item) + 1);
+            addVP(item.vp, player);
             treasuresOwnedPerPlayer.get(player).add(item);
         } else
             throw new AssertionError("Cannot buy treasure as none left: " + item);

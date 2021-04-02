@@ -4,7 +4,9 @@ import games.dicemonastery.DiceMonasteryGameState;
 
 import java.util.Random;
 
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
 public class Forage extends UseMonk {
 
@@ -22,7 +24,7 @@ public class Forage extends UseMonk {
             case 1:
                 break;
             case 2:
-                r = Resource.PALE_BLUE_PIGMENT;
+                r = PALE_BLUE_PIGMENT;
                 break;
             case 3:
                 r = Resource.PALE_GREEN_PIGMENT;
@@ -31,14 +33,18 @@ public class Forage extends UseMonk {
                 r = Resource.PALE_RED_PIGMENT;
                 break;
             case 5:
-                // TODO: This is actually a choice, requiring FORAGE to be turned into an Extended Sequence
-                int rndPigment = rnd.nextInt(3);
-                if (rndPigment == 0)
-                    r = Resource.PALE_BLUE_PIGMENT;
-                if (rndPigment == 1)
-                    r = Resource.PALE_GREEN_PIGMENT;
-                if (rndPigment == 2)
-                    r = Resource.PALE_RED_PIGMENT;
+                // Technically a choice, but we'll just go with the least common type
+                int player = state.getCurrentPlayer();
+                int blue = state.getResource(player, PALE_BLUE_PIGMENT, STOREROOM) + state.getResource(player, PALE_BLUE_INK, STOREROOM);
+                int green = state.getResource(player, PALE_GREEN_PIGMENT, STOREROOM) + state.getResource(player, PALE_GREEN_INK, STOREROOM);
+                int red = state.getResource(player, PALE_RED_PIGMENT, STOREROOM) + state.getResource(player, PALE_RED_INK, STOREROOM);
+
+                if (blue <= green && blue <= red)
+                    r = PALE_BLUE_PIGMENT;
+                else if (green <= red)
+                    r = PALE_GREEN_PIGMENT;
+                else
+                    r = PALE_RED_PIGMENT;
                 break;
             case 6:
                 r = Resource.BERRIES;

@@ -32,7 +32,6 @@ public class BuyTreasure extends UseMonk{
         int player = state.getCurrentPlayer();
         state.acquireTreasure(treasure, player);
         state.addResource(player, DiceMonasteryConstants.Resource.SHILLINGS, -treasure.cost);
-        state.addVP(treasure.vp, player);
         return true;
     }
 }

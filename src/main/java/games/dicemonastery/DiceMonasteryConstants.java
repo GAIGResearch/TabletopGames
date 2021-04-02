@@ -184,7 +184,8 @@ public class DiceMonasteryConstants {
         CHALICE(20, 5, 1),
         MITRE(24, 6, 1),
         PLATE(28, 7, 1),
-        ALTAR_CROSS(32, 8, 1);
+        ALTAR_CROSS(32, 8, 1),
+        RELIC(999, 3, 4);  // from Pilgrimages, not purchase
 
         public final int cost;
         public final int vp;

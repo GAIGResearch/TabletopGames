@@ -8,10 +8,9 @@ import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
+import static games.dicemonastery.DiceMonasteryConstants.TREASURE.RELIC;
 
 public class Pilgrimage extends Component {
-
-    public final static int RELIC_VP = 3;
 
     public enum DESTINATION {
         SANTIAGO(false, VIVID_RED_PIGMENT), ROME(false, VIVID_GREEN_PIGMENT),
@@ -83,7 +82,7 @@ public class Pilgrimage extends Component {
         if (progress == destination.vpPerStep.length - 1) {
             // we have finished
             if (isRelic) {
-                state.addVP(RELIC_VP, player);
+                state.acquireTreasure(RELIC, player);
             } else {
                 state.addResource(player, destination.finalReward, 1);
             }
