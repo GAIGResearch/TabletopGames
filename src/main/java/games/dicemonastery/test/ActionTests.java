@@ -21,6 +21,7 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.CAPE;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
+import static games.dicemonastery.Pilgrimage.DESTINATION.ROME;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
@@ -89,6 +90,8 @@ public class ActionTests {
             state.addResource(p, PRAYER, -1); // remove starting Prayers
         startOfUseMonkPhaseForArea(MEADOW, SPRING, Collections.emptyMap());
         // finally we take BONUS_TOKEN and possible PROMOTION
+        state.putToken(MEADOW, PROMOTION, 0);
+        state.putToken(MEADOW, PROMOTION, 1);
         assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
         fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
         if (state.isActionInProgress())
@@ -109,6 +112,8 @@ public class ActionTests {
         state.addResource(state.getCurrentPlayer(), PRAYER, 1); // add Prayer token
 
         // finally we take BONUS_TOKEN and possible PROMOTION
+        state.putToken(MEADOW, PROMOTION, 0);
+        state.putToken(MEADOW, PROMOTION, 1);
         assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
         fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
         if (state.isActionInProgress())
@@ -147,6 +152,8 @@ public class ActionTests {
         startOfUseMonkPhaseForArea(MEADOW, SPRING, Collections.emptyMap());
 
         // finally we take BONUS_TOKEN and possible PROMOTION
+        state.putToken(MEADOW, PROMOTION, 0);
+        state.putToken(MEADOW, PROMOTION, 1);
         assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
         fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
         if (state.isActionInProgress())
@@ -464,10 +471,15 @@ public class ActionTests {
     }
 
     @Test
-    public void gatehouseActionsCorrect() {
+    public void gatehouseActionsCorrectWithoutPilgrimages() {
         startOfUseMonkPhaseForAreaAfterBonusToken(GATEHOUSE, SPRING);
 
         state.useAP(turnOrder.getActionPointsLeft() - 1);
+        state.monksIn(GATEHOUSE, -1).stream()  // Move monks eligible for pilgrimage out of Gatehouse
+                .filter(m -> m.getPiety() >=3 )
+                .forEach( m-> state.moveMonk(m.getComponentID(), GATEHOUSE, DORMITORY));
+        Monk p1 = state.createMonk(1, state.getCurrentPlayer());
+        state.moveMonk(p1.getComponentID(), DORMITORY, GATEHOUSE);
 
         assertEquals(3, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
@@ -489,6 +501,86 @@ public class ActionTests {
         state.useAP(-1);
         assertEquals(6, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new HireNovice()));
+    }
+
+    @Test
+    public void gatehousePilgrimageActionsCorrect() {
+        startOfUseMonkPhaseForAreaAfterBonusToken(GATEHOUSE, SPRING);
+        int player = state.getCurrentPlayer();
+
+        state.monksIn(GATEHOUSE, -1).stream()  // Move monks eligible for pilgrimage out of Gatehouse
+                .filter(m -> m.getPiety() >=3 )
+                .forEach( m-> state.moveMonk(m.getComponentID(), GATEHOUSE, DORMITORY));
+
+        // set AP to three, and remove all money
+        state.useAP(turnOrder.getActionPointsLeft() - 3);
+        state.addResource(player, SHILLINGS, -state.getResource(player, SHILLINGS, STOREROOM));
+
+        assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof GoOnPilgrimage));
+
+        Monk p4 = state.createMonk(4, player);
+        state.moveMonk(p4.getComponentID(), DORMITORY, GATEHOUSE);
+        state.addActionPoints(4);
+        assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof GoOnPilgrimage));
+
+        state.addResource(player, SHILLINGS, 3);
+        assertEquals(2, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
+        // ROME and SANTIAGO
+        assertEquals(2, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).getActionPoints() == 4).count());
+
+        state.addResource(player, SHILLINGS, 3); // can now go to JERUSALEM or ALEXANDRIA
+        assertEquals(2, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
+
+        Monk p5 = state.createMonk(5, player);
+        state.moveMonk(p5.getComponentID(), DORMITORY, GATEHOUSE);
+        state.addActionPoints(5);
+        assertEquals(6, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
+        // 2 copies of ROME and SANTIAGO
+        assertEquals(2, fm.computeAvailableActions(state).stream()
+                .filter(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination == ROME).count());
+    }
+
+    @Test
+    public void pilgrimage() {
+        startOfUseMonkPhaseForAreaAfterBonusToken(GATEHOUSE, SPRING);
+        int player = state.getCurrentPlayer();
+        Monk p5 = state.createMonk(5, player); // should be only piety 5 monk in Gatehouse
+        state.moveMonk(p5.getComponentID(), DORMITORY, GATEHOUSE);
+        state.addActionPoints(5);
+        int ap = state.getAPLeft();
+        assertEquals(4, state.pilgrimagesLeft(ROME));
+        assertEquals(0, state.getPilgrimagesStarted().size());
+        Pilgrimage next = state.peekAtNextPilgrimageTo(ROME);
+
+        fm.next(state, new GoOnPilgrimage(ROME, 5));
+
+        assertEquals(3, state.pilgrimagesLeft(ROME));
+        assertNotSame(next, state.peekAtNextPilgrimageTo(ROME));
+        assertEquals(1, state.getPilgrimagesStarted().size());
+        assertEquals(ap - 5, state.getAPLeft());
+    }
+
+    @Test
+    public void cannotChoosePilgrimageIfNoneLeft() {
+        startOfUseMonkPhaseForAreaAfterBonusToken(GATEHOUSE, SPRING);
+        int player = state.getCurrentPlayer();
+
+        state.addResource(player, SHILLINGS, 10);
+        Monk p5 = state.createMonk(5, player); // should be only piety 5 monk in Gatehouse
+        state.moveMonk(p5.getComponentID(), DORMITORY, GATEHOUSE);
+        state.addActionPoints(5);
+
+        for (int i = 0; i < 4; i++) {
+            assertTrue(fm.computeAvailableActions(state).stream()
+                    .anyMatch(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination == ROME));
+            Monk pilgrim = state.createMonk(3, 0);
+            state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
+            state.addResource(0, SHILLINGS, 3);
+            state.startPilgrimage(ROME, pilgrim);
+        }
+
+        assertTrue(fm.computeAvailableActions(state).stream()
+                .noneMatch(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination == ROME));
     }
 
     @Test

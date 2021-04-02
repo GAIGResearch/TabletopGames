@@ -2,8 +2,8 @@ package games.dicemonastery.test;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.*;
+import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -223,6 +223,7 @@ public class CoreGameLoop {
                 .collect(toList());
         nonAlcoholicResources.remove(SHILLINGS);  // could change due to BONUS_TOKENS
         nonAlcoholicResources.remove(PRAYER);  // could change due to BONUS_TOKENS
+        nonAlcoholicResources.removeAll(Arrays.asList(VIVID_BLUE_PIGMENT, VIVID_GREEN_PIGMENT, VIVID_PURPLE_PIGMENT, VIVID_RED_PIGMENT));  // possible from pilgrimage
         for (int player = 0; player < 4; player++) {
      //       System.out.println("Player : " + player);
             Map<Resource, Integer> spring = springResources.get(player);
@@ -441,7 +442,8 @@ public class CoreGameLoop {
         assertTrue(totalOners > 0);
         int monksInChapelWhoWillPipUp = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() < 6).count();
         int monksInChapelWhoWillRetire = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 6).count();
-        int pietyOneMonksInChapel =  (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
+        int pietyOneMonksInChapel = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
+        int monksOnPilgrimage = state.monksIn(PILGRIMAGE, 1).size();
         totalOners -= pietyOneMonksInChapel; // they won't be oners when they get to feeding time
 
         do {
@@ -450,7 +452,7 @@ public class CoreGameLoop {
         assertEquals(WINTER, turnOrder.getSeason());
 
         int newPips = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).sum();
-        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp - monksInChapelWhoWillRetire * 6, newPips);
+        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp + monksOnPilgrimage - monksInChapelWhoWillRetire * 6, newPips);
         assertEquals(10 - monksP1.size(), state.getVictoryPoints(1));
     }
 
@@ -513,6 +515,7 @@ public class CoreGameLoop {
         // repeat until all of Player 0's monks are back in the dormitory
         // before we do the Bidding we remove all of P0's monks
         state.monksIn(DORMITORY, 0).forEach(state::retireMonk);
+        state.monksIn(PILGRIMAGE, 0).forEach(state::retireMonk);
         assertEquals(0, state.monksIn(DORMITORY, 0).size());
 
         do {

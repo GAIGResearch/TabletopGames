@@ -192,7 +192,8 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                     state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
                                 retValue.add(HIRE_NOVICE);
                             List<Monk> eligibleMonks = state.monksIn(GATEHOUSE, currentPlayer);
-                            int highestPiety = eligibleMonks.stream()
+                            // it is possible to have no monks in the gatehouse with AP remaining if a Devotion token was used
+                            int highestPiety = eligibleMonks.isEmpty() ? 0 : eligibleMonks.stream()
                                     .max(comparingInt(Monk::getPiety))
                                     .orElseThrow(() -> new AssertionError("No Monks in Gatehouse?"))
                                     .piety;

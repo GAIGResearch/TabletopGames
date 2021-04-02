@@ -300,6 +300,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return retValue;
     }
 
+    public int pilgrimagesLeft(Pilgrimage.DESTINATION to) {
+        return pilgrimageDecks.get(to).getSize();
+    }
+
+    public List<Pilgrimage> getPilgrimagesStarted() {
+        return pilgrimagesStarted;
+    }
+
     void advancePilgrims() {
         for (Pilgrimage p : pilgrimagesStarted) {
             if (p.active) {
