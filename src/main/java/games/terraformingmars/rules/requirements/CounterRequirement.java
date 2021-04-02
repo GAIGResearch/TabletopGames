@@ -80,19 +80,19 @@ public class CounterRequirement implements Requirement<TMGameState> {
         int t = threshold;
         if (counterID == -1) {
             c = setCounter(gs);
-        } else {
-            c = (Counter) gs.getComponentById(counterID);
             if (c.getComponentName().equalsIgnoreCase("temperature")) {
                 // Turn to index
                 t = c.getValues()[threshold];
             }
+        } else {
+            c = (Counter) gs.getComponentById(counterID);
         }
         String text;
         TMTypes.GlobalParameter p = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
         if (p != null) {
-            text = max? "max " : "min " + t + " " + p.getShortString();
+            text = t + " " + p.getShortString();
         } else {
-            text = max? "max " : "min " + t + " " + c.getComponentName();
+            text = t + " " + c.getComponentName();
         }
         return text;
     }
@@ -103,9 +103,9 @@ public class CounterRequirement implements Requirement<TMGameState> {
         int discount = discount(gs);
 
         if (max) {
-            return "value " + (value - discount) + " when " + getDisplayText(gs);
+            return "value " + (value - discount) + " when max " + getDisplayText(gs);
         } else {
-            return "value " + (value + discount) + " when " + getDisplayText(gs);
+            return "value " + (value + discount) + " when min " + getDisplayText(gs);
         }
     }
 

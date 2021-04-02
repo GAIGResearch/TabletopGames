@@ -135,6 +135,7 @@ public class TMDeckDisplay extends JComponent {
     }
 
     private void drawCard(Graphics2D g, TMCard card, int x, int y, int width, int height) {
+        FontMetrics fm = g.getFontMetrics();
         Rectangle aboveRibbon = new Rectangle(x + width/5, y, width - width/5 - spacing/2, height/8);
         if (card.cardType == TMTypes.CardType.Corporation) {
             Image img = ImageIO.GetInstance().getImage(TMTypes.CardType.Corporation.getImagePath());
@@ -357,8 +358,7 @@ public class TMDeckDisplay extends JComponent {
                     String text = r.getDisplayText(gs);
                     Image[] imgs = r.getDisplayImages();
                     if (text != null) {
-                        drawShadowString(g, text, sX, sY);
-                        FontMetrics fm = g.getFontMetrics();
+                        drawShadowStringCentered(g, text, new Rectangle(sX, sY, fm.stringWidth(text), tagSize));
                         sX += fm.stringWidth(text);
                     }
                     if (imgs != null) {

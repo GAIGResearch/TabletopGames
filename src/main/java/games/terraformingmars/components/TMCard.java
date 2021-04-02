@@ -279,6 +279,7 @@ public class TMCard extends Card {
                                     String[] split = s.split(" ");
                                     // first is threshold, second is counter code
                                     Requirement r = new CounterRequirement(split[1], Integer.parseInt(split[0]), max);
+                                    card.requirements.add(r);
                                 }
                             }
                         } else if (info2 != null && info2.contains("description")) {

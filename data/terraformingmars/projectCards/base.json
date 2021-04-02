@@ -103,7 +103,7 @@
         "div": [
           {
             "@class": "requirements ",
-            "#text": "3 OceanTiles. 1 MegaCreditprod"
+            "#text": "3 OceanTiles"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -292,7 +292,7 @@
           },
           {
             "@class": "requirements ",
-            "#text": "4 OceanTiles. 2 Energyprod"
+            "#text": "4 OceanTiles"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -648,7 +648,7 @@
           },
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 7 Oxygen. 1 Energyprod"
+            "#text": "max 7 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -752,10 +752,6 @@
                 "#text": "3"
               }
             ]
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
           },
           {
             "@class": "tile city-tile ",
@@ -1028,10 +1024,6 @@
             "@class": "tile ocean-tile "
           },
           {
-            "@class": "requirements ",
-            "#text": "2 MegaCreditprod"
-          },
-          {
             "@class": "description ",
             "#text": "placetile/ocean/ocean/true . dec-MegaCreditprod-2  . inc-heatprod-3 "
           }
@@ -1236,7 +1228,7 @@
         "div": [
           {
             "@class": "requirements requirements-max ",
-            "#text": "max 9 Oxygen. 1 Energyprod"
+            "#text": "max 9 Oxygen"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -1936,10 +1928,6 @@
             ]
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Plantprod"
-          },
-          {
             "@class": "description",
             "#text": "dec-Plantprod-1  . inc-MegaCreditprod-4 "
           }
@@ -2037,10 +2025,6 @@
               }
             ],
             "br": ""
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
           },
           {
             "@class": "description",
@@ -2158,10 +2142,6 @@
               }
             ],
             "br": ""
-          },
-          {
-            "@class": "requirements ",
-            "#text": "2 MegaCreditprod"
           },
           {
             "@class": "description",
@@ -3309,10 +3289,6 @@
             "br": ""
           },
           {
-            "@class": "requirements ",
-            "#text": "1 MegaCreditprod"
-          },
-          {
             "@class": "description",
             "#text": "dec-MegaCreditprod-1  . inc-Energyprod-2 "
           }
@@ -3503,10 +3479,6 @@
               }
             ],
             "br": ""
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 MegaCreditprod"
           },
           {
             "@class": "description",
@@ -4130,10 +4102,6 @@
             "@style": "margin-left:20px "
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
-          },
-          {
             "@class": "description ",
             "#text": "dec-energyprod-1  . inc-MegaCreditprod-2 . placetile/City/Ground/true/City-City "
           }
@@ -4227,10 +4195,6 @@
             ],
             "br": "",
             "#text": "4"
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
           },
           {
             "@class": "description",
@@ -4810,10 +4774,6 @@
           },
           {
             "@class": "tile oxygen-tile "
-          },
-          {
-            "@class": "requirements ",
-            "#text": "2 Energyprod"
           },
           {
             "@class": "description ",
@@ -5792,10 +5752,6 @@
             "@class": "tile rating"
           },
           {
-            "@class": "requirements ",
-            "#text": "4 Energyprod"
-          },
-          {
             "@class": "description",
             "#text": "dec-Energyprod-4  . inc-Plantprod-2 . inc-TR-3 "
           }
@@ -6138,10 +6094,6 @@
             "@class": "tile rating"
           },
           {
-            "@class": "requirements ",
-            "#text": "2 Energyprod"
-          },
-          {
             "@class": "description",
             "#text": "dec-Energyprod-2 . inc-Plantprod-1. inc-TR-1"
           }
@@ -6477,10 +6429,6 @@
             ]
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
-          },
-          {
             "@class": "description ",
             "#text": "dec-Energyprod-1  . inc-Plantprod-1 "
           }
@@ -6624,7 +6572,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "9 Oxygen. 1 Plantprod"
+            "#text": "9 Oxygen."
           },
           {
             "@class": "animal resource"
@@ -7032,10 +6980,6 @@
             "@class": "tile city-tile "
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Energyprod. 2 MegaCreditprod"
-          },
-          {
             "@class": "description ",
             "#text": "dec-Energyprod-1  . dec-MegaCreditprod-2 . placetile/city/ground/true "
           }
@@ -7170,10 +7114,6 @@
           },
           {
             "@class": "tile rating"
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
           },
           {
             "@class": "description",

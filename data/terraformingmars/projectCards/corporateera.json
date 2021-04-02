@@ -939,7 +939,7 @@
           },
           {
             "@class": "requirements requirements-max",
-            "#text": "max 8 Oxygen. 1 Energyprod"
+            "#text": "max 8 Oxygen"
           },
           {
             "@class": "resource plant"
@@ -1387,10 +1387,6 @@
             ]
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
-          },
-          {
             "@class": "description",
             "@style": "margin-top:-5px",
             "#text": "dec-energyprod-1  . inc-MegaCreditprod-4 "
@@ -1777,10 +1773,6 @@
             "br": ""
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Heatprod"
-          },
-          {
             "@class": "description",
             "#text": "dec-heatprod-2  . inc-MegaCreditprod-3 "
           }
@@ -2025,10 +2017,6 @@
               "@class": "production money",
               "#text": "-1"
             }
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 MegaCreditprod"
           },
           {
             "@class": "description ",
@@ -2325,14 +2313,6 @@
             ]
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Plantprod"
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
-          },
-          {
             "@class": "description ",
             "#text": "dec-energyprod-1  . dec-MegaCreditprod-2-any. inc-MegaCreditprod-2 ."
           }
@@ -2543,10 +2523,6 @@
             "@class": "resource money",
             "@style": "margin-left:20px;",
             "#text": "10"
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 MegaCreditprod"
           },
           {
             "@class": "description ",
@@ -2842,10 +2818,6 @@
             "br": ""
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
-          },
-          {
             "@class": "description ",
             "#text": "dec-Energyprod-1  . inc-titanium-1 . inc-MegaCreditprod-1 "
           }
@@ -2911,10 +2883,6 @@
           {
             "@class": "tile city-tile ",
             "@style": "margin-left:20px "
-          },
-          {
-            "@class": "requirements ",
-            "#text": "1 Energyprod"
           },
           {
             "@class": "description ",
@@ -3478,7 +3446,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "Science Science Science tags. 1 Energyprod"
+            "#text": "Science Science Science tags"
           },
           {
             "@class": "red-arrow "
