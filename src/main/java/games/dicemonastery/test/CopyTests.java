@@ -525,7 +525,7 @@ public class CopyTests {
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
 
-        state.buyTreasure(DiceMonasteryConstants.TREASURE.CAPE);
+        state.acquireTreasure(DiceMonasteryConstants.TREASURE.CAPE, state.getCurrentPlayer());
 
         int midHash = state.hashCode();
         DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();

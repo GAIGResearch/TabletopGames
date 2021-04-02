@@ -63,7 +63,8 @@ public enum DiceMonasteryStateAttributes implements IGameAttribute {
     RETIRED((s, p) -> s.monksIn(DiceMonasteryConstants.ActionArea.RETIRED, p).size()),
     PILGRIMS((s, p) -> s.monksIn(PILGRIMAGE, p).size()),
     DEAD((s, p) -> s.monksIn(GRAVEYARD, p).size()),
-    VP(DiceMonasteryGameState::getVictoryPoints)
+    VP(DiceMonasteryGameState::getVictoryPoints),
+    TREASURE((s, p) -> s.getTreasures(p).stream().mapToInt(t -> t.vp).sum())
     ;
 
     private final BiFunction<DiceMonasteryGameState, Integer, Object> lambda;

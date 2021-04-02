@@ -491,7 +491,7 @@ public class ActionTests {
         assertEquals(4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
 
-        state.buyTreasure(TREASURE.CAPE);
+        state.acquireTreasure(TREASURE.CAPE, state.getCurrentPlayer());
         assertEquals(3, fm.computeAvailableActions(state).size());
         assertFalse(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
 

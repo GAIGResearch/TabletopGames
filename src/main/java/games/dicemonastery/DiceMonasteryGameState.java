@@ -29,6 +29,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     int nextRetirementReward = 0;
     Map<ILLUMINATED_TEXT, Integer> textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
     Map<TREASURE, Integer> treasuresCommissioned = new EnumMap<>(TREASURE.class);
+    List<List<TREASURE>> treasuresOwnedPerPlayer = new ArrayList<>();
     Map<Pilgrimage.DESTINATION, Deck<Pilgrimage>> pilgrimageDecks = new HashMap<>(4);
     List<Pilgrimage> pilgrimagesStarted = new ArrayList<>();
     int[] victoryPoints;
@@ -53,6 +54,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
             playerTreasuries.add(new EnumMap<>(Resource.class));
+            treasuresOwnedPerPlayer.add(new ArrayList<>());
         }
         nextRetirementReward = 0;
         textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
@@ -147,9 +149,17 @@ public class DiceMonasteryGameState extends AbstractGameState {
         for (int player = 0; player < bidPerPlayer.size(); player++) {
             Map<Resource, Integer> treasury = playerTreasuries.get(player);
             if (bidPerPlayer.get(player) == lowestBid) {
-                // this takes precedence over ordinality - no VP, and lose a monk
-                Optional<Monk> lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety));
-                lowestMonk.ifPresent(monk -> moveMonk(monk.getComponentID(), DORMITORY, GRAVEYARD));
+                // this takes precedence over ordinality - no VP, and lose a Treasure, or a Monk
+                // TODO: Technically this is a choice that the player can make
+                if (treasuresOwnedPerPlayer.get(player).isEmpty()) {
+                    Optional<Monk> lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety));
+                    lowestMonk.ifPresent(monk -> moveMonk(monk.getComponentID(), DORMITORY, GRAVEYARD));
+                } else {
+                    List<TREASURE> treasures = treasuresOwnedPerPlayer.get(player);
+                    TREASURE loss = treasures.stream().max(comparingInt(t -> t.vp)).orElseThrow(() -> new AssertionError("No Treasures to lose?"));
+                    treasures.remove(loss);
+                    addVP(-loss.vp, player);
+                }
                 playerBids.remove(player);
             } else {
                 // Gain VP
@@ -198,15 +208,24 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return textsWritten.get(textType);
     }
 
-    public void buyTreasure(TREASURE item) {
-        if (treasuresCommissioned.get(item) < item.limit)
+    public void acquireTreasure(TREASURE item, int player) {
+        if (treasuresCommissioned.get(item) < item.limit) {
             treasuresCommissioned.put(item, treasuresCommissioned.get(item) + 1);
-        else
+            treasuresOwnedPerPlayer.get(player).add(item);
+        } else
             throw new AssertionError("Cannot buy treasure as none left: " + item);
+    }
+
+    public void addTreasure(TREASURE item) {
+        treasuresCommissioned.merge(item, -1, Integer::sum);
     }
 
     public int getNumberCommissioned(TREASURE item) {
         return treasuresCommissioned.get(item);
+    }
+
+    public List<TREASURE> getTreasures(int player) {
+        return treasuresOwnedPerPlayer.get(player);
     }
 
     public void useAP(int actionPointsSpent) {
@@ -442,6 +461,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         retValue.playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
             retValue.playerTreasuries.add(new EnumMap<>(playerTreasuries.get(p)));
+            retValue.treasuresOwnedPerPlayer.add(new ArrayList<>(treasuresOwnedPerPlayer.get(p)));
             if (playerBids.containsKey(p))
                 retValue.playerBids.put(p, new HashMap<>(playerBids.get(p)));
         }
@@ -489,7 +509,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         DiceMonasteryGameState other = (DiceMonasteryGameState) o;
         return other.allMonks.equals(allMonks) && other.monkLocations.equals(monkLocations) &&
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
-                 other.playerBids.equals(playerBids) &&
+                other.playerBids.equals(playerBids) && other.treasuresOwnedPerPlayer.equals(treasuresOwnedPerPlayer) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
                 other.textsWritten.equals(textsWritten) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
                 other.pilgrimagesStarted.equals(pilgrimagesStarted) && other.pilgrimageDecks.equals(pilgrimageDecks) &&
@@ -500,7 +520,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
                 gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten, treasuresCommissioned,
-                pilgrimageDecks, pilgrimagesStarted) +
+                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

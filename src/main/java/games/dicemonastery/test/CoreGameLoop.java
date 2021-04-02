@@ -19,6 +19,7 @@ import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
+import static games.dicemonastery.DiceMonasteryConstants.TREASURE.*;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
@@ -556,13 +557,16 @@ public class CoreGameLoop {
     }
 
 
-    private void advanceToSummer() {
+    private void advanceToSummerAndRemoveTreasure() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (!(turnOrder.getSeason() == SUMMER));
+
+        for (int p = 0; p < 4; p++)
+            state.getTreasures(p).clear();
 
         assertEquals(2, turnOrder.getYear());
     }
@@ -578,7 +582,7 @@ public class CoreGameLoop {
 
     @Test
     public void summerActionsCorrect() {
-        advanceToSummer();
+        advanceToSummerAndRemoveTreasure();
         emptyAllStores();
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
 
@@ -628,7 +632,7 @@ public class CoreGameLoop {
 
     @Test
     public void summerBidsUniqueForAllPlayers() {
-        advanceToSummer();
+        advanceToSummerAndRemoveTreasure();
         emptyAllStores();
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
@@ -672,7 +676,7 @@ public class CoreGameLoop {
 
     @Test
     public void summerBidTiesForFirstAndThird() {
-        advanceToSummer();
+        advanceToSummerAndRemoveTreasure();
         emptyAllStores();
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
@@ -712,7 +716,7 @@ public class CoreGameLoop {
 
     @Test
     public void summerBidTiesForSecond() {
-        advanceToSummer();
+        advanceToSummerAndRemoveTreasure();
         emptyAllStores();
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
@@ -748,6 +752,47 @@ public class CoreGameLoop {
         assertEquals(startMonks[1] - 1, state.monksIn(DORMITORY, 1).size());
         assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
         assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
+    }
+
+    @Test
+    public void vikingsTakeTreasure() {
+        advanceToSummerAndRemoveTreasure();
+        emptyAllStores();
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        state.addTreasure(CAPE);
+        state.addTreasure(CANDLESTICK);
+
+        state.acquireTreasure(CAPE, 1);
+        state.acquireTreasure(CANDLESTICK, 1);
+        state.acquireTreasure(ALTAR_CROSS, 3);
+        state.addVP(10, 1);
+        // get rid of any monks on PILGRIMAGE
+        state.monksIn(PILGRIMAGE, 1).forEach(m -> state.moveMonk(m.getComponentID(), PILGRIMAGE, DORMITORY));
+
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            state.addResource(p, BEER, 10);
+            state.addResource(p, MEAD, 10);
+        }
+        int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
+        int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
+        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(0, 2));
+        fm.next(state, new SummerBid(0, 1));
+        fm.next(state, new SummerBid(2, 0));
+
+        assertEquals(AUTUMN, turnOrder.getSeason());
+
+        assertEquals(startMonks[0], state.monksIn(DORMITORY, 0).size());
+        assertEquals(startMonks[1], state.monksIn(DORMITORY, 1).size());
+        assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
+        assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
+
+        assertEquals(startVP[1] - 3, state.getVictoryPoints(1));
+        assertEquals(1, state.getTreasures(1).size());
+        assertFalse(state.getTreasures(1).contains(CANDLESTICK));
+        assertEquals(1, state.getTreasures(3).size());
     }
 
 }
