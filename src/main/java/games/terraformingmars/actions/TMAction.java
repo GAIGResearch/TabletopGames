@@ -22,6 +22,7 @@ public class TMAction extends AbstractAction {
     public int player;
     public final boolean pass;
 
+    public Requirement<TMGameState> costRequirement;
     public HashSet<Requirement<TMGameState>> requirements;
     public boolean played;
 
@@ -31,7 +32,8 @@ public class TMAction extends AbstractAction {
 
     private int cost = 0;
     private TMTypes.Resource costResource;
-    private int cardID = -1;
+    private int playCardID = -1;  // Card used to play this action (factors into the cost of the action)
+    private int cardID = -1;  // Card related to the action (does not factor into the cost)
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
@@ -109,12 +111,9 @@ public class TMAction extends AbstractAction {
     public void setActionCost(TMTypes.Resource resource, int cost, int cardID) {
         this.costResource = resource;
         this.cost = cost;
-        this.cardID = cardID;
-        this.requirements.add(new ResourceRequirement(resource, Math.abs(cost), false, player, cardID));
-    }
-
-    public void setCardID(int cardID) {
-        this.cardID = cardID;
+        this.playCardID = cardID;
+        this.costRequirement = new ResourceRequirement(resource, Math.abs(cost), false, player, cardID);
+        this.requirements.add(costRequirement);
     }
 
     public boolean canBePlayed(TMGameState gs) {
@@ -352,9 +351,9 @@ public class TMAction extends AbstractAction {
 
                 if (split2.length > 3) {
                     if (split2[3].equalsIgnoreCase("another")) {
-                        effect.cardID = -1;
+                        effect.playCardID = -1;
                     } else if (split2[3].equalsIgnoreCase("any")) {
-                        effect.cardID = -1;
+                        effect.playCardID = -1;
                         ((AddResourceOnCard) effect).chooseAny = true;
                     }
                     if (split2.length > 4) {
@@ -384,7 +383,15 @@ public class TMAction extends AbstractAction {
         return costResource;  // none by default, the resource to be paid for this action
     }
 
+    public int getPlayCardID() {
+        return playCardID;  // none by default, the component ID of card used for this action
+    }
+
+    public void setCardID(int cardID) {
+        this.cardID = cardID;
+    }
+
     public int getCardID() {
-        return cardID;  // none by default, the component ID of card used for this action
+        return cardID;
     }
 }

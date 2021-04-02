@@ -200,6 +200,10 @@ public abstract class AbstractGameState {
         }
     }
 
+    public Stack<IExtendedSequence> getActionsInProgress() {
+        return actionsInProgress;
+    }
+
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
      * This method is called after initialising the game state.

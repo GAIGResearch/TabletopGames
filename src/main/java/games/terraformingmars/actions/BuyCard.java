@@ -1,7 +1,6 @@
 package games.terraformingmars.actions;
 
 import core.AbstractGameState;
-import core.components.Counter;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -43,11 +42,9 @@ public class BuyCard extends TMAction {
             // Add persisting effects
             gs.addPersistingEffects(card.persistingEffects);
         } else {
-            Counter c = gs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit);
             gs.getPlayerHands()[player].add(card);
-            c.decrement(gp.getProjectPurchaseCost());
+            gs.getPlayerCardChoice()[player].remove(card);
         }
-        gs.getPlayerCardChoice()[player].remove(card);
         return true;
     }
 

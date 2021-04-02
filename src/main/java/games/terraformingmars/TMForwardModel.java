@@ -247,15 +247,14 @@ public class TMForwardModel extends AbstractForwardModel {
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
         int player = gs.getCurrentPlayer();
 
-        ArrayList<TMAction> possibleActions = getAllActions(gs);
+        List<AbstractAction> possibleActions = getAllActions(gs);
 
         // Wrap actions that can actually be played and must be paid for
-        for (TMAction a: possibleActions) {
+        for (AbstractAction aa: possibleActions) {
+            TMAction a = (TMAction) aa;
             if (a.canBePlayed(gs)) {
-                int cost = a.getCost();
-                int cardID = a.getCardID();  // -1 if no card
-                if (cost > 0) {
-                    actions.add(new PayForAction(a.actionType, player, a, a.getCostResource(), cost, cardID));
+                if (a.getCost() != 0) {
+                    actions.add(new PayForAction(player, a));
                 } else {
                     actions.add(a);
                 }
@@ -265,10 +264,25 @@ public class TMForwardModel extends AbstractForwardModel {
         return actions;
     }
 
-    public ArrayList<TMAction> getAllActions(TMGameState gs) {
+    /**
+     * Bypass regular computeActions function call to list all actions possible in the current state, some of which
+     * might not be playable at the moment. Requirements list on the action informs of why an action is not playable.
+     * Used to display full information in the GUI for unplayable (but possible) actions.
+     * @param gs - current state
+     * @return - list of all actions available, playable and not playable
+     */
+    public List<AbstractAction> getAllActions(TMGameState gs) {
+        // If there is an action in progress (see IExtendedSequence), then delegate to that
+        // Regular game loop calls will not reach here, but external calls (e.g. GUI, agents) will and need correct info
+        if (gs.isActionInProgress()) {
+            return gs.getActionsInProgress().peek()._computeAvailableActions(gs);
+        }
+
+        // Calculate all actions
+
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
         int player = gs.getCurrentPlayer();
-        ArrayList<TMAction> possibleActions = new ArrayList<>();
+        List<AbstractAction> possibleActions = new ArrayList<>();
 
         if (gs.getGamePhase() == CorporationSelect) {
             // Decide one card at a time, first one player, then the other

@@ -13,6 +13,7 @@ public class PlayCard extends TMAction {
     public PlayCard(int player, TMCard card, boolean free) {
         super(TMTypes.ActionType.PlayCard, player, free);
         this.setActionCost(TMTypes.Resource.MegaCredit, card.cost, card.getComponentID());
+        this.setCardID(card.getComponentID());
 
         this.requirements.addAll(card.requirements);
         for (TMAction aa : card.immediateEffects) {
@@ -24,7 +25,7 @@ public class PlayCard extends TMAction {
     @Override
     public boolean _execute(TMGameState gs) {
         TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
-        TMCard card = (TMCard) gs.getComponentById(getCardID());
+        TMCard card = (TMCard) gs.getComponentById(getPlayCardID());
         playCard(gs, card);
         return true;
     }
@@ -75,12 +76,12 @@ public class PlayCard extends TMAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        TMCard card = (TMCard) gameState.getComponentById(getCardID());
+        TMCard card = (TMCard) gameState.getComponentById(getPlayCardID());
         return "Play card " + card.getComponentName();
     }
 
     @Override
     public String toString() {
-        return "Play card id " + getCardID();
+        return "Play card id " + getPlayCardID();
     }
 }

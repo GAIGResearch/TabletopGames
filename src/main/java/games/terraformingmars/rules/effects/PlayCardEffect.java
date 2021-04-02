@@ -25,7 +25,7 @@ public class PlayCardEffect extends Effect {
         PayForAction aa = (PayForAction) actionTaken;
         if (!(aa.action instanceof PlayCard)) return false;
         PlayCard action = (PlayCard) aa.action;
-        TMCard card = (TMCard) gameState.getComponentById(action.getCardID());
+        TMCard card = (TMCard) gameState.getComponentById(action.getPlayCardID());
         for (TMTypes.Tag t: card.tags) {
             if (t == tagOnCard) {
                 return super.canExecute(gameState, actionTaken, player);

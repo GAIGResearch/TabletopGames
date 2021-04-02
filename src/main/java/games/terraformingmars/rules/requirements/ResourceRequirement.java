@@ -6,6 +6,7 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class ResourceRequirement implements Requirement<TMGameState> {
 
@@ -71,5 +72,18 @@ public class ResourceRequirement implements Requirement<TMGameState> {
     @Override
     public String toString() {
         return "Resource" + (production? " production" : "");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ResourceRequirement)) return false;
+        ResourceRequirement that = (ResourceRequirement) o;
+        return amount == that.amount && production == that.production && player == that.player && cardID == that.cardID && resource == that.resource;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(resource, amount, production, player, cardID);
     }
 }

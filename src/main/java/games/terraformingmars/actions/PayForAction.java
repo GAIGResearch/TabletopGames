@@ -7,6 +7,7 @@ import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 
 import java.util.*;
 
@@ -18,10 +19,11 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     int stage;
     TMTypes.Resource[] resourcesToPayWith;
 
-    public PayForAction(TMTypes.ActionType type, int player, TMAction action, TMTypes.Resource resourceToPay, int costTotal, int cardID) {
-        super(type, player, true);
+    public PayForAction(int player, TMAction action) {
+        super(action.actionType, player, true);
         this.action = action;
-        this.setActionCost(resourceToPay, Math.abs(costTotal), cardID);
+        this.setActionCost(action.getCostResource(), Math.abs(action.getCost()), action.getPlayCardID());
+        this.requirements.add(new PlayableActionRequirement(action));
     }
 
     @Override
@@ -34,11 +36,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Pay for card with resources until all paid
         // Second: execute action
 
-        if (this.player == -1) player = gs.getCurrentPlayer();
-
         TMCard card = null;
-        if (getCardID() > -1) {
-            card = (TMCard) gs.getComponentById(getCardID());
+        if (getPlayCardID() > -1) {
+            card = (TMCard) gs.getComponentById(getPlayCardID());
             setCost(getCost() - gs.discountCardCost(card, player));  // Apply card discount
         } else {
             // Check action type discounts
@@ -57,6 +57,8 @@ public class PayForAction extends TMAction implements IExtendedSequence {
                 // If only 1 option, just do it
                 TMAction a = (TMAction) actions.get(0);
                 boolean s1 = a.execute(gs);
+                this.action.player = player;
+                this.action.requirements.remove(this.action.costRequirement);  // No need to check this for playing it
                 boolean s2 = this.action.execute(gs);
                 stage = resourcesToPayWith.length;
                 return s1 && s2;
@@ -77,7 +79,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Find minimum that must be spent of this resource so that the card is still payable with remaining resources
         HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
 
-        TMCard card = (TMCard) gs.getComponentById(getCardID());
+        TMCard card = (TMCard) gs.getComponentById(getPlayCardID());
         int sum = gs.playerResourceSum(player, card, resourcesRemaining, getCostResource());
         int remaining = getCost() - costPaid - sum;
         int min = Math.max(0, (int)(Math.ceil(remaining/gs.getResourceMapRate(res, getCostResource()))));
@@ -103,6 +105,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (! (action instanceof ModifyPlayerResource)) {
             stage = resourcesToPayWith.length;  // TODO: bad, this shouldn't happen
+            this.action.player = player;
             this.action.execute(state);
             return;
         }
@@ -112,6 +115,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         stage++;
         if (costPaid >= getCost()) {
             // Action paid for, execute
+            this.action.player = player;
             this.action.execute(state);
             stage = resourcesToPayWith.length;
         } else if (stage == resourcesToPayWith.length-1) {
@@ -120,6 +124,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
                 // If only 1 option left, just do it
                 TMAction a = (TMAction) actions.get(0);
                 a.execute(gs);
+                this.action.player = player;
                 this.action.execute(state);
                 stage = resourcesToPayWith.length;
             }
