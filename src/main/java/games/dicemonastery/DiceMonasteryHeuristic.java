@@ -7,6 +7,7 @@ import utilities.Utils;
 
 import java.util.Arrays;
 
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.PILGRIMAGE;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
@@ -14,11 +15,15 @@ import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 
 public class DiceMonasteryHeuristic extends TunableParameters implements IStateHeuristic {
 
-    double[] MONKS = {0.1, 0.05, 0.0}; // one value for each of the three years of a game
-    double[] PIETY = {0.3, 0.2, 0.1}; // one value per year
-    double[] SCORE = {0.0, 0.2, 0.5}; // one value per year
-    double[] VP = {0.1, 0.1, 0.0}; // one value per year
-    double[] FOOD_SUFFICIENCY = {0.1, 0.2, 0.5}; // unlike the others, this applies on a seasonal basis
+    double[] MONKS = {-0.1, -0.1, 0.0}; // one value for each of the three years of a game
+    double[] PIETY = {0.0, 0.0, 0.0}; // one value per year
+    double[] SCORE = {0.5, 0.5, 0.5}; // one value per year
+    double[] VP = {0.5, 0.5, 0.5}; // one value per year
+    double[] FOOD_SUFFICIENCY = {0.1, 0.1, 1.0}; // unlike the others, this applies on a seasonal basis
+    double[] INK_TYPES = {0.0, 0.0, 0.0};
+    double[] TREASURES = {0.0, 0.0, 0.0};
+    double[] CORE_WRITING = {0.0, 0.0, 0.0};
+    double[] PILGRIMS = {0.0, 0.0, 0.0};
 
     public DiceMonasteryHeuristic() {
         for (int i = 1; i <= 3; i++) {
@@ -28,6 +33,10 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             addTunableParameter("SCORE_" + digit, SCORE[i - 1]);
             addTunableParameter("VP_" + digit, VP[i - 1]);
             addTunableParameter("FOOD_" + digit, FOOD_SUFFICIENCY[i - 1]);
+            addTunableParameter("INK_" + digit, INK_TYPES[i - 1]);
+            addTunableParameter("TREASURE_" + digit, TREASURES[i - 1]);
+            addTunableParameter("WRITE_" + digit, CORE_WRITING[i - 1]);
+            addTunableParameter("PILGRIM_" + digit, PILGRIMS[i - 1]);
         }
     }
 
@@ -40,6 +49,10 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             SCORE[i - 1] = (double) getParameterValue("SCORE_" + digit);
             VP[i - 1] = (double) getParameterValue("VP_" + digit);
             FOOD_SUFFICIENCY[i - 1] = (double) getParameterValue("FOOD_" + digit);
+            INK_TYPES[i - 1] = (double) getParameterValue("INK_" + digit);
+            TREASURES[i - 1] = (double) getParameterValue("TREASURE_" + digit);
+            CORE_WRITING[i - 1] = (double) getParameterValue("WRITE_" + digit);
+            PILGRIMS[i - 1] = (double) getParameterValue("PILGRIM_" + digit);
         }
     }
 
@@ -62,7 +75,8 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             season = 1;
 
         double totalCoeff = Math.abs(MONKS[year]) + Math.abs(PIETY[year]) + +Math.abs(SCORE[year])
-                + Math.abs(VP[year]) + Math.abs(FOOD_SUFFICIENCY[season]);
+                + Math.abs(VP[year]) + Math.abs(FOOD_SUFFICIENCY[season]) + Math.abs(INK_TYPES[year]) +
+                Math.abs(CORE_WRITING[year]) + Math.abs(TREASURES[year]) + Math.abs(PILGRIMS[year]);
         if (totalCoeff == 0.0) return 0.0;
 
         double monks = 0.0;
@@ -82,9 +96,30 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             int numberMonks = state.monksIn(null, playerId).size();
             food = numberMonks == 0 ? 1.0 : Math.min(1.0, food / numberMonks);
         }
+        double ink = 0.0;
+        if (INK_TYPES[season] != 0.0) {
+            int differentInks = state.getStores(playerId, r -> r.isInk).size();
+            ink = differentInks / 7.0;
+        }
+        double writing = 0.0;
+        if (CORE_WRITING[season] != 0.0) {
+            int vellum = state.getResource(playerId, VELLUM, STOREROOM);
+            int candles = state.getResource(playerId, CANDLE, STOREROOM);
+            writing = Math.min(Math.max(vellum, candles) / 5.0, 1.0);
+        }
+        double treasure = 0.0;
+        if (TREASURES[season] != 0.0) {
+            treasure = Math.min(state.getTreasures(playerId).stream().mapToInt( t -> t.vp).sum() / 36.0, 1.0);
+        }
+        double pilgrims = 0.0;
+        if (PILGRIMS[season] != 0.0) {
+            pilgrims = Math.min(state.monksIn(PILGRIMAGE, playerId).size() / 4.0, 1.0);
+        }
 
         return (monks * MONKS[year] + piety * PIETY[year] + score * SCORE[year] + vp * VP[year]
-                + food * FOOD_SUFFICIENCY[season]) / totalCoeff;
+                + food * FOOD_SUFFICIENCY[season]) + ink * INK_TYPES[year] + writing * CORE_WRITING[year]
+                + treasure * TREASURES[year] + pilgrims * PILGRIMS[year]
+                / totalCoeff;
     }
 
     @Override
@@ -94,6 +129,10 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         retValue.PIETY = Arrays.copyOf(PIETY, PIETY.length);
         retValue.SCORE = Arrays.copyOf(SCORE, SCORE.length);
         retValue.VP = Arrays.copyOf(VP, VP.length);
+        retValue.INK_TYPES = Arrays.copyOf(INK_TYPES, INK_TYPES.length);
+        retValue.CORE_WRITING = Arrays.copyOf(CORE_WRITING, CORE_WRITING.length);
+        retValue.TREASURES = Arrays.copyOf(TREASURES, TREASURES.length);
+        retValue.PILGRIMS = Arrays.copyOf(PILGRIMS, PILGRIMS.length);
         retValue.FOOD_SUFFICIENCY = Arrays.copyOf(FOOD_SUFFICIENCY, FOOD_SUFFICIENCY.length);
         return retValue;
     }
@@ -104,6 +143,8 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             DiceMonasteryHeuristic other = (DiceMonasteryHeuristic) o;
             return Arrays.equals(other.MONKS, MONKS) && Arrays.equals(other.PIETY, PIETY) &&
                     Arrays.equals(other.SCORE, SCORE) && Arrays.equals(other.VP, VP) &&
+                    Arrays.equals(other.INK_TYPES, INK_TYPES) && Arrays.equals(other.CORE_WRITING, CORE_WRITING) &&
+                    Arrays.equals(other.TREASURES, TREASURES) && Arrays.equals(other.PILGRIMS, PILGRIMS) &&
                     Arrays.equals(other.FOOD_SUFFICIENCY, FOOD_SUFFICIENCY);
         }
         return false;

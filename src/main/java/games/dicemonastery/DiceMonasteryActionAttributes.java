@@ -34,6 +34,7 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         if (a instanceof BuyTreasure) return ((BuyTreasure) a).treasure.name();
         if (a instanceof WriteText) return ((WriteText) a).textType.name();
         if (a instanceof TakeToken) return ((TakeToken) a).token.name();
+        if (a instanceof GoOnPilgrimage) return ((GoOnPilgrimage) a).destination.name();
         return "";
     }),
     VALUE((s, a) -> {
@@ -43,6 +44,7 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         if (a instanceof SummerBid)
             return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
         if (a instanceof Pray) return ((Pray) a).prayerCount;
+        if (a instanceof GoOnPilgrimage) return ((GoOnPilgrimage) a).getActionPoints();
         return 0;
     }),
     ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft())

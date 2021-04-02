@@ -34,4 +34,9 @@ public class BuyTreasure extends UseMonk{
         state.addResource(player, DiceMonasteryConstants.Resource.SHILLINGS, -treasure.cost);
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Buy " + treasure;
+    }
 }

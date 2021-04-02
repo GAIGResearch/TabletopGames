@@ -493,7 +493,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
             if (playerId != -1) {// only top card is visible, so shuffle if copied from any player's perspective
                 Pilgrimage topCard = copyDeck.draw();
                 copyDeck.shuffle(rnd);
-                copyDeck.add(topCard);
+                if (topCard != null)
+                    copyDeck.add(topCard);
             }
             retValue.pilgrimageDecks.put(destination, copyDeck);
         }
