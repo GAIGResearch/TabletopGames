@@ -3565,7 +3565,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-Energyprod-X for X Power tags you have, including this"
+            "#text": "inc-Energyprod-X-Power"
           }
         ]
       }
@@ -5280,7 +5280,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-heatprod-x . inc-MegaCreditprod-x"
+            "#text": "dec-Heatprod-X-MegaCreditprod"
           }
         ]
       }

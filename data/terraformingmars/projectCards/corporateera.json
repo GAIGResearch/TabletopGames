@@ -1937,7 +1937,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-MegaCredit-X for X event EVER PLAYED by all players"
+            "#text": "inc-MegaCredit-X-Event-any"
           }
         ],
         "#text": "/"
@@ -3066,7 +3066,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-X and inc-MegaCredit-X"
+            "#text": "Action: dec-Energy-X-MegaCredit"
           }
         ],
         "#text": "X"

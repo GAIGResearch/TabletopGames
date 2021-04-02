@@ -163,7 +163,10 @@ public class TMAction extends AbstractAction {
             }
             c.setValue(0);
         } else if (nCards < 0) {
-            // TODO player needs to discard nCards
+            // Player needs to discard nCards
+            for (int i = 0; i < Math.abs(nCards); i++) {
+                new DiscardCard(player).execute(gs);
+            }
         }
     }
 
@@ -201,7 +204,6 @@ public class TMAction extends AbstractAction {
 
     public static Pair<TMAction, String> parseAction(String encoding, boolean free, int cardID) {
 
-        // Third element is effect
         TMAction effect = null;
         String effectString = "";
         int player = -1;
@@ -223,7 +225,33 @@ public class TMAction extends AbstractAction {
                 TMTypes.GlobalParameter which = Utils.searchEnum(TMTypes.GlobalParameter.class, split2[1]);
 
                 if (increment == null) {
-                    // TODO: handle "dec X to increase X", sub action to be done only when first is done and X decided
+                    if (split2[2].equalsIgnoreCase("X")) {
+                        // 2 formats:
+                        // - inc-Resource-X-tag(-any): X = Event tags played by any player
+                        // - dec-Resource1-X-Resource2 : X = chosen by player from 0 to N first resource, decrease first resource that, increase second resource that
+                        increment = 1;
+                        String resString = split2[1].split("prod")[0];
+                        TMTypes.Resource res1 = Utils.searchEnum(TMTypes.Resource.class, resString);
+                        TMTypes.Resource res2 = Utils.searchEnum(TMTypes.Resource.class, split2[3].replace("prod", ""));
+                        effect = new ModifyPlayerResource(player, player, increment, res1, split2[1].contains("prod"), free);
+                        if (res2 != null) {
+                            ((ModifyPlayerResource) effect).counterResource = res2;
+                            ((ModifyPlayerResource) effect).counterResourceProduction = split2[3].contains("prod");
+                        } else {
+                            // A tag to count
+                            TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3]);
+                            if (tag != null) {
+                                ((ModifyPlayerResource) effect).tagToCount = tag;
+                                if (split2.length > 4 && split2[4].equalsIgnoreCase("any")) {
+                                    ((ModifyPlayerResource) effect).any = true;
+                                }
+                            } else {
+                                int a = 0;
+                            }
+                        }
+                    } else {
+                        int a = 0;
+                    }
                 } else {
                     if (which == null) {
                         // A resource or production instead
@@ -305,7 +333,7 @@ public class TMAction extends AbstractAction {
                 }
             } else {
                 // TODO handle "Capital" tile type as City, but special rules
-                int a = 0; // TODO this shouldn't happen
+                int a = 0; // this shouldn't happen
             }
             effectString = split2[1];
             if (effect != null && split2.length > 4) {

@@ -2,16 +2,24 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
-public class DiscardCard extends TMAction {
+import java.util.ArrayList;
+import java.util.List;
+
+public class DiscardCard extends TMAction implements IExtendedSequence {
 
     public DiscardCard(int player, int cardID) {
         super(player, true);
         setCardID(cardID);
+    }
+
+    public DiscardCard(int player) {
+        super(player, true);
     }
 
     @Override
@@ -23,13 +31,40 @@ public class DiscardCard extends TMAction {
                 gs.getDiscardCards().add(card);
             }
             gs.getPlayerCardChoice()[player].remove(card);
-            return true;
+        } else {
+            gs.setActionInProgress(this);
         }
-        return false;
+        return true;
     }
 
     @Override
-    public AbstractAction copy() {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+        // Choose which card in hand to discard
+        List<AbstractAction> actions = new ArrayList<>();
+        TMGameState gs = (TMGameState) state;
+        for (int i = 0; i < gs.getPlayerHands()[player].getSize(); i++) {
+            actions.add(new DiscardCard(player, gs.getPlayerHands()[player].get(i).getComponentID()));
+        }
+        return actions;
+    }
+
+    @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        return player;
+    }
+
+    @Override
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        setCardID(((DiscardCard)action).getCardID());
+    }
+
+    @Override
+    public boolean executionComplete(AbstractGameState state) {
+        return getCardID() != -1;
+    }
+
+    @Override
+    public DiscardCard copy() {
         return this;
     }
 
