@@ -2,12 +2,15 @@ package evaluation;
 
 import core.AbstractPlayer;
 import core.interfaces.ITunableParameters;
-import evodef.*;
+import evodef.EvoAlg;
+import evodef.MultiSolutionEvaluator;
+import evodef.SearchSpace;
 import games.GameType;
-import ntbea.*;
+import ntbea.MultiNTupleBanditEA;
+import ntbea.NTupleBanditEA;
+import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
-import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.StatSummary;
 import utilities.SummaryLogger;
@@ -16,7 +19,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,7 +41,7 @@ public class ParameterSearch {
                         "Then there are a number of optional arguments:\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
-                        "\topponent=      The agent used as opponent. Default is a Random player. \n" +
+                        "\topponent=      The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
                         "\t               This can either be a json-format file detailing the parameters, or\n" +
                         "\t               one of mcts|rmhc|random|osla|<className>  \n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
@@ -52,16 +58,6 @@ public class ParameterSearch {
 
         if (argsList.size() < 3)
             throw new AssertionError("Must specify at least three parameters: searchSpace/ITunableParameters, NTBEA iterations, game");
-        int iterationsPerRun = Integer.parseInt(args[1]);
-        GameType game = GameType.valueOf(args[2]);
-        int repeats = getArg(args, "repeat", 1);
-        int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
-        double kExplore = getArg(args, "kExplore", 1.0);
-        String opponentDescriptor = getArg(args, "opponent", "");
-        boolean verbose = Arrays.asList(args).contains("verbose");
-        int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
-        long seed = getArg(args, "seed", System.currentTimeMillis());
-        String logfile = getArg(args, "logFile", "");
 
         // Create the SearchSpace, and report some useful stuff to the console.
         ITPSearchSpace searchSpace;
@@ -102,11 +98,10 @@ public class ParameterSearch {
                         ).sum()
                 ).sum();
 
-        int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
         boolean useThreeTuples = Arrays.asList(args).contains("useThreeTuples");
 
-        System.out.println(String.format("Search space consists of %d states and %d possible 2-Tuples%s",
-                searchSpaceSize, twoTupleSize, useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : ""));
+        System.out.printf("Search space consists of %d states and %d possible 2-Tuples%s%n",
+                searchSpaceSize, twoTupleSize, useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : "");
 
         for (int i = 0; i < searchSpace.nDims(); i++) {
             int finalI = i;
@@ -121,17 +116,42 @@ public class ParameterSearch {
         NTupleSystem landscapeModel = new NTupleSystem(searchSpace);
         landscapeModel.setUse3Tuple(useThreeTuples);
         landscapeModel.addTuples();
+
+        if (getArg(args, "opponent", "").isEmpty()) {
+            runMultiNTBEA(landscapeModel, args);
+        } else {
+            runSingleNTBEA(landscapeModel, args);
+        }
+
+    }
+
+    public static void runSingleNTBEA(NTupleSystem landscapeModel, String[] args) {
+
+        int iterationsPerRun = Integer.parseInt(args[1]);
+        GameType game = GameType.valueOf(args[2]);
+        int repeats = getArg(args, "repeat", 1);
+        int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
+        double kExplore = getArg(args, "kExplore", 1.0);
+        String opponentDescriptor = getArg(args, "opponent", "");
+        boolean verbose = Arrays.asList(args).contains("verbose");
+        int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
+        long seed = getArg(args, "seed", System.currentTimeMillis());
+        String logfile = getArg(args, "logFile", "");
+
+        ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
+        int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
+        int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
+
         NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, kExplore, hood);
 
         // Set up opponents
         List<AbstractPlayer> opponents = new ArrayList<>();
         for (int i = 0; i < nPlayers; i++) {
-            AbstractPlayer opponent = opponentDescriptor.isEmpty() ? new RandomPlayer() : PlayerFactory.createPlayer(opponentDescriptor);
+            AbstractPlayer opponent = PlayerFactory.createPlayer(opponentDescriptor);
             opponents.add(opponent);
         }
 
-        // TODO: At some later point we also need to allow different evaluation functions to be used. Win/Lose / Score / Ordinal position
-        // and then for Game tuning other items that measure how close the result is, etc.
+        // TODO: Add Game tuning objectives that measure how close the result is, etc.
 
         // Initialise the GameEvaluator that will do all the heavy lifting
         GameEvaluator evaluator = new GameEvaluator(
@@ -141,6 +161,57 @@ public class ParameterSearch {
                 opponents,
                 seed,
                 true
+        );
+
+        // Get the results. And then log them.
+        // This loops once for each complete repetition of NTBEA specified.
+        // runNTBEA runs a complete set of trials, and spits out the mean and std error on the mean of the best sampled result
+        // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
+        Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
+        for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
+            landscapeModel.reset();
+            Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
+            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+            printDetailsOfRun(retValue, searchSpace, logfile);
+            if (verbose) {
+                System.out.println("MCTS Statistics: ");
+                System.out.println(evaluator.statsLogger.toString());
+            }
+            evaluator.statsLogger = new SummaryLogger();
+            if (retValue.a.a > bestResult.a.a)
+                bestResult = retValue;
+
+        }
+        System.out.println("\nFinal Recommendation: ");
+        // we don't log the final run to file to avoid duplication
+        printDetailsOfRun(bestResult, searchSpace, "");
+    }
+
+    public static void runMultiNTBEA(NTupleSystem landscapeModel, String[] args) {
+
+        int iterationsPerRun = Integer.parseInt(args[1]);
+        GameType game = GameType.valueOf(args[2]);
+        int repeats = getArg(args, "repeat", 1);
+        int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
+        double kExplore = getArg(args, "kExplore", 1.0);
+        String opponentDescriptor = getArg(args, "opponent", "");
+        boolean verbose = Arrays.asList(args).contains("verbose");
+        int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
+        long seed = getArg(args, "seed", System.currentTimeMillis());
+        String logfile = getArg(args, "logFile", "");
+
+        ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
+        int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
+        int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
+
+        MultiNTupleBanditEA searchFramework = new MultiNTupleBanditEA(landscapeModel, kExplore, hood, nPlayers);
+
+        // Initialise the GameEvaluator that will do all the heavy lifting
+        MultiSolutionEvaluator evaluator = new GameMultiPlayerEvaluator(
+                game,
+                searchSpace,
+                nPlayers,
+                seed
         );
 
         // Get the results. And then log them.
@@ -270,14 +341,14 @@ public class ParameterSearch {
                         ).toArray());
 
                 System.out.println("Tuples explored by size: " + tuplesExploredBySize);
-                System.out.println(String.format("Summary of 1-tuple statistics after %d samples:", landscapeModel.numberOfSamples()));
+                System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
 
                 IntStream.range(0, searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
                         .mapToObj(i -> new Pair<>(searchSpace.name(i), landscapeModel.getTuples().get(i)))
                         .forEach(nameTuplePair ->
                                 nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
                                     StatSummary v = nameTuplePair.b.ntMap.get(k);
-                                    System.out.println(String.format("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr()));
+                                    System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
                                 })
                         );
 
@@ -289,8 +360,8 @@ public class ParameterSearch {
                                 .sorted(Comparator.comparing(p -> -p.b.n()))
                                 .limit(10)
                                 .forEach(item ->
-                                        System.out.println(String.format("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)",
-                                                item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v)))
+                                        System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
+                                                item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
                                 )
                         );
             }
@@ -306,7 +377,7 @@ public class ParameterSearch {
                         return evaluator.evaluate(settings);
                     }).toArray();
 
-            double avg = Arrays.stream(results).average().getAsDouble();
+            double avg = Arrays.stream(results).average().orElse(0.0);
             double stdErr = Math.sqrt(Arrays.stream(results)
                     .map(d -> Math.pow(d - avg, 2.0)).sum()) / (evalGames - 1.0);
 
