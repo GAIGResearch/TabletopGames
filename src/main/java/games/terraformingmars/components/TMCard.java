@@ -269,9 +269,24 @@ public class TMCard extends Card {
                                     }
                                     Requirement r = new TagsPlayedRequirement(tags, min);
                                     card.requirements.add(r);
-                                } else if (s.contains("tile")) {
-                                    // Tile count placed requirement TODO
-//                                    Requirement r = new TilePlacedRequirement()
+                                } else if (s.contains("tile") && !s.contains("tiles")) {
+                                    // Tile count placed requirement
+                                    String[] split = s.split(" ");
+                                    int nTiles = 0;
+                                    boolean max = false;
+                                    boolean any = false;
+                                    TMTypes.Tile t = TMTypes.Tile.valueOf(split[0].trim());
+                                    for (int i = 0; i < split.length; i++) {
+                                        if (split[i].equalsIgnoreCase("tile")) {
+                                            nTiles = i;
+                                        } else if (split[i].equalsIgnoreCase("max")) {
+                                            max = true;
+                                        } else if (split[i].equalsIgnoreCase("any")) {
+                                            any = true;
+                                        }
+                                    }
+                                    Requirement r = new TilePlacedRequirement(t, nTiles, max, any);
+                                    card.requirements.add(r);
                                 } else {
                                     // Counter requirement
                                     boolean max = s.contains("max");
@@ -320,6 +335,7 @@ public class TMCard extends Card {
                                         card.pointsThreshold = nOther;
                                     }
                                 } else {
+                                    // parse immediate effects
                                     String[] orSplit = s.split(" or ");
                                     if (orSplit.length == 1) {
                                         TMAction a = TMAction.parseAction(s, true, card.getComponentID()).a;
@@ -327,8 +343,10 @@ public class TMCard extends Card {
                                             immediateEffects.add(a);
                                             if (a instanceof PlaceTile) {
                                                 a.setCardID(card.getComponentID());
+                                            } else if (a instanceof AddResourceOnCard && !((AddResourceOnCard) a).chooseAny) {
+                                                // if add resource on card (not other), set resource on this card
+                                                card.resourceOnCard = ((AddResourceOnCard) a).resource;
                                             }
-                                            // TODO if add resource on card (not other), set resource on this card
                                         } else {
                                             int b = 0;  // action didn't parse, put a breakpoint here to see it
                                         }
@@ -343,6 +361,9 @@ public class TMCard extends Card {
                                                 TMAction a = TMAction.parseAction(s2, true, card.getComponentID()).a;
                                                 if (a != null) {
                                                     actionChoice[i] = a;
+                                                    if (a instanceof PlaceTile) {
+                                                        a.setCardID(card.getComponentID());
+                                                    }
                                                 }
                                             } else {
                                                 // Compound action
@@ -353,6 +374,9 @@ public class TMCard extends Card {
                                                     TMAction a = TMAction.parseAction(s3, true, card.getComponentID()).a;
                                                     if (a != null) {
                                                         compound[j] = a;
+                                                        if (a instanceof PlaceTile) {
+                                                            a.setCardID(card.getComponentID());
+                                                        }
                                                     }
                                                     j++;
                                                 }
@@ -360,8 +384,8 @@ public class TMCard extends Card {
                                             }
                                             i++;
                                         }
-                                        for (int k = 0; k < actionChoice.length; k++) {
-                                            if (actionChoice[k] == null) {
+                                        for (TMAction tmAction : actionChoice) {
+                                            if (tmAction == null) {
                                                 int p = 0;
                                             }
                                         }

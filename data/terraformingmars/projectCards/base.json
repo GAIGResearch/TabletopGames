@@ -5788,7 +5788,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "5 Oxygen. 1 Energyprod"
+            "#text": "5 Oxygen"
           },
           {
             "@class": "resource-tag tag-space"

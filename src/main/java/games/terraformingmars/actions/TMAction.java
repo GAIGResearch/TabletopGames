@@ -303,7 +303,9 @@ public class TMAction extends AbstractAction {
             // PlaceTile action, format: "placetile/Tile/{Where = map type or name or Volcanic or resources sep by -}/{true or false for OnMars}/{Adjacency: Owned or None or tile names sep by -}"
             String[] split2 = encoding.split("/");
             // split2[1] is type of tile to place
-            TMTypes.Tile toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
+            TMTypes.Tile toPlace;
+            if (split2[1].equalsIgnoreCase("capital")) toPlace = TMTypes.Tile.City;
+            else toPlace = Utils.searchEnum(TMTypes.Tile.class, split2[1]);
             if (toPlace != null) {
                 // split2[2] is where to place it. can be a map tile, or a city name, or volcanic or resources gained.
                 if (split2[2].equalsIgnoreCase("volcanic")) {
@@ -332,7 +334,6 @@ public class TMAction extends AbstractAction {
                     }
                 }
             } else {
-                // TODO handle "Capital" tile type as City, but special rules
                 int a = 0; // this shouldn't happen
             }
             effectString = split2[1];

@@ -21,10 +21,22 @@ public class TilePlacedRequirement implements Requirement<TMGameState> {
 
     @Override
     public boolean testCondition(TMGameState gs) {
-        // TODO
-//        if (max && c.getValue() - discount <= threshold) return true;
-//        return !max && c.getValue() + discount >= threshold;
-        return true;
+        int nPlaced = nPlaced(gs);
+        if (max && nPlaced <= threshold) return true;
+        return !max && nPlaced >= threshold;
+    }
+
+    private int nPlaced(TMGameState gs) {
+        int player = gs.getCurrentPlayer();
+        int nPlaced = 0;
+        if (!any) {
+            nPlaced = gs.getPlayerTilesPlaced()[player].get(tile).getValue();
+        } else {
+            for (int i = 0; i < gs.getNPlayers(); i++) {
+                nPlaced = gs.getPlayerTilesPlaced()[i].get(tile).getValue();
+            }
+        }
+        return nPlaced;
     }
 
     @Override
@@ -44,7 +56,8 @@ public class TilePlacedRequirement implements Requirement<TMGameState> {
 
     @Override
     public String getReasonForFailure(TMGameState gs) {
-        return "";  // TODO
+        int nPlaced = nPlaced(gs);
+        return nPlaced + "/" + threshold + " " + tile + " tiles placed" + (!any? " by you" : "");
     }
 
     @Override

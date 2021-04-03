@@ -525,14 +525,23 @@ public class TMGameState extends AbstractGameState {
         // Add greeneries on board
         points += playerTilesPlaced[player].get(TMTypes.Tile.Greenery).getValue();
 
-        // Add cities on board TODO
+        // Add cities on board
+        for (int i = 0; i < board.getHeight(); i++) {
+            for (int j = 0; j < board.getWidth(); j++) {
+                TMMapTile mt = board.getElement(j, i);
+                if (mt != null && mt.getTilePlaced() == TMTypes.Tile.City) {
+                    // Count adjacent greeneries
+                    points += PlaceTile.nAdjacentTiles(this, mt, TMTypes.Tile.Greenery);
+                }
+            }
+        }
 
         // Add points on cards
         points += playerCardPoints[player].getValue();
 
         for (TMCard card: playerComplicatedPointCards[player].getComponents()) {
             if (card == null) {
-                continue;  // TODO: shouldn't happen
+                continue;
             }
             if (card.pointsThreshold != null) {
                 if (card.pointsResource != null) {
@@ -559,6 +568,11 @@ public class TMGameState extends AbstractGameState {
                     } else {
                         points += card.nPoints * playerTilesPlaced[player].get(card.pointsTile).getValue();
                     }
+                } else if (card.getComponentName().equalsIgnoreCase("capital")) {
+                    // x VP per Ocean adjacent
+                    int position = card.mapTileIDTilePlaced;
+                    TMMapTile mt = (TMMapTile) getComponentById(position);
+                    points += card.nPoints * PlaceTile.nAdjacentTiles(this, mt, TMTypes.Tile.Ocean);
                 }
             }
         }
