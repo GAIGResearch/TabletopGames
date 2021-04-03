@@ -1,14 +1,11 @@
 package evaluation;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.ITunableParameters;
-import evodef.EvoAlg;
-import evodef.MultiSolutionEvaluator;
-import evodef.SearchSpace;
+import evodef.*;
 import games.GameType;
-import ntbea.MultiNTupleBanditEA;
-import ntbea.NTupleBanditEA;
-import ntbea.NTupleSystem;
+import ntbea.*;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import utilities.Pair;
@@ -19,10 +16,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -43,9 +37,11 @@ public class ParameterSearch {
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\topponent=      The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
                         "\t               This can either be a json-format file detailing the parameters, or\n" +
-                        "\t               one of mcts|rmhc|random|osla|<className>  \n" +
+                        "\t               one of coop|mcts|rmhc|random|osla|<className>  \n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
-                        "\t               with a no-argument constructor\n" +
+                        "\t               with a no-argument constructor.\n" +
+                        "\t               'coop' means that the agent being tuned is used for all agents (i.e. if co-operative)\n" +
+                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising. Defaults to Win.\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
                         "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
@@ -137,6 +133,7 @@ public class ParameterSearch {
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
+        String evalMethod = getArg(args, "eval", "Win");
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -146,18 +143,33 @@ public class ParameterSearch {
 
         // Set up opponents
         List<AbstractPlayer> opponents = new ArrayList<>();
-        for (int i = 0; i < nPlayers; i++) {
-            AbstractPlayer opponent = PlayerFactory.createPlayer(opponentDescriptor);
-            opponents.add(opponent);
+        // if we are in coop mode, then we have no opponents. This is indicated by leaving the list empty.
+        if (!opponentDescriptor.equals("coop")) {
+            for (int i = 0; i < nPlayers; i++) {
+                AbstractPlayer opponent = opponentDescriptor.isEmpty() ? new RandomPlayer() : PlayerFactory.createPlayer(opponentDescriptor);
+                opponents.add(opponent);
+            }
         }
 
         // TODO: Add Game tuning objectives that measure how close the result is, etc.
+        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
+        if (evalMethod.equals("Win"))
+            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId].value;
+        if (evalMethod.equals("Score"))
+            evalFunction = AbstractGameState::getGameScore;
+        if (evalMethod.equals("Heuristic"))
+            evalFunction = AbstractGameState::getHeuristicScore;
+        if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
+            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
+        if (evalFunction == null)
+            throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
         // Initialise the GameEvaluator that will do all the heavy lifting
         GameEvaluator evaluator = new GameEvaluator(
                 game,
                 searchSpace,
                 nPlayers,
+                evalFunction,
                 opponents,
                 seed,
                 true
