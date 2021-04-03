@@ -6,6 +6,7 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.AdjacencyRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
@@ -198,11 +199,101 @@ public class TMAction extends AbstractAction {
         return actionType != null? actionType.name() : "Pass";
     }
 
-    public static Pair<TMAction, String> parseAction(String encoding, boolean free) {
+    public int getCost() {
+        return cost;  // 0 by default, the cost in resources this action takes to perform
+    }
+
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
+
+    public TMTypes.Resource getCostResource() {
+        return costResource;  // none by default, the resource to be paid for this action
+    }
+
+    public int getPlayCardID() {
+        return playCardID;  // none by default, the component ID of card used for this action
+    }
+
+    public void setCardID(int cardID) {
+        this.cardID = cardID;
+    }
+
+    public int getCardID() {
+        return cardID;
+    }
+
+
+
+    /* parsing input **/
+
+
+    public static TMAction parseActionOnCard(String s, TMCard card, boolean free) {
+        String[] orSplit = s.split(" or ");
+        int cardID = -1;
+        if (card != null) cardID = card.getComponentID();
+        if (orSplit.length == 1) {
+            TMAction a = TMAction.parseAction(s, free, cardID).a;
+            if (a != null) {
+                if (a instanceof PlaceTile) {
+                    a.setCardID(cardID);
+                } else if (card != null && a instanceof AddResourceOnCard && !((AddResourceOnCard) a).chooseAny) {
+                    // if add resource on card (not other), set resource on this card
+                    card.resourceOnCard = ((AddResourceOnCard) a).resource;
+                }
+                return a;
+            } else {
+                int b = 0;  // action didn't parse, put a breakpoint here to see it
+            }
+        } else {
+            // Action choice
+            TMAction[] actionChoice = new TMAction[orSplit.length];
+            int i = 0;
+            for (String s2 : orSplit) {
+                s2 = s2.trim();
+                String[] andSplit = s2.split(" and ");
+                if (andSplit.length == 1) {
+                    TMAction a = TMAction.parseAction(s2, free, cardID).a;
+                    if (a != null) {
+                        actionChoice[i] = a;
+                        if (a instanceof PlaceTile) {
+                            a.setCardID(cardID);
+                        }
+                    }
+                } else {
+                    // Compound action
+                    TMAction[] compound = new TMAction[andSplit.length];
+                    int j = 0;
+                    for (String s3 : andSplit) {
+                        s3 = s3.trim();
+                        TMAction a = TMAction.parseAction(s3, free, cardID).a;
+                        if (a != null) {
+                            compound[j] = a;
+                            if (a instanceof PlaceTile) {
+                                a.setCardID(cardID);
+                            }
+                        }
+                        j++;
+                    }
+                    actionChoice[i] = new CompoundAction(-1, compound);
+                }
+                i++;
+            }
+            for (TMAction tmAction : actionChoice) {
+                if (tmAction == null) {
+                    int p = 0;
+                }
+            }
+            return new ChoiceAction(-1, actionChoice);
+        }
+        return null;
+    }
+
+    private static Pair<TMAction, String> parseAction(String encoding, boolean free) {
         return parseAction(encoding, free, -1);
     }
 
-    public static Pair<TMAction, String> parseAction(String encoding, boolean free, int cardID) {
+    private static Pair<TMAction, String> parseAction(String encoding, boolean free, int cardID) {
 
         TMAction effect = null;
         String effectString = "";
@@ -398,29 +489,5 @@ public class TMAction extends AbstractAction {
             } catch (Exception ignored) {}
         }
         return new Pair<>(effect, effectString);
-    }
-
-    public int getCost() {
-        return cost;  // 0 by default, the cost in resources this action takes to perform
-    }
-
-    public void setCost(int cost) {
-        this.cost = cost;
-    }
-
-    public TMTypes.Resource getCostResource() {
-        return costResource;  // none by default, the resource to be paid for this action
-    }
-
-    public int getPlayCardID() {
-        return playCardID;  // none by default, the component ID of card used for this action
-    }
-
-    public void setCardID(int cardID) {
-        this.cardID = cardID;
-    }
-
-    public int getCardID() {
-        return cardID;
     }
 }

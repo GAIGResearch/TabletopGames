@@ -7,28 +7,26 @@ import games.terraformingmars.actions.PlayCard;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 
-public class PlayCardEffect extends Effect {
-    public TMTypes.Tag tagOnCard;
+import java.util.HashSet;
 
-    public PlayCardEffect(boolean mustBeCurrentPlayer, TMAction effectAction, TMTypes.Tag tag) {
+public class PlayCardEffect extends Effect {
+    public HashSet<TMTypes.Tag> tagsOnCard;
+
+    public PlayCardEffect(boolean mustBeCurrentPlayer, TMAction effectAction, HashSet<TMTypes.Tag> tags) {
         super(mustBeCurrentPlayer, effectAction);
-        this.tagOnCard = tag;
-    }
-    public PlayCardEffect(boolean mustBeCurrentPlayer, String effectAction, TMTypes.Tag tag) {
-        super(mustBeCurrentPlayer, effectAction);
-        this.tagOnCard = tag;
+        this.tagsOnCard = tags;
     }
 
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
-        if (!(actionTaken instanceof PayForAction)) return false;
+        if (!(actionTaken instanceof PayForAction) || !super.canExecute(gameState, actionTaken, player)) return false;  // PlayCard is always wrapped in PayForAction
         PayForAction aa = (PayForAction) actionTaken;
         if (!(aa.action instanceof PlayCard)) return false;
         PlayCard action = (PlayCard) aa.action;
         TMCard card = (TMCard) gameState.getComponentById(action.getPlayCardID());
         for (TMTypes.Tag t: card.tags) {
-            if (t == tagOnCard) {
-                return super.canExecute(gameState, actionTaken, player);
+            if (tagsOnCard.contains(t)) {
+                return true;
             }
         }
         return false;

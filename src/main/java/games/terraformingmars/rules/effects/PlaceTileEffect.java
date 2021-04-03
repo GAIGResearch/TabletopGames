@@ -21,17 +21,12 @@ public class PlaceTileEffect extends Effect {
         this.tile = tile;
         this.resourceTypeGained = resourceGained;
     }
-    public PlaceTileEffect(boolean mustBeCurrentPlayer, String effectAction, boolean onMars, TMTypes.Tile tile, TMTypes.Resource[] resourceGained) {
-        super(mustBeCurrentPlayer, effectAction);
-        this.onMars = onMars;
-        this.tile = tile;
-        this.resourceTypeGained = resourceGained;
-    }
 
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
         if (!(actionTaken instanceof PlaceTile) &&
-                !(actionTaken instanceof PayForAction && (((PayForAction) actionTaken).action instanceof PlaceTile))) return false;
+                !(actionTaken instanceof PayForAction && (((PayForAction) actionTaken).action instanceof PlaceTile))
+                || !super.canExecute(gameState, actionTaken, player)) return false;
 
         PlaceTile action;
         if (actionTaken instanceof PayForAction) action = (PlaceTile) ((PayForAction) actionTaken).action;
@@ -54,6 +49,6 @@ public class PlaceTileEffect extends Effect {
                 }
             }
         }
-        return marsCondition && tileCondition && resourceTypeCondition && super.canExecute(gameState, actionTaken, player);
+        return marsCondition && tileCondition && resourceTypeCondition;
     }
 }

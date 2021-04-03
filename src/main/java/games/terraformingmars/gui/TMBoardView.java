@@ -4,13 +4,11 @@ import core.components.Counter;
 import core.components.GridBoard;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.actions.TMAction;
+import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Bonus;
 import gui.views.ComponentView;
 import utilities.ImageIO;
-import utilities.Pair;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -313,26 +311,18 @@ public class TMBoardView extends ComponentView {
                         int imgY = yDisplay + displayHeight/2 - size/2;
 
                         // Find image to display, for a global counter, resource/production, or tile
-                        Pair<TMAction, String> effect = b.getEffect();
-                        TMTypes.GlobalParameter gp = Utils.searchEnum(TMTypes.GlobalParameter.class, effect.b);
+                        TMAction effect = b.getEffect();
                         String imgPath = null;
-                        if (gp == null) {
-                            // A resource or production?
-                            String resString = effect.b.split("prod")[0];
-                            TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, resString);
-                            if (res != null) {
-                                Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
-                                drawResource(g, resImg, production, effect.b.contains("prod"), imgX, imgY, size, 0.8);
-                            } else {
-                                // A tile to place?
-                                TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, effect.b);
-                                if (t != null) {
-                                    imgPath = t.getImagePath();
-                                }
-                            }
-                        } else {
-                            // A global counter (temp, oxygen, oceantiles)
-                            imgPath = gp.getImagePath();
+                        // A resource or production?
+                        if (effect instanceof ModifyPlayerResource) {
+                            Image resImg = ImageIO.GetInstance().getImage(((ModifyPlayerResource) effect).resource.getImagePath());
+                            drawResource(g, resImg, production, ((ModifyPlayerResource) effect).production, imgX, imgY, size, 0.8);
+                        }
+                        else if (effect instanceof PlaceTile) {
+                            // A tile to place?
+                            imgPath = ((PlaceTile) effect).tile.getImagePath();
+                        } else if (effect instanceof ModifyGlobalParameter) {
+                            imgPath = ((ModifyGlobalParameter) effect).param.getImagePath();
                         }
 
                         if (imgPath != null) {

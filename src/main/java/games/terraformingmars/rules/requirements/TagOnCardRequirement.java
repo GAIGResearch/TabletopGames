@@ -5,23 +5,31 @@ import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
 import java.awt.*;
-import java.util.Objects;
+import java.util.Arrays;
 
 public class TagOnCardRequirement implements Requirement<TMCard> {
 
-    final TMTypes.Tag tag;
+    final TMTypes.Tag[] tags;  // card must contain all of these tags
 
-    public TagOnCardRequirement(TMTypes.Tag t) {
-        this.tag = t;
+    public TagOnCardRequirement(TMTypes.Tag[] t) {
+        this.tags = t;
     }
 
     @Override
     public boolean testCondition(TMCard card) {
         if (card == null) return false;
-        for (TMTypes.Tag t: card.tags) {
-            if (t == tag) return true;
+        if (tags == null) return true;
+        for (TMTypes.Tag tag: tags) {
+            boolean found = false;
+            for (TMTypes.Tag t : card.tags) {
+                if (t == tag) {
+                    found = true;
+                    break;
+                }
+            }
+            if (! found) return false;
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -58,12 +66,12 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
         if (this == o) return true;
         if (!(o instanceof TagOnCardRequirement)) return false;
         TagOnCardRequirement that = (TagOnCardRequirement) o;
-        return tag == that.tag;
+        return Arrays.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tag);
+        return Arrays.hashCode(tags);
     }
 
     @Override

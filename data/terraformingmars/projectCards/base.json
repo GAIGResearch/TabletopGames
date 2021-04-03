@@ -251,7 +251,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energy-1 to inc-MegaCredit-1-City-true-any "
+            "#text": "Action: dec-Energy-1 and inc-MegaCredit-1-City-true-any "
           }
         ],
         "#text": "/"
@@ -558,7 +558,7 @@
               "",
               ""
             ],
-            "#text": "Action: dec-MegaCredit-12 to placetile/ocean/ocean/true . TITANIUM MAY BE USED as if playing a Space card . 1 VP per 1 Jovian tag "
+            "#text": "Action: dec-MegaCredit-12 and placetile/ocean/ocean/true . TITANIUM MAY BE USED as if playing a Space card . 1 VP per 1 Jovian tag "
           }
         ],
         "span": {
@@ -607,7 +607,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-Energyprod-1  to inc-TR-1 "
+            "#text": "Action: dec-Energyprod-1 and inc-TR-1 "
           }
         ],
         "span": {
@@ -910,14 +910,14 @@
         "div": [
           {
             "@class": "description ",
-            "#text": "Effect: When you play a card, you pay 1 MegaCredit less for it"
+            "#text": "Effect: discount-1"
           },
           {
             "@class": "tile city-tile "
           },
           {
             "@class": "description ",
-            "#text": "placetile/city/ground/true  NEXT TO NO OTHER TILE"
+            "#text": "placetile/city/ground/true/None"
           }
         ],
         "br": "",
@@ -1068,14 +1068,14 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When anyone placetile/ocean/ocean/true , inc-Plant-2"
+            "#text": "Effect: When anyone placetile/ocean/any/true / inc-Plant-2"
           },
           {
             "@class": "resource plant "
           },
           {
             "@class": "description ",
-            "#text": "It must be -12 C or colder to play. inc-Plant-1"
+            "#text": "Requires -12 C or colder to play. inc-Plant-1"
           }
         ],
         "br": "",
@@ -1389,7 +1389,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a Space Event, inc-MegaCredit-3 and inc-heat-3"
+            "#text": "Effect: playcard(tag-Space,Event) / inc-MegaCredit-3 and inc-heat-3"
           }
         ],
         "#text": ":"
@@ -1760,7 +1760,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: When any City tile is placed, inc-MegaCredit-2"
+            "#text": "Effect: placetile(City,,any) / inc-MegaCredit-2"
           }
         ],
         "#text": ":"
@@ -1969,7 +1969,7 @@
           },
           {
             "@class": "description",
-            "#text": "It must be -18 C or colder. inc-Plantprod-1 "
+            "#text": "Requires -18 C or colder. inc-Plantprod-1 "
           }
         ]
       }
@@ -2903,7 +2903,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-MegaCredit-7 to inc-energyprod-1 "
+            "#text": "Action: dec-MegaCredit-7 and inc-energyprod-1 "
           }
         ]
       }
@@ -4282,7 +4282,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: playcard(tag-Animal-Plant) : add-1-Animal "
+            "#text": "Effect: playcard(tag-Animal,Plant) / add-1-Animal "
           },
           {
             "@class": "tile special-tile",
@@ -4446,7 +4446,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: playcard(tag-Animal-Plant-Microbe) :  add-3-Microbe .  add-3-Microbe  "
+            "#text": "Effect: playcard(tag-Animal,Plant,Microbe) / add-3-Microbe .  add-3-Microbe  "
           },
           {
             "@class": "description",
@@ -4608,7 +4608,7 @@
               "",
               ""
             ],
-            "#text": "Action: inc-plant-1 or add-2-Microbe-another . It must be -10 C or colder"
+            "#text": "Action: inc-plant-1 or add-2-Microbe-another . Requires -10 C or colder"
 
           }
         ],
@@ -5160,7 +5160,7 @@
           {
             "@class": "description ",
             "@style": "margin-top:-8px;",
-            "#text": "Effect: placetile/Greenery/Ground/true : add-1-Animal "
+            "#text": "Effect: placetile(Greenery,onMars,any) / add-1-Animal "
           },
           {
             "@class": "animal resource ",
@@ -5317,7 +5317,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: global parameter discount 2"
+            "#text": "Effect: discount-2-global"
           }
         ],
         "#text": ": +/- 2"
@@ -5366,7 +5366,7 @@
           },
           {
             "@class": "description ",
-            "#text": "It must be -14 C or colder. inc-Plantprod-2 "
+            "#text": "Requires -14 C or colder. inc-Plantprod-2 "
           }
         ]
       }
@@ -5799,7 +5799,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
+            "#text": "Effect: discount-2-Space"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -6141,7 +6141,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: placetile/City/any/any : add-1-Animal "
+            "#text": "Effect: placetile(City,,any) / add-1-Animal "
           },
           {
             "@class": "animal resource"
@@ -6312,7 +6312,7 @@
               "",
               ""
             ],
-            "#text":  "Action: dec-Energy-3 to inc-Oxygen-1"
+            "#text":  "Action: dec-Energy-3 and inc-Oxygen-1"
           }
         ]
       }
@@ -6655,7 +6655,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-MegaCredit-8 to placetile/ocean/ocean/true . STEEL MAY BE USED as if you were playing a Building card"
+            "#text": "Action: dec-MegaCredit-8 and placetile/ocean/ocean/true . STEEL MAY BE USED as if you were playing a Building card"
           }
         ],
         "#text": [
@@ -6956,7 +6956,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When a City tile is placed, including this, inc-MegaCreditprod-1 "
+            "#text": "Effect: placetile(City,,any) / inc-MegaCreditprod-1 . inc-MegaCreditprod-1 "
           },
           {
             "@class": "production-boxprod-box-size2a",
@@ -7031,7 +7031,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-MegaCredit-10 to inc-heatprod-2 "
+            "#text": "Action: dec-MegaCredit-10 and inc-heatprod-2 "
           }
         ]
       }

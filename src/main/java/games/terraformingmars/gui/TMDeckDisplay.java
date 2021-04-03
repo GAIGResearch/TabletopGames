@@ -247,13 +247,10 @@ public class TMDeckDisplay extends JComponent {
                         from = ImageIO.GetInstance().getImage(TMTypes.Tile.City.getImagePath());
                     }
                 } else if (e instanceof PlayCardEffect) {
-                    from = ImageIO.GetInstance().getImage(((PlayCardEffect) e).tagOnCard.getImagePath());
+                    from = ImageIO.GetInstance().getImage(((PlayCardEffect) e).tagsOnCard.iterator().next().getImagePath());  // TODO display all tags, separate by /
                 }
                 // "to" depends on the action applied as the effect
                 TMAction action = e.effectAction;
-                if (action == null) {
-                    action = TMAction.parseAction(e.effectEncoding, true).a;
-                }
                 if (action instanceof ModifyPlayerResource) {
                     drawModifyPlayerResourceAction(g, (ModifyPlayerResource) action, xEF + size * 4, yEF, size);
                 }

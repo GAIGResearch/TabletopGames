@@ -242,7 +242,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
+            "#text": "Effect: discount-2-Space"
           }
         ],
         "#text": ":"
@@ -1014,7 +1014,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a card, you pay 2 MegaCredit less for it"
+            "#text": "Effect: discount-2"
           }
         ],
         "span": {
@@ -1065,7 +1065,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: Each titanium you have is worth 1 MegaCredit extra. Each steel you have is worth 1 MegaCredit extra. )"
+            "#text": "Effect: resourcemapping-Titanium-MegaCredit-1.0 . Effect: resourcemapping-Steel-MegaCredit-1.0 )"
           }
         ],
         "br": "",
@@ -1112,7 +1112,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: playcard(tag-Science) : dec-card-1 and inc-card-1 . dec-card-1 and inc-card-1"
+            "#text": "Effect: playcard(tag-Science) / dec-card-1 and inc-card-1 . dec-card-1 and inc-card-1"
           }
         ],
         "span": [
@@ -1177,7 +1177,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a  plant, microbe, or an animal tag, including this, inc-Plant-1 or add-1-resource-that"
+            "#text": "Effect: playcard(tag-Plant,Microbe,Animal) / inc-Plant-1 or add-1-resource-that .  inc-Plant-1 "
           }
         ],
         "br": "",
@@ -1233,7 +1233,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
+            "#text": "Effect: discount-2-Space"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -1636,7 +1636,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a Space card, you pay 2 MegaCredit less for it"
+            "#text": "Effect: discount-2-Space"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -1858,7 +1858,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play an Earth card, you pay 3 MegaCredit less for it"
+            "#text": "Effect: discount-3-Earth"
           }
         ],
         "#text": ":"
@@ -1977,7 +1977,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: After you play an event card, inc-MegaCredit-3"
+            "#text": "Effect: playCard(tag-Event) / inc-MegaCredit-3"
           }
         ],
         "#text": ":"
@@ -2466,7 +2466,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When you play a card, you pay 2 MegaCredit less for it"
+            "#text": "Effect: discount-2"
           },
           {
             "@class": "description ",
@@ -2617,7 +2617,7 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: After you pay for a standard project, except selling patents, inc-MegaCredit-3"
+            "#text": "Effect: payforaction(StandardProject) / inc-MegaCredit-3"
           }
         ],
         "#text": ":"
@@ -2941,7 +2941,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: playcard(tag-Science) : add-1-Science or use-1-Science and inc-Card-1. add-1-Science "
+            "#text": "Effect: playcard(tag-Science) / add-1-Science or use-1-Science and inc-Card-1. add-1-Science "
           }
         ],
         "#text": [

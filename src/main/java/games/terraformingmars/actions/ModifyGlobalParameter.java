@@ -9,7 +9,7 @@ import games.terraformingmars.rules.requirements.CounterRequirement;
 import java.util.Objects;
 
 public class ModifyGlobalParameter extends TMModifyCounter {
-    TMTypes.GlobalParameter param;
+    public TMTypes.GlobalParameter param;
 
     public ModifyGlobalParameter(TMTypes.GlobalParameter param, int change, boolean free) {
         super(-1, change, free);

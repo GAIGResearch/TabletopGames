@@ -3,6 +3,7 @@ package games.terraformingmars;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
+import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.components.Award;
@@ -352,7 +353,7 @@ public class TMTypes {
                                 JSONObject b = (JSONObject) o2;
                                 String effectString = (String) b.get("effect");
                                 int threshold = (int)(long) b.get("threshold");
-                                bonuses.add(new Bonus(p, threshold, effectString));
+                                bonuses.add(new Bonus(p, threshold, TMAction.parseActionOnCard(effectString, null, true)));
                             }
                         }
                     }

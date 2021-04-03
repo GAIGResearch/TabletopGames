@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static games.terraformingmars.actions.TMAction.parseActionOnCard;
+
 public class TMCard extends Card {
     public int number;
     public TMTypes.CardType cardType;
@@ -92,7 +94,7 @@ public class TMCard extends Card {
             if (type.equalsIgnoreCase("first")) {
                 // First action in action phase for the player is decided, not free
                 String action = (String) other.get("action");
-                card.firstAction = TMAction.parseAction(action, false, card.getComponentID()).a;
+                card.firstAction = TMAction.parseActionOnCard(action, card, false);
             }
         }
 
@@ -119,11 +121,13 @@ public class TMCard extends Card {
                 String[] costStr = ((String) effect.get("cost")).split("/");
                 TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
                 int cost = Integer.parseInt(costStr[1]);
-                TMAction a = TMAction.parseAction(action, false, card.componentID).a;
-                actions.add(a);
-                a.actionType = TMTypes.ActionType.ActiveAction;
-                a.setActionCost(costResource, cost, -1);
-                a.setCardID(card.getComponentID());
+                TMAction a = TMAction.parseActionOnCard(action, card, false);
+                if (a != null) {
+                    actions.add(a);
+                    a.actionType = TMTypes.ActionType.ActiveAction;
+                    a.setActionCost(costResource, cost, -1);
+                    a.setCardID(card.getComponentID());
+                }
             } else if (type.equalsIgnoreCase("discount")) {
                 // Parse discounts
                 int amount = (int)(long)effect.get("amount");
@@ -164,35 +168,8 @@ public class TMCard extends Card {
                 card.resourceMappings.add(new TMGameState.ResourceMapping(from, to, rate,null));
             } else if (type.equalsIgnoreCase("effect")) {
                 String condition = (String)effect.get("if");
-                String actionTypeCondition = condition.split("\\(")[0];
                 String result = (String)effect.get("then");
-                if (actionTypeCondition.equalsIgnoreCase("placetile")) {
-                    // Place tile effect
-                    String cond = condition.split("\\(")[1].replace(")", "");
-                    String[] split2 = cond.split(",");
-                    TMTypes.Tile tile = null;
-                    TMTypes.Resource[] resourcesGained = null;
-                    if (split2.length > 1) {
-                        tile = TMTypes.Tile.valueOf(split2[0]);
-                    } else {
-                        if (split2[0].contains("gain")) {
-                            String[] split3 = split2[0].replace("gain ", "").split("/");
-                            resourcesGained = new TMTypes.Resource[split3.length];
-                            for (int i = 0; i < split3.length; i++) {
-                                resourcesGained[i] = TMTypes.Resource.valueOf(split3[i]);
-                            }
-                        }
-                    }
-                    persistingEffects.add(new PlaceTileEffect(!condition.contains("any"), result, condition.contains("onMars"), tile, resourcesGained));
-                } else if (actionTypeCondition.equalsIgnoreCase("playcard")) {
-                    // Play card effect
-                    String[] cond = condition.split("\\(")[1].replace(")", "").split("-");
-                    persistingEffects.add(new PlayCardEffect(!condition.contains("any"), result, TMTypes.Tag.valueOf(cond[1])));
-                } else if (actionTypeCondition.equalsIgnoreCase("payforaction")) {
-                    // pay for action effect
-                    int minCost = Integer.parseInt(condition.split("\\(")[1].replace(")", ""));
-                    persistingEffects.add(new PayForActionEffect(!condition.contains("any"), result, minCost));
-                }
+                persistingEffects.add(parseEffect(condition, TMAction.parseActionOnCard(result, card, true)));
             }
         }
 
@@ -211,6 +188,8 @@ public class TMCard extends Card {
         ArrayList<TMTypes.Tag> tempTags = new ArrayList<>();
 
         ArrayList<TMAction> immediateEffects = new ArrayList<>();
+        ArrayList<TMAction> actions = new ArrayList<>();
+        ArrayList<Effect> persistingEffects = new ArrayList<>();
         for (Object o: div1) {
             JSONObject ob = (JSONObject)o;
             String info = (String)ob.get("@class");
@@ -303,10 +282,77 @@ public class TMCard extends Card {
                             for (String s: split) {
                                 if (s.contains("Requires") || s.contains("must"))
                                     continue;  // Already parsed requirements
-                                if (s.contains("Action")) continue;  // TODO if add resource action, mark card.resourceOnCard property
-                                if (s.contains("Effect")) continue;  // TODO
                                 s = s.trim();
-                                if (s.contains("VP")) {
+                                if (s.contains("Action")) {
+                                    TMAction a = parseActionOnCard(s.split(":")[1], card, false);
+                                    if (a != null) {
+                                        actions.add(a);
+                                    }
+                                } else if (s.contains("discount")) {
+                                    // Discount effects
+                                    String[] split2 = s.split("-");
+                                    int amount = Integer.parseInt(split2[1]);
+                                    Requirement r = null;
+                                    if (split2.length > 2) {
+                                        if (split2[2].equalsIgnoreCase("global")) {
+                                            // global parameter effect
+                                            for (TMTypes.GlobalParameter gp: TMTypes.GlobalParameter.values()) {
+                                                r = new CounterRequirement(gp.name(), -1, true);
+                                                if (card.discountEffects.containsKey(r)) {
+                                                    card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                                                } else {
+                                                    card.discountEffects.put(r, amount);
+                                                }
+                                            }
+                                        } else {
+                                            // A tag discount?
+                                            String[] tagDef = split2[2].split(",");
+                                            TMTypes.Tag[] tags = new TMTypes.Tag[tagDef.length];
+                                            for (int i = 0; i < tagDef.length; i++) {
+                                                TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, tagDef[i]);
+                                                if (t != null) {
+                                                    tags[i] = t;
+                                                } else {
+                                                    tags = null;
+                                                    break;
+                                                }
+                                            }
+                                            if (tags != null) {
+                                                r = new TagOnCardRequirement(tags);
+                                            }
+                                        }
+                                    } else {
+                                        r = new TagOnCardRequirement(null);
+                                    }
+                                    if (r != null) {
+                                        if (card.discountEffects.containsKey(r)) {
+                                            card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                                        } else {
+                                            card.discountEffects.put(r, amount);
+                                        }
+                                    }
+                                } else if (s.contains("resourcemapping")) {
+                                    // Resource mappings
+                                    String[] split2 = s.split("-");
+                                    TMTypes.Resource from = TMTypes.Resource.valueOf(split2[1]);
+                                    TMTypes.Resource to = TMTypes.Resource.valueOf(split2[2]);
+                                    double rate = Double.parseDouble(split2[3]);
+                                    card.resourceMappings.add(new TMGameState.ResourceMapping(from, to, rate,null));
+                                }
+                                else if (s.contains("Effect")) {
+                                    // Persisting effects
+                                    // Format:
+//                                    payforaction(StandardProject) / effect
+//                                    playcard(tag-Tag,Tag,Tag-any) / effect
+//                                    placetile(City,onMars,any) / effect
+
+                                    String s2 = s.split(":")[1].trim();
+                                    String when = s2.split(" / ")[0].trim();
+                                    String then = s2.split(" / ")[1].trim();
+                                    Effect e = parseEffect(when, TMAction.parseActionOnCard(then, card, true));
+                                    persistingEffects.add(e);
+                                }
+                                else if (s.contains("VP")) {
                                     // This card has special rules for awarding victory points
                                     String[] pointCondition = s.split(" ");
                                     int nVP = Integer.parseInt(pointCondition[0]);
@@ -336,60 +382,9 @@ public class TMCard extends Card {
                                     }
                                 } else {
                                     // parse immediate effects
-                                    String[] orSplit = s.split(" or ");
-                                    if (orSplit.length == 1) {
-                                        TMAction a = TMAction.parseAction(s, true, card.getComponentID()).a;
-                                        if (a != null) {
-                                            immediateEffects.add(a);
-                                            if (a instanceof PlaceTile) {
-                                                a.setCardID(card.getComponentID());
-                                            } else if (a instanceof AddResourceOnCard && !((AddResourceOnCard) a).chooseAny) {
-                                                // if add resource on card (not other), set resource on this card
-                                                card.resourceOnCard = ((AddResourceOnCard) a).resource;
-                                            }
-                                        } else {
-                                            int b = 0;  // action didn't parse, put a breakpoint here to see it
-                                        }
-                                    } else {
-                                        // Action choice
-                                        TMAction[] actionChoice = new TMAction[orSplit.length];
-                                        int i = 0;
-                                        for (String s2 : orSplit) {
-                                            s2 = s2.trim();
-                                            String[] andSplit = s2.split(" and ");
-                                            if (andSplit.length == 1) {
-                                                TMAction a = TMAction.parseAction(s2, true, card.getComponentID()).a;
-                                                if (a != null) {
-                                                    actionChoice[i] = a;
-                                                    if (a instanceof PlaceTile) {
-                                                        a.setCardID(card.getComponentID());
-                                                    }
-                                                }
-                                            } else {
-                                                // Compound action
-                                                TMAction[] compound = new TMAction[andSplit.length];
-                                                int j = 0;
-                                                for (String s3 : andSplit) {
-                                                    s3 = s3.trim();
-                                                    TMAction a = TMAction.parseAction(s3, true, card.getComponentID()).a;
-                                                    if (a != null) {
-                                                        compound[j] = a;
-                                                        if (a instanceof PlaceTile) {
-                                                            a.setCardID(card.getComponentID());
-                                                        }
-                                                    }
-                                                    j++;
-                                                }
-                                                actionChoice[i] = new CompoundAction(-1, compound);
-                                            }
-                                            i++;
-                                        }
-                                        for (TMAction tmAction : actionChoice) {
-                                            if (tmAction == null) {
-                                                int p = 0;
-                                            }
-                                        }
-                                        immediateEffects.add(new ChoiceAction(-1, actionChoice));
+                                    TMAction a = parseActionOnCard(s, card, true);
+                                    if (a != null) {
+                                        immediateEffects.add(a);
                                     }
                                 }
                             }
@@ -399,9 +394,56 @@ public class TMCard extends Card {
             }
         }
 
+        card.actions = actions.toArray(new TMAction[0]);
+        card.persistingEffects = persistingEffects.toArray(new Effect[0]);
         card.immediateEffects = immediateEffects.toArray(new TMAction[0]);
         card.tags = tempTags.toArray(new TMTypes.Tag[0]);
 
         return card;
     }
+
+    private static Effect parseEffect(String when, TMAction then) {
+        String actionTypeCondition = when.split("\\(")[0].trim();
+        String content = when.split("\\(")[1].replace(")", "");
+        boolean mustBeCurrentPlayer = !when.contains("any");
+
+        if (actionTypeCondition.equalsIgnoreCase("placetile")) {
+            // Place tile effect
+            String[] split2 = content.split(",");
+            TMTypes.Tile tile = null;
+            TMTypes.Resource[] resourcesGained = null;
+            if (split2.length > 1) {
+                tile = TMTypes.Tile.valueOf(split2[0]);
+            } else {
+                if (split2[0].contains("gain")) {
+                    String[] split3 = split2[0].replace("gain ", "").split("/");
+                    resourcesGained = new TMTypes.Resource[split3.length];
+                    for (int i = 0; i < split3.length; i++) {
+                        resourcesGained[i] = TMTypes.Resource.valueOf(split3[i]);
+                    }
+                }
+            }
+            return new PlaceTileEffect(mustBeCurrentPlayer, then, when.contains("onMars"), tile, resourcesGained);
+        } else if (actionTypeCondition.equalsIgnoreCase("playcard")) {
+            // Play card effect
+            String[] tagDef = content.split("-")[1].split(",");
+            HashSet<TMTypes.Tag> tags = new HashSet<>();
+            for (String s: tagDef) {
+                tags.add(TMTypes.Tag.valueOf(s));
+            }
+            return new PlayCardEffect(mustBeCurrentPlayer, then, tags);
+        } else if (actionTypeCondition.equalsIgnoreCase("payforaction")) {
+            // pay for action effect
+            TMTypes.ActionType at = Utils.searchEnum(TMTypes.ActionType.class, content);
+            if (at != null) {
+                return new PayForActionEffect(mustBeCurrentPlayer, then, at);
+            } else {
+                int minCost = Integer.parseInt(content);
+                return new PayForActionEffect(mustBeCurrentPlayer, then, minCost);
+            }
+        }
+
+        return null;
+    }
+
 }
