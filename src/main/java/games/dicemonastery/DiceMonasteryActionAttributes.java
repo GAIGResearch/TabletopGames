@@ -45,6 +45,7 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
             return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
         if (a instanceof Pray) return ((Pray) a).prayerCount;
         if (a instanceof GoOnPilgrimage) return ((GoOnPilgrimage) a).getActionPoints();
+        if (a instanceof TakeToken) return 2 - s.availableBonusTokens(((TakeToken) a).fromArea).size();
         return 0;
     }),
     ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft())
