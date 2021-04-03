@@ -1068,7 +1068,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: When anyone placetile/ocean/any/true / inc-Plant-2"
+            "#text": "Effect: placetile(Ocean,onMars,any) / inc-Plant-2"
           },
           {
             "@class": "resource plant "

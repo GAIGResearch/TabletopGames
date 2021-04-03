@@ -288,69 +288,71 @@ public class TMCard extends Card {
                                     if (a != null) {
                                         actions.add(a);
                                     }
-                                } else if (s.contains("discount")) {
-                                    // Discount effects
-                                    String[] split2 = s.split("-");
-                                    int amount = Integer.parseInt(split2[1]);
-                                    Requirement r = null;
-                                    if (split2.length > 2) {
-                                        if (split2[2].equalsIgnoreCase("global")) {
-                                            // global parameter effect
-                                            for (TMTypes.GlobalParameter gp: TMTypes.GlobalParameter.values()) {
-                                                r = new CounterRequirement(gp.name(), -1, true);
-                                                if (card.discountEffects.containsKey(r)) {
-                                                    card.discountEffects.put(r, card.discountEffects.get(r) + amount);
-                                                } else {
-                                                    card.discountEffects.put(r, amount);
-                                                }
-                                            }
-                                        } else {
-                                            // A tag discount?
-                                            String[] tagDef = split2[2].split(",");
-                                            TMTypes.Tag[] tags = new TMTypes.Tag[tagDef.length];
-                                            for (int i = 0; i < tagDef.length; i++) {
-                                                TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, tagDef[i]);
-                                                if (t != null) {
-                                                    tags[i] = t;
-                                                } else {
-                                                    tags = null;
-                                                    break;
-                                                }
-                                            }
-                                            if (tags != null) {
-                                                r = new TagOnCardRequirement(tags);
-                                            }
-                                        }
-                                    } else {
-                                        r = new TagOnCardRequirement(null);
-                                    }
-                                    if (r != null) {
-                                        if (card.discountEffects.containsKey(r)) {
-                                            card.discountEffects.put(r, card.discountEffects.get(r) + amount);
-                                        } else {
-                                            card.discountEffects.put(r, amount);
-                                        }
-                                    }
-                                } else if (s.contains("resourcemapping")) {
-                                    // Resource mappings
-                                    String[] split2 = s.split("-");
-                                    TMTypes.Resource from = TMTypes.Resource.valueOf(split2[1]);
-                                    TMTypes.Resource to = TMTypes.Resource.valueOf(split2[2]);
-                                    double rate = Double.parseDouble(split2[3]);
-                                    card.resourceMappings.add(new TMGameState.ResourceMapping(from, to, rate,null));
                                 }
                                 else if (s.contains("Effect")) {
-                                    // Persisting effects
-                                    // Format:
+                                    if (s.contains("discount")) {
+                                        // Discount effects
+                                        String[] split2 = s.split("-");
+                                        int amount = Integer.parseInt(split2[1]);
+                                        Requirement r = null;
+                                        if (split2.length > 2) {
+                                            if (split2[2].equalsIgnoreCase("global")) {
+                                                // global parameter effect
+                                                for (TMTypes.GlobalParameter gp: TMTypes.GlobalParameter.values()) {
+                                                    r = new CounterRequirement(gp.name(), -1, true);
+                                                    if (card.discountEffects.containsKey(r)) {
+                                                        card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                                                    } else {
+                                                        card.discountEffects.put(r, amount);
+                                                    }
+                                                }
+                                            } else {
+                                                // A tag discount?
+                                                String[] tagDef = split2[2].split(",");
+                                                TMTypes.Tag[] tags = new TMTypes.Tag[tagDef.length];
+                                                for (int i = 0; i < tagDef.length; i++) {
+                                                    TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, tagDef[i]);
+                                                    if (t != null) {
+                                                        tags[i] = t;
+                                                    } else {
+                                                        tags = null;
+                                                        break;
+                                                    }
+                                                }
+                                                if (tags != null) {
+                                                    r = new TagOnCardRequirement(tags);
+                                                }
+                                            }
+                                        } else {
+                                            r = new TagOnCardRequirement(null);
+                                        }
+                                        if (r != null) {
+                                            if (card.discountEffects.containsKey(r)) {
+                                                card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                                            } else {
+                                                card.discountEffects.put(r, amount);
+                                            }
+                                        }
+                                    } else if (s.contains("resourcemapping")) {
+                                        // Resource mappings
+                                        String[] split2 = s.split("-");
+                                        TMTypes.Resource from = TMTypes.Resource.valueOf(split2[1]);
+                                        TMTypes.Resource to = TMTypes.Resource.valueOf(split2[2]);
+                                        double rate = Double.parseDouble(split2[3]);
+                                        card.resourceMappings.add(new TMGameState.ResourceMapping(from, to, rate,null));
+                                    } else {
+                                        // Persisting effects
+                                        // Format:
 //                                    payforaction(StandardProject) / effect
 //                                    playcard(tag-Tag,Tag,Tag-any) / effect
 //                                    placetile(City,onMars,any) / effect
 
-                                    String s2 = s.split(":")[1].trim();
-                                    String when = s2.split(" / ")[0].trim();
-                                    String then = s2.split(" / ")[1].trim();
-                                    Effect e = parseEffect(when, TMAction.parseActionOnCard(then, card, true));
-                                    persistingEffects.add(e);
+                                        String s2 = s.split(":")[1].trim();
+                                        String when = s2.split(" / ")[0].trim();
+                                        String then = s2.split(" / ")[1].trim();
+                                        Effect e = parseEffect(when, TMAction.parseActionOnCard(then, card, true));
+                                        persistingEffects.add(e);
+                                    }
                                 }
                                 else if (s.contains("VP")) {
                                     // This card has special rules for awarding victory points
@@ -403,8 +405,9 @@ public class TMCard extends Card {
     }
 
     private static Effect parseEffect(String when, TMAction then) {
-        String actionTypeCondition = when.split("\\(")[0].trim();
-        String content = when.split("\\(")[1].replace(")", "");
+        String[] ss = when.split("\\(");
+        String actionTypeCondition = ss[0].trim();
+        String content = ss[1].replace(")", "");
         boolean mustBeCurrentPlayer = !when.contains("any");
 
         if (actionTypeCondition.equalsIgnoreCase("placetile")) {

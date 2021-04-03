@@ -47,8 +47,8 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             gs.playerResourceMap[i] = new HashSet<>();
             // By default, players can exchange steel for X MC and titanium for X MC. More may be added
-            gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit, params.nSteelMC, new TagOnCardRequirement(TMTypes.Tag.Building)));
-            gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit, params.nTitaniumMC, new TagOnCardRequirement(TMTypes.Tag.Space)));
+            gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit, params.nSteelMC, new TagOnCardRequirement(new TMTypes.Tag[]{TMTypes.Tag.Building})));
+            gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit, params.nTitaniumMC, new TagOnCardRequirement(new TMTypes.Tag[]{TMTypes.Tag.Space})));
 
             // Set up player discount maps
             gs.playerDiscountEffects[i] = new HashMap<>();
