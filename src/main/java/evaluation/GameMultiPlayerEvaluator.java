@@ -12,6 +12,7 @@ import utilities.SummaryLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiFunction;
 
 /**
  * Game Evaluator is used for NTBEA optimisation of parameters. It implements the SolutionEvaluator interface.
@@ -28,6 +29,8 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
     Random rnd;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
+    BiFunction<AbstractGameState, Integer, Double> evalFn;
+
 
     /**
      * GameEvaluator
@@ -38,10 +41,11 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
      * @param seed             Random seed to use
      */
     public <T> GameMultiPlayerEvaluator(GameType game, ITPSearchSpace parametersToTune,
-                                        int nPlayers,
+                                        int nPlayers, BiFunction<AbstractGameState, Integer, Double> evaluationFunction,
                                         long seed) {
         this.game = game;
         this.searchSpace = parametersToTune;
+        evalFn = evaluationFunction;
         this.nPlayers = nPlayers;
         this.rnd = new Random(seed);
     }
@@ -63,8 +67,8 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
      */
     @Override
     public double[] evaluate(List<int[]> settings) {
-/*        System.out.println(String.format("Starting evaluation %d of %s at %tT", nEvals,
-                Arrays.toString(settings), System.currentTimeMillis()));*/
+//        System.out.printf("Starting evaluation %d of %n\t%s at %tT%n", nEvals,
+//                settings.stream().map(Arrays::toString).collect(joining(",\n\t")), System.currentTimeMillis());
 
         List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
 
@@ -81,7 +85,12 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
         AbstractGameState finalState = newGame.getGameState();
 
         nEvals++;
-        return finalState.getHeuristicScore(playerIndex);
+        double[] retValue = new double[nPlayers];
+        for (int i = 0; i < nPlayers; i++)
+            retValue[i] = evalFn.apply(finalState, i);
+
+    //    System.out.printf("Result : %s%n", Arrays.toString(retValue));
+        return retValue;
     }
 
     /**
@@ -91,14 +100,5 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
     public SearchSpace searchSpace() {
         return searchSpace;
     }
-
-    /**
-     * @return The number of NTBEA iterations/trials that have been run so far
-     */
-    @Override
-    public int nEvals() {
-        return nEvals;
-    }
-
 
 }

@@ -3,9 +3,12 @@ package evaluation;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.ITunableParameters;
-import evodef.*;
+import evodef.EvoAlg;
+import evodef.SearchSpace;
 import games.GameType;
-import ntbea.*;
+import ntbea.MultiNTupleBanditEA;
+import ntbea.NTupleBanditEA;
+import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import utilities.Pair;
@@ -16,7 +19,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -146,7 +153,7 @@ public class ParameterSearch {
         // if we are in coop mode, then we have no opponents. This is indicated by leaving the list empty.
         if (!opponentDescriptor.equals("coop")) {
             for (int i = 0; i < nPlayers; i++) {
-                AbstractPlayer opponent = opponentDescriptor.isEmpty() ? new RandomPlayer() : PlayerFactory.createPlayer(opponentDescriptor);
+                AbstractPlayer opponent = PlayerFactory.createPlayer(opponentDescriptor);
                 opponents.add(opponent);
             }
         }
@@ -182,7 +189,7 @@ public class ParameterSearch {
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
-            Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
+            Pair<Double, Double> r = runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace, logfile);
             if (verbose) {
@@ -206,11 +213,23 @@ public class ParameterSearch {
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
         double kExplore = getArg(args, "kExplore", 1.0);
-        String opponentDescriptor = getArg(args, "opponent", "");
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
+
+        String evalMethod = getArg(args, "eval", "Win");
+        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
+        if (evalMethod.equals("Win"))
+            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId].value;
+        if (evalMethod.equals("Score"))
+            evalFunction = AbstractGameState::getGameScore;
+        if (evalMethod.equals("Heuristic"))
+            evalFunction = AbstractGameState::getHeuristicScore;
+        if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
+            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
+        if (evalFunction == null)
+            throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -219,10 +238,11 @@ public class ParameterSearch {
         MultiNTupleBanditEA searchFramework = new MultiNTupleBanditEA(landscapeModel, kExplore, hood, nPlayers);
 
         // Initialise the GameEvaluator that will do all the heavy lifting
-        MultiSolutionEvaluator evaluator = new GameMultiPlayerEvaluator(
+        GameMultiPlayerEvaluator evaluator = new GameMultiPlayerEvaluator(
                 game,
                 searchSpace,
                 nPlayers,
+                evalFunction,
                 seed
         );
 
@@ -233,14 +253,10 @@ public class ParameterSearch {
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
-            Pair<Double, Double> r = runNTBEA(evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
+            Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace, logfile);
-            if (verbose) {
-                System.out.println("MCTS Statistics: ");
-                System.out.println(evaluator.statsLogger.toString());
-            }
-            evaluator.statsLogger = new SummaryLogger();
+
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
 
@@ -327,6 +343,7 @@ public class ParameterSearch {
      * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
      */
     public static Pair<Double, Double> runNTBEA(GameEvaluator evaluator,
+                                                GameMultiPlayerEvaluator multiPlayerEvaluator,
                                                 EvoAlg searchFramework,
                                                 int totalRuns, int reportEvery,
                                                 int evalGames, boolean logResults) {
@@ -337,8 +354,13 @@ public class ParameterSearch {
         // If reportEvery == totalRuns, then this will just loop once
         // (Which is the usual default)
         for (int iter = 0; iter < totalRuns / reportEvery; iter++) {
-            evaluator.reset();
-            searchFramework.runTrial(evaluator, reportEvery);
+            if (evaluator != null) {
+                evaluator.reset();
+                searchFramework.runTrial(evaluator, reportEvery);
+            } else {
+                multiPlayerEvaluator.reset();
+                searchFramework.runTrial(multiPlayerEvaluator, reportEvery);
+            }
 
             if (logResults) {
                 System.out.println("Current best sampled point (using mean estimate): " +
@@ -379,7 +401,7 @@ public class ParameterSearch {
             }
         }
         // now run the evaluation games on the final recommendation
-        if (evalGames > 0) {
+        if (evaluator != null && evalGames > 0) {
             evaluator.reportStatistics = true;
             double[] results = IntStream.range(0, evalGames)
                     .mapToDouble(answer -> {
