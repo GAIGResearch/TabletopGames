@@ -10,12 +10,12 @@ import games.terraformingmars.components.TMCard;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DuplicateAction extends TMAction implements IExtendedSequence {
+public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
     TMTypes.Tag tagRequirement;  // tag card chosen must have
     Class<? extends TMAction> actionClass;  // what type of effect can be duplicated
     boolean production;  // If modify player resource, must it be production?
 
-    public DuplicateAction(TMTypes.Tag tagRequirement, Class<? extends TMAction> actionClass, boolean production) {
+    public DuplicateImmediateEffect(TMTypes.Tag tagRequirement, Class<? extends TMAction> actionClass, boolean production) {
         super(-1, true);
         this.actionClass = actionClass;
         this.tagRequirement = tagRequirement;
@@ -23,7 +23,7 @@ public class DuplicateAction extends TMAction implements IExtendedSequence {
         this.setCardID(-1);
     }
 
-    public DuplicateAction(int player, int cardID, Class<? extends TMAction> actionClass, TMTypes.Tag tagRequirement, boolean production) {
+    public DuplicateImmediateEffect(int player, int cardID, Class<? extends TMAction> actionClass, TMTypes.Tag tagRequirement, boolean production) {
         super(player, true);
         this.setCardID(cardID);
         this.actionClass = actionClass;
@@ -71,7 +71,7 @@ public class DuplicateAction extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState) state;
         List<AbstractAction> actions = new ArrayList<>();
         for (TMCard card: gs.getPlayerCardChoice()[player].getComponents()) {
-            actions.add(new DuplicateAction(player, card.getComponentID(), actionClass, tagRequirement, production));
+            actions.add(new DuplicateImmediateEffect(player, card.getComponentID(), actionClass, tagRequirement, production));
         }
         return actions;
     }
@@ -94,7 +94,7 @@ public class DuplicateAction extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public DuplicateAction copy() {
+    public DuplicateImmediateEffect copy() {
         return this;
     }
 }

@@ -487,7 +487,7 @@ public class TMAction extends AbstractAction {
             String[] split = encoding.split("-");
             TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, split[1]);
             if (split[2].equalsIgnoreCase("ModifyPlayerResource")) {
-                effect = new DuplicateAction(t, ModifyPlayerResource.class, split[3].equalsIgnoreCase("true"));
+                effect = new DuplicateImmediateEffect(t, ModifyPlayerResource.class, split[3].equalsIgnoreCase("true"));
             }
         } else if (encoding.contains("look")) {
             // Look at top X cards, keep/buy N cards, discard the rest: look-nLook-nKeep-buy
