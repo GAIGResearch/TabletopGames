@@ -18,6 +18,8 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     public TMTypes.Tag tagRequirement;  // tag target card must have
     public int minResRequirement;
 
+    public TMTypes.Tag tagTopCardDrawDeck;  // tag top card of the draw deck must have for this to be played; top card discarded either way
+
     public AddResourceOnCard(int player, int cardID, TMTypes.Resource resource, int amount, boolean free) {
         super(player, free);
         this.resource = resource;
@@ -32,10 +34,24 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     @Override
     public boolean _execute(TMGameState gs) {
         if (getCardID() != -1) {
-            TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
-            TMCard card = (TMCard) gs.getComponentById(getCardID());
-            card.nResourcesOnCard += amount;
-            return true;
+            boolean canExecute = true;
+            if (tagTopCardDrawDeck != null) {
+                canExecute = false;
+                TMCard topCard = gs.getProjectCards().pick(0);
+                for (TMTypes.Tag t: topCard.tags) {
+                    if (t == tagTopCardDrawDeck) {
+                        canExecute = true;
+                        break;
+                    }
+                }
+                gs.getDiscardCards().add(topCard);
+            }
+            if (canExecute) {
+                TMCard card = (TMCard) gs.getComponentById(getCardID());
+                card.nResourcesOnCard += amount;
+                return true;
+            }
+            return false;
         }
         gs.setActionInProgress(this);
         return true;
@@ -63,7 +79,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             if (card.resourceOnCard != null) {
                 if (resource != null && card.resourceOnCard == resource ||
                     resource == null && card.nResourcesOnCard > minResRequirement) {
-                    if (amount > 0 || amount < 0 && card.nResourcesOnCard > amount) {
+                    if (amount > 0 || amount < 0 && card.nResourcesOnCard > amount && card.canResourcesBeRemoved) {
                         if (tagRequirement == null || contains(card.tags, tagRequirement)) {
                             actions.add(new AddResourceOnCard(player, card.getComponentID(), resource, amount, true));
                         }

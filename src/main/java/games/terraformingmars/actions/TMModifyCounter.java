@@ -10,15 +10,15 @@ import java.util.Objects;
 
 public class TMModifyCounter extends TMAction {
     public int counterID;
-    public int change;
+    public double change;
 
-    public TMModifyCounter(int counterID, int change, boolean free) {
+    public TMModifyCounter(int counterID, double change, boolean free) {
         super(-1, free);
         this.counterID = counterID;
         this.change = change;
     }
 
-    public TMModifyCounter(TMTypes.ActionType actionType, int counterID, int change, boolean free) {
+    public TMModifyCounter(TMTypes.ActionType actionType, int counterID, double change, boolean free) {
         super(actionType, -1, free);
         this.counterID = counterID;
         this.change = change;
@@ -34,10 +34,10 @@ public class TMModifyCounter extends TMAction {
     public boolean _execute(TMGameState gs) {
         Counter c = (Counter)gs.getComponentById(counterID);
         if (change > 0 && !c.isMaximum()) {
-            c.increment(change);
+            c.increment((int)change);
             return true;
         } else if (change < 0 && !c.isMinimum()) {
-            c.increment(change);
+            c.increment((int)change);
             return true;
         }
         return false;

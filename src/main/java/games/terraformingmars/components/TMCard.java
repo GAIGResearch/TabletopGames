@@ -43,8 +43,9 @@ public class TMCard extends Card {
     public TMTypes.Tile pointsTile;  // Type of tiles placed earning points
     public boolean pointsTileAdjacent;  // If true, only count tiles of type adjacent to tile placed by card
 
-    public TMTypes.Resource resourceOnCard; // TODO
+    public TMTypes.Resource resourceOnCard;
     public int nResourcesOnCard;  // One count for each type of token
+    public boolean canResourcesBeRemoved = true;
 
     public TMCard() {
         nResourcesOnCard = 0;
@@ -222,7 +223,7 @@ public class TMCard extends Card {
                             String ps = (String) ob2.get("#text");
                             card.nPoints = Double.parseDouble(ps.split("/")[0]);
                         } else if (info2 != null && info2.contains("requirements")) {
-                            String[] reqStr = ((String) ob2.get("#text")).split("\\.");
+                            String[] reqStr = ((String) ob2.get("#text")).split("\\*");
                             for (String s: reqStr) {
                                 s = s.trim();
                                 if (s.contains("tags")) {
@@ -278,55 +279,30 @@ public class TMCard extends Card {
                             }
                         } else if (info2 != null && info2.contains("description")) {
                             String ps = (String) ob2.get("#text");
-                            String[] split = ps.split("\\.");  // Dot separates multiple effects
+                            String[] split = ps.split("\\*");  // * separates multiple effects
                             for (String s: split) {
                                 if (s.contains("Requires") || s.contains("must"))
                                     continue;  // Already parsed requirements
                                 s = s.trim();
-                                if (s.contains("Action")) {
+                                if (s.contains("Action:")) {
                                     TMAction a = parseActionOnCard(s.split(":")[1], card, false);
                                     if (a != null) {
                                         actions.add(a);
                                     }
+                                } else if (s.contains("stays on this card")) {
+                                    card.canResourcesBeRemoved = false;
+                                } else if (s.contains("next card")) {
+                                    // TODO temporary effects, removed after player plays a card (optionally, this generation)
+                                    boolean thisGeneration = s.contains("this generation");
+                                    HashSet<Requirement> reqs = parseDiscount(s.split(" is ")[1].split("-"));
                                 }
-                                else if (s.contains("Effect")) {
+                                else if (s.contains("Effect:")) {
                                     if (s.contains("discount")) {
                                         // Discount effects
                                         String[] split2 = s.split("-");
                                         int amount = Integer.parseInt(split2[1]);
-                                        Requirement r = null;
-                                        if (split2.length > 2) {
-                                            if (split2[2].equalsIgnoreCase("global")) {
-                                                // global parameter effect
-                                                for (TMTypes.GlobalParameter gp: TMTypes.GlobalParameter.values()) {
-                                                    r = new CounterRequirement(gp.name(), -1, true);
-                                                    if (card.discountEffects.containsKey(r)) {
-                                                        card.discountEffects.put(r, card.discountEffects.get(r) + amount);
-                                                    } else {
-                                                        card.discountEffects.put(r, amount);
-                                                    }
-                                                }
-                                            } else {
-                                                // A tag discount?
-                                                String[] tagDef = split2[2].split(",");
-                                                TMTypes.Tag[] tags = new TMTypes.Tag[tagDef.length];
-                                                for (int i = 0; i < tagDef.length; i++) {
-                                                    TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, tagDef[i]);
-                                                    if (t != null) {
-                                                        tags[i] = t;
-                                                    } else {
-                                                        tags = null;
-                                                        break;
-                                                    }
-                                                }
-                                                if (tags != null) {
-                                                    r = new TagOnCardRequirement(tags);
-                                                }
-                                            }
-                                        } else {
-                                            r = new TagOnCardRequirement(null);
-                                        }
-                                        if (r != null) {
+                                        HashSet<Requirement> reqs = parseDiscount(split2);
+                                        for (Requirement r: reqs) {
                                             if (card.discountEffects.containsKey(r)) {
                                                 card.discountEffects.put(r, card.discountEffects.get(r) + amount);
                                             } else {
@@ -402,6 +378,37 @@ public class TMCard extends Card {
         card.tags = tempTags.toArray(new TMTypes.Tag[0]);
 
         return card;
+    }
+
+    private static HashSet<Requirement> parseDiscount(String[] split2) {
+        HashSet<Requirement> reqs = new HashSet<>();
+        if (split2.length > 2) {
+            if (split2[2].equalsIgnoreCase("global")) {
+                // global parameter effect
+                for (TMTypes.GlobalParameter gp: TMTypes.GlobalParameter.values()) {
+                    reqs.add(new CounterRequirement(gp.name(), -1, true));
+                }
+            } else {
+                // A tag discount?
+                String[] tagDef = split2[2].split(",");
+                TMTypes.Tag[] tags = new TMTypes.Tag[tagDef.length];
+                for (int i = 0; i < tagDef.length; i++) {
+                    TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, tagDef[i]);
+                    if (t != null) {
+                        tags[i] = t;
+                    } else {
+                        tags = null;
+                        break;
+                    }
+                }
+                if (tags != null) {
+                    reqs.add(new TagOnCardRequirement(tags));
+                }
+            }
+        } else {
+            reqs.add(new TagOnCardRequirement(null));
+        }
+        return reqs;
     }
 
     private static Effect parseEffect(String when, TMAction then) {

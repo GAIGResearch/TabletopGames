@@ -53,7 +53,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         }
     }
 
-    public ModifyPlayerResource(int player, int targetPlayer, int change, TMTypes.Resource resource, boolean production,
+    public ModifyPlayerResource(int player, int targetPlayer, double change, TMTypes.Resource resource, boolean production,
                                 TMTypes.Tag tagToCount, TMTypes.Tile tileToCount, boolean any, boolean opponents, boolean onMars,
                                 TMTypes.Resource counterResource, boolean counterResourceProduction,
                                 boolean free) {
@@ -71,11 +71,11 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.counterResource = counterResource;
         this.counterResourceProduction = counterResourceProduction;
         if (change < 0) {
-            this.requirements.add(new ResourceRequirement(resource, Math.abs(change), production, targetPlayer, -1));
+            this.requirements.add(new ResourceRequirement(resource, Math.abs((int)change), production, targetPlayer, -1));
         }
     }
 
-    public ModifyPlayerResource(int player, int targetPlayer, int change, TMTypes.Resource resource, boolean production,
+    public ModifyPlayerResource(int player, int targetPlayer, double change, TMTypes.Resource resource, boolean production,
                                 boolean free) {
         // Used for parsing, other properties set individually
         super(-1, change, free);
@@ -84,7 +84,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.targetPlayer = targetPlayer;
         this.player = player;
         if (change < 0) {
-            this.requirements.add(new ResourceRequirement(resource, Math.abs(change), production, targetPlayer, -1));
+            this.requirements.add(new ResourceRequirement(resource, Math.abs((int)change), production, targetPlayer, -1));
         }
     }
 
@@ -155,7 +155,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                 } else {
                     c = gs.getPlayerResources()[targetPlayer].get(counterResource);
                 }
-                c.increment(Math.abs(change));
+                c.increment(Math.abs((int)change));
                 gs.getPlayerResourceIncreaseGen()[targetPlayer].put(counterResource, true);
             }
             if (change > 0) {

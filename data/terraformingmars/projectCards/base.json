@@ -76,7 +76,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-Energyprod-1 . inc-Temperature-1 "
+            "#text": "inc-Energyprod-1 * inc-Temperature-1 "
           }
         ]
       }
@@ -138,7 +138,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 3 oceanTiles. dec-MegaCreditprod-1 . dec-heatprod-1-any . inc-Plantprod-2 "
+            "#text": "Requires 3 oceanTiles* dec-MegaCreditprod-1 * dec-heatprod-1-any * inc-Plantprod-2 "
           }
         ]
       }
@@ -205,7 +205,7 @@
               ""
             ],
             "#text":
-              "Action: dec-MegaCredit-1 and reveal the top card of the draw deck. If that card has a Microbe tag, add-1-Science . 3 VP if 1 Science "
+              "Action: dec-MegaCredit-1 and add-1-Science---Microbe * 3 VP if 1 Science "
 
           }
         ]
@@ -328,7 +328,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 4 oceanTiles. placetile/Capital/ground/true . dec-Energyprod-2 . inc-MegaCreditprod-5 . 1 VP per 1 Ocean Adjacent "
+            "#text": "Requires 4 oceanTiles* placetile/Capital/ground/true * dec-Energyprod-2 * inc-MegaCreditprod-5 * 1 VP per 1 Ocean Adjacent "
           }
         ]
       }
@@ -381,7 +381,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-temperature-1  . inc-titanium-2. dec-Plant-3-any"
+            "#text": "inc-temperature-1  * inc-titanium-2* dec-Plant-3-any"
           }
         ],
         "br": [
@@ -435,7 +435,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-temperature-1  .placetile/ocean/ocean/true . dec-Plant-3-any"
+            "#text": "inc-temperature-1  *placetile/ocean/ocean/true * dec-Plant-3-any"
           }
         ],
         "br": ""
@@ -501,7 +501,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-temperature-2  . inc-titanium-4. dec-Plant-4-any"
+            "#text": "inc-temperature-2  * inc-titanium-4* dec-Plant-4-any"
           }
         ],
         "br": [
@@ -558,7 +558,7 @@
               "",
               ""
             ],
-            "#text": "Action: dec-MegaCredit-12 and placetile/ocean/ocean/true . TITANIUM MAY BE USED as if playing a Space card . 1 VP per 1 Jovian tag "
+            "#text": "Action: dec-MegaCredit-12 and placetile/ocean/ocean/true * TITANIUM MAY BE USED as if playing a Space card * 1 VP per 1 Jovian tag "
           }
         ],
         "span": {
@@ -697,7 +697,7 @@
               ""
             ],
             "#text":
-              "Oxygen must be 7-max. inc-Plant-3. placetile/city/ground/true . dec-Energyprod-1 . inc-MegaCreditprod-3 "
+              "Oxygen must be 7-max* inc-Plant-3* placetile/city/ground/true * dec-Energyprod-1 * inc-MegaCreditprod-3 "
 
           }
         ],
@@ -759,7 +759,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-Energyprod-1  . inc-MegaCreditprod-3 . placetile/City/Noctis/true "
+            "#text": "dec-Energyprod-1  * inc-MegaCreditprod-3 * placetile/City/Noctis/true "
           }
         ],
         "br": ""
@@ -818,7 +818,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 2% oxygen. inc-heatprod-2  . inc-Plantprod-2 "
+            "#text": "Requires 2% oxygen* inc-heatprod-2  * inc-Plantprod-2 "
           }
         ]
       }
@@ -870,7 +870,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-Plant-3 or add-3-Microbe-another or add-2-Animal-another . placetile/ocean/ocean/true "
+            "#text": "inc-Plant-3 or add-3-Microbe-another or add-2-Animal-another * placetile/ocean/ocean/true "
           }
         ],
         "br": ""
@@ -965,7 +965,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-titaniumprod-1  . placetile/city/Phobos/false "
+            "#text": "inc-titaniumprod-1  * placetile/city/Phobos/false "
           }
         ]
       }
@@ -1025,7 +1025,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true . dec-MegaCreditprod-2  . inc-heatprod-3 "
+            "#text": "placetile/ocean/ocean/true * dec-MegaCreditprod-2  * inc-heatprod-3 "
           }
         ]
       }
@@ -1075,7 +1075,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires -12 C or colder to play. inc-Plant-1"
+            "#text": "Requires -12 C or colder to play* inc-Plant-1"
           }
         ],
         "br": "",
@@ -1131,7 +1131,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 11% oxygen. 1 VP per 1 Animal "
+            "#text": "Requires 11% oxygen* 1 VP per 1 Animal "
           }
         ],
         "br": ""
@@ -1193,7 +1193,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires -12 C or warmer. add-1-Animal-another-Animal . inc-Plant-3. inc-MegaCreditprod-2 "
+            "#text": "Requires -12 C or warmer* add-1-Animal-another-Animal * inc-Plant-3* inc-MegaCreditprod-2 "
           }
         ],
         "br": "",
@@ -1260,7 +1260,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Oxygen must be 9-max. placetile/city/ground/true . dec-Energyprod-1  . inc-MegaCreditprod-3 "
+            "#text": "Oxygen must be 9-max* placetile/city/ground/true * dec-Energyprod-1  * inc-MegaCreditprod-3 "
           }
         ]
       }
@@ -1339,7 +1339,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-MegaCreditprod-2  . inc-heatprod-2 . inc-Energyprod-2 "
+            "#text": "dec-MegaCreditprod-2  * inc-heatprod-2 * inc-Energyprod-2 "
           }
         ]
       }
@@ -1455,7 +1455,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/city/ground/true . dec-Energyprod-2  . inc-steelprod-2 "
+            "#text": "placetile/city/ground/true * dec-Energyprod-2  * inc-steelprod-2 "
           }
         ]
       }
@@ -1505,7 +1505,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: add-1-Microbe . Action: rem-2-Microbe and inc-oxygen-1 "
+            "#text": "Action: add-1-Microbe * Action: rem-2-Microbe and inc-oxygen-1 "
           }
         ],
         "br": "",
@@ -1566,7 +1566,7 @@
               "",
               ""
             ],
-            "#text": "Action: add-1-Microbe . Action: rem-2-Microbe and inc-Temperature-1"
+            "#text": "Action: add-1-Microbe * Action: rem-2-Microbe and inc-Temperature-1"
           }
         ],
         "br": "",
@@ -1623,7 +1623,7 @@
               ""
             ],
             "#text":
-              "Action: rem-1-Microbe-any and add-1-Microbe . 1 VP per 2 Microbe "
+              "Action: rem-1-Microbe-any and add-1-Microbe * 1 VP per 2 Microbe "
 
           }
         ]
@@ -1715,7 +1715,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-TR-2  . inc-temperature-1 . inc-Plantprod-1 , but inc-Plantprod-4  if you have 3 Plant tags"
+            "#text": "inc-TR-2  * inc-temperature-1 * inc-Plantprod-1 , but inc-Plantprod-4  if you have 3 Plant tags"
           }
         ],
         "br": [
@@ -1820,7 +1820,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-temperature-3  . inc-steel-4. dec-Plant-8-any"
+            "#text": "inc-temperature-3  * inc-steel-4* dec-Plant-8-any"
           }
         ],
         "br": [
@@ -1929,7 +1929,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-Plantprod-1  . inc-MegaCreditprod-4 "
+            "#text": "dec-Plantprod-1  * inc-MegaCreditprod-4 "
           }
         ]
       }
@@ -1969,7 +1969,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -18 C or colder. inc-Plantprod-1 "
+            "#text": "Requires -18 C or colder* inc-Plantprod-1 "
           }
         ]
       }
@@ -2028,7 +2028,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-Energyprod-1  . inc-heatprod-3 "
+            "#text": "dec-Energyprod-1  * inc-heatprod-3 "
           }
         ]
       }
@@ -2081,7 +2081,7 @@
           },
           {
             "@class": "description",
-            "#text": "Oxygen must be 4-max. placetile/Park/ground/true/None . inc-MegaCreditprod-1 "
+            "#text": "Oxygen must be 4-max* placetile/Park/ground/true/None * inc-MegaCreditprod-1 "
           }
         ],
         "#text": "*"
@@ -2145,7 +2145,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-MegaCreditprod-2  . inc-Energyprod-3 "
+            "#text": "dec-MegaCreditprod-2  * inc-Energyprod-3 "
           }
         ]
       }
@@ -2194,7 +2194,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 5 oceanTiles. inc-Plant-1 . inc-Plantprod-2 "
+            "#text": "Requires 5 oceanTiles* inc-Plant-1 * inc-Plantprod-2 "
           }
         ]
       }
@@ -2298,7 +2298,7 @@
               "",
               ""
             ],
-            "#text": "Requires +2 C or warmer. dec-Plantprod-1-any . 1 VP per 1 Animal "
+            "#text": "Requires +2 C or warmer* dec-Plantprod-1-any * 1 VP per 1 Animal "
             
           }
         ],
@@ -2344,7 +2344,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 0 C or warmer. placetile/ocean/ocean/true . placetile/ocean/ocean/true "
+            "#text": "Requires 0 C or warmer* placetile/ocean/ocean/true * placetile/ocean/ocean/true "
           }
         ],
         "br": ""
@@ -2413,7 +2413,7 @@
               "",
               ""
             ],
-            "#text": " inc-Plantprod-1 . 1 VP per 2 Animal "
+            "#text": " inc-Plantprod-1 * 1 VP per 2 Animal "
 
           }
         ],
@@ -2481,7 +2481,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 6 oceanTiles. inc-MegaCreditprod-2  . inc-Plantprod-3 . inc-Plant-2"
+            "#text": "Requires 6 oceanTiles* inc-MegaCreditprod-2  * inc-Plantprod-3 * inc-Plant-2"
           }
         ]
       }
@@ -2550,7 +2550,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires a Jovian tag. inc-heatprod-3 . inc-Energyprod-3  "
+            "#text": "Requires a Jovian tag* inc-heatprod-3 * inc-Energyprod-3  "
           }
         ]
       }
@@ -2591,7 +2591,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires +4 C or warmer. placetile/greenery/ocean/true "
+            "#text": "Requires +4 C or warmer* placetile/greenery/ocean/true "
           }
         ]
       }
@@ -2647,7 +2647,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -4 C or warmer. inc-Plantprod-3 . inc-Plant-1"
+            "#text": "Requires -4 C or warmer* inc-Plantprod-3 * inc-Plant-1"
           }
         ]
       }
@@ -2691,7 +2691,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-oxygen-1 . dec-Plant-2-any. inc-steel-2"
+            "#text": "inc-oxygen-1 * dec-Plant-2-any* inc-steel-2"
           }
         ],
         "br": ""
@@ -2780,7 +2780,7 @@
           {
             "@class": "requirements",
             "@style": "margin-bottom:5px;",
-            "#text": "13 Oxygen. 2 Plantprod"
+            "#text": "13 Oxygen"
           },
           {
             "@class": "red-arrow "
@@ -2813,7 +2813,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px;",
-            "#text": "Requires 13% oxygen. dec-Plantprod-2. 1 VP per 1 Animal "
+            "#text": "Requires 13% oxygen* dec-Plantprod-2* 1 VP per 1 Animal "
           }
         ]
       }
@@ -2857,7 +2857,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-Plant-2. inc-oxygen-1 . placetile/ocean/ocean/true "
+            "#text": "inc-Plant-2* inc-oxygen-1 * placetile/ocean/ocean/true "
           }
         ],
         "br": ""
@@ -2950,7 +2950,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-energyprod-1  . inc-titanium-2"
+            "#text": "inc-energyprod-1  * inc-titanium-2"
           }
         ],
         "br": ""
@@ -2989,7 +2989,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true . placetile/ocean/ocean/true "
+            "#text": "placetile/ocean/ocean/true * placetile/ocean/ocean/true "
           }
         ]
       }
@@ -3039,7 +3039,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-temperature-2  . placetile/ocean/ocean/true . placetile/ocean/ocean/true . dec-Plant-6-any"
+            "#text": "inc-temperature-2  * placetile/ocean/ocean/true * placetile/ocean/ocean/true * dec-Plant-6-any"
           }
         ],
         "br": [
@@ -3089,7 +3089,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/city/Ganymede/false . 1 VP per 1 Jovian tag "
+            "#text": "placetile/city/Ganymede/false * 1 VP per 1 Jovian tag "
           }
         ],
         "#text": "*"
@@ -3186,7 +3186,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -16 C or warmer. inc-plantprod-1 . inc-Plant-3"
+            "#text": "Requires -16 C or warmer* inc-plantprod-1 * inc-Plant-3"
           }
         ]
       }
@@ -3230,7 +3230,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -14 C or warmer. inc-plantprod-1 . inc-Plant-1"
+            "#text": "Requires -14 C or warmer* inc-plantprod-1 * inc-Plant-1"
           }
         ]
       }
@@ -3290,7 +3290,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-MegaCreditprod-1  . inc-Energyprod-2 "
+            "#text": "dec-MegaCreditprod-1  * inc-Energyprod-2 "
           }
         ]
       }
@@ -3342,7 +3342,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -10 C or warmer. inc-plantprod-2 . inc-Plant-2"
+            "#text": "Requires -10 C or warmer* inc-plantprod-2 * inc-Plant-2"
           }
         ]
       }
@@ -3424,7 +3424,7 @@
           },
           {
             "@class": "description",
-            "#text": "placetile/NuclearExplosion/ground/true . inc-temperature-2 "
+            "#text": "placetile/NuclearExplosion/ground/true * inc-temperature-2 "
           }
         ],
         "br": ""
@@ -3482,7 +3482,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-MegaCreditprod-1  . inc-Energyprod-1 "
+            "#text": "dec-MegaCreditprod-1  * inc-Energyprod-1 "
           }
         ]
       }
@@ -3736,7 +3736,7 @@
               ""
             ],
             "#text":
-              "Requires 12% oxygen. inc-Plant-2. placetile/City/ground/true . dec-Energyprod-1 . inc-MegaCreditprod-4 "
+              "Requires 12% oxygen* inc-Plant-2* placetile/City/ground/true * dec-Energyprod-1 * inc-MegaCreditprod-4 "
 
           }
         ],
@@ -3903,7 +3903,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -6 C or warmer. placetile/ocean/ground/true"
+            "#text": "Requires -6 C or warmer* placetile/ocean/ground/true"
           }
         ],
         "#text": "*"
@@ -4008,7 +4008,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires +4 C or warmer. inc-MegaCreditprod-2  . inc-plantprod-2 . inc-Plant-2"
+            "#text": "Requires +4 C or warmer* inc-MegaCreditprod-2  * inc-plantprod-2 * inc-Plant-2"
           }
         ]
       }
@@ -4103,7 +4103,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-energyprod-1  . inc-MegaCreditprod-2 . placetile/City/Ground/true/City-City "
+            "#text": "dec-energyprod-1  * inc-MegaCreditprod-2 * placetile/City/Ground/true/City-City "
           }
         ],
         "br": "",
@@ -4148,7 +4148,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 3 ocean tiles. dec-Plant-1. inc-plantprod-1 "
+            "#text": "Requires 3 ocean tiles* dec-Plant-1* inc-plantprod-1 "
           }
         ],
         "#text": "-"
@@ -4198,7 +4198,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-Energyprod-1  . inc-heatprod-4 "
+            "#text": "dec-Energyprod-1  * inc-heatprod-4 "
           }
         ]
       }
@@ -4292,7 +4292,7 @@
           {
             "@class": "description",
             "@style": "text-align:left;margin-top:-55px;",
-            "#text": "Requires that you have a greenery tile. placetile/Nature/Ground/true/Greenery .  add-2-Animal . 1 VP per 2 Animal "
+            "#text": "Requires that you have a greenery tile* placetile/Nature/Ground/true/Greenery *  add-2-Animal * 1 VP per 2 Animal "
           }
         ],
         "#text": [
@@ -4346,7 +4346,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 5% oxygen. inc-MegaCreditprod-1-City-true-any "
+            "#text": "Requires 5% oxygen* inc-MegaCreditprod-1-City-true-any "
           }
         ]
       }
@@ -4393,7 +4393,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 4% oxygen. inc-Plantprod-1  for every 2 Microbe tags you have, including this"
+            "#text": "Requires 4% oxygen* inc-Plantprod-0.5-Microbe"
           }
         ]
       }
@@ -4446,12 +4446,12 @@
           },
           {
             "@class": "description",
-            "#text": "Effect: playcard(tag-Animal,Plant,Microbe) / add-3-Microbe .  add-3-Microbe  "
+            "#text": "Effect: playcard(tag-Animal,Plant,Microbe) / add-3-Microbe *  add-3-Microbe  "
           },
           {
             "@class": "description",
             "@style": "margin-top:10px;",
-            "#text": "Requires 3% oxygen. 1 VP per 3 Microbe "
+            "#text": "Requires 3% oxygen* 1 VP per 3 Microbe "
           }
         ],
         "#text": [
@@ -4509,7 +4509,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 2 Power tags. inc-Energyprod-3 "
+            "#text": "Requires 2 Power tags* inc-Energyprod-3 "
           }
         ]
       }
@@ -4553,7 +4553,7 @@
               "",
               ""
             ],
-            "#text": "Action: add-1-Microbe-another . Requires -14 C or warmer"
+            "#text": "Action: add-1-Microbe-another * Requires -14 C or warmer"
           }
         ],
         "#text": "*"
@@ -4777,7 +4777,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-Energyprod-2 . inc-steelprod-2  . inc-titaniumprod-1 . inc-oxygen-2 "
+            "#text": "dec-Energyprod-2 * inc-steelprod-2  * inc-titaniumprod-1 * inc-oxygen-2 "
           }
         ],
         "br": ""
@@ -4822,7 +4822,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 3 oceanTiles. inc-energyprod-1 "
+            "#text": "Requires 3 oceanTiles* inc-energyprod-1 "
           }
         ]
       }
@@ -4862,7 +4862,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-temperature-2  . placetile/Volcano/Volcanic/true "
+            "#text": "inc-temperature-2  * placetile/Volcano/Volcanic/true "
           }
         ],
         "br": "",
@@ -4942,7 +4942,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-heatprod-4 . placetile/Moonhole/ocean/true"
+            "#text": "inc-heatprod-4 * placetile/Moonhole/ocean/true"
           }
         ],
         "br": "",
@@ -4998,7 +4998,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true . inc-Card-2. inc-Plant-5 or add-4-Animal-another "
+            "#text": "placetile/ocean/ocean/true * inc-Card-2* inc-Plant-5 or add-4-Animal-another "
           }
         ],
         "br": "",
@@ -5059,7 +5059,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 2 Science tags. inc-Energyprod-3 "
+            "#text": "Requires 2 Science tags* inc-Energyprod-3 "
           }
         ]
       }
@@ -5089,7 +5089,7 @@
         "div": [
           {
             "@class": "requirements",
-            "#text": "3 OceanTiles. 2 Plantprod"
+            "#text": "3 OceanTiles"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -5110,7 +5110,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 3 oceanTiles . dec-Plant-2. inc-plantprod-2 "
+            "#text": "Requires 3 oceanTiles * dec-Plant-2* inc-plantprod-2 "
           }
         ],
         "#text": "-"
@@ -5190,7 +5190,7 @@
               "",
               ""
             ],
-            "#text":  "Requires 8% oxygen. add-1-Animal . dec-Plantprod-1-any. 1 VP per 2 Animal "
+            "#text":  "Requires 8% oxygen* add-1-Animal * dec-Plantprod-1-any* 1 VP per 2 Animal "
           }
         ],
         "#text": ":"
@@ -5238,7 +5238,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 6% oxygen. inc-Plantprod-1-Plant "
+            "#text": "Requires 6% oxygen* inc-Plantprod-1-Plant "
           }
         ]
       }
@@ -5366,7 +5366,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires -14 C or colder. inc-Plantprod-2 "
+            "#text": "Requires -14 C or colder* inc-Plantprod-2 "
           }
         ]
       }
@@ -5410,7 +5410,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: add-1-Microbe . Action: rem-3-Microbe and inc-TR-1 ."
+            "#text": "Action: add-1-Microbe * Action: rem-3-Microbe and inc-TR-1 "
           },
           {
             "@class": "microbe resource "
@@ -5471,7 +5471,7 @@
           },
           {
             "@class": "description",
-            "#text": "inc-Energyprod-1 . inc-steelprod-1"
+            "#text": "inc-Energyprod-1 * inc-steelprod-1"
           }
         ]
       }
@@ -5511,7 +5511,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -24 C or warmer. inc-Plantprod-1 "
+            "#text": "Requires -24 C or warmer* inc-Plantprod-1 "
           }
         ]
       }
@@ -5550,7 +5550,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true . inc-card-1"
+            "#text": "placetile/ocean/ocean/true * inc-card-1"
           }
         ]
       }
@@ -5601,7 +5601,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-heatprod-1  . inc-heat-3"
+            "#text": "inc-heatprod-1  * inc-heat-3"
           }
         ]
       }
@@ -5648,7 +5648,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-TR-1 . inc-Plant-4. add-3-Microbe-another . add-2-Animal-another "
+            "#text": "inc-TR-1 * inc-Plant-4* add-3-Microbe-another * add-2-Animal-another "
           }
         ],
         "#text": [
@@ -5753,7 +5753,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-Energyprod-4  . inc-Plantprod-2 . inc-TR-3 "
+            "#text": "dec-Energyprod-4  * inc-Plantprod-2 * inc-TR-3 "
           }
         ],
         "br": ""
@@ -5829,7 +5829,7 @@
           {
             "@class": "description ",
             "@style": "position:absolute;margin-top:-90px;text-align:left;margin-left:86px;",
-            "#text": "Requires 5% oxygen. dec-Energyprod-1  . inc-MegaCreditprod-2 "
+            "#text": "Requires 5% oxygen* dec-Energyprod-1  * inc-MegaCreditprod-2 "
           }
         ],
         "#text": ":"
@@ -5923,7 +5923,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires 7% oxygen. inc-Energyprod-1 "
+            "#text": "Requires 7% oxygen* inc-Energyprod-1 "
           }
         ]
       }
@@ -5978,7 +5978,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -6 C or warmer. inc-Plantprod-1  . inc-MegaCreditprod-2 . inc-Plant-1"
+            "#text": "Requires -6 C or warmer* inc-Plantprod-1  * inc-MegaCreditprod-2 * inc-Plant-1"
           }
         ]
       }
@@ -6034,7 +6034,7 @@
           },
           {
             "@class": "description ",
-            "#text": "add-2-Microbe-another . inc-heatprod-3  . inc-Plantprod-1 "
+            "#text": "add-2-Microbe-another * inc-heatprod-3  * inc-Plantprod-1 "
           }
         ],
         "br": "",
@@ -6095,7 +6095,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-Energyprod-2 . inc-Plantprod-1. inc-TR-1"
+            "#text": "dec-Energyprod-2 * inc-Plantprod-1* inc-TR-1"
           }
         ]
       }
@@ -6150,7 +6150,7 @@
             "@class": "description",
             "@style": "text-align:left;margin-top:10px;",
             "br": "",
-            "#text": "add-1-animal. 1 VP per 2 Animal . Animal stays on this card."
+            "#text": "add-1-animal* 1 VP per 2 Animal * Animal stays on this card"
           }
         ],
         "br": [
@@ -6201,7 +6201,7 @@
           },
           {
             "@class": "description ",
-            "#text": "inc-MegaCreditprod-2 . placetile/greenery/ocean/true . inc-oxygen-1 "
+            "#text": "inc-MegaCreditprod-2 * placetile/greenery/ocean/true * inc-oxygen-1 "
           }
         ],
         "#text": "*"
@@ -6257,7 +6257,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires -20 C or warmer. inc-MegaCreditprod-1  . inc-Plant-2"
+            "#text": "Requires -20 C or warmer* inc-MegaCreditprod-1  * inc-Plant-2"
           }
         ]
       }
@@ -6374,7 +6374,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-heatprod-2-any . inc-Energyprod-1"
+            "#text": "dec-heatprod-2-any * inc-Energyprod-1"
           }
         ]
       }
@@ -6430,7 +6430,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-Energyprod-1  . inc-Plantprod-1 "
+            "#text": "dec-Energyprod-1  * inc-Plantprod-1 "
           }
         ]
       }
@@ -6467,7 +6467,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires +2 C or warmer. placetile/ocean/ocean/true "
+            "#text": "Requires +2 C or warmer* placetile/ocean/ocean/true "
           }
         ]
       }
@@ -6535,7 +6535,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 6% oxygen. dec-Plantprod-1-any . inc-Energyprod-2"
+            "#text": "Requires 6% oxygen* dec-Plantprod-1-any * inc-Energyprod-2"
           }
         ]
       }
@@ -6572,7 +6572,7 @@
           },
           {
             "@class": "requirements",
-            "#text": "9 Oxygen."
+            "#text": "9 Oxygen*"
           },
           {
             "@class": "animal resource"
@@ -6610,7 +6610,7 @@
           {
             "@class": "description",
             "@style": "position:absolute;margin-top:-85px;text-align:left;margin-left:80px;font-size:10px;",
-            "#text": "Requires 9% oxygen. dec-Plantprod-1  . inc-MegaCreditprod-2 . 1 VP per 1 Animal ."
+            "#text": "Requires 9% oxygen* dec-Plantprod-1  * inc-MegaCreditprod-2 * 1 VP per 1 Animal "
           }
         ],
         "span": {
@@ -6655,7 +6655,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Action: dec-MegaCredit-8 and placetile/ocean/ocean/true . STEEL MAY BE USED as if you were playing a Building card"
+            "#text": "Action: dec-MegaCredit-8 and placetile/ocean/ocean/true * STEEL MAY BE USED as if you were playing a Building card"
           }
         ],
         "#text": [
@@ -6703,7 +6703,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true . IF THERE ARE TILES ADJACENT TO THIS OCEAN TILE, YOU MAY REMOVE 4 MegaCredit FROM THE OWNER OF ONE OF THOSE TILES"
+            "#text": "placetile/ocean/ocean/true * IF THERE ARE TILES ADJACENT TO THIS OCEAN TILE, YOU MAY REMOVE 4 MegaCredit FROM THE OWNER OF ONE OF THOSE TILES"
           }
         ],
         "#text": "*"
@@ -6829,7 +6829,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Requires -8 C or warmer. placetile/ocean/ocean/true "
+            "#text": "Requires -8 C or warmer* placetile/ocean/ocean/true "
           }
         ]
       }
@@ -6866,7 +6866,7 @@
           },
           {
             "@class": "description",
-            "#text": "Requires 2 Science tags. placetile/greenery/ground/true  . inc-oxygen-1 "
+            "#text": "Requires 2 Science tags* placetile/greenery/ground/true  * inc-oxygen-1 "
           }
         ]
       }
@@ -6914,7 +6914,7 @@
           {
             "@class": "description",
             "@style": "margin-top:-5px",
-            "#text": "inc-MegaCreditprod-5 . 1 VP per 3 City "
+            "#text": "inc-MegaCreditprod-5 * 1 VP per 3 City "
           }
         ]
       }
@@ -6956,7 +6956,7 @@
           },
           {
             "@class": "description ",
-            "#text": "Effect: placetile(City,,any) / inc-MegaCreditprod-1 . inc-MegaCreditprod-1 "
+            "#text": "Effect: placetile(City,,any) / inc-MegaCreditprod-1 * inc-MegaCreditprod-1 "
           },
           {
             "@class": "production-boxprod-box-size2a",
@@ -6981,7 +6981,7 @@
           },
           {
             "@class": "description ",
-            "#text": "dec-Energyprod-1  . dec-MegaCreditprod-2 . placetile/city/ground/true "
+            "#text": "dec-Energyprod-1  * dec-MegaCreditprod-2 * placetile/city/ground/true "
           }
         ],
         "br": "",
@@ -7117,7 +7117,7 @@
           },
           {
             "@class": "description",
-            "#text": "dec-Energyprod-1 . inc-TR-2 "
+            "#text": "dec-Energyprod-1 * inc-TR-2 "
           }
         ],
         "br": ""

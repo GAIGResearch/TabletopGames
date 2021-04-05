@@ -164,7 +164,7 @@ public class TMAction extends AbstractAction {
             }
             c.setValue(0);
         } else if (nCards < 0) {
-            // Player needs to discard nCards
+            // Player needs to discard nCards TODO: this should be discarding from hand, not card choice
             for (int i = 0; i < Math.abs(nCards); i++) {
                 new DiscardCard(player).execute(gs);
             }
@@ -304,46 +304,38 @@ public class TMAction extends AbstractAction {
             String[] split2 = encoding.split("-");
             try {
                 // Find how much
-                Integer increment = null;
+                Double increment = null;
                 if (!split2[2].equalsIgnoreCase("x")) {
-                    increment = Integer.parseInt(split2[2]);
+                    increment = Double.parseDouble(split2[2]);
+                    if (encoding.contains("dec")) increment *= -1;
                 }
-                if (encoding.contains("dec")) increment *= -1;
-
                 effectString = split2[1];
 
-                // Find which counter
-                TMTypes.GlobalParameter which = Utils.searchEnum(TMTypes.GlobalParameter.class, split2[1]);
-
                 if (increment == null) {
-                    if (split2[2].equalsIgnoreCase("X")) {
-                        // 2 formats:
-                        // - inc-Resource-X-tag(-any): X = Event tags played by any player
-                        // - dec-Resource1-X-Resource2 : X = chosen by player from 0 to N first resource, decrease first resource that, increase second resource that
-                        increment = 1;
-                        String resString = split2[1].split("prod")[0];
-                        TMTypes.Resource res1 = Utils.searchEnum(TMTypes.Resource.class, resString);
-                        TMTypes.Resource res2 = Utils.searchEnum(TMTypes.Resource.class, split2[3].replace("prod", ""));
-                        effect = new ModifyPlayerResource(player, player, increment, res1, split2[1].contains("prod"), free);
-                        if (res2 != null) {
-                            ((ModifyPlayerResource) effect).counterResource = res2;
-                            ((ModifyPlayerResource) effect).counterResourceProduction = split2[3].contains("prod");
-                        } else {
-                            // A tag to count
-                            TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3]);
-                            if (tag != null) {
-                                ((ModifyPlayerResource) effect).tagToCount = tag;
-                                if (split2.length > 4 && split2[4].equalsIgnoreCase("any")) {
-                                    ((ModifyPlayerResource) effect).any = true;
-                                }
-                            } else {
-                                int a = 0;
+                    // 2 formats:
+                    // - inc-Resource-X-tag(-any): X = Event tags played by any player
+                    // - dec-Resource1-X-Resource2 : X = chosen by player from 0 to N first resource, decrease first resource that, increase second resource that
+                    increment = 1.0;
+                    String resString = split2[1].split("prod")[0];
+                    TMTypes.Resource res1 = Utils.searchEnum(TMTypes.Resource.class, resString);
+                    TMTypes.Resource res2 = Utils.searchEnum(TMTypes.Resource.class, split2[3].replace("prod", ""));
+                    effect = new ModifyPlayerResource(player, player, increment, res1, split2[1].contains("prod"), free);
+                    if (res2 != null) {
+                        ((ModifyPlayerResource) effect).counterResource = res2;
+                        ((ModifyPlayerResource) effect).counterResourceProduction = split2[3].contains("prod");
+                    } else {
+                        // A tag to count
+                        TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3]);
+                        if (tag != null) {
+                            ((ModifyPlayerResource) effect).tagToCount = tag;
+                            if (split2.length > 4 && split2[4].equalsIgnoreCase("any")) {
+                                ((ModifyPlayerResource) effect).any = true;
                             }
                         }
-                    } else {
-                        int a = 0;
                     }
                 } else {
+                    // Find which counter
+                    TMTypes.GlobalParameter which = Utils.searchEnum(TMTypes.GlobalParameter.class, split2[1]);
                     if (which == null) {
                         // A resource or production instead
                         String resString = split2[1].split("prod")[0];
@@ -424,8 +416,6 @@ public class TMAction extends AbstractAction {
                         ((PlaceTile) effect).respectingAdjacency = respectAdjacency;
                     }
                 }
-            } else {
-                int a = 0; // this shouldn't happen
             }
             effectString = split2[1];
             if (effect != null && split2.length > 4) {
@@ -461,19 +451,20 @@ public class TMAction extends AbstractAction {
             TMTypes.MapTileType toPlace = TMTypes.MapTileType.valueOf(split2[1]);
             effect = new ReserveTile(-1, toPlace, free);
         } else if (encoding.contains("add") || encoding.contains("rem")) {
-            // Add resource to card
+            // Add resource to card: add/rem-amount-Resource-another/any-minAmount/Tag-Tag(on card top of draw deck, to be discarded)
             int sign = encoding.contains("rem") ? -1 : 1;
             String[] split2 = encoding.split("-");
             try {
                 int amount = Integer.parseInt(split2[1]);
                 TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, split2[2]);
+                if (encoding.contains("that")) cardID = -1;
                 effect = new AddResourceOnCard(-1, cardID, res, amount * sign, free);
 
                 if (split2.length > 3) {
                     if (split2[3].equalsIgnoreCase("another")) {
-                        effect.playCardID = -1;
+                        effect.cardID = -1;
                     } else if (split2[3].equalsIgnoreCase("any")) {
-                        effect.playCardID = -1;
+                        effect.cardID = -1;
                         ((AddResourceOnCard) effect).chooseAny = true;
                     }
                     if (split2.length > 4) {
@@ -485,8 +476,30 @@ public class TMAction extends AbstractAction {
                             ((AddResourceOnCard) effect).tagRequirement = Utils.searchEnum(TMTypes.Tag.class, split2[4]);
                         }
                     }
+                    if (split2.length > 5) {
+                        // Tag that top card of draw deck should have to execute this action (card is discarded either way)
+                        ((AddResourceOnCard) effect).tagTopCardDrawDeck = Utils.searchEnum(TMTypes.Tag.class, split2[5]);
+                    }
                 }
             } catch (Exception ignored) {}
+        } else if (encoding.contains("duplicate")) {
+            // Duplicate action, format: duplicate-Building-ModifyPlayerResource-true
+            String[] split = encoding.split("-");
+            TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, split[1]);
+            if (split[2].equalsIgnoreCase("ModifyPlayerResource")) {
+                effect = new DuplicateAction(t, ModifyPlayerResource.class, split[3].equalsIgnoreCase("true"));
+            }
+        } else if (encoding.contains("look")) {
+            // Look at top X cards, keep/buy N cards, discard the rest: look-nLook-nKeep-buy
+            String[] split = encoding.split("-");
+            int nCardsLook = Integer.parseInt(split[1]);
+            int nCardsKeep = Integer.parseInt(split[2]);
+            boolean buy = Boolean.parseBoolean(split[3]);
+            effect = new TopCardDecision(nCardsLook, nCardsKeep, buy);
+        }
+
+        if (effect == null) {
+            int a = 0;
         }
         return new Pair<>(effect, effectString);
     }

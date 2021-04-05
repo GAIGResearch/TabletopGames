@@ -17,9 +17,22 @@ public class PlayCardEffect extends Effect {
         this.tagsOnCard = tags;
     }
 
+    public void execute(TMGameState gs, TMAction actionTaken, int player) {
+        if (canExecute(gs, actionTaken, player)) {
+            PlayCard action = (PlayCard) ((PayForAction)actionTaken).action;
+            effectAction.player = player;
+            if (effectAction.getCardID() == -1) {
+                /* Effect based on card played, e.g. add resource to that card */
+                effectAction.setCardID(action.getPlayCardID());
+            }
+            this.effectAction.execute(gs);
+        }
+    }
+
     @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
-        if (!(actionTaken instanceof PayForAction) || !super.canExecute(gameState, actionTaken, player)) return false;  // PlayCard is always wrapped in PayForAction
+        // PlayCard is always wrapped in PayForAction
+        if (!(actionTaken instanceof PayForAction) || !super.canExecute(gameState, actionTaken, player)) return false;
         PayForAction aa = (PayForAction) actionTaken;
         if (!(aa.action instanceof PlayCard)) return false;
         PlayCard action = (PlayCard) aa.action;

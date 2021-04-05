@@ -31,6 +31,7 @@ public class CompoundAction extends TMAction{
         boolean s = true;
         for (TMAction a: actions) {
             a.player = player;
+            a.setCardID(getCardID());
             s &= a.execute(gameState);
         }
         return s;
