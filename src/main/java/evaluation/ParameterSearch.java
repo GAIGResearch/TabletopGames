@@ -19,14 +19,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;
 import static utilities.Utils.loadJSONFile;
 
@@ -111,7 +109,7 @@ public class ParameterSearch {
             String allValues = IntStream.range(0, searchSpace.nValues(i))
                     .mapToObj(j -> searchSpace.value(finalI, j))
                     .map(Object::toString)
-                    .collect(Collectors.joining(", "));
+                    .collect(joining(", "));
             System.out.printf("%30s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
         }
 
@@ -256,6 +254,7 @@ public class ParameterSearch {
             Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace, logfile);
+            printDiversityResults(landscapeModel, kExplore);
 
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
@@ -281,10 +280,10 @@ public class ParameterSearch {
     private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile) {
         System.out.printf("Recommended settings have score %.3g +/- %.3g:\t%s\n %s%n",
                 data.a.a, data.a.b,
-                Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(Collectors.joining(", ")),
+                Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
                         .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b.intValue(), searchSpace)))
-                        .collect(Collectors.joining(" ")));
+                        .collect(joining(" ")));
 
         if (!logFile.isEmpty()) {
             try {
@@ -302,7 +301,7 @@ public class ParameterSearch {
                 String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
                 String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
                         .map(p -> valueToString(p.a, p.b.intValue(), searchSpace))
-                        .collect(Collectors.joining("\t"));
+                        .collect(joining("\t"));
                 writer.write(firstPart + values + "\n");
                 writer.flush();
                 writer.close();
@@ -323,6 +322,92 @@ public class ParameterSearch {
             valueString = String.format("%.3g", value);
         }
         return valueString;
+    }
+
+    private static List<int[]> generate(List<int[]> previous, int cardinality) {
+        List<int[]> retValue = new ArrayList<>();
+        for (int[] x : previous) {
+            for (int i = 0; i < cardinality; i++) {
+                int[] newX = new int[x.length + 1];
+                for (int j = 0; j < x.length; j++) {
+                    newX[j] = x[j];
+                }
+                newX[x.length] = i;
+                retValue.add(newX);
+            }
+        }
+        return retValue;
+    }
+
+    private static void printDiversityResults(NTupleSystem model, double kExplore) {
+        // the idea is to run through all the points in the model, and initially order them by estimated value
+
+        // first we need to generate all the possible int[] parameter settings
+        // then getMeanEstimate() for each
+        // order by descending value
+
+        // pick a K, calculate the diverse set of points, and report this.
+        SearchSpace ss = model.getSearchSpace();
+        List<int[]> allTuples = new ArrayList<>();
+
+        // For very large search spaces, we use the sampled points to reduce risks of memory problems with very large arrays
+        int searchSpaceSize = IntStream.range(0, ss.nDims()).reduce(1, (acc, i) -> acc * ss.nValues(i));
+        Set<int[]> allSampledPoints = model.getSampledPoints();
+        if (searchSpaceSize < allSampledPoints.size()) {
+            allTuples.add(new int[0]);
+            for (int d = 0; d < ss.nDims(); d++) {
+                allTuples = generate(allTuples, ss.nValues(d));
+            }
+        } else {
+            allTuples = new ArrayList<>(allSampledPoints);
+        }
+        Map<int[], Double> tuplesWithValue = allTuples.stream().collect(toMap(t -> t, model::getMeanEstimate));
+        double[] bestD = model.getBestOfSampled();
+        int[] best = new int[bestD.length];
+        for (int i = 0; i < bestD.length; i++)
+            best[i] = (int) (bestD[i] + 0.5);
+        double bestValue = model.getMeanEstimate(best);
+
+        Set<int[]> bestSet = new HashSet<>();
+        int diverseSize = allTuples.size();
+        int optimalSize = 9;
+        for (double k : Arrays.asList(0.1, 0.03, 0.02, 0.01, 0.003, 0.001, 0.0003)) {
+            double modK = k * kExplore;
+            Set<int[]> diverseGood = new HashSet<>();
+            diverseGood.add(best);
+            for (int[] tuple : tuplesWithValue.keySet()) {
+                double value = tuplesWithValue.get(tuple);
+                int distanceToNearest = diverseGood.stream().mapToInt(g -> manhattan(g, tuple)).min().orElse(0);
+                if (value + modK * distanceToNearest > bestValue) {
+                    // first we remove any from the set that are superseded by the new point
+                    diverseGood.removeIf(t -> {
+                        double v = model.getMeanEstimate(t);
+                        int d = manhattan(tuple, t);
+                        return v + modK * d < value;
+                    });
+                    diverseGood.add(tuple);
+                }
+            }
+            // We
+            if (Math.abs(Math.sqrt(optimalSize) - Math.sqrt(diverseGood.size())) < Math.abs(Math.sqrt(optimalSize) - Math.sqrt(diverseSize))) {
+                diverseSize = diverseGood.size();
+                bestSet = diverseGood;
+            }
+            System.out.printf("k = %.6f gives %d tuples out of %d%n", modK, diverseGood.size(), allTuples.size());
+        }
+        System.out.println("\nBest settings with diversity:");
+        for (int[] settings : bestSet) {
+            System.out.printf("\t%.3f\t%s%n", model.getMeanEstimate(settings), Arrays.toString(settings));
+        }
+
+    }
+
+    private static int manhattan(int[] x, int[] y) {
+        int retValue = 0;
+        for (int i = 0; i < x.length; i++) {
+            retValue += Math.abs(x[i] - y[i]);
+        }
+        return retValue;
     }
 
     /**
