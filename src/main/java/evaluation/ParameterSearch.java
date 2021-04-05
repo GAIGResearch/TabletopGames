@@ -371,7 +371,7 @@ public class ParameterSearch {
         Set<int[]> bestSet = new HashSet<>();
         int diverseSize = allTuples.size();
         int optimalSize = 9;
-        for (double k : Arrays.asList(0.1, 0.03, 0.02, 0.01, 0.003, 0.001, 0.0003)) {
+        for (double k : Arrays.asList(0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3)) {
             double modK = k * kExplore;
             Set<int[]> diverseGood = new HashSet<>();
             diverseGood.add(best);
@@ -388,12 +388,15 @@ public class ParameterSearch {
                     diverseGood.add(tuple);
                 }
             }
+            System.out.printf("k = %.6f gives %d tuples out of %d%n", modK, diverseGood.size(), allTuples.size());
             // We
             if (Math.abs(Math.sqrt(optimalSize) - Math.sqrt(diverseGood.size())) < Math.abs(Math.sqrt(optimalSize) - Math.sqrt(diverseSize))) {
                 diverseSize = diverseGood.size();
                 bestSet = diverseGood;
             }
-            System.out.printf("k = %.6f gives %d tuples out of %d%n", modK, diverseGood.size(), allTuples.size());
+            // we can stop once we have at least the optimal number (to avoid thrashing compute)
+            if (diverseGood.size() >= optimalSize)
+                break;
         }
         System.out.println("\nBest settings with diversity:");
         for (int[] settings : bestSet) {
