@@ -421,13 +421,22 @@ public class TMAction extends AbstractAction {
             if (effect != null && split2.length > 4) {
                 // split2[4] = adjacency rule: X tile types separated by -, Owned, None (not placed)
                 // Adjacency rules
-                AdjacencyRequirement req;
+                AdjacencyRequirement req = null;
                 if (split2[4].equalsIgnoreCase("Owned")) {
                     req = new AdjacencyRequirement();
                     req.owned = true;
                 } else if (split2[4].equalsIgnoreCase("None")) {
                     req = new AdjacencyRequirement();
                     req.noneAdjacent = true;
+                } else if (split2[4].contains("any")) {
+                    // If adjacent to any tiles, can remove resources from owner of those tiles: any-Amount-Resource
+                    String[] split3 = split2[4].split("-");
+                    int amount = Integer.parseInt(split3[1]);
+                    TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, split3[2].replace("prod", ""));
+                    ((PlaceTile) effect).removeResourcesAdjacentOwner = true;
+                    ((PlaceTile) effect).removeResourcesRes = res;
+                    ((PlaceTile) effect).removeResourcesAmount = amount;
+                    ((PlaceTile) effect).removeResourcesProd = split3[2].contains("prod");
                 } else {
                     // Adjacent to some types, make hashmap
                     HashMap<TMTypes.Tile, Integer> types = new HashMap<>();

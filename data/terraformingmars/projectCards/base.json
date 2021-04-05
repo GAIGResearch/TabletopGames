@@ -6703,7 +6703,7 @@
           },
           {
             "@class": "description ",
-            "#text": "placetile/ocean/ocean/true * IF THERE ARE TILES ADJACENT TO THIS OCEAN TILE, YOU MAY REMOVE 4 MegaCredit FROM THE OWNER OF ONE OF THOSE TILES"
+            "#text": "placetile/ocean/ocean/true/any-4-MegaCredit"
           }
         ],
         "#text": "*"

@@ -10,6 +10,7 @@ import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.ResourceRequirement;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +18,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
     public TMTypes.Resource resource;
     public boolean production;
     public int targetPlayer;
+    public HashSet<Integer> targetPlayerOptions;
 
     public TMTypes.Resource counterResource;  // if not null, player chooses how much of resource to decrease in order to increase counterResource by same amount
     public boolean counterResourceProduction;
@@ -200,12 +202,27 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
 
         if (targetPlayer == -2) {
             // Choose a player
-            for (int i = 0; i < state.getNPlayers(); i++) {
-                ModifyPlayerResource a = new ModifyPlayerResource(player, i, change, resource, production, tagToCount, tileToCount,
-                        any, opponents, onMars, counterResource, counterResourceProduction, true);
-                a.complete = true;
-                if (a.canBePlayed((TMGameState) state)) {
-                    actions.add(a);
+            if (targetPlayerOptions != null) {
+                for (int i: targetPlayerOptions) {
+                    if (i == -1) {
+                        actions.add(new TMAction(player));  // Pass
+                        continue;
+                    }
+                    ModifyPlayerResource a = new ModifyPlayerResource(player, i, change, resource, production, tagToCount, tileToCount,
+                            any, opponents, onMars, counterResource, counterResourceProduction, true);
+                    a.complete = true;
+                    if (a.canBePlayed((TMGameState) state)) {
+                        actions.add(a);
+                    }
+                }
+            } else {
+                for (int i = 0; i < state.getNPlayers(); i++) {
+                    ModifyPlayerResource a = new ModifyPlayerResource(player, i, change, resource, production, tagToCount, tileToCount,
+                            any, opponents, onMars, counterResource, counterResourceProduction, true);
+                    a.complete = true;
+                    if (a.canBePlayed((TMGameState) state)) {
+                        actions.add(a);
+                    }
                 }
             }
         } else if (counterResource != null) {

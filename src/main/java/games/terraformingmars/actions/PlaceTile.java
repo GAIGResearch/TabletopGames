@@ -32,6 +32,11 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     public AdjacencyRequirement adjacencyRequirement;
 
+    public boolean removeResourcesAdjacentOwner;
+    public int removeResourcesAmount;
+    public TMTypes.Resource removeResourcesRes;
+    public boolean removeResourcesProd;
+
     boolean placed;
     boolean impossible;
 
@@ -70,6 +75,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         this.resourcesGainedRestriction = resourcesGainedRestriction;
         this.mapTileID = -1;
     }
+
     public PlaceTile(int player, TMTypes.Tile tile, boolean volcanicRestriction, boolean free) {
         // Used in parsing
         super(player, free);
@@ -77,6 +83,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         this.volcanicRestriction = volcanicRestriction;
         this.mapTileID = -1;
     }
+
     public PlaceTile(int player, TMTypes.Tile tile, String tileName, boolean onMars, boolean free) {  // Place a named tile
         // Used in parsing
         super(player, free);
@@ -139,6 +146,22 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     // Save location of tile placed on card
                     TMCard card = (TMCard) gs.getComponentById(getCardID());
                     card.mapTileIDTilePlaced = mt.getComponentID();
+                }
+                if (removeResourcesAdjacentOwner) {
+                    HashSet<Integer> adjacentOwners = new HashSet<>();
+                    List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
+                    for (Vector2D n : neighbours) {
+                        TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                        if (other != null && other.getTilePlaced() != null) {
+                            adjacentOwners.add(other.getOwner());
+                        }
+                    }
+                    if (adjacentOwners.size() > 0) {
+                        ModifyPlayerResource mpr = new ModifyPlayerResource(player, -removeResourcesAmount, removeResourcesRes, removeResourcesProd);
+                        mpr.targetPlayer = -2;
+                        mpr.targetPlayerOptions = adjacentOwners;
+                        mpr.execute(gs);
+                    }
                 }
             }
             return success;
