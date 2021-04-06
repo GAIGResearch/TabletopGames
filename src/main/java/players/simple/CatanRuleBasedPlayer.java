@@ -22,6 +22,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     // All current actions in the game, used for dynamically creating sub sets of the actions
     private enum ActionType {
+            DoNothing,
             AcceptTrade,
             BuildCity,
             BuildRoad,
@@ -124,7 +125,13 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     break;
 
                 case PlaceRoad:
-                    //TODO currently bugged in game
+                    if(placeRoadCheck(cgs, action)==0){
+                        actionLists.get(1).add(action);
+                    } else if(placeRoadCheck(cgs, action)==1){
+                        actionLists.get(2).add(action);
+                    } else if(placeRoadCheck(cgs, action)==2){
+                        actionLists.get(3).add(action);
+                    }
                     break;
 
                 case BuildCity:
@@ -230,6 +237,11 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
             return 2;
         }
 
+        return -1;
+    }
+
+    private int placeRoadCheck(CatanGameState cgs, AbstractAction action){
+        //TODO implement
         return -1;
     }
 
