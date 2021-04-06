@@ -3,19 +3,20 @@ package players.simple;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.catan.CatanGameState;
-import games.catan.CatanTile;
-import games.catan.actions.AcceptTrade;
-import games.catan.actions.OfferPlayerTrade;
+import games.catan.*;
+import games.catan.actions.BuildCity;
+import games.catan.actions.BuildRoad;
+import games.catan.actions.BuildSettlement;
+import games.catan.actions.YearOfPlenty;
 import games.catan.components.Settlement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+
+import java.util.*;
 
 public class CatanRuleBasedPlayer extends AbstractPlayer {
 
+    private List<int[]> desiredResources;
+    private boolean roadBlocked = false;
 
     private final Random rnd; // random generator for selection of equally ranked actions
 
@@ -48,11 +49,15 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+        CatanGameState cgs = (CatanGameState) gameState;
 
-        List<List<AbstractAction>> actionLists = getActionSubsets((CatanGameState) gameState, possibleActions);
+        roadBlocked = checkIfRoadBlocked(cgs);
+
+        List<List<AbstractAction>> actionLists = getActionSubsets(cgs , possibleActions);
         for(List<AbstractAction> actionList : actionLists){
             if (actionList.size()>0){
-                return selectRandomAction(actionList);
+                int randomAction = rnd.nextInt(actionList.size());
+                return actionList.get(randomAction);
             }
         }
 
@@ -60,20 +65,34 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     }
 
-    public String toString() { return "CatanRuleBased";}
+    private boolean checkIfRoadBlocked(CatanGameState cgs){
 
-    private AbstractAction selectRandomAction(List<AbstractAction> actions){
-        int randomAction = rnd.nextInt(actions.size());
-        return actions.get(randomAction);
+        CatanTile[][] board = cgs.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
+                    Settlement settlement = tile.getSettlements()[i];
+                    // where it is legal to place tile then it can be placed from there
+                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
+                            && CatanActionFactory.checkSettlementPlacement(settlement, cgs)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     private List<List<AbstractAction>> getActionSubsets(CatanGameState cgs, List<AbstractAction> possibleActions){
         List<List<AbstractAction>> actionLists = new ArrayList<>();
-        actionLists.add(new ArrayList<>()); // highest priority actions - Play development cards
+        actionLists.add(new ArrayList<>()); // highest priority actions
         actionLists.add(new ArrayList<>()); // 2nd priority actions
         actionLists.add(new ArrayList<>()); // 3rd priority actions
         actionLists.add(new ArrayList<>()); // 4th priority actions
         actionLists.add(new ArrayList<>()); // 5th priority actions
+        actionLists.add(new ArrayList<>()); // 6th priority actions
         actionLists.add(new ArrayList<>()); // default case actions
         ActionType actionType = null;
 
@@ -88,13 +107,19 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
                 case Monopoly:
                     if(MonopolyCardCheck(cgs, action)){
-                        actionLists.get(0).add(action);
+                        actionLists.get(2).add(action);
                     }
                     break;
 
                 case YearOfPlenty:
-                    if(YearOfPlentyCardCheck(cgs, action)){
-                        actionLists.get(0).add(action);
+                    if(YearOfPlentyCardCheck(cgs, action)==0){
+                        actionLists.get(2).add(action);
+                    } else if (YearOfPlentyCardCheck(cgs, action)==1)
+                    {
+                        actionLists.get(3).add(action);
+                    } else if (YearOfPlentyCardCheck(cgs, action)==2)
+                    {
+                        actionLists.get(4).add(action);
                     }
                     break;
 
@@ -103,32 +128,32 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     break;
 
                 case BuildCity:
-                    actionLists.get(1).add(action);
+                    actionLists.get(0).add(action);
                     break;
 
                 case BuildSettlement:
-                    actionLists.get(2).add(action);
+                    actionLists.get(1).add(action);
                     break;
 
                 case BuyDevelopmentCard:
-                    actionLists.get(3).add(action);
+                    actionLists.get(4).add(action);
                     break;
 
                 case BuildRoad:
                     if(BuildRoadCheck(cgs, action)){
-                        actionLists.get(4).add(action);
+                        actionLists.get(5).add(action);
                     }
                     break;
 
                 case DefaultTrade:
                     if(DefaultTradeCheck(cgs, action)){
-                        actionLists.get(2).add(action);
+                        actionLists.get(4).add(action);
                     }
                     break;
 
                 case OfferPlayerTrade:
                     if(OfferPlayerTradeCheck(cgs, action)){
-                        actionLists.get(3).add(action);
+                        actionLists.get(5).add(action);
                     }
                     break;
 
@@ -142,7 +167,6 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         actionLists.get(0).add(action);
                     }
 
-
                 default:
                     actionLists.get(actionLists.size()-1).add(action);
             }
@@ -154,7 +178,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     private boolean KnightCardCheck(CatanGameState cgs, AbstractAction action){
         CatanTile robberTile = cgs.getRobber(cgs.getBoard());
         for(Settlement settlement : robberTile.getSettlements()){
-            if (settlement.getOwner()==cgs.getCurrentPlayer()){
+            if (settlement.getOwner()==getPlayerID()){
                 return true;
             }
         }
@@ -171,7 +195,8 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                 secondKnights = knightCount;
             }
         }
-        if (knights[cgs.getCurrentPlayer()]==secondKnights&&firstKnights-secondKnights<1){
+
+        if (knights[getPlayerID()]==secondKnights&&firstKnights-secondKnights<2){
             return true;
         }
 
@@ -179,20 +204,39 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     }
 
     private boolean MonopolyCardCheck(CatanGameState cgs, AbstractAction action){
-        //TODO check if monopoly card should be played
+        //TODO at a later date as complicated
+        // Track rolls made against settlements owned to track players resources
         return rnd.nextInt(2)==0;
     }
 
-    private boolean YearOfPlentyCardCheck(CatanGameState cgs, AbstractAction action){
-        //TODO check if Year of Plenty card should be played
-        return rnd.nextInt(2)==0;
+    private int YearOfPlentyCardCheck(CatanGameState cgs, AbstractAction action){
+        int[] resources = cgs.getPlayerResources(getPlayerID());
+        YearOfPlenty yearOfPlenty = (YearOfPlenty) action;
+        resources[yearOfPlenty.resource1.ordinal()] = resources[yearOfPlenty.resource1.ordinal()] +1;
+        resources[yearOfPlenty.resource2.ordinal()] = resources[yearOfPlenty.resource2.ordinal()] +1;
+
+        int[] cityCostDiff = arraySubtraction(CatanParameters.costMapping.get("city"), resources);
+        int[] settlementCostDiff = arraySubtraction(CatanParameters.costMapping.get("settlement"),resources);
+        int[] roadCostDiff = arraySubtraction(CatanParameters.costMapping.get("road"),resources);
+        int totalCityCostDiff = sumArray(cityCostDiff);
+        int totalSettlementCostDiff = sumArray(settlementCostDiff);
+        int totalRoadCostDiff = sumArray(roadCostDiff);
+
+        if (totalCityCostDiff==0){
+            return 0;
+        } else if (totalSettlementCostDiff==0){
+            return 1;
+        } else if (roadBlocked && totalRoadCostDiff == 0){
+            return 2;
+        }
+
+        return -1;
     }
 
     private boolean BuildRoadCheck(CatanGameState cgs, AbstractAction action){
         //TODO workout a way of deciding whether or not building a road is a good idea?
         return rnd.nextInt(2)==0;
     }
-
 
     private boolean DefaultTradeCheck(CatanGameState cgs, AbstractAction action){
         //TODO check if default trade should be made
@@ -214,4 +258,23 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         //TODO identify good spots to move the robber
         return rnd.nextInt(2)==0;
     }
+
+    public String toString() { return "CatanRuleBased";}
+
+    private int[] arraySubtraction(int[] arr1, int[] arr2){
+        int[] arr3 = new int[arr1.length];
+        for (int i = 0; i < arr1.length; i++){
+            arr3[i] = Math.max(0,arr1[i]-arr2[i]);
+        }
+        return arr3;
+    }
+
+    private int sumArray(int[] arr){
+        int sum = 0;
+        for (int i = 0; i < arr.length; i++){
+            sum += arr[i];
+        }
+        return sum;
+    }
+
 }

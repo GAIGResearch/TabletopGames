@@ -310,7 +310,7 @@ public class CatanActionFactory {
         return actions;
     }
 
-    static boolean checkSettlementPlacement(Settlement settlement, CatanGameState gs){
+    public static boolean checkSettlementPlacement(Settlement settlement, CatanGameState gs){
         // checks if any of the neighbouring settlements are already taken (distance rule)
         // if yes returns false otherwise true
 

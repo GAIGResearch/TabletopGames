@@ -14,8 +14,8 @@ import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.resourceDeckHash;
 
 public class YearOfPlenty extends AbstractAction {
-    CatanParameters.Resources resource1;
-    CatanParameters.Resources resource2;
+    public CatanParameters.Resources resource1;
+    public CatanParameters.Resources resource2;
     Card card;
 
     public YearOfPlenty(CatanParameters.Resources resource1, CatanParameters.Resources resource2, Card card){
