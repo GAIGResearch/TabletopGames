@@ -48,9 +48,13 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         // ROBBER
         // Only place robber on tiles with settlements
 
-        // random select from all actions if the above rules fail
+        // random select from all actions if all rules fail
+        if (actionsToSelectFrom.size() == 0){
+            actionsToSelectFrom = possibleActions;
+        }
+
         int randomAction = rnd.nextInt(possibleActions.size());
-        return possibleActions.get(randomAction);
+        return actionsToSelectFrom.get(randomAction);
     }
 
     public String toString() { return "CatanRuleBased";}
