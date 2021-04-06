@@ -26,6 +26,9 @@ import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUI;
+import games.sushigo.SGForwardModel;
+import games.sushigo.SGGameState;
+import games.sushigo.SGParameters;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -162,6 +165,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements" :
                 return DominionImprovements;
+            case "SushiGO":
+                return SushiGO;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -230,6 +235,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case SushiGO:
+                forwardModel = new SGForwardModel();
+                gameState = new SGGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -263,6 +272,8 @@ public enum GameType {
                 return DominionParameters.sizeDistortion(seed);
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
+            case SushiGO:
+                return new SGParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -321,6 +332,8 @@ public enum GameType {
             case DominionSizeDistortion:
                 gui = new DominionGUI(game, ac, human);
                 break;
+            case SushiGO:
+                gui = new PrototypeGUI(game.getGameType(), game.getGameState(), ac, 100);
             // TODO: Diamant GUI
         }
 
