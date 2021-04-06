@@ -239,6 +239,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                 ModifyPlayerResource a = new ModifyPlayerResource(player, targetPlayer, -i, resource, production, tagToCount, tileToCount,
                         any, opponents, onMars, counterResource, counterResourceProduction, true);
                 a.complete = true;
+                actions.add(a);
             }
         }
 

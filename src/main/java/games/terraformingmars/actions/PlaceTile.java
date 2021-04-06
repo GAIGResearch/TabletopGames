@@ -203,23 +203,28 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     for (int i = 0; i < gs.getBoard().getHeight(); i++) {
                         for (int j = 0; j < gs.getBoard().getWidth(); j++) {
                             TMMapTile mt = gs.getBoard().getElement(j, i);
+
                             // Check if we can place tile here
-                            if (mt != null && mt.getTilePlaced() == null && (!mt.isReserved() || mt.getReserved() == player) &&
-                                    (tileName == null && (mapType == null || mt.getTileType() == mapType) ||
-                                    (mt.getComponentName().equalsIgnoreCase(tileName))) &&
-                                    (!volcanicRestriction || mt.isVolcanic()) &&
-                                    (resourcesGainedRestriction == null || contains(mt.getResources(), resourcesGainedRestriction))) {
-                                // Check placement rules
-                                if (respectingAdjacency && adjacencyRequirement != null) {
-                                    if (adjacencyRequirement.testCondition(new Group<>(gs, mt, player))) {
-                                        actions.add(new PlaceTile(player, mt.getComponentID(), tile, respectingAdjacency, onMars, tileName, mapType,
-                                                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
-                                    }
-                                } else {
+                            if (mt == null || mt.getTilePlaced() != null) continue;
+                            if (mt.isReserved() && mt.getReserved() != player) continue;
+                            if (tileName != null && !mt.getComponentName().equalsIgnoreCase(tileName)) continue;
+                            if (mapType != null && mt.getTileType() != mapType) continue;
+                            if (volcanicRestriction && !mt.isVolcanic()) continue;
+                            if (resourcesGainedRestriction != null && !contains(mt.getResources(), resourcesGainedRestriction)) continue;
+
+                            // Check placement rules
+                            if (respectingAdjacency && adjacencyRequirement != null) {
+                                if (adjacencyRequirement.testCondition(new Group<>(gs, mt, player))) {
                                     actions.add(new PlaceTile(player, mt.getComponentID(), tile, respectingAdjacency, onMars, tileName, mapType,
                                             legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
+                                } else {
+                                    int a = 0;
                                 }
+                            } else {
+                                actions.add(new PlaceTile(player, mt.getComponentID(), tile, respectingAdjacency, onMars, tileName, mapType,
+                                        legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
                             }
+
                         }
                     }
                 } else {

@@ -3,7 +3,6 @@ package games.terraformingmars.rules.requirements;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import jdk.nashorn.internal.objects.Global;
 import utilities.Utils;
 
 import java.awt.*;
@@ -25,30 +24,11 @@ public class CounterRequirement implements Requirement<TMGameState> {
 
     @Override
     public boolean testCondition(TMGameState gs) {
-        int value = calculate(gs);
+        int value = getCounter(gs).getValue();
         int discount = discount(gs);
 
         if (max && (value - discount <= threshold)) return true;
         return !max && (value + discount >= threshold);
-    }
-
-    private int calculate(TMGameState gs) {
-        Counter c;
-        if (counterID == -1) {
-            c = setCounter(gs);
-            if (c.getComponentName().equalsIgnoreCase("temperature")) {
-                // Turn to index
-                threshold = Utils.indexOf(c.getValues(), threshold);
-            }
-        } else {
-            c = (Counter) gs.getComponentById(counterID);
-        }
-
-        if (max && threshold == -1) {
-            threshold = c.getMaximum();
-        }
-
-        return c.getValue();
     }
 
     private int discount(TMGameState gs) {
@@ -76,30 +56,20 @@ public class CounterRequirement implements Requirement<TMGameState> {
 
     @Override
     public String getDisplayText(TMGameState gs) {
-        Counter c;
-        int t = threshold;
-        if (counterID == -1) {
-            c = setCounter(gs);
-            if (c.getComponentName().equalsIgnoreCase("temperature")) {
-                // Turn to index
-                t = c.getValues()[threshold];
-            }
-        } else {
-            c = (Counter) gs.getComponentById(counterID);
-        }
+        Counter c = getCounter(gs);
         String text;
         TMTypes.GlobalParameter p = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
         if (p != null) {
-            text = t + " " + p.getShortString();
+            text = c.getValues()[threshold] + " " + p.getShortString();
         } else {
-            text = t + " " + c.getComponentName();
+            text = c.getValue() + " " + c.getComponentName();
         }
         return text;
     }
 
     @Override
     public String getReasonForFailure(TMGameState gs) {
-        int value = calculate(gs);
+        int value = getCounter(gs).getValue();
         int discount = discount(gs);
 
         if (max) {
@@ -114,9 +84,23 @@ public class CounterRequirement implements Requirement<TMGameState> {
         return null;  // TODO: if player counter, display image of resource instead
     }
 
-    private Counter setCounter(TMGameState gs) {
-        Counter which = gs.stringToGPOrPlayerResCounter(counterCode, -1);
-        counterID = which.getComponentID();
+    private Counter getCounter(TMGameState gs) {
+        Counter which;
+        if (counterID == -1) {
+            which = gs.stringToGPOrPlayerResCounter(counterCode, -1);
+            counterID = which.getComponentID();
+            if (which.getComponentName().equalsIgnoreCase("temperature")) {
+                // Turn to index
+                threshold = Utils.indexOf(which.getValues(), threshold);
+            }
+        } else {
+            which = (Counter) gs.getComponentById(counterID);
+        }
+
+        if (max && threshold == -1) {
+            threshold = which.getMaximum();
+        }
+
         return which;
     }
 

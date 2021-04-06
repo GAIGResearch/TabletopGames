@@ -230,20 +230,24 @@ public class TMAction extends AbstractAction {
 
     public static TMAction parseActionOnCard(String s, TMCard card, boolean free) {
         String[] orSplit = s.split(" or ");
+        String[] andSplit = s.split(" and ");
         int cardID = -1;
         if (card != null) cardID = card.getComponentID();
         if (orSplit.length == 1) {
-            TMAction a = TMAction.parseAction(s, free, cardID).a;
-            if (a != null) {
-                if (a instanceof PlaceTile) {
-                    a.setCardID(cardID);
-                } else if (card != null && a instanceof AddResourceOnCard && !((AddResourceOnCard) a).chooseAny) {
-                    // if add resource on card (not other), set resource on this card
-                    card.resourceOnCard = ((AddResourceOnCard) a).resource;
+            if (andSplit.length == 1) {
+                TMAction a = TMAction.parseAction(s, free, cardID).a;
+                if (a != null) {
+                    if (a instanceof PlaceTile) {
+                        a.setCardID(cardID);
+                    } else if (card != null && a instanceof AddResourceOnCard && !((AddResourceOnCard) a).chooseAny) {
+                        // if add resource on card (not other), set resource on this card
+                        card.resourceOnCard = ((AddResourceOnCard) a).resource;
+                    }
+                    return a;
                 }
-                return a;
             } else {
-                int b = 0;  // action didn't parse, put a breakpoint here to see it
+                // Compound action
+                return processCompoundAction(free, andSplit, cardID);
             }
         } else {
             // Action choice
@@ -251,7 +255,7 @@ public class TMAction extends AbstractAction {
             int i = 0;
             for (String s2 : orSplit) {
                 s2 = s2.trim();
-                String[] andSplit = s2.split(" and ");
+                andSplit = s2.split(" and ");
                 if (andSplit.length == 1) {
                     TMAction a = TMAction.parseAction(s2, free, cardID).a;
                     if (a != null) {
@@ -262,20 +266,7 @@ public class TMAction extends AbstractAction {
                     }
                 } else {
                     // Compound action
-                    TMAction[] compound = new TMAction[andSplit.length];
-                    int j = 0;
-                    for (String s3 : andSplit) {
-                        s3 = s3.trim();
-                        TMAction a = TMAction.parseAction(s3, free, cardID).a;
-                        if (a != null) {
-                            compound[j] = a;
-                            if (a instanceof PlaceTile) {
-                                a.setCardID(cardID);
-                            }
-                        }
-                        j++;
-                    }
-                    actionChoice[i] = new CompoundAction(-1, compound);
+                    actionChoice[i] = processCompoundAction(free, andSplit, cardID);
                 }
                 i++;
             }
@@ -289,8 +280,21 @@ public class TMAction extends AbstractAction {
         return null;
     }
 
-    private static Pair<TMAction, String> parseAction(String encoding, boolean free) {
-        return parseAction(encoding, free, -1);
+    private static CompoundAction processCompoundAction(boolean free, String[] andSplit, int cardID) {
+        TMAction[] compound = new TMAction[andSplit.length];
+        int j = 0;
+        for (String s3 : andSplit) {
+            s3 = s3.trim();
+            TMAction a = TMAction.parseAction(s3, free, cardID).a;
+            if (a != null) {
+                compound[j] = a;
+                if (a instanceof PlaceTile) {
+                    a.setCardID(cardID);
+                }
+            }
+            j++;
+        }
+        return new CompoundAction(-1, compound);
     }
 
     private static Pair<TMAction, String> parseAction(String encoding, boolean free, int cardID) {
