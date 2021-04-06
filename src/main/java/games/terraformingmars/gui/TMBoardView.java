@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static core.AbstractGUI.defaultItemSize;
-import static games.terraformingmars.gui.TMDeckDisplay.drawResource;
+import static games.terraformingmars.gui.TMCardView.drawResource;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMBoardView extends ComponentView {

@@ -13,9 +13,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static games.terraformingmars.actions.TMAction.parseActionOnCard;
 
@@ -456,4 +454,22 @@ public class TMCard extends Card {
         return null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TMCard)) return false;
+        if (!super.equals(o)) return false;
+        TMCard tmCard = (TMCard) o;
+        return number == tmCard.number && cost == tmCard.cost && mapTileIDTilePlaced == tmCard.mapTileIDTilePlaced && Double.compare(tmCard.nPoints, nPoints) == 0 && pointsTileAdjacent == tmCard.pointsTileAdjacent && nResourcesOnCard == tmCard.nResourcesOnCard && canResourcesBeRemoved == tmCard.canResourcesBeRemoved && cardType == tmCard.cardType && Objects.equals(requirements, tmCard.requirements) && Arrays.equals(tags, tmCard.tags) && Objects.equals(discountEffects, tmCard.discountEffects) && Objects.equals(resourceMappings, tmCard.resourceMappings) && Arrays.equals(persistingEffects, tmCard.persistingEffects) && Objects.equals(firstAction, tmCard.firstAction) && Arrays.equals(actions, tmCard.actions) && Arrays.equals(immediateEffects, tmCard.immediateEffects) && pointsResource == tmCard.pointsResource && Objects.equals(pointsThreshold, tmCard.pointsThreshold) && pointsTag == tmCard.pointsTag && pointsTile == tmCard.pointsTile && resourceOnCard == tmCard.resourceOnCard;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), number, cardType, cost, requirements, discountEffects, resourceMappings, firstAction, mapTileIDTilePlaced, nPoints, pointsResource, pointsThreshold, pointsTag, pointsTile, pointsTileAdjacent, resourceOnCard, nResourcesOnCard, canResourcesBeRemoved);
+        result = 31 * result + Arrays.hashCode(tags);
+        result = 31 * result + Arrays.hashCode(persistingEffects);
+        result = 31 * result + Arrays.hashCode(actions);
+        result = 31 * result + Arrays.hashCode(immediateEffects);
+        return result;
+    }
 }

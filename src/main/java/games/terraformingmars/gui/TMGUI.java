@@ -34,7 +34,8 @@ public class TMGUI extends AbstractGUI {
 
     TMBoardView view;
     TMPlayerView playerView;
-    TMDeckDisplay playerHand, playerCardChoice, playerCorporation;
+    TMDeckDisplay playerHand, playerCardChoice;
+    TMCardView playerCorporation;
     TMDeckDisplay2 playerCardsPlayed;
     JScrollPane paneHand, paneCardChoice, paneCardsPlayed;
     JPanel infoPanel;
@@ -110,8 +111,7 @@ public class TMGUI extends AbstractGUI {
         paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneHand.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
 
-        playerCorporation = new TMDeckDisplay(this, gameState, null);
-        playerCorporation.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight + 20));
+        playerCorporation = new TMCardView(gameState, null, -1, TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight);
 
         playerCardChoice = new TMDeckDisplay(this, gameState, gameState.getPlayerCardChoice()[focusPlayer]);
         paneCardChoice = new JScrollPane(playerCardChoice);
@@ -190,7 +190,7 @@ public class TMGUI extends AbstractGUI {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(Color.white);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight(), playerHand.getHighlight(), playerCardChoice.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
+        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -354,25 +354,21 @@ public class TMGUI extends AbstractGUI {
                 }
             }
 
-            if (playerHand.highlight.size() > 0) {
-                // A card to choose, check highlights
-                for (Rectangle r: playerHand.highlight) {
-                    String code = playerHand.rects.get(r);
-                    int idx = Integer.parseInt(code);
-                    // card idx can be played
-                    for (TMAction action: playCardActions) {
-                        if (action.getCardID() == gs.getPlayerHands()[focusPlayer].get(idx).getComponentID()) {
-                            actionButtons[i].setVisible(true);
-                            if (action.canBePlayed(gs)) {
-                                setButtonAction(actionButtons[i], player.getPlayerID(), action, "Play");
-                            } else {
-                                actionButtons[i].setText(action.getString(gs));
-                                actionButtons[i].setEnabled(false);
-                                actionButtons[i].setToolTipText(getInvalidActionReason(action, gs));
-                            }
-                            i++;
-                            break;
+            int highlightIdx = playerHand.getHighlightIndex();
+            if (highlightIdx >= 0) {
+                // A card to choose
+                for (TMAction action: playCardActions) {
+                    if (action.getCardID() == gs.getPlayerHands()[focusPlayer].get(highlightIdx).getComponentID()) {
+                        actionButtons[i].setVisible(true);
+                        if (action.canBePlayed(gs)) {
+                            setButtonAction(actionButtons[i], player.getPlayerID(), action, "Play");
+                        } else {
+                            actionButtons[i].setText(action.getString(gs));
+                            actionButtons[i].setEnabled(false);
+                            actionButtons[i].setToolTipText(getInvalidActionReason(action, gs));
                         }
+                        i++;
+                        break;
                     }
                 }
             } else {
@@ -459,23 +455,13 @@ public class TMGUI extends AbstractGUI {
 
             view.update(gs);
             playerView.update(gs);
-            playerHand.update(gs.getPlayerHands()[focusPlayer]);
-            playerCardChoice.update(gs.getPlayerCardChoice()[focusPlayer]);
+            playerHand.update(gs.getPlayerHands()[focusPlayer], false);
+            Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
+            playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
             playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer]);
 
-            Deck<TMCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
-            if (corp != null) {
-                temp.add(corp);
-            }
-            playerCorporation.update(temp);
-
-            if (gs.allCorpChosen() && gs.getPlayerCardChoice()[focusPlayer].getSize() > 0) {
-                playerCardChoice.drawHighlights = false;
-            } else {
-                playerCardChoice.drawHighlights = true;
-                playerCardChoice.highlight.clear();
-            }
+            playerCorporation.update(gs, corp, -1);
 
             if (player instanceof HumanGUIPlayer) {
                 if (actionChosen) {
