@@ -1,6 +1,10 @@
 package games;
 
 import core.*;
+import core.turnorders.AlternatingTurnOrder;
+import games.battlelore.BattleloreForwardModel;
+import games.battlelore.BattleloreGameState;
+import games.battlelore.BattleloreParameters;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -38,6 +42,7 @@ import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.dominion.*;
 import gui.PrototypeGUI;
+import org.apache.commons.math3.random.StableRandomGenerator;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -91,7 +96,7 @@ public enum GameType {
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
             }}),
-    Diamant( 2, 6,
+    Diamant(2, 6,
             new ArrayList<Category>() {{
                 add(Adventure);
                 add(Bluffing);
@@ -110,8 +115,12 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
-    ;
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+
+    Battlelore (2, 2,
+            new ArrayList<Category>() {{ add(Fantasy); add(Miniatures); add(Wargame);}},
+            new ArrayList<Mechanic>() {{ add(Campaign); add(BattleCardDriven); add(CommandCards);
+                add(DiceRolling); add(GridMovement); add(ModularBoard); add(VariablePlayerPowers); }});
 
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
@@ -150,6 +159,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements" :
                 return DominionImprovements;
+            case "battlelore" :
+                return Battlelore;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -217,6 +228,12 @@ public enum GameType {
             case DominionSizeDistortion:
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
+                break;
+            case Battlelore:
+                params = new BattleloreParameters(seed);
+                forwardModel = new BattleloreForwardModel();
+                //TODO_Ertugrul: Check params_
+                gameState = new BattleloreGameState(params, new AlternatingTurnOrder(nPlayers), GameType.Battlelore);
                 break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
@@ -310,6 +327,9 @@ public enum GameType {
                 gui = new DominionGUI(game, ac, human);
                 break;
             // TODO: Diamant GUI
+
+            case Battlelore:
+                gui = new PrototypeGUI(game.getGameType(), game.getGameState(), ac, 100);
         }
 
         return gui;
@@ -346,7 +366,8 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        Wargame;
 
         /**
          * Retrieves a list of all games within this category.
@@ -411,7 +432,9 @@ public enum GameType {
         Campaign,
         MoveThroughDeck,
         Enclosure,
-        DeckManagement;
+        DeckManagement,
+        BattleCardDriven,
+        CommandCards;
 
         /**
          * Retrieves a list of all games using this mechanic.
