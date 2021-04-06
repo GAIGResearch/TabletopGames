@@ -5,8 +5,10 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.catan.CatanGameState;
+import games.catan.CatanTile;
 import games.catan.actions.AcceptTrade;
 import games.catan.actions.OfferPlayerTrade;
+import games.catan.components.Settlement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,8 +152,30 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     }
 
     private boolean KnightCardCheck(CatanGameState cgs, AbstractAction action){
-        //TODO check if knight card should be played
-        return rnd.nextInt(2)==0;
+        CatanTile robberTile = cgs.getRobber(cgs.getBoard());
+        for(Settlement settlement : robberTile.getSettlements()){
+            if (settlement.getOwner()==cgs.getCurrentPlayer()){
+                return true;
+            }
+        }
+
+        int[] knights = cgs.getKnights();
+        int firstKnights = -1;
+        int secondKnights = -1;
+        for (int knightCount : knights){
+            if (knightCount > firstKnights){
+                secondKnights = firstKnights;
+                firstKnights = knightCount;
+            }
+            else if (knightCount > secondKnights){
+                secondKnights = knightCount;
+            }
+        }
+        if (knights[cgs.getCurrentPlayer()]==secondKnights&&firstKnights-secondKnights<1){
+            return true;
+        }
+
+        return false;
     }
 
     private boolean MonopolyCardCheck(CatanGameState cgs, AbstractAction action){
