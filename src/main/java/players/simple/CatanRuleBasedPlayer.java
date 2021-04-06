@@ -3,6 +3,7 @@ package players.simple;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import games.catan.CatanGameState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,16 +14,46 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     private final Random rnd; // random generator for selection of equally ranked actions
 
+    // All current actions in the game, used for dynamically creating sub sets of the actions
+    //TODO : This can be done using isInstance for a more resilient system but that introduces the
+    // overheads of creating a new object to check against each time, not sure if it is worth it
+    private enum ActionType {
+            DoNothing,
+            AcceptTrade,
+            BuildCity,
+            BuildRoad,
+            BuildRoadByRef,
+            BuildSettlement,
+            BuildSettlementByRef,
+            BuyDevelopmentCard,
+            DefaultTrade,
+            DiscardCards,
+            Monopoly,
+            MoveRobber,
+            OfferPlayerTrade,
+            PlaceRoad,
+            PlaceSettlementWithRoad,
+            PlayDevelopmentCard,
+            PlayKnightCard,
+            StealResource,
+            YearOfPlenty,
+    }
+
+
     public CatanRuleBasedPlayer(Random rnd) {this.rnd = rnd;}
 
     public CatanRuleBasedPlayer() {this(new Random());}
 
+    /**
+     *
+     * @param gameState observation of the current game state
+     * @param possibleActions
+     * @return AbstractAction
+     */
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        // list of actions, need to select one from the list
-        // check for each available actions, add possible ones to list to select from
-        // actions are either going to be trade/buy or play a dev card
-        List<AbstractAction> actionsToSelectFrom = new ArrayList<>();
+
+        List<List<AbstractAction>> actionLists = getActionSubsets((CatanGameState) gameState, possibleActions);
 
         // DEVELOPMENT CARDS
         // Design a good scenario for when each development card should be played
@@ -49,13 +80,57 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         // Only place robber on tiles with settlements
 
         // random select from all actions if all rules fail
-        if (actionsToSelectFrom.size() == 0){
-            actionsToSelectFrom = possibleActions;
-        }
 
-        int randomAction = rnd.nextInt(possibleActions.size());
-        return actionsToSelectFrom.get(randomAction);
+        return selectRandomAction(possibleActions);
     }
 
     public String toString() { return "CatanRuleBased";}
+
+    private AbstractAction selectRandomAction(List<AbstractAction> actions){
+        int randomAction = rnd.nextInt(actions.size());
+        return actions.get(randomAction);
+    }
+
+    private List<List<AbstractAction>> getActionSubsets(CatanGameState cgs, List<AbstractAction> possibleActions){
+        List<List<AbstractAction>> actionLists = new ArrayList<>();
+        actionLists.add(new ArrayList<>()); // build city actions
+        actionLists.add(new ArrayList<>()); // build settlement actions
+        actionLists.add(new ArrayList<>()); // buy development card actions
+        actionLists.add(new ArrayList<>()); // build road actions
+        actionLists.add(new ArrayList<>()); // default case actions
+        ActionType actionType = null;
+
+        for(AbstractAction action : possibleActions){
+            actionType = ActionType.valueOf(action.getClass().getSimpleName());
+            switch (actionType) {
+                case BuildCity:
+                    actionLists.get(0).add(action);
+                    break;
+
+                case BuildSettlement:
+                    actionLists.get(1).add(action);
+                    break;
+
+                case BuyDevelopmentCard:
+                    actionLists.get(2).add(action);
+                    break;
+
+                case BuildRoad:
+                    if(BuildRoadCheck(action)){
+                        actionLists.get(3).add(action);
+                    }
+                    break;
+
+                default:
+                    actionLists.get(actionLists.size()-1).add(action);
+            }
+        }
+
+        return actionLists;
+    }
+
+    private boolean BuildRoadCheck(AbstractAction action){
+        //TODO workout a way of deciding whether or not building a road is a good idea?
+        return rnd.nextInt(2)==0;
+    }
 }
