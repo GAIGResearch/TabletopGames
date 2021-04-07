@@ -3,6 +3,7 @@ package games.coltexpress.test;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
+import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import games.coltexpress.ColtExpressForwardModel;
@@ -41,6 +42,11 @@ public class RoundCardVisibilityAndShuffling {
     }
 
     static class TestRoundEndListener implements IGameListener {
+        @Override
+        public void onGameEvent(CoreConstants.GameEvents type, Game game) {
+
+        }
+
         @Override
         public void onEvent(CoreConstants.GameEvents type, AbstractGameState gameState, AbstractAction action) {
             if (type == ROUND_OVER) {
