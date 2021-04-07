@@ -106,9 +106,110 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-//        TMGameState copy = new TMGameState(gameParameters, getNPlayers());  // TODO
+        Random rnd = new Random(getGameParameters().getRandomSeed());
+        TMGameState copy = new TMGameState(gameParameters, getNPlayers());
 
-        return this;
+        // General public info
+        copy.generation = generation;
+        copy.board = board.copy();  // TODO check deep copy
+        copy.extraTiles = new HashSet<>();
+        for (TMMapTile mt: extraTiles) {
+            copy.extraTiles.add(mt.copy());
+        }
+        copy.globalParameters = new HashMap<>();
+        for (TMTypes.GlobalParameter p: globalParameters.keySet()) {
+            copy.globalParameters.put(p, globalParameters.get(p).copy());
+        }
+        copy.bonuses = new HashSet<>();
+        for (Bonus b: bonuses) {
+            copy.bonuses.add(b.copy());
+        }
+        copy.milestones = new HashSet<>();
+        for (Milestone m: milestones) {
+            copy.milestones.add(m.copy());
+        }
+        copy.awards = new HashSet<>();
+        for (Award a: awards) {
+            copy.awards.add(a.copy());
+        }
+        copy.nMilestonesClaimed = nMilestonesClaimed.copy();
+        copy.nAwardsFunded = nAwardsFunded.copy();
+
+        // Face-down decks
+        copy.projectCards = projectCards.copy();
+        copy.projectCards.shuffle(rnd);
+        copy.corpCards = corpCards.copy();
+        copy.corpCards.shuffle(rnd);
+        copy.discardCards = discardCards.copy(); // TODO: some of these are unknown
+
+        // Player-specific public info
+        copy.playerExtraActions = new HashSet[getNPlayers()];
+        copy.playerResourceMap = new HashSet[getNPlayers()];
+        copy.playerPersistingEffects = new HashSet[getNPlayers()];
+        copy.playerDiscountEffects = new HashMap[getNPlayers()];
+        copy.playerResources = new HashMap[getNPlayers()];
+        copy.playerResourceIncreaseGen = new HashMap[getNPlayers()];
+        copy.playerProduction = new HashMap[getNPlayers()];
+        copy.playerCardsPlayedTags = new HashMap[getNPlayers()];
+        copy.playerCardsPlayedTypes = new HashMap[getNPlayers()];
+        copy.playerTilesPlaced = new HashMap[getNPlayers()];
+        copy.playerCardPoints = new Counter[getNPlayers()];
+        copy.playerComplicatedPointCards = new Deck[getNPlayers()];
+        copy.playedCards = new Deck[getNPlayers()];
+        copy.playerCorporations = new TMCard[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            copy.playerExtraActions[i] = new HashSet<>();
+            copy.playerResourceMap[i] = new HashSet<>();
+            copy.playerPersistingEffects[i] = new HashSet<>();
+            copy.playerDiscountEffects[i] = new HashMap<>();
+            copy.playerResources[i] = new HashMap<>();
+            copy.playerResourceIncreaseGen[i] = new HashMap<>(playerResourceIncreaseGen[i]);
+            copy.playerProduction[i] = new HashMap<>();
+            copy.playerCardsPlayedTags[i] = new HashMap<>();
+            copy.playerCardsPlayedTypes[i] = new HashMap<>();
+            copy.playerTilesPlaced[i] = new HashMap<>();
+            copy.playerCardPoints[i] = playerCardPoints[i].copy();
+            copy.playerComplicatedPointCards[i] = playerComplicatedPointCards[i].copy();
+            copy.playedCards[i] = playedCards[i].copy();
+            copy.playerCorporations[i] = playerCorporations[i].copy();
+            for (TMAction a: playerExtraActions[i]) {
+                copy.playerExtraActions[i].add((TMAction) a.copy());
+            }
+            for (ResourceMapping rm: playerResourceMap[i]) {
+                copy.playerResourceMap[i].add(rm.copy());
+            }
+            for (Requirement r: playerDiscountEffects[i].keySet()) {
+                copy.playerDiscountEffects[i].put(r.copy(), playerDiscountEffects[i].get(r));
+            }
+            for (Effect e: playerPersistingEffects[i]) {
+                copy.playerPersistingEffects[i].add(e.copy());
+            }
+            for (TMTypes.Resource r: playerResources[i].keySet()) {
+                copy.playerResources[i].put(r, playerResources[i].get(r).copy());
+            }
+            for (TMTypes.Resource r: playerProduction[i].keySet()) {
+                copy.playerProduction[i].put(r, playerProduction[i].get(r).copy());
+            }
+            for (TMTypes.Tag t: playerCardsPlayedTags[i].keySet()) {
+                copy.playerCardsPlayedTags[i].put(t, playerCardsPlayedTags[i].get(t).copy());
+            }
+            for (TMTypes.CardType t: playerCardsPlayedTypes[i].keySet()) {
+                copy.playerCardsPlayedTypes[i].put(t, playerCardsPlayedTypes[i].get(t).copy());
+            }
+            for (TMTypes.Tile t: playerTilesPlaced[i].keySet()) {
+                copy.playerTilesPlaced[i].put(t, playerTilesPlaced[i].get(t).copy());
+            }
+        }
+
+        // Player-specific hidden info
+        copy.playerHands = new Deck[getNPlayers()];
+        copy.playerCardChoice = new Deck[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            copy.playerHands[i] = playerHands[i].copy();
+            copy.playerCardChoice[i] = playerCardChoice[i].copy();
+        }
+
+        return copy;
     }
 
     @Override
@@ -580,17 +681,17 @@ public class TMGameState extends AbstractGameState {
     }
 
     public static class ResourceMapping {
-        public TMTypes.Resource from;
-        public TMTypes.Resource to;
+        public final TMTypes.Resource from;
+        public final TMTypes.Resource to;
         public double rate;
         Requirement<TMCard> requirement;
+
         public ResourceMapping(TMTypes.Resource from, TMTypes.Resource to, double rate, Requirement<TMCard> requirement) {
             this.from = from;
             this.to = to;
             this.rate = rate;
             this.requirement = requirement;
         }
-        // TODO: copy
 
         @Override
         public boolean equals(Object o) {
@@ -605,6 +706,10 @@ public class TMGameState extends AbstractGameState {
         @Override
         public int hashCode() {
             return Objects.hash(from, to, requirement);
+        }
+
+        public ResourceMapping copy() {
+            return new ResourceMapping(from, to, rate, requirement.copy());
         }
     }
 }

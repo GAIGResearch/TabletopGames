@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
-    TMTypes.Tag tagRequirement;  // tag card chosen must have
-    Class<? extends TMAction> actionClass;  // what type of effect can be duplicated
-    boolean production;  // If modify player resource, must it be production?
+    final TMTypes.Tag tagRequirement;  // tag card chosen must have
+    final Class<? extends TMAction> actionClass;  // what type of effect can be duplicated
+    final boolean production;  // If modify player resource, must it be production?
 
     public DuplicateImmediateEffect(TMTypes.Tag tagRequirement, Class<? extends TMAction> actionClass, boolean production) {
         super(-1, true);
@@ -95,6 +95,11 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
 
     @Override
     public DuplicateImmediateEffect copy() {
-        return this;
+        return (DuplicateImmediateEffect) super.copy();
+    }
+
+    @Override
+    public DuplicateImmediateEffect _copy() {
+        return new DuplicateImmediateEffect(player, getCardID(), actionClass, tagRequirement, production);
     }
 }

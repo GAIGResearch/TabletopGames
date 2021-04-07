@@ -27,6 +27,7 @@ public class Award extends Token {
     }
 
     public int checkProgress(TMGameState gs, int player) {
+        if (player == -1) player = gs.getCurrentPlayer();
         int sum = 0;
         String[] split = counterID.split("-");
         for (String s : split) {

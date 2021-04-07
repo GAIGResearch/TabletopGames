@@ -56,6 +56,10 @@ public class TMCard extends Card {
         requirements = new HashSet<>();
     }
 
+    public TMCard(String name, int componentID) {
+        super(name, componentID);
+    }
+
     public boolean meetsRequirements(TMGameState gs) {
         for (Requirement r: requirements) {
             if (!r.testCondition(gs)) return false;
@@ -471,5 +475,64 @@ public class TMCard extends Card {
         result = 31 * result + Arrays.hashCode(actions);
         result = 31 * result + Arrays.hashCode(immediateEffects);
         return result;
+    }
+
+    @Override
+    public TMCard copy() {
+        TMCard copy = new TMCard(componentName, componentID);
+        copy.number = number;
+        copy.cardType = cardType;
+        copy.cost = cost;
+        if (requirements != null) {
+            copy.requirements = new HashSet<>();
+            for (Requirement r: requirements) {
+                copy.requirements.add(r.copy());
+            }
+        }
+        copy.tags = tags.clone();
+        if (discountEffects != null) {
+            copy.discountEffects = new HashMap<>();
+            for (Requirement r: discountEffects.keySet()) {
+                copy.discountEffects.put(r.copy(), discountEffects.get(r));
+            }
+        }
+        if (resourceMappings != null) {
+            copy.resourceMappings = new HashSet<>();
+            for (TMGameState.ResourceMapping rm: resourceMappings) {
+                copy.resourceMappings.add(rm.copy());
+            }
+        }
+        if (persistingEffects != null) {
+            copy.persistingEffects =  new Effect[persistingEffects.length];
+            for (int i = 0; i < persistingEffects.length; i++) {
+                copy.persistingEffects[i] = persistingEffects[i].copy();
+            }
+        }
+        if (firstAction != null) {
+            copy.firstAction = firstAction.copy();
+        }
+        if (actions != null) {
+            copy.actions = new TMAction[actions.length];
+            for (int i = 0; i < actions.length; i++) {
+                copy.actions[i] = actions[i].copy();
+            }
+        }
+        if (immediateEffects != null) {
+            copy.immediateEffects = new TMAction[immediateEffects.length];
+            for (int i = 0; i < immediateEffects.length; i++) {
+                copy.immediateEffects[i] = immediateEffects[i].copy();
+            }
+        }
+        copy.mapTileIDTilePlaced = mapTileIDTilePlaced;
+        copy.nPoints = nPoints;
+        copy.pointsResource = pointsResource;
+        copy.pointsThreshold = pointsThreshold;
+        copy.pointsTag = pointsTag;
+        copy.pointsTile = pointsTile;
+        copy.pointsTileAdjacent = pointsTileAdjacent;
+        copy.resourceOnCard = resourceOnCard;
+        copy.nResourcesOnCard = nResourcesOnCard;
+        copy.canResourcesBeRemoved = canResourcesBeRemoved;
+        return copy;
     }
 }

@@ -6,11 +6,13 @@ import utilities.ImageIO;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class TagsPlayedRequirement implements Requirement<TMGameState> {
 
-    public TMTypes.Tag[] tags;
-    public int[] nMin;
+    public final TMTypes.Tag[] tags;
+    public final int[] nMin;
     int nTags;
 
     public TagsPlayedRequirement(TMTypes.Tag[] tag, int[] nMin) {
@@ -84,7 +86,28 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public TagsPlayedRequirement copy() {
+        return new TagsPlayedRequirement(tags.clone(), nMin.clone());
+    }
+
+    @Override
     public String toString() {
         return "Tags Played";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TagsPlayedRequirement)) return false;
+        TagsPlayedRequirement that = (TagsPlayedRequirement) o;
+        return nTags == that.nTags && Arrays.equals(tags, that.tags) && Arrays.equals(nMin, that.nMin);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(nTags);
+        result = 31 * result + Arrays.hashCode(tags);
+        result = 31 * result + Arrays.hashCode(nMin);
+        return result;
     }
 }

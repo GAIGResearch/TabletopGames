@@ -60,4 +60,10 @@ public class ModifyGlobalParameter extends TMModifyCounter {
         return Objects.hash(super.hashCode(), param);
     }
 
+    @Override
+    public TMModifyCounter _copy() {
+        ModifyGlobalParameter copy = new ModifyGlobalParameter(param, change, freeActionPoint);
+        copy.counterID = counterID;
+        return copy;
+    }
 }

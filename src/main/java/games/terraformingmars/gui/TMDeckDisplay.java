@@ -88,7 +88,7 @@ public class TMDeckDisplay extends JComponent {
         }
 
         this.deck = deck;
-//        revalidate();
+        revalidate();
 
     }
 

@@ -5,18 +5,20 @@ import games.terraformingmars.TMTypes;
 import utilities.ImageIO;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class TilePlacedRequirement implements Requirement<TMGameState> {
 
-    public TMTypes.Tile tile;
-    int threshold;
-    public boolean max;  // if true, value of counter must be <= threshold, if false >=
-    boolean any;  // tiles placed by any player, or by the player who checks this
+    public final TMTypes.Tile tile;
+    public final int threshold;
+    public final boolean max;  // if true, value of counter must be <= threshold, if false >=
+    public final boolean any;  // tiles placed by any player, or by the player who checks this
 
     public TilePlacedRequirement(TMTypes.Tile tile, int threshold, boolean max, boolean any) {
         this.tile = tile;
         this.threshold = threshold;
         this.max = max;
+        this.any = any;
     }
 
     @Override
@@ -66,7 +68,25 @@ public class TilePlacedRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public TilePlacedRequirement copy() {
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "Tile Placed";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TilePlacedRequirement)) return false;
+        TilePlacedRequirement that = (TilePlacedRequirement) o;
+        return threshold == that.threshold && max == that.max && any == that.any && tile == that.tile;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tile, threshold, max, any);
     }
 }

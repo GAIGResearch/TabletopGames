@@ -64,8 +64,13 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
     }
 
     @Override
+    public DiscardCard _copy() {
+        return new DiscardCard(player, getCardID());
+    }
+
+    @Override
     public DiscardCard copy() {
-        return this;
+        return (DiscardCard) super.copy();
     }
 
     @Override

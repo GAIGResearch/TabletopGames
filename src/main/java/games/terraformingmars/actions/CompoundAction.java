@@ -1,10 +1,11 @@
 package games.terraformingmars.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.requirements.PlayableActionRequirement;
+
+import java.util.Arrays;
 
 public class CompoundAction extends TMAction{
     public TMAction[] actions;
@@ -38,8 +39,12 @@ public class CompoundAction extends TMAction{
     }
 
     @Override
-    public AbstractAction copy() {
-        return this;
+    public CompoundAction _copy() {
+        TMAction[] acopy = new TMAction[actions.length];
+        for (int i = 0; i < actions.length; i++) {
+            acopy[i] = actions[i].copy();
+        }
+        return new CompoundAction(player, acopy);
     }
 
     @Override
@@ -58,5 +63,21 @@ public class CompoundAction extends TMAction{
             s.append(action.toString()).append(" and ");
         }
         return s.substring(0, s.length()-5);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CompoundAction)) return false;
+        if (!super.equals(o)) return false;
+        CompoundAction that = (CompoundAction) o;
+        return Arrays.equals(actions, that.actions);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(actions);
+        return result;
     }
 }

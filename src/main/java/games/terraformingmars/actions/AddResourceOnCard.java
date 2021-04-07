@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
-import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
@@ -116,8 +115,18 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     }
 
     @Override
+    public AddResourceOnCard _copy() {
+        AddResourceOnCard copy = new AddResourceOnCard(player, getCardID(), resource, amount, freeActionPoint);
+        copy.chooseAny = chooseAny;
+        copy.tagRequirement = tagRequirement;
+        copy.minResRequirement = minResRequirement;
+        copy.tagTopCardDrawDeck = tagTopCardDrawDeck;
+        return copy;
+    }
+
+    @Override
     public AddResourceOnCard copy() {
-        return this;
+        return (AddResourceOnCard) super.copy();
     }
 
     @Override
@@ -126,12 +135,12 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         if (!(o instanceof AddResourceOnCard)) return false;
         if (!super.equals(o)) return false;
         AddResourceOnCard that = (AddResourceOnCard) o;
-        return amount == that.amount && chooseAny == that.chooseAny && minResRequirement == that.minResRequirement && resource == that.resource && tagRequirement == that.tagRequirement;
+        return amount == that.amount && chooseAny == that.chooseAny && minResRequirement == that.minResRequirement && resource == that.resource && tagRequirement == that.tagRequirement && tagTopCardDrawDeck == that.tagTopCardDrawDeck;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource, amount, chooseAny, tagRequirement, minResRequirement);
+        return Objects.hash(super.hashCode(), resource, amount, chooseAny, tagRequirement, minResRequirement, tagTopCardDrawDeck);
     }
 
     @Override

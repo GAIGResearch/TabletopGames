@@ -173,12 +173,12 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         if (!(o instanceof ModifyPlayerResource)) return false;
         if (!super.equals(o)) return false;
         ModifyPlayerResource that = (ModifyPlayerResource) o;
-        return production == that.production && targetPlayer == that.targetPlayer && counterResourceProduction == that.counterResourceProduction && any == that.any && opponents == that.opponents && onMars == that.onMars && resource == that.resource && counterResource == that.counterResource && tagToCount == that.tagToCount && tileToCount == that.tileToCount;
+        return production == that.production && targetPlayer == that.targetPlayer && counterResourceProduction == that.counterResourceProduction && any == that.any && opponents == that.opponents && onMars == that.onMars && complete == that.complete && resource == that.resource && Objects.equals(targetPlayerOptions, that.targetPlayerOptions) && counterResource == that.counterResource && tagToCount == that.tagToCount && tileToCount == that.tileToCount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource, production, targetPlayer, counterResource, counterResourceProduction, tagToCount, tileToCount, any, opponents, onMars);
+        return Objects.hash(super.hashCode(), resource, production, targetPlayer, targetPlayerOptions, counterResource, counterResourceProduction, tagToCount, tileToCount, any, opponents, onMars, complete);
     }
 
     @Override
@@ -192,8 +192,19 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
     }
 
     @Override
+    public ModifyPlayerResource _copy() {
+        ModifyPlayerResource copy = new ModifyPlayerResource(player, targetPlayer, change, resource, production, tagToCount, tileToCount, any, opponents, onMars, counterResource, counterResourceProduction, freeActionPoint);
+        copy.counterID = counterID;
+        if (targetPlayerOptions != null) {
+            copy.targetPlayerOptions = new HashSet<>(targetPlayerOptions);
+        }
+        copy.complete = complete;
+        return copy;
+    }
+
+    @Override
     public ModifyPlayerResource copy() {
-        return this;
+        return (ModifyPlayerResource) super.copy();
     }
 
     @Override

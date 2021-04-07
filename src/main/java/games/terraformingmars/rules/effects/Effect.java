@@ -40,5 +40,5 @@ public abstract class Effect {
         return Objects.hash(mustBeCurrentPlayer, effectAction);
     }
 
-    // TODO copy?
+    public abstract Effect copy();
 }

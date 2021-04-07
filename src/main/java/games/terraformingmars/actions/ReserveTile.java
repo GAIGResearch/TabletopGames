@@ -10,7 +10,7 @@ import games.terraformingmars.components.TMMapTile;
 import java.util.*;
 
 public class ReserveTile extends TMAction implements IExtendedSequence {
-    public int mapTileID;
+    public final int mapTileID;
     public TMTypes.MapTileType mapType;
 
     boolean placed;
@@ -39,12 +39,17 @@ public class ReserveTile extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public ReserveTile copy() {
+    public ReserveTile _copy() {
         ReserveTile copy = new ReserveTile(player, mapTileID, freeActionPoint);
         copy.impossible = impossible;
         copy.placed = placed;
         copy.mapType = mapType;
         return copy;
+    }
+
+    @Override
+    public ReserveTile copy() {
+        return (ReserveTile) super.copy();
     }
 
     @Override

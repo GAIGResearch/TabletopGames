@@ -7,6 +7,7 @@ import utilities.Utils;
 
 import java.awt.*;
 import java.util.Map;
+import java.util.Objects;
 
 public class CounterRequirement implements Requirement<TMGameState> {
 
@@ -84,6 +85,13 @@ public class CounterRequirement implements Requirement<TMGameState> {
         return null;  // TODO: if player counter, display image of resource instead
     }
 
+    @Override
+    public CounterRequirement copy() {
+        CounterRequirement copy = new CounterRequirement(counterCode, threshold, max);
+        copy.counterID = counterID;
+        return copy;
+    }
+
     private Counter getCounter(TMGameState gs) {
         Counter which;
         if (counterID == -1) {
@@ -109,5 +117,18 @@ public class CounterRequirement implements Requirement<TMGameState> {
     @Override
     public String toString() {
         return "Counter Value";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CounterRequirement)) return false;
+        CounterRequirement that = (CounterRequirement) o;
+        return counterID == that.counterID && threshold == that.threshold && max == that.max && Objects.equals(counterCode, that.counterCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(counterCode, counterID, threshold, max);
     }
 }

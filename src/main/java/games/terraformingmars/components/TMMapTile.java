@@ -140,8 +140,15 @@ public class TMMapTile extends Component {
     }
 
     @Override
-    public Component copy() {
-        return new TMMapTile(x, y, componentID); // TODO
+    public TMMapTile copy() {
+        TMMapTile copy = new TMMapTile(x, y, componentID);
+        copy.owner = owner;
+        copy.tilePlaced = tilePlaced;
+        copy.type = type;
+        copy.resources = resources.clone();
+        copy.volcanic = volcanic;
+        copy.reserved = reserved;
+        return copy;
     }
 
     public static TMMapTile parseMapTile(String s) {

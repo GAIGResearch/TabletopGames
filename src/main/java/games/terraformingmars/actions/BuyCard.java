@@ -49,8 +49,8 @@ public class BuyCard extends TMAction {
     }
 
     @Override
-    public TMAction copy() {
-        return this;
+    public BuyCard _copy() {
+        return new BuyCard(player, getCardID(), getCost());
     }
 
     @Override

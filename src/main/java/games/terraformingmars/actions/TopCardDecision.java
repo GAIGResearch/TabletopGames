@@ -9,6 +9,7 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class TopCardDecision extends TMAction implements IExtendedSequence {
     int stage;
@@ -78,7 +79,29 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
     }
 
     @Override
+    public TopCardDecision _copy() {
+        TopCardDecision copy = new TopCardDecision(nCardsLook, nCardsKeep, buy);
+        copy.nCardsKept = nCardsKept;
+        copy.stage = stage;
+        return copy;
+    }
+
+    @Override
     public TopCardDecision copy() {
-        return this;
+        return (TopCardDecision) super.copy();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TopCardDecision)) return false;
+        if (!super.equals(o)) return false;
+        TopCardDecision that = (TopCardDecision) o;
+        return stage == that.stage && nCardsKept == that.nCardsKept && nCardsLook == that.nCardsLook && nCardsKeep == that.nCardsKeep && buy == that.buy;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), stage, nCardsKept, nCardsLook, nCardsKeep, buy);
     }
 }

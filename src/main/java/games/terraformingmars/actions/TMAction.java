@@ -19,9 +19,9 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class TMAction extends AbstractAction {
-    public final boolean freeActionPoint;
+    public boolean freeActionPoint;
     public int player;
-    public final boolean pass;
+    public boolean pass;
 
     public Requirement<TMGameState> costRequirement;
     public HashSet<Requirement<TMGameState>> requirements;
@@ -171,9 +171,32 @@ public class TMAction extends AbstractAction {
         }
     }
 
+    public TMAction _copy() { return new TMAction(player, freeActionPoint); }
+
     @Override
-    public AbstractAction copy() {
-        return this; // TODO
+    public TMAction copy() {
+        TMAction action = _copy();
+        action.freeActionPoint = freeActionPoint;
+        action.player = player;
+        action.pass = pass;
+        if (costRequirement != null) {
+            action.costRequirement = costRequirement.copy();
+        }
+        if (requirements != null) {
+            action.requirements = new HashSet<>();
+            for (Requirement r : requirements) {
+                action.requirements.add(r.copy());
+            }
+        }
+        action.played = played;
+        action.actionType = actionType;
+        action.standardProject = standardProject;
+        action.basicResourceAction = basicResourceAction;
+        action.cost = cost;
+        action.costResource = costResource;
+        action.playCardID = playCardID;
+        action.cardID = cardID;
+        return action;
     }
 
     @Override
@@ -181,12 +204,12 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject;
+        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID && Objects.equals(costRequirement, tmAction.costRequirement) && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction && costResource == tmAction.costResource;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(freeActionPoint, player, pass, requirements, played, actionType, standardProject);
+        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirements, played, actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
     }
 
     @Override

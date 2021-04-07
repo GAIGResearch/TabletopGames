@@ -22,6 +22,10 @@ public class PlayCard extends TMAction {
         }
     }
 
+    private PlayCard(int player, boolean free) {
+        super(player, free);
+    }
+
     @Override
     public boolean _execute(TMGameState gs) {
         TMGameParameters gp = (TMGameParameters) gs.getGameParameters();
@@ -70,8 +74,8 @@ public class PlayCard extends TMAction {
     }
 
     @Override
-    public PlayCard copy() {
-        return this;
+    public PlayCard _copy() {
+        return new PlayCard(player, freeActionPoint);
     }
 
     @Override

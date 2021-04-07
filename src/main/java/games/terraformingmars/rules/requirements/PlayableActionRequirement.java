@@ -4,6 +4,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.actions.TMAction;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class PlayableActionRequirement implements Requirement<TMGameState> {
 
@@ -49,7 +50,25 @@ public class PlayableActionRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public PlayableActionRequirement copy() {
+        return new PlayableActionRequirement(action.copy());
+    }
+
+    @Override
     public String toString() {
         return "Playable Action";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayableActionRequirement)) return false;
+        PlayableActionRequirement that = (PlayableActionRequirement) o;
+        return Objects.equals(action, that.action);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(action);
     }
 }

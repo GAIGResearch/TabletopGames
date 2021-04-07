@@ -26,4 +26,11 @@ public class PayForActionEffect extends Effect {
         if (actionType != null) return action.actionType == null;
         return action.getCost() >= minCost;
     }
+
+    @Override
+    public Effect copy() {
+        PayForActionEffect copy = new PayForActionEffect(mustBeCurrentPlayer, effectAction.copy(), actionType);
+        copy.minCost = minCost;
+        return copy;
+    }
 }

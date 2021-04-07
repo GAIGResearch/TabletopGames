@@ -7,6 +7,7 @@ import utilities.Group;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static games.terraformingmars.actions.PlaceTile.*;
 
@@ -66,7 +67,32 @@ public class AdjacencyRequirement implements Requirement<Group<TMGameState, TMMa
     }
 
     @Override
+    public AdjacencyRequirement copy() {
+        AdjacencyRequirement copy = new AdjacencyRequirement();
+        if (tileTypes != null) {
+            copy.tileTypes = new HashMap<>(tileTypes);
+        }
+        copy.noneAdjacent = noneAdjacent;
+        copy.owned = owned;
+        copy.reversed = reversed;
+        return copy;
+    }
+
+    @Override
     public String toString() {
         return "Adjacency";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AdjacencyRequirement)) return false;
+        AdjacencyRequirement that = (AdjacencyRequirement) o;
+        return owned == that.owned && noneAdjacent == that.noneAdjacent && reversed == that.reversed && Objects.equals(tileTypes, that.tileTypes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tileTypes, owned, noneAdjacent, reversed);
     }
 }

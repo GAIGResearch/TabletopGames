@@ -171,9 +171,9 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public PlaceTile copy() {
+    public PlaceTile _copy() {
         PlaceTile copy = new PlaceTile(player, mapTileID, tile, respectingAdjacency, onMars, tileName, mapType,
-                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, freeActionPoint);
+                legalPositions, resourcesGainedRestriction.clone(), volcanicRestriction, adjacencyRequirement, freeActionPoint);
         copy.impossible = impossible;
         copy.placed = placed;
         HashSet<Integer> copyPos = null;
@@ -181,7 +181,19 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             copyPos = new HashSet<>(legalPositions);
         }
         copy.legalPositions = copyPos;
+        if (adjacencyRequirement != null) {
+            copy.adjacencyRequirement = adjacencyRequirement.copy();
+        }
+        copy.removeResourcesAdjacentOwner = removeResourcesAdjacentOwner;
+        copy.removeResourcesAmount = removeResourcesAmount;
+        copy.removeResourcesRes = removeResourcesRes;
+        copy.removeResourcesProd = removeResourcesProd;
         return copy;
+    }
+
+    @Override
+    public PlaceTile copy() {
+        return (PlaceTile) super.copy();
     }
 
     @Override
@@ -269,12 +281,12 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         if (!(o instanceof PlaceTile)) return false;
         if (!super.equals(o)) return false;
         PlaceTile placeTile = (PlaceTile) o;
-        return respectingAdjacency == placeTile.respectingAdjacency && onMars == placeTile.onMars && mapTileID == placeTile.mapTileID && volcanicRestriction == placeTile.volcanicRestriction && placed == placeTile.placed && impossible == placeTile.impossible && Objects.equals(tileName, placeTile.tileName) && tile == placeTile.tile && mapType == placeTile.mapType && Objects.equals(legalPositions, placeTile.legalPositions) && Arrays.equals(resourcesGainedRestriction, placeTile.resourcesGainedRestriction) && Objects.equals(adjacencyRequirement, placeTile.adjacencyRequirement);
+        return respectingAdjacency == placeTile.respectingAdjacency && onMars == placeTile.onMars && mapTileID == placeTile.mapTileID && volcanicRestriction == placeTile.volcanicRestriction && removeResourcesAdjacentOwner == placeTile.removeResourcesAdjacentOwner && removeResourcesAmount == placeTile.removeResourcesAmount && removeResourcesProd == placeTile.removeResourcesProd && placed == placeTile.placed && impossible == placeTile.impossible && Objects.equals(tileName, placeTile.tileName) && tile == placeTile.tile && mapType == placeTile.mapType && Objects.equals(legalPositions, placeTile.legalPositions) && Arrays.equals(resourcesGainedRestriction, placeTile.resourcesGainedRestriction) && Objects.equals(adjacencyRequirement, placeTile.adjacencyRequirement) && removeResourcesRes == placeTile.removeResourcesRes;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), respectingAdjacency, onMars, tileName, mapTileID, tile, mapType, legalPositions, volcanicRestriction, adjacencyRequirement, placed, impossible);
+        int result = Objects.hash(super.hashCode(), respectingAdjacency, onMars, tileName, mapTileID, tile, mapType, legalPositions, volcanicRestriction, adjacencyRequirement, removeResourcesAdjacentOwner, removeResourcesAmount, removeResourcesRes, removeResourcesProd, placed, impossible);
         result = 31 * result + Arrays.hashCode(resourcesGainedRestriction);
         return result;
     }

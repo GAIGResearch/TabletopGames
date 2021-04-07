@@ -45,7 +45,7 @@ public class ClaimAwardMilestone extends TMAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public ClaimAwardMilestone _copy() {
         return new ClaimAwardMilestone(player, toClaimID, actionType, getCost());
     }
 

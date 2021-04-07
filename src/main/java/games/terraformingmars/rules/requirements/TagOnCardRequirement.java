@@ -58,7 +58,7 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
     }
 
     public TagOnCardRequirement copy() {
-        return this;
+        return new TagOnCardRequirement(tags.clone());
     }
 
     @Override

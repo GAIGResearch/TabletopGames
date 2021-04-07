@@ -10,11 +10,11 @@ import java.util.Objects;
 
 public class ResourceRequirement implements Requirement<TMGameState> {
 
-    TMTypes.Resource resource;
-    int amount;
-    boolean production;
-    int player;
-    int cardID;
+    final TMTypes.Resource resource;
+    final int amount;
+    final boolean production;
+    final int cardID;
+    final int player;
 
     public ResourceRequirement(TMTypes.Resource resource, int amount, boolean production, int player, int cardID) {
         this.resource = resource;
@@ -32,16 +32,17 @@ public class ResourceRequirement implements Requirement<TMGameState> {
         if (cardID != -1) {
             card = (TMCard) gs.getComponentById(cardID);
         }
-        if (player == -1) {
-            player = gs.getCurrentPlayer();
-        } else if (player == -2) {
+        int p = player;
+        if (p == -1) {
+            p = gs.getCurrentPlayer();
+        } else if (p == -2) {
             // Can any player pay?
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 if (gs.canPlayerPay(i, card, null, resource, amount, production)) return true;
             }
             return false;
         }
-        return gs.canPlayerPay(player, card, null, resource, amount, production);
+        return gs.canPlayerPay(p, card, null, resource, amount, production);
     }
 
     @Override
@@ -70,6 +71,11 @@ public class ResourceRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public ResourceRequirement copy() {
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "Resource" + (production? " production" : "");
     }
@@ -79,11 +85,11 @@ public class ResourceRequirement implements Requirement<TMGameState> {
         if (this == o) return true;
         if (!(o instanceof ResourceRequirement)) return false;
         ResourceRequirement that = (ResourceRequirement) o;
-        return amount == that.amount && production == that.production && player == that.player && cardID == that.cardID && resource == that.resource;
+        return amount == that.amount && production == that.production && cardID == that.cardID && player == that.player && resource == that.resource;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource, amount, production, player, cardID);
+        return Objects.hash(resource, amount, production, cardID, player);
     }
 }

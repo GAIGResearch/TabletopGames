@@ -5,11 +5,12 @@ import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameState> {
 
-    int amID;
-    int player;
+    final int amID;
+    final int player;
 
     public ClaimableAwardMilestoneRequirement(int amID, int player) {
         this.amID = amID;
@@ -18,11 +19,12 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
 
     @Override
     public boolean testCondition(TMGameState gs) {
-        if (player == -1) {
-            player = gs.getCurrentPlayer();
+        int p = player;
+        if (p == -1) {
+            p = gs.getCurrentPlayer();
         }
         Award am = (Award) gs.getComponentById(amID);
-        return am.canClaim(gs, player);
+        return am.canClaim(gs, p);
     }
 
     @Override
@@ -58,7 +60,25 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
     }
 
     @Override
+    public ClaimableAwardMilestoneRequirement copy() {
+        return new ClaimableAwardMilestoneRequirement(amID, player);
+    }
+
+    @Override
     public String toString() {
         return "Award/Milestone";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ClaimableAwardMilestoneRequirement)) return false;
+        ClaimableAwardMilestoneRequirement that = (ClaimableAwardMilestoneRequirement) o;
+        return amID == that.amID && player == that.player;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(amID, player);
     }
 }

@@ -37,4 +37,6 @@ public interface Requirement<T> {
             return new CounterRequirement(split[0], Integer.parseInt(split[1]), split[2].equalsIgnoreCase("max"));
         }
     }
+
+    Requirement<T> copy();
 }
