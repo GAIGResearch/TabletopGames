@@ -54,6 +54,10 @@ public class PlaceTileEffect extends Effect {
 
     @Override
     public Effect copy() {
-        return new PlaceTileEffect(mustBeCurrentPlayer, effectAction.copy(), onMars, tile, resourceTypeGained.clone());
+        PlaceTileEffect ef = new PlaceTileEffect(mustBeCurrentPlayer, effectAction.copy(), onMars, tile, resourceTypeGained);
+        if (resourceTypeGained != null) {
+            ef.resourceTypeGained = resourceTypeGained.clone();
+        }
+        return ef;
     }
 }

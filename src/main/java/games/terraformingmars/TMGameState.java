@@ -171,9 +171,11 @@ public class TMGameState extends AbstractGameState {
             copy.playerCardPoints[i] = playerCardPoints[i].copy();
             copy.playerComplicatedPointCards[i] = playerComplicatedPointCards[i].copy();
             copy.playedCards[i] = playedCards[i].copy();
-            copy.playerCorporations[i] = playerCorporations[i].copy();
+            if (playerCorporations[i] != null) {
+                copy.playerCorporations[i] = playerCorporations[i].copy();
+            }
             for (TMAction a: playerExtraActions[i]) {
-                copy.playerExtraActions[i].add((TMAction) a.copy());
+                copy.playerExtraActions[i].add(a.copy());
             }
             for (ResourceMapping rm: playerResourceMap[i]) {
                 copy.playerResourceMap[i].add(rm.copy());
@@ -709,7 +711,11 @@ public class TMGameState extends AbstractGameState {
         }
 
         public ResourceMapping copy() {
-            return new ResourceMapping(from, to, rate, requirement.copy());
+            ResourceMapping rm = new ResourceMapping(from, to, rate, requirement);
+            if (requirement != null) {
+                rm.requirement = requirement.copy();
+            }
+            return rm;
         }
     }
 }

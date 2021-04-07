@@ -173,7 +173,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     @Override
     public PlaceTile _copy() {
         PlaceTile copy = new PlaceTile(player, mapTileID, tile, respectingAdjacency, onMars, tileName, mapType,
-                legalPositions, resourcesGainedRestriction.clone(), volcanicRestriction, adjacencyRequirement, freeActionPoint);
+                legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, freeActionPoint);
         copy.impossible = impossible;
         copy.placed = placed;
         HashSet<Integer> copyPos = null;
@@ -183,6 +183,9 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         copy.legalPositions = copyPos;
         if (adjacencyRequirement != null) {
             copy.adjacencyRequirement = adjacencyRequirement.copy();
+        }
+        if (resourcesGainedRestriction != null) {
+            copy.resourcesGainedRestriction = resourcesGainedRestriction.clone();
         }
         copy.removeResourcesAdjacentOwner = removeResourcesAdjacentOwner;
         copy.removeResourcesAmount = removeResourcesAmount;

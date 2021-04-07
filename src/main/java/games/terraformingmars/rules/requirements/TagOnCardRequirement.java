@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class TagOnCardRequirement implements Requirement<TMCard> {
 
-    final TMTypes.Tag[] tags;  // card must contain all of these tags
+    TMTypes.Tag[] tags;  // card must contain all of these tags
 
     public TagOnCardRequirement(TMTypes.Tag[] t) {
         this.tags = t;
@@ -58,7 +58,9 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
     }
 
     public TagOnCardRequirement copy() {
-        return new TagOnCardRequirement(tags.clone());
+        TagOnCardRequirement t = new TagOnCardRequirement(tags);
+        if (tags != null) t.tags = tags.clone();
+        return t;
     }
 
     @Override
