@@ -4,9 +4,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import games.catan.*;
-import games.catan.actions.BuildCity;
-import games.catan.actions.BuildRoad;
-import games.catan.actions.BuildSettlement;
 import games.catan.actions.YearOfPlenty;
 import games.catan.components.Settlement;
 
@@ -147,30 +144,30 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     break;
 
                 case BuildRoad:
-                    if(BuildRoadCheck(cgs, action)){
+                    if(buildRoadCheck(cgs, action)){
                         actionLists.get(5).add(action);
                     }
                     break;
 
                 case DefaultTrade:
-                    if(DefaultTradeCheck(cgs, action)){
+                    if(defaultTradeCheck(cgs, action)){
                         actionLists.get(4).add(action);
                     }
                     break;
 
                 case OfferPlayerTrade:
-                    if(OfferPlayerTradeCheck(cgs, action)){
+                    if(offerPlayerTradeCheck(cgs, action)){
                         actionLists.get(5).add(action);
                     }
                     break;
 
                 case MoveRobber:
-                    if(MoveRobberCheck(cgs,action)){
+                    if(moveRobberCheck(cgs,action)){
                         actionLists.get(0).add(action);
                     }
 
                 case AcceptTrade:
-                    if(AcceptTradeCheck(cgs,action)){
+                    if(acceptTradeCheck(cgs,action)){
                         actionLists.get(0).add(action);
                     }
 
@@ -222,18 +219,13 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         resources[yearOfPlenty.resource1.ordinal()] = resources[yearOfPlenty.resource1.ordinal()] +1;
         resources[yearOfPlenty.resource2.ordinal()] = resources[yearOfPlenty.resource2.ordinal()] +1;
 
-        int[] cityCostDiff = arraySubtraction(CatanParameters.costMapping.get("city"), resources);
-        int[] settlementCostDiff = arraySubtraction(CatanParameters.costMapping.get("settlement"),resources);
-        int[] roadCostDiff = arraySubtraction(CatanParameters.costMapping.get("road"),resources);
-        int totalCityCostDiff = sumArray(cityCostDiff);
-        int totalSettlementCostDiff = sumArray(settlementCostDiff);
-        int totalRoadCostDiff = sumArray(roadCostDiff);
+        int[] costDiffs = costDifferenceCheck(resources);
 
-        if (totalCityCostDiff==0){
+        if (costDiffs[0]==0){
             return 0;
-        } else if (totalSettlementCostDiff==0){
+        } else if (costDiffs[1]==0){
             return 1;
-        } else if (roadBlocked && totalRoadCostDiff == 0){
+        } else if (roadBlocked && costDiffs[2] == 0){
             return 2;
         }
 
@@ -242,32 +234,33 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     private int placeRoadCheck(CatanGameState cgs, AbstractAction action){
         //TODO implement
-        return -1;
+        return rnd.nextInt(3);
     }
 
-    private boolean BuildRoadCheck(CatanGameState cgs, AbstractAction action){
+    private boolean buildRoadCheck(CatanGameState cgs, AbstractAction action){
         //TODO workout a way of deciding whether or not building a road is a good idea?
         return rnd.nextInt(2)==0;
     }
 
-    private boolean DefaultTradeCheck(CatanGameState cgs, AbstractAction action){
+    private boolean defaultTradeCheck(CatanGameState cgs, AbstractAction action){
         //TODO check if default trade should be made
         return rnd.nextInt(2)==0;
     }
 
-    private boolean OfferPlayerTradeCheck(CatanGameState cgs, AbstractAction action){
+    private boolean offerPlayerTradeCheck(CatanGameState cgs, AbstractAction action){
         //TODO check if trade should be offered
         //TODO some state tracking for negotiations might be needed
         return rnd.nextInt(2)==0;
     }
 
-    private boolean MoveRobberCheck(CatanGameState cgs, AbstractAction action){
+    private boolean moveRobberCheck(CatanGameState cgs, AbstractAction action){
         //TODO identify good spots to move the robber
         return rnd.nextInt(2)==0;
     }
 
-    private boolean AcceptTradeCheck(CatanGameState cgs, AbstractAction action){
-        //TODO identify good spots to move the robber
+    private boolean acceptTradeCheck(CatanGameState cgs, AbstractAction action){
+        //TODO identify whether or not to accept trade
+
         return rnd.nextInt(2)==0;
     }
 
@@ -287,6 +280,22 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
             sum += arr[i];
         }
         return sum;
+    }
+
+    private int[] costDifferenceCheck(int[] resources){
+        int[] cityCostDiff = new int[5], settlementCostDiff = new int[5], roadCostDiff = new int[5];
+        for (int i = 0; i < resources.length; i++){
+            cityCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("city")[i] - resources[i]);
+            settlementCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("settlement")[i] - resources[i]);
+            roadCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("road")[i] - resources[i]);
+        }
+        int[] costs = new int[3];
+        for (int i = 0; i < resources.length; i++){
+            costs[0] += cityCostDiff[i];
+            costs[1] += settlementCostDiff[i];
+            costs[2] += roadCostDiff[i];
+        }
+        return costs;
     }
 
 }
