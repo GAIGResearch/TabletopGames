@@ -9,9 +9,7 @@ import evodef.SearchSpace;
 import games.GameType;
 import utilities.SummaryLogger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiFunction;
 
 /**
@@ -67,8 +65,8 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
      */
     @Override
     public double[] evaluate(List<int[]> settings) {
-  //      System.out.printf("Starting evaluation %d of %n\t%s at %tT%n", nEvals,
-   //             settings.stream().map(Arrays::toString).collect(Collectors.joining(",\n\t")), System.currentTimeMillis());
+   //     System.out.printf("Starting evaluation %d of %n\t%s at %tT%n", nEvals,
+     //           settings.stream().map(Arrays::toString).collect(joining(",\n\t")), System.currentTimeMillis());
 
         List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
 
@@ -89,7 +87,7 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
         for (int i = 0; i < nPlayers; i++)
             retValue[i] = evalFn.apply(finalState, i);
 
-  //      System.out.printf("Result : %s%n", Arrays.toString(retValue));
+     //   System.out.printf("Result : %s%n", Arrays.toString(retValue));
         return retValue;
     }
 
