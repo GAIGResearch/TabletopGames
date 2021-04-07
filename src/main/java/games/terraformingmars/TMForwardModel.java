@@ -345,12 +345,16 @@ public class TMForwardModel extends AbstractForwardModel {
             possibleActions.add(new CompoundAction(StandardProject, player, new TMAction[]{a1, a2}, params.nCostSPCity));
 
             // Claim a milestone
-            int milestoneCost = params.getnCostMilestone()[gs.getnMilestonesClaimed().getValue()];
+            int nMilestonesClaimed = gs.getnMilestonesClaimed().getValue();
+            int milestoneCost = 0;
+            if (!gs.getnMilestonesClaimed().isMaximum()) milestoneCost = params.getnCostMilestone()[nMilestonesClaimed];
             for (Milestone m : gs.milestones) {
                 possibleActions.add(new ClaimAwardMilestone(player, m, milestoneCost));
             }
             // Fund an award
-            int awardCost = params.getnCostAwards()[gs.getnAwardsFunded().getValue()];
+            int nAwardsFunded = gs.getnAwardsFunded().getValue();
+            int awardCost = 0;
+            if (!gs.getnAwardsFunded().isMaximum()) awardCost = params.getnCostAwards()[nAwardsFunded];
             for (Award a : gs.awards) {
                 possibleActions.add(new ClaimAwardMilestone(player, a, awardCost));
             }

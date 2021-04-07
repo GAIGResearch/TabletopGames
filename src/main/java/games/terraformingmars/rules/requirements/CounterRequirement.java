@@ -94,7 +94,9 @@ public class CounterRequirement implements Requirement<TMGameState> {
                 threshold = Utils.indexOf(which.getValues(), threshold);
             }
         } else {
+            gs.getAllComponents();
             which = (Counter) gs.getComponentById(counterID);
+            int a = 0;
         }
 
         if (max && threshold == -1) {

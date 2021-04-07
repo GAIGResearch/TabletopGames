@@ -73,6 +73,7 @@ public class TMDeckDisplay extends JComponent {
 //            if (playerHand.isComponentVisible(i, gs.getCurrentPlayer())) {
                 if (deck.get(i) != null) {
                     cardViews[i].update(gs, deck.get(i), i);
+                    cardViews[i].repaint();
                 }
 //            }
             }
@@ -83,6 +84,7 @@ public class TMDeckDisplay extends JComponent {
         for (int i = deck.getSize(); i < maxCards; i++) {
             cardViews[i].update(gs, null, -1);
             cardViews[i].clicked = false;
+            cardViews[i].repaint();
         }
 
         this.deck = deck;

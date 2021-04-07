@@ -39,6 +39,11 @@ public class TMCardView extends JComponent {
     TMCard card;
     TMGameState gs;
 
+    TMCard updateCard;
+    TMGameState updateGS;
+    int updateIndex;
+    boolean update;
+
     static int spacing = 10;
     Rectangle aboveRibbon;
 
@@ -80,6 +85,12 @@ public class TMCardView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g1) {
+        if (update) {
+            card = updateCard;
+            index = updateIndex;
+            gs = updateGS;
+            update = false;
+        }
         if (card == null) return;
 
         Graphics2D g = (Graphics2D) g1;
@@ -578,9 +589,9 @@ public class TMCardView extends JComponent {
     }
 
     public void update(TMGameState gs, TMCard card, int idx) {
-        this.gs = gs;
-        this.card = card;
-        this.index = idx;
-        // TODO: this is set on a different thread to the drawing and causes errors, mark to update and do update when drawing
+        this.updateGS = gs;
+        this.updateCard = card;
+        this.updateIndex = idx;
+        this.update = true;
     }
 }
