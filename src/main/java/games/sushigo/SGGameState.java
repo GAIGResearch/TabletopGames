@@ -21,7 +21,7 @@ public class SGGameState extends AbstractGameState {
      * @param nPlayers      - amount of players for this game.
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new SGTurnOrder(nPlayers));
     }
 
     @Override
