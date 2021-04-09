@@ -43,7 +43,11 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        SingleTreeNode root = new SingleTreeNode(this, null, gameState, rnd);
+        SingleTreeNode root = new SingleTreeNode(this, null,null, gameState, rnd);
+        if (params.MASTRollout) {
+            ((MASTPlayer) rolloutStrategy).setRoot(root);
+            ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
+        }
         root.mctsSearch(getStatsLogger());
 
         if (debug)

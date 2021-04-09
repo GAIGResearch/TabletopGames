@@ -1,21 +1,25 @@
 package players.mcts;
 
-import core.*;
+import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.*;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
-import static players.mcts.MCTSEnums.TreePolicy.*;
-import static utilities.Utils.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.TreePolicy.AlphaGo;
+import static utilities.Utils.entropyOf;
+import static utilities.Utils.noise;
 
 public class SingleTreeNode {
     // Root node of tree
@@ -26,6 +30,7 @@ public class SingleTreeNode {
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
+    Map<AbstractAction, Pair<Integer, Double>> MASTStatistics;
     // Depth of this node
     final int depth;
 
@@ -43,6 +48,7 @@ public class SingleTreeNode {
     private final Random rnd;
 
     // State in this node (closed loop)
+    private AbstractAction actionToReach;
     private AbstractGameState state;
     private List<AbstractAction> actionsFromState;
 
@@ -51,11 +57,16 @@ public class SingleTreeNode {
     }
 
     // Called in tree expansion
-    public SingleTreeNode(MCTSPlayer player, SingleTreeNode parent, AbstractGameState state, Random rnd) {
+    public SingleTreeNode(MCTSPlayer player, SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
+        if (root == this) {
+            // Root node maintains MAST statistics
+            MASTStatistics = new HashMap<>();
+        }
+        this.actionToReach = actionToReach;
         decisionPlayer = state.getCurrentPlayer();
         totValue = new double[state.getNPlayers()];
         setState(state); // this also initialises actions and children
@@ -128,12 +139,17 @@ public class SingleTreeNode {
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
             SingleTreeNode selected = treePolicy();
             // Monte carlo rollout: return value of MC rollout from the newly added node
-            double[] delta = selected.rollOut();
+            List<AbstractAction> rolloutActions = new ArrayList<>();
+            double[] delta = selected.rollOut(rolloutActions);
             // Back up the value of the rollout through the tree
             selected.backUp(delta);
+            if (player.params.MAST) {
+                root.MASTBackup(rolloutActions, delta);
+            }
+
             // Finished iteration
             numIters++;
-     //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
+            //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = player.params.budgetType;
             if (budgetType == BUDGET_TIME) {
@@ -257,19 +273,35 @@ public class SingleTreeNode {
      */
     private SingleTreeNode expand() {
         // Find random child not already created
-        Random r = new Random(player.params.getRandomSeed());
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
-        AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
-
+        AbstractAction chosen = null;
+        if (player.params.MASTExpansion) {
+            double bestValue = Double.NEGATIVE_INFINITY;
+            for (AbstractAction action : unexpandedActions()) {
+                if (MASTStatistics.containsKey(action)) {
+                    Pair<Integer, Double> stats = MASTStatistics.get(action);
+                    double estimate = stats.b / stats.a;
+                    if (estimate > bestValue) {
+                        bestValue = estimate;
+                        chosen = action;
+                    }
+                }
+            }
+        } else {
+            chosen = notChosen.get(rnd.nextInt(notChosen.size()));
+        }
+        if (chosen == null)
+            throw new AssertionError("We have somehow failed to pick an action to expand");
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
         AbstractGameState nextState = state.copy();
         root.copyCount++;
-        advance(nextState, chosen.copy());
+        AbstractAction actionCopy = chosen.copy();
+        advance(nextState, actionCopy);
 
         // then instantiate a new node
-        SingleTreeNode tn = new SingleTreeNode(player, this, nextState, rnd);
+        SingleTreeNode tn = new SingleTreeNode(player, this, actionCopy, nextState, rnd);
         SingleTreeNode[] nodeArray = new SingleTreeNode[state.getNPlayers()];
         nodeArray[nextState.getCurrentPlayer()] = tn;
         children.put(chosen, nodeArray);
@@ -341,12 +373,13 @@ public class SingleTreeNode {
             // We do not need to copy the state, as we advance this as we descend the tree.
             // In open loop we never re-use the state...the only purpose of storing it on the Node is
             // to pick it up in the next uct() call as we descend the tree
-            advance(state, actionChosen.copy());
+            AbstractAction chosenCopy = actionChosen.copy();
+            advance(state, chosenCopy);
             int nextPlayer = state.getCurrentPlayer();
             SingleTreeNode nextNode = nodeArray[nextPlayer];
             if (nextNode == null) {
                 // need to create a new node
-                nodeArray[nextPlayer] = new SingleTreeNode(player, this, state, rnd);
+                nodeArray[nextPlayer] = new SingleTreeNode(player, this, chosenCopy, state, rnd);
                 nextNode = nodeArray[nextPlayer];
             } else {
                 // pick up the existing one, and set the state
@@ -467,7 +500,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    private double[] rollOut() {
+    private double[] rollOut(List<AbstractAction> rolloutActions) {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
@@ -484,7 +517,10 @@ public class SingleTreeNode {
             AbstractPlayer rolloutStrategy = player.rolloutStrategy;
             while (!finishRollout(rolloutState, rolloutDepth)) {
                 List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
+                if (availableActions.isEmpty())
+                    break;
                 AbstractAction next = rolloutStrategy.getAction(rolloutState, availableActions);
+                rolloutActions.add(next);
                 advance(rolloutState, next);
                 rolloutDepth++;
             }
@@ -542,6 +578,18 @@ public class SingleTreeNode {
             n = n.parent;
         }
     }
+
+
+    private void MASTBackup(List<AbstractAction> rolloutActions, double[] delta) {
+        for (AbstractAction action : rolloutActions) {
+            Pair<Integer, Double> stats = MASTStatistics.getOrDefault(action, new Pair<>(0, 0.0));
+            stats.a++;  // visits
+            stats.b += delta[root.decisionPlayer];   // value
+            MASTStatistics.put(action, stats);
+            // TODO: expand to include separate MAST stats for other players
+        }
+    }
+
 
     /**
      * Calculates the best action from the root according to the selection policy

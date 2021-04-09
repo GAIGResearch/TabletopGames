@@ -28,6 +28,10 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Strategies rolloutType = RANDOM;
     public boolean openLoop = false;
     public boolean redeterminise = false;
+    public boolean MAST = false;
+    public boolean MASTExpansion = false;
+    public boolean MASTRollout = false;
+    public double MASTBoltzmann = 0.0;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
@@ -109,6 +113,8 @@ public class MCTSParams extends PlayerParameters {
         switch (rolloutType) {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
+            case MAST:
+                return new MASTPlayer(new Random(getRandomSeed()));
             default:
                 throw new AssertionError("Unknown rollout type : " + rolloutType);
         }
