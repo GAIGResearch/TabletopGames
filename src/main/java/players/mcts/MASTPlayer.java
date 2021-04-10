@@ -36,9 +36,9 @@ public class MASTPlayer extends AbstractPlayer {
             pdf[i] = actionValue;
         }
 
-        double mean = Arrays.stream(pdf).sum() / possibleActions.size();
+        double max = Arrays.stream(pdf).max().orElseThrow(() -> new AssertionError("Nothing in pdf!"));
         for (int i = 0; i < pdf.length; i++)
-            pdf[i] = Math.exp((pdf[i] - mean) / temperature);
+            pdf[i] = Math.exp((pdf[i] - max) / temperature);
         double sum = Arrays.stream(pdf).sum();
         for (int i = 0; i < pdf.length; i++)
             pdf[i] /= sum; // and normalise to a pdf
