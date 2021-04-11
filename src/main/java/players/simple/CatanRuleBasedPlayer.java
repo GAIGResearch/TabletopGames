@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import games.catan.*;
-import games.catan.actions.YearOfPlenty;
+import games.catan.actions.*;
 import games.catan.components.Settlement;
 
 
@@ -244,6 +244,10 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     private boolean defaultTradeCheck(CatanGameState cgs, AbstractAction action){
         //TODO check if default trade should be made
+        DefaultTrade defaultTrade = (DefaultTrade) action;
+        int[] resources = cgs.getPlayerResources(getPlayerID());
+        resources[defaultTrade]
+
         return rnd.nextInt(2)==0;
     }
 

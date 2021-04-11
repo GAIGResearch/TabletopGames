@@ -12,6 +12,7 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
+import players.simple.CatanRuleBasedPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
@@ -51,7 +52,7 @@ public class CatanGame extends Game {
         //agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
         agents.add(new RandomPlayer(new Random()));
-        agents.add(new RandomPlayer(new Random()));
+        agents.add(new CatanRuleBasedPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/", System.currentTimeMillis());
         CatanForwardModel forwardModel = new CatanForwardModel(params, agents.size());
