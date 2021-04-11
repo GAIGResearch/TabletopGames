@@ -7,6 +7,7 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
+import games.GameType;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -105,7 +106,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      *
@@ -154,7 +155,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      * @param nPlayers - number of players.
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
+        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn), GameType.Pandemic);
         data = new PandemicData();
         data.load(((PandemicParameters)gameParameters).getDataPath());
     }

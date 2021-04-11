@@ -26,14 +26,16 @@ public class DominionListener implements IGameListener {
             Map<String, Object> data = Arrays.stream(DominionGameAttributes.values())
                     .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, null)));
             logger.record(data);
-        } else if (type == CoreConstants.GameEvents.GAME_SEQUENCE_OVER) {
-            logger.processDataAndFinish();
         }
-
     }
 
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // nothing
+    }
+
+    @Override
+    public void allGamesFinished() {
+        logger.processDataAndFinish();
     }
 }

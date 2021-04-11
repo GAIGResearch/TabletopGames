@@ -28,6 +28,9 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Strategies rolloutType = RANDOM;
     public boolean openLoop = false;
     public boolean redeterminise = false;
+    public boolean MASTExpansion = false;
+    public boolean MAST = false;
+    public double MASTBoltzmann = 0.0;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
@@ -41,10 +44,11 @@ public class MCTSParams extends PlayerParameters {
     public MCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
+        addTunableParameter("boltzmannTemp", 1.0);
         addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30));
         addTunableParameter("epsilon", 1e-6);
-        addTunableParameter("rolloutType", RANDOM);
+        addTunableParameter("rolloutType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("openLoop", false, Arrays.asList(false, true));
         addTunableParameter("redeterminise", false, Arrays.asList(false, true));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
@@ -52,22 +56,34 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("expansionType", MCTSEnums.Strategies.RANDOM);
     }
 
     @Override
     public void _reset() {
         super._reset();
+        MAST = false; // do we need to calculate MAST statistics?
+        MASTExpansion = false;
+
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
+        if (rolloutType == MCTSEnums.Strategies.MAST)
+            MAST = true;
         openLoop = (boolean) getParameterValue("openLoop");
         redeterminise = (boolean) getParameterValue("redeterminise");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
+        MCTSEnums.Strategies expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
+        if (expansionPolicy == MCTSEnums.Strategies.MAST) {
+            MASTExpansion = true;
+            MAST = true;
+        }
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
+        MASTBoltzmann = (double) getParameterValue("boltzmannTemp");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         if (heuristic instanceof TunableParameters) {
             TunableParameters tunableHeuristic = (TunableParameters) heuristic;
@@ -109,6 +125,8 @@ public class MCTSParams extends PlayerParameters {
         switch (rolloutType) {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
+            case MAST:
+                return new MASTPlayer(new Random(getRandomSeed()));
             default:
                 throw new AssertionError("Unknown rollout type : " + rolloutType);
         }

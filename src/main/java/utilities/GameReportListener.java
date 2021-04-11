@@ -118,9 +118,12 @@ public class GameReportListener implements IGameListener {
 
             logger.record(collectedData);
             collectedData = new HashMap<>();
-        } else if (type == GAME_SEQUENCE_OVER) {
-            logger.processDataAndFinish();
         }
+    }
+
+    @Override
+    public void allGamesFinished() {
+        logger.processDataAndFinish();
     }
 
     /**

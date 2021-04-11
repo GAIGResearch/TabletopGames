@@ -5,6 +5,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.uno.cards.*;
 
 import java.util.*;
@@ -27,7 +28,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new UnoTurnOrder(nPlayers));
+        super(gameParameters, new UnoTurnOrder(nPlayers), GameType.Uno);
     }
 
     @Override

@@ -227,6 +227,9 @@ public class Game {
                     ((IPrintable) observation).printToConsole();
                 }
 
+                // Start the timer for this decision
+                gameState.playerTimer[activePlayer].resume();
+
                 // Either ask player which action to use or, in case no actions are available, report the updated observation
                 AbstractAction action = null;
                 if (observedActions.size() > 0) {
@@ -248,11 +251,19 @@ public class Game {
                             nDecisions++;
                         }
                     }
+                    if (COMPETITION_MODE && !observedActions.contains(action)) {
+                        System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                        action = null;
+                    }
                     AbstractAction finalAction = action;
                     listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
                 } else {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
+
+                // End the timer for this decision
+                gameState.playerTimer[activePlayer].pause();
+                gameState.playerTimer[activePlayer].incrementAction();
 
                 if (VERBOSE) {
                     if (action != null) {
@@ -262,10 +273,15 @@ public class Game {
                     }
                 }
 
-                // Resolve action and game rules, time it
-                s = System.nanoTime();
-                forwardModel.next(gameState, action);
-                nextTime += (System.nanoTime() - s);
+                // Check player timeout
+                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                    forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
+                } else {
+                    // Resolve action and game rules, time it
+                    s = System.nanoTime();
+                    forwardModel.next(gameState, action);
+                    nextTime += (System.nanoTime() - s);
+                }
             } else {
                 if (firstEnd) {
                     if (VERBOSE) {

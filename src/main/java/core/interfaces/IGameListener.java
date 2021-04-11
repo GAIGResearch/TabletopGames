@@ -29,21 +29,33 @@ public interface IGameListener {
     // for all other event types
     void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action);
 
+    /**
+     * This is called when all processing is finished, for example after running a sequence of games
+     * As such, no state is provided.
+     *
+     * This is useful for Listeners that are just interested in aggregate data across many runs
+     */
+    default void allGamesFinished() {
+        // default is to do nothing
+    }
+
 
     static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
         IGameListener listener = new GameReportListener(logger);
-        try {
-            Class<?> clazz = Class.forName(listenerClass);
-
-            Constructor<?> constructor;
+        if (!listenerClass.equals("")) {
             try {
-                constructor = clazz.getConstructor(IStatisticLogger.class);
-                listener = (IGameListener) constructor.newInstance(logger);
-            } catch (NoSuchMethodException e) {
-                return createListener(listenerClass);
+                Class<?> clazz = Class.forName(listenerClass);
+
+                Constructor<?> constructor;
+                try {
+                    constructor = clazz.getConstructor(IStatisticLogger.class);
+                    listener = (IGameListener) constructor.newInstance(logger);
+                } catch (NoSuchMethodException e) {
+                    return createListener(listenerClass);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return listener;
     }

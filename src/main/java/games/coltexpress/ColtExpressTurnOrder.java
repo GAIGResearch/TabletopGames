@@ -131,6 +131,10 @@ public class ColtExpressTurnOrder extends TurnOrder {
      */
     @Override
     public void endRound(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
+
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
 
         turnCounter = 0;
