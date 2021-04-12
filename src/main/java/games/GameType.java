@@ -29,6 +29,7 @@ import games.pandemic.gui.PandemicGUI;
 import games.sushigo.SGForwardModel;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
+import games.sushigo.gui.SGGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -333,7 +334,7 @@ public enum GameType {
                 gui = new DominionGUI(game, ac, human);
                 break;
             case SushiGO:
-                gui = new PrototypeGUI(game.getGameType(), game.getGameState(), ac, 100);
+                gui = new SGGUI(game, ac);
             // TODO: Diamant GUI
         }
 
