@@ -74,7 +74,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         if (turnOrder.getSeason() == SUMMER)
             season = 1;
 
-        double totalCoeff = Math.abs(MONKS[year]) + Math.abs(PIETY[year]) + +Math.abs(SCORE[year])
+        double totalCoeff = Math.abs(MONKS[year]) + Math.abs(PIETY[year]) + Math.abs(SCORE[year])
                 + Math.abs(VP[year]) + Math.abs(FOOD_SUFFICIENCY[season]) + Math.abs(INK_TYPES[year]) +
                 Math.abs(CORE_WRITING[year]) + Math.abs(TREASURES[year]) + Math.abs(PILGRIMS[year]);
         if (totalCoeff == 0.0) return 0.0;
@@ -117,8 +117,8 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         }
 
         return (monks * MONKS[year] + piety * PIETY[year] + score * SCORE[year] + vp * VP[year]
-                + food * FOOD_SUFFICIENCY[season]) + ink * INK_TYPES[year] + writing * CORE_WRITING[year]
-                + treasure * TREASURES[year] + pilgrims * PILGRIMS[year]
+                + food * FOOD_SUFFICIENCY[season] + ink * INK_TYPES[year] + writing * CORE_WRITING[year]
+                + treasure * TREASURES[year] + pilgrims * PILGRIMS[year])
                 / totalCoeff;
     }
 

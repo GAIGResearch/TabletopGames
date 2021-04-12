@@ -16,15 +16,18 @@ public class DMActionListener implements IGameListener {
 
     IStatisticLogger logger;
 
+    @Override
+    public void allGamesFinished() {
+        logger.processDataAndFinish();
+    }
+
     public DMActionListener(IStatisticLogger logger) {
         this.logger = logger;
     }
 
     @Override
     public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_SEQUENCE_OVER) {
-            logger.processDataAndFinish();
-        }
+// Nothing
     }
 
     @Override

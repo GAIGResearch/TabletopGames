@@ -257,8 +257,8 @@ public class CoreGameLoop {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.isNotTerminal());
 
-        assertEquals(4, turnOrder.getYear());
-        assertEquals(SPRING, turnOrder.getSeason());
+        assertEquals(3, turnOrder.getYear());
+        assertEquals(WINTER, turnOrder.getSeason());
         assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == Utils.GameResult.GAME_ONGOING));
     }
 

@@ -23,9 +23,7 @@ public class DMSeasonListener implements IGameListener {
 
     @Override
     public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_SEQUENCE_OVER) {
-            logger.processDataAndFinish();
-        }
+        // nothing
     }
 
     @Override
@@ -38,5 +36,10 @@ public class DMSeasonListener implements IGameListener {
                 logger.record(data);
             }
         }
+    }
+
+    @Override
+    public void allGamesFinished() {
+        logger.processDataAndFinish();
     }
 }

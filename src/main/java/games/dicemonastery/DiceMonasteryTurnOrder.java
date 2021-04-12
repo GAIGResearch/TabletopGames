@@ -137,24 +137,24 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 state.springAutumnHousekeeping();
                 break;
             case SUMMER:
-                state.summerHousekeeping();
                 break;
             case WINTER:
                 abbot = (abbot + 1 + nPlayers) % nPlayers;
-                roundCounter++;  // increment year
-                if (getYear() > nMaxRounds) {
+                if (getYear() >= nMaxRounds) {
                     state.endGame();
+                    return;
                 }
+                roundCounter++;  // increment year
                 break;
         }
         season = season.next();
         if (season == SUMMER && getYear() == 1)
             season = season.next(); // we skip Summer in the first year
-        if (season == WINTER)
-            state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
         state.checkAtLeastOneMonk();
         state.setGamePhase(Phase.PLACE_MONKS);
         turnOwner = firstPlayerWithMonks(state);
+        if (season == WINTER)
+            state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
     }
 
     private int firstPlayerWithMonks(DiceMonasteryGameState state) {
@@ -164,9 +164,11 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 return player;
         }
         // should only reach here if NO player has any monks left! So we skip the entire season!
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
-        season.next();
-        return abbot;
+        // infinite recursion should not be possible due to finite number of turns
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+    //    System.out.printf("No monks at all in %s %d : %d %n", turnOrder.season, turnOrder.getYear(), state.getGameID());
+        endRound(state);
+        return turnOwner;
     }
 
     private int actionPoints(DiceMonasteryGameState state, ActionArea region, int player) {

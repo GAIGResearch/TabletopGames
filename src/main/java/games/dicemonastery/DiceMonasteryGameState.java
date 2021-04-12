@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.Token;
+import games.GameType;
 import utilities.Utils;
 
 import java.util.*;
@@ -37,7 +38,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Random rnd;
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters));
+        super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters), GameType.DiceMonastery);
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -293,14 +294,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
             addResource(player, Resource.PROTO_MEAD_1, -notMead);
         }
         advancePilgrims();
-        checkAtLeastOneMonk();
         drawBonusTokens();
         marketCards.draw();
     }
 
-    void summerHousekeeping() {
-        checkAtLeastOneMonk();
-    }
 
     void checkAtLeastOneMonk() {
         for (int player = 0; player < getNPlayers(); player++) {
