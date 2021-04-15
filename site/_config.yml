@@ -2,8 +2,8 @@
 title: TAG
 description: Tabletop Games Framework
 favicon: /assets/img/favicon.png
-baseurl: https://gaigresearch.github.io/TabletopGames/
-url: https://gaigresearch.github.io/TabletopGames/
+baseurl: https://gaigresearch.github.io/TabletopGames/site/
+url: https://gaigresearch.github.io/TabletopGames/site/
 rss_url: /pages/atom.xml
 google_analytics: UA-63653234-1
 
