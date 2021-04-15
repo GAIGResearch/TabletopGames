@@ -141,7 +141,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         PayForAction copy = new PayForAction(player, action.copy());
         copy.costPaid = costPaid;
         copy.stage = stage;
-        copy.resourcesToPayWith = resourcesToPayWith.clone();
+        if (resourcesToPayWith != null) {
+            copy.resourcesToPayWith = resourcesToPayWith.clone();
+        }
         return copy;
     }
 

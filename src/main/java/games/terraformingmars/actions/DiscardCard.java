@@ -2,6 +2,7 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
@@ -76,7 +77,8 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
     @Override
     public String getString(AbstractGameState gameState) {
         if (getCardID() == -1) return "Discard a card";
-        return "Discard " + gameState.getComponentById(getCardID()).getComponentName();
+        Component c = gameState.getComponentById(getCardID());
+        return "Discard " + c.getComponentName();
     }
 
     @Override

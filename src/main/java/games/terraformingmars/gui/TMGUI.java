@@ -326,6 +326,7 @@ public class TMGUI extends AbstractGUI {
             TMForwardModel fm = (TMForwardModel) player.getForwardModel();
 
             List<AbstractAction> actions = fm.getAllActions(gs);
+            List<AbstractAction> legalActions = fm.computeAvailableActions(gs);
 
             int i = 0;
             TMAction passAction = null;
