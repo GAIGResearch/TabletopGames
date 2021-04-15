@@ -12,7 +12,7 @@ script: ./scripts/cibuild
 # branch whitelist, only for GitHub Pages
 branches:
   only:
-    - gh-pages # test the gh-pages branch
+    - site # test the gh-pages branch
 
 env:
   global:
