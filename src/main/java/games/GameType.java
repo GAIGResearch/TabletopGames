@@ -335,6 +335,7 @@ public enum GameType {
                 break;
             case SushiGO:
                 gui = new SGGUI(game, ac);
+                //gui = new PrototypeGUI(game.getGameType(), game.getGameState(), ac, 100);
             // TODO: Diamant GUI
         }
 
