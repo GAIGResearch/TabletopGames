@@ -30,7 +30,7 @@ public class SingleTreeNode {
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
-    Map<AbstractAction, Pair<Integer, Double>> MASTStatistics;
+    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics;
     // Depth of this node
     final int depth;
 
@@ -62,9 +62,11 @@ public class SingleTreeNode {
         this.fmCallsCount = 0;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
+        MASTStatistics = new ArrayList<>();
         if (root == this) {
             // Root node maintains MAST statistics
-            MASTStatistics = new HashMap<>();
+            for (int i = 0; i < state.getNPlayers(); i++)
+            MASTStatistics.add(new HashMap<>());
         }
         this.actionToReach = actionToReach;
         decisionPlayer = state.getCurrentPlayer();
@@ -137,14 +139,28 @@ public class SingleTreeNode {
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
-            SingleTreeNode selected = treePolicy();
+            List<Pair<Integer, AbstractAction>> treeActions = new ArrayList<>();
+            SingleTreeNode selected = treePolicy(treeActions);
             // Monte carlo rollout: return value of MC rollout from the newly added node
-            List<AbstractAction> rolloutActions = new ArrayList<>();
+            List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
             double[] delta = selected.rollOut(rolloutActions);
             // Back up the value of the rollout through the tree
             selected.backUp(delta);
-            if (player.params.MAST) {
-                root.MASTBackup(rolloutActions, delta);
+            if (player.params.useMAST) {
+                List<Pair<Integer, AbstractAction>> MASTActions = new ArrayList<>();
+                switch (player.params.MAST) {
+                    case Rollout:
+                        MASTActions = rolloutActions;
+                        break;
+                    case Tree:
+                        MASTActions = treeActions;
+                        break;
+                    case Both:
+                        MASTActions = rolloutActions;
+                        MASTActions.addAll(treeActions);
+                        break;
+                }
+                root.MASTBackup(MASTActions, delta);
             }
 
             // Finished iteration
@@ -235,6 +251,7 @@ public class SingleTreeNode {
                 .mapToInt(arr -> Arrays.stream(arr).filter(Objects::nonNull).mapToInt(n -> n.nVisits).sum())
                 .toArray();
     }
+
     /**
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.
@@ -242,9 +259,10 @@ public class SingleTreeNode {
      *
      * @return - new node added to the tree.
      */
-    private SingleTreeNode treePolicy() {
+    private SingleTreeNode treePolicy(List<Pair<Integer, AbstractAction>> treeActions) {
 
         SingleTreeNode cur = this;
+        Integer actingPlayer = cur.decisionPlayer;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromState.size() > 0) {
@@ -256,6 +274,7 @@ public class SingleTreeNode {
                 cur = cur.nextNodeInTree();
             }
         }
+        treeActions.add(new Pair<>(actingPlayer, cur.actionToReach));
         return cur;
     }
 
@@ -276,16 +295,18 @@ public class SingleTreeNode {
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
         AbstractAction chosen = null;
-        if (player.params.MASTExpansion) {
+        if (player.params.expansionPolicy == MCTSEnums.Strategies.MAST) {
+            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : unexpandedActions()) {
-                if (MASTStatistics.containsKey(action)) {
-                    Pair<Integer, Double> stats = MASTStatistics.get(action);
-                    double estimate = stats.b / stats.a;
-                    if (estimate > bestValue) {
-                        bestValue = estimate;
-                        chosen = action;
-                    }
+                double estimate = rnd.nextDouble() / 100.0;
+                if (MAST.containsKey(action)) {
+                    Pair<Integer, Double> stats = MAST.get(action);
+                    estimate = stats.b / stats.a;
+                }
+                if (estimate > bestValue) {
+                    bestValue = estimate;
+                    chosen = action;
                 }
             }
         } else {
@@ -500,7 +521,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    private double[] rollOut(List<AbstractAction> rolloutActions) {
+    private double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions) {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
@@ -520,7 +541,7 @@ public class SingleTreeNode {
                 if (availableActions.isEmpty())
                     break;
                 AbstractAction next = rolloutStrategy.getAction(rolloutState, availableActions);
-                rolloutActions.add(next);
+                rolloutActions.add(new Pair<>(rolloutState.getCurrentPlayer(), next));
                 advance(rolloutState, next);
                 rolloutDepth++;
             }
@@ -580,13 +601,14 @@ public class SingleTreeNode {
     }
 
 
-    private void MASTBackup(List<AbstractAction> rolloutActions, double[] delta) {
-        for (AbstractAction action : rolloutActions) {
-            Pair<Integer, Double> stats = MASTStatistics.getOrDefault(action, new Pair<>(0, 0.0));
+    private void MASTBackup(List<Pair<Integer, AbstractAction>> rolloutActions, double[] delta) {
+        for (Pair<Integer, AbstractAction> pair : rolloutActions) {
+            AbstractAction action = pair.b;
+            int player = pair.a;
+            Pair<Integer, Double> stats = MASTStatistics.get(player).getOrDefault(action, new Pair<>(0, 0.0));
             stats.a++;  // visits
-            stats.b += delta[root.decisionPlayer];   // value
-            MASTStatistics.put(action, stats);
-            // TODO: expand to include separate MAST stats for other players
+            stats.b += delta[player];   // value
+            MASTStatistics.get(player).put(action, stats);
         }
     }
 
