@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.Card;
 import games.catan.*;
 import games.catan.actions.*;
 import games.catan.components.Settlement;
@@ -68,6 +69,8 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         }
 
         switch (gamePhase){
+            case Setup:
+                return possibleActions.get(rnd.nextInt(possibleActions.size()));
             case Trade:
                 // If the player has the resources to get a city or settlement already don't do anything in the trade phase
                 if(sumResources(resourcesRequiredToAffordCosts[1])==0 || sumResources(resourcesRequiredToAffordCosts[2])==0){
@@ -237,20 +240,53 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                             actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
                     }
                 }
+            case Discard:
+                for (AbstractAction action : possibleActions) {
+                    tempResources = currentResources;
+                    DiscardCards discardCards = (DiscardCards) action;
+                    ArrayList<Card> cardsToDiscard = discardCards.getToBeDiscarded();
+                    int[] discardValues = new int[5];
+                    for(Card card : cardsToDiscard){
+                        if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.BRICK)){
+                            discardValues[0]+=1;
+                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.LUMBER)){
+                            discardValues[1]+=1;
+                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.ORE)){
+                            discardValues[2]+=1;
+                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.GRAIN)){
+                            discardValues[3]+=1;
+                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.WOOL)){
+                            discardValues[4]+=1;
+                        }
+                    }
+                    tempResources = arraySubtraction(tempResources,discardValues);
+                    if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],currentResources)){
+                        actionPriorityLists.get(0).add(action);
+                    } else if (calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],currentResources)+1){
+                        actionPriorityLists.get(1).add(action);
+                    } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],currentResources)){
+                        actionPriorityLists.get(2).add(action);
+                    } else if (calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],currentResources)+1){
+                        actionPriorityLists.get(3).add(action);
+                    } else {
+                        actionPriorityLists.get(4).add(action);
+                    }
+                }
+            case Steal:
+                return possibleActions.get(rnd.nextInt(possibleActions.size()));
             default:
                 // safety implementation to ensure that actions are taken when no rules are met
-                int randomAction = rnd.nextInt(possibleActions.size());
-                return possibleActions.get(randomAction);
+                return possibleActions.get(rnd.nextInt(possibleActions.size()));
         }
 
         for(List<AbstractAction> actionList : actionPriorityLists){
             if (actionList.size()>0){
-                int randomAction = rnd.nextInt(actionList.size());
-                return actionList.get(randomAction);
+                return actionList.get(rnd.nextInt(actionList.size()));
             }
         }
 
-        return new DoNothing(); // should never be reached
+        System.out.println("Error: Catan Rule Based Agent did not select an action!");
+        return possibleActions.get(rnd.nextInt(possibleActions.size())); // should never be reached
 
     }
 
