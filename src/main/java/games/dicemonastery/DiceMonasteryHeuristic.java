@@ -24,6 +24,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
     double[] TREASURES = {0.0, 0.0, 0.0};
     double[] CORE_WRITING = {0.0, 0.0, 0.0};
     double[] PILGRIMS = {0.0, 0.0, 0.0};
+    double[] SHILLINGS = {0.0, 0.0, 0.0};
 
     public DiceMonasteryHeuristic() {
         for (int i = 1; i <= 3; i++) {
@@ -37,6 +38,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             addTunableParameter("TREASURE_" + digit, TREASURES[i - 1]);
             addTunableParameter("WRITE_" + digit, CORE_WRITING[i - 1]);
             addTunableParameter("PILGRIM_" + digit, PILGRIMS[i - 1]);
+            addTunableParameter("SHILLINGS_" + digit, SHILLINGS[i - 1]);
         }
     }
 
@@ -53,6 +55,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             TREASURES[i - 1] = (double) getParameterValue("TREASURE_" + digit);
             CORE_WRITING[i - 1] = (double) getParameterValue("WRITE_" + digit);
             PILGRIMS[i - 1] = (double) getParameterValue("PILGRIM_" + digit);
+            SHILLINGS[i - 1] = (double) getParameterValue("SHILLINGS_" + digit);
         }
     }
 
@@ -76,7 +79,8 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
 
         double totalCoeff = Math.abs(MONKS[year]) + Math.abs(PIETY[year]) + Math.abs(SCORE[year])
                 + Math.abs(VP[year]) + Math.abs(FOOD_SUFFICIENCY[season]) + Math.abs(INK_TYPES[year]) +
-                Math.abs(CORE_WRITING[year]) + Math.abs(TREASURES[year]) + Math.abs(PILGRIMS[year]);
+                Math.abs(CORE_WRITING[year]) + Math.abs(TREASURES[year]) + Math.abs(PILGRIMS[year]) +
+                Math.abs(SHILLINGS[year]);
         if (totalCoeff == 0.0) return 0.0;
 
         double monks = 0.0;
@@ -88,6 +92,29 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         if (SCORE[year] != 0.0) score = Math.min(1.0, state.getGameScore(playerId) / 80.0);
         double vp = 0.0;
         if (VP[year] != 0.0) vp = Math.min(1.0, state.getVictoryPoints(playerId) / 40.0);
+        double ink = 0.0;
+        if (INK_TYPES[year] != 0.0) {
+            int differentInks = state.getStores(playerId, r -> r.isInk).size();
+            ink = differentInks / 7.0;
+        }
+        double writing = 0.0;
+        if (CORE_WRITING[year] != 0.0) {
+            int vellum = state.getResource(playerId, VELLUM, STOREROOM);
+            int candles = state.getResource(playerId, CANDLE, STOREROOM);
+            writing = Math.min(Math.max(vellum, candles) / 5.0, 1.0);
+        }
+        double treasure = 0.0;
+        if (TREASURES[year] != 0.0) {
+            treasure = Math.min(state.getTreasures(playerId).stream().mapToInt( t -> t.vp).sum() / 36.0, 1.0);
+        }
+        double shillings = 0.0;
+        if (SHILLINGS[year] != 0.0) {
+            shillings = Math.min(state.getResource(playerId, DiceMonasteryConstants.Resource.SHILLINGS, STOREROOM) / 20.0, 1.0);
+        }
+        double pilgrims = 0.0;
+        if (PILGRIMS[year] != 0.0) {
+            pilgrims = Math.min(state.monksIn(PILGRIMAGE, playerId).size() / 4.0, 1.0);
+        }
         double food = 0.0;
         if (FOOD_SUFFICIENCY[season] != 0.0) {
             food = state.getResource(playerId, BREAD, STOREROOM) +
@@ -96,29 +123,10 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             int numberMonks = state.monksIn(null, playerId).size();
             food = numberMonks == 0 ? 1.0 : Math.min(1.0, food / numberMonks);
         }
-        double ink = 0.0;
-        if (INK_TYPES[season] != 0.0) {
-            int differentInks = state.getStores(playerId, r -> r.isInk).size();
-            ink = differentInks / 7.0;
-        }
-        double writing = 0.0;
-        if (CORE_WRITING[season] != 0.0) {
-            int vellum = state.getResource(playerId, VELLUM, STOREROOM);
-            int candles = state.getResource(playerId, CANDLE, STOREROOM);
-            writing = Math.min(Math.max(vellum, candles) / 5.0, 1.0);
-        }
-        double treasure = 0.0;
-        if (TREASURES[season] != 0.0) {
-            treasure = Math.min(state.getTreasures(playerId).stream().mapToInt( t -> t.vp).sum() / 36.0, 1.0);
-        }
-        double pilgrims = 0.0;
-        if (PILGRIMS[season] != 0.0) {
-            pilgrims = Math.min(state.monksIn(PILGRIMAGE, playerId).size() / 4.0, 1.0);
-        }
 
         return (monks * MONKS[year] + piety * PIETY[year] + score * SCORE[year] + vp * VP[year]
                 + food * FOOD_SUFFICIENCY[season] + ink * INK_TYPES[year] + writing * CORE_WRITING[year]
-                + treasure * TREASURES[year] + pilgrims * PILGRIMS[year])
+                + treasure * TREASURES[year] + pilgrims * PILGRIMS[year] + shillings * SHILLINGS[year])
                 / totalCoeff;
     }
 
