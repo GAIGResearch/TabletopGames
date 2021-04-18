@@ -182,6 +182,13 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     }
                 }
                 break;
+            case PlaceRoad:
+                for(AbstractAction action : possibleActions){
+                    if(placeRoadCheck(cgs,action)){
+                        actionPriorityLists.get(0).add(action);
+                    }
+                }
+                break;
             case TradeReaction:
                 // If the player has the resources to get a city or settlement already don't do anything
                 if(sumResources(resourcesRequiredToAffordCosts[1])==0
