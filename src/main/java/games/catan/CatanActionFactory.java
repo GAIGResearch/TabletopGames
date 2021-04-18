@@ -225,11 +225,6 @@ public class CatanActionFactory {
             actions.addAll(getDevCardActions(gs));
         }
 
-        actions.add(new DoNothing());
-        actions.addAll(getBuyActions(gs));
-        actions.addAll(getTradeActions(gs));
-
-
         return actions;
     }
 

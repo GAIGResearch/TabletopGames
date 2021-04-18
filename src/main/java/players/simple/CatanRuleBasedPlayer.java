@@ -3,6 +3,7 @@ package players.simple;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import games.catan.*;
 import games.catan.actions.*;
 import games.catan.components.Settlement;
@@ -12,7 +13,8 @@ import java.util.*;
 
 public class CatanRuleBasedPlayer extends AbstractPlayer {
 
-    private List<int[]> desiredResources;
+    private int[][] resourcesRequiredToAffordCosts;
+    private int[] currentResources;
     private boolean roadBlocked = false;
 
     private final Random rnd; // random generator for selection of equally ranked actions
@@ -41,26 +43,169 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     }
 
 
-    public CatanRuleBasedPlayer(Random rnd) {this.rnd = rnd;}
+    public CatanRuleBasedPlayer(Random rnd) {
+        this.rnd = rnd;
+        resourcesRequiredToAffordCosts = new int[4][5]; // 0: road, 1: settlement, 2: city, 3: development card
+        currentResources = new int[5];
+    }
 
     public CatanRuleBasedPlayer() {this(new Random());}
 
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         CatanGameState cgs = (CatanGameState) gameState;
-
         roadBlocked = checkIfRoadBlocked(cgs);
+        this.currentResources = cgs.getPlayerResources(getPlayerID());
+        calculateResourcesRequired();
+        int[] tempResources = new int[5];
+        ActionType actionType = null;
+        CatanGameState.CatanGamePhase gamePhase = (CatanGameState.CatanGamePhase) cgs.getGamePhase();
 
-        List<List<AbstractAction>> actionLists = getActionSubsets(cgs , possibleActions);
-        for(List<AbstractAction> actionList : actionLists){
+        List<List<AbstractAction>> actionPriorityLists = new ArrayList<>();
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+        actionPriorityLists.add(new ArrayList<>());
+
+        switch (gamePhase){
+            case Trade:
+                // If the player has the resources to get a city or settlement already don't do anything in the trade phase
+                if(sumResources(resourcesRequiredToAffordCosts[1])==0 || sumResources(resourcesRequiredToAffordCosts[2])==0){
+                    for (AbstractAction action : possibleActions) {
+                        if (action.getClass().getSimpleName().equals("DoNothing")){
+                            return action;
+                        }
+                    }
+                }
+                // Loop through and prioritise trade actions
+                for (AbstractAction action : possibleActions) {
+                    actionType = ActionType.valueOf(action.getClass().getSimpleName());
+                    tempResources = currentResources;
+                    switch (actionType) {
+                        case DefaultTrade:
+                            DefaultTrade defaultTrade = (DefaultTrade) action;
+                            tempResources[defaultTrade.resourceToGet.ordinal()]+=1;
+                            if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
+                                actionPriorityLists.get(0).add(action);
+                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
+                                actionPriorityLists.get(1).add(action);
+                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],tempResources)==0 && roadBlocked){
+                                actionPriorityLists.get(2).add(action);
+                            }
+                            break;
+                        case OfferPlayerTrade:
+                            OfferPlayerTrade offerPlayerTrade = (OfferPlayerTrade) action;
+                            for(int i = 0; i < tempResources.length; i++){
+                                tempResources[i]= Math.max(0,(tempResources[i]+offerPlayerTrade.getResourcesRequested()[i]-offerPlayerTrade.getResourcesOffered()[i]));
+                                if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
+                                    if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
+                                        actionPriorityLists.get(3).add(action);
+                                    }
+                                    else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
+                                        actionPriorityLists.get(5).add(action);
+                                    }
+                                }
+                                if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
+                                    if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
+                                        actionPriorityLists.get(4).add(action);
+                                    }
+                                    else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
+                                        actionPriorityLists.get(6).add(action);
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            // add to lowest priority list as default
+                            actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
+                    }
+                }
+                break;
+            case Build:
+                for (AbstractAction action : possibleActions) {
+                    actionType = ActionType.valueOf(action.getClass().getSimpleName());
+                    tempResources = currentResources;
+                    switch (actionType){
+                        case PlayKnightCard:
+                            if(KnightCardCheck(cgs, action)){
+                                actionPriorityLists.get(0).add(action);
+                            }
+                            break;
+                        case BuildCity:
+                            actionPriorityLists.get(1).add(action);
+                            break;
+                        case BuildSettlement:
+                            actionPriorityLists.get(2).add(action);
+                            break;
+                        case PlaceRoad:
+                            if(placeRoadCheck(cgs, action)){
+                                actionPriorityLists.get(3).add(action);
+                            }
+                            break;
+                        case Monopoly:
+                            if(MonopolyCardCheck(cgs, action)){
+                                actionPriorityLists.get(4).add(action);
+                            }
+                            break;
+                        case BuildRoad:
+                            if(roadBlocked){
+                                if(buildRoadCheck(cgs, action)){
+                                    actionPriorityLists.get(5).add(action);
+                                }
+                            } else {
+                                if(buildRoadCheck(cgs, action)){
+                                    actionPriorityLists.get(9).add(action);
+                                }
+                            }
+                            break;
+                        case YearOfPlenty:
+                            int check = YearOfPlentyCardCheck(cgs, action);
+                            if(check==0){
+                                actionPriorityLists.get(6).add(action);
+                            } else if (check==1)
+                            {
+                                actionPriorityLists.get(7).add(action);
+                            } else if (check==2)
+                            {
+                                actionPriorityLists.get(8).add(action);
+                            }
+                            break;
+
+                        default:
+                            // add to lowest priority list as default
+                            actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
+                    }
+                }
+                break;
+            default:
+                // safety implementation to ensure that actions are taken when no rules are met
+                int randomAction = rnd.nextInt(possibleActions.size());
+                return possibleActions.get(randomAction);
+        }
+
+        for(List<AbstractAction> actionList : actionPriorityLists){
             if (actionList.size()>0){
                 int randomAction = rnd.nextInt(actionList.size());
                 return actionList.get(randomAction);
             }
         }
 
-        return null; // should never be reached
+        return new DoNothing(); // should never be reached
 
+    }
+
+    private int sumResources(int[] resources){
+        int sum = 0;
+        for(int i = 0; i < resources.length; i++){
+            sum += resources[i];
+        }
+        return sum;
     }
 
     private boolean checkIfRoadBlocked(CatanGameState cgs){
@@ -81,102 +226,6 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         }
 
         return true;
-    }
-
-    private List<List<AbstractAction>> getActionSubsets(CatanGameState cgs, List<AbstractAction> possibleActions){
-        List<List<AbstractAction>> actionLists = new ArrayList<>();
-        actionLists.add(new ArrayList<>()); // highest priority actions
-        actionLists.add(new ArrayList<>()); // 2nd priority actions
-        actionLists.add(new ArrayList<>()); // 3rd priority actions
-        actionLists.add(new ArrayList<>()); // 4th priority actions
-        actionLists.add(new ArrayList<>()); // 5th priority actions
-        actionLists.add(new ArrayList<>()); // 6th priority actions
-        actionLists.add(new ArrayList<>()); // default case actions
-        ActionType actionType = null;
-
-        for(AbstractAction action : possibleActions){
-            actionType = ActionType.valueOf(action.getClass().getSimpleName());
-            switch (actionType) {
-                case PlayKnightCard:
-                    if(KnightCardCheck(cgs, action)){
-                        actionLists.get(0).add(action);
-                    }
-                    break;
-
-                case Monopoly:
-                    if(MonopolyCardCheck(cgs, action)){
-                        actionLists.get(2).add(action);
-                    }
-                    break;
-
-                case YearOfPlenty:
-                    if(YearOfPlentyCardCheck(cgs, action)==0){
-                        actionLists.get(2).add(action);
-                    } else if (YearOfPlentyCardCheck(cgs, action)==1)
-                    {
-                        actionLists.get(3).add(action);
-                    } else if (YearOfPlentyCardCheck(cgs, action)==2)
-                    {
-                        actionLists.get(4).add(action);
-                    }
-                    break;
-
-                case PlaceRoad:
-                    if(placeRoadCheck(cgs, action)==0){
-                        actionLists.get(1).add(action);
-                    } else if(placeRoadCheck(cgs, action)==1){
-                        actionLists.get(2).add(action);
-                    } else if(placeRoadCheck(cgs, action)==2){
-                        actionLists.get(3).add(action);
-                    }
-                    break;
-
-                case BuildCity:
-                    actionLists.get(0).add(action);
-                    break;
-
-                case BuildSettlement:
-                    actionLists.get(1).add(action);
-                    break;
-
-                case BuyDevelopmentCard:
-                    actionLists.get(4).add(action);
-                    break;
-
-                case BuildRoad:
-                    if(buildRoadCheck(cgs, action)){
-                        actionLists.get(5).add(action);
-                    }
-                    break;
-
-                case DefaultTrade:
-                    if(defaultTradeCheck(cgs, action)){
-                        actionLists.get(4).add(action);
-                    }
-                    break;
-
-                case OfferPlayerTrade:
-                    if(offerPlayerTradeCheck(cgs, action)){
-                        actionLists.get(5).add(action);
-                    }
-                    break;
-
-                case MoveRobber:
-                    if(moveRobberCheck(cgs,action)){
-                        actionLists.get(0).add(action);
-                    }
-
-                case AcceptTrade:
-                    if(acceptTradeCheck(cgs,action)){
-                        actionLists.get(0).add(action);
-                    }
-
-                default:
-                    actionLists.get(actionLists.size()-1).add(action);
-            }
-        }
-
-        return actionLists;
     }
 
     private boolean KnightCardCheck(CatanGameState cgs, AbstractAction action){
@@ -214,58 +263,35 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     }
 
     private int YearOfPlentyCardCheck(CatanGameState cgs, AbstractAction action){
-        int[] resources = cgs.getPlayerResources(getPlayerID());
+        int[] resources = currentResources;
         YearOfPlenty yearOfPlenty = (YearOfPlenty) action;
         resources[yearOfPlenty.resource1.ordinal()] = resources[yearOfPlenty.resource1.ordinal()] +1;
         resources[yearOfPlenty.resource2.ordinal()] = resources[yearOfPlenty.resource2.ordinal()] +1;
 
-        int[] costDiffs = costDifferenceCheck(resources);
+        int[] costDiffs = new int[3];
+        costDiffs[0] = calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],resources);
+        costDiffs[1] = calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],resources);
+        costDiffs[2] = calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],resources);
 
-        if (costDiffs[0]==0){
-            return 0;
+        if (roadBlocked && costDiffs[0] == 0){
+            return 2;
         } else if (costDiffs[1]==0){
             return 1;
-        } else if (roadBlocked && costDiffs[2] == 0){
-            return 2;
+        } else if (costDiffs[2]==0){
+            return 0;
         }
 
         return -1;
     }
 
-    private int placeRoadCheck(CatanGameState cgs, AbstractAction action){
+    private boolean placeRoadCheck(CatanGameState cgs, AbstractAction action){
         //TODO implement
-        return rnd.nextInt(3);
+        return true;
     }
 
     private boolean buildRoadCheck(CatanGameState cgs, AbstractAction action){
         //TODO workout a way of deciding whether or not building a road is a good idea?
-        return rnd.nextInt(2)==0;
-    }
-
-    private boolean defaultTradeCheck(CatanGameState cgs, AbstractAction action){
-        //TODO check if default trade should be made
-        DefaultTrade defaultTrade = (DefaultTrade) action;
-        int[] resources = cgs.getPlayerResources(getPlayerID());
-        resources[defaultTrade]
-
-        return rnd.nextInt(2)==0;
-    }
-
-    private boolean offerPlayerTradeCheck(CatanGameState cgs, AbstractAction action){
-        //TODO check if trade should be offered
-        //TODO some state tracking for negotiations might be needed
-        return rnd.nextInt(2)==0;
-    }
-
-    private boolean moveRobberCheck(CatanGameState cgs, AbstractAction action){
-        //TODO identify good spots to move the robber
-        return rnd.nextInt(2)==0;
-    }
-
-    private boolean acceptTradeCheck(CatanGameState cgs, AbstractAction action){
-        //TODO identify whether or not to accept trade
-
-        return rnd.nextInt(2)==0;
+        return rnd.nextInt(4)>0;
     }
 
     public String toString() { return "CatanRuleBased";}
@@ -286,20 +312,24 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         return sum;
     }
 
-    private int[] costDifferenceCheck(int[] resources){
-        int[] cityCostDiff = new int[5], settlementCostDiff = new int[5], roadCostDiff = new int[5];
-        for (int i = 0; i < resources.length; i++){
-            cityCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("city")[i] - resources[i]);
-            settlementCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("settlement")[i] - resources[i]);
-            roadCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("road")[i] - resources[i]);
+    private void calculateResourcesRequired(){
+        int[] cityCostDiff = new int[5], settlementCostDiff = new int[5], roadCostDiff = new int[5], developmentCardDiff = new int[5];
+        for (int i = 0; i < currentResources.length; i++){
+            cityCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("city")[i] - currentResources[i]);
+            settlementCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("settlement")[i] - currentResources[i]);
+            roadCostDiff[i] = Math.max(0,CatanParameters.costMapping.get("road")[i] - currentResources[i]);
+            developmentCardDiff[i] = Math.max(0,CatanParameters.costMapping.get("developmentCard")[i] - currentResources[i]);
         }
-        int[] costs = new int[3];
-        for (int i = 0; i < resources.length; i++){
-            costs[0] += cityCostDiff[i];
-            costs[1] += settlementCostDiff[i];
-            costs[2] += roadCostDiff[i];
+        for (int i = 0; i < currentResources.length; i++){
+            resourcesRequiredToAffordCosts[0] = roadCostDiff;
+            resourcesRequiredToAffordCosts[1] = settlementCostDiff;
+            resourcesRequiredToAffordCosts[2] = cityCostDiff;
+            resourcesRequiredToAffordCosts[3] = developmentCardDiff;
         }
-        return costs;
+    }
+
+    private int calculateTotalResourceDifference(int[] resources1, int[] resources2){
+        return sumArray(arraySubtraction(resources1,resources2));
     }
 
 }
