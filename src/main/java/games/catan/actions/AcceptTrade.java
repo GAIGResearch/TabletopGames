@@ -21,6 +21,10 @@ public class AcceptTrade extends AbstractAction {
         return new AcceptTrade((OfferPlayerTrade) offeredTrade.copy());
     }
 
+    public OfferPlayerTrade getOfferedTrade(){
+        return offeredTrade;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

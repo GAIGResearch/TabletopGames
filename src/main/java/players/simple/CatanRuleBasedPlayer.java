@@ -95,25 +95,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                             break;
                         case OfferPlayerTrade:
                             OfferPlayerTrade offerPlayerTrade = (OfferPlayerTrade) action;
-                            for(int i = 0; i < tempResources.length; i++){
-                                tempResources[i]= Math.max(0,(tempResources[i]+offerPlayerTrade.getResourcesRequested()[i]-offerPlayerTrade.getResourcesOffered()[i]));
-                                if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
-                                    if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
-                                        actionPriorityLists.get(3).add(action);
-                                    }
-                                    else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
-                                        actionPriorityLists.get(5).add(action);
-                                    }
-                                }
-                                if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
-                                    if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
-                                        actionPriorityLists.get(4).add(action);
-                                    }
-                                    else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
-                                        actionPriorityLists.get(6).add(action);
-                                    }
-                                }
-                            }
+                            checkOfferPlayerTrade(tempResources, actionPriorityLists, action, offerPlayerTrade);
                             break;
                         default:
                             // add to lowest priority list as default
@@ -187,19 +169,67 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     } else {
                         int tileRank = 5;
                         Settlement[] settlements = tile.getSettlements();
-                        for(int i = 0; i < settlements.length; i++){
-                            if (settlements[i].getOwner()==getPlayerID()){
-                                actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
+                        for (Settlement settlement : settlements) {
+                            if (settlement.getOwner() == getPlayerID()) {
+                                actionPriorityLists.get(actionPriorityLists.size() - 1).add(action);
                                 break;
                             }
-                            if(settlements[i].getOwner()!=-1){
-                                tileRank+=1;
+                            if (settlement.getOwner() != -1) {
+                                tileRank += 1;
                             }
                         }
                         actionPriorityLists.get(tileRank).add(action);
                     }
                 }
                 break;
+            case TradeReaction:
+                // If the player has the resources to get a city or settlement already don't do anything
+                if(sumResources(resourcesRequiredToAffordCosts[1])==0
+                        || sumResources(resourcesRequiredToAffordCosts[2])==0
+                        || (roadBlocked && calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0))
+                {
+                    for (AbstractAction action : possibleActions) {
+                        if (action.getClass().getSimpleName().equals("DoNothing")){
+                            return action;
+                        }
+                    }
+                }
+                // Loop through and prioritise trade reaction actions
+                for (AbstractAction action : possibleActions) {
+                    actionType = ActionType.valueOf(action.getClass().getSimpleName());
+                    tempResources = currentResources;
+                    switch (actionType) {
+                        case AcceptTrade:
+                            AcceptTrade acceptTrade = (AcceptTrade) action;
+                            for(int i = 0; i < tempResources.length; i++){
+                                tempResources[i]= Math.max(0,(tempResources[i]+acceptTrade.getOfferedTrade().getResourcesOffered()[i]-acceptTrade.getOfferedTrade().getResourcesRequested()[i]));
+                            }
+                            if(!roadBlocked){
+                                if( calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0
+                                        || calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0)
+                                {
+                                    actionPriorityLists.get(0).add(action);
+                                } else if ( calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)<calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],currentResources)
+                                        || calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)<calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],currentResources))
+                                {
+                                    // if the trade helps player get closer to city or settlement then chance agent will accept
+                                    if(rnd.nextBoolean()){
+                                        actionPriorityLists.get(0).add(action);
+                                    }
+                                }
+                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0 && sumResources(acceptTrade.getOfferedTrade().getResourcesRequested())==sumResources(acceptTrade.getOfferedTrade().getResourcesOffered())){
+                                actionPriorityLists.get(0).add(action);
+                            }
+                            break;
+                        case OfferPlayerTrade:
+                            OfferPlayerTrade offerPlayerTrade = (OfferPlayerTrade) action;
+                            checkOfferPlayerTrade(tempResources, actionPriorityLists, action, offerPlayerTrade);
+                            break;
+                        default:
+                            // add to lowest priority list as default
+                            actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
+                    }
+                }
             default:
                 // safety implementation to ensure that actions are taken when no rules are met
                 int randomAction = rnd.nextInt(possibleActions.size());
@@ -215,6 +245,28 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
         return new DoNothing(); // should never be reached
 
+    }
+
+    private void checkOfferPlayerTrade(int[] tempResources, List<List<AbstractAction>> actionPriorityLists, AbstractAction action, OfferPlayerTrade offerPlayerTrade) {
+        for(int i = 0; i < tempResources.length; i++){
+            tempResources[i]= Math.max(0,(tempResources[i]+offerPlayerTrade.getResourcesRequested()[i]-offerPlayerTrade.getResourcesOffered()[i]));
+        }
+        if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
+            if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
+                actionPriorityLists.get(3).add(action);
+            }
+            else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
+                actionPriorityLists.get(5).add(action);
+            }
+        }
+        if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
+            if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
+                actionPriorityLists.get(4).add(action);
+            }
+            else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
+                actionPriorityLists.get(6).add(action);
+            }
+        }
     }
 
     private int sumResources(int[] resources){
@@ -244,6 +296,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
         return true;
     }
+
 
     private boolean KnightCardCheck(CatanGameState cgs, AbstractAction action){
         CatanTile robberTile = cgs.getRobber(cgs.getBoard());
