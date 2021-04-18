@@ -1,5 +1,6 @@
 package players.simple;
 
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.AbstractPlayer;
 import core.AbstractGameState;
@@ -17,31 +18,28 @@ public class OSLAPlayer extends AbstractPlayer {
     // Heuristics used for the agent
     IStateHeuristic heuristic;
 
-    public OSLAPlayer(){
-        this.random = new Random();
+    public OSLAPlayer(Random random)  {
+        this.random = random;
     }
 
-    public OSLAPlayer(Random random)
-    {
-        this.random = random;
+    public OSLAPlayer(){
+        this(new Random());
     }
 
     public OSLAPlayer(IStateHeuristic heuristic){
-        this.heuristic = heuristic;
-        this.random = new Random();
+        this(heuristic, new Random());
     }
 
     public OSLAPlayer(IStateHeuristic heuristic, Random random){
+        this(random);
         this.heuristic = heuristic;
-        this.random = random;
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gs ) {
+    public AbstractAction getAction(AbstractGameState gs, List<AbstractAction> actions) {
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
-        List<AbstractAction> actions = gs.getActions();
 
         for (AbstractAction action : actions) {
             AbstractGameState gsCopy = gs.copy();
@@ -62,6 +60,11 @@ public class OSLAPlayer extends AbstractPlayer {
         }
 
         return bestAction;
+    }
+
+    @Override
+    public String toString() {
+        return "OSLA";
     }
 
 }

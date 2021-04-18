@@ -54,7 +54,7 @@ public class RMHCPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState stateObs){
+    public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions){
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         avgTimeTaken = 0;
         acumTimeTaken = 0;
@@ -104,6 +104,11 @@ public class RMHCPlayer extends AbstractPlayer {
         numIters++;
         acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
         avgTimeTaken = acumTimeTaken / numIters;
+    }
+
+    @Override
+    public String toString() {
+        return "RMHC";
     }
 
 //    public static void main(String[] args){

@@ -10,8 +10,11 @@ import java.util.*;
 
 public class TicTacToeGame extends Game {
 
-    public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params)
-    {
+    public TicTacToeGame(TicTacToeGameParameters params) {
+        super(GameType.TicTacToe, new TicTacToeForwardModel(), new TicTacToeGameState(params, 2));
+    }
+
+    public TicTacToeGame(List<AbstractPlayer> agents, TicTacToeGameParameters params) {
         super(GameType.TicTacToe, agents, new TicTacToeForwardModel(), new TicTacToeGameState(params, agents.size()));
     }
 

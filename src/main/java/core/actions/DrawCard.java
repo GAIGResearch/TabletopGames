@@ -59,6 +59,7 @@ public class DrawCard extends AbstractAction {
     @Override
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
+            if (fromIndex == -1) return null;
             Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
             return deck.get(fromIndex);
         }

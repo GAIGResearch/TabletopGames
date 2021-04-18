@@ -2,6 +2,7 @@ package evaluation;
 
 import core.AbstractPlayer;
 import games.GameType;
+import players.mcts.BasicMCTSPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import players.mcts.MCTSPlayer;
@@ -17,6 +18,7 @@ public class RoundRobinTournament extends AbstractTournament {
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private final int gamesPerMatchUp;
+    private int matchUpsRun;
     private final boolean selfPlay;
 
     /**
@@ -25,18 +27,18 @@ public class RoundRobinTournament extends AbstractTournament {
     @SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
     public static void main(String[] args){
         /* 1. Settings for the tournament */
-        GameType gameToPlay = TicTacToe;
+        GameType gameToPlay = Uno;
         int nPlayersTotal = 4;
-        int nPlayersPerGame = 2;
-        int nGamesPerMatchUp = 100;
+        int nPlayersPerGame = 3;
+        int nGamesPerMatchUp = 10;
         boolean selfPlay = false;
 
         /* 2. Set up players */
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         agents.add(new RandomPlayer());
+        agents.add(new BasicMCTSPlayer());
         agents.add(new RMHCPlayer());
         agents.add(new OSLAPlayer());
-        agents.add(new MCTSPlayer());
 
         // Run!
         AbstractTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay);
@@ -80,8 +82,8 @@ public class RoundRobinTournament extends AbstractTournament {
             createAndRunMatchUp(matchUp, g);
 
             for (int i = 0; i < this.agents.size(); i++) {
-                System.out.println(this.agents.get(i).toString() + " got " + pointsPerPlayer[i] + " points");
-                System.out.println(this.agents.get(i).toString() + " won " + pointsPerPlayer[i]/600.0 + "% games");
+                System.out.println(String.format("%s got %d points ", agents.get(i), pointsPerPlayer[i]));
+                System.out.println(String.format("%s won %.1f%% of the games ", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun)));
             }
         }
     }
@@ -126,5 +128,6 @@ public class RoundRobinTournament extends AbstractTournament {
                 pointsPerPlayer[agentIDs.get(j)] += results[j] == Utils.GameResult.WIN ? 1 : 0;
             }
         }
+        matchUpsRun++;
     }
 }
