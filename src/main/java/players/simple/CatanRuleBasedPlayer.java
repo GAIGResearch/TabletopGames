@@ -62,16 +62,10 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         CatanGameState.CatanGamePhase gamePhase = (CatanGameState.CatanGamePhase) cgs.getGamePhase();
 
         List<List<AbstractAction>> actionPriorityLists = new ArrayList<>();
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
-        actionPriorityLists.add(new ArrayList<>());
+        // Levels of priorities for actions
+        for (int i = 0; i < 10; i++){
+            actionPriorityLists.add(new ArrayList<>());
+        }
 
         switch (gamePhase){
             case Trade:
@@ -180,6 +174,29 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         default:
                             // add to lowest priority list as default
                             actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
+                    }
+                }
+                break;
+            case Robber:
+                CatanTile[][] board = cgs.getBoard();
+                for(AbstractAction action : possibleActions){
+                    MoveRobber moveRobber = (MoveRobber) action;
+                    CatanTile tile = board[moveRobber.getXY()[0]][moveRobber.getXY()[1]];
+                    if(tile.getType()==CatanParameters.TileType.DESERT){
+                        actionPriorityLists.get(actionPriorityLists.size()-2).add(action);
+                    } else {
+                        int tileRank = 5;
+                        Settlement[] settlements = tile.getSettlements();
+                        for(int i = 0; i < settlements.length; i++){
+                            if (settlements[i].getOwner()==getPlayerID()){
+                                actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
+                                break;
+                            }
+                            if(settlements[i].getOwner()!=-1){
+                                tileRank+=1;
+                            }
+                        }
+                        actionPriorityLists.get(tileRank).add(action);
                     }
                 }
                 break;

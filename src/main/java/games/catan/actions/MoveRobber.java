@@ -25,6 +25,10 @@ public class MoveRobber extends AbstractAction {
         return false;
     }
 
+    public int[] getXY(){
+        return new int[]{x,y};
+    }
+
     @Override
     public AbstractAction copy() {
         return new MoveRobber(x, y);
