@@ -101,10 +101,11 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         case DefaultTrade:
                             DefaultTrade defaultTrade = (DefaultTrade) action;
                             tempResources[defaultTrade.resourceToGet.ordinal()]+=1;
+                            tempResources[defaultTrade.resourceOffer.ordinal()]-=4;
                             if(roadBlocked){
                                 if(calculateTotalResourceDifference(resourceCosts[0],tempResources)==0)
                                 {
-                                    return (action);
+                                    actionPriorityLists.get(0).add(action);
                                 } else if(calculateTotalResourceDifference(resourceCosts[3],tempResources)==0
                                         && (calculateTotalResourceDifference(resourceCosts[3],tempResources)<calculateTotalResourceDifference(resourceCosts[3],currentResources)))
                                 {
