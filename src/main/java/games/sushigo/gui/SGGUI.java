@@ -14,6 +14,10 @@ import java.util.Collection;
 public class SGGUI extends AbstractGUI {
     public SGGUI(Game game, ActionController ac) {
         super(ac, 15);
+
+        //Currently active player
+        int activePlayer;
+
         //Set width and hight
         this.width = 1280;
         this.height = 720;
@@ -23,11 +27,16 @@ public class SGGUI extends AbstractGUI {
             AbstractGameState gameState = game.getGameState();
             if(gameState != null)
             {
+                //Initialise active player
+                activePlayer = gameState.getCurrentPlayer();
+
+                //Initialise main panel
                 JPanel mainGameArea = new JPanel();
                 mainGameArea.setLayout(new BorderLayout());
 
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Sushi GO", gameState, width, defaultInfoPanelHeight);
+
                 // Bottom area will show actions available
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 

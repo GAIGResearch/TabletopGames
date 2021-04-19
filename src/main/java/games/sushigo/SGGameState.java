@@ -12,7 +12,6 @@ import java.util.List;
 
 public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerHands;
-    int round = 0;
     int[] playerScore;
     /**
      * Constructor. Initialises some generic game state variables.

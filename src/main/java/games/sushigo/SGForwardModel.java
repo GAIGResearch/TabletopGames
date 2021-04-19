@@ -3,7 +3,6 @@ package games.sushigo;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Deck;
 import games.sushigo.actions.DebugAction;
 import games.sushigo.cards.SGCard;
@@ -22,7 +21,7 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerScore = new int[firstState.getNPlayers()];
         SGGS.playerHands = new ArrayList<>();
         for (int i = 0; i < SGGS.getNPlayers(); i++){
-            SGGS.playerHands.add(new Deck<>("Player" + i + " deck", i));
+            SGGS.playerHands.add(new Deck<>("Player" + i + " hand", i));
         }
         SGGS.playerHands.get(0).add(new SGCard(SGCard.SGCardType.EggNigiri, 0));
         SGGS.getTurnOrder().setStartingPlayer(0);
@@ -31,8 +30,8 @@ public class SGForwardModel extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         SGGameState SGGS = (SGGameState)currentState;
-        SGGS.round++;
-        if(SGGS.round % 4 == 0) System.out.println("Show cards!");
+        int turn = SGGS.getTurnOrder().getTurnCounter();
+        if(turn % 4 == 0) System.out.println("Show cards!");
         currentState.getTurnOrder().endPlayerTurn(currentState);
     }
 
