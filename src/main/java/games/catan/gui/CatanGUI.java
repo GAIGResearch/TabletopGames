@@ -26,6 +26,7 @@ public class CatanGUI extends AbstractGUI {
     JLabel longestRoad;
     JLabel playerResources;
     JLabel devCards;
+    JLabel playerColourLabel;
 
     public CatanGUI(Game game, ActionController ac) {
         super(ac, 25);
@@ -58,6 +59,7 @@ public class CatanGUI extends AbstractGUI {
         victoryPointsLabel.setText("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
 
         playerResources.setText("<html>Resources: ");
+        playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
         for (int i = 0 ; i < gameState.getNPlayers(); i++){
             playerResources.setText(playerResources.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPlayerResources(i)));
         }
@@ -68,6 +70,21 @@ public class CatanGUI extends AbstractGUI {
             devCards.setText(devCards.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPLayerDevCards(i)));
         }
         devCards.setText(devCards.getText() + "</html>");
+
+        switch (gameState.getCurrentPlayer()){
+            case 0:
+                playerColourLabel.setText("Current Player Colour: Red");
+                break;
+            case 1:
+                playerColourLabel.setText("Current Player Colour: Yellow");
+                break;
+            case 2:
+                playerColourLabel.setText("Current Player Colour: Blue");
+                break;
+            case 3:
+                playerColourLabel.setText("Current Player Colour: Green");
+                break;
+        }
 
         repaint();
     }
@@ -81,6 +98,7 @@ public class CatanGUI extends AbstractGUI {
 
         updateGameStateInfo(gameState);
 
+        playerColourLabel = new JLabel("Current Player Colour: Red");
         knightCount = new JLabel("Knights: " + Arrays.toString(gs.getKnights()));
         longestRoad = new JLabel("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         victoryPointsLabel = new JLabel("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
@@ -88,6 +106,7 @@ public class CatanGUI extends AbstractGUI {
         diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState)gameState).getRollValue());
 
         playerResources = new JLabel("<html>Resources: ");
+        playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
         for (int i = 0 ; i < gameState.getNPlayers(); i++){
             playerResources.setText(playerResources.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPlayerResources(i)));
         }
@@ -105,6 +124,7 @@ public class CatanGUI extends AbstractGUI {
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
+        gameInfo.add(playerColourLabel);
         gameInfo.add(knightCount);
         gameInfo.add(longestRoad);
         gameInfo.add(victoryPointsLabel);

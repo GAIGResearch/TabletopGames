@@ -171,19 +171,18 @@ public class CatanActionFactory {
 
         for (int quantityAvailableToOfferIndex = 1; quantityAvailableToOfferIndex < playerResources[resourceRequestedIndex] + 1; quantityAvailableToOfferIndex++ ){ // loop through the quantity of resources to offer
             for (int quantityAvailableToRequestIndex = 1; quantityAvailableToRequestIndex < (exchangeRate * quantityAvailableToOfferIndex) - (quantityAvailableToOfferIndex - 1); quantityAvailableToRequestIndex++){ // loop to generate all possible combinations of offer for the current resource pair
-                for (int quantityToOffer = 1; quantityToOffer < (quantityAvailableToOfferIndex + 1); quantityToOffer++) { // add the amount of resources to offer to the list
-                    resourcesToOffer[resourceRequestedIndex]++;
+                    if(!(quantityAvailableToOfferIndex == resourcesRequested[resourceRequestedIndex] && quantityAvailableToRequestIndex == resourcesOffered[resourceOfferedIndex])) {
+                        resourcesToOffer[resourceRequestedIndex]+=quantityAvailableToOfferIndex; // add the amount of resources to offer to the list
+                        resourcesToRequest[resourceOfferedIndex]+=quantityAvailableToRequestIndex; // add the amount of resources to request to the list
+                        if (!(resourcesToOffer.equals(resourcesRequested) && resourcesToRequest.equals(resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
+                            actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
+                        }
+                        Arrays.fill(resourcesToOffer, 0);
+                        Arrays.fill(resourcesToRequest, 0);
+                    }
                 }
-                for (int quantityToRequest = 1; quantityToRequest < (quantityAvailableToRequestIndex + 1); quantityToRequest++){ // add the amount of resources to request to the list
-                    resourcesToRequest[resourceOfferedIndex]++;
-                }
-                if(!(resourcesToOffer.equals(resourcesRequested) && resourcesToRequest.equals(resourcesOffered))){ // ensures the trade offer is not the same as the existing trade offer
-                    actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount())); // create the action
-                }
-                Arrays.fill(resourcesToOffer,0);
-                Arrays.fill(resourcesToRequest,0);
             }
-        }
+
 
         return actions;
     }
