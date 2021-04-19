@@ -88,12 +88,15 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         case DefaultTrade:
                             DefaultTrade defaultTrade = (DefaultTrade) action;
                             tempResources[defaultTrade.resourceToGet.ordinal()]+=1;
-                            if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
+                            if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],tempResources)<calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],currentResources) && roadBlocked){
                                 actionPriorityLists.get(0).add(action);
-                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
+                            }
+                            else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
                                 actionPriorityLists.get(1).add(action);
-                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],tempResources)==0 && roadBlocked){
+                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
                                 actionPriorityLists.get(2).add(action);
+                            } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],tempResources)==0){
+                                actionPriorityLists.get(3).add(action);
                             }
                             break;
                         case OfferPlayerTrade:
@@ -229,6 +232,13 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                                 }
                             } else if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0 && sumResources(acceptTrade.getOfferedTrade().getResourcesRequested())==sumResources(acceptTrade.getOfferedTrade().getResourcesOffered())){
                                 actionPriorityLists.get(0).add(action);
+                            } else {
+                                if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],tempResources)<calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],currentResources)){
+                                    // if the trade helps player get closer to road while road blocked then chance agent will accept
+                                    if(rnd.nextBoolean()){
+                                        actionPriorityLists.get(0).add(action);
+                                    }
+                                }
                             }
                             break;
                         case OfferPlayerTrade:
@@ -294,20 +304,23 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         for(int i = 0; i < tempResources.length; i++){
             tempResources[i]= Math.max(0,(tempResources[i]+offerPlayerTrade.getResourcesRequested()[i]-offerPlayerTrade.getResourcesOffered()[i]));
         }
+        if(roadBlocked && calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],tempResources)<calculateTotalResourceDifference(resourcesRequiredToAffordCosts[0],currentResources)){
+            actionPriorityLists.get(4).add(action);
+        }
         if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[2],tempResources)==0){
             if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
-                actionPriorityLists.get(3).add(action);
+                actionPriorityLists.get(5).add(action);
             }
             else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
-                actionPriorityLists.get(5).add(action);
+                actionPriorityLists.get(7).add(action);
             }
         }
         if(calculateTotalResourceDifference(resourcesRequiredToAffordCosts[1],tempResources)==0){
             if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())*2){
-                actionPriorityLists.get(4).add(action);
+                actionPriorityLists.get(6).add(action);
             }
             else if(sumArray(offerPlayerTrade.getResourcesOffered())>=sumArray(offerPlayerTrade.getResourcesRequested())){
-                actionPriorityLists.get(6).add(action);
+                actionPriorityLists.get(8).add(action);
             }
         }
     }
@@ -398,13 +411,15 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     }
 
     private boolean placeRoadCheck(CatanGameState cgs, AbstractAction action){
-        //TODO implement
         return true;
     }
 
     private boolean buildRoadCheck(CatanGameState cgs, AbstractAction action){
-        //TODO workout a way of deciding whether or not building a road is a good idea?
-        return rnd.nextInt(4)>0;
+        if(roadBlocked){
+            return true;
+        } else {
+            return rnd.nextInt(4)>0;
+        }
     }
 
     public String toString() { return "CatanRuleBased";}
