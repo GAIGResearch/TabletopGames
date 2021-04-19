@@ -9,4 +9,5 @@ public class TicTacToeConstants {
         add(new Token("x"));
         add(new Token("o"));
     }};
+    public static final String emptyCell = ".";
 }
