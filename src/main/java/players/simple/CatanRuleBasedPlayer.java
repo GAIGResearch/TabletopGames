@@ -76,18 +76,16 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
             actionPriorityLists.add(new ArrayList<>());
         }
 
-        if(sumArray(currentResources)>7){
-            currentResources = currentResources;
-        }
-
         switch (gamePhase){
             case Setup:
                 return possibleActions.get(rnd.nextInt(possibleActions.size()));
             case Trade:
                 // If the player has the resources to get a city/settlement/road already don't do anything in the trade phase
-                if(sumArray(resourcesRequiredToAffordCosts[1])==0 || sumArray(resourcesRequiredToAffordCosts[2])==0
-                        || ( roadBlocked
-                        && sumArray(resourcesRequiredToAffordCosts[0])==0))
+                if((!roadBlocked
+                        && (sumArray(resourcesRequiredToAffordCosts[1])==0
+                            || sumArray(resourcesRequiredToAffordCosts[2])==0))
+                    || roadBlocked
+                        && sumArray(resourcesRequiredToAffordCosts[0])==0)
                 {
                     for (AbstractAction action : possibleActions) {
                         if (action.getClass().getSimpleName().equals("DoNothing")){
@@ -98,7 +96,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                 // Loop through and prioritise trade actions
                 for (AbstractAction action : possibleActions) {
                     actionType = ActionType.valueOf(action.getClass().getSimpleName());
-                    tempResources = currentResources;
+                    tempResources = currentResources.clone();
                     switch (actionType) {
                         case DefaultTrade:
                             DefaultTrade defaultTrade = (DefaultTrade) action;
@@ -107,11 +105,14 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                                 if(calculateTotalResourceDifference(resourceCosts[0],tempResources)==0)
                                 {
                                     return (action);
-                                } else if(calculateTotalResourceDifference(resourceCosts[3],tempResources)==0)
+                                } else if(calculateTotalResourceDifference(resourceCosts[3],tempResources)==0
+                                        && (calculateTotalResourceDifference(resourceCosts[3],tempResources)<calculateTotalResourceDifference(resourceCosts[3],currentResources)))
                                 {
                                     actionPriorityLists.get(1).add(action);
                                 } else if (calculateTotalResourceDifference(resourceCosts[0],tempResources)<calculateTotalResourceDifference(resourceCosts[0],currentResources)
-                                        || calculateTotalResourceDifference(resourceCosts[3],tempResources)<calculateTotalResourceDifference(resourceCosts[3],currentResources))
+                                            || calculateTotalResourceDifference(resourceCosts[3],tempResources)<calculateTotalResourceDifference(resourceCosts[3],currentResources)
+                                        && (calculateTotalResourceDifference(resourceCosts[3],tempResources)!=0
+                                            && calculateTotalResourceDifference(resourceCosts[3],currentResources) != 0))
                                 {
                                     actionPriorityLists.get(2).add(action);
                                 }
@@ -146,7 +147,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
             case Build:
                 for (AbstractAction action : possibleActions) {
                     actionType = ActionType.valueOf(action.getClass().getSimpleName());
-                    tempResources = currentResources;
+                    tempResources = currentResources.clone();
                     switch (actionType){
                         case PlayKnightCard:
                             if(KnightCardCheck(cgs, action)){
@@ -249,7 +250,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                 // Loop through and prioritise trade reaction actions
                 for (AbstractAction action : possibleActions) {
                     actionType = ActionType.valueOf(action.getClass().getSimpleName());
-                    tempResources = currentResources;
+                    tempResources = currentResources.clone();
                     switch (actionType) {
                         case AcceptTrade:
                             AcceptTrade acceptTrade = (AcceptTrade) action;
@@ -293,12 +294,13 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                             actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
                     }
                 }
+                break;
             case Discard:
                 for (AbstractAction action : possibleActions) {
                     if (action.getClass().getSimpleName().equals("DoNothing")){
                         return action;
                     }
-                    tempResources = currentResources;
+                    tempResources = currentResources.clone();
                     DiscardCards discardCards = (DiscardCards) action;
                     ArrayList<Card> cardsToDiscard = discardCards.getToBeDiscarded();
                     int[] discardValues = new int[5];
@@ -328,6 +330,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         actionPriorityLists.get(4).add(action);
                     }
                 }
+                break;
             case Steal:
                 return possibleActions.get(rnd.nextInt(possibleActions.size()));
             default:
