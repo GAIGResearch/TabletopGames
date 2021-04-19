@@ -461,7 +461,8 @@ public class CatanActionFactory {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
                 for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                    if (checkRoadPlacement(i, tile, gs)){
+                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
+                            && checkRoadPlacement(i, tile, gs)){
                         roads.add(tile.getRoads()[i]);
                     }
                 }
