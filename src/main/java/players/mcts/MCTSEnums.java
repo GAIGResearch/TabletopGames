@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 public class MCTSEnums {
 
-    public enum strategies {
+    public enum Strategies {
         RANDOM
     }
 

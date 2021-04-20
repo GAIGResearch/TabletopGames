@@ -169,6 +169,15 @@ public enum GameType {
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
             }}),
+    Dominion(2, 6,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+                add(TerritoryBuilding);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Enclosure);
+            }}),
     Diamant( 2, 6,
             new ArrayList<Category>() {{
                 add(Adventure);

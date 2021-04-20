@@ -8,18 +8,19 @@ import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
+import games.coltexpress.ColtExpressTypes.CharacterType;
+import games.coltexpress.ColtExpressTypes.LootType;
 import games.coltexpress.actions.*;
 import games.coltexpress.cards.ColtExpressCard;
-import games.coltexpress.components.Loot;
-import games.coltexpress.ColtExpressTypes.*;
-import utilities.Group;
 import games.coltexpress.components.Compartment;
+import games.coltexpress.components.Loot;
+import utilities.Group;
 import utilities.Utils;
-
-import static core.CoreConstants.VERBOSE;
 
 import java.util.*;
 
+import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.VisibilityMode;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
 
 public class ColtExpressForwardModel extends AbstractForwardModel {
@@ -51,7 +52,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             if (characterType == CharacterType.Belle)
                 cegs.playerPlayingBelle = playerIndex;
 
-            Deck<ColtExpressCard> playerCards = new Deck<>("playerCards" + playerIndex, playerIndex);
+            Deck<ColtExpressCard> playerCards = new Deck<>("playerCards" + playerIndex, playerIndex, VisibilityMode.HIDDEN_TO_ALL);
             for (ColtExpressCard.CardType type : cep.cardCounts.keySet()){
                 for (int j = 0; j < cep.cardCounts.get(type); j++) {
                     playerCards.add(new ColtExpressCard(playerIndex, type));
@@ -60,12 +61,11 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
             cegs.playerDecks.add(playerCards);
             playerCards.shuffle(new Random(cep.getRandomSeed()+playerIndex));
 
-            Deck<ColtExpressCard> playerHand = new Deck<>(
-                    "playerHand" + playerIndex, playerIndex);
+            Deck<ColtExpressCard> playerHand = new Deck<>("playerHand" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
 
             cegs.playerHandCards.add(playerHand);
 
-            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex);
+            Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.HIDDEN_TO_ALL);
             for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
                 LootType lootType = e.a;
                 int value = e.b;
@@ -87,22 +87,24 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     }
 
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
-        cegs.rounds = new Deck<>("Rounds", -1);
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
+
+        // Add 1 random end round card
+        // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck)
+        cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
 
         // Add random round cards
-        ArrayList<Integer> availableRounds = new ArrayList<>();
-        for (int i = 0; i < cep.roundCards.length; i++) {
-            availableRounds.add(i);
-        }
+        ArrayList<ColtExpressTypes.RegularRoundCard> availableRounds = new ArrayList<>(Arrays.asList(cep.roundCards));
         for (int i = 0; i < cep.nMaxRounds-1; i++) {
             Random r = new Random(cep.getRandomSeed() + cegs.getTurnOrder().getRoundCounter() + i);
             int choice = r.nextInt(availableRounds.size());
-            cegs.rounds.add(cegs.getRoundCard(cep, choice, cegs.getNPlayers()));
-            availableRounds.remove(Integer.valueOf(choice));
+            cegs.rounds.add(cegs.getRoundCard(availableRounds.get(choice), cegs.getNPlayers()));
+            availableRounds.remove(availableRounds.get(choice));
         }
-
-        // Add 1 random end round card
-        cegs.rounds.add(cegs.getRandomEndRoundCard(cep, cegs.getTurnOrder().getRoundCounter()));
+        // set first card to be visible
+        boolean[] allTrue = new boolean[cegs.getNPlayers()];
+        Arrays.fill(allTrue, true);
+        cegs.rounds.setVisibilityOfComponent(0, allTrue);
     }
 
     @Override
@@ -567,7 +569,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
                     }
                 }
 
-                // Add player below if your are tuco
+                // Add player above if your are tuco
                 if (cegs.playerCharacters.get(player) == CharacterType.Tuco) {
                     for (Integer target : cegs.trainCompartments.get(playerCompartmentIndex).playersOnTopOfCompartment)
                         targets.put(target, playerCompartment);

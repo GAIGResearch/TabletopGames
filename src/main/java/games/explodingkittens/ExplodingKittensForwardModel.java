@@ -1,8 +1,9 @@
 package games.explodingkittens;
 
-import core.actions.AbstractAction;
-import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.CoreConstants.VisibilityMode;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.actions.*;
@@ -15,8 +16,8 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static core.CoreConstants.VERBOSE;
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.generatePermutations;
 
 public class ExplodingKittensForwardModel extends AbstractForwardModel {
@@ -67,7 +68,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
             }
         }
         ekgs.setPlayerHandCards(playerHandCards);
-        ekgs.setDiscardPile(new Deck<>("Discard Pile"));
+        ekgs.setDiscardPile(new Deck<>("Discard Pile", VisibilityMode.VISIBLE_TO_ALL));
 
         // Add remaining defuse cards and exploding kitten cards to the deck and shuffle again
         for (int i = ekgs.getNPlayers(); i < ekp.nDefuseCards; i++){

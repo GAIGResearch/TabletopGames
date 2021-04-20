@@ -20,11 +20,13 @@ Currently implemented games:
 - [x] Exploding Kittens (Inman and others 2015)
 - [x] Colt Express (Christophe Raimbault 2014)
 - [x] Pandemic (Matt Leacock 2008)
+- [x] Diamant (Bruno Faidutti and Alan R. Moon 2005)
+- [x] Dominion (Donald X. Vaccarino 2008)
 
 Games in progress:
 - [ ] Settlers of Catan (Klaus Teuber 1995)
-- [ ] Carcassone (Klaus-Jürgen Wrede 2000)
 - [ ] Descent (Jesper Ejsing, John Goodenough, Frank Walls 2005)
+- [ ] Santorini (Lina Cossette, David Forest 2016)
 
 ## Setting up
 The project requires Java with minimum version 8. In order to run the code, you must either download the repository, or clone it. If you are looking for a particular release, you can find all listed [here](https://github.com/GAIGResearch/TabletopGames/releases). 

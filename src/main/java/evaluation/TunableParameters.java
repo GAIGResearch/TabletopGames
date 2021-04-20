@@ -1,10 +1,14 @@
 package evaluation;
 
 import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
 import java.io.FileReader;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.*;
 
@@ -42,9 +46,10 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     Map<String, Object> currentValues = new HashMap<>();
     Map<String, Class<?>> parameterTypes = new HashMap<>();
 
-    /**Note that any sub-class of TunableParameters does not need to do any copying of parameters added
+    /**
+     * Note that any sub-class of TunableParameters does not need to do any copying of parameters added
      * via addTunableParameter(). These are copied here.
-     *
+     * <p>
      * Sub-classes should NOT need to implement copy(). Instead they should just implement _copy(), and return
      * an empty copy of themselves, with any non-tunable parameters set appropriately.
      *
@@ -65,7 +70,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     /**
      * Use this to add a non-Tunable Parameter (i.e. one with a single value that does not change)
      * While this is not tuned, it means that a value for it can be defined in a JSON input file
-     *
+     * <p>
      * A tunable parameter can be any of Integer, Double, String, Enum, Boolean.
      *
      * @param name  The name of the parameter
@@ -83,10 +88,10 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * ParameterSearch permits a JSON file to be specified that provides a way of overriding (adding to and/or
      * subtracting from) the values to be used. (See ParameterSearch documentation.)
      *
-     * @param name          The name of the parameter
-     * @param defaultValue  The default value this should take
-     * @param allSettings   All possible (non-exhaustive, just a reasonable set) values this can take.
-     * @param <T>   The type of the parameter
+     * @param name         The name of the parameter
+     * @param defaultValue The default value this should take
+     * @param allSettings  All possible (non-exhaustive, just a reasonable set) values this can take.
+     * @param <T>          The type of the parameter
      */
     public <T> void addTunableParameter(String name, T defaultValue, List<T> allSettings) {
         if (!parameterNames.contains(name)) parameterNames.add(name);
@@ -139,7 +144,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             Object[] values = parameterTypes.get(parameterName).getEnumConstants();
             Optional<Object> found = Arrays.stream(values).filter(v -> v.toString().equals(value)).findFirst();
             if (found.isPresent())
-            currentValues.put(parameterName, found.get());
+                currentValues.put(parameterName, found.get());
             else
                 throw new AssertionError("No corresponding Enum found for " + value + " in " + parameterName);
         } else {
@@ -264,9 +269,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
         for (String pName : allParams) {
-            //       Class<?> clazz = params.parameterTypes.get(pName);
             if (isParamSingular(pName, rawData)) {
-                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName));
+                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
                 params.addTunableParameter(pName, pValue);
             } else {
                 Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
@@ -278,8 +282,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         params._reset();
 
         // We should also check that there are no other properties in there
-        allParams.add("algorithm");
-        allParams.add("parametersType");
+        allParams.add("class");
         for (Object key : rawData.keySet()) {
             if (key instanceof String && !allParams.contains(key)) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
@@ -295,13 +298,33 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * @return The value of the parameter found.
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getParam(String name, JSONObject json, T defaultValue) {
+    private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
         Object finalData = json.getOrDefault(name, defaultValue);
-        Object data = (finalData instanceof Long) ? new Integer(((Long) finalData).intValue()): finalData;
+        Object data = (finalData instanceof Long) ? new Integer(((Long) finalData).intValue()) : finalData;
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
+        if (finalData instanceof JSONObject) {
+            JSONObject subJson = (JSONObject) finalData;
+            String className = (String) subJson.get("class");
+            if (className == null)
+                throw new AssertionError("No class name specified for " + name);
+            try {
+                Class<?> clazz = Class.forName(className);
+                Constructor<?> constructor = clazz.getConstructor();
+                T retValue = (T) constructor.newInstance();
+                if (retValue instanceof TunableParameters) {
+                    TunableParameters subParams = (TunableParameters) retValue;
+                    TunableParameters.loadFromJSON(subParams, subJson);
+                    params.registerChild(name, subJson);
+                }
+                return retValue;
+            } catch (Exception e) {
+                System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
+                throw new AssertionError("Error loading Class");
+            }
+        }
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
-            Optional<?> matchingValue =  Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
+            Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {
                 return (T) matchingValue.get();
             }
@@ -339,6 +362,26 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     @Override
     public List<String> getParameterNames() {
         return new ArrayList<>(parameterNames);
+    }
+
+    @Override
+    public ITunableParameters registerChild(String nameSpace, JSONObject json) {
+        try {
+            Class<?> clazz = Class.forName((String) json.get("class"));
+            TunableParameters child = (TunableParameters) clazz.getConstructor().newInstance();
+            TunableParameters.loadFromJSON(child, json);
+            // we then need to 'pull up' the parameters in the heuristic into our list of parameters
+            // this is so that we have a single tunable set
+            for (String name : child.getParameterNames()) {
+                addTunableParameter(nameSpace + "." + name, child.getDefaultParameterValue(name));
+                // and then set the value
+                child.setParameterValue(name, child.getDefaultParameterValue(name));
+            }
+            return child;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError(e.getMessage() + " when trying to a nested TunableParameters : " + json.get("class"));
+        }
     }
 
     @Override

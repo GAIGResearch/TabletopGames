@@ -2,14 +2,16 @@ package games.virus.components;
 
 import core.components.Component;
 import core.components.Deck;
+import core.interfaces.IComponentContainer;
 import games.virus.cards.VirusCard;
 import utilities.Utils;
 
 import java.util.List;
 
 import static core.CoreConstants.*;
+import static core.CoreConstants.VisibilityMode.*;
 
-public class VirusOrgan extends Component {
+public class VirusOrgan extends Component implements IComponentContainer<VirusCard> {
 
     public enum VirusOrganState {
         None,
@@ -28,14 +30,14 @@ public class VirusOrgan extends Component {
     {
         super(Utils.ComponentType.TOKEN);
         state = VirusOrganState.None;
-        cards = new Deck<>("DeckOnOrgan");
+        cards = new Deck<>("DeckOnOrgan", VISIBLE_TO_ALL);
     }
 
     protected VirusOrgan(int ID)
     {
         super(Utils.ComponentType.TOKEN, ID);
         state = VirusOrganState.None;
-        cards = new Deck<>("DeckOnOrgan");
+        cards = new Deck<>("DeckOnOrgan", VISIBLE_TO_ALL);
     }
 
     public void initialiseOrgan()
@@ -151,4 +153,15 @@ public class VirusOrgan extends Component {
     public Deck<VirusCard> getCards() {
         return cards;
     }
+
+    @Override
+    public List<VirusCard> getComponents() {
+        return cards.getComponents();
+    }
+
+    @Override
+    public VisibilityMode getVisibilityMode() {
+        return VISIBLE_TO_ALL;
+    }
+
 }

@@ -2,6 +2,7 @@ package games.poker;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
@@ -51,7 +52,7 @@ public class PokerForwardModel extends AbstractForwardModel {
 
         pgs.playerDecks = new ArrayList<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            pgs.playerDecks.add(new Deck<>("Player " + i + " deck", i));
+            pgs.playerDecks.add(new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
         }
 
 
@@ -59,11 +60,11 @@ public class PokerForwardModel extends AbstractForwardModel {
 
 
         // Create the draw deck with all the cards
-        pgs.drawDeck = new Deck<>("DrawDeck");
+        pgs.drawDeck = new Deck<>("DrawDeck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
         createCards(pgs);
 
         // Create the discard deck, at the beginning it is empty
-        pgs.discardDeck = new Deck<>("DiscardDeck");
+        pgs.discardDeck = new Deck<>("DiscardDeck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
         //pgs.communityCards = new Deck<>("CommunityCards");
 
         // Player 0 starts the game

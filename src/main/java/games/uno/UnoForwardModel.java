@@ -1,17 +1,21 @@
 package games.uno;
 
-import core.actions.AbstractAction;
-import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
-import games.uno.cards.*;
+import games.uno.cards.UnoCard;
 import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 
 import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.VisibilityMode.*;
 
 public class UnoForwardModel extends AbstractForwardModel {
 
@@ -23,15 +27,15 @@ public class UnoForwardModel extends AbstractForwardModel {
         ugs.playerScore = new int[firstState.getNPlayers()];
         ugs.playerDecks = new ArrayList<>();
         for (int i = 0; i < ugs.getNPlayers(); i++) {
-            ugs.playerDecks.add(new Deck<>("Player " + i + " deck", i));
+            ugs.playerDecks.add(new Deck<>("Player " + i + " deck", i, VISIBLE_TO_OWNER));
         }
 
         // Create the draw deck with all the cards
-        ugs.drawDeck = new Deck<>("DrawDeck");
+        ugs.drawDeck = new Deck<>("DrawDeck", HIDDEN_TO_ALL);
         createCards(ugs);
 
         // Create the discard deck, at the beginning it is empty
-        ugs.discardDeck = new Deck<>("DiscardDeck");
+        ugs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
 
         // Player 0 starts the game
         ugs.getTurnOrder().setStartingPlayer(0);

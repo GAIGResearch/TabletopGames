@@ -6,8 +6,10 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
+import games.virus.components.VirusOrgan;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Virus);
     }
 
     @Override
@@ -68,26 +70,13 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new VirusHeuristic().evaluateState(this, playerId);
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            add(drawDeck.getComponentID());
-            for (Component c: drawDeck.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component c: playerDecks.get(i).getComponents()) {
-                        add(c.getComponentID());
-                    }
-                }
-            }
-        }};
+    public double getGameScore(int playerId) {
+        return playerBodies.get(playerId).organs.values().stream().filter(VirusOrgan::isHealthy).count();
     }
 
     @Override

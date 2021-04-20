@@ -5,6 +5,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.uno.cards.*;
 
 import java.util.*;
@@ -27,7 +28,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new UnoTurnOrder(nPlayers));
+        super(gameParameters, new UnoTurnOrder(nPlayers), GameType.Uno);
     }
 
     @Override
@@ -158,26 +159,21 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new UnoHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            add(drawDeck.getComponentID());
-            for (Component c: drawDeck.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component c: playerDecks.get(i).getComponents()) {
-                        add(c.getComponentID());
-                    }
-                }
-            }
-        }};
+    public double getGameScore(int playerId) {
+        return calculatePlayerPoints(playerId);
     }
 
     @Override

@@ -104,4 +104,10 @@ public class Dice extends Component {
         this.nSides = ((Long) ( (JSONArray) dice.get("count")).get(1)).intValue();
         parseComponent(this, dice);
     }
+
+
+    @Override
+    public final int hashCode() {
+        return componentID;
+    }
 }

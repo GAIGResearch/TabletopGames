@@ -10,13 +10,14 @@ import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import games.diamant.components.DiamantHand;
-import games.diamant.components.DiamantTreasureChest;
 import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
 public class DiamantForwardModel extends AbstractForwardModel {
     @Override
@@ -36,9 +37,9 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.playerInCave.add(true);
         }
 
-        dgs.mainDeck    = new Deck("MainDeck");
-        dgs.discardDeck = new Deck("DiscardDeck");
-        dgs.path        = new Deck("Path");
+        dgs.mainDeck    = new Deck("MainDeck", HIDDEN_TO_ALL);
+        dgs.discardDeck = new Deck("DiscardDeck", VISIBLE_TO_ALL);
+        dgs.path        = new Deck("Path", VISIBLE_TO_ALL);
         dgs.actionsPlayed = new ActionsPlayed();
 
         createCards(dgs);
@@ -96,6 +97,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         }
         dgs.getTurnOrder().endPlayerTurn(dgs);
     }
+
 
     private void playActions(DiamantGameState dgs)
     {

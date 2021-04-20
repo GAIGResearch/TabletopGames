@@ -1,18 +1,21 @@
 package games.dotsboxes;
 
+import core.components.Component;
+import utilities.Utils;
 import utilities.Vector2D;
 
 import java.util.Objects;
 
-public class DBEdge {
-    Vector2D from;  // Edges are lines between 2 points, from -> to. No direction, so to -> from is the same.
-    Vector2D to;
-    int owner;  // Keep track of who placed this edge on the board for drawing purposes.
+public class DBEdge extends Component {
+    // Edges are lines between 2 points, from -> to. No direction, so to -> from is the same.
+
+    final Vector2D from;
+    final Vector2D to;
 
     public DBEdge(Vector2D from, Vector2D to) {
+        super(Utils.ComponentType.TOKEN);
         this.from = from;
         this.to = to;
-        this.owner = -1;
     }
 
     @Override
@@ -31,9 +34,6 @@ public class DBEdge {
     }
 
     public DBEdge copy() {
-        // We'll need deep copies of the board, so this should also be able to copy itself
-        DBEdge e = new DBEdge(from.copy(), to.copy());
-        e.owner = owner;
-        return e;
+        return this;  // Immutable
     }
 }

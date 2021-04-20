@@ -2,14 +2,7 @@ package games.pandemic.actions;
 
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
-import core.components.Card;
-import core.components.Deck;
 import core.AbstractGameState;
-import games.pandemic.PandemicGameState;
-
-import java.util.Objects;
-
-import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class QuietNight extends DrawCard {

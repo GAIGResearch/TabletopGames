@@ -9,11 +9,13 @@ import java.util.List;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
 
 import static core.components.FrenchCard.FrenchCardType.*;
 
@@ -46,7 +48,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
      */
 
     public PokerGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Poker);
     }
 
     @Override
@@ -112,7 +114,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     }
 
     public Deck<FrenchCard> getCommunityCards() {
-        Deck<FrenchCard> temp = new Deck<FrenchCard>("CommunityCards");
+        Deck<FrenchCard> temp = new Deck<FrenchCard>("CommunityCards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
        //if (communityCards[0] == )
         if (getTurnOrder().getRoundCounter() == 2) {
             temp.add(communityCards[0]);
@@ -669,9 +671,19 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new PokerHeuristic().evaluateState(this, playerId);
     }
+
+    @Override
+    public double getGameScore(int playerId) {
+        return 0;
+    }
+
+    /*@Override
+    protected double _getScore(int playerId) {
+
+    }*/
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {

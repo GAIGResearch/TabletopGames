@@ -1,6 +1,5 @@
 package players.mcts.test;
 
-//import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
@@ -15,10 +14,7 @@ import utilities.SummaryLogger;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.function.*;
 
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
@@ -39,7 +35,7 @@ public class RewardsForParanoia {
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.iterationsBudget = 1000;
+        params.budget = 1000;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.K = 1.0;
     }

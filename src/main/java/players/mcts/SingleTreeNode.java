@@ -3,8 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
-import games.loveletter.LoveLetterGame;
-import games.loveletter.LoveLetterGameState;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Utils;
@@ -105,12 +103,11 @@ public class SingleTreeNode {
         int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if (player.params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(player.params.timeBudget);
+            elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
         // Tracking number of iterations for iteration budget
         int numIters = 0;
-
         boolean stop = false;
         // We keep a copy of this, as if we are using an open loop approach, then we need to advance a state
         // through the tree on each iteration, while still keeping an unchanged master copy (rootState)
@@ -136,7 +133,7 @@ public class SingleTreeNode {
             selected.backUp(delta);
             // Finished iteration
             numIters++;
-
+     //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = player.params.budgetType;
             if (budgetType == BUDGET_TIME) {
@@ -147,10 +144,14 @@ public class SingleTreeNode {
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= player.params.iterationsBudget;
+                stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = (copyCount + fmCallsCount) > player.params.fmCallsBudget;
+                stop =  fmCallsCount > player.params.budget || numIters > player.params.budget;
+            } else if (budgetType == BUDGET_COPY_CALLS) {
+                stop = copyCount > player.params.budget || numIters > player.params.budget;
+            } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
+                stop = (copyCount + fmCallsCount) > player.params.budget || numIters > player.params.budget;
             }
         }
 
@@ -182,27 +183,42 @@ public class SingleTreeNode {
         statsLogger.record(stats);
     }
 
+    /**
+     * Uses plain java loop instead of streams for performance
+     * (this is called often enough it can make a measurable difference)
+     */
     private int actionVisits(AbstractAction action) {
-        return Arrays.stream(children.get(action))
-                .filter(Objects::nonNull)
-                .mapToInt(n -> n.nVisits)
-                .sum();
+        int retValue = 0;
+        for (SingleTreeNode node : children.get(action)) {
+            if (node != null)
+                retValue += node.nVisits;
+        }
+        return retValue;
     }
 
+    /**
+     * Uses plain java loop instead of streams for performance
+     * (this is called often enough it can make a measurable difference)
+     */
     private double actionTotValue(AbstractAction action, int playerId) {
-        return Arrays.stream(children.get(action))
-                .filter(Objects::nonNull)
-                .mapToDouble(n -> n.totValue[playerId])
-                .sum();
+        double retValue = 0.0;
+        for (SingleTreeNode node : children.get(action)) {
+            if (node != null)
+                retValue += node.totValue[playerId];
+        }
+        return retValue;
     }
 
+    /**
+     * Uses only by TreeStatistics and bestAction() after mctsSearch()
+     * For this reason not converted to old-style java loop as there would be no performance gain
+     */
     private int[] actionVisits() {
         return children.values().stream()
                 .filter(Objects::nonNull)
                 .mapToInt(arr -> Arrays.stream(arr).filter(Objects::nonNull).mapToInt(n -> n.nVisits).sum())
                 .toArray();
     }
-
     /**
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.
@@ -282,7 +298,7 @@ public class SingleTreeNode {
     private void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
         while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
-            AbstractGameState preGS = gs.copy();
+            //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
             List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(gs);
             if (availableActions.isEmpty())
@@ -476,11 +492,7 @@ public class SingleTreeNode {
         // Evaluate final state and return normalised score
         double[] retValue = new double[state.getNPlayers()];
         for (int i = 0; i < retValue.length; i++) {
-            if (player.heuristic != null) {
-                retValue[i] = player.heuristic.evaluateState(rolloutState, i);
-            } else {
-                retValue[i] = rolloutState.getScore(i);
-            }
+            retValue[i] = player.heuristic.evaluateState(rolloutState, i);
         }
         return retValue;
     }
@@ -574,10 +586,21 @@ public class SingleTreeNode {
         return bestAction;
     }
 
-    public int getVisits() {return nVisits;}
-    public double[] getTotValue() {return totValue;}
-    public Map<AbstractAction, SingleTreeNode[]> getChildren() {return children;}
-    public int getActor() {return decisionPlayer;}
+    public int getVisits() {
+        return nVisits;
+    }
+
+    public double[] getTotValue() {
+        return totValue;
+    }
+
+    public Map<AbstractAction, SingleTreeNode[]> getChildren() {
+        return children;
+    }
+
+    public int getActor() {
+        return decisionPlayer;
+    }
 
     @Override
     public String toString() {

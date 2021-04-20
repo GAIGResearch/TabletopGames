@@ -92,7 +92,7 @@ public class Individual implements Comparable {
             if (this.heuristic != null){
                 score = heuristic.evaluateState(gameStates[i+1], playerID);
             } else {
-                score = gameStates[i+1].getScore(playerID);
+                score = gameStates[i+1].getHeuristicScore(playerID);
             }
 
             delta += Math.pow(discountFactor, i) * score;
@@ -106,7 +106,7 @@ public class Individual implements Comparable {
                 List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
                 AbstractAction action = null;
                 if (currentActions.size() > 0) {
-                     action = currentActions.get(gen.nextInt(currentActions.size()));
+                    action = currentActions.get(gen.nextInt(currentActions.size()));
                 }
 
                 // Advance game state with random action
@@ -127,7 +127,7 @@ public class Individual implements Comparable {
                     if (this.heuristic != null){
                         score = heuristic.evaluateState(gameStates[i+1], playerID);
                     } else {
-                        score = gameStates[i+1].getScore(playerID);
+                        score = gameStates[i+1].getHeuristicScore(playerID);
                     }
                     delta += Math.pow(discountFactor, i) * score;
                 } else {

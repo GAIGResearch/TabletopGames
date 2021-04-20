@@ -2,13 +2,21 @@ package evaluation;
 
 import core.interfaces.ITunableParameters;
 import evodef.AgentSearchSpace;
-import org.json.simple.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import utilities.Pair;
 
 import java.io.FileReader;
-import java.util.*;
-import static java.util.stream.Collectors.*;
-import java.util.stream.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * This is a wrapper around ITunableParameters<T> (the TAG standard) to implement the AgentSearchSpace
@@ -29,6 +37,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         super(convertToSuperFormatString(tunableParameters.getJSONDescription(), tunableParameters), tunableParameters.getParameterTypes());
         initialiseITP(tunableParameters);
     }
+
     private void initialiseITP(ITunableParameters tunableParameters) {
         itp = tunableParameters;
         tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
@@ -61,7 +70,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
     }
 
     public ITPSearchSpace(ITunableParameters tunableParameters, JSONObject json) {
-        super(convertToSuperFormatJSON(json, tunableParameters), tunableParameters.getParameterTypes());
+        super(convertToSuperFormatJSON(json, tunableParameters),
+                allParameterTypesWithRecursion(json, tunableParameters));
         initialiseITP(tunableParameters);
     }
 
@@ -70,36 +80,61 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         for (int i = 0; i < settings.length; i++) {
             String pName = tunedIndexToParameterName.get(i);
             Object value = value(i, settings[i]);
-         //   Object value = itp.getPossibleValues(pName).get(settings[i]);
+            //   Object value = itp.getPossibleValues(pName).get(settings[i]);
             itp.setParameterValue(pName, value);
         }
         return itp.instantiate();
     }
 
-    private static List<String> convertToSuperFormatJSON(JSONObject json, ITunableParameters itp) {
-        List<String> retValue = new ArrayList<>();
-        for (Object key : json.keySet()) {
-            if (key instanceof String) {
-                if (itp.getParameterNames().contains(key)) {
-                    Object data = json.get(key);
-                    if (data instanceof JSONArray) {
+    private static List<Pair<String, Class<?>>> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters itp) {
+        List<Pair<String, Class<?>>> retValue = new ArrayList<>();
+        for (Object baseKey : json.keySet()) {
+            if (baseKey instanceof String) {
+                if (itp.getParameterNames().contains(baseKey)) {
+                    Object data = json.get(baseKey);
+                    String key = "".equals(nameSpace) ? (String) baseKey : nameSpace + "." + baseKey;
+                    if (data instanceof JSONObject) {
+                        // in this case we have nesting, and need to recurse to get all of the relevant parameters
+                        // we use key as the nameSpace
+                        try {
+                            JSONObject subJSON = (JSONObject) data;
+                            ITunableParameters subitp = itp.registerChild(key, subJSON);
+                            retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, subitp));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
+                        }
+
+                    } else if (data instanceof JSONArray) {
                         // we have a set of options for this parameter
                         JSONArray arr = (JSONArray) data;
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
-                        retValue.add(results);
+                        retValue.add(new Pair<>(results, itp.getDefaultParameterValue((String) baseKey).getClass()));
                     } else {
                         // this defines a default we should be using in itp
                         if (data == null)
                             throw new AssertionError("We have a problem with null data in JSON file using key " + key);
-                        itp.setParameterValue((String) key, data);
+                        String[] namespaceSplit = key.split("\\.");
+                        itp.setParameterValue(namespaceSplit[namespaceSplit.length - 1], data);
                     }
-                } else {
-                    System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + key);
+                } else if (!baseKey.equals("class")){
+                    System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
                 }
             }
         }
         return retValue;
+    }
+
+    private static Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json, ITunableParameters itp) {
+        return extractRecursiveParameters("", json, itp).stream()
+                .collect(
+                        toMap(p -> p.a.split("=")[0], p -> p.b)
+                );
+    }
+
+    private static List<String> convertToSuperFormatJSON(JSONObject json, ITunableParameters itp) {
+        return extractRecursiveParameters("", json, itp).stream().map(p -> p.a).collect(toList());
     }
 
     private static List<String> convertToSuperFormatString(String json, ITunableParameters itp) {

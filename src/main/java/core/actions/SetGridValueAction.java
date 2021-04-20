@@ -1,12 +1,13 @@
 package core.actions;
 
 import core.AbstractGameState;
+import core.components.Component;
 import core.interfaces.IPrintable;
 import core.components.GridBoard;
 
 import java.util.Objects;
 
-public class SetGridValueAction<T> extends AbstractAction implements IPrintable {
+public class SetGridValueAction<T extends Component> extends AbstractAction implements IPrintable {
 
     private final int gridBoard;
     private final int x;

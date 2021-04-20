@@ -1,23 +1,26 @@
 package games.coltexpress;
 
-import core.AbstractParameters;
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import games.GameType;
+import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
-import core.components.PartialObservableDeck;
-import games.coltexpress.ColtExpressTypes.*;
 import utilities.Pair;
 
 import java.util.*;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.VisibilityMode;
+import static java.util.stream.Collectors.toList;
 
 public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 
@@ -43,13 +46,16 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     // The train to loot
     LinkedList<Compartment> trainCompartments;
     // The round cards
-    Deck<RoundCard> rounds;
+    PartialObservableDeck<RoundCard> rounds;
+
+    Random rnd;
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds), GameType.ColtExpress);
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
+        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -57,12 +63,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         List<Component> components = new ArrayList<>();
         components.add(plannedActions);
         components.addAll(trainCompartments);
-
-        for (Compartment compartment: trainCompartments) {
-            components.add(compartment.getLootInside());
-            components.add(compartment.getLootOnTop());
-        }
-
         components.addAll(playerHandCards);
         components.addAll(playerDecks);
         components.addAll(playerLoot);
@@ -100,7 +100,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         }
 
         if (PARTIAL_OBSERVABLE && playerId != -1) {
-            Random r = new Random(copy.gameParameters.getRandomSeed());
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // Other player hands are hidden, but it's known what's in a player's deck
@@ -108,7 +107,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                     copy.playerDecks.get(i).add(copy.playerHandCards.get(i));
                     int nCardsInHand = copy.playerHandCards.get(i).getSize();
                     copy.playerHandCards.get(i).clear();
-                    copy.playerDecks.get(i).shuffle(r);
+                    copy.playerDecks.get(i).shuffle(rnd);
                     for (int j = 0; j < nCardsInHand; j++) {
                         copy.playerHandCards.get(i).add(copy.playerDecks.get(i).draw());
                     }
@@ -122,7 +121,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                     // Random value for loot of this same type
                     Loot realLoot = playerLoot.get(i).get(j);
                     ArrayList<Pair<Integer,Integer>> lootOptions = ((ColtExpressParameters)copy.gameParameters).loot.get(realLoot.getLootType());
-                    int randomValue = lootOptions.get(r.nextInt(lootOptions.size())).a;
+                    int randomValue = lootOptions.get(rnd.nextInt(lootOptions.size())).a;
                     dLoot.add(new Loot(realLoot.getLootType(), randomValue));
                 }
             }
@@ -137,14 +136,14 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                     // Random value for loot of this same type
                     Loot realLoot = realCompartment.lootOnTop.get(j);
                     ArrayList<Pair<Integer,Integer>> lootOptions = ((ColtExpressParameters)copy.gameParameters).loot.get(realLoot.getLootType());
-                    int randomValue = lootOptions.get(r.nextInt(lootOptions.size())).a;
+                    int randomValue = lootOptions.get(rnd.nextInt(lootOptions.size())).a;
                     copyCompartment.lootOnTop.add(new Loot(realLoot.getLootType(), randomValue));
                 }
                 for (int j = 0; j < realCompartment.lootInside.getSize(); j++) {
                     // Random value for loot of this same type
                     Loot realLoot = realCompartment.lootInside.get(j);
                     ArrayList<Pair<Integer,Integer>> lootOptions = ((ColtExpressParameters)copy.gameParameters).loot.get(realLoot.getLootType());
-                    int randomValue = lootOptions.get(r.nextInt(lootOptions.size())).a;
+                    int randomValue = lootOptions.get(rnd.nextInt(lootOptions.size())).a;
                     copyCompartment.lootInside.add(new Loot(realLoot.getLootType(), randomValue));
                 }
             }
@@ -169,8 +168,8 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             // Then we randomise the invisible ones
             for (Map.Entry<Integer, ArrayList<Integer>> e: cardReplacements.entrySet()) {
                 // loop over each player, and shuffle their decks (which now includes all cards we can't see)
-                copy.playerDecks.get(e.getKey()).shuffle(r);
-                Deck<ColtExpressCard> bulletCards = new Deck<>("tempDeck");
+                copy.playerDecks.get(e.getKey()).shuffle(rnd);
+                Deck<ColtExpressCard> bulletCards = new Deck<>("tempDeck", VisibilityMode.HIDDEN_TO_ALL);
                 for (int i: e.getValue()) {
                     // This might be a bullet card...
                     ColtExpressCard topCard = copy.playerDecks.get(e.getKey()).draw();
@@ -183,68 +182,36 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                 }
                 // then we put the bullet cards back into the player deck and reshuffle
                 copy.playerDecks.get(e.getKey()).add(bulletCards);
-                copy.playerDecks.get(e.getKey()).shuffle(r);
+                copy.playerDecks.get(e.getKey()).shuffle(rnd);
             }
 
             // Round cards are hidden for subsequent rounds, randomize those
-            for (int i = getTurnOrder().getRoundCounter()+1; i < rounds.getSize(); i++) {
-                if (i != rounds.getSize() -1) {
-                    copy.rounds.setComponent(i, getRandomRoundCard((ColtExpressParameters) getGameParameters(), i));
-                } else {
-                    copy.rounds.setComponent(i, getRandomEndRoundCard((ColtExpressParameters) getGameParameters(), i));
+            // We exclude any visible RoundCard
+            List<RoundCard> exclusionList = copy.rounds.getVisibleComponents(playerId).stream()
+                    .filter(Objects::nonNull).collect(toList());
+            for (int i = 0; i < rounds.getSize(); i++) {
+                if (!rounds.isComponentVisible(i, playerId)) {
+                    if (i == rounds.getSize() - 1) { // last card, so use an End Round Card
+                        copy.rounds.setComponent(i, getRandomEndRoundCard((ColtExpressParameters) getGameParameters()));
+                    } else {
+                        copy.rounds.setComponent(i, getRandomRoundCard((ColtExpressParameters) getGameParameters(), i, exclusionList));
+                        exclusionList.add(copy.rounds.get(i));
+                    }
                 }
             }
         }
+
         return copy;
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new ColtExpressHeuristic().evaluateState(this, playerId);
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            // Other player hands and decks are not visible
-            // All loot is not visible
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerHandCards.get(i).getComponentID());
-                    for (Component co: playerHandCards.get(i).getComponents()) {
-                        add(co.getComponentID());
-                    }
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component co: playerDecks.get(i).getComponents()) {
-                        add(co.getComponentID());
-                    }
-                }
-                add(playerLoot.get(i).getComponentID());
-                for (Component co: playerLoot.get(i).getComponents()) {
-                    add(co.getComponentID());
-                }
-            }
-            for (Compartment c: trainCompartments) {
-                add(c.lootInside.getComponentID());
-                for (Component co: c.lootInside.getComponents()) {
-                    add(co.getComponentID());
-                }
-                add(c.lootOnTop.getComponentID());
-                for (Component co: c.lootOnTop.getComponents()) {
-                    add(co.getComponentID());
-                }
-            }
-            // Following round cards are not visible
-            for (int i = getTurnOrder().getRoundCounter()+1; i < rounds.getSize(); i++) {
-                add(rounds.getComponents().get(i).getComponentID());
-            }
-            // Some planned actions might not be visible
-            for (int i = 0; i < plannedActions.getSize(); i++) {
-                if (!plannedActions.isComponentVisible(i, playerId)) {
-                    add(plannedActions.getComponents().get(i).getComponentID());
-                }
-            }
-        }};
+    public double getGameScore(int playerId) {
+        return getLoot(playerId).sumInt(Loot::getValue);
     }
 
     @Override
@@ -257,7 +224,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         playerPlayingBelle = -1;
         plannedActions = null;
         trainCompartments = new LinkedList<>();
-        rounds = new Deck<>("Rounds", -1);
+        rounds = new PartialObservableDeck<>("Rounds", -1, getNPlayers());
         gamePhase = ColtExpressGamePhase.PlanActions;
     }
 
@@ -348,7 +315,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     public List<Deck<ColtExpressCard>> getPlayerDecks() {
         return playerDecks;
     }
-    public Deck<RoundCard> getRounds() {
+    public PartialObservableDeck<RoundCard> getRounds() {
         return rounds;
     }
     public HashMap<Integer, CharacterType> getPlayerCharacters() {
@@ -422,9 +389,9 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
      * Helper getter methods for round card composition.
      */
 
-    RoundCard getRandomEndRoundCard(ColtExpressParameters cep, int i) {
+    RoundCard getRandomEndRoundCard(ColtExpressParameters cep) {
         int nEndCards = cep.endRoundCards.length;
-        int choice = new Random(cep.getRandomSeed() + i).nextInt(nEndCards);
+        int choice = rnd.nextInt(nEndCards);
         return getEndRoundCard(cep, choice);
     }
 
@@ -437,19 +404,19 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return null;
     }
 
-    RoundCard getRandomRoundCard(ColtExpressParameters cep, int i) {
-        int nRoundCards = cep.roundCards.length;
-        int choice = new Random(cep.getRandomSeed() + i).nextInt(nRoundCards);
-        return getRoundCard(cep, choice, getNPlayers());
+    RoundCard getRandomRoundCard(ColtExpressParameters cep, int i, List<RoundCard> exclusionList) {
+        List<String> namesToExclude = exclusionList.stream().map(RoundCard::getComponentName).collect(toList());
+        List<ColtExpressTypes.RegularRoundCard> availableTypes = Arrays.stream(cep.roundCards)
+                .filter(rc -> !namesToExclude.contains(rc.name())).collect(toList());
+        int nRoundCards = availableTypes.size();
+        int choice = rnd.nextInt(nRoundCards);
+        return getRoundCard(availableTypes.get(choice), getNPlayers());
     }
 
-    RoundCard getRoundCard(ColtExpressParameters cep, int idx, int nPlayers) {
-        if (idx >= 0 && idx < cep.roundCards.length) {
-            RoundCard.TurnType[] turnTypes = cep.roundCards[idx].getTurnTypeSequence(nPlayers);
-            AbstractAction event = cep.roundCards[idx].getEndCardEvent();
-            return new RoundCard(cep.roundCards[idx].name(), turnTypes, event);
-        }
-        return null;
+    RoundCard getRoundCard(ColtExpressTypes.RegularRoundCard cardType, int nPlayers) {
+        RoundCard.TurnType[] turnTypes = cardType.getTurnTypeSequence(nPlayers);
+        AbstractAction event = cardType.getEndCardEvent();
+        return new RoundCard(cardType.name(), turnTypes, event);
     }
 
 }

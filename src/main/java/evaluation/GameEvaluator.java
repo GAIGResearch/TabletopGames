@@ -4,7 +4,6 @@ import core.*;
 import core.interfaces.IStatisticLogger;
 import evodef.*;
 import games.GameType;
-import players.mcts.MCTSPlayer;
 import utilities.SummaryLogger;
 
 import java.util.*;
@@ -80,6 +79,8 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     @Override
     public double evaluate(int[] settings) {
+/*        System.out.println(String.format("Starting evaluation %d of %s at %tT", nEvals,
+                Arrays.toString(settings), System.currentTimeMillis()));*/
         Object configuredThing = searchSpace.getAgent(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;
@@ -115,7 +116,7 @@ public class GameEvaluator implements SolutionEvaluator {
         AbstractGameState finalState = newGame.getGameState();
 
         nEvals++;
-        return finalState.getScore(playerIndex);
+        return finalState.getHeuristicScore(playerIndex);
     }
 
     /**

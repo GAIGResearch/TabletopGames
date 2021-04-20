@@ -1,23 +1,22 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
+import players.mcts.MCTSParams;
 import players.simple.RandomPlayer;
 import utilities.Pair;
-import utilities.StatSummary;
+import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
@@ -25,7 +24,7 @@ import static games.GameType.*;
 public class Game {
 
     // Type of game
-    private GameType gameType;
+    private final GameType gameType;
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
@@ -35,7 +34,7 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     /* Game Statistics */
 
@@ -49,6 +48,9 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
+
+    private static final AtomicInteger idFountain = new AtomicInteger(0);
+    private int gameID;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -96,25 +98,6 @@ public class Game {
     }
 
     /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules,
-     * and initialises all players.
-     *
-     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
-     */
-    public final void reset(long newRandomSeed) {
-        gameState.reset(newRandomSeed);
-        forwardModel.abstractSetup(gameState);
-        if (players != null) {
-            for (AbstractPlayer player : players) {
-                AbstractGameState observation = gameState.copy(player.getPlayerID());
-                player.initializePlayer(observation);
-            }
-        }
-
-        resetStats();
-    }
-
-    /**
      * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
      * and their IDs, and initialises all players.
      *
@@ -136,6 +119,8 @@ public class Game {
 
             player.initializePlayer(observation);
         }
+        gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
 
         resetStats();
     }
@@ -163,7 +148,8 @@ public class Game {
 
             player.initializePlayer(observation);
         }
-
+        gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
         resetStats();
     }
 
@@ -181,6 +167,7 @@ public class Game {
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
+        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
     /**
@@ -224,7 +211,6 @@ public class Game {
             copyTime += (System.nanoTime() - s);
 
             // Get actions for the player
-            forwardModel.computeAvailableActions(gameState);  // Compute true actions
             s = System.nanoTime();
             List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
             actionComputeTime += (System.nanoTime() - s);
@@ -241,6 +227,9 @@ public class Game {
                 if (observation instanceof IPrintable && VERBOSE) {
                     ((IPrintable) observation).printToConsole();
                 }
+
+                // Start the timer for this decision
+                gameState.playerTimer[activePlayer].resume();
 
                 // Either ask player which action to use or, in case no actions are available, report the updated observation
                 AbstractAction action = null;
@@ -263,9 +252,19 @@ public class Game {
                             nDecisions++;
                         }
                     }
+                    if (COMPETITION_MODE && !observedActions.contains(action)) {
+                        System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                        action = null;
+                    }
+                    AbstractAction finalAction = action;
+                    listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
                 } else {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
+
+                // End the timer for this decision
+                gameState.playerTimer[activePlayer].pause();
+                gameState.playerTimer[activePlayer].incrementAction();
 
                 if (VERBOSE) {
                     if (action != null) {
@@ -275,10 +274,15 @@ public class Game {
                     }
                 }
 
-                // Resolve action and game rules, time it
-                s = System.nanoTime();
-                forwardModel.next(gameState, action);
-                nextTime += (System.nanoTime() - s);
+                // Check player timeout
+                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                    forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
+                } else {
+                    // Resolve action and game rules, time it
+                    s = System.nanoTime();
+                    forwardModel.next(gameState, action);
+                    nextTime += (System.nanoTime() - s);
+                }
             } else {
                 if (firstEnd) {
                     if (VERBOSE) {
@@ -331,6 +335,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
+        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
         if (VERBOSE) {
             System.out.println("Game Over");
         }
@@ -352,7 +357,8 @@ public class Game {
         copyTime /= tick;
         actionComputeTime /= tick;
         agentTime /= nDecisions;
-        nActionsPerTurnSum /= nActionsPerTurnCount;
+        if (nActionsPerTurnCount > 0)
+            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**
@@ -455,6 +461,18 @@ public class Game {
         return gameType;
     }
 
+    public void addListener(IGameListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+            gameState.turnOrder.addListener(listener);
+        }
+    }
+
+    public void clearListeners() {
+        listeners.clear();
+        getGameState().turnOrder.clearListeners();
+    }
+
     /**
      * Retrieves the list of players in the game.
      *
@@ -481,10 +499,12 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed, ActionController ac,
-                              boolean randomizeParameters) {
+                              boolean randomizeParameters, List<IGameListener> listeners) {
         // Creating game instance (null if not implemented)
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
+            if (listeners != null)
+                listeners.forEach(game::addListener);
 
             // Randomize parameters
             if (randomizeParameters) {
@@ -523,16 +543,16 @@ public class Game {
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
                                int nRepetitions, ActionController ac, boolean randomizeParameters,
-                               boolean detailedStatistics) {
+                               boolean detailedStatistics, List<IGameListener> listeners) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        StatSummary[] overall = new StatSummary[nPlayers];
+        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
         String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
             String[] split = players.get(i).getClass().toString().split("\\.");
             String agentName = split[split.length - 1] + "-" + i;
-            overall[i] = new StatSummary("Overall " + agentName);
+            overall[i] = new TAGStatSummary("Overall " + agentName);
             agentNames[i] = agentName;
         }
 
@@ -540,9 +560,9 @@ public class Game {
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
+                statSummaries[i] = new TAGStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -552,7 +572,7 @@ public class Game {
                 Long s = seed;
                 if (s == null) s = System.currentTimeMillis();
                 s += offset;
-                game = runOne(gt, players, s, ac, randomizeParameters);
+                game = runOne(gt, players, s, ac, randomizeParameters, listeners);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                     offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
@@ -600,27 +620,27 @@ public class Game {
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters) {
+                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        StatSummary[] overall = new StatSummary[nPlayers];
+        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new StatSummary("Overall Player " + i);
+            overall[i] = new TAGStatSummary("Overall Player " + i);
         }
 
         // For each game...
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new TAGStatSummary("Game: " + gt.name() + "; Player: " + i);
             }
 
             // Play n repetitions of this game and record player results
             for (int i = 0; i < nRepetitions; i++) {
-                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters);
+                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters, listeners);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                 }
@@ -650,7 +670,7 @@ public class Game {
      * @param statSummaries - object recording statistics
      * @param game          - finished game
      */
-    public static void recordPlayerResults(StatSummary[] statSummaries, Game game) {
+    public static void recordPlayerResults(TAGStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
         Utils.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
@@ -670,8 +690,8 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = null;
-        //ActionController ac = new ActionController();
+        ActionController ac = new ActionController(); //null;
+        //ActionController ac = null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
@@ -679,31 +699,19 @@ public class Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new RMHCPlayer());
-        //players.add(new RMHCPlayer());
-        //players.add(new OSLAPlayer());
-        //players.add(new HumanGUIPlayer(ac));
-        //players.add(new RandomPlayer());
-        //players.add(new OSLAPlayer());
-        //players.add(new MCTSPlayer());
-        //players.add(new HumanConsolePlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new HumanConsolePlayer());
+        MCTSParams params1 = new MCTSParams();
 
-        //players.add(new HumanGUIPlayer(ac));
-        //players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanConsolePlayer());
-        players.add(new HumanConsolePlayer());
-        //players.add(new MCTSPlayer());
         //players.add(new RandomPlayer());
+//        players.add(new RMHCPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
+        //players.add(new HumanConsolePlayer());
+        //players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Poker, players, seed, ac, false);
-//        runMany(GameType.Category.Strategy.getAllGames(), players, null, 50, null, false);
+        runOne(Poker, players, seed, ac, false, null);
+        //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
@@ -716,5 +724,6 @@ public class Game {
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 100, ac, false, true);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
+
     }
 }
