@@ -35,7 +35,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         CatanGameState state = (CatanGameState) firstState;
-        CatanParameters params = (CatanParameters)state.getGameParameters();
+        params = (CatanParameters)state.getGameParameters();
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
