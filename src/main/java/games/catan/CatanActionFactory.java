@@ -190,6 +190,7 @@ public class CatanActionFactory {
 
     static List<AbstractAction> getStealActions(CatanGameState gs){
         ArrayList<AbstractAction> actions = new ArrayList();
+        int[] stealingFrom = {0,0,0,0};
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
@@ -197,7 +198,8 @@ public class CatanActionFactory {
                 if (tile.hasRobber()){
                     Settlement[] settlements = tile.getSettlements();
                     for (int i = 0; i < settlements.length; i++){
-                        if (settlements[i].getOwner() != -1 && settlements[i].getOwner() != gs.getCurrentPlayer()){
+                        if (settlements[i].getOwner() != -1 && settlements[i].getOwner() != gs.getCurrentPlayer() && stealingFrom[settlements[i].getOwner()]==0){
+                            stealingFrom[settlements[i].getOwner()]=1;
                             actions.add(new StealResource(settlements[i].getOwner()));
                         }
                     }
@@ -265,7 +267,6 @@ public class CatanActionFactory {
                 actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
             }
         }
-
         return actions;
     }
 
