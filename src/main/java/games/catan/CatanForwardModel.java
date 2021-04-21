@@ -167,31 +167,33 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         int value = gs.getRollValue();
         CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                if (tile.getNumber() == value && !tile.hasRobber()) {
-                    // allocate resource for each settlement/city
-                    for (Settlement settl : tile.getSettlements()) {
-                        if (settl.getOwner() != -1) {
-                            // Move the card from the resource deck and give it to the player
-                            List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
-                            int counter = 0;
-                            for (int i = 0; i < resourceDeck.size(); i++) {
-                                Card card = resourceDeck.get(i);
-                                if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
-                                    // remove from deck and give it to player
-                                    System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
-                                    ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
-                                    ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
-                                    counter++;
+        if(value!=7){
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    if (tile.getNumber() == value && !tile.hasRobber()) {
+                        // allocate resource for each settlement/city
+                        for (Settlement settl : tile.getSettlements()) {
+                            if (settl.getOwner() != -1) {
+                                // Move the card from the resource deck and give it to the player
+                                List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
+                                int counter = 0;
+                                for (int i = 0; i < resourceDeck.size(); i++) {
+                                    Card card = resourceDeck.get(i);
+                                    if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
+                                        // remove from deck and give it to player
+                                        System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
+                                        ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
+                                        ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
+                                        counter++;
+                                    }
+                                    // getType is 1 for settlement; 2 for city
+                                    if (counter >= settl.getType()) {
+                                        break;
+                                    }
                                 }
-                                // getType is 1 for settlement; 2 for city
-                                if (counter >= settl.getType()) {
-                                    break;
-                                }
-                            }
 
+                            }
                         }
                     }
                 }

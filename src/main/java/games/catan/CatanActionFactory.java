@@ -13,6 +13,7 @@ import games.catan.CatanParameters.Resources;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.resourceDeckHash;
@@ -228,6 +229,7 @@ public class CatanActionFactory {
     }
 
     static List<AbstractAction> getDiscardActions(CatanGameState gs){
+        final int DISCARD_COMBINATION_LIMIT = 13;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<Card> playerResourceDeck = (Deck<Card>)gs.getComponentActingPlayer(playerHandHash);
         Deck<Card> commonResourceDeck = (Deck<Card>)gs.getComponent(resourceDeckHash);
@@ -236,23 +238,32 @@ public class CatanActionFactory {
         if (deckSize <= ((CatanParameters)gs.getGameParameters()).max_cards_without_discard){
             actions.add(new DoNothing());
             return actions;
-        } else{
-            // list all the combinations
-            int n = playerResourceDeck.getSize();
-            int r = n / 2; // remove half of the resources
+        } else {
+            if(deckSize < DISCARD_COMBINATION_LIMIT){
+                // list all the combinations
+                int n = playerResourceDeck.getSize();
+                int r = n / 2; // remove half of the resources
 
-            List<int[]> results = new ArrayList<>();
-            // todo limit number of actions when too many cards are in player's hand
-            System.out.println("Discarding " + r + " card from " + n + "cards");
-            getCombination(results, new int[r], 0, 0, n, r);
-            for (int[] result: results){
+                List<int[]> results = new ArrayList<>();
+                // todo limit number of actions when too many cards are in player's hand
+                System.out.println("Discarding " + r + " card from " + n + "cards");
+                getCombination(results, new int[r], 0, 0, n, r);
+                for (int[] result: results){
+                    ArrayList<Card> cardsToDiscard = new ArrayList<>();
+                    for (int i = 0; i < result.length; i++){
+                        cardsToDiscard.add(playerResourceDeck.get(result[i]));
+                    }
+                    actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
+                }
+            } else {
+                // Current solution to memory issue, random picks cards to discard if player has over DISCARD_COMBINATION_LIMIT
                 ArrayList<Card> cardsToDiscard = new ArrayList<>();
-                for (int i = 0; i < result.length; i++){
-                    cardsToDiscard.add(playerResourceDeck.get(i));
+                Random rnd = new Random();
+                for (int i = 0; i < deckSize/2; i++){
+                    cardsToDiscard.add(playerResourceDeck.get(rnd.nextInt(deckSize)));
                 }
                 actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
             }
-
         }
 
         return actions;
