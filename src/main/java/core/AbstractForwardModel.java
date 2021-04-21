@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import utilities.ElapsedCpuChessTimer;
 import utilities.Utils;
 
 import java.util.Arrays;
@@ -24,6 +25,12 @@ public abstract class AbstractForwardModel {
         firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
         Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
         firstState.gamePhase = AbstractGameState.DefaultGamePhase.Main;
+        firstState.playerTimer = new ElapsedCpuChessTimer[firstState.getNPlayers()];
+        for (int i = 0; i < firstState.getNPlayers(); i++) {
+            firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameParameters.thinkingTimeMins,
+                    firstState.gameParameters.incrementActionS, firstState.gameParameters.incrementTurnS,
+                    firstState.gameParameters.incrementRoundS, firstState.gameParameters.incrementMilestoneS);
+        }
 
         _setup(firstState);
         firstState.addAllComponents();
@@ -77,15 +84,23 @@ public abstract class AbstractForwardModel {
     }
 
     /**
-     * Current player tried to play an illegal action. Either disqualify (Automatic loss and no more playing),
-     * or play a random action for them instead.
+     * Current player tried to play an illegal action.
      * Subclasses can overwrite for their own behaviour.
      *
      * @param gameState - game state in which illegal action was attempted.
      * @param action    - action played
      */
     protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
-        if (DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED) {
+        disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED, gameState);
+    }
+
+    /**
+     * Either disqualify (automatic loss and no more playing), or play a random action for the player instead.
+     * @param flag - boolean to check if player should be disqualified, or random action should be played
+     * @param gameState - current game state
+     */
+    protected final void disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
+        if (flag) {
             gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             gameState.turnOrder.endPlayerTurn(gameState);
         } else {

@@ -7,6 +7,7 @@ public class CoreConstants {
     public final static boolean PARTIAL_OBSERVABLE = true;
     public final static boolean COMPETITION_MODE = false;
     public final static boolean DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED = false;
+    public final static boolean DISQUALIFY_PLAYER_ON_TIMEOUT = false;
     public final static boolean ALWAYS_DISPLAY_FULL_OBSERVABLE = false;
     public final static boolean ALWAYS_DISPLAY_CURRENT_PLAYER = false;
     public final static long FRAME_SLEEP_MS = 100;
@@ -33,7 +34,7 @@ public class CoreConstants {
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
 
     public enum GameEvents {
-        GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
+        ABOUT_TO_START, GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
     }
 
     /**

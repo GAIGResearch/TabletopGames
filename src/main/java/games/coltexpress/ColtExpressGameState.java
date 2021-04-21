@@ -8,6 +8,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.cards.RoundCard;
@@ -50,7 +51,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     Random rnd;
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds));
+        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds), GameType.ColtExpress);
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;

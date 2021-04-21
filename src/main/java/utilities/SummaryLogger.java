@@ -8,7 +8,7 @@ import java.util.*;
 import static java.util.stream.Collectors.*;
 
 /**
- * Statistics Logger that just takes in Numeric data and maintains summery statistics for each type:
+ * Statistics Logger that just takes in Numeric data and maintains summary statistics for each type:
  * - mean, min, max, standard error, standard deviation, n
  * A summary is printed out in alphabetic order once finished.
  */

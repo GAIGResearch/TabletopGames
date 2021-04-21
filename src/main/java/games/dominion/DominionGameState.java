@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.actions.IDelayedAction;
 import games.dominion.cards.CardType;
@@ -59,7 +60,7 @@ public class DominionGameState extends AbstractGameState {
      * @param nPlayers       - number of players
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DominionTurnOrder(nPlayers));
+        super(gameParameters, new DominionTurnOrder(nPlayers), GameType.Dominion);
         rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
         defenceStatus = new boolean[nPlayers];  // defaults to false

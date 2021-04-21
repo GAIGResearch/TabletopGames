@@ -20,6 +20,8 @@ public class LoveLetterTurnOrder extends AlternatingTurnOrder {
             return;
         }
 
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
+
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }

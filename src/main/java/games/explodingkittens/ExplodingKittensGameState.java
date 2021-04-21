@@ -8,6 +8,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
@@ -38,7 +39,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     Stack<AbstractAction> actionStack;
 
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers));
+        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers), GameType.ExplodingKittens);
         playerGettingAFavor = -1;
     }
 
