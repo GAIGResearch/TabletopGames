@@ -14,6 +14,7 @@ import java.util.List;
 import static core.CoreConstants.playerHandHash;
 
 public class Monopoly extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     CatanParameters.Resources resource;
     Card card;
 

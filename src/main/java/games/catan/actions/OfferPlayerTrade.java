@@ -8,6 +8,7 @@ import games.catan.CatanParameters.Resources;
 import java.util.List;
 
 public class OfferPlayerTrade extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     int[] resourcesOffered;
     int[] resourcesRequested;
     int offeringPlayerID;

@@ -13,6 +13,7 @@ import static core.CoreConstants.VERBOSE;
 
 // Builds the Road by reference
 public class BuildRoadByRef extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     Road road;
 
     public BuildRoadByRef(Road road){

@@ -10,6 +10,7 @@ import games.catan.CatanParameters;
 import games.catan.CatanTurnOrder;
 
 public class PlayKnightCard extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     Card card;
 
     public PlayKnightCard(Card card){

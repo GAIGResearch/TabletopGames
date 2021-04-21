@@ -13,6 +13,7 @@ import static games.catan.CatanConstants.resourceDeckHash;
 
 /* Takes in a list of cards to be discarded from the player's hand*/
 public class DiscardCards extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     ArrayList<Card> toBeDiscarded;
     int playerID;
 

@@ -13,6 +13,7 @@ import static core.CoreConstants.VERBOSE;
 
 // Places a road by reference - player is not charged resources
 public class PlaceRoad extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     Road road;
     Card card;
 

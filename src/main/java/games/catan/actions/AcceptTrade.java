@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 
 public class AcceptTrade extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     protected OfferPlayerTrade offeredTrade;
 
     public AcceptTrade(OfferPlayerTrade offeredTrade) {

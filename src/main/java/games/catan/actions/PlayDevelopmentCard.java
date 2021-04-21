@@ -36,7 +36,7 @@ public class PlayDevelopmentCard extends AbstractAction {
             new Monopoly(CatanParameters.Resources.BRICK, card);
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Year of Plenty")) {
             System.out.println("Take any 2 resources from the resourceDeck");
-            new YearOfPlenty(CatanParameters.Resources.BRICK, CatanParameters.Resources.BRICK, card);
+            //new YearOfPlenty(CatanParameters.Resources.BRICK, CatanParameters.Resources.BRICK, card);
         }else if (card.getProperty(CatanConstants.cardType).toString().equals("Road Building")) {
             System.out.println("Player can immediately place 2 roads for free");
         }

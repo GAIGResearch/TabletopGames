@@ -6,6 +6,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanTile;
 
 public class MoveRobber extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     int x;
     int y;
 

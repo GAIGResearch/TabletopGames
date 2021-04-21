@@ -18,6 +18,7 @@ import java.util.Random;
  * Player may steal a resource from a player when moving a robber or playing a knight card
  */
 public class StealResource extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     int targetPlayerID;
 
     public StealResource(int targetPlayerID){

@@ -12,6 +12,7 @@ import games.catan.components.Settlement;
 import static core.CoreConstants.VERBOSE;
 
 public class BuildCity extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     int row;
     int col;
     int vertex;

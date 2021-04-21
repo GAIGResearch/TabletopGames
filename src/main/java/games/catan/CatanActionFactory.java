@@ -453,7 +453,7 @@ public class CatanActionFactory {
             if (cardType.equals(CatanParameters.CardTypes.YEAR_OF_PLENTY.toString())){
                 for (CatanParameters.Resources resource1: CatanParameters.Resources.values()){
                     for (CatanParameters.Resources resource2: CatanParameters.Resources.values()) {
-                        actions.add(new YearOfPlenty(resource1, resource2, c));
+                        actions.add(new YearOfPlenty(resource1, resource2));
                     }
                 }
             }

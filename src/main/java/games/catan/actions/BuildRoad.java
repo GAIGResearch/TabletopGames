@@ -11,6 +11,7 @@ import games.catan.CatanTile;
 import static core.CoreConstants.VERBOSE;
 
 public class BuildRoad extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     int x;
     int y;
     int edge;

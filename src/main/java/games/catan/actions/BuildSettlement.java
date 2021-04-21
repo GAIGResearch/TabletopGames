@@ -17,6 +17,7 @@ import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.resourceDeckHash;
 
 public class BuildSettlement extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     int x;
     int y;
     int vertex;

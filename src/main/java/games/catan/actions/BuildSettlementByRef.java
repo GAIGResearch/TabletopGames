@@ -13,6 +13,7 @@ import static core.CoreConstants.VERBOSE;
 
 // Builds a Settlement by reference
 public class BuildSettlementByRef extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     Settlement settlement;
     int owner;
 

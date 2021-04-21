@@ -16,6 +16,7 @@ import java.util.List;
 /* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
 * This action also includes the Harbor trades using the exchangeRate*/
 public class DefaultTrade extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     public Resources resourceOffer;
     public Resources resourceToGet;
     public int exchangeRate;

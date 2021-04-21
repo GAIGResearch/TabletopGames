@@ -9,6 +9,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 
 public class BuyDevelopmentCard extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
 
     @Override
     public boolean execute(AbstractGameState gs) {

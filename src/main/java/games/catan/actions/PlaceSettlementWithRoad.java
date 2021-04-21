@@ -21,6 +21,7 @@ import static games.catan.CatanConstants.*;
 * Class to execute both placing a settlement and a road at the same time instead of doing it as a 2 step process
 *  */
 public class PlaceSettlementWithRoad extends AbstractAction {
+    //TODO HASH,Equals,Copy,State
     BuildSettlement bs;
     BuildRoad br;
 
