@@ -9,7 +9,6 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 
 public class BuyDevelopmentCard extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -30,7 +29,7 @@ public class BuyDevelopmentCard extends AbstractAction {
             return true;
         }
 
-        return false;
+        throw new AssertionError("Player cannot afford a development card");
     }
 
     @Override
@@ -49,7 +48,7 @@ public class BuyDevelopmentCard extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 0;
+        return 2;
     }
 
     @Override

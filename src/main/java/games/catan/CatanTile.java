@@ -120,7 +120,7 @@ public class CatanTile {
             this.robber = false;
             return true;
         }
-        return false;
+        throw new AssertionError("Cannot remove robber");
     }
 
     public Polygon getHexagon(){
@@ -141,7 +141,7 @@ public class CatanTile {
             this.roads[edge] = road;
             return true;
         }
-        return false;
+        throw new AssertionError("Cannot set road: edge: " + edge);
     }
 
     public boolean addRoad(int edge, int playerID){
@@ -150,7 +150,7 @@ public class CatanTile {
             this.roads[edge].setOwner(playerID);
             return true;
         }
-        return false;
+        throw new AssertionError("Cannot add road: edge: " + edge);
     }
 
     public Road[] getRoads(){
@@ -163,7 +163,7 @@ public class CatanTile {
             this.hasHarbor = true;
             return true;
         }
-        return false;
+        throw new AssertionError("Cannot add harbour: edge: " + edge);
     }
 
     public int[] getHarbors(){
@@ -179,7 +179,7 @@ public class CatanTile {
             this.settlements[vertex].setOwner(playerID);
             return true;
         }
-        return false;
+        throw new AssertionError("Cannot add settlement: vertex: " + vertex);
     }
 
     public boolean setSettlement(int vertex, Settlement settlement){
@@ -188,7 +188,7 @@ public class CatanTile {
             this.settlements[vertex] = settlement;
             return true;
         }
-        return false;
+        throw new AssertionError("Cannot set settlement: vertex: " + vertex);
     }
 
     public Settlement[] getSettlements(){
@@ -197,7 +197,7 @@ public class CatanTile {
 
     public boolean addCity(int vertex){
         if (this.settlements[vertex] == null){
-            return false;
+            throw new AssertionError("Cannot add city: vertex: " + vertex);
         } else{
             return this.settlements[vertex].upgrade();
         }

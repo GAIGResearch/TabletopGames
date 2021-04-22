@@ -5,10 +5,13 @@ import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 import games.catan.CatanTile;
 
+import java.util.Objects;
+
+import static core.CoreConstants.VERBOSE;
+
 public class MoveRobber extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    int x;
-    int y;
+    public final int x;
+    public final int y;
 
     public MoveRobber(int x, int y){
         this.x = x;
@@ -18,12 +21,16 @@ public class MoveRobber extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
         CatanTile robberTile = cgs.getRobber(cgs.getBoard());
-        System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
+        if(VERBOSE){
+            System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
+        }
+
         if (robberTile.removeRobber()){
             cgs.getBoard()[x][y].placeRobber();
             return true;
+        } else {
+            throw new AssertionError("Cannot move robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
         }
-        return false;
     }
 
     public int[] getXY(){
@@ -32,7 +39,7 @@ public class MoveRobber extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new MoveRobber(x, y);
+        return this;
     }
 
     @Override
@@ -47,7 +54,7 @@ public class MoveRobber extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(x,y);
     }
 
     @Override

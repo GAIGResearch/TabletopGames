@@ -8,12 +8,10 @@ import core.components.Deck;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
-import games.catan.components.Road;
-import games.catan.components.Settlement;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static games.catan.CatanConstants.*;
 
@@ -21,27 +19,36 @@ import static games.catan.CatanConstants.*;
 * Class to execute both placing a settlement and a road at the same time instead of doing it as a 2 step process
 *  */
 public class PlaceSettlementWithRoad extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    BuildSettlement bs;
-    BuildRoad br;
+    public final int x;
+    public final int y;
+    public final int i;
+    public final int player;
 
-    public PlaceSettlementWithRoad(BuildSettlement bs, BuildRoad br){
-        this.bs = bs;
-        this.br = br;
+    public PlaceSettlementWithRoad(int x, int y, int i, int player) {
+        this.x = x;
+        this.y = y;
+        this.i = i;
+        this.player = player;
     }
+
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (this.bs.execute(gs) && this.br.execute(gs)){
+        BuildSettlement buildSettlement  = new BuildSettlement(x,y,i,player,true);
+        BuildRoad buildRoad = new BuildRoad(x,y,i,player,true);
+
+        String test = this.getString(gs);
+
+        if (buildSettlement.execute(gs) && buildRoad.execute(gs)){
             // players get the resources in the second round after the settlements they placed
             if (gs.getTurnOrder().getRoundCounter() == 1){
                 CatanGameState cgs = ((CatanGameState)gs);
                 CatanTile[][] board = cgs.getBoard();
                 // in the second round players get the resources from the the tiles around the settlement
                 ArrayList<CatanTile> tiles = new ArrayList<CatanTile>();
-                CatanTile tile = cgs.getBoard()[bs.x][bs.y];
+                CatanTile tile = cgs.getBoard()[buildSettlement.x][buildSettlement.y];
                 // next step is to find the tiles around the settlement
-                int[][] neighbourCoords =  CatanTile.get_neighbours_on_vertex(tile, bs.vertex);
+                int[][] neighbourCoords =  CatanTile.get_neighbours_on_vertex(tile, buildSettlement.vertex);
                 tiles.add(tile);
                 tiles.add(board[neighbourCoords[0][0]][neighbourCoords[0][1]]);
                 tiles.add(board[neighbourCoords[1][0]][neighbourCoords[1][1]]);
@@ -70,32 +77,32 @@ public class PlaceSettlementWithRoad extends AbstractAction {
 
             }
             return true;
+        } else {
+            throw new AssertionError("Could not execute chosen settlement and road build");
         }
-        return false;
     }
 
     @Override
     public AbstractAction copy() {
-        return new PlaceSettlementWithRoad((BuildSettlement)bs.copy(), (BuildRoad)br.copy());
+        return this;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other instanceof PlaceSettlementWithRoad){
-            PlaceSettlementWithRoad otherAction = (PlaceSettlementWithRoad)other;
-            return bs.equals(otherAction.bs) && br.equals(otherAction.br);
+    public boolean equals(Object obj) {
+        if (obj instanceof PlaceSettlementWithRoad){
+            PlaceSettlementWithRoad other = (PlaceSettlementWithRoad)obj;
+            return other.x == x && other.y == y && other.i==i && other.player == player;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(x,y,i,player);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "PlaceSettlementWithRoad settlement = " + bs.toString() + " and road = " + br.toString();
+        return String.format("PlaceSettlementWithRoad: x=%d y=%d i=%d player=%d",x,y,i,player);
     }
 }

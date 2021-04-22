@@ -426,14 +426,10 @@ public class CatanGameState extends AbstractGameState {
 
         for (int i = 0; i < playerResourcesToTradeCopy.length; i++){
             if (playerResourcesToTradeCopy[i] > 0){
-                if (VERBOSE)
-                    System.out.println("Player does not have enough resources in hand");
-                return false;
+                throw new AssertionError("Player does not have enough resources in hand");
             }
             if (otherPlayerResourcesToTradeCopy[i] > 0){
-                if (VERBOSE)
-                    System.out.println("Other player does not have enough resources in hand");
-                return false;
+                throw new AssertionError("Other player does not have enough resources in hand");
             }
         }
 
@@ -534,6 +530,70 @@ public class CatanGameState extends AbstractGameState {
             copy.put(key, a.copy());
         }
         return copy;
+    }
+
+    public boolean checkRoadPlacement(int roadId, CatanTile tile, int player){
+        /*
+         * @args:
+         * roadId - Id of the road on tile
+         * tile - tile on which we would like to build a road
+         * gs - Game state */
+
+        Graph<Settlement, Road> graph = getGraph();
+        Road road = tile.getRoads()[roadId];
+
+        // check if road is already taken
+        if (road.getOwner() != -1){
+            return false;
+        }
+        // check if there is our settlement along edge
+        Settlement settl1 = tile.getSettlements()[roadId];
+        Settlement settl2 = tile.getSettlements()[(roadId+1)%6];
+        if (settl1.getOwner() == player || settl2.getOwner() == player){
+            return true;
+        }
+
+        // check if there is a road on a neighbouring edge
+        List<Road> roads = graph.getConnections(settl1);
+        roads.addAll(graph.getConnections(settl2));
+        for (Road rd :roads){
+            if (rd.getOwner() == player){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkSettlementPlacement(Settlement settlement, int player){
+        // checks if any of the neighbouring settlements are already taken (distance rule)
+        // if yes returns false otherwise true
+
+        // if settlement is taken then cannot replace it
+        if (settlement.getOwner() != -1){
+            return false;
+        }
+
+        // check if there is a settlement one distance away
+        Graph<Settlement, Road> graph = getGraph();
+        List<Settlement> settlements = graph.getNeighbourNodes(settlement);
+        for (Settlement settl: settlements){
+            if (settl.getOwner() != -1){
+                return false;
+            }
+        }
+
+        List<Road> roads = graph.getConnections(settlement);
+        // check first if we have a road next to the settlement owned by the player
+        // Doesn't apply in the setup phase
+        if (!getGamePhase().equals(CatanGameState.CatanGamePhase.Setup)){
+            for (Road road : roads) {
+                if (road.getOwner() == player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     private CatanTile[][] copyBoard(){

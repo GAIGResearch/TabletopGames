@@ -8,67 +8,69 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
 
+import java.util.Objects;
+
 import static core.CoreConstants.VERBOSE;
 
 public class BuildRoad extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    int x;
-    int y;
-    int edge;
-    int playerID;
+    public final int x;
+    public final int y;
+    public final int edge;
+    public final int playerID;
+    public final boolean free;
 
-    public BuildRoad(int x, int y, int edge, int playerID){
+    public BuildRoad(int x, int y, int edge, int playerID, boolean free) {
         this.x = x;
         this.y = y;
         this.edge = edge;
         this.playerID = playerID;
+        this.free = free;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        CatanGameState cgs = (CatanGameState)gs;
+        CatanGameState cgs = (CatanGameState) gs;
         CatanTile[][] board = cgs.getBoard();
         if (board[x][y].getRoads()[edge].getOwner() == -1) {
-            if (((Counter)cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum()){
-                if (VERBOSE)
-                    System.out.println("No more roads to build for player " + gs.getCurrentPlayer());
-                return false;
+            if (((Counter) cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum()) {
+                throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
             }
-            ((Counter)cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).increment(1);
-            // take resources after second round
-            if (cgs.getTurnOrder().getRoundCounter() >= 2) {
-                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("road"))) return false;
+            ((Counter) cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).increment(1);
+            // only take resources after set up and not with road building card
+            if (!free) {
+                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("road"))) {
+                    throw new AssertionError("Player " + gs.getCurrentPlayer() + " cannot afford this road");
+                }
             }
-            return board[this.x][this.y].addRoad(edge, playerID);
+            board[this.x][this.y].addRoad(edge, playerID);
+            return true;
+        } else {
+            throw new AssertionError("Road already owned: " + this.toString());
         }
-
-        return false;
     }
 
     @Override
     public AbstractAction copy() {
-        BuildRoad copy = new BuildRoad(x, y, edge, playerID);
-        return copy;
+        return this;
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other instanceof BuildRoad){
-            BuildRoad otherAction = (BuildRoad)other;
-            return x == otherAction.x && y == otherAction.y && edge == otherAction.edge && playerID == otherAction.playerID;
+        if (other instanceof BuildRoad) {
+            BuildRoad otherAction = (BuildRoad) other;
+            return x == otherAction.x && y == otherAction.y && edge == otherAction.edge && playerID == otherAction.playerID && free == otherAction.free;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(x, y, edge, playerID, free);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Buildroad in x=" + x + " y=" + y + " edge=" + edge;
+        return "Buildroad in x=" + x + " y=" + y + " edge=" + edge + " free = " + free;
     }
 
     public int getX() {

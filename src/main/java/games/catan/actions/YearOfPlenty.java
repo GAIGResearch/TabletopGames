@@ -15,10 +15,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static core.CoreConstants.playerHandHash;
+import static games.catan.CatanConstants.cardType;
 import static games.catan.CatanConstants.resourceDeckHash;
 
 public class YearOfPlenty extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
     public final CatanParameters.Resources resource1;
     public final CatanParameters.Resources resource2;
 
@@ -40,11 +40,11 @@ public class YearOfPlenty extends AbstractAction {
                 .findFirst();
         if(yearOfPlenty.isPresent()){
             Card yearOfPlentyCard = yearOfPlenty.get();
-            Optional<Card> firstResource = playerDevDeck.stream()
-                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resource1))
+            Optional<Card> firstResource = commonResourceDeck.stream()
+                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resource1.toString()))
                     .findFirst();
-            Optional<Card> secondResource = playerDevDeck.stream()
-                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resource2))
+            Optional<Card> secondResource = commonResourceDeck.stream()
+                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resource2.toString()))
                     .findFirst();
             if(firstResource.isPresent() && secondResource.isPresent()){
                 Card firstResourceCard = firstResource.get();
@@ -58,6 +58,7 @@ public class YearOfPlenty extends AbstractAction {
                 playerResourceDeck.add(secondResourceCard);
                 commonResourceDeck.remove(secondResourceCard);
             } else {
+                commonResourceDeck.stream().forEach(card -> System.out.println(card.getProperty(cardType)));
                 throw new AssertionError("Cannot use a Year of Plenty Card for resources that are not in deck: " + resource1.toString() + " " + resource2.toString());
             }
         } else {

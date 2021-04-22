@@ -4,26 +4,34 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 
-public class AcceptTrade extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    protected OfferPlayerTrade offeredTrade;
+import java.util.Arrays;
+import java.util.Objects;
 
-    public AcceptTrade(OfferPlayerTrade offeredTrade) {
-        this.offeredTrade = offeredTrade;
+public class AcceptTrade extends AbstractAction {
+    public final int offeringPlayer;
+    public final int receivingPlayer;
+    public final int[] resourcesRequested;
+    public final int[] resourcesOffered;
+
+    public AcceptTrade(int offeringPlayer, int receivingPlayer, int[] resourcesRequested, int[] resourcesOffered) {
+        this.offeringPlayer = offeringPlayer;
+        this.receivingPlayer = receivingPlayer;
+        this.resourcesRequested = resourcesRequested;
+        this.resourcesOffered = resourcesOffered;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        return CatanGameState.swapResources((CatanGameState) gs, gs.getCurrentPlayer(), offeredTrade.getOfferingPlayerID(), offeredTrade.getResourcesRequested(), offeredTrade.getResourcesOffered());
+        if(CatanGameState.swapResources((CatanGameState) gs, receivingPlayer, offeringPlayer, resourcesRequested, resourcesOffered)){
+           return true;
+        } else {
+            throw new AssertionError("A partner did not have sufficient resources");
+        }
     }
 
     @Override
     public AbstractAction copy() {
-        return new AcceptTrade((OfferPlayerTrade) offeredTrade.copy());
-    }
-
-    public OfferPlayerTrade getOfferedTrade(){
-        return offeredTrade;
+        return this;
     }
 
     @Override
@@ -31,20 +39,23 @@ public class AcceptTrade extends AbstractAction {
         if (this == obj) return true;
         if (obj instanceof AcceptTrade){
             AcceptTrade otherAction = (AcceptTrade)obj;
-            return offeredTrade.equals(otherAction.offeredTrade);
+            return otherAction.offeringPlayer==offeringPlayer
+                    && otherAction.receivingPlayer == receivingPlayer
+                    && Arrays.equals(otherAction.resourcesRequested, resourcesRequested)
+                    && Arrays.equals(otherAction.resourcesOffered, resourcesOffered);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int retValue = Objects.hash(offeringPlayer,receivingPlayer);
+        return retValue + 41 * Arrays.hashCode(resourcesOffered) + 163 * Arrays.hashCode(resourcesRequested);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        //todo expand string
-        return "Player " + offeredTrade.getOtherPlayerID() + " trading with "
-                + offeredTrade.getOtherPlayerID();
+        return "Player " + offeringPlayer + " trading" + Arrays.toString(resourcesOffered) + " for " + Arrays.toString(resourcesRequested) + " with Player "
+                + receivingPlayer;
     }
 }

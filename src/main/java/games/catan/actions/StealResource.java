@@ -12,14 +12,14 @@ import games.catan.CatanParameters.Resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 /**
  * Player may steal a resource from a player when moving a robber or playing a knight card
  */
 public class StealResource extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    int targetPlayerID;
+    public final int targetPlayerID;
 
     public StealResource(int targetPlayerID){
         this.targetPlayerID = targetPlayerID;
@@ -45,12 +45,11 @@ public class StealResource extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new StealResource(targetPlayerID);
+        return this;
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
         if (other instanceof StealResource){
             StealResource otherAction = (StealResource)other;
             return targetPlayerID == otherAction.targetPlayerID;
@@ -60,7 +59,7 @@ public class StealResource extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(targetPlayerID);
     }
 
     @Override

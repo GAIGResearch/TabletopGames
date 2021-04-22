@@ -5,22 +5,16 @@ import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters.Resources;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class OfferPlayerTrade extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    int[] resourcesOffered;
-    int[] resourcesRequested;
-    int offeringPlayerID;
-    int otherPlayerID;
-    int negotiationCount = 0;
-
-    public OfferPlayerTrade(int[] resourcesOffered, int[] resourcesRequested, int offeringPlayerID, int otherPlayerID){
-        this.resourcesOffered = resourcesOffered;
-        this.resourcesRequested = resourcesRequested;
-        this.offeringPlayerID = offeringPlayerID;
-        this.otherPlayerID = otherPlayerID;
-    }
+    public final int[] resourcesOffered;
+    public final int[] resourcesRequested;
+    public final int offeringPlayerID;
+    public final int otherPlayerID;
+    public final int negotiationCount;
 
     public OfferPlayerTrade(int[] resourcesOffered, int[] resourcesRequested, int offeringPlayerID, int otherPlayerID, int negotiationCount){
         this.resourcesOffered = resourcesOffered;
@@ -34,25 +28,21 @@ public class OfferPlayerTrade extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        negotiationCount++;
         cgs.setCurrentTradeOffer(this);
         return true;
     }
 
     @Override
     public AbstractAction copy() {
-        OfferPlayerTrade other = new OfferPlayerTrade(resourcesOffered, resourcesRequested, offeringPlayerID, otherPlayerID);
-        other.negotiationCount = this.negotiationCount;
-        return other;
+        return this;
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
         if (other instanceof OfferPlayerTrade){
             OfferPlayerTrade otherAction = (OfferPlayerTrade)other;
-            return resourcesOffered == otherAction.resourcesOffered
-                    && resourcesRequested == otherAction.resourcesRequested
+            return Arrays.equals(otherAction.resourcesRequested, resourcesRequested)
+                    && Arrays.equals(otherAction.resourcesOffered, resourcesOffered)
                     && offeringPlayerID == otherAction.offeringPlayerID
                     && otherPlayerID == otherAction.otherPlayerID
                     && negotiationCount == otherAction.negotiationCount;
@@ -62,7 +52,8 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 0;
+        int retValue = Objects.hash(offeringPlayerID,otherPlayerID,negotiationCount);
+        return retValue + 17 * Arrays.hashCode(resourcesOffered) + 73 * Arrays.hashCode(resourcesRequested);
     }
 
     @Override

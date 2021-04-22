@@ -4,26 +4,30 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
+import games.catan.CatanConstants;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.resourceDeckHash;
 
 /* Takes in a list of cards to be discarded from the player's hand*/
 public class DiscardCards extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    ArrayList<Card> toBeDiscarded;
-    int playerID;
+    public final CatanParameters.Resources[] cardsToDiscard;
+    public final int playerID;
 
-    public DiscardCards(ArrayList<Card> toBeDiscarded, int playerID){
-        this.toBeDiscarded = toBeDiscarded;
+    public DiscardCards(CatanParameters.Resources[] cardsToDiscard, int playerID){
+        this.cardsToDiscard = cardsToDiscard;
         this.playerID = playerID;
     }
 
-    public ArrayList<Card> getToBeDiscarded() {
-        return toBeDiscarded;
+    public CatanParameters.Resources[] getToBeDiscarded() {
+        return cardsToDiscard;
     }
 
     @Override
@@ -32,9 +36,18 @@ public class DiscardCards extends AbstractAction {
         Deck<Card> playerResourceDeck = (Deck<Card>)cgs.getComponentActingPlayer(playerHandHash);
         Deck<Card> commonResourceDeck = (Deck<Card>)cgs.getComponent(resourceDeckHash);
 
-        for (Card card: toBeDiscarded){
-            playerResourceDeck.remove(card);
-            commonResourceDeck.add(card);
+        for (CatanParameters.Resources cardType: cardsToDiscard){
+
+            Optional<Card> resource = playerResourceDeck.stream()
+                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(cardType.toString()))
+                    .findFirst();
+            if(resource.isPresent()){
+                Card resourceCard = resource.get();
+                playerResourceDeck.remove(resourceCard);
+                commonResourceDeck.add(resourceCard);
+            } else {
+                throw new AssertionError(String.format("Player cannot dispose of a card they do not possess: %s ",cardType.toString()));
+            }
         }
 
         return true;
@@ -42,7 +55,7 @@ public class DiscardCards extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new DiscardCards((ArrayList<Card>) toBeDiscarded.clone(), playerID);
+        return this;
     }
 
     @Override
@@ -50,18 +63,20 @@ public class DiscardCards extends AbstractAction {
         if (this == other) return true;
         if (other instanceof DiscardCards){
             DiscardCards otherAction = (DiscardCards)other;
-            return toBeDiscarded.equals(otherAction.toBeDiscarded) && playerID == otherAction.playerID;
+            return Arrays.equals(otherAction.cardsToDiscard, cardsToDiscard) && playerID == otherAction.playerID;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int returnVal = Objects.hash(playerID);
+        return returnVal + 13 * Arrays.hashCode(cardsToDiscard);
+
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "DiscardCards cards= " + toBeDiscarded.toString();
+        return "DiscardCards cards= " + Arrays.toString(cardsToDiscard);
     }
 }

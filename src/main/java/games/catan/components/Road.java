@@ -1,7 +1,5 @@
 package games.catan.components;
 
-import games.catan.actions.BuildRoadByRef;
-
 public class Road implements Copiable {
     private int owner;
     private static int counter = 0;

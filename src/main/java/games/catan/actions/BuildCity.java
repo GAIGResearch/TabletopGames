@@ -9,14 +9,15 @@ import games.catan.CatanParameters;
 import games.catan.CatanTile;
 import games.catan.components.Settlement;
 
+import java.util.Objects;
+
 import static core.CoreConstants.VERBOSE;
 
 public class BuildCity extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    int row;
-    int col;
-    int vertex;
-    int playerID;
+    public final int row;
+    public final int col;
+    public final int vertex;
+    public final int playerID;
 
     public BuildCity(int row, int col, int vertex, int playerID) {
         this.row = row;
@@ -34,29 +35,31 @@ public class BuildCity extends AbstractAction {
         if (settlement != null) {
             if (settlement.getOwner() == playerID) {
                 if (((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).isMaximum()){
-                    if (VERBOSE)
-                        System.out.println("No more cities to build for player " + gs.getCurrentPlayer());
-                    return false;
+                    throw new AssertionError("Player cannot build anymore cities");
                 }
                 ((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).increment(1);
                 // if player builds a city it gets back the settlement token
                 ((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).decrement(1);
-                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("city"))) return false;
+                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("city"))) {
+                    throw new AssertionError("Player cannot afford city");
+                }
                 settlement.upgrade();
                 return true;
+            } else {
+                throw new AssertionError("Player does not own this settlement");
             }
+        } else {
+            throw new AssertionError("No settlement here");
         }
-        return false;
     }
 
     @Override
     public AbstractAction copy() {
-        return new BuildCity(row, col, vertex, playerID);
+        return this;
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
         if (other instanceof BuildCity){
             BuildCity otherAction = (BuildCity)other;
             return row == otherAction.row && col == otherAction.col && vertex == otherAction.vertex && playerID == otherAction.playerID;
@@ -66,11 +69,11 @@ public class BuildCity extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(row,col,vertex,playerID);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return String.format("BuildCity: row=%d col=%d vertex=%d player=%d",row,col,vertex,playerID);
     }
 }

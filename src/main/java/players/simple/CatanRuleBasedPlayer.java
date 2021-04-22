@@ -256,7 +256,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         case AcceptTrade:
                             AcceptTrade acceptTrade = (AcceptTrade) action;
                             for(int i = 0; i < tempResources.length; i++){
-                                tempResources[i]= Math.max(0,(tempResources[i]+acceptTrade.getOfferedTrade().getResourcesOffered()[i]-acceptTrade.getOfferedTrade().getResourcesRequested()[i]));
+                                tempResources[i]= Math.max(0,(tempResources[i]+acceptTrade.resourcesOffered[i]-acceptTrade.resourcesRequested[i]));
                             }
                             if(!roadBlocked){
                                 if( calculateTotalResourceDifference(resourceCosts[2],tempResources)==0
@@ -273,7 +273,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                                     }
                                 }
                             } else if(calculateTotalResourceDifference(resourceCosts[1],tempResources)==0
-                                    && sumArray(acceptTrade.getOfferedTrade().getResourcesRequested())==sumArray(acceptTrade.getOfferedTrade().getResourcesOffered()))
+                                    && sumArray(acceptTrade.resourcesRequested)==sumArray(acceptTrade.resourcesOffered))
                             {
                                 actionPriorityLists.get(0).add(action);
                             } else {
@@ -303,18 +303,18 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     }
                     tempResources = currentResources.clone();
                     DiscardCards discardCards = (DiscardCards) action;
-                    ArrayList<Card> cardsToDiscard = discardCards.getToBeDiscarded();
+                    CatanParameters.Resources[] cardsToDiscard = discardCards.getToBeDiscarded();
                     int[] discardValues = new int[5];
-                    for(Card card : cardsToDiscard){
-                        if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.BRICK)){
+                    for(CatanParameters.Resources card : cardsToDiscard){
+                        if (card.equals(CatanParameters.Resources.BRICK)){
                             discardValues[0]+=1;
-                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.LUMBER)){
+                        } else if (card.equals(CatanParameters.Resources.LUMBER)){
                             discardValues[1]+=1;
-                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.ORE)){
+                        } else if (card.toString().equals(CatanParameters.Resources.ORE)){
                             discardValues[2]+=1;
-                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.GRAIN)){
+                        } else if (card.equals(CatanParameters.Resources.GRAIN)){
                             discardValues[3]+=1;
-                        } else if (card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.Resources.WOOL)){
+                        } else if (card.equals(CatanParameters.Resources.WOOL)){
                             discardValues[4]+=1;
                         }
                     }
@@ -385,7 +385,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     Settlement settlement = tile.getSettlements()[i];
                     // where it is legal to place tile then it can be placed from there
                     if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
-                            && CatanActionFactory.checkSettlementPlacement(settlement, cgs)) {
+                            && cgs.checkSettlementPlacement(settlement, getPlayerID())) {
                         return false;
                     }
                 }

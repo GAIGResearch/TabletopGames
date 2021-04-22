@@ -9,52 +9,58 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTurnOrder;
 
-public class PlayKnightCard extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    Card card;
+import java.util.Objects;
+import java.util.Optional;
 
-    public PlayKnightCard(Card card){
-        this.card = card;
-    }
+public class PlayKnightCard extends AbstractAction {
+
+    public PlayKnightCard(){}
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
-        cgs.addKnight(cgs.getCurrentPlayer());
-        cgs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
+        Optional<Card> knight = playerDevDeck.stream()
+                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.CardTypes.KNIGHT_CARD.toString()))
+                .findFirst();
+        if(knight.isPresent()){
+            Card card = knight.get();
 
-        playerDevDeck.remove(card);
-        developmentDiscardDeck.add(card);
+            cgs.addKnight(cgs.getCurrentPlayer());
+            cgs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
 
-        ((CatanTurnOrder)cgs.getTurnOrder()).setDevelopmentCardPlayed(true);
+            playerDevDeck.remove(card);
+            developmentDiscardDeck.add(card);
 
-        return false;
+            ((CatanTurnOrder)cgs.getTurnOrder()).setDevelopmentCardPlayed(true);
+        } else {
+            throw new AssertionError("Cannot use a Knight card that is not in hand.");
+        }
+
+        return true;
     }
 
     @Override
     public AbstractAction copy() {
-        return new PlayKnightCard(card.copy());
+        return this;
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
         if (other instanceof PlayKnightCard){
-            PlayKnightCard otherAction = (PlayKnightCard)other;
-            return card.equals(otherAction.card);
+            return true;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return 1;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Play Knight Card card = " + card.toString();
+        return "Play Knight Card";
     }
 }

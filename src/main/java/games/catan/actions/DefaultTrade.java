@@ -12,14 +12,14 @@ import games.catan.CatanParameters.Resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
 * This action also includes the Harbor trades using the exchangeRate*/
 public class DefaultTrade extends AbstractAction {
-    //TODO HASH,Equals,Copy,State
-    public Resources resourceOffer;
-    public Resources resourceToGet;
-    public int exchangeRate;
+    public final Resources resourceOffer;
+    public final Resources resourceToGet;
+    public final int exchangeRate;
 
     public DefaultTrade(Resources resourceOffer, Resources resourceToGet, int exchangeRate){
         this.resourceOffer = resourceOffer;
@@ -40,7 +40,7 @@ public class DefaultTrade extends AbstractAction {
                 cardsToReturn.add(card);
             }
         }
-        if (cardsToReturn.size() < exchangeRate) return false;
+        if (cardsToReturn.size() < exchangeRate) throw new AssertionError("Player does not have enough cards for this trade");
         for (int i = 0; i < exchangeRate; i++){
             Card card = cardsToReturn.get(i);
             playerResources.remove(card);
@@ -51,12 +51,11 @@ public class DefaultTrade extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new DefaultTrade(resourceOffer, resourceToGet, exchangeRate);
+        return this;
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
         if (other instanceof DefaultTrade){
             DefaultTrade otherAction = (DefaultTrade)other;
             return resourceOffer == otherAction.resourceOffer && resourceToGet == otherAction.resourceToGet && exchangeRate == otherAction.exchangeRate;
@@ -66,7 +65,7 @@ public class DefaultTrade extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(resourceToGet,resourceOffer,exchangeRate);
     }
 
     @Override
