@@ -6,6 +6,10 @@ public class MCTSEnums {
         RANDOM, MAST
     }
 
+    public enum MASTType {
+        Rollout, Tree, Both
+    }
+
     public enum SelectionPolicy {
         ROBUST, SIMPLE
     }
