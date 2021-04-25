@@ -25,6 +25,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
     double[] CORE_WRITING = {0.0, 0.0, 0.0};
     double[] PILGRIMS = {0.0, 0.0, 0.0};
     double[] SHILLINGS = {0.0, 0.0, 0.0};
+    boolean scoreOnly = true;
 
     public DiceMonasteryHeuristic() {
         for (int i = 1; i <= 3; i++) {
@@ -65,11 +66,17 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         Utils.GameResult playerResult = state.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
-            return -1;
-        if (playerResult == Utils.GameResult.WIN)
-            return 1;
-
+        if (!gs.isNotTerminal()) {
+            if (scoreOnly) {
+                return gs.getGameScore(playerId) / 50.0;
+            } else {
+                if (playerResult == Utils.GameResult.LOSE)
+                    return -1;
+                if (playerResult == Utils.GameResult.WIN)
+                    return 1;
+            }
+            throw new AssertionError("Not expecting to reach this point if game is over");
+        }
         int year = turnOrder.getYear() - 1;
         int season = 2; // AUTUMN or WINTER
         if (turnOrder.getSeason() == SPRING)

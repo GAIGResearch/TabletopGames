@@ -4,7 +4,9 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import games.dicemonastery.DiceMonasteryStateAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -19,6 +21,7 @@ public class MCTSPlayer extends AbstractPlayer {
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
     protected boolean debug = false;
+    protected SingleTreeNode root;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -43,13 +46,14 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        SingleTreeNode root = new SingleTreeNode(this, null,null, gameState, rnd);
+        root = new SingleTreeNode(this, null,null, gameState, rnd);
         if (rolloutStrategy instanceof MASTPlayer) {
             ((MASTPlayer) rolloutStrategy).setRoot(root);
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
         }
         root.mctsSearch(getStatsLogger());
-
+        ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer("DM_Data.txt", Arrays.asList(DiceMonasteryStateAttributes.values()));
+        eidg.recordData(root);
         if (debug)
             System.out.println(root.toString());
 

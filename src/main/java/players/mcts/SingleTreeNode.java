@@ -660,6 +660,12 @@ public class SingleTreeNode {
         return nVisits;
     }
 
+    /**
+     * The returned array has one element per player. If the Tree type supports decisions by other players (MaxN)
+     * then the relevant elements will provide this information.
+     *
+     * @return An array of the value fo the state from the perspective of each player
+     */
     public double[] getTotValue() {
         return totValue;
     }
