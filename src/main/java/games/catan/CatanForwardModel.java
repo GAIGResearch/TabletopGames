@@ -215,10 +215,8 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanGameState cgs = (CatanGameState)gameState;
-
         if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
             // special case -> rolling only happens in the Main phase
             ((CatanTurnOrder)cgs.getTurnOrder()).endTurnStage(cgs);
@@ -244,9 +242,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.TradeReaction){
             return CatanActionFactory.getTradeReactionActions(cgs);
         }
-
-
-        return actions;
+        throw new AssertionError("GamePhase is not in the defined set of options");
     }
 
     @Override
