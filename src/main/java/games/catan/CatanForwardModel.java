@@ -194,7 +194,9 @@ public class CatanForwardModel extends AbstractForwardModel {
                                     Card card = resourceDeck.get(i);
                                     if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
                                         // remove from deck and give it to player
-                                        System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
+                                        if(VERBOSE){
+                                            System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
+                                        }
                                         ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
                                         ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
                                         counter++;

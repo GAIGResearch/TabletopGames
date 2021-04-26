@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static core.CoreConstants.VERBOSE;
 import static games.catan.CatanConstants.*;
 
 /*
@@ -68,7 +69,9 @@ public class PlaceSettlementWithRoad extends AbstractAction {
                             if (c.getProperty(cardType).toString().equals(res.toString())){
                                 resourceDeck.remove(c);
                                 playerHand.add(c);
-                                System.out.println("At setup Player " + cgs.getCurrentPlayer() + " got " + c.getProperty(cardType));
+                                if(VERBOSE){
+                                    System.out.println("At setup Player " + cgs.getCurrentPlayer() + " got " + c.getProperty(cardType));
+                                }
                                 break;
                             }
                         }
