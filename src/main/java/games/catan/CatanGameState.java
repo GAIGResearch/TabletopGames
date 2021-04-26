@@ -15,6 +15,7 @@ import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
+import utilities.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class CatanGameState extends AbstractGameState {
     protected int largestArmy = -1; // playerID of the player currently holding the largest army
     protected int longestRoad = -1; // playerID of the player currently holding the longest road
     protected int longestRoadLength = 0;
-    protected OfferPlayerTrade currentTradeOffer = null; // Holds the current trade offer to allow access between players
+    protected OfferPlayerTrade currentTradeOffer = null; // Holds the current trade offer to allow access between players TODO make primitive
     int rollValue;
 
     // GamePhases that may occur in Catan
@@ -507,7 +508,11 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return 0;
+        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+            return -1.0;
+        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+            return 1.0;
+        return (double)(scores[playerId])/10.0;
     }
 
     @Override
