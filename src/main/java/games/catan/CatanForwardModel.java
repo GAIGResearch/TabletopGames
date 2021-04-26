@@ -102,9 +102,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         if (action != null){
             action.execute(gs);
         } else {
-            if (VERBOSE)
-                System.out.println("Player cannot do anything since he has drawn cards or " +
-                        " doesn't have any targets available");
+            throw new AssertionError("No action selected by current player");
         }
         // handle scoring
         if (action instanceof BuildRoad) {
