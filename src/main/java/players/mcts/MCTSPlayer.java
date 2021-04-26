@@ -21,6 +21,7 @@ public class MCTSPlayer extends AbstractPlayer {
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
     protected boolean debug = false;
+    protected boolean expertIteration = false;
     protected SingleTreeNode root;
 
     public MCTSPlayer() {
@@ -52,8 +53,10 @@ public class MCTSPlayer extends AbstractPlayer {
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
         }
         root.mctsSearch(getStatsLogger());
-        ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer("DM_Data.txt", Arrays.asList(DiceMonasteryStateAttributes.values()));
-        eidg.recordData(root);
+        if (expertIteration) {
+            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer("DM_Data.txt", Arrays.asList(DiceMonasteryStateAttributes.values()));
+            eidg.recordData(root);
+        }
         if (debug)
             System.out.println(root.toString());
 

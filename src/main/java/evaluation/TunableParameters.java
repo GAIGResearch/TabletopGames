@@ -1,8 +1,6 @@
 package evaluation;
 
 import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -10,9 +8,9 @@ import org.json.simple.parser.JSONParser;
 import java.io.FileReader;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A sub-class of AbstractParameters that implements the ITunableParameters interface

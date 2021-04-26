@@ -1,7 +1,11 @@
-package games.dicemonastery;
+package games.dicemonastery.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
+import evaluation.TunableParameters;
+import games.dicemonastery.DiceMonasteryConstants;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.Monk;
 
 import java.util.List;
 import java.util.Map;
@@ -9,11 +13,16 @@ import java.util.Map;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
-public class DiceMonasteryLinearHeuristic implements IStateHeuristic {
+public class DiceMonasteryLinearHeuristic001 extends TunableParameters implements IStateHeuristic  {
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
+
+        if (!gs.isNotTerminal()) {
+            // Game Over
+            return gs.getGameScore(playerId) / 100.0;
+        }
 
         double retValue = 0.0;
 
@@ -56,6 +65,26 @@ public class DiceMonasteryLinearHeuristic implements IStateHeuristic {
         retValue += state.monksIn(GRAVEYARD, playerId).size() * 0.044;
         retValue += state.getVictoryPoints(playerId) * 0.012;
         return retValue;
+
+    }
+
+    @Override
+    protected DiceMonasteryLinearHeuristic001 _copy() {
+        return this;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        return o instanceof DiceMonasteryLinearHeuristic001;
+    }
+
+    @Override
+    public DiceMonasteryLinearHeuristic001 instantiate() {
+        return this;
+    }
+
+    @Override
+    public void _reset() {
 
     }
 }
