@@ -1,6 +1,10 @@
 package games;
 
 import core.*;
+import games.blackjack.BlackjackForwardModel;
+import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
+import games.blackjack.gui.BlackjackGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -134,6 +138,18 @@ public enum GameType {
                 add(LoseATurn);
                 add(TakeThat);
             }}),
+    Blackjack(2, 2,
+            new ArrayList<games.GameType.Category>() {{
+                add(Cards);
+                add(ComicBook);
+                add(Number);
+                add(MoviesTVRadio);
+            }},
+            new ArrayList<games.GameType.Mechanic>() {{
+                add(HandManagement);
+                add(LoseATurn);
+                add(TakeThat);
+            }}),
     Virus(2, 6,
             new ArrayList<Category>() {{
                 add(Cards);
@@ -212,6 +228,8 @@ public enum GameType {
                 return LoveLetter;
             case "uno":
                 return Uno;
+            case "blackjack":
+                return Blackjack;
             case "virus":
                 return Virus;
             case "coltexpress":
@@ -268,6 +286,9 @@ public enum GameType {
                 forwardModel = new UnoForwardModel();
                 gameState = new UnoGameState(params, nPlayers);
                 break;
+            case Blackjack:
+                forwardModel = new BlackjackForwardModel();
+                gameState = new BlackjackGameState(params, nPlayers);
             case Poker:
                 forwardModel = new PokerForwardModel();
                 gameState = new PokerGameState(params, nPlayers);
@@ -307,6 +328,8 @@ public enum GameType {
                 return new LoveLetterParameters(seed);
             case Uno:
                 return new UnoGameParameters(seed);
+            case Blackjack:
+                return new BlackjackParameters(seed);
             case Poker:
                 return new PokerGameParameters(seed);
             case Virus:
@@ -356,6 +379,9 @@ public enum GameType {
 //                }
             case Uno:
                 gui = new UnoGUI(game, ac, human);
+                break;
+            case Blackjack:
+                gui = new BlackjackGUI(game, ac, human);
                 break;
             case Poker:
                 gui = new PokerGUI(game, ac, human);
@@ -582,6 +608,8 @@ public enum GameType {
                 return new LoveLetterParameters(seed);
             case Uno:
                 return new UnoGameParameters(seed);
+            case Blackjack:
+                return new BlackjackParameters(seed);
             case Poker:
                 return new PokerGameParameters(seed);
             case Virus:
