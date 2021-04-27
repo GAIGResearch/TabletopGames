@@ -289,6 +289,7 @@ public enum GameType {
             case Blackjack:
                 forwardModel = new BlackjackForwardModel();
                 gameState = new BlackjackGameState(params, nPlayers);
+                break;
             case Poker:
                 forwardModel = new PokerForwardModel();
                 gameState = new PokerGameState(params, nPlayers);
