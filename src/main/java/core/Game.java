@@ -690,7 +690,7 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
+        ActionController ac = null; //new ActionController(); //null;
         //ActionController ac = null;
 
         /* 2. Game seed */
@@ -704,10 +704,10 @@ public class Game {
         //players.add(new RandomPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        //players.add(new HumanConsolePlayer());
-        //players.add(new HumanConsolePlayer());
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanConsolePlayer());
+        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
         runOne(Poker, players, seed, ac, false, null);
