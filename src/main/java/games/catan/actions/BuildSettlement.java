@@ -48,6 +48,33 @@ public class BuildSettlement extends AbstractAction {
                 }
             }
             board[x][y].addSettlement(vertex, playerID);
+            if(board[x][y].getSettlements()[vertex].getHarbour()!=null){
+                int defaultExchangeRate = ((CatanParameters)cgs.getGameParameters()).default_exchange_rate;
+                int[] exchangeRates = cgs.getExchangeRates(playerID);
+                switch (board[x][y].getSettlements()[vertex].getHarbour()){
+                    case BRICK:
+                        exchangeRates[0] = defaultExchangeRate - 2;
+                        break;
+                    case LUMBER:
+                        exchangeRates[1] = defaultExchangeRate - 2;
+                        break;
+                    case ORE:
+                        exchangeRates[2] = defaultExchangeRate - 2;
+                        break;
+                    case GRAIN:
+                        exchangeRates[3] = defaultExchangeRate - 2;
+                        break;
+                    case WOOL:
+                        exchangeRates[4] = defaultExchangeRate - 2;
+                        break;
+                    case GENERIC:
+                        for (int i = 0; i < exchangeRates.length; i++){
+                            if(exchangeRates[i] > defaultExchangeRate - 1){
+                                exchangeRates[i] = defaultExchangeRate - 1;
+                            }
+                        }
+                }
+            }
             return true;
         } else {
             throw new AssertionError("Settlement already owned: " + this.toString());

@@ -215,8 +215,8 @@ public class CatanGameState extends AbstractGameState {
         return scores;
     }
 
-    public int[] getExchangeRates(){
-        return exchangeRates[getCurrentPlayer()];
+    public int[] getExchangeRates(int playerID){
+        return exchangeRates[playerID];
     }
 
     public void setBoughtDevCard(Card card){
@@ -569,6 +569,10 @@ public class CatanGameState extends AbstractGameState {
             }
         }
         return false;
+    }
+
+    public void updateExchangeRates(int player, int[] exchangeRates){
+        this.exchangeRates[player] = exchangeRates;
     }
 
     public boolean checkSettlementPlacement(Settlement settlement, int player){

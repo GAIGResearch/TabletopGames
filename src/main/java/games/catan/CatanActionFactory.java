@@ -555,7 +555,7 @@ public class CatanActionFactory {
         int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
 
         // default trade
-        int playerExchangeRate[] = gs.getExchangeRates();
+        int playerExchangeRate[] = gs.getExchangeRates(gs.getCurrentPlayer());
         for (int i = 0; i < resources.length; i++) {
             if (resources[i] >= playerExchangeRate[i]) {
                 for (int j = 0; j < resources.length; j++) {

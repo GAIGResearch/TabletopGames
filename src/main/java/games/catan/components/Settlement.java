@@ -1,10 +1,13 @@
 package games.catan.components;
 
+import games.catan.CatanParameters;
+
 public class Settlement implements Copiable {
     private int type; // settlement = 1, city = 2
     private int owner;
     private static int counter = 0;
     private int id;
+    private CatanParameters.HarborTypes harbour = null;
 
     public Settlement(int owner){
         this.owner = owner;
@@ -41,10 +44,18 @@ public class Settlement implements Copiable {
         return id;
     }
 
+    public CatanParameters.HarborTypes getHarbour() {
+        return harbour;
+    }
+
+    public void setHarbour(CatanParameters.HarborTypes harbour) {
+        this.harbour = harbour;
+    }
 
     public Settlement copy(){
         Settlement copy = new Settlement(owner, id);
         copy.type = this.type;
+        copy.harbour = this.harbour;
         return copy;
     }
 

@@ -161,6 +161,8 @@ public class CatanTile {
         if (!hasHarbor) {
             this.harbors[edge] = type;
             this.hasHarbor = true;
+            this.settlements[edge].setHarbour(CatanParameters.HarborTypes.values()[type]);
+            this.settlements[(edge+1)%6].setHarbour(CatanParameters.HarborTypes.values()[type]);
             return true;
         }
         throw new AssertionError("Cannot add harbour: edge: " + edge);
@@ -269,6 +271,7 @@ public class CatanTile {
         for (int i = 0 ; i < roads.length; i++){
             copy.roads[i] = roads[i].copy();
         }
+        copy.hasHarbor = this.hasHarbor;
         copy.harbors = new int[HEX_SIDES];
         copy.harbors = Arrays.copyOf(harbors, harbors.length);
         copy.settlements = new Settlement[HEX_SIDES];
