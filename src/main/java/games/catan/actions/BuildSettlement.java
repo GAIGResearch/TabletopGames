@@ -74,6 +74,7 @@ public class BuildSettlement extends AbstractAction {
                             }
                         }
                 }
+                cgs.updateExchangeRates(playerID,exchangeRates);
             }
             return true;
         } else {
