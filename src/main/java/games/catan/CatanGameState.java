@@ -616,7 +616,7 @@ public class CatanGameState extends AbstractGameState {
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         // todo return unknown components
         return new ArrayList<Integer>() {{
-            Deck<Card> resourceDeck = (Deck<Card>) getComponent(playerDeckHash);
+            Deck<Card> resourceDeck = (Deck<Card>) getComponent(resourceDeckHash);
             Deck<Card> devDeck = (Deck<Card>) getComponent(developmentDeckHash);
             add(resourceDeck.getComponentID());
             add(devDeck.getComponentID());
