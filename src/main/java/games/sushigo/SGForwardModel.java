@@ -22,8 +22,12 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerHands = new ArrayList<>();
         for (int i = 0; i < SGGS.getNPlayers(); i++){
             SGGS.playerHands.add(new Deck<>("Player" + i + " hand", i));
+            SGGS.playerHands.get(i).add(new SGCard(SGCard.SGCardType.EggNigiri, 0));
+            SGGS.playerHands.get(i).add(new SGCard(SGCard.SGCardType.Maki_1, 0));
+            SGGS.playerHands.get(i).add(new SGCard(SGCard.SGCardType.Wasabi, 0));
+
         }
-        SGGS.playerHands.get(0).add(new SGCard(SGCard.SGCardType.EggNigiri, 0));
+
         SGGS.getTurnOrder().setStartingPlayer(0);
     }
 

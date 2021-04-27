@@ -5,7 +5,9 @@ import core.components.Card;
 public class SGCard extends Card {
 
     public enum SGCardType {
-        MakiRoll,
+        Maki_1,
+        Maki_2,
+        Maki_3,
         Tempura,
         Sashimi,
         Dumpling,
