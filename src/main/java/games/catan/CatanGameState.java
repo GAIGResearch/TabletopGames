@@ -361,7 +361,9 @@ public class CatanGameState extends AbstractGameState {
                 }
             }
         }
-        System.out.println("There are " + counter + " settlements");
+        if(VERBOSE){
+            System.out.println("There are " + counter + " settlements");
+        }
         return settlements;
     }
 

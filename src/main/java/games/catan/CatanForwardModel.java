@@ -144,7 +144,9 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
             }
             gs.setGameStatus(Utils.GameResult.GAME_END);
-            System.out.println("Game over! winner = " + gs.getCurrentPlayer());
+            if(VERBOSE){
+                System.out.println("Game over! winner = " + gs.getCurrentPlayer());
+            }
         } else if (params.max_round_count!=-1 && gs.getTurnOrder().getRoundCounter()>params.max_round_count) { // end in tie if round limit exceeded
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 gs.setPlayerResult(Utils.GameResult.DRAW, i);
