@@ -21,7 +21,7 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
     double playerCities = 0.25;
     double playerSettlements = 0.15;
     double playerPorts = 0.1;
-    double opponentsScore = -1;
+    double opponentsScore = -1.0;
 
     public CatanHeuristic() {
         addTunableParameter("playerScore", 0.4);
@@ -30,7 +30,7 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
         addTunableParameter("playerCities", 0.25);
         addTunableParameter("playerSettlements", 0.15);
         addTunableParameter("playerPorts", 0.1);
-        addTunableParameter("opponentsScore", -1);
+        addTunableParameter("opponentsScore", -1.0);
     }
 
     @Override
@@ -56,23 +56,20 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
 
         double stateValue = 0.0;
 
-        // value the players and opponents scores by score and vic points for each player then dividing by total required to win
+        // value each player’s score then divide by total required to win, for opponents divide by number of opponents
         if(playerScore != 0.0 || opponentsScore != 0.0){
             int[] scores = state.getScores();
-            int[] victoryPoints = state.getVictoryPoints();
             for(int i = 0; i < scores.length; i++){
                 if (i != playerId){
-                    stateValue += opponentsScore * ((((scores[i] + victoryPoints[i]))
-                            / (double)((CatanParameters)state.getGameParameters()).points_to_win)/3.0);
+                    stateValue += opponentsScore * ((((scores[i] + state.getVictoryPoints()[i]))
+                            / (double)((CatanParameters)state.getGameParameters()).points_to_win)/(double) state.getNPlayers());
                 } else {
-                    stateValue += playerScore * (((scores[i] + victoryPoints[i]))
+                    stateValue += playerScore * (((scores[i]))
                             / (double)((CatanParameters)state.getGameParameters()).points_to_win);
                 }
             }
-
-            stateValue += playerScore * ((double) (state.getScores()[playerId] + state.getVictoryPoints()[playerId]))
-                    / ((CatanParameters)state.getGameParameters()).points_to_win;
         }
+
 
         // value total resources, caps out at 7
         if(playerResources != 0.0){
