@@ -706,6 +706,8 @@ public class Game {
 //        players.add(new MCTSPlayer(params1));
         //players.add(new HumanGUIPlayer(ac));
         //players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
         players.add(new HumanConsolePlayer());
         players.add(new HumanConsolePlayer());
 

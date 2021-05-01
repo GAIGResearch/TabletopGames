@@ -66,19 +66,6 @@ public class FrenchCard extends Card {
         return new FrenchCard(type, suite, number, drawN, componentID);
     }
 
-    public boolean isPlayable(PokerGameState gameState) {
-        switch (type) {
-            case Number:
-                return this.number == gameState.getCurrentCard().number || this.suite.equals(gameState.getCurrentSuite());
-            case Jack:
-            case Queen:
-            case King:
-            case Ace:
-                return this.suite.equals(gameState.getCurrentSuite());
-        }
-        return false;
-    }
-
     @Override
     public String toString() {
         switch (type) {
