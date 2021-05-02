@@ -13,7 +13,7 @@ import players.simple.RandomPlayer;
 import java.util.Arrays;
 import java.util.Random;
 
-import static players.mcts.MCTSEnums.MASTType.*;
+import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
@@ -36,6 +36,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
+    public String rolloutClass = "";
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
 
@@ -60,6 +61,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("expansionType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
+        addTunableParameter("rolloutClass", "");
     }
 
     @Override
@@ -80,6 +82,7 @@ public class MCTSParams extends PlayerParameters {
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
         MASTBoltzmann = (double) getParameterValue("boltzmannTemp");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
+        rolloutClass = (String) getParameterValue("rolloutClass");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
             useMAST = true;
         }
@@ -126,6 +129,13 @@ public class MCTSParams extends PlayerParameters {
                 return new RandomPlayer(new Random(getRandomSeed()));
             case MAST:
                 return new MASTPlayer(new Random(getRandomSeed()));
+            case CLASS:
+                try {
+                    Class<?> rollout = Class.forName(rolloutClass);
+                    return (AbstractPlayer) rollout.getConstructor().newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             default:
                 throw new AssertionError("Unknown rollout type : " + rolloutType);
         }

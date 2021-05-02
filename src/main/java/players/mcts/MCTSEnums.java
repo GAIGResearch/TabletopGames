@@ -3,7 +3,7 @@ package players.mcts;
 public class MCTSEnums {
 
     public enum Strategies {
-        RANDOM, MAST
+        RANDOM, MAST, CLASS
     }
 
     public enum MASTType {
