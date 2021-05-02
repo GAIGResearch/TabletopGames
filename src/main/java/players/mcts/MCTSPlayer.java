@@ -21,7 +21,7 @@ public class MCTSPlayer extends AbstractPlayer {
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
     protected boolean debug = false;
-    protected boolean expertIteration = false;
+    protected boolean expertIteration = true;
     protected SingleTreeNode root;
 
     public MCTSPlayer() {
