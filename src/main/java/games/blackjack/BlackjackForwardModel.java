@@ -1,6 +1,5 @@
 package games.blackjack;
 
-//import com.sun.javafx.scene.text.TextLayout;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -8,11 +7,12 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.blackjack.actions.Hit;
+import games.blackjack.actions.HitCard;
 import games.blackjack.actions.Stand;
-//import games.blackjack.actions.noCard;
 import utilities.Utils;
 
 import javax.rmi.CORBA.Util;
+import javax.swing.*;
 import java.io.Console;
 import java.util.ArrayList;
 import java.util.*;
@@ -49,10 +49,7 @@ public class BlackjackForwardModel extends AbstractForwardModel {
 
         bjgs.getTurnOrder().setStartingPlayer(0);
 
-
         bjgs.getCurrentPlayer();
-        //checkPoints(bjgs);
-
     }
 
     private void createCards(BlackjackGameState bjgs) {
@@ -103,7 +100,7 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         int bjWin = bjgp.blackJack;
 
         for (int j = 0; j < bjgs.getNPlayers(); j++){
-            bjgs.Score[j] += bjgs.calcPoint(j);
+            bjgs.Score[j] = bjgs.calcPoint(j);
         }
 
         int dealerPlayer = -1;
@@ -112,47 +109,53 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         }
 
         HashSet<Integer> winners = new HashSet<>();
+        if (bjgs.Score[0] > 21){
+            System.out.println("Test1");
+            System.out.println(Arrays.toString(bjgs.Score));
+            winners.add(dealerPlayer);
+            aWinner = true;
+        }
+        else if (bjgs.Score[dealerPlayer] > 21){
+            System.out.println("Test2");
+            System.out.println(Arrays.toString(bjgs.Score));
+            winners.add(0);
+            aWinner = true;
+        }
+        else if (bjgs.Score[dealerPlayer] >= 17){
+            if (bjgs.Score[dealerPlayer] > bjgs.Score[0]){
+                System.out.println("Test3");
+                System.out.println(Arrays.toString(bjgs.Score));
+                winners.add(dealerPlayer);
+                aWinner = true;
+            }
+            else if (bjgs.Score[dealerPlayer] < bjgs.Score[0]){
+                System.out.println("Test4");
+                System.out.println(Arrays.toString(bjgs.Score));
+                winners.add(0);
+                aWinner = true;
+            }
+            else if (bjgs.Score[dealerPlayer] == bjgs.Score[0]){
+                System.out.println("Test5");
+                System.out.println(Arrays.toString(bjgs.Score));
+                push = true;
+                aWinner = true;
+            }
+        }
 
-        if (bjgs.Score[0] == 21){
-            winners.add(0);
-            aWinner = true;
-        }
-        else if (bjgs.Score[0] > 21){
-            winners.add(dealerPlayer);
-            aWinner = true;
-        }
-        else if (bjgs.Score[dealerPlayer] > 21 && bjgs.Score[0] > 21){
-            aWinner = true;
-            push = true;
-        }
-        else if (bjgs.Score[dealerPlayer] >= 17 && bjgs.Score[dealerPlayer] > bjgs.Score[0]){
-            winners.add(dealerPlayer);
-            aWinner = true;
-        }
-        else if (bjgs.Score[dealerPlayer] >= 17 && bjgs.Score[dealerPlayer] < bjgs.Score[0]){
-            winners.add(0);
-            aWinner = true;
-        }
 
         if (aWinner){
-            if (push){
+            if(bust){
+                bjgs.setPlayerResult(Utils.GameResult.LOSE, 0);
+            }
+            else if (push){
                 bjgs.setPlayerResult(Utils.GameResult.DRAW, 0);
             }
-            else if (bust){
-                bjgs.setPlayerResult(Utils.GameResult.WIN, 0);
-            }
-
             else if (winners.contains(0)){
                 bjgs.setPlayerResult(Utils.GameResult.WIN, 0);
             }
             else if (winners.contains(dealerPlayer)){
                 bjgs.setPlayerResult(Utils.GameResult.WIN, dealerPlayer);
-                bjgs.setPlayerResult(Utils.GameResult.LOSE, 0);
             }
-            else{
-                bjgs.setPlayerResult(Utils.GameResult.LOSE, 0);
-            }
-
             bjgs.setGameStatus(Utils.GameResult.GAME_END);
             return true;
         }
@@ -167,57 +170,31 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         int player = bjgs.getCurrentPlayer();
         Deck<FrenchCard> currentHand =  bjgs.playerDecks.get(player);
 
-
         int dealerPlayer = -1;
         for (int dealer = 0; dealer < bjgs.getNPlayers(); dealer++){
             dealerPlayer++;
         }
 
-
+        //Check if current player is the dealer
+        //dealer must hit if score is <=16 otherwise must stand
         if (bjgs.getCurrentPlayer() == dealerPlayer){
-/*            if(bjgs.calcPoint(dealerPlayer) >)*/
-
-            if(bjgs.getGameScore(bjgs.getCurrentPlayer()) == 21){
-                System.out.println("Dealer Blackjack!");
-                //endGame(gameState);
-            }
-            else if (bjgs.getGameScore(bjgs.getCurrentPlayer()) >= 17){
-                //System.out.println("Dealer stands on 17");
-                actions.add(new Hit(currentHand.getComponentID()));
+            if (bjgs.Score[dealerPlayer] >=17){
+                System.out.println("Stand");
                 actions.add(new Stand());
-                return actions;
-                //endGame(gameState);
-                /*actions.add(new Stand());
-                return actions;*/
+                return  actions;
             }
             else{
-                //System.out.println("Dealer Hits");
+                System.out.println("Hit");
                 actions.add(new Hit(currentHand.getComponentID()));
-                actions.add(new Stand());
                 return actions;
             }
         }
         else{
-            if(bjgs.getGameScore(bjgs.getCurrentPlayer()) < 21){
-                actions.add(new Hit(currentHand.getComponentID()));
-                actions.add(new Stand());
-                return actions;
-            }
-            else if(bjgs.getGameScore(bjgs.getCurrentPlayer()) == 21){
-                System.out.println("Blackjack!");
-            }
-/*        else if (bjgs.point == 21){
-            System.out.println("BlackJack!");
-            bjgs.setPlayerResult(Utils.GameResult.WIN, bjgs.getCurrentPlayer());
-            bjgs.setGameStatus(Utils.GameResult.GAME_END);
+            actions.add(new Hit(currentHand.getComponentID()));
+            actions.add(new Stand());
+            return  actions;
         }
-        else{
-            System.out.println("Push");
-            bjgs.setPlayerResult(Utils.GameResult.LOSE, bjgs.getCurrentPlayer());
-            bjgs.setGameStatus(Utils.GameResult.GAME_END);
-        }*/
-        }
-        return  actions;
+
     }
 
     @Override
@@ -251,6 +228,31 @@ public class BlackjackForwardModel extends AbstractForwardModel {
                 }
                 break;
                 }
+            else if(gameState.getPlayerResults()[playerID] == Utils.GameResult.DRAW){
+                System.out.println("Push");
+
+                String[] strings = new String[2];
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("Player Hand: ");
+                for (FrenchCard card : bjgs.playerDecks.get(0).getComponents()){
+                    sb.append(card.toString());
+                    sb.append(" ");
+                }
+
+                StringBuilder sb1 = new StringBuilder();
+                sb1.append("Dealer Hand: ");
+                for (FrenchCard card : bjgs.playerDecks.get(1).getComponents()){
+                    sb1.append(card.toString());
+                    sb1.append(" ");
+                }
+                strings[0] = sb.toString();
+                strings[1] = sb1.toString();
+                for (String s : strings){
+                    System.out.println(s);
+                }
+                break;
+            }
 
             }
         }

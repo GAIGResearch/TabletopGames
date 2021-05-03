@@ -1,13 +1,5 @@
 package core.components;
 
-import core.components.Card;
-//import games.uno.cards.UnoCard;
-import core.components.Deck;
-import games.poker.PokerGameState;
-import games.uno.UnoGameState;
-import games.uno.cards.UnoCard;
-//import games.uno.cards.UnoCard;
-
 public class FrenchCard extends Card {
 
     public enum FrenchCardType {
@@ -16,6 +8,7 @@ public class FrenchCard extends Card {
         King,
         Ace,
         Number,
+        Draw,
     }
 
     public final String suite;
@@ -70,15 +63,17 @@ public class FrenchCard extends Card {
     public String toString() {
         switch (type) {
             case Number:
-                return type + "{" + suite + " " + drawN + "}";
+                return "{" + suite + " " + drawN + "}";
+            case Draw:
+                return "{" + drawN + " " + number + "}";
             case Queen:
-                return type + "{" + "Queen" + suite + "}";
+                return "{" + "Queen " + suite + "}";
             case King:
-                return type + "{" + "King" + suite + "}";
+                return "{" + "King " + suite + "}";
             case Jack:
-                return type + "{" + "Jack" + suite + "}";
+                return "{" + "Jack " + suite + "}";
             case Ace:
-                return type + "{" + "Ace" + suite + "}";
+                return "{" + "Ace " + suite + "}";
         }
         return null;
     }

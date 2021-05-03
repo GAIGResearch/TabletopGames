@@ -27,7 +27,6 @@ public class BlackjackGUI extends AbstractGUI {
 
     int width, height;
     BlackjackPlayerView[] playerHands;
-    BlackjackDeckView drawdeck;
 
     int activePlayer = -1;
     int humanID;
@@ -87,8 +86,6 @@ public class BlackjackGUI extends AbstractGUI {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-/*                drawdeck = new BlackjackDeckView(bjgs.DrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, bjgp.getDataPath());
-                centerArea.add(drawdeck);*/
                 JPanel jp = new JPanel();
                 jp.setLayout(new GridBagLayout());
                 jp.add(centerArea);
@@ -105,7 +102,6 @@ public class BlackjackGUI extends AbstractGUI {
                 getContentPane().add(actionPanel, BorderLayout.SOUTH);
             }
         }
-
         setFrameProperties();
             }
 

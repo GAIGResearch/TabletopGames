@@ -1,8 +1,6 @@
 package games.blackjack;
 
 import core.AbstractParameters;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BlackjackParameters extends AbstractParameters {

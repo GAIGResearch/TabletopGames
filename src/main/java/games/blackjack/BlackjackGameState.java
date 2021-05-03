@@ -47,18 +47,11 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     public List<Deck<FrenchCard>> PlayerDecks() { return playerDecks; }
 
-    public int[] getPlayerScore() { return Score; }
-
     public int point() {  return Score[0]; }
 
     public Deck<FrenchCard> getTableDeck() { return tableDeck;}
 
-    public String getCurrentSuite(){
-        return currentSuite;
-    }
-
     public int calcPoint(int PlayerID){
-        BlackjackParameters bjp  = (BlackjackParameters) getGameParameters();
         int points = 0;
         int ace = 0;
         for (int other = 0; other < getNPlayers(); other++){
@@ -94,7 +87,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
         }
         point = points;
         return point;
-        //return points;
     }
 
 

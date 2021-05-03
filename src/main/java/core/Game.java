@@ -9,6 +9,7 @@ import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
@@ -710,7 +711,7 @@ public class Game {
         players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Poker, players, seed, ac, false, null);
+        runOne(Blackjack, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
