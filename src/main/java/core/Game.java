@@ -706,7 +706,7 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-/*        long seeds[] = new long[500];
+        long seeds[] = new long[500];
 
         for (int i = 0; i < 500; i++) {
             try {
@@ -715,22 +715,22 @@ public class Game {
                 e.printStackTrace();
             }
             seeds[i] = System.currentTimeMillis();
-        }*/
+        }
 
         //players.add(new RandomPlayer());
 //        players.add(new RMHCPlayer());
-//       players.add(new MCTSPlayer(params1));
+       players.add(new MCTSPlayer(params1));
         //players.add(new HumanGUIPlayer(ac));
         //players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanConsolePlayer());
-//        players.add(new SameActionPlayer());
-        players.add(new HumanConsolePlayer());
+//        players.add(new HumanConsolePlayer());
+        players.add(new SameActionPlayer());
+//        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Blackjack, players, seed, ac, false, null);
-       // runMany(new ArrayList<GameType>() {{add(Blackjack);}}, players, 500, seeds, null, false, null);
+        //runOne(Blackjack, players, seed, ac, false, null);
+        runMany(new ArrayList<GameType>() {{add(Blackjack);}}, players, 500, seeds, null, false, null);
         //runMany(Collections.singletonList(Blackjack), players, 100L,100, null, false, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
