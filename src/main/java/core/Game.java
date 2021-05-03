@@ -5,17 +5,21 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import games.blackjack.BlackjackGameState;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
 import players.simple.RandomPlayer;
+import players.simple.SameActionPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -702,19 +706,32 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
+/*        long seeds[] = new long[500];
+
+        for (int i = 0; i < 500; i++) {
+            try {
+                Thread.sleep((long)(Math.random() * 1000));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            seeds[i] = System.currentTimeMillis();
+        }*/
+
         //players.add(new RandomPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new MCTSPlayer(params1));
+//       players.add(new MCTSPlayer(params1));
         //players.add(new HumanGUIPlayer(ac));
         //players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
         players.add(new HumanConsolePlayer());
+//        players.add(new SameActionPlayer());
         players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
         runOne(Blackjack, players, seed, ac, false, null);
-        //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
+       // runMany(new ArrayList<GameType>() {{add(Blackjack);}}, players, 500, seeds, null, false, null);
+        //runMany(Collections.singletonList(Blackjack), players, 100L,100, null, false, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);

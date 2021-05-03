@@ -48,8 +48,10 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         drawPlayerCards(bjgs);
 
         bjgs.getTurnOrder().setStartingPlayer(0);
-
-        bjgs.getCurrentPlayer();
+        int point = bjgs.calcPoint(bjgs.getCurrentPlayer());
+        if (point == 21){
+            checkGameEnd(bjgs);
+        }
     }
 
     private void createCards(BlackjackGameState bjgs) {
@@ -97,7 +99,6 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         boolean aWinner = false;
         boolean push = false;
         boolean bust = false;
-        int bjWin = bjgp.blackJack;
 
         for (int j = 0; j < bjgs.getNPlayers(); j++){
             bjgs.Score[j] = bjgs.calcPoint(j);
@@ -118,6 +119,10 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         else if (bjgs.Score[dealerPlayer] > 21){
             System.out.println("Test2");
             System.out.println(Arrays.toString(bjgs.Score));
+            winners.add(0);
+            aWinner = true;
+        }
+        else if (bjgs.Score[0] == 21){
             winners.add(0);
             aWinner = true;
         }
@@ -194,7 +199,6 @@ public class BlackjackForwardModel extends AbstractForwardModel {
             actions.add(new Stand());
             return  actions;
         }
-
     }
 
     @Override
