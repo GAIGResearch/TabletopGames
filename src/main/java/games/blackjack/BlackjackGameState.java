@@ -99,26 +99,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
-
-//        if (PARTIAL_OBSERVABLE && playerId != -1){
-//            Random r = new Random(copy.gameParameters.getRandomSeed());
-//            for (int i = 0; i< getNPlayers(); i++){
-//                if (i != playerId){
-//                    copy.drawDeck.add(copy.playerDecks.get(i));
-//                }
-//            }
-//            copy.drawDeck.shuffle(r);
-//            for(int i = 0; i < getNPlayers(); i++){
-//                if (i != playerId){
-//                    Deck<FrenchCard> d = copy.playerDecks.get(i);
-//                    int Cards = d.getSize();
-//                    d.clear();
-//                    for (int j = 0; j < Cards; j++){
-//                        d.add(copy.drawDeck().draw());
-//                    }
-//                }
-//            }
-//        }
         copy.tableDeck = tableDeck.copy();
         copy.currentSuite = currentSuite;
         copy.Score = Score.clone();

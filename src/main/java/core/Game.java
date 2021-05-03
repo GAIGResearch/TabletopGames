@@ -706,9 +706,9 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-        long seeds[] = new long[500];
+        long seeds[] = new long[10];
 
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 10; i++) {
             try {
                 Thread.sleep((long)(Math.random() * 1000));
             } catch (InterruptedException e) {
@@ -718,8 +718,8 @@ public class Game {
         }
 
         //players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
-       players.add(new MCTSPlayer(params1));
+        players.add(new RMHCPlayer());
+//       players.add(new MCTSPlayer(params1));
         //players.add(new HumanGUIPlayer(ac));
         //players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
@@ -730,7 +730,7 @@ public class Game {
 
         /* 4. Run! */
         //runOne(Blackjack, players, seed, ac, false, null);
-        runMany(new ArrayList<GameType>() {{add(Blackjack);}}, players, 500, seeds, null, false, null);
+        runMany(new ArrayList<GameType>() {{add(Poker);}}, players, 10, seeds, null, false, null);
         //runMany(Collections.singletonList(Blackjack), players, 100L,100, null, false, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

@@ -15,7 +15,7 @@ public class RMHCParams extends PlayerParameters {
 
     public RMHCParams(long seed) {
         super(seed);
-        addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
+        addTunableParameter("horizon", 1, Arrays.asList(1, 3, 5, 10, 20, 30));
         addTunableParameter("discountFactor", 0.9, Arrays.asList(0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0));
     }
 
