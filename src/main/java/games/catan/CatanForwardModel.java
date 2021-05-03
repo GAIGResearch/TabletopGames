@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractForwardModel;
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.*;
 import core.properties.PropertyString;
 import games.catan.actions.*;
@@ -154,14 +155,18 @@ public class CatanForwardModel extends AbstractForwardModel {
             gs.setGameStatus(Utils.GameResult.GAME_END);
         }
 
+        // prevents multiple DoNothing actions with multi-action turn stages
+        if(action instanceof DoNothing
+                && (gs.getGamePhase()==CatanGameState.CatanGamePhase.Trade
+                || gs.getGamePhase()==CatanGameState.CatanGamePhase.Build)){
+            cto.skipTurnStage(gs);
+        }
+
         // end player's turn; roll dice and allocate resources
         cto.endTurnStage(gs);
 
-
-        if (action instanceof OfferPlayerTrade){ //TODO need to move this
-            // add other player to the reactive player's list
-            gs.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction); // TODO move this into CTO somehow?
-            ((CatanTurnOrder)gs.getTurnOrder()).addReactivePlayer(((OfferPlayerTrade)action).getOtherPlayerID());
+        if (action instanceof OfferPlayerTrade){
+            cto.handleTradeOffer(gs,((OfferPlayerTrade) action).otherPlayerID);
         }
 
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {

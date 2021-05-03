@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
+import games.catan.actions.OfferPlayerTrade;
 
 import java.util.LinkedList;
 
@@ -12,6 +13,7 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
     protected int turnStage; // trade stage (0), build stage (1)
+    protected int actionsTakenInCurrentStage = 0;
     protected boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
     private IGamePhase nextGamePhase; // tracks the game phase where it should be reset after a reaction
 
@@ -37,6 +39,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         copy.developmentCardPlayed = developmentCardPlayed;
         copy.reactivePlayers = new LinkedList<>(reactivePlayers);
         copy.nextGamePhase = nextGamePhase;
+        copy.actionsTakenInCurrentStage = actionsTakenInCurrentStage;
         return copy;
     }
 
@@ -94,12 +97,18 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade)){
-            gameState.setGamePhase(CatanGameState.CatanGamePhase.Build);
+            if(actionsTakenInCurrentStage++==((CatanParameters)gameState.getGameParameters()).max_trade_actions_allowed){
+                actionsTakenInCurrentStage=0;
+                gameState.setGamePhase(CatanGameState.CatanGamePhase.Build);
+            }
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Build)){
-            endPlayerTurn(gameState);
-            gameState.setMainGamePhase();
+            if(actionsTakenInCurrentStage++==((CatanParameters)gameState.getGameParameters()).max_build_actions_allowed){
+                actionsTakenInCurrentStage=0;
+                endPlayerTurn(gameState);
+                gameState.setMainGamePhase();
+            }
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
@@ -129,6 +138,20 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
                 // After 2 rounds of setup the main game phase starts
                 gameState.setMainGamePhase();
             }
+        }
+    }
+
+    public void handleTradeOffer(CatanGameState gameState, int player){
+        gameState.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction);
+        addReactivePlayer(player);
+    }
+
+    // Skips remaining actions in turn stage, called for DoNothing actions in multi-action turn stages
+    public void skipTurnStage(CatanGameState gameState){
+        if(gameState.getGamePhase()== CatanGameState.CatanGamePhase.Trade){
+            actionsTakenInCurrentStage = ((CatanParameters)gameState.getGameParameters()).max_trade_actions_allowed;
+        } else {
+            actionsTakenInCurrentStage = ((CatanParameters)gameState.getGameParameters()).max_build_actions_allowed;
         }
     }
 
