@@ -1,5 +1,4 @@
 package games.poker;
-
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -253,7 +252,6 @@ public class PokerForwardModel extends AbstractForwardModel {
 
     private boolean checkGameEnd(PokerGameState pgs, int[] playerScores) {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
-
 
         playerPoints = pgs.calculatePlayerHand();
         int max = 0;
