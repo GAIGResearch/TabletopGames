@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
-import games.catan.actions.OfferPlayerTrade;
 
 import java.util.LinkedList;
 
@@ -12,7 +11,6 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
-    protected int turnStage; // trade stage (0), build stage (1)
     protected int actionsTakenInCurrentStage = 0;
     protected boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
     private IGamePhase nextGamePhase; // tracks the game phase where it should be reset after a reaction
@@ -20,7 +18,6 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     CatanTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
         turnStep = 0;
-        turnStage = 0;
         developmentCardPlayed = false;
     }
 
@@ -35,7 +32,6 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     protected TurnOrder _copy() {
         CatanTurnOrder copy = new CatanTurnOrder(nPlayers, nMaxRounds);
         copy.turnStep = turnStep;
-        copy.turnStage = turnStage;
         copy.developmentCardPlayed = developmentCardPlayed;
         copy.reactivePlayers = new LinkedList<>(reactivePlayers);
         copy.nextGamePhase = nextGamePhase;
@@ -54,7 +50,6 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
-        turnStage = 0;
         setDevelopmentCardPlayed(false);
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
