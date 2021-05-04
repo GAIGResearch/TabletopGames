@@ -63,4 +63,9 @@ public class BuyCard extends TMAction {
         return "Buy card id " + getCardID();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BuyCard)) return false;
+        return super.equals(o);
+    }
 }

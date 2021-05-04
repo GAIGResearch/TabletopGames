@@ -9,6 +9,7 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
     final TMTypes.Tag tagRequirement;  // tag card chosen must have
@@ -101,5 +102,19 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
     @Override
     public DuplicateImmediateEffect _copy() {
         return new DuplicateImmediateEffect(player, getCardID(), actionClass, tagRequirement, production);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DuplicateImmediateEffect)) return false;
+        if (!super.equals(o)) return false;
+        DuplicateImmediateEffect that = (DuplicateImmediateEffect) o;
+        return production == that.production && tagRequirement == that.tagRequirement && Objects.equals(actionClass, that.actionClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), tagRequirement, actionClass, production);
     }
 }

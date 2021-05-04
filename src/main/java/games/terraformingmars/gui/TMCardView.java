@@ -154,7 +154,13 @@ public class TMCardView extends JComponent {
                         contentRect.x + contentRect.width/2 + contentRect.width/4 - size/2, contentRect.y + contentRect.height/2 - size/2,
                         size, size);
             } else {
-                drawShadowStringCentered(g, "" + (int)card.nPoints, contentRect, Color.orange);
+                String text;
+                if ((card.nPoints == Math.floor(card.nPoints)) && !Double.isInfinite(card.nPoints)) {
+                    text = "" + (int) card.nPoints;
+                } else {
+                    text = "" + card.nPoints;
+                }
+                drawShadowStringCentered(g, text, contentRect, Color.orange);
             }
         }
         // Draw tags
@@ -281,7 +287,14 @@ public class TMCardView extends JComponent {
             Image to = ImageIO.GetInstance().getImage(rm.to.getImagePath());
             drawImage(g, from, xRM, yRM, size, size);
             drawImage(g, to, xRM + size * 5, yRM, size, size);
-            drawShadowStringCentered(g, ": " + rm.rate, new Rectangle(xRM + size, yRM, size*4, size));
+
+            String text;
+            if ((rm.rate == Math.floor(rm.rate)) && !Double.isInfinite(rm.rate)) {
+                text = ": " + (int) rm.rate;
+            } else {
+                text = ": " + rm.rate;
+            }
+            drawShadowStringCentered(g, text, new Rectangle(xRM + size, yRM, size*4, size));
             yRM += size + spacing/2;
         }
         // Draw after-action effects
@@ -513,7 +526,12 @@ public class TMCardView extends JComponent {
 
     private void drawModifyPlayerResourceAction(Graphics2D g, ModifyPlayerResource aa, int x, int y, int size) {
         // x is the middle of this rectangle
-        String amount = "" + aa.change;
+        String amount;
+        if ((aa.change == Math.floor(aa.change)) && !Double.isInfinite(aa.change)) {
+            amount = "" + (int)aa.change;
+        } else {
+            amount = "" + aa.change;
+        }
         FontMetrics fm = g.getFontMetrics();
         int textWidth = fm.stringWidth(amount);
         int totalWidth = size + spacing/5 + textWidth;

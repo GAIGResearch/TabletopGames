@@ -88,4 +88,11 @@ public class PlayCard extends TMAction {
     public String toString() {
         return "Play card id " + getPlayCardID();
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PlayCard)) return false;
+        return super.equals(o);
+    }
 }

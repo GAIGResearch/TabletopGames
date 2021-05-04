@@ -275,6 +275,7 @@ public class TMGUI extends AbstractGUI {
         if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
             TMForwardModel fm = (TMForwardModel) player.getForwardModel();
             List<AbstractAction> actions = fm.getAllActions(gs);
+            List<AbstractAction> legalActions = fm.computeAvailableActions(gs);
 
             int mnemonicStart = KeyEvent.VK_A;
             for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
@@ -284,15 +285,14 @@ public class TMGUI extends AbstractGUI {
 
                     for (AbstractAction aa: actions) {
                         TMAction a = (TMAction) aa;
+                        TMAction fullLegalAction = getFullLegalAction(a, legalActions);
+
                         if (a.actionType != null && a.actionType == t) {
                             JMenuItem menuItem;
-                            if (a.canBePlayed(gs)) {
+                            if (fullLegalAction != null) {
                                 menuItem = new JMenuItem(a.getString(gs));
                                 menuItem.setForeground(Color.white);
-                                menuItem.addActionListener(e -> {
-                                    if (a.getCost() != 0) ac.addAction(new PayForAction(player.getPlayerID(), a));
-                                    else ac.addAction(a);
-                                });
+                                menuItem.addActionListener(e -> ac.addAction(fullLegalAction));
                             } else {
                                 menuItem = new JMenuItem("<html><strike>" + a.getString(gs) + "</strike><html>");
                                 menuItem.setForeground(Color.darkGray);
@@ -335,14 +335,15 @@ public class TMGUI extends AbstractGUI {
 
             for (AbstractAction aa: actions) {
                 TMAction a = (TMAction) aa;
+                TMAction fullLegalAction = getFullLegalAction(a, legalActions);
                 if (a.actionType == null) {
                     if (a.pass) passAction = a;
                     else if (a instanceof PlaceTile) {
                         placeActions.add(a);
                     } else {
                         actionButtons[i].setVisible(true);
-                        if (a.canBePlayed(gs)) {
-                            setButtonAction(actionButtons[i], player.getPlayerID(), a, gs);
+                        if (fullLegalAction != null) {
+                            actionButtons[i].setButtonAction(fullLegalAction, gs);
                         } else {
                             actionButtons[i].setText(a.getString(gs));
                             actionButtons[i].setEnabled(false);
@@ -360,9 +361,10 @@ public class TMGUI extends AbstractGUI {
                 // A card to choose
                 for (TMAction action: playCardActions) {
                     if (action.getCardID() == gs.getPlayerHands()[focusPlayer].get(highlightIdx).getComponentID()) {
+                        TMAction fullLegalAction = getFullLegalAction(action, legalActions);
                         actionButtons[i].setVisible(true);
-                        if (action.canBePlayed(gs)) {
-                            setButtonAction(actionButtons[i], player.getPlayerID(), action, "Play");
+                        if (fullLegalAction != null) {
+                            actionButtons[i].setButtonAction(action, "Play");
                         } else {
                             actionButtons[i].setText(action.getString(gs));
                             actionButtons[i].setEnabled(false);
@@ -384,6 +386,8 @@ public class TMGUI extends AbstractGUI {
                     String code = view.rects.get(r);
                     for (TMAction a: placeActions) {
                         if (a instanceof PlaceTile) {
+                            TMAction fullLegalAction = getFullLegalAction(a, legalActions);
+
                             TMMapTile mt = (TMMapTile) gs.getComponentById(((PlaceTile) a).mapTileID);
                             if (mt != null && code.contains("grid")) {
                                 // a grid location, trim actions to place tile here
@@ -391,7 +395,11 @@ public class TMGUI extends AbstractGUI {
                                 int y = Integer.parseInt(code.split("-")[2]);
                                 if (mt.getX() == x && mt.getY() == y) {
                                     actionButtons[i].setVisible(true);
-                                    setButtonAction(actionButtons[i], player.getPlayerID(), a, "Place " + ((PlaceTile) a).tile);
+                                    if (fullLegalAction != null) {
+                                        actionButtons[i].setButtonAction(fullLegalAction, "Place " + ((PlaceTile) a).tile);
+                                    } else {
+                                        actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
+                                    }
                                     i++;
                                 }
                             } else if (code.contains("+") || code.contains("-")) {
@@ -401,7 +409,11 @@ public class TMGUI extends AbstractGUI {
                                 for (TMMapTile mt2: gs.getExtraTiles()) {
                                     if (mt2 != null && mt2.getComponentName().equalsIgnoreCase(code)) {
                                         actionButtons[i].setVisible(true);
-                                        setButtonAction(actionButtons[i], player.getPlayerID(), a, "Place " + ((PlaceTile) a).tile);
+                                        if (fullLegalAction != null) {
+                                            actionButtons[i].setButtonAction(fullLegalAction, "Place " + ((PlaceTile) a).tile);
+                                        } else {
+                                            actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
+                                        }
                                         i++;
                                     }
                                 }
@@ -417,20 +429,12 @@ public class TMGUI extends AbstractGUI {
         }
     }
 
-    private void setButtonAction(ActionButton ab, int player, TMAction action, String text) {
-        if (action.getCost() != 0) {
-            ab.setButtonAction(new PayForAction(player, action), text);
-        } else {
-            ab.setButtonAction(action, text);
+    private TMAction getFullLegalAction(TMAction a, List<AbstractAction> legalActions) {
+        for (AbstractAction aa: legalActions) {
+            if (aa instanceof PayForAction && a.equals(((PayForAction) aa).action)) return (TMAction) aa;
+            if (!(aa instanceof PayForAction) && a.equals(aa)) return (TMAction) aa;
         }
-    }
-
-    private void setButtonAction(ActionButton ab, int player, TMAction action, TMGameState gs) {
-        if (action.getCost() != 0) {
-            ab.setButtonAction(new PayForAction(player, action), gs);
-        } else {
-            ab.setButtonAction(action, gs);
-        }
+        return null;
     }
 
     private String getInvalidActionReason(TMAction action, TMGameState gs) {
