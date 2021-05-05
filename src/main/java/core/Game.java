@@ -8,6 +8,10 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
+import players.simple.CatanRuleBasedPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
@@ -18,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
+import static games.GameType.Catan;
 import static games.GameType.DotsAndBoxes;
 
 public class Game {
@@ -696,30 +701,13 @@ public class Game {
 
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-
-        MCTSParams params1 = new MCTSParams();
-
-        players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
-//        players.add(new MCTSPlayer(params1));
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-
+        players.add(new MCTSPlayer());
+        players.add(new CatanRuleBasedPlayer());
+        players.add(new CatanRuleBasedPlayer());
+        players.add(new CatanRuleBasedPlayer());
         /* 4. Run! */
-        runOne(DotsAndBoxes, players, seed, ac, false, null);
-        //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
-//        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(TicTacToe);
-//        games.add(ExplodingKittens);
-//        games.add(LoveLetter);
-//        runMany(games, players, null, 50, null, false, false);
+        runOne(Catan, players, seed, ac, false, null);
 
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, null, 100, ac, false, true);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
 
     }
 }
