@@ -35,11 +35,17 @@ public class PilgrimageTests {
         assertEquals(0, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
         assertEquals(3, state.getResource(0, SHILLINGS, STOREROOM));
 
+        // we now get the reward, but the monk does not return
+        p.advance(state);
+        assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
+        assertEquals(5, pilgrim.getPiety());
+        assertEquals(3, state.getVictoryPoints(0));
+        assertEquals(1, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
+
+        // the monk returns
         p.advance(state);
         assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(6, pilgrim.getPiety());
-        assertEquals(3, state.getVictoryPoints(0));
-        assertEquals(1, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
     }
 
     @Test
@@ -65,10 +71,15 @@ public class PilgrimageTests {
         assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
 
         p.advance(state);
-        assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
-        assertEquals(6, pilgrim.getPiety());
+        assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
+        assertEquals(5, pilgrim.getPiety());
         assertEquals(7, state.getVictoryPoints(0));
         assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
+
+        // the monk returns
+        p.advance(state);
+        assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
+        assertEquals(6, pilgrim.getPiety());
     }
 
     @Test
@@ -114,23 +125,23 @@ public class PilgrimageTests {
         turnOrder.endRound(state);  // SPRING -> SUMMER
         assertEquals(SUMMER, turnOrder.getSeason());
         assertTrue(p1.isActive());
-        assertFalse(p2.isActive());
+        assertTrue(p2.isActive());
 
         turnOrder.endRound(state);  // SUMMER -> AUTUMN
         assertEquals(AUTUMN, turnOrder.getSeason());
         assertTrue(p1.isActive());
-        assertFalse(p2.isActive());
+        assertTrue(p2.isActive());
         assertEquals(5, pilgrim1.getPiety());
-        assertEquals(6, pilgrim2.getPiety());
+        assertEquals(5, pilgrim2.getPiety());
 
         state.addResource(0, BREAD, 10);
         state.addResource(1, BREAD, 10);
 
         turnOrder.endRound(state);  // AUTUMN -> WINTER
         assertEquals(WINTER, turnOrder.getSeason());
-        assertFalse(p1.isActive());
+        assertTrue(p1.isActive());
         assertFalse(p2.isActive());
-        assertEquals(6, pilgrim1.getPiety());
+        assertEquals(5, pilgrim1.getPiety());
         assertEquals(6, pilgrim2.getPiety());
     }
 

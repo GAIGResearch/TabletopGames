@@ -21,7 +21,6 @@ public class MCTSPlayer extends AbstractPlayer {
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
     protected boolean debug = false;
-    protected boolean expertIteration = true;
     protected SingleTreeNode root;
 
     public MCTSPlayer() {
@@ -47,14 +46,14 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        root = new SingleTreeNode(this, null,null, gameState, rnd);
+        root = new SingleTreeNode(this, null, null, gameState, rnd);
         if (rolloutStrategy instanceof MASTPlayer) {
             ((MASTPlayer) rolloutStrategy).setRoot(root);
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
         }
         root.mctsSearch(getStatsLogger());
-        if (expertIteration) {
-            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer("DM_Data.txt", Arrays.asList(DiceMonasteryStateAttributes.values()));
+        if (params.gatherExpertIterationData) {
+            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(params.expertIterationFile, Arrays.asList(DiceMonasteryStateAttributes.values()));
             eidg.recordData(root);
         }
         if (debug)

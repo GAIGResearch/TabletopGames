@@ -131,7 +131,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void executeBids() {
-        if (((DiceMonasteryTurnOrder) turnOrder).season != SUMMER)
+        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
+        if (dmto.season != SUMMER)
             throw new AssertionError(String.format("Wrong season (%s) for Viking raids!", ((DiceMonasteryTurnOrder) turnOrder).season));
 
         List<Integer> bidPerPlayer = IntStream.range(0, getNPlayers()).map(player -> {
@@ -155,10 +156,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 // TODO: Technically this is a choice that the player can make
                 if (treasuresOwnedPerPlayer.get(player).isEmpty()) {
                     Optional<Monk> lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety));
-                    lowestMonk.ifPresent(monk -> moveMonk(monk.getComponentID(), DORMITORY, GRAVEYARD));
+                    if (lowestMonk.isPresent()) {
+                        moveMonk(lowestMonk.get().getComponentID(), DORMITORY, GRAVEYARD);
+                        dmto.logEvent(String.format("Player %d loses monk of piety %d to vikings", player, lowestMonk.get().getPiety()), this);
+                    }
                 } else {
                     List<TREASURE> treasures = treasuresOwnedPerPlayer.get(player);
                     TREASURE loss = treasures.stream().max(comparingInt(t -> t.vp)).orElseThrow(() -> new AssertionError("No Treasures to lose?"));
+                    dmto.logEvent(String.format("Player %d loses %s to vikings ", player, loss), this);
                     treasures.remove(loss);
                     addVP(-loss.vp, player);
                 }
@@ -177,6 +182,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void retireMonk(Monk monk) {
+        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         if (getMonkLocation(monk.getComponentID()) == RETIRED)
             throw new AssertionError("Already retired!");
         moveMonk(monk.getComponentID(), getMonkLocation(monk.getComponentID()), RETIRED);
@@ -184,6 +190,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             // no more benefits to retirement
             return;
         }
+        dmto.logEvent("Monk retired for " + RETIREMENT_REWARDS[nextRetirementReward] + " VP", this);
         addVP(RETIREMENT_REWARDS[nextRetirementReward], monk.getOwnerId());
         nextRetirementReward++;
     }
@@ -393,6 +400,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             // for each player feed monks, and then discard perishables
             List<Monk> monks = monksIn(DORMITORY, player);
             int requiredFood = monks.size();
+            DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
             requiredFood -= getResource(player, Resource.BERRIES, STOREROOM);
             requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
             if (requiredFood > 0) {
@@ -402,6 +410,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             }
             if (requiredFood > 0) {
                 // monks starve
+                dmto.logEvent(String.format("Player %d fails to feed %d of %d monks", player, requiredFood, monks.size()), this);
                 addVP(-requiredFood, player);
                 // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
                 // TODO: Make this a player decision

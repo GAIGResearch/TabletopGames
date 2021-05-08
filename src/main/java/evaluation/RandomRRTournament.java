@@ -90,6 +90,7 @@ public class RandomRRTournament extends RoundRobinTournament {
             // the problem only occurs if we are populating one of the first nPlayer indices (i1), with a value that
             // is in the last (nPlayer - i1) values of the previous permutation
             if (i1 >= nPlayers) return false;
+            if (currentPermutation.length == nPlayers) return false;
             for (int i = nPlayers - 1; i >= i1; i--) {
                 if (lastValues[i] == currentPermutation[i2]) {
                     return true;

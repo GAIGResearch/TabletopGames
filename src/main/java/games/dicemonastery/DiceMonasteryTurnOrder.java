@@ -2,8 +2,10 @@ package games.dicemonastery;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.turnorders.TurnOrder;
+import games.dicemonastery.actions.LogEvent;
 
 import java.util.*;
 
@@ -116,6 +118,11 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             default:
                 throw new AssertionError(String.format("Unknown Game Phase of %s in %s", state.getGamePhase(), season));
         }
+    }
+
+    void logEvent(String eventText, DiceMonasteryGameState state) {
+        AbstractAction logAction = new LogEvent(eventText);
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ACTION_CHOSEN, state, logAction));
     }
 
     private void initialiseUseMonkBooleans(DiceMonasteryGameState state) {
