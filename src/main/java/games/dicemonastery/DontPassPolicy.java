@@ -42,8 +42,8 @@ public class DontPassPolicy extends AbstractPlayer {
             }
         }
 
-        if (possibleActions.stream().anyMatch(a -> a instanceof WriteText)) {
-            possibleActions.removeIf(a -> !(a instanceof WriteText));
+        if (possibleActions.stream().anyMatch(a -> a instanceof WriteText || a instanceof GoOnPilgrimage)) {
+            possibleActions.removeIf(a -> !(a instanceof WriteText) && !(a instanceof GoOnPilgrimage));
         }
 
         AbstractAction firstAction = possibleActions.get(0);
