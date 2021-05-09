@@ -40,7 +40,7 @@ public class MCTSParams extends PlayerParameters {
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public boolean gatherExpertIterationData = false;
-    public String expertIterationFile = "ExpertIterationData.txt";
+    public String expertIterationFileStem = "ExpertIterationData";
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -88,7 +88,7 @@ public class MCTSParams extends PlayerParameters {
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         rolloutClass = (String) getParameterValue("rolloutClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
-        expertIterationFile = (String) getParameterValue("expIterFile");
+        expertIterationFileStem = (String) getParameterValue("expIterFile");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
             useMAST = true;
         }

@@ -310,6 +310,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         for (int player = 0; player < getNPlayers(); player++) {
             if (monksIn(null, player).isEmpty()) {
                 // Hire a free novice!
+                ((DiceMonasteryTurnOrder) turnOrder).logEvent(String.format("Player %d gets new Novice due to lack of monks", player), this);
                 createMonk(1, player);
             }
         }

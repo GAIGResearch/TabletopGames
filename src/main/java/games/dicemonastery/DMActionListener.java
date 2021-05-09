@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static core.CoreConstants.GameEvents.ACTION_CHOSEN;
+import static core.CoreConstants.GameEvents.GAME_EVENT;
+
 public class DMActionListener implements IGameListener {
 
     IStatisticLogger logger;
@@ -32,7 +35,7 @@ public class DMActionListener implements IGameListener {
 
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
+        if (type == ACTION_CHOSEN || type == GAME_EVENT) {
             Map<String, Object> data = Arrays.stream(DiceMonasteryActionAttributes.values())
                     .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, action)));
             logger.record(data);

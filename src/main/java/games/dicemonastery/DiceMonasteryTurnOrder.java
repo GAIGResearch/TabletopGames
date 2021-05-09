@@ -122,7 +122,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
     void logEvent(String eventText, DiceMonasteryGameState state) {
         AbstractAction logAction = new LogEvent(eventText);
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ACTION_CHOSEN, state, logAction));
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
     }
 
     private void initialiseUseMonkBooleans(DiceMonasteryGameState state) {

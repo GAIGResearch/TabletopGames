@@ -3,16 +3,45 @@ package games.dicemonastery;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.*;
+import games.dicemonastery.actions.BakeBread;
+import games.dicemonastery.actions.HarvestWheat;
 import games.dicemonastery.actions.Pass;
+import games.dicemonastery.actions.PrepareVellum;
 
 import java.util.*;
+
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
 public class DontPassPolicy extends AbstractPlayer {
 
     Random rnd = new Random(System.currentTimeMillis());
+    AbstractAction vellum = new PrepareVellum();
+    AbstractAction harvest = new HarvestWheat();
+    AbstractAction bakeBread = new BakeBread();
 
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
+        int player = state.getCurrentPlayer();
+
+        // We first check a few priorities
+        if (possibleActions.contains(vellum))
+            return vellum;
+
+        if (possibleActions.contains(harvest))
+            return harvest;
+
+        if (possibleActions.contains(bakeBread)) {
+            int berries = state.getResource(player, BERRIES, STOREROOM);
+            int bread = state.getResource(player, BREAD, STOREROOM);
+            int honey = state.getResource(player, HONEY, STOREROOM);
+            if (berries + bread + honey < state.monksIn(null, player).size()) {
+                // we do not have enough food for Winter
+                return bakeBread;
+            }
+        }
 
         AbstractAction firstAction = possibleActions.get(0);
 
@@ -20,7 +49,6 @@ public class DontPassPolicy extends AbstractPlayer {
         possibleActions.remove(new DoNothing());
 
         if (possibleActions.isEmpty())
-
             return firstAction;
 
         return possibleActions.get(rnd.nextInt(possibleActions.size()));
