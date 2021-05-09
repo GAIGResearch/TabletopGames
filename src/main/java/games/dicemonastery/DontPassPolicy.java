@@ -2,13 +2,12 @@ package games.dicemonastery;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.actions.*;
-import games.dicemonastery.actions.BakeBread;
-import games.dicemonastery.actions.HarvestWheat;
-import games.dicemonastery.actions.Pass;
-import games.dicemonastery.actions.PrepareVellum;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import games.dicemonastery.actions.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
@@ -41,6 +40,10 @@ public class DontPassPolicy extends AbstractPlayer {
                 // we do not have enough food for Winter
                 return bakeBread;
             }
+        }
+
+        if (possibleActions.stream().anyMatch(a -> a instanceof WriteText)) {
+            possibleActions.removeIf(a -> !(a instanceof WriteText));
         }
 
         AbstractAction firstAction = possibleActions.get(0);

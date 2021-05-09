@@ -39,7 +39,7 @@ public class ExpertIterationDataGatherer {
             if (!logFileQ.exists()) {
                 writerQ = new FileWriter(logFileQ, false);
                 StringBuilder header = new StringBuilder();
-                header.append("Action\tActionHash\tValue\tVisits\tN");
+                header.append("Action\tActionHash\tValue\tAdvantage\tVisits\tN");
                 for (IGameAttribute feature : features) {
                     header.append("\t").append(feature.name());
                 }
@@ -68,7 +68,8 @@ public class ExpertIterationDataGatherer {
                 StringBuilder output = new StringBuilder();
                 StringBuilder coreData = new StringBuilder();
                 int player = node.getActor();
-                output.append(String.format("%.3g\t%d\t%d", node.getTotValue()[player] / node.getVisits(), node.depth, node.getVisits()));
+                double stateValue = node.getTotValue()[player] / node.getVisits();
+                output.append(String.format("%.3g\t%d\t%d", stateValue, node.depth, node.getVisits()));
                 for (IGameAttribute feature : features) {
                     coreData.append("\t").append(feature.get(node.getState(), player));
                 }
@@ -81,8 +82,9 @@ public class ExpertIterationDataGatherer {
                     if (node.children.get(action) == null || node.children.get(action)[player] == null)
                         continue;
                     SingleTreeNode childNode = node.children.get(action)[player];
-                    output.append(String.format("%s\t%d\t%.3g\t%d\t%d", action.toString(), action.hashCode(),
-                            childNode.getTotValue()[player] / childNode.getVisits(), childNode.getVisits(), node.getVisits()));
+                    double actionValue = childNode.getTotValue()[player] / childNode.getVisits();
+                    output.append(String.format("%s\t%d\t%.3g\t%.3g\t%d\t%d", action.toString(), action.hashCode(),
+                            actionValue, actionValue - stateValue, childNode.getVisits(), node.getVisits()));
                     output.append(coreData).append(System.lineSeparator());
                     writerQ.write(output.toString());
                 }
