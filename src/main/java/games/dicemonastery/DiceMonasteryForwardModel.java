@@ -13,6 +13,8 @@ import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
 import static java.util.Comparator.comparingInt;
@@ -245,13 +247,32 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                 }
                 break;
             case SUMMER:
-                // we generate up to 16 SummerBids for every possibility of 0% to 100% of total stuff in 33% increments
-                // taking each of beer and mead independently
-                //  (removing any duplicate bids, so in practise the actual number will be rather lower)
-                int totalBeer = state.getResource(currentPlayer, BEER, STOREROOM);
-                int totalMead = state.getResource(currentPlayer, MEAD, STOREROOM);
-                return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
-                        .distinct().collect(toList());
+                if (state.getGamePhase() == SACRIFICE) {
+                    // in this case we have sacrifice decisions to make - Monk or Treasure
+                    List<AbstractAction> retValue = new ArrayList<>();
+                    List<TREASURE> treasure = state.getTreasures(currentPlayer);
+                    if (!treasure.isEmpty())
+                        retValue.add(new PayTreasure(treasure.stream().max(comparingInt(t -> t.vp)).get()));
+                    int[] pietyLevels = state.monksIn(DORMITORY, currentPlayer).stream().mapToInt(Monk::getPiety).distinct().toArray();
+                    for (int piety : pietyLevels)
+                        retValue.add(new KillMonk(piety));
+                    if (retValue.isEmpty()) {
+                        // somehow no penalty is due!
+                        retValue.add(new DoNothing());
+                    }
+                    return retValue;
+                } else {
+                    if (state.getGamePhase() != BID)
+                        throw new AssertionError("We are in an invalid Phase " + state.getGamePhase());
+                    // in this case we are still in the bidding phase to determine who the Vikings raid
+                    // we generate up to 16 SummerBids for every possibility of 0% to 100% of total stuff in 33% increments
+                    // taking each of beer and mead independently
+                    //  (removing any duplicate bids, so in practise the actual number will be rather lower)
+                    int totalBeer = state.getResource(currentPlayer, BEER, STOREROOM);
+                    int totalMead = state.getResource(currentPlayer, MEAD, STOREROOM);
+                    return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
+                            .distinct().collect(toList());
+                }
             case WINTER:
                 List<AbstractAction> retValue = state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()
                         .mapToInt(Monk::getPiety)

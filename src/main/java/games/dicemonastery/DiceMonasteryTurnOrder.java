@@ -11,6 +11,8 @@ import java.util.*;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.stream.Collectors.*;
 
@@ -30,6 +32,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     List<Integer> playerOrderForCurrentArea;
     boolean turnOwnerTakenReward, turnOwnerPrayed;
     int actionPointsLeftForCurrentPlayer = 0;
+    List<Integer> playersToMakeVikingDecisions = new ArrayList<>();
 
     @Override
     protected void _reset() {
@@ -53,6 +56,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         retValue.turnOwnerTakenReward = turnOwnerTakenReward;
         retValue.turnOwnerPrayed = turnOwnerPrayed;
         retValue.actionPointsLeftForCurrentPlayer = actionPointsLeftForCurrentPlayer;
+        retValue.playersToMakeVikingDecisions = new ArrayList<>(playersToMakeVikingDecisions);
         return retValue;
     }
 
@@ -102,10 +106,25 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 }
                 break;
             case SUMMER:
-                turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
-                if (state.allBidsIn()) {
-                    // we have completed SUMMER bidding
-                    state.executeBids();
+                switch ((DiceMonasteryConstants.Phase) state.getGamePhase()) {
+                    case BID:
+                        turnOwner = (turnOwner + 1 + nPlayers) % nPlayers;
+                        if (state.allBidsIn()) {
+                            // we have completed SUMMER bidding
+                            playersToMakeVikingDecisions = state.executeBids();
+                            state.setGamePhase(SACRIFICE);
+                            if (!playersToMakeVikingDecisions.isEmpty())
+                                turnOwner = playersToMakeVikingDecisions.get(0);
+                        }
+                        break;
+                    case SACRIFICE:
+                        playersToMakeVikingDecisions.remove(0);
+                        if (!playersToMakeVikingDecisions.isEmpty())
+                            turnOwner = playersToMakeVikingDecisions.get(0);
+                        break;
+                }
+                if (state.getGamePhase() == SACRIFICE && playersToMakeVikingDecisions.isEmpty()) {
+                    // we have finished the raids, and all players have made sacrifice decisions
                     endRound(state);
                 }
                 break;
@@ -158,7 +177,10 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         if (season == SUMMER && getYear() == 1)
             season = season.next(); // we skip Summer in the first year
         state.checkAtLeastOneMonk();
-        state.setGamePhase(Phase.PLACE_MONKS);
+        if (season == SUMMER)
+            state.setGamePhase(BID);
+        else
+            state.setGamePhase(Phase.PLACE_MONKS);
         turnOwner = firstPlayerWithMonks(state);
         if (season == WINTER)
             state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
@@ -282,6 +304,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                     other.currentAreaBeingExecuted == currentAreaBeingExecuted &&
                     other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
                     other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
+                    other.playersToMakeVikingDecisions.equals(playersToMakeVikingDecisions) &&
                     super.equals(other);
         }
         return false;
@@ -290,7 +313,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public int hashCode() {
         return super.hashCode() + 31 * Objects.hash(season, abbot, currentAreaBeingExecuted,
-                actionPointsLeftForCurrentPlayer, turnOwnerTakenReward, turnOwnerPrayed);
+                actionPointsLeftForCurrentPlayer, turnOwnerTakenReward, turnOwnerPrayed, playersToMakeVikingDecisions);
     }
 
 

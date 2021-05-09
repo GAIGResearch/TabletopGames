@@ -92,7 +92,7 @@ public class DiceMonasteryConstants {
     }
 
     public enum Phase implements IGamePhase {
-        PLACE_MONKS, USE_MONKS
+        PLACE_MONKS, USE_MONKS, BID, SACRIFICE
     }
 
     public enum Season {

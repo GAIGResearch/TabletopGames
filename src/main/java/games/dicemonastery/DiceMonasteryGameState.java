@@ -130,7 +130,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return true;
     }
 
-    public void executeBids() {
+    public void loseTreasure(int player, TREASURE treasure) {
+        treasuresOwnedPerPlayer.get(player).remove(treasure);
+        addVP(-treasure.vp, player);
+    }
+
+    public List<Integer> executeBids() {
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         if (dmto.season != SUMMER)
             throw new AssertionError(String.format("Wrong season (%s) for Viking raids!", ((DiceMonasteryTurnOrder) turnOrder).season));
@@ -149,24 +154,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
         // contains the ordinality of the player bids, 0 = best bid (including joint equals) and so on.
         List<Integer> playerOrdinality = bidPerPlayer.stream().map(sortedBids::indexOf).collect(toList());
 
+        List<Integer> retValue = new ArrayList<>();
         for (int player = 0; player < bidPerPlayer.size(); player++) {
             Map<Resource, Integer> treasury = playerTreasuries.get(player);
             if (bidPerPlayer.get(player) == lowestBid) {
-                // this takes precedence over ordinality - no VP, and lose a Treasure, or a Monk
-                // TODO: Technically this is a choice that the player can make
-                if (treasuresOwnedPerPlayer.get(player).isEmpty()) {
-                    Optional<Monk> lowestMonk = monksIn(DORMITORY, player).stream().min(comparingInt(Monk::getPiety));
-                    if (lowestMonk.isPresent()) {
-                        moveMonk(lowestMonk.get().getComponentID(), DORMITORY, GRAVEYARD);
-                        dmto.logEvent(String.format("Player %d loses monk of piety %d to vikings", player, lowestMonk.get().getPiety()), this);
-                    }
-                } else {
-                    List<TREASURE> treasures = treasuresOwnedPerPlayer.get(player);
-                    TREASURE loss = treasures.stream().max(comparingInt(t -> t.vp)).orElseThrow(() -> new AssertionError("No Treasures to lose?"));
-                    dmto.logEvent(String.format("Player %d loses %s to vikings ", player, loss), this);
-                    treasures.remove(loss);
-                    addVP(-loss.vp, player);
-                }
+                // add them to the list of player to make a sacrifice decision
+                retValue.add(player);
                 playerBids.remove(player);
             } else {
                 // Gain VP
@@ -179,6 +172,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 playerBids.remove(player);
             }
         }
+        return retValue;
     }
 
     public void retireMonk(Monk monk) {

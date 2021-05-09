@@ -15,8 +15,7 @@ import java.util.stream.IntStream;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Phase;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.*;
@@ -637,22 +636,26 @@ public class CoreGameLoop {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
+        assertEquals(BID, state.getGamePhase());
         for (int p = 0; p < state.getNPlayers(); p++) {
             state.addResource(p, BEER, 10);
             state.addResource(p, MEAD, 10);
         }
         int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
         int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
+        assertEquals(1, state.getCurrentPlayer());
         fm.next(state, new SummerBid(1, 5));
         assertEquals(10, state.getResource(1, BEER, STOREROOM));
         assertEquals(10, state.getResource(1, MEAD, STOREROOM));
         fm.next(state, new SummerBid(0, 5));
         fm.next(state, new SummerBid(3, 2));
-        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(1, 0));  // Player 0
         assertEquals(10, state.getResource(0, BEER, STOREROOM));
         assertEquals(10, state.getResource(0, MEAD, STOREROOM));
 
-        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(SUMMER, turnOrder.getSeason());
+        assertEquals(SACRIFICE, state.getGamePhase());
+        assertEquals(0, turnOrder.getCurrentPlayer(state));
         assertEquals(startVP[0], state.getVictoryPoints(0));
         assertEquals(startVP[1] + 6, state.getVictoryPoints(1));
         assertEquals(startVP[2] + 4, state.getVictoryPoints(2));
@@ -667,6 +670,13 @@ public class CoreGameLoop {
         assertEquals(5, state.getResource(2, MEAD, STOREROOM));
         assertEquals(7, state.getResource(3, BEER, STOREROOM));
         assertEquals(8, state.getResource(3, MEAD, STOREROOM));
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.get(0) instanceof KillMonk);
+        fm.next(state, actions.get(0));
+
+        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(PLACE_MONKS, state.getGamePhase());
 
         assertEquals(startMonks[0] - 1, state.monksIn(DORMITORY, 0).size());
         assertEquals(startMonks[1], state.monksIn(DORMITORY, 1).size());
@@ -687,16 +697,27 @@ public class CoreGameLoop {
         }
         int[] startVP = IntStream.range(0, 4).map(state::getVictoryPoints).toArray();
         int[] startMonks = IntStream.range(0, 4).map(p -> state.monksIn(DORMITORY, p).size()).toArray();
-        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(1, 0)); // player 1
         fm.next(state, new SummerBid(0, 1));
         fm.next(state, new SummerBid(0, 1));
-        fm.next(state, new SummerBid(1, 0));
+        fm.next(state, new SummerBid(1, 0)); // player 0
 
-        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(SUMMER, turnOrder.getSeason());
+        assertEquals(SACRIFICE, state.getGamePhase());
+        assertEquals(0, turnOrder.getCurrentPlayer(state));
+
         assertEquals(startVP[0], state.getVictoryPoints(0));
         assertEquals(startVP[1], state.getVictoryPoints(1));
         assertEquals(startVP[2] + 6, state.getVictoryPoints(2));
         assertEquals(startVP[3] + 6, state.getVictoryPoints(3));
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.get(0) instanceof KillMonk);
+        fm.next(state, actions.get(0));
+        assertEquals(1, turnOrder.getCurrentPlayer(state));
+        actions = fm.computeAvailableActions(state);
+        assertTrue(actions.get(0) instanceof KillMonk);
+        fm.next(state, actions.get(0));
 
         // Then check that
         assertEquals(10, state.getResource(0, BEER, STOREROOM));
@@ -732,7 +753,10 @@ public class CoreGameLoop {
         fm.next(state, new SummerBid(0, 1));
         fm.next(state, new SummerBid(2, 0));
 
-        assertEquals(AUTUMN, turnOrder.getSeason());
+        assertEquals(SUMMER, turnOrder.getSeason());
+        assertEquals(SACRIFICE, state.getGamePhase());
+        assertEquals(1, turnOrder.getCurrentPlayer(state));
+
         assertEquals(startVP[0] + 4, state.getVictoryPoints(0));
         assertEquals(startVP[1], state.getVictoryPoints(1));
         assertEquals(startVP[2] + 6, state.getVictoryPoints(2));
@@ -747,6 +771,15 @@ public class CoreGameLoop {
         assertEquals(8, state.getResource(2, MEAD, STOREROOM));
         assertEquals(10, state.getResource(3, BEER, STOREROOM));
         assertEquals(9, state.getResource(3, MEAD, STOREROOM));
+
+        assertEquals(startMonks[0], state.monksIn(DORMITORY, 0).size());
+        assertEquals(startMonks[1], state.monksIn(DORMITORY, 1).size());
+        assertEquals(startMonks[2], state.monksIn(DORMITORY, 2).size());
+        assertEquals(startMonks[3], state.monksIn(DORMITORY, 3).size());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.get(0) instanceof KillMonk);
+        fm.next(state, actions.get(0));
 
         assertEquals(startMonks[0], state.monksIn(DORMITORY, 0).size());
         assertEquals(startMonks[1] - 1, state.monksIn(DORMITORY, 1).size());
@@ -781,6 +814,17 @@ public class CoreGameLoop {
         fm.next(state, new SummerBid(0, 2));
         fm.next(state, new SummerBid(0, 1));
         fm.next(state, new SummerBid(2, 0));
+
+        assertEquals(SUMMER, turnOrder.getSeason());
+        assertEquals(SACRIFICE, state.getGamePhase());
+        assertEquals(1, turnOrder.getCurrentPlayer(state));
+
+        assertEquals(2, state.getTreasures(1).size());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.stream().filter(a -> a instanceof PayTreasure).count());
+        assertTrue(actions.contains(new PayTreasure(CANDLESTICK)));
+        fm.next(state, new PayTreasure(CANDLESTICK));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
 

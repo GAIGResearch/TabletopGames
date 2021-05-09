@@ -13,8 +13,9 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
 import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.PSALM;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.AUTUMN;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
 import static org.junit.Assert.*;
@@ -299,14 +300,14 @@ public class CopyTests {
         fm.next(fullCopy, new SummerBid(1, 5));
 
         assertEquals(1, fullCopy.getCurrentPlayer());
-        assertEquals(AUTUMN, ((DiceMonasteryTurnOrder)fullCopy.getTurnOrder()).getSeason());
+        assertEquals(SACRIFICE, fullCopy.getGamePhase());
         assertTrue(fm.computeAvailableActions(fullCopy).stream().noneMatch(a -> a instanceof SummerBid));
 
         fm.next(perspectiveCopy, new SummerBid(1, 0));
         fm.next(perspectiveCopy, new SummerBid(1, 5));
 
         assertEquals(1, perspectiveCopy.getCurrentPlayer()); // still P0 to move
-        assertEquals(SUMMER, ((DiceMonasteryTurnOrder)perspectiveCopy.getTurnOrder()).getSeason());  // but still in SUMMER
+        assertEquals(BID, perspectiveCopy.getGamePhase());  // but still in SUMMER
         assertTrue(fm.computeAvailableActions(perspectiveCopy).stream().allMatch(a -> a instanceof SummerBid));
     }
 
