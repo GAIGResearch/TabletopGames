@@ -61,6 +61,8 @@ public class SGGameState extends AbstractGameState {
 
     public int[] getPlayerScore() {return playerScore;}
 
+    public List<Deck<SGCard>> getPlayerFields() {return playerFields;}
+
     public List<Deck<SGCard>> getPlayerDecks() {return playerHands;}
 
     @Override

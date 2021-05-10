@@ -5,6 +5,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.sushigo.actions.DebugAction;
+import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerFields = new ArrayList<>();
         for (int i = 0; i < SGGS.getNPlayers(); i++){
             SGGS.playerHands.add(new Deck<>("Player" + i + " hand", i));
+            SGGS.playerFields.add(new Deck<>("Player" + "Card field", i));
             int cardAmount = 0;
             switch (firstState.getNPlayers())
             {
@@ -115,16 +117,66 @@ public class SGForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
+        //Perform action
+        action.execute(currentState);
+
+        //Show cards after everyone has picked a card
         SGGameState SGGS = (SGGameState)currentState;
         int turn = SGGS.getTurnOrder().getTurnCounter();
         if(turn % 4 == 0) System.out.println("Show cards!");
+
+        //End turn
         currentState.getTurnOrder().endPlayerTurn(currentState);
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        SGGameState SGGS = (SGGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DebugAction());
+
+        int deckFromId = SGGS.getPlayerDecks().get(gameState.getCurrentPlayer()).getComponentID();
+        int deckToId = SGGS.getPlayerFields().get(gameState.getCurrentPlayer()).getComponentID();
+        Deck<SGCard> currentPlayerHand = SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer());
+        for (int i = 0; i < currentPlayerHand.getSize(); i++){
+            switch (currentPlayerHand.get(i).type) {
+                case Maki_1:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Maki_1));
+                    break;
+                case Maki_2:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Maki_2));
+                    break;
+                case Maki_3:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Maki_3));
+                    break;
+                case Tempura:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Tempura));
+                    break;
+                case Sashimi:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Sashimi));
+                    break;
+                case Dumpling:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Dumpling));
+                    break;
+                case SquidNigiri:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.SquidNigiri));
+                    break;
+                case SalmonNigiri:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.SalmonNigiri));
+                    break;
+                case EggNigiri:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.EggNigiri));
+                    break;
+                case Wasabi:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Wasabi));
+                    break;
+                case Chopsticks:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Chopsticks));
+                    break;
+                case Pudding:
+                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Pudding));
+                    break;
+            }
+        }
         return actions;
     }
 
