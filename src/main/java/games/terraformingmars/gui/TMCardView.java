@@ -49,6 +49,7 @@ public class TMCardView extends JComponent {
 
     boolean clicked;
     TMCardView[] views;
+    TMGUI gui;
 
     public TMCardView(TMGameState gs, TMCard card, int index, int width, int height) {
         this.gs = gs;
@@ -75,10 +76,12 @@ public class TMCardView extends JComponent {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     clicked = true;
                 }
+                gui.updateButtons = true;
             }
         });
     }
 
+    void informGUI (TMGUI gui) { this.gui = gui; }
     void informOtherViews(TMCardView[] views) {
         this.views = views;
     }

@@ -44,6 +44,7 @@ public class TMDeckDisplay extends JComponent {
         cardViews = new TMCardView[maxCards];
         for (int i = 0; i < maxCards; i++) {
             cardViews[i] = new TMCardView(gs, null, i, cardWidth, cardHeight);
+            cardViews[i].informGUI(gui);
             add(cardViews[i]);
         }
         for (int i = 0; i < maxCards; i++) {

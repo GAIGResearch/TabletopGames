@@ -35,7 +35,7 @@ public class PlayCard extends TMAction {
     }
 
     private void playCard(TMGameState gs, TMCard card) {
-        // Second: remove from hand, resolve on-play effects and add tags etc. to cards played lists
+        // Remove from hand, resolve on-play effects and add tags etc. to cards played lists
         gs.getPlayerHands()[player].remove(card);
 
         // Add info to played cards stats

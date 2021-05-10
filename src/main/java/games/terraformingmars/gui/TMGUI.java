@@ -366,7 +366,7 @@ public class TMGUI extends AbstractGUI {
                         if (fullLegalAction != null) {
                             actionButtons[i].setButtonAction(action, "Play");
                         } else {
-                            actionButtons[i].setText(action.getString(gs));
+                            actionButtons[i].setText("Play");
                             actionButtons[i].setEnabled(false);
                             actionButtons[i].setToolTipText(getInvalidActionReason(action, gs));
                         }
