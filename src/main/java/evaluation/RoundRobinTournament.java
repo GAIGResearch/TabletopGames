@@ -67,7 +67,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay) :
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, totalMatchups,
                         System.currentTimeMillis());
-        tournament.dataLogger = logFile.equals("") ? null : new FileStatsLogger(logFile, "\t");
+        tournament.dataLogger = logFile.equals("") ? null : new FileStatsLogger(logFile, "\t", true);
         tournament.runTournament();
     }
 

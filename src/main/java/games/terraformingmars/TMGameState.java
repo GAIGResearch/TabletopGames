@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
+import games.GameType;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.Award;
@@ -71,7 +72,7 @@ public class TMGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TMGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters)gameParameters).nActionsPerPlayer));
+        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters)gameParameters).nActionsPerPlayer), GameType.TerraformingMars);
     }
 
     @Override

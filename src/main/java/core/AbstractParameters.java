@@ -1,18 +1,19 @@
 package core;
 
 import core.interfaces.ITunableParameters;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import java.io.FileReader;
 import java.util.*;
-import java.util.stream.*;
-
-import static java.util.stream.Collectors.*;
 
 public abstract class AbstractParameters {
 
+    // Random seed for this game
     long randomSeed;
+
+    // Player thinking time for the entire game, in minutes. Default max value.
+    long thinkingTimeMins = 90;
+    // Increment in seconds, added after a common milestone: action, turn, round. Default 0.
+    long incrementActionS = 0, incrementTurnS = 0, incrementRoundS = 0;
+    // Increment in seconds, added after a custom milestone (to be added manually in game implementation). Default 0.
+    long incrementMilestoneS = 0;
 
     public AbstractParameters(long seed) {
         randomSeed = seed;
@@ -43,6 +44,46 @@ public abstract class AbstractParameters {
      */
     public long getRandomSeed() {
         return randomSeed;
+    }
+
+    /**
+     * Retrieve total thinking time for the game, in minutes
+     * @return - thinking time.
+     */
+    public long getThinkingTimeMins() {
+        return thinkingTimeMins;
+    }
+
+    /**
+     * Retrieve the number of seconds added to a player's timer after an action is taken
+     * @return - action increment
+     */
+    public long getIncrementActionS() {
+        return incrementActionS;
+    }
+
+    /**
+     * Retrieve the number of seconds added to a player's timer after a turn is finished
+     * @return - turn increment
+     */
+    public long getIncrementTurnS() {
+        return incrementTurnS;
+    }
+
+    /**
+     * Retrieve the number of seconds added to a player's timer after a round is finished
+     * @return - round increment
+     */
+    public long getIncrementRoundS() {
+        return incrementRoundS;
+    }
+
+    /**
+     * Retrieve the number of seconds added to a player's timer after a game-specific defined milestone
+     * @return - milestone increment
+     */
+    public long getIncrementMilestoneS() {
+        return incrementMilestoneS;
     }
 
     /**
@@ -92,11 +133,16 @@ public abstract class AbstractParameters {
         if (this == o) return true;
         if (!(o instanceof AbstractParameters)) return false;
         AbstractParameters that = (AbstractParameters) o;
-        return randomSeed == that.randomSeed && _equals(o);
+        return randomSeed == that.randomSeed &&
+                thinkingTimeMins == that.thinkingTimeMins &&
+                incrementActionS == that.incrementActionS &&
+                incrementTurnS == that.incrementTurnS &&
+                incrementRoundS == that.incrementRoundS &&
+                incrementMilestoneS == that.incrementMilestoneS;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(randomSeed);
+        return Objects.hash(randomSeed, thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS);
     }
 }

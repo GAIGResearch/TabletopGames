@@ -57,6 +57,8 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     /**
      * Retrieves the components in this deck visible by the given player.
      *
+     * It always returns a List of the correct length, but with a NULL entry for hidden components
+     *
      * @param playerID - ID of player observing the deck.
      * @return - ArrayList of components observed by the player.
      */

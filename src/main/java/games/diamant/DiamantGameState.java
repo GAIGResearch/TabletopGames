@@ -7,6 +7,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.SimultaneousTurnOrder;
+import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
 
@@ -46,7 +47,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public DiamantGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SimultaneousTurnOrder(nPlayers));
+        super(gameParameters, new SimultaneousTurnOrder(nPlayers), GameType.Diamant);
     }
 
     @Override

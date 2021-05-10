@@ -8,12 +8,15 @@ import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
+import games.GameType;
+import utilities.ElapsedCpuChessTimer;
 import utilities.Utils;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.WIN;
 
 
 /**
@@ -32,6 +35,11 @@ public abstract class AbstractGameState {
     protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;
     private Area allComponents;
+
+    // Timers for all players
+    protected ElapsedCpuChessTimer[] playerTimer;
+    // Game being played
+    protected final GameType gameType;
 
     // A record of all actions taken to reach this game state
     private List<AbstractAction> history = new ArrayList<>();
@@ -52,18 +60,15 @@ public abstract class AbstractGameState {
 
     private int gameID;
 
-    // this will add some extra sanity/fragility checks to help detect errors with GameStates behaving in
-    // unusual - and probably wrong - ways.
-    private boolean extraChecks = false;
-
     /**
      * Constructor. Initialises some generic game state variables.
      * @param gameParameters - game parameters.
      * @param turnOrder - turn order for this game.
      */
-    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder){
+    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType){
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
+        this.gameType = gameType;
     }
 
     /**
@@ -78,6 +83,7 @@ public abstract class AbstractGameState {
         gamePhase = DefaultGamePhase.Main;
         history = new ArrayList<>();
         historyText = new ArrayList<>();
+        playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
         _reset();
     }
 
@@ -159,17 +165,26 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.data = data;  // Should never be modified
 
-        s.history = new ArrayList<>(history);
-        s.historyText = new ArrayList<>(historyText);
-        if (extraChecks && historyText.size() > 1000) {
-            throw new AssertionError("History really shouldn't be over 1000 entries long?");
-        }
+        if (!CoreConstants.COMPETITION_MODE) {
+            s.history = new ArrayList<>(history);
+            s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
-
+            // History is for debugging and spectation of games. There is a risk that History might contain information
+            // formally hidden to some participants. For this reason, in COMPETITION_MODE we explicitly do not copy
+            // any history over in case a sneaky agent tries to take advantage of it.
+            // If there is any information only available in History that could legitimately be used, then this should
+            // be incorporated in the game-specific data in GameState where the correct hiding protocls can be enforced.
+        }
+        // TODO: uncomment
 //        s.actionsInProgress = new Stack<>();
 //        actionsInProgress.forEach(
 //                a -> s.actionsInProgress.push(a.copy())
 //        );
+
+        s.playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            s.playerTimer[i] = playerTimer[i].copy();
+        }
 
         // Update the list of components for ID matching in actions.
         s.addAllComponents();
@@ -200,10 +215,6 @@ public abstract class AbstractGameState {
         }
     }
 
-    public Stack<IExtendedSequence> getActionsInProgress() {
-        return actionsInProgress;
-    }
-
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
      * This method is called after initialising the game state.
@@ -228,14 +239,38 @@ public abstract class AbstractGameState {
     protected abstract double _getHeuristicScore(int playerId);
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
-     * @param playerId
+     * @param playerId - player observing the state.
      * @return - double, score of current state
      */
     public abstract double getGameScore(int playerId);
+
+    /**
+     * Returns the ordinal position of a player using getGameScore().
+     *
+     * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
+     * then this method should be overridden.
+     * This may also apply for games with important tie-breaking rules not visible in the raw score.
+     *
+     * @param playerId player ID
+     * @return The ordinal position of the player; 1 is 1st, 2 is 2nd and so on.
+     */
+    public int getOrdinalPosition(int playerId) {
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1;
+        double playerScore = getGameScore(playerId);
+        int ordinal = 1;
+        for (int i = 0, n = getNPlayers(); i < n; i++) {
+            if (getGameScore(i) > playerScore)
+                ordinal++;
+        }
+        if (ordinal == 1 && !isNotTerminal() && playerResults[playerId] != Utils.GameResult.WIN)
+            ordinal = 1 + (int) Arrays.stream(playerResults).filter(r -> r == WIN).count();
+        return ordinal;
+    }
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
@@ -317,6 +352,18 @@ public abstract class AbstractGameState {
         return copy(-1);
     }
 
+    public final ElapsedCpuChessTimer[] getPlayerTimer() {
+        return playerTimer;
+    }
+
+    public final GameType getGameType() {
+        return gameType;
+    }
+
+    public final Stack<IExtendedSequence> getActionsInProgress() {
+        return actionsInProgress;
+    }
+
     /**
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
@@ -358,9 +405,6 @@ public abstract class AbstractGameState {
     protected void recordAction(AbstractAction action) {
         history.add(action);
         historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
-        if (extraChecks && history.size() > 1000) {
-            throw new AssertionError("History is probably a bit too long...");
-        }
     }
 
     /**
