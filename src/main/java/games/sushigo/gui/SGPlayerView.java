@@ -38,8 +38,8 @@ public class SGPlayerView extends JComponent {
         g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border + SGCardHeight+10);
     }
 
-    public Dimension getPrefferedSize()
-    {
+    @Override
+    public Dimension getPreferredSize() {
         return new Dimension(width, height);
     }
 
