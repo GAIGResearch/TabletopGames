@@ -12,6 +12,9 @@ import java.util.List;
 
 public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerHands;
+    List<Deck<SGCard>> playerFields;
+    Deck<SGCard> drawPile;
+    Deck<SGCard> discardPile;
     int[] playerScore;
     /**
      * Constructor. Initialises some generic game state variables.
@@ -27,17 +30,32 @@ public class SGGameState extends AbstractGameState {
     protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{
             addAll(playerHands);
+            addAll(playerFields);
+            add(drawPile);
+            add(discardPile);
         }};
     }
 
     @Override
     protected AbstractGameState _copy(int playerId) {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
-        copy.playerHands = new ArrayList<>();
+        copy.playerScore = playerScore.clone();
 
+        //Copy player hands
+        copy.playerHands = new ArrayList<>();
         for (Deck<SGCard> d : playerHands){
             copy.playerHands.add(d.copy());
         }
+
+        //Copy player fields
+        copy.playerFields = new ArrayList<>();
+        for (Deck<SGCard> d : playerFields){
+            copy.playerFields.add(d.copy());
+        }
+
+        //Other decks
+        copy.drawPile = drawPile.copy();
+        copy.discardPile = discardPile.copy();
         return copy;
     }
 
@@ -65,6 +83,7 @@ public class SGGameState extends AbstractGameState {
                         add(c.getComponentID());
 
                     }
+                    add(drawPile.getComponentID());
                 }
             }
         }};
@@ -73,7 +92,9 @@ public class SGGameState extends AbstractGameState {
     @Override
     protected void _reset() {
         playerHands = new ArrayList<>();
-
+        playerFields = new ArrayList<>();
+        drawPile = null;
+        discardPile = null;
     }
 
     @Override
