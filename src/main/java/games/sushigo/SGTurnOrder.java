@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.turnorders.AlternatingTurnOrder;
 import utilities.Utils;
 
+import static utilities.Utils.GameResult.GAME_ONGOING;
+
 public class SGTurnOrder extends AlternatingTurnOrder {
     public SGTurnOrder(int nPlayers) {
         super(nPlayers);
@@ -19,6 +21,7 @@ public class SGTurnOrder extends AlternatingTurnOrder {
     @Override
     public void endRound(AbstractGameState gameState) {
         //super.endRound(gameState);
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
         SGGameState SGGS = (SGGameState) gameState;
         roundCounter++;
 

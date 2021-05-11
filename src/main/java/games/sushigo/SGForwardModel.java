@@ -125,6 +125,8 @@ public class SGForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
+        if(currentState.getGameStatus() == Utils.GameResult.GAME_END) return;
+
         //Perform action
         action.execute(currentState);
 
@@ -134,7 +136,7 @@ public class SGForwardModel extends AbstractForwardModel {
         if((turn + 1) % 4 == 0)
         {
             RevealCards(SGGS);
-            RotateDecks();
+            //RotateDecks(SGGS);
         }
 
         //Calculate points
@@ -143,7 +145,7 @@ public class SGForwardModel extends AbstractForwardModel {
         //Check if game/round over
         if(IsRoundOver(SGGS))
         {
-            if(SGGS.getTurnOrder().getRoundCounter() >= 3)
+            if(SGGS.getTurnOrder().getRoundCounter() >= 2)
             {
                 currentState.setGameStatus(Utils.GameResult.GAME_END);
                 return;
@@ -177,9 +179,15 @@ public class SGForwardModel extends AbstractForwardModel {
         }
     }
 
-    void RotateDecks()
+    void RotateDecks(SGGameState SGGS)
     {
-
+        Deck<SGCard> tempDeck;
+        tempDeck = SGGS.getPlayerDecks().get(0);
+        for(int i = 1; i > SGGS.getNPlayers(); i++)
+        {
+            SGGS.getPlayerDecks().set(i - 1, SGGS.getPlayerDecks().get(i));
+        }
+        SGGS.getPlayerDecks().set(SGGS.getNPlayers() - 1, tempDeck);
     }
 
     void CalculatePoints()
