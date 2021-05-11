@@ -136,7 +136,7 @@ public class SGForwardModel extends AbstractForwardModel {
         if((turn + 1) % 4 == 0)
         {
             RevealCards(SGGS);
-            //RotateDecks(SGGS);
+            RotateDecks(SGGS);
         }
 
         //Calculate points
@@ -173,6 +173,7 @@ public class SGForwardModel extends AbstractForwardModel {
     {
         for(int i = 0; i < SGGS.getNPlayers(); i++)
         {
+            if(SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i]) continue;
             SGCard cardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerCardPicks()[i]);
             SGGS.getPlayerDecks().get(i).remove(cardToReveal);
             SGGS.getPlayerFields().get(i).add(cardToReveal);
@@ -182,12 +183,12 @@ public class SGForwardModel extends AbstractForwardModel {
     void RotateDecks(SGGameState SGGS)
     {
         Deck<SGCard> tempDeck;
-        tempDeck = SGGS.getPlayerDecks().get(0);
-        for(int i = 1; i > SGGS.getNPlayers(); i++)
+        tempDeck = SGGS.getPlayerDecks().get(0).copy();
+        for(int i = 1; i < SGGS.getNPlayers(); i++)
         {
-            SGGS.getPlayerDecks().set(i - 1, SGGS.getPlayerDecks().get(i));
+            SGGS.getPlayerDecks().set(i - 1, SGGS.getPlayerDecks().get(i).copy());
         }
-        SGGS.getPlayerDecks().set(SGGS.getNPlayers() - 1, tempDeck);
+        SGGS.getPlayerDecks().set(SGGS.getNPlayers() - 1, tempDeck.copy());
     }
 
     void CalculatePoints()

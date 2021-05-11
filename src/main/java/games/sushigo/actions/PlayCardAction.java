@@ -45,6 +45,6 @@ public class PlayCardAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Play " + cardType;
+        return "Chose " + cardType;
     }
 }
