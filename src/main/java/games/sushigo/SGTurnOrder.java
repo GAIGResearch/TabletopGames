@@ -30,6 +30,5 @@ public class SGTurnOrder extends AlternatingTurnOrder {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
             }
         }
-        System.out.println("Show cards!");
     }
 }

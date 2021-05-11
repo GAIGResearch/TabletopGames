@@ -24,6 +24,7 @@ public class SGForwardModel extends AbstractForwardModel {
 
         //Setup player scores
         SGGS.playerScore = new int[firstState.getNPlayers()];
+        SGGS.playerCardPicks = new int[firstState.getNPlayers()];
 
         //Setup draw & discard piles
         SetupDrawpile(SGGS);
@@ -126,8 +127,20 @@ public class SGForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         //Perform action
         action.execute(currentState);
-        SGGameState SGGS = (SGGameState)currentState;
 
+        //Rotate deck and reveal cards
+        SGGameState SGGS = (SGGameState)currentState;
+        int turn = SGGS.getTurnOrder().getTurnCounter();
+        if((turn + 1) % 4 == 0)
+        {
+            RevealCards(SGGS);
+            RotateDecks();
+        }
+
+        //Calculate points
+        CalculatePoints();
+
+        //Check if game/round over
         if(IsRoundOver(SGGS))
         {
             if(SGGS.getTurnOrder().getRoundCounter() >= 3)
@@ -138,8 +151,6 @@ public class SGForwardModel extends AbstractForwardModel {
             SGGS.getTurnOrder().endRound(currentState);
             return;
         }
-//        int turn = SGGS.getTurnOrder().getTurnCounter();
-//        if(turn % 4 == 0) System.out.println("Show cards!");
 
         //End turn
         if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
@@ -156,6 +167,26 @@ public class SGForwardModel extends AbstractForwardModel {
         return true;
     }
 
+    void RevealCards(SGGameState SGGS)
+    {
+        for(int i = 0; i < SGGS.getNPlayers(); i++)
+        {
+            SGCard cardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerCardPicks()[i]);
+            SGGS.getPlayerDecks().get(i).remove(cardToReveal);
+            SGGS.getPlayerFields().get(i).add(cardToReveal);
+        }
+    }
+
+    void RotateDecks()
+    {
+
+    }
+
+    void CalculatePoints()
+    {
+
+    }
+
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         SGGameState SGGS = (SGGameState) gameState;
@@ -167,40 +198,40 @@ public class SGForwardModel extends AbstractForwardModel {
         for (int i = 0; i < currentPlayerHand.getSize(); i++){
             switch (currentPlayerHand.get(i).type) {
                 case Maki_1:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Maki_1));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Maki_1));
                     break;
                 case Maki_2:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Maki_2));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Maki_2));
                     break;
                 case Maki_3:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Maki_3));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Maki_3));
                     break;
                 case Tempura:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Tempura));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Tempura));
                     break;
                 case Sashimi:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Sashimi));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Sashimi));
                     break;
                 case Dumpling:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Dumpling));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Dumpling));
                     break;
                 case SquidNigiri:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.SquidNigiri));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.SquidNigiri));
                     break;
                 case SalmonNigiri:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.SalmonNigiri));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.SalmonNigiri));
                     break;
                 case EggNigiri:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.EggNigiri));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.EggNigiri));
                     break;
                 case Wasabi:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Wasabi));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Wasabi));
                     break;
                 case Chopsticks:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Chopsticks));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Chopsticks));
                     break;
                 case Pudding:
-                    actions.add(new PlayCardAction(deckFromId, deckToId, i, SGCard.SGCardType.Pudding));
+                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Pudding));
                     break;
             }
         }

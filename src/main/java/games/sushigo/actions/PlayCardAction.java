@@ -9,15 +9,13 @@ import games.sushigo.cards.SGCard;
 import java.awt.font.TextHitInfo;
 
 public class PlayCardAction extends AbstractAction {
-    int deckFromId;
-    int deckToId;
+    int playerId;
     int cardIndex;
     SGCard.SGCardType cardType;
 
-    public PlayCardAction(int deckFromId, int deckToId, int cardIndex, SGCard.SGCardType cardType)
+    public PlayCardAction(int playerId, int cardIndex, SGCard.SGCardType cardType)
     {
-        this.deckFromId = deckFromId;
-        this.deckToId = deckToId;
+        this.playerId = playerId;
         this.cardIndex = cardIndex;
         this.cardType = cardType;
     }
@@ -25,11 +23,7 @@ public class PlayCardAction extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         SGGameState SGGS = (SGGameState) gs;
-        Deck<SGCard> deckFrom = (Deck<SGCard>) SGGS.getComponentById(deckFromId);
-        Deck<SGCard> deckTo = (Deck<SGCard>) SGGS.getComponentById(deckToId);
-        SGCard cardToPlay = deckFrom.get(cardIndex);
-        deckFrom.remove(cardIndex);
-        deckTo.add(cardToPlay);
+        SGGS.setPlayerCardPick(cardIndex, playerId);
         return true;
     }
 

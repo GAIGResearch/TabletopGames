@@ -18,6 +18,7 @@ public class SGGameState extends AbstractGameState {
     Deck<SGCard> discardPile;
     int cardAmount = 0;
     int[] playerScore;
+    int[] playerCardPicks;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -42,6 +43,7 @@ public class SGGameState extends AbstractGameState {
     protected AbstractGameState _copy(int playerId) {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
         copy.playerScore = playerScore.clone();
+        copy.playerCardPicks = playerCardPicks.clone();
 
         //Copy player hands
         copy.playerHands = new ArrayList<>();
@@ -62,6 +64,11 @@ public class SGGameState extends AbstractGameState {
     }
 
     public int[] getPlayerScore() {return playerScore;}
+    public int[] getPlayerCardPicks() {return playerCardPicks;}
+
+    public void setPlayerCardPick(int cardIndex, int playerId) {
+        this.playerCardPicks[playerId] = cardIndex;
+    }
 
     public List<Deck<SGCard>> getPlayerFields() {return playerFields;}
 
@@ -74,7 +81,7 @@ public class SGGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerScore[playerId];
     }
 
     @Override
