@@ -16,6 +16,7 @@ public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerFields;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
+    int cardAmount = 0;
     int[] playerScore;
     /**
      * Constructor. Initialises some generic game state variables.

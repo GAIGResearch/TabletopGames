@@ -18,6 +18,18 @@ public class SGTurnOrder extends AlternatingTurnOrder {
 
     @Override
     public void endRound(AbstractGameState gameState) {
-        super.endRound(gameState);
+        //super.endRound(gameState);
+        SGGameState SGGS = (SGGameState) gameState;
+        roundCounter++;
+
+        //Draw new hands
+        for (int i = 0; i < SGGS.getNPlayers(); i++){
+            SGGS.getPlayerFields().get(i).clear();
+            for (int j = 0; j < SGGS.cardAmount; j++)
+            {
+                SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
+            }
+        }
+        System.out.println("Show cards!");
     }
 }

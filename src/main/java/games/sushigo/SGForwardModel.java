@@ -18,7 +18,6 @@ import static java.util.stream.Collectors.joining;
 
 public class SGForwardModel extends AbstractForwardModel {
 
-
     @Override
     protected void _setup(AbstractGameState firstState) {
         SGGameState SGGS = (SGGameState) firstState;
@@ -33,33 +32,39 @@ public class SGForwardModel extends AbstractForwardModel {
         //Setup player hands and fields
         SGGS.playerHands = new ArrayList<>();
         SGGS.playerFields = new ArrayList<>();
+        switch (firstState.getNPlayers())
+        {
+            case 2:
+                SGGS.cardAmount = 10;
+                break;
+            case 3:
+                SGGS.cardAmount = 9;
+                break;
+            case 4:
+                SGGS.cardAmount = 8;
+                break;
+            case 5:
+                SGGS.cardAmount = 7;
+                break;
+
+        }
         for (int i = 0; i < SGGS.getNPlayers(); i++){
             SGGS.playerHands.add(new Deck<SGCard>("Player" + i + " hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             SGGS.playerFields.add(new Deck<SGCard>("Player" + "Card field", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-            int cardAmount = 0;
-            switch (firstState.getNPlayers())
-            {
-                case 2:
-                    cardAmount = 10;
-                    break;
-                case 3:
-                    cardAmount = 9;
-                    break;
-                case 4:
-                    cardAmount = 8;
-                    break;
-                case 5:
-                    cardAmount = 7;
-                    break;
+        }
+        DrawNewHands(SGGS);
 
-            }
-            for (int j = 0; j < cardAmount; j++)
+        SGGS.getTurnOrder().setStartingPlayer(0);
+    }
+
+    public void DrawNewHands(SGGameState SGGS)
+    {
+        for (int i = 0; i < SGGS.getNPlayers(); i++){
+            for (int j = 0; j < SGGS.cardAmount; j++)
             {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
             }
         }
-
-        SGGS.getTurnOrder().setStartingPlayer(0);
     }
 
     private void SetupDrawpile(SGGameState SGGS)
@@ -125,17 +130,16 @@ public class SGForwardModel extends AbstractForwardModel {
 
         if(IsRoundOver(SGGS))
         {
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
+            if(SGGS.getTurnOrder().getRoundCounter() >= 3)
+            {
+                currentState.setGameStatus(Utils.GameResult.GAME_END);
+                return;
+            }
+            SGGS.getTurnOrder().endRound(currentState);
             return;
         }
 //        int turn = SGGS.getTurnOrder().getTurnCounter();
 //        if(turn % 4 == 0) System.out.println("Show cards!");
-
-        //Round over
-//        if(IsRoundOver(SGGS))
-//        {
-//            SGGS.getTurnOrder().endRound(currentState);
-//        }
 
         //End turn
         if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
