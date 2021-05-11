@@ -2,7 +2,6 @@ package utilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.function.Function;
 
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
@@ -10,7 +9,7 @@ import java.util.function.Function;
  * of how many, the sum and the sum of the squares is sufficient (plus max and min, for max and min).
  */
 
-public class StatSummary {
+public class TAGStatSummary {
 
     public String name; // defaults to ""
 
@@ -24,11 +23,11 @@ public class StatSummary {
 
     private ArrayList<Double> elements;
 
-    public StatSummary() {
+    public TAGStatSummary() {
         this("");
     }
 
-    public StatSummary(String name) {
+    public TAGStatSummary(String name) {
         this.name = name;
         reset();
     }
@@ -124,7 +123,7 @@ public class StatSummary {
         return sd() / Math.sqrt(n);
     }
 
-    public void add(StatSummary ss) {
+    public void add(TAGStatSummary ss) {
         n += ss.n;
         sum += ss.sum;
         sumsq += ss.sumsq;
@@ -194,8 +193,8 @@ public class StatSummary {
         return elements;
     }
 
-    public StatSummary copy() {
-        StatSummary ss = new StatSummary();
+    public TAGStatSummary copy() {
+        TAGStatSummary ss = new TAGStatSummary();
 
         ss.name = this.name;
         ss.sum = this.sum;

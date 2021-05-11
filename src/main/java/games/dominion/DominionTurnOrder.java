@@ -1,25 +1,11 @@
 package games.dominion;
 
-import core.AbstractGameState;
-import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 
 public class DominionTurnOrder extends TurnOrder {
     public DominionTurnOrder(int nPlayers) {
         super(nPlayers);
     }
-
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        DominionGameState dgs = (DominionGameState) state;
-        if (dgs.isActionInProgress()) {
-            // this is when things might differ from the default
-            return dgs.actionsInProgress.peek().getCurrentPlayer(dgs);
-        }
-        return super.getCurrentPlayer(state);
-    }
-
 
     /**
      * Resets the state of this turn order object to its initial state.

@@ -3,6 +3,7 @@ package games.dominion.actions;
 import core.AbstractGameState;
 import core.actions.*;
 import core.components.Deck;
+import core.interfaces.IExtendedSequence;
 import games.dominion.DominionGameState;
 import games.dominion.cards.*;
 
@@ -46,7 +47,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         List<AbstractAction> retValue = new ArrayList<>(CARDS_AFFECTED + 1);
         switch (completedStage) {
             case playSentry:
@@ -85,12 +86,12 @@ public class Sentry extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         Decision decision = null;
         if (action instanceof TrashCard && ((TrashCard) action).player == player)
             decision = Decision.trash;
@@ -130,7 +131,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return completedStage == reset;
     }
 

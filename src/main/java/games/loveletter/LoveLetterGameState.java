@@ -7,6 +7,7 @@ import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
@@ -41,7 +42,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     int[] affectionTokens;
 
     public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new LoveLetterTurnOrder(nPlayers));
+        super(gameParameters, new LoveLetterTurnOrder(nPlayers), GameType.LoveLetter);
         gamePhase = Draw;
     }
 
@@ -120,35 +121,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     @Override
     public double getGameScore(int playerId) {
         return affectionTokens[playerId];
-    }
-
-    @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // Draw pile, other player hands and reserve cards
-        return new ArrayList<Integer>() {{
-            add(drawPile.getComponentID());
-            for (int i = 0; i < drawPile.getSize(); i++) {
-                if (!drawPile.isComponentVisible(i, playerId)) {
-                    add(drawPile.get(i).getComponentID());
-                }
-            }
-            add(reserveCards.getComponentID());
-            for (int i = 0; i < reserveCards.getSize(); i++) {
-                if (!reserveCards.isComponentVisible(i, playerId)) {
-                    add(reserveCards.get(i).getComponentID());
-                }
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (playerHandCards.get(i).getDeckVisibility()[playerId]){
-                    add(playerHandCards.get(i).getComponentID());
-                    for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
-                        if (!playerHandCards.get(i).isComponentVisible(j, playerId)) {
-                            add(playerHandCards.get(i).get(j).getComponentID());
-                        }
-                    }
-                }
-            }
-        }};
     }
 
     @Override

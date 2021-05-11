@@ -1,7 +1,9 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
@@ -34,7 +36,7 @@ public class AttackReaction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         List<AbstractAction> reactions = cardsToPlay.stream().distinct()
                 .map(c -> DominionCard.create(c).getAttackReaction(defender))
                 .collect(toList());
@@ -43,12 +45,12 @@ public class AttackReaction implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return defender;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof DoNothing)
             cardsToPlay.clear();
         if (action instanceof IDominionReaction) {
@@ -60,7 +62,7 @@ public class AttackReaction implements IExtendedSequence {
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return cardsToPlay.isEmpty();
     }
 

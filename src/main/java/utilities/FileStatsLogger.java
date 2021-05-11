@@ -2,10 +2,11 @@ package utilities;
 
 import core.interfaces.IStatisticLogger;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A Class to log details to file for later analysis
@@ -17,7 +18,7 @@ public class FileStatsLogger implements IStatisticLogger {
     public String doubleFormat = "%.3g";
     public String intFormat = "%d";
 
-    private Set<String> allKeys = new HashSet<>();
+    private Set<String> allKeys = new LinkedHashSet<>();
 
     /**
      * Note that one line will be output to the file per Map<String, ?>
@@ -26,17 +27,18 @@ public class FileStatsLogger implements IStatisticLogger {
      * @param fileName  The full location of the file to write results to
      * @param delimiter The delimiter to use in the file between data items
      */
-    public FileStatsLogger(String fileName, String delimiter) {
+    public FileStatsLogger(String fileName, String delimiter, boolean append) {
         this.delimiter = delimiter;
         try {
-            writer = new FileWriter(fileName);
+            writer = new FileWriter(fileName, append);
         } catch (Exception e) {
             e.printStackTrace();
             throw new AssertionError("Problem opening file " + fileName + " : " + e.getMessage());
         }
     }
+
     public FileStatsLogger(String fileName) {
-        this(fileName, "\t");
+        this(fileName, "\t", true);
     }
 
     /**
@@ -103,7 +105,7 @@ public class FileStatsLogger implements IStatisticLogger {
      * @return A summary of the data
      */
     @Override
-    public Map<String, StatSummary> summary() {
+    public Map<String, TAGStatSummary> summary() {
         return new HashMap<>();
     }
 }

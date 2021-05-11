@@ -121,6 +121,8 @@ public abstract class TurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
+
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
 
         turnCounter++;
@@ -138,6 +140,10 @@ public abstract class TurnOrder {
      * @param gameState - current game state.
      */
     public void endRound(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
+
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
 
         roundCounter++;
@@ -156,6 +162,10 @@ public abstract class TurnOrder {
      * @return int, current player ID.
      */
     public int getCurrentPlayer(AbstractGameState gameState) {
+        if (gameState.isActionInProgress()) {
+            // this is when things might differ from the default
+            return gameState.currentActionInProgress().getCurrentPlayer(gameState);
+        }
         return turnOwner;
     }
 

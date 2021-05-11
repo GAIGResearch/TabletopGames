@@ -1,5 +1,6 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.*;
 import games.dominion.*;
 import games.dominion.cards.CardType;
@@ -57,7 +58,7 @@ public class Bandit extends DominionAttackAction {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         return Arrays.stream(topCards)
                 .filter(Objects::nonNull)
                 .filter(DominionCard::isTreasureCard)
@@ -68,13 +69,13 @@ public class Bandit extends DominionAttackAction {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         // decisions made by victims
         return super.currentTarget;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof TrashCard && ((TrashCard) action).player == currentTarget)
             cardTrashed = true;
     }

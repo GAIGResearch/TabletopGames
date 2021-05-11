@@ -1,7 +1,8 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
@@ -33,7 +34,8 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         // We get a list of all cards in Hand. We must trash one of them (unless we have none, in which case we DoNothing)
         if (cardTrashed == null) {
             // Phase 1 - trash a card in hand
@@ -53,12 +55,12 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return player;
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof TrashCard) {
             TrashCard tc = (TrashCard) action;
             if (tc.player == player)
@@ -72,7 +74,7 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean executionComplete(DominionGameState state) {
+    public boolean executionComplete(AbstractGameState state) {
         return cardTrashed != null && cardGained != null;
     }
 

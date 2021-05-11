@@ -344,11 +344,11 @@ public enum GameType {
 
 
     // Minimum and maximum number of players supported in this game
-    private int minPlayers, maxPlayers;
+    private final int minPlayers, maxPlayers;
 
     // boardgamegeek.com topic classification of games
-    private ArrayList<Category> categories;
-    private ArrayList<Mechanic> mechanics;
+    private final ArrayList<Category> categories;
+    private final ArrayList<Mechanic> mechanics;
 
     public enum Category {
         Strategy,

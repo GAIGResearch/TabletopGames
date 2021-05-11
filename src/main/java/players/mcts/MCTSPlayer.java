@@ -4,8 +4,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.IStatisticLogger;
-import utilities.SummaryLogger;
 
 import java.util.List;
 import java.util.Random;

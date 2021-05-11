@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
@@ -32,7 +33,7 @@ public class KingAction extends DrawCard implements IPrintable {
 
         // create a temporary deck to store cards in and then swap cards accordingly
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
-            Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp");
+            Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             while (opponentDeck.getSize() > 0)
                 tmpDeck.add(opponentDeck.draw());
             while (playerDeck.getSize() > 0)

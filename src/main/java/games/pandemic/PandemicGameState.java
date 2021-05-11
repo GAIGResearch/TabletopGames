@@ -7,6 +7,7 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
+import games.GameType;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -105,7 +106,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      *
@@ -115,22 +116,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     @Override
     public double getGameScore(int playerId) {
         return 0;
-    }
-
-    @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            Deck<Card> pd = (Deck<Card>) getComponent(playerDeckHash);
-            Deck<Card> id = (Deck<Card>) getComponent(infectionHash);
-            add(pd.getComponentID());
-            add(id.getComponentID());
-            for (Component c: pd.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (Component c: id.getComponents()) {
-                add(c.getComponentID());
-            }
-        }};
     }
 
     @Override
@@ -170,7 +155,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      * @param nPlayers - number of players.
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn));
+        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn), GameType.Pandemic);
         data = new PandemicData();
         data.load(((PandemicParameters)gameParameters).getDataPath());
     }
@@ -244,7 +229,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
             if (playerId != -1 && key == -1) {
                 // Hiding face-down decks in game area
                 a = new Area(key, "Game area");
-                HashMap<Integer, Component> oldComponents = areas.get(key).getComponents();
+                HashMap<Integer, Component> oldComponents = areas.get(key).getComponentsMap();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
                     if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
                         Random r = new Random(gs.getGameParameters().getRandomSeed());
