@@ -31,4 +31,5 @@ public class SGDeckView extends DeckView<SGCard> {
     {
         return ImageIO.GetInstance().getImage(dataPath + card.type + ".png");
     }
+
 }
