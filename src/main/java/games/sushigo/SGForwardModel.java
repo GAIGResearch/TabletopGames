@@ -32,6 +32,7 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerFields = new ArrayList<>();
         for (int i = 0; i < SGGS.getNPlayers(); i++){
             SGGS.playerHands.add(new Deck<>("Player" + i + " hand", i));
+            SGGS.playerFields.add(new Deck<>("Player" + "Card field", i));
             int cardAmount = 0;
             switch (firstState.getNPlayers())
             {
@@ -53,6 +54,10 @@ public class SGForwardModel extends AbstractForwardModel {
             {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
             }
+
+            SGGS.playerFields.get(i).add(new SGCard(SGCard.SGCardType.Pudding, 0));
+            SGGS.playerFields.get(i).add(new SGCard(SGCard.SGCardType.Chopsticks, 0));
+            SGGS.playerFields.get(i).add(new SGCard(SGCard.SGCardType.EggNigiri, 0));
         }
 
         SGGS.getTurnOrder().setStartingPlayer(0);
