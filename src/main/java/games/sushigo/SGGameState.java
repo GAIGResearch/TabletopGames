@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
+import games.GameType;
 import games.sushigo.cards.SGCard;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class SGGameState extends AbstractGameState {
      * @param nPlayers      - amount of players for this game.
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SGTurnOrder(nPlayers));
+        super(gameParameters, new SGTurnOrder(nPlayers), GameType.SushiGO);
     }
 
     @Override

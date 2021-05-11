@@ -2,6 +2,7 @@ package games.sushigo;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.sushigo.actions.DebugAction;
@@ -26,14 +27,14 @@ public class SGForwardModel extends AbstractForwardModel {
 
         //Setup draw & discard piles
         SetupDrawpile(SGGS);
-        SGGS.discardPile = new Deck<>("Discard pile");
+        SGGS.discardPile = new Deck<SGCard>("Discard pile", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         //Setup player hands and fields
         SGGS.playerHands = new ArrayList<>();
         SGGS.playerFields = new ArrayList<>();
         for (int i = 0; i < SGGS.getNPlayers(); i++){
-            SGGS.playerHands.add(new Deck<>("Player" + i + " hand", i));
-            SGGS.playerFields.add(new Deck<>("Player" + "Card field", i));
+            SGGS.playerHands.add(new Deck<SGCard>("Player" + i + " hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            SGGS.playerFields.add(new Deck<SGCard>("Player" + "Card field", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
             int cardAmount = 0;
             switch (firstState.getNPlayers())
             {
@@ -63,7 +64,7 @@ public class SGForwardModel extends AbstractForwardModel {
     private void SetupDrawpile(SGGameState SGGS)
     {
         SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-        SGGS.drawPile = new Deck<>("Draw pile");
+        SGGS.drawPile = new Deck<SGCard>("Draw pile", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         for (int i = 0; i < parameters.nMaki_3Cards; i++)
         {
             SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_3, 0));
