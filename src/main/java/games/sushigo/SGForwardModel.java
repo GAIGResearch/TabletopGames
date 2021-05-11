@@ -8,6 +8,7 @@ import core.components.Deck;
 import games.sushigo.actions.DebugAction;
 import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,26 +119,28 @@ public class SGForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        SGGameState SGGS = (SGGameState)currentState;
-        SGTurnOrder turnOrder = (SGTurnOrder) SGGS.getTurnOrder();
-        //Show cards after everyone has picked a card
-        int turn = SGGS.getTurnOrder().getTurnCounter();
-        if(turn % 4 == 0) System.out.println("Show cards!");
-
-
         //Perform action
         action.execute(currentState);
+        SGGameState SGGS = (SGGameState)currentState;
 
-
-        //Round over
         if(IsRoundOver(SGGS))
         {
-            turnOrder.endRound(currentState);
+            currentState.setGameStatus(Utils.GameResult.GAME_END);
+            return;
         }
+//        int turn = SGGS.getTurnOrder().getTurnCounter();
+//        if(turn % 4 == 0) System.out.println("Show cards!");
+
+        //Round over
+//        if(IsRoundOver(SGGS))
+//        {
+//            SGGS.getTurnOrder().endRound(currentState);
+//        }
 
         //End turn
-        turnOrder.endPlayerTurn(currentState);
-
+        if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            currentState.getTurnOrder().endPlayerTurn(currentState);
+        }
     }
 
     boolean IsRoundOver(SGGameState SGGS)
@@ -197,6 +200,7 @@ public class SGForwardModel extends AbstractForwardModel {
                     break;
             }
         }
+        if(actions.size() <= 0) actions.add(new DebugAction());
         return actions;
     }
 

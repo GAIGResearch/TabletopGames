@@ -8,6 +8,8 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
@@ -18,8 +20,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.DotsAndBoxes;
-import static games.GameType.SushiGO;
+import static games.GameType.*;
 
 public class Game {
 
@@ -699,10 +700,12 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
         MCTSParams params1 = new MCTSParams();
+        RMHCPlayer params2 = new RMHCPlayer();
+        params1.budget = 10;
 
         players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
-//        players.add(new MCTSPlayer(params1));
+        players.add(new RMHCPlayer());
+        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
