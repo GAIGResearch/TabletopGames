@@ -32,7 +32,7 @@ public class SGPlayerView extends JComponent {
 
     public SGPlayerView(Deck<SGCard> deck, Deck<SGCard> playDeck, int playerId, int humanId, String dataPath)
     {
-        this.width = playerAreaWidth + border*2;
+        this.width = playerAreaWidth + border*20;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
         this.playerHandView = new SGDeckView(humanId, deck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));

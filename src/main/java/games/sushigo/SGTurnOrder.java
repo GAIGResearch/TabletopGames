@@ -2,6 +2,7 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.turnorders.AlternatingTurnOrder;
+import games.sushigo.cards.SGCard;
 import utilities.Utils;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -25,9 +26,17 @@ public class SGTurnOrder extends AlternatingTurnOrder {
         SGGameState SGGS = (SGGameState) gameState;
         roundCounter++;
 
-        //Draw new hands
         for (int i = 0; i < SGGS.getNPlayers(); i++){
-            SGGS.getPlayerFields().get(i).clear();
+            //Clear fields ignoring dumplings
+            for(int j = SGGS.getPlayerFields().get(i).getSize() - 1; j >= 0; j--)
+            {
+                if (SGGS.getPlayerFields().get(i).get(j).type != SGCard.SGCardType.Pudding)
+                {
+                    SGGS.getPlayerFields().get(i).remove(j);
+                }
+            }
+
+            //Draw new hands
             for (int j = 0; j < SGGS.cardAmount; j++)
             {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());

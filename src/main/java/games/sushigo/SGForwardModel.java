@@ -133,7 +133,7 @@ public class SGForwardModel extends AbstractForwardModel {
         //Rotate deck and reveal cards
         SGGameState SGGS = (SGGameState)currentState;
         int turn = SGGS.getTurnOrder().getTurnCounter();
-        if((turn + 1) % 4 == 0)
+        if((turn + 1) % SGGS.getNPlayers() == 0)
         {
             RevealCards(SGGS);
             RotateDecks(SGGS);
