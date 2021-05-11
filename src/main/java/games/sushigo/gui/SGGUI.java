@@ -23,9 +23,9 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 public class SGGUI extends AbstractGUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 130;
-    final static int SGCardWidth = 90;
-    final static int SGCardHeight = 115;
+    final static int playerAreaHeight = 200;
+    final static int SGCardWidth = 60;
+    final static int SGCardHeight = 85;
 
     // List of player hand views
     SGPlayerView[] playerHands;
@@ -73,7 +73,7 @@ public class SGGUI extends AbstractGUI {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    SGPlayerView playerHand = new SGPlayerView(parsedGameState.getPlayerDecks().get(i), i, humanID, parameters.getDataPath());
+                    SGPlayerView playerHand = new SGPlayerView(parsedGameState.getPlayerDecks().get(i), parsedGameState.getPlayerFields().get(i), i, humanID, parameters.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -91,6 +91,8 @@ public class SGGUI extends AbstractGUI {
                     next = (next + 1) % (locations.length);
                     playerHands[i] = playerHand;
                 }
+
+
                 for (int i = 0; i < locations.length; i++) {
                     mainGameArea.add(sides[i], locations[i]);
                 }

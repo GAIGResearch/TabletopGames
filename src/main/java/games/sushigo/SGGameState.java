@@ -65,6 +65,8 @@ public class SGGameState extends AbstractGameState {
 
     public List<Deck<SGCard>> getPlayerDecks() {return playerHands;}
 
+    public List<Deck<SGCard>> getPlayerFields() {return playerFields;}
+
     @Override
     protected double _getHeuristicScore(int playerId) {
         return 0;
