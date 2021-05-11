@@ -94,15 +94,15 @@ public class SGForwardModel extends AbstractForwardModel {
         }
         for (int i = 0; i < parameters.nSquidNigiriCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri, 3));
         }
         for (int i = 0; i < parameters.nSalmonNigiriCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri, 2));
         }
         for (int i = 0; i < parameters.nEggNigiriCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri, 1));
         }
         for (int i = 0; i < parameters.nWasabiCards; i++)
         {
@@ -117,16 +117,35 @@ public class SGForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        //Perform action
-        action.execute(currentState);
-
-        //Show cards after everyone has picked a card
         SGGameState SGGS = (SGGameState)currentState;
+        SGTurnOrder turnOrder = (SGTurnOrder) SGGS.getTurnOrder();
+        //Show cards after everyone has picked a card
         int turn = SGGS.getTurnOrder().getTurnCounter();
         if(turn % 4 == 0) System.out.println("Show cards!");
 
+
+        //Perform action
+        action.execute(currentState);
+
+
+        //Round over
+        if(IsRoundOver(SGGS))
+        {
+            turnOrder.endRound(currentState);
+        }
+
         //End turn
-        currentState.getTurnOrder().endPlayerTurn(currentState);
+        turnOrder.endPlayerTurn(currentState);
+
+    }
+
+    boolean IsRoundOver(SGGameState SGGS)
+    {
+        for (int i = 0; i < SGGS.getPlayerDecks().size(); i++)
+        {
+            if(SGGS.getPlayerDecks().get(i).getSize() > 0) return false;
+        }
+        return true;
     }
 
     @Override

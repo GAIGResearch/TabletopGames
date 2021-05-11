@@ -15,4 +15,9 @@ public class SGTurnOrder extends AlternatingTurnOrder {
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }
+
+    @Override
+    public void endRound(AbstractGameState gameState) {
+        super.endRound(gameState);
+    }
 }
