@@ -84,6 +84,11 @@ public class SGGameState extends AbstractGameState {
         return playerScore[playerId];
     }
 
+    public void setGameScore(int playerId, int score)
+    {
+        playerScore[playerId] = score;
+    }
+
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<Integer>() {{

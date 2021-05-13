@@ -74,51 +74,51 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.drawPile = new Deck<SGCard>("Draw pile", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         for (int i = 0; i < parameters.nMaki_3Cards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_3, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_3));
         }
         for (int i = 0; i < parameters.nMaki_2Cards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_2, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_2));
         }
         for (int i = 0; i < parameters.nMaki_1Cards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_1, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_1));
         }
         for (int i = 0; i < parameters.nChopstickCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Chopsticks, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Chopsticks));
         }
         for (int i = 0; i < parameters.nTempuraCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Tempura, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Tempura));
         }
         for (int i = 0; i < parameters.nSashimiCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Sashimi, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Sashimi));
         }
         for (int i = 0; i < parameters.nDumplingCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Dumpling, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Dumpling));
         }
         for (int i = 0; i < parameters.nSquidNigiriCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri, 3));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri));
         }
         for (int i = 0; i < parameters.nSalmonNigiriCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri, 2));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri));
         }
         for (int i = 0; i < parameters.nEggNigiriCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri, 1));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri));
         }
         for (int i = 0; i < parameters.nWasabiCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Wasabi, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Wasabi));
         }
         for (int i = 0; i < parameters.nPuddingCards; i++)
         {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Pudding, 0));
+            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Pudding));
         }
         SGGS.drawPile.shuffle(new Random());
     }

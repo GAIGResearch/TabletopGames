@@ -18,6 +18,22 @@ public class SGParameters extends AbstractParameters {
     public int nWasabiCards = 6;
     public int nPuddingCards = 10;
 
+    public int valueMakiMost = 6;
+    public int valueMakiSecond = 3;
+    public int valueTempuraPair = 5;
+    public int valueSashimiTriss = 10;
+    public int valueDumpling = 1;
+    public int valueDumplingPair = 3;
+    public int valueDumplingTriss = 6;
+    public int valueDumplingQuad = 10;
+    public int valueDumplingPent = 15;
+    public int valueSquidNigiri = 3;
+    public int valueSalmonNigiri = 2;
+    public int valueEggNigiri = 1;
+    public int multiplierWasabi = 2;
+    public int valuePuddingMost = 6;
+    public int valuePuddingLeast = -6;
+
     public SGParameters(long seed) {
         super(seed);
     }
@@ -40,6 +56,22 @@ public class SGParameters extends AbstractParameters {
         sgp.nEggNigiriCards = nEggNigiriCards;
         sgp.nWasabiCards = nWasabiCards;
         sgp.nPuddingCards = nPuddingCards;
+
+        sgp.valueMakiMost = valueMakiMost;
+        sgp.valueMakiSecond = valueMakiSecond;
+        sgp.valueTempuraPair = valueTempuraPair;
+        sgp.valueSashimiTriss = valueSashimiTriss;
+        sgp.valueDumpling = valueDumpling;
+        sgp.valueDumplingPair = valueDumplingPair;
+        sgp.valueDumplingTriss = valueDumplingTriss;
+        sgp.valueDumplingQuad = valueDumplingQuad;
+        sgp.valueDumplingPent = valueDumplingPent;
+        sgp.valueSquidNigiri = valueSquidNigiri;
+        sgp.valueSalmonNigiri = valueSalmonNigiri;
+        sgp.valueEggNigiri = valueEggNigiri;
+        sgp.multiplierWasabi = multiplierWasabi;
+        sgp.valuePuddingMost = valuePuddingMost;
+        sgp.valuePuddingLeast = valuePuddingLeast;
         return sgp;
     }
 
@@ -60,6 +92,21 @@ public class SGParameters extends AbstractParameters {
                 nSalmonNigiriCards == that.nSalmonNigiriCards &&
                 nEggNigiriCards == that.nEggNigiriCards &&
                 nWasabiCards == that.nWasabiCards &&
-                nPuddingCards == that.nPuddingCards;
+                nPuddingCards == that.nPuddingCards &&
+                valueMakiMost == that.valueMakiMost &&
+                valueMakiSecond == that.valueMakiSecond &&
+                valueTempuraPair == that.valueTempuraPair &&
+                valueSashimiTriss == that.valueSashimiTriss &&
+                valueDumpling == that.valueDumpling &&
+                valueDumplingPair == that.valueDumplingPair &&
+                valueDumplingTriss == that.valueDumplingTriss &&
+                valueDumplingQuad == that.valueDumplingQuad &&
+                valueDumplingPent == that.valueDumplingPent &&
+                valueSquidNigiri == that.valueSquidNigiri &&
+                valueSalmonNigiri == that.valueSalmonNigiri &&
+                valueEggNigiri == that.valueEggNigiri &&
+                multiplierWasabi == that.multiplierWasabi &&
+                valuePuddingMost == that.valuePuddingMost &&
+                valuePuddingLeast == that.valuePuddingLeast;
     }
 }
