@@ -53,6 +53,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         allMonks = new HashMap<>();
         monkLocations = new HashMap<>();
         playerTreasuries = new ArrayList<>();
+        treasuresOwnedPerPlayer = new ArrayList<>();
         playerBids = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
             playerTreasuries.add(new EnumMap<>(Resource.class));

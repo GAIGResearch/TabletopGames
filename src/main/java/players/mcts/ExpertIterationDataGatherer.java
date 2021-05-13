@@ -15,7 +15,7 @@ public class ExpertIterationDataGatherer {
     File logFileV, logFileQ;
     List<IGameAttribute> features;
     FileWriter writerV, writerQ;
-    public int visitThreshold = 10;
+    public int visitThreshold = 20;
 
     public ExpertIterationDataGatherer(String fileStem, List<IGameAttribute> features) {
         this.logFileV = new File(fileStem + "_V.txt");
