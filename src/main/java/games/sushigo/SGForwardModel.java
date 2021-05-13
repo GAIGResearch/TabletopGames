@@ -140,15 +140,16 @@ public class SGForwardModel extends AbstractForwardModel {
             RotateDecks(SGGS);
         }
 
-        //Calculate points
-        CalculatePoints();
 
         //Check if game/round over
         if(IsRoundOver(SGGS))
         {
+            //GiveMakiPoints();
             if(SGGS.getTurnOrder().getRoundCounter() >= 2)
             {
+                //GivePuddingPoints();
                 currentState.setGameStatus(Utils.GameResult.GAME_END);
+                //SetWinner
                 return;
             }
             SGGS.getTurnOrder().endRound(currentState);
@@ -174,10 +175,46 @@ public class SGForwardModel extends AbstractForwardModel {
     {
         for(int i = 0; i < SGGS.getNPlayers(); i++)
         {
+            //Moves the card from the players hand to field
             if(SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i]) continue;
             SGCard cardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerCardPicks()[i]);
             SGGS.getPlayerDecks().get(i).remove(cardToReveal);
             SGGS.getPlayerFields().get(i).add(cardToReveal);
+
+            //Add points to player
+            SGGS.setGameScore(i, (int)SGGS.getGameScore(i) + GetCardScore(cardToReveal.type, (SGParameters) SGGS.getGameParameters()));
+        }
+    }
+
+    public int GetCardScore(SGCard.SGCardType cardType, SGParameters parameters)
+    {
+        switch (cardType) {
+            case Maki_1:
+                return 0;
+            case Maki_2:
+                return 0;
+            case Maki_3:
+                return 0;
+            case Tempura:
+                return 0;
+            case Sashimi:
+                return 0;
+            case Dumpling:
+                return parameters.valueDumpling;
+            case SquidNigiri:
+                return parameters.valueSquidNigiri;
+            case SalmonNigiri:
+                return parameters.valueSalmonNigiri;
+            case EggNigiri:
+                return parameters.valueEggNigiri;
+            case Wasabi:
+                return parameters.multiplierWasabi;
+            case Chopsticks:
+                return 0;
+            case Pudding:
+                return 0;
+            default:
+                return -1;
         }
     }
 
