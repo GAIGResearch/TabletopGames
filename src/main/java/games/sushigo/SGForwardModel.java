@@ -147,7 +147,7 @@ public class SGForwardModel extends AbstractForwardModel {
             GiveMakiPoints(SGGS);
             if(SGGS.getTurnOrder().getRoundCounter() >= 2)
             {
-                //GivePuddingPoints();
+                GivePuddingPoints(SGGS);
                 currentState.setGameStatus(Utils.GameResult.GAME_END);
                 //SetWinner
                 return;
@@ -217,25 +217,96 @@ public class SGForwardModel extends AbstractForwardModel {
         }
 
         //Calculate the score each player gets
-        int mostScore = 6;
-        int secondScore = 3;
+        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
+        int mostScore = parameters.valueMakiMost;
+        int secondScore = parameters.valueMakiSecond;
         if(!mostPlayers.isEmpty()) mostScore /= mostPlayers.size();
-        if(!secondPlayers.isEmpty()) secondScore /= mostPlayers.size();
+        if(!secondPlayers.isEmpty()) secondScore /= secondPlayers.size();
 
         //Add score to players
-        if(currentBest > 0)
+        if(currentBest != 0)
         {
             for(int i = 0; i < mostPlayers.size(); i++)
             {
                 SGGS.setGameScore(mostPlayers.get(i), (int)SGGS.getGameScore(mostPlayers.get(i)) + mostScore);
             }
         }
-        if(secondBest > 0)
+        if(secondBest != 0)
         {
             for(int i = 0; i < secondPlayers.size(); i++)
             {
                 SGGS.setGameScore(secondPlayers.get(i), (int)SGGS.getGameScore(secondPlayers.get(i)) + secondScore);
             }
+        }
+    }
+
+    private void GivePuddingPoints(SGGameState SGGS)
+    {
+        //Calculate maki points for each player
+        int[] puddingPlayerPoints = new int[SGGS.getNPlayers()];
+        for (int i = 0; i < SGGS.getNPlayers(); i++)
+        {
+            for (int j = 0; j < SGGS.getPlayerFields().get(i).getSize(); j++)
+            {
+                switch (SGGS.getPlayerFields().get(i).get(j).type)
+                {
+                    case Pudding:
+                        puddingPlayerPoints[i] += 3;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        //Calculate who has the most points and who has the second most points
+        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
+        int currentBest = 0;
+        int currentWorst = parameters.nPuddingCards + 1;
+        List<Integer> mostPlayers = new ArrayList<>();
+        List<Integer> leastPlayers = new ArrayList<>();
+        for(int i = 0; i < puddingPlayerPoints.length; i++)
+        {
+            if(puddingPlayerPoints[i] > currentBest)
+            {
+                currentBest = puddingPlayerPoints[i];
+                mostPlayers.clear();
+                mostPlayers.add(i);
+            }
+            else if(puddingPlayerPoints[i] == currentBest) mostPlayers.add(i);
+            else currentWorst = puddingPlayerPoints[i];
+        }
+        if(currentBest > currentWorst)
+        {
+            for(int i = 0; i < puddingPlayerPoints.length; i++)
+            {
+                if(puddingPlayerPoints[i] < currentWorst)
+                {
+                    currentWorst = puddingPlayerPoints[i];
+                    leastPlayers.clear();
+                    leastPlayers.add(i);
+                }
+                else if(puddingPlayerPoints[i] == currentWorst) leastPlayers.add(i);
+            }
+        }
+
+        //Calculate the score each player gets
+        int mostScore = parameters.valuePuddingMost;
+        int leastScore = parameters.valuePuddingLeast;
+        if(!mostPlayers.isEmpty()) mostScore /= mostPlayers.size();
+        if(!leastPlayers.isEmpty()) leastScore /= leastPlayers.size();
+
+        //Add score to players
+        if(currentBest != 0)
+        {
+            for(int i = 0; i < mostPlayers.size(); i++)
+            {
+                SGGS.setGameScore(mostPlayers.get(i), (int)SGGS.getGameScore(mostPlayers.get(i)) + mostScore);
+            }
+        }
+        for(int i = 0; i < leastPlayers.size(); i++)
+        {
+            SGGS.setGameScore(leastPlayers.get(i), (int)SGGS.getGameScore(leastPlayers.get(i)) + leastScore);
         }
     }
 
