@@ -22,6 +22,9 @@ public class SGGameState extends AbstractGameState {
     int cardAmount = 0;
     int[] playerScore;
     int[] playerCardPicks;
+    int[] playerTempuraAmount;
+    int[] playerSashimiAmount;
+    int[] playerDumplingAmount;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -47,6 +50,11 @@ public class SGGameState extends AbstractGameState {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
         copy.playerScore = playerScore.clone();
         copy.playerCardPicks = playerCardPicks.clone();
+        copy.playerTempuraAmount = playerTempuraAmount.clone();
+        copy.playerSashimiAmount = playerSashimiAmount.clone();
+        copy.playerDumplingAmount = playerDumplingAmount.clone();
+
+        copy.cardAmount = cardAmount;
 
         //Copy player hands
         copy.playerHands = new ArrayList<>();
@@ -90,6 +98,36 @@ public class SGGameState extends AbstractGameState {
     public void setGameScore(int playerId, int score)
     {
         playerScore[playerId] = score;
+    }
+
+    public int getPlayerTempuraAmount(int playerId)
+    {
+         return playerTempuraAmount[playerId];
+    }
+
+    public int getPlayerSashimiAmount(int playerId)
+    {
+        return playerSashimiAmount[playerId];
+    }
+
+    public int getPlayerDumplingAmount(int playerId)
+    {
+        return playerDumplingAmount[playerId];
+    }
+
+    public void setPlayerTempuraAmount(int playerId, int amount)
+    {
+        playerTempuraAmount[playerId] = amount;
+    }
+
+    public void setPlayerSashimiAmount(int playerId, int amount)
+    {
+        playerSashimiAmount[playerId] = amount;
+    }
+
+    public void setPlayerDumplingAmount(int playerId, int amount)
+    {
+        playerDumplingAmount[playerId] = amount;
     }
 
     @Override

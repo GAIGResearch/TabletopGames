@@ -26,6 +26,9 @@ public class SGForwardModel extends AbstractForwardModel {
         //Setup player scores
         SGGS.playerScore = new int[firstState.getNPlayers()];
         SGGS.playerCardPicks = new int[firstState.getNPlayers()];
+        SGGS.playerTempuraAmount = new int[firstState.getNPlayers()];
+        SGGS.playerSashimiAmount = new int[firstState.getNPlayers()];
+        SGGS.playerDumplingAmount = new int[firstState.getNPlayers()];
 
         //Setup draw & discard piles
         SetupDrawpile(SGGS);
@@ -330,12 +333,13 @@ public class SGForwardModel extends AbstractForwardModel {
             SGGS.getPlayerFields().get(i).add(cardToReveal);
 
             //Add points to player
-            SGGS.setGameScore(i, (int)SGGS.getGameScore(i) + GetCardScore(cardToReveal.type, (SGParameters) SGGS.getGameParameters()));
+            SGGS.setGameScore(i, (int)SGGS.getGameScore(i) + GetCardScore(cardToReveal.type, SGGS, i));
         }
     }
 
-    public int GetCardScore(SGCard.SGCardType cardType, SGParameters parameters)
+    public int GetCardScore(SGCard.SGCardType cardType, SGGameState SGGS, int playerId)
     {
+        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
         switch (cardType) {
             case Maki_1:
                 return 0;
@@ -344,11 +348,22 @@ public class SGForwardModel extends AbstractForwardModel {
             case Maki_3:
                 return 0;
             case Tempura:
-                return 0;
+                SGGS.setPlayerTempuraAmount(playerId, SGGS.getPlayerTempuraAmount(playerId) + 1);
+                if(SGGS.getPlayerTempuraAmount(playerId) % 2 == 0) return 5;
+                else return 0;
             case Sashimi:
-                return 0;
+                SGGS.setPlayerSashimiAmount(playerId, SGGS.getPlayerSashimiAmount(playerId) + 1);
+                if(SGGS.getPlayerSashimiAmount(playerId) % 3 == 0) return 10;
+                else return 0;
             case Dumpling:
-                return parameters.valueDumpling;
+                SGGS.setPlayerDumplingAmount(playerId, SGGS.getPlayerDumplingAmount(playerId) + 1);
+                int amount = SGGS.getPlayerDumplingAmount(playerId);
+                if(amount == 1) return parameters.valueDumpling;
+                else if(amount == 2) return parameters.valueDumplingPair - parameters.valueDumpling;
+                else if(amount == 3) return parameters.valueDumplingTriss - parameters.valueDumplingPair;
+                else if(amount == 4) return parameters.valueDumplingQuad - parameters.valueDumplingTriss;
+                else if(amount == 5) return parameters.valueDumplingPent - parameters.valueDumplingQuad;
+                else return 0;
             case SquidNigiri:
                 return parameters.valueSquidNigiri;
             case SalmonNigiri:

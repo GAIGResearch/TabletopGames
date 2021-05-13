@@ -41,6 +41,11 @@ public class SGTurnOrder extends AlternatingTurnOrder {
             {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
             }
+
+            //Clear counters
+            SGGS.setPlayerTempuraAmount(i, 0);
+            SGGS.setPlayerSashimiAmount(i, 0);
+            SGGS.setPlayerDumplingAmount(i, 0);
         }
     }
 }
