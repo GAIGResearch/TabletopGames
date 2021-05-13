@@ -34,6 +34,11 @@ public class SGParameters extends AbstractParameters {
     public int valuePuddingMost = 6;
     public int valuePuddingLeast = -6;
 
+    public int cardAmountTwoPlayers = 10;
+    public int cardAmountThreePlayers = 9;
+    public int cardAmountFourPlayers = 8;
+    public int cardAmountFivePlayers = 7;
+
     public SGParameters(long seed) {
         super(seed);
     }
@@ -72,6 +77,11 @@ public class SGParameters extends AbstractParameters {
         sgp.multiplierWasabi = multiplierWasabi;
         sgp.valuePuddingMost = valuePuddingMost;
         sgp.valuePuddingLeast = valuePuddingLeast;
+
+        sgp.cardAmountTwoPlayers = cardAmountTwoPlayers;
+        sgp.cardAmountThreePlayers = cardAmountThreePlayers;
+        sgp.cardAmountFourPlayers = cardAmountFourPlayers;
+        sgp.cardAmountFivePlayers = cardAmountFivePlayers;
         return sgp;
     }
 
@@ -107,6 +117,10 @@ public class SGParameters extends AbstractParameters {
                 valueEggNigiri == that.valueEggNigiri &&
                 multiplierWasabi == that.multiplierWasabi &&
                 valuePuddingMost == that.valuePuddingMost &&
-                valuePuddingLeast == that.valuePuddingLeast;
+                valuePuddingLeast == that.valuePuddingLeast &&
+                cardAmountTwoPlayers == that.cardAmountTwoPlayers &&
+                cardAmountThreePlayers == that.cardAmountThreePlayers &&
+                cardAmountFourPlayers == that.cardAmountFourPlayers &&
+                cardAmountFivePlayers == that.cardAmountFivePlayers;
     }
 }

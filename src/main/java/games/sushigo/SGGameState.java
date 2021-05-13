@@ -7,9 +7,12 @@ import core.components.Component;
 import core.components.Deck;
 import games.GameType;
 import games.sushigo.cards.SGCard;
+import games.uno.UnoGameState;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerHands;
@@ -111,10 +114,23 @@ public class SGGameState extends AbstractGameState {
         playerFields = new ArrayList<>();
         drawPile = null;
         discardPile = null;
+        cardAmount = 0;
+        playerScore = null;
+        playerCardPicks = null;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return false;
+
+        if (this == o) return true;
+        if (!(o instanceof SGGameState)) return false;
+        if (!super.equals(o)) return false;
+        SGGameState that = (SGGameState) o;
+        return Objects.equals(playerHands, that.playerHands) &&
+                Objects.equals(playerFields, that.playerFields) &&
+                Objects.equals(drawPile, that.drawPile) &&
+                Objects.equals(discardPile, that.discardPile) &&
+                Arrays.equals(playerScore, that.playerScore) &&
+                Arrays.equals(playerCardPicks, that.playerCardPicks);
     }
 }

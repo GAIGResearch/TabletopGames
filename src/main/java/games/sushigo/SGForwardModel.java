@@ -21,6 +21,7 @@ public class SGForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         SGGameState SGGS = (SGGameState) firstState;
+        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
 
         //Setup player scores
         SGGS.playerScore = new int[firstState.getNPlayers()];
@@ -36,16 +37,16 @@ public class SGForwardModel extends AbstractForwardModel {
         switch (firstState.getNPlayers())
         {
             case 2:
-                SGGS.cardAmount = 10;
+                SGGS.cardAmount = parameters.cardAmountTwoPlayers;
                 break;
             case 3:
-                SGGS.cardAmount = 9;
+                SGGS.cardAmount = parameters.cardAmountThreePlayers;
                 break;
             case 4:
-                SGGS.cardAmount = 8;
+                SGGS.cardAmount = parameters.cardAmountFourPlayers;
                 break;
             case 5:
-                SGGS.cardAmount = 7;
+                SGGS.cardAmount = parameters.cardAmountFivePlayers;
                 break;
 
         }
