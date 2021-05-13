@@ -704,8 +704,8 @@ public class Game {
         params1.budget = 10;
 
 //        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());

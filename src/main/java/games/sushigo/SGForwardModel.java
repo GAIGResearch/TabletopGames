@@ -144,7 +144,7 @@ public class SGForwardModel extends AbstractForwardModel {
         //Check if game/round over
         if(IsRoundOver(SGGS))
         {
-            //GiveMakiPoints();
+            GiveMakiPoints(SGGS);
             if(SGGS.getTurnOrder().getRoundCounter() >= 2)
             {
                 //GivePuddingPoints();
@@ -159,6 +159,83 @@ public class SGForwardModel extends AbstractForwardModel {
         //End turn
         if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
             currentState.getTurnOrder().endPlayerTurn(currentState);
+        }
+    }
+
+    private void GiveMakiPoints(SGGameState SGGS)
+    {
+        //Calculate maki points for each player
+        int[] makiPlayerPoints = new int[SGGS.getNPlayers()];
+        for (int i = 0; i < SGGS.getNPlayers(); i++)
+        {
+            for (int j = 0; j < SGGS.getPlayerFields().get(i).getSize(); j++)
+            {
+                switch (SGGS.getPlayerFields().get(i).get(j).type)
+                {
+                    case Maki_1:
+                        makiPlayerPoints[i] += 1;
+                        break;
+                    case Maki_2:
+                        makiPlayerPoints[i] += 2;
+                        break;
+                    case Maki_3:
+                        makiPlayerPoints[i] += 3;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        //Calculate who has the most points and who has the second most points
+        int currentBest = 0;
+        int secondBest = 0;
+        List<Integer> mostPlayers = new ArrayList<>();
+        List<Integer> secondPlayers = new ArrayList<>();
+        for(int i = 0; i < makiPlayerPoints.length; i++)
+        {
+            if(makiPlayerPoints[i] > currentBest)
+            {
+                secondBest = currentBest;
+                secondPlayers.clear();
+                for(Integer x : mostPlayers){
+                    secondPlayers.add(x.intValue());
+                }
+
+                currentBest = makiPlayerPoints[i];
+                mostPlayers.clear();
+                mostPlayers.add(i);
+            }
+            else if(makiPlayerPoints[i] == currentBest) mostPlayers.add(i);
+            else if(makiPlayerPoints[i] > secondBest)
+            {
+                secondBest = makiPlayerPoints[i];
+                secondPlayers.clear();
+                secondPlayers.add(i);
+            }
+            else if(makiPlayerPoints[i] == secondBest) secondPlayers.add(i);
+        }
+
+        //Calculate the score each player gets
+        int mostScore = 6;
+        int secondScore = 3;
+        if(!mostPlayers.isEmpty()) mostScore /= mostPlayers.size();
+        if(!secondPlayers.isEmpty()) secondScore /= mostPlayers.size();
+
+        //Add score to players
+        if(currentBest > 0)
+        {
+            for(int i = 0; i < mostPlayers.size(); i++)
+            {
+                SGGS.setGameScore(mostPlayers.get(i), (int)SGGS.getGameScore(mostPlayers.get(i)) + mostScore);
+            }
+        }
+        if(secondBest > 0)
+        {
+            for(int i = 0; i < secondPlayers.size(); i++)
+            {
+                SGGS.setGameScore(secondPlayers.get(i), (int)SGGS.getGameScore(secondPlayers.get(i)) + secondScore);
+            }
         }
     }
 
@@ -208,7 +285,7 @@ public class SGForwardModel extends AbstractForwardModel {
             case EggNigiri:
                 return parameters.valueEggNigiri;
             case Wasabi:
-                return parameters.multiplierWasabi;
+                return 0;
             case Chopsticks:
                 return 0;
             case Pudding:
