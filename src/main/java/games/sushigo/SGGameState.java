@@ -25,6 +25,7 @@ public class SGGameState extends AbstractGameState {
     int[] playerTempuraAmount;
     int[] playerSashimiAmount;
     int[] playerDumplingAmount;
+    Integer winningPlayer;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -129,6 +130,12 @@ public class SGGameState extends AbstractGameState {
     {
         playerDumplingAmount[playerId] = amount;
     }
+
+    public void setWinningPlayer(int playerId){
+        winningPlayer = playerId;
+    }
+    
+    public Integer getWinningPlayer(){ return winningPlayer; }
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {

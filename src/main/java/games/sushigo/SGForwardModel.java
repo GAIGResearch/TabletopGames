@@ -151,8 +151,8 @@ public class SGForwardModel extends AbstractForwardModel {
             if(SGGS.getTurnOrder().getRoundCounter() >= 2)
             {
                 GivePuddingPoints(SGGS);
-                SetWinner(SGGS);
                 currentState.setGameStatus(Utils.GameResult.GAME_END);
+                SetWinner(SGGS);
                 return;
             }
             SGGS.getTurnOrder().endRound(currentState);
@@ -165,6 +165,19 @@ public class SGForwardModel extends AbstractForwardModel {
         }
     }
 
+    private void TestWinner(SGGameState SGGS){
+        int currentBestScore = 0;
+        int currentBestPlayer = 0;
+        List<Integer> winners = new ArrayList<>();
+
+        for (int i = 0; i < SGGS.getNPlayers(); i++){
+            if (SGGS.getGameScore(i) > currentBestScore){
+                winners.clear();
+                winners.add(i);
+            }
+        }
+    }
+
     private void SetWinner(SGGameState SGGS) {
         int currentBestScore = 0;
         List<Integer> winners = new ArrayList<>();
@@ -172,8 +185,10 @@ public class SGForwardModel extends AbstractForwardModel {
         {
             if(SGGS.getGameScore(i) > currentBestScore)
             {
+                currentBestScore = (int)SGGS.getGameScore(i);
                 winners.clear();
                 winners.add(i);
+
             }
             else if(SGGS.getGameScore(i) == currentBestScore) winners.add(i);
         }
@@ -187,6 +202,7 @@ public class SGForwardModel extends AbstractForwardModel {
             {
                 if (GetPuddingAmount(winners.get(i), SGGS) > bestPuddingScore)
                 {
+                    bestPuddingScore = GetPuddingAmount(winners.get(i), SGGS);
                     trueWinners.clear();
                     trueWinners.add(winners.get(i));
                 }
@@ -220,6 +236,7 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
             }
             SGGS.setPlayerResult(Utils.GameResult.WIN, winners.get(0));
+            SGGS.setWinningPlayer(winners.get(0));
         }
     }
 

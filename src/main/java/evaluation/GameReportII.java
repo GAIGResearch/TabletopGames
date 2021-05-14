@@ -50,23 +50,23 @@ public class GameReportII {
             );
             return;
         }
-
+        //utilities.GameReportListener
         // Get Player to be used
-        String playerDescriptor = getArg(args, "player", "random");
+        String playerDescriptor = getArg(args, "mcts", "mcts");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameReportListener").split("\\|")));
-        List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "games.sushigo.testing.SGListener", "games.sushigo.testing.SGListener").split("\\|")));
+        List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "SGReport.txt", "SGReport.txt").split("\\|")));
 
         if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
-        int nGames = getArg(args, "nGames", 1000);
-        List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
+        int nGames = getArg(args, "nGames", 100);
+        List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "SushiGO").split("\\|")));
         if (games.get(0).equals("all"))
             games = Arrays.stream(GameType.values()).map(Enum::name).collect(toList());
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
-        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "nPlayers", "all").split("\\|"))
+        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "4", "4").split("\\|"))
                 .map(str -> {
                     if (str.contains("-")) {
                         int hyphenIndex = str.indexOf("-");
@@ -118,9 +118,13 @@ public class GameReportII {
                 for (int i = 0; i < nGames; i++) {
                     List<AbstractPlayer> allPlayers = new ArrayList<>();
                     for (int j = 0; j < playerCount; j++) {
-                        allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
+                        //allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
                     }
                     // Run games, resetting the player each time
+                    allPlayers.add(PlayerFactory.createPlayer("osla"));
+                    allPlayers.add(PlayerFactory.createPlayer("random"));
+                    allPlayers.add(PlayerFactory.createPlayer("mcts"));
+                    allPlayers.add(PlayerFactory.createPlayer("rmhc"));
 
                     game.reset(allPlayers);
                     game.run();

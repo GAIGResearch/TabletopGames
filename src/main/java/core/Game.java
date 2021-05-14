@@ -3,6 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateHeuristic;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.human.ActionController;
@@ -10,6 +11,7 @@ import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
@@ -707,7 +709,8 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
-        players.add(new HumanGUIPlayer(ac));
+        //players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLAPlayer());
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
