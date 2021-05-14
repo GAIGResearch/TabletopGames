@@ -217,7 +217,7 @@ public class SGForwardModel extends AbstractForwardModel {
                     trueWinners.clear();
                     trueWinners.add(winners.get(i));
                 }
-                if (GetPuddingAmount(winners.get(i), SGGS) == bestPuddingScore) trueWinners.add(winners.get(i));
+                else if (GetPuddingAmount(winners.get(i), SGGS) == bestPuddingScore) trueWinners.add(winners.get(i));
             }
 
             if(trueWinners.size() > 1)

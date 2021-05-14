@@ -41,11 +41,11 @@ public class PlayCardAction extends AbstractAction {
                 return 0;
             case Tempura:
                 SGGS.setPlayerTempuraAmount(playerId, SGGS.getPlayerTempuraAmount(playerId) + 1);
-                if(SGGS.getPlayerTempuraAmount(playerId) % 2 == 0) return 5;
+                if(SGGS.getPlayerTempuraAmount(playerId) % 2 == 0) return parameters.valueTempuraPair;
                 else return 0;
             case Sashimi:
                 SGGS.setPlayerSashimiAmount(playerId, SGGS.getPlayerSashimiAmount(playerId) + 1);
-                if(SGGS.getPlayerSashimiAmount(playerId) % 3 == 0) return 10;
+                if(SGGS.getPlayerSashimiAmount(playerId) % 3 == 0) return parameters.valueSashimiTriss;
                 else return 0;
             case Dumpling:
                 SGGS.setPlayerDumplingAmount(playerId, SGGS.getPlayerDumplingAmount(playerId) + 1);
