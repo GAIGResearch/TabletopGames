@@ -30,7 +30,7 @@ public class SGParameters extends AbstractParameters {
     public int valueSquidNigiri = 3;
     public int valueSalmonNigiri = 2;
     public int valueEggNigiri = 1;
-    public int multiplierWasabi = 2;
+    public int multiplierWasabi = 3;
     public int valuePuddingMost = 6;
     public int valuePuddingLeast = -6;
 

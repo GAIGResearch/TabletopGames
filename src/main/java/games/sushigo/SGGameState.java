@@ -21,11 +21,13 @@ public class SGGameState extends AbstractGameState {
     Deck<SGCard> discardPile;
     int cardAmount = 0;
     int[] playerScore;
+    int[] playerScoreToAdd;
     int[] playerCardPicks;
     int[] playerTempuraAmount;
     int[] playerSashimiAmount;
     int[] playerDumplingAmount;
-    Integer winningPlayer;
+    int[] playerWasabiAvailable;
+    int[] playerChopSticksAmount;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -51,9 +53,12 @@ public class SGGameState extends AbstractGameState {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
         copy.playerScore = playerScore.clone();
         copy.playerCardPicks = playerCardPicks.clone();
+        copy.playerScoreToAdd = playerScoreToAdd.clone();
         copy.playerTempuraAmount = playerTempuraAmount.clone();
         copy.playerSashimiAmount = playerSashimiAmount.clone();
         copy.playerDumplingAmount = playerDumplingAmount.clone();
+        copy.playerWasabiAvailable = playerWasabiAvailable.clone();
+        copy.playerChopSticksAmount = playerChopSticksAmount.clone();
 
         copy.cardAmount = cardAmount;
 
@@ -76,6 +81,7 @@ public class SGGameState extends AbstractGameState {
     }
 
     public int[] getPlayerScore() {return playerScore;}
+
     public int[] getPlayerCardPicks() {return playerCardPicks;}
 
     public void setPlayerCardPick(int cardIndex, int playerId) {
@@ -94,6 +100,10 @@ public class SGGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         return playerScore[playerId];
+    }
+
+    public int getPlayerScoreToAdd(int playerId) {
+        return playerScoreToAdd[playerId];
     }
 
     public void setGameScore(int playerId, int score)
@@ -116,6 +126,21 @@ public class SGGameState extends AbstractGameState {
         return playerDumplingAmount[playerId];
     }
 
+    public int getPlayerWasabiAvailable(int playerId)
+    {
+        return playerWasabiAvailable[playerId];
+    }
+
+    public int getPlayerChopSticksAmount(int playerId)
+    {
+        return playerChopSticksAmount[playerId];
+    }
+
+    public void setPlayerScoreToAdd(int playerId, int amount)
+    {
+        playerScoreToAdd[playerId] = amount;
+    }
+
     public void setPlayerTempuraAmount(int playerId, int amount)
     {
         playerTempuraAmount[playerId] = amount;
@@ -126,16 +151,19 @@ public class SGGameState extends AbstractGameState {
         playerSashimiAmount[playerId] = amount;
     }
 
-    public void setPlayerDumplingAmount(int playerId, int amount)
+    public void setPlayerDumplingAmount(int playerId, int amount) { playerDumplingAmount[playerId] = amount; }
+
+    public void setPlayerWasabiAvailable(int playerId, int amount)
     {
-        playerDumplingAmount[playerId] = amount;
+        playerWasabiAvailable[playerId] = amount;
     }
 
-    public void setWinningPlayer(int playerId){
-        winningPlayer = playerId;
+    public void setPlayerChopSticksAmount(int playerId, int amount)
+    {
+        playerChopSticksAmount[playerId] = amount;
     }
-    
-    public Integer getWinningPlayer(){ return winningPlayer; }
+
+
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
@@ -162,6 +190,9 @@ public class SGGameState extends AbstractGameState {
         cardAmount = 0;
         playerScore = null;
         playerCardPicks = null;
+        playerScoreToAdd = null;
+        playerWasabiAvailable = null;
+        playerChopSticksAmount = null;
     }
 
     @Override
@@ -176,6 +207,9 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) &&
                 Arrays.equals(playerScore, that.playerScore) &&
-                Arrays.equals(playerCardPicks, that.playerCardPicks);
+                Arrays.equals(playerCardPicks, that.playerCardPicks) &&
+                Arrays.equals(playerWasabiAvailable, that.playerWasabiAvailable) &&
+                Arrays.equals(playerChopSticksAmount, that.playerChopSticksAmount) &&
+                Arrays.equals(playerScoreToAdd, that.playerScoreToAdd);
     }
 }
