@@ -15,6 +15,7 @@ public class SGTurnOrder extends AlternatingTurnOrder {
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         if(gameState.getGameStatus() != Utils.GameResult.GAME_ONGOING) return;
+        SGGameState SGGS = (SGGameState) gameState;
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }
@@ -46,6 +47,8 @@ public class SGTurnOrder extends AlternatingTurnOrder {
             SGGS.setPlayerTempuraAmount(i, 0);
             SGGS.setPlayerSashimiAmount(i, 0);
             SGGS.setPlayerDumplingAmount(i, 0);
+            SGGS.setPlayerWasabiAvailable(i, 0);
+            SGGS.setPlayerChopSticksAmount(i, 0);
         }
     }
 }

@@ -29,6 +29,10 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerTempuraAmount = new int[firstState.getNPlayers()];
         SGGS.playerSashimiAmount = new int[firstState.getNPlayers()];
         SGGS.playerDumplingAmount = new int[firstState.getNPlayers()];
+        SGGS.playerWasabiAvailable = new int[firstState.getNPlayers()];
+        SGGS.playerChopSticksAmount = new int[firstState.getNPlayers()];
+        SGGS.playerScoreToAdd = new int[firstState.getNPlayers()];
+
 
         //Setup draw & discard piles
         SetupDrawpile(SGGS);
@@ -141,6 +145,12 @@ public class SGForwardModel extends AbstractForwardModel {
         {
             RevealCards(SGGS);
             RotateDecks(SGGS);
+
+            //Clear points
+            for(int i = 0; i < SGGS.getNPlayers(); i++)
+            {
+                SGGS.setPlayerScoreToAdd(i, 0);
+            }
         }
 
 
@@ -401,53 +411,11 @@ public class SGForwardModel extends AbstractForwardModel {
             SGGS.getPlayerFields().get(i).add(cardToReveal);
 
             //Add points to player
-            SGGS.setGameScore(i, (int)SGGS.getGameScore(i) + GetCardScore(cardToReveal.type, SGGS, i));
+            SGGS.setGameScore(i, (int)SGGS.getGameScore(i) + SGGS.getPlayerScoreToAdd(i));
         }
     }
 
-    public int GetCardScore(SGCard.SGCardType cardType, SGGameState SGGS, int playerId)
-    {
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-        switch (cardType) {
-            case Maki_1:
-                return 0;
-            case Maki_2:
-                return 0;
-            case Maki_3:
-                return 0;
-            case Tempura:
-                SGGS.setPlayerTempuraAmount(playerId, SGGS.getPlayerTempuraAmount(playerId) + 1);
-                if(SGGS.getPlayerTempuraAmount(playerId) % 2 == 0) return 5;
-                else return 0;
-            case Sashimi:
-                SGGS.setPlayerSashimiAmount(playerId, SGGS.getPlayerSashimiAmount(playerId) + 1);
-                if(SGGS.getPlayerSashimiAmount(playerId) % 3 == 0) return 10;
-                else return 0;
-            case Dumpling:
-                SGGS.setPlayerDumplingAmount(playerId, SGGS.getPlayerDumplingAmount(playerId) + 1);
-                int amount = SGGS.getPlayerDumplingAmount(playerId);
-                if(amount == 1) return parameters.valueDumpling;
-                else if(amount == 2) return parameters.valueDumplingPair - parameters.valueDumpling;
-                else if(amount == 3) return parameters.valueDumplingTriss - parameters.valueDumplingPair;
-                else if(amount == 4) return parameters.valueDumplingQuad - parameters.valueDumplingTriss;
-                else if(amount == 5) return parameters.valueDumplingPent - parameters.valueDumplingQuad;
-                else return 0;
-            case SquidNigiri:
-                return parameters.valueSquidNigiri;
-            case SalmonNigiri:
-                return parameters.valueSalmonNigiri;
-            case EggNigiri:
-                return parameters.valueEggNigiri;
-            case Wasabi:
-                return 0;
-            case Chopsticks:
-                return 0;
-            case Pudding:
-                return 0;
-            default:
-                return -1;
-        }
-    }
+
 
     void RotateDecks(SGGameState SGGS)
     {
