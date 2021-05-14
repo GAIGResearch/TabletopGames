@@ -2,12 +2,10 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import games.GameType;
 import games.sushigo.cards.SGCard;
-import games.uno.UnoGameState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,11 +21,14 @@ public class SGGameState extends AbstractGameState {
     int[] playerScore;
     int[] playerScoreToAdd;
     int[] playerCardPicks;
+    int[] playerExtraCardPicks;
     int[] playerTempuraAmount;
     int[] playerSashimiAmount;
     int[] playerDumplingAmount;
     int[] playerWasabiAvailable;
     int[] playerChopSticksAmount;
+    boolean[] playerChopsticksActivated;
+    boolean[] playerExtraTurnUsed;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -53,12 +54,15 @@ public class SGGameState extends AbstractGameState {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
         copy.playerScore = playerScore.clone();
         copy.playerCardPicks = playerCardPicks.clone();
+        copy.playerExtraCardPicks = playerExtraCardPicks.clone();
         copy.playerScoreToAdd = playerScoreToAdd.clone();
         copy.playerTempuraAmount = playerTempuraAmount.clone();
         copy.playerSashimiAmount = playerSashimiAmount.clone();
         copy.playerDumplingAmount = playerDumplingAmount.clone();
         copy.playerWasabiAvailable = playerWasabiAvailable.clone();
         copy.playerChopSticksAmount = playerChopSticksAmount.clone();
+        copy.playerChopsticksActivated = playerChopsticksActivated.clone();
+        copy.playerExtraTurnUsed = playerExtraTurnUsed.clone();
 
         copy.cardAmount = cardAmount;
 
@@ -86,6 +90,12 @@ public class SGGameState extends AbstractGameState {
 
     public void setPlayerCardPick(int cardIndex, int playerId) {
         this.playerCardPicks[playerId] = cardIndex;
+    }
+
+    public int[] getPlayerExtraCardPicks() {return playerExtraCardPicks;}
+
+    public void setPlayerExtraCardPick(int cardIndex, int playerId) {
+        this.playerExtraCardPicks[playerId] = cardIndex;
     }
 
     public List<Deck<SGCard>> getPlayerFields() {return playerFields;}
@@ -136,6 +146,16 @@ public class SGGameState extends AbstractGameState {
         return playerChopSticksAmount[playerId];
     }
 
+    public boolean getPlayerChopSticksActivated(int playerId)
+    {
+        return playerChopsticksActivated[playerId];
+    }
+
+    public boolean getPlayerExtraTurnUsed(int playerId)
+    {
+        return playerExtraTurnUsed[playerId];
+    }
+
     public void setPlayerScoreToAdd(int playerId, int amount)
     {
         playerScoreToAdd[playerId] = amount;
@@ -161,6 +181,16 @@ public class SGGameState extends AbstractGameState {
     public void setPlayerChopSticksAmount(int playerId, int amount)
     {
         playerChopSticksAmount[playerId] = amount;
+    }
+
+    public void setPlayerChopsticksActivated(int playerId, boolean value)
+    {
+        playerChopsticksActivated[playerId] = value;
+    }
+
+    public void setPlayerExtraTurnUsed(int playerId, boolean value)
+    {
+        playerExtraTurnUsed[playerId] = value;
     }
 
 
@@ -190,9 +220,12 @@ public class SGGameState extends AbstractGameState {
         cardAmount = 0;
         playerScore = null;
         playerCardPicks = null;
+        playerExtraCardPicks = null;
         playerScoreToAdd = null;
         playerWasabiAvailable = null;
         playerChopSticksAmount = null;
+        playerChopsticksActivated = null;
+        playerExtraTurnUsed = null;
     }
 
     @Override
@@ -208,8 +241,11 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(discardPile, that.discardPile) &&
                 Arrays.equals(playerScore, that.playerScore) &&
                 Arrays.equals(playerCardPicks, that.playerCardPicks) &&
+                Arrays.equals(playerExtraCardPicks, that.playerExtraCardPicks) &&
                 Arrays.equals(playerWasabiAvailable, that.playerWasabiAvailable) &&
                 Arrays.equals(playerChopSticksAmount, that.playerChopSticksAmount) &&
-                Arrays.equals(playerScoreToAdd, that.playerScoreToAdd);
+                Arrays.equals(playerScoreToAdd, that.playerScoreToAdd) &&
+                Arrays.equals(playerChopsticksActivated, that.playerChopsticksActivated) &&
+                Arrays.equals(playerExtraTurnUsed, that.playerExtraTurnUsed);
     }
 }

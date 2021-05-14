@@ -27,12 +27,15 @@ public class SGForwardModel extends AbstractForwardModel {
         //Setup player scores
         SGGS.playerScore = new int[firstState.getNPlayers()];
         SGGS.playerCardPicks = new int[firstState.getNPlayers()];
+        SGGS.playerExtraCardPicks = new int[firstState.getNPlayers()];
         SGGS.playerTempuraAmount = new int[firstState.getNPlayers()];
         SGGS.playerSashimiAmount = new int[firstState.getNPlayers()];
         SGGS.playerDumplingAmount = new int[firstState.getNPlayers()];
         SGGS.playerWasabiAvailable = new int[firstState.getNPlayers()];
         SGGS.playerChopSticksAmount = new int[firstState.getNPlayers()];
         SGGS.playerScoreToAdd = new int[firstState.getNPlayers()];
+        SGGS.playerChopsticksActivated = new boolean[firstState.getNPlayers()];
+        SGGS.playerExtraTurnUsed = new boolean[firstState.getNPlayers()];
 
 
         //Setup draw & discard piles
