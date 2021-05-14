@@ -10,8 +10,8 @@ import java.util.function.*;
 
 public enum SGGameAttributes implements IGameAttribute {
     GAME_ID((SGGameState s, AbstractAction a) -> s.getGameID()),
-    PLAYER((SGGameState s, AbstractAction a) -> s.getCurrentPlayer()),
-    WINNING_PLAYER((SGGameState s, AbstractAction a) -> s.getWinningPlayer());
+    PLAYER((SGGameState s, AbstractAction a) -> s.getCurrentPlayer());
+    //WINNING_PLAYER((SGGameState s, AbstractAction a) -> s.getWinningPlayer());
 
 
     private final BiFunction<SGGameState, AbstractAction, Object> lambda;

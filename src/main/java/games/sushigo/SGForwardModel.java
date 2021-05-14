@@ -247,7 +247,7 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
             }
             SGGS.setPlayerResult(Utils.GameResult.WIN, winners.get(0));
-            SGGS.setWinningPlayer(winners.get(0));
+            //SGGS.setWinningPlayer(winners.get(0));
         }
     }
 
