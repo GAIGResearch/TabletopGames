@@ -6,6 +6,7 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.sushigo.actions.DebugAction;
+import games.sushigo.actions.NigiriWasabiAction;
 import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
 import utilities.Utils;
@@ -458,12 +459,18 @@ public class SGForwardModel extends AbstractForwardModel {
                     break;
                 case SquidNigiri:
                     actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.SquidNigiri));
+                    if(SGGS.getPlayerWasabiAvailable(SGGS.getCurrentPlayer()) > 0)
+                        actions.add(new NigiriWasabiAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.SquidNigiri));
                     break;
                 case SalmonNigiri:
                     actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.SalmonNigiri));
+                    if(SGGS.getPlayerWasabiAvailable(SGGS.getCurrentPlayer()) > 0)
+                        actions.add(new NigiriWasabiAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.SalmonNigiri));
                     break;
                 case EggNigiri:
                     actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.EggNigiri));
+                    if(SGGS.getPlayerWasabiAvailable(SGGS.getCurrentPlayer()) > 0)
+                        actions.add(new NigiriWasabiAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.EggNigiri));
                     break;
                 case Wasabi:
                     actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Wasabi));

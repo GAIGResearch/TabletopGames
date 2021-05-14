@@ -3,6 +3,7 @@ package games.sushigo.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.sushigo.SGGameState;
+import games.sushigo.SGParameters;
 import games.sushigo.cards.SGCard;
 
 public class NigiriWasabiAction extends AbstractAction {
@@ -21,12 +22,30 @@ public class NigiriWasabiAction extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         SGGameState SGGS = (SGGameState) gs;
         SGGS.setPlayerCardPick(cardIndex, playerId);
+        SGGS.setPlayerScoreToAdd(playerId,SGGS.getPlayerScoreToAdd(playerId) + GetCardScore(cardType, SGGS, playerId));
+        SGGS.setPlayerWasabiAvailable(playerId, SGGS.getPlayerWasabiAvailable(playerId) - 1);
         return true;
+    }
+
+    private int GetCardScore(SGCard.SGCardType cardType, SGGameState SGGS, int playerId)
+    {
+        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
+        switch (cardType)
+        {
+            case SquidNigiri:
+                return parameters.valueSquidNigiri * parameters.multiplierWasabi;
+            case SalmonNigiri:
+                return parameters.valueSalmonNigiri * parameters.multiplierWasabi;
+            case EggNigiri:
+                return parameters.valueEggNigiri * parameters.multiplierWasabi;
+            default:
+                return -1;
+        }
     }
 
     @Override
     public AbstractAction copy() {
-        return null;
+        return new NigiriWasabiAction(playerId, cardIndex, cardType);
     }
 
     @Override
@@ -42,6 +61,6 @@ public class NigiriWasabiAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Use wasabi with " + cardType;
+        return "Play " + cardType + " on Wasabi";
     }
 }

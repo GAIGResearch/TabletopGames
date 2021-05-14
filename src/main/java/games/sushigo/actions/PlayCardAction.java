@@ -77,7 +77,7 @@ public class PlayCardAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return null;
+        return new PlayCardAction(playerId, cardIndex, cardType);
     }
 
     @Override
