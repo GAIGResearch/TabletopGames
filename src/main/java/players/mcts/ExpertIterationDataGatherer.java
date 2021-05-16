@@ -70,6 +70,10 @@ public class ExpertIterationDataGatherer {
                 int player = node.getActor();
                 double stateValue = node.getTotValue()[player] / node.getVisits();
                 output.append(String.format("%.3g\t%d\t%d", stateValue, node.depth, node.getVisits()));
+//                if (node.children.keySet().stream().anyMatch(a -> a instanceof SummerBid)) {
+//                    if ((int) DiceMonasteryStateAttributes.MONKS_IN_KITCHEN.get(node.getState(), player) > 0)
+//                        throw new AssertionError("???");
+//                }
                 for (IGameAttribute feature : features) {
                     coreData.append("\t").append(feature.get(node.getState(), player));
                 }

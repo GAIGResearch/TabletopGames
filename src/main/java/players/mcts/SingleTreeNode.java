@@ -49,7 +49,8 @@ public class SingleTreeNode {
 
     // State in this node (closed loop)
     private AbstractAction actionToReach;
-    private AbstractGameState state;
+    private final AbstractGameState state;
+    private AbstractGameState openLoopState;
     private List<AbstractAction> actionsFromState;
 
     public AbstractGameState getState() {
@@ -66,12 +67,22 @@ public class SingleTreeNode {
         if (root == this) {
             // Root node maintains MAST statistics
             for (int i = 0; i < state.getNPlayers(); i++)
-            MASTStatistics.add(new HashMap<>());
+                MASTStatistics.add(new HashMap<>());
         }
         this.actionToReach = actionToReach;
         decisionPlayer = state.getCurrentPlayer();
         totValue = new double[state.getNPlayers()];
-        setState(state); // this also initialises actions and children
+        openLoopState = state;
+        if (player.params.openLoop && player.params.gatherExpertIterationData) {
+            // if we're using open loop, then we need to make sure the reference state is never changed
+            root.copyCount++;
+            this.state = state.copy();
+        } else {
+            this.state = state;
+        }
+
+
+        setActionsFromState(state);
         if (parent != null) {
             depth = parent.depth + 1;
         } else {
@@ -80,28 +91,14 @@ public class SingleTreeNode {
         this.rnd = rnd;
     }
 
-    private void setState(AbstractGameState newState) {
-        if (newState.getCurrentPlayer() != decisionPlayer)
-            throw new AssertionError("Problem: We should never have a state assigned to this node for a different deciding player");
-        state = newState;
-        actionsFromState = player.getForwardModel().computeAvailableActions(state);
-        /*
-         * we run through the actions, and add any new ones not currently in the list
-         * When in open loop, it is entirely possible that on a transition to a new state we have actions that were
-         * not previously possible. (Especially in stochastic games, where different iterations may have different
-         * random draws; but this can also happen in deterministic games if we model the opponent moves in their own trees
-         * for example.)
-         */
+    private void setActionsFromState(AbstractGameState actionState) {
+        actionsFromState = player.getForwardModel().computeAvailableActions(actionState);
         for (AbstractAction action : actionsFromState) {
             if (!children.containsKey(action)) {
                 children.put(action, null); // mark a new node to be expanded
                 // This *does* rely on a good equals method being implemented for Actions
             }
         }
-        // TODO: This does not yet take account of cases where we have rarely possible actions. Where the
-        // action frequency can be very variable we should take this into account (see Cowling et al. 2012 I think)
-        // This boils down to keeping track of how many times the action was available out of the total visits to the
-        // node.
     }
 
     /**
@@ -122,18 +119,11 @@ public class SingleTreeNode {
         // Tracking number of iterations for iteration budget
         int numIters = 0;
         boolean stop = false;
-        // We keep a copy of this, as if we are using an open loop approach, then we need to advance a state
-        // through the tree on each iteration, while still keeping an unchanged master copy (rootState)
-        AbstractGameState rootState = state.copy();
-        copyCount++;
         while (!stop) {
             if (player.params.openLoop) { // this assumes that copy(id) randomises the invisible components
-                setState(player.params.redeterminise ? rootState.copy(player.getPlayerID()) : rootState.copy());
+                openLoopState = player.params.redeterminise ? state.copy(player.getPlayerID()) : state.copy();
                 copyCount++;
-            } else
-                setState(rootState);
-            // TODO: Can we determinise in Closed Loop? Closed Loop currently means we do not advance the state though
-            // the tree - so shuffling the cards at the root makes no difference.
+            }
 
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
@@ -265,16 +255,16 @@ public class SingleTreeNode {
         Integer actingPlayer = cur.decisionPlayer;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromState.size() > 0) {
+        while (cur.openLoopState.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromState.size() > 0) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 return cur.expand();
             } else {
                 // Move to next child given by UCT function
                 cur = cur.nextNodeInTree();
+                treeActions.add(new Pair<>(actingPlayer, cur.actionToReach));
             }
         }
-        treeActions.add(new Pair<>(actingPlayer, cur.actionToReach));
         return cur;
     }
 
@@ -316,7 +306,7 @@ public class SingleTreeNode {
             throw new AssertionError("We have somehow failed to pick an action to expand");
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
-        AbstractGameState nextState = state.copy();
+        AbstractGameState nextState = openLoopState.copy();
         root.copyCount++;
         AbstractAction actionCopy = chosen.copy();
         advance(nextState, actionCopy);
@@ -395,16 +385,17 @@ public class SingleTreeNode {
             // In open loop we never re-use the state...the only purpose of storing it on the Node is
             // to pick it up in the next uct() call as we descend the tree
             AbstractAction chosenCopy = actionChosen.copy();
-            advance(state, chosenCopy);
-            int nextPlayer = state.getCurrentPlayer();
+            advance(openLoopState, chosenCopy);
+            int nextPlayer = openLoopState.getCurrentPlayer();
             SingleTreeNode nextNode = nodeArray[nextPlayer];
             if (nextNode == null) {
                 // need to create a new node
-                nodeArray[nextPlayer] = new SingleTreeNode(player, this, chosenCopy, state, rnd);
+                nodeArray[nextPlayer] = new SingleTreeNode(player, this, chosenCopy, openLoopState, rnd);
                 nextNode = nodeArray[nextPlayer];
             } else {
                 // pick up the existing one, and set the state
-                nextNode.setState(state);
+                nextNode.openLoopState = openLoopState;
+                nextNode.setActionsFromState(openLoopState);
             }
             // we also need to check to see if there are any new actions on this transition
             root.fmCallsCount++;
@@ -525,7 +516,7 @@ public class SingleTreeNode {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
-        AbstractGameState rolloutState = state;
+        AbstractGameState rolloutState = openLoopState;
         if (player.params.rolloutLength > 0) {
             if (!player.params.openLoop) {
                 // the thinking here is that in openLoop we copy the state right at the root, and then use the forward

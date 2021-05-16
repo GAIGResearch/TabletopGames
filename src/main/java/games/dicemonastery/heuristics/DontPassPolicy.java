@@ -1,9 +1,10 @@
-package games.dicemonastery;
+package games.dicemonastery.heuristics;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.actions.*;
 
 import java.util.List;

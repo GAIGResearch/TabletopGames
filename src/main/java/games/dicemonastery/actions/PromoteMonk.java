@@ -52,8 +52,9 @@ public class PromoteMonk extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pietyLevelToPromote, location);
+        return Objects.hash(pietyLevelToPromote, location) + 97;
     }
+    // +97 is to avoid hashcode clashes with ChooseMonk
 
     @Override
     public String getString(AbstractGameState gameState) {

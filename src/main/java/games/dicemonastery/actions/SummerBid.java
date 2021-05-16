@@ -39,7 +39,7 @@ public class SummerBid extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return beer * 59 + mead * 3;
+        return beer * 59 + mead * 3 - 74398421;
     }
 
     @Override

@@ -61,7 +61,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("expansionType", MCTSEnums.Strategies.RANDOM);
+        addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
         addTunableParameter("rolloutClass", "");
         addTunableParameter("expertIteration", false);
@@ -111,6 +111,7 @@ public class MCTSParams extends PlayerParameters {
      */
     @Override
     public ITunableParameters registerChild(String nameSpace, JSONObject json) {
+        // TODO: Cater for a tunable rollout policy, as well as a state heuristic
         ITunableParameters child = super.registerChild(nameSpace, json);
         if (child instanceof IStateHeuristic) {
             heuristic = (IStateHeuristic) child;
@@ -130,6 +131,7 @@ public class MCTSParams extends PlayerParameters {
      * This defaults to a Random player.
      */
     public AbstractPlayer getRolloutStrategy() {
+        // TODO: Cater for the rollout class being itself Tunable
         switch (rolloutType) {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
