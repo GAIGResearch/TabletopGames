@@ -8,44 +8,23 @@ import games.sushigo.cards.SGCard;
 
 public class ChopSticksAction extends AbstractAction {
     int playerId;
-    int cardIndex;
-    SGCard.SGCardType cardType;
 
-    public ChopSticksAction(int playerId, int cardIndex, SGCard.SGCardType cardType)
+    public ChopSticksAction(int playerId)
     {
         this.playerId = playerId;
-        this.cardIndex = cardIndex;
-        this.cardType = cardType;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         SGGameState SGGS = (SGGameState) gs;
-        SGGS.setPlayerCardPick(cardIndex, playerId);
-        SGGS.setPlayerScoreToAdd(playerId,SGGS.getPlayerScoreToAdd(playerId) + GetCardScore(cardType, SGGS, playerId));
-        SGGS.setPlayerWasabiAvailable(playerId, SGGS.getPlayerWasabiAvailable(playerId) - 1);
+        SGGS.setPlayerChopsticksActivated(playerId, true);
+        SGGS.setPlayerExtraTurns(playerId, 2);
         return true;
-    }
-
-    private int GetCardScore(SGCard.SGCardType cardType, SGGameState SGGS, int playerId)
-    {
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-        switch (cardType)
-        {
-            case SquidNigiri:
-                return parameters.valueSquidNigiri * parameters.multiplierWasabi;
-            case SalmonNigiri:
-                return parameters.valueSalmonNigiri * parameters.multiplierWasabi;
-            case EggNigiri:
-                return parameters.valueEggNigiri * parameters.multiplierWasabi;
-            default:
-                return -1;
-        }
     }
 
     @Override
     public AbstractAction copy() {
-        return new NigiriWasabiAction(playerId, cardIndex, cardType);
+        return new ChopSticksAction(playerId);
     }
 
     @Override
@@ -61,7 +40,7 @@ public class ChopSticksAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Play " + cardType + " on Wasabi";
+        return "Use ChopSticks";
     }
 }
 

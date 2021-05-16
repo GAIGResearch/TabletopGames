@@ -5,6 +5,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.sushigo.actions.ChopSticksAction;
 import games.sushigo.actions.DebugAction;
 import games.sushigo.actions.NigiriWasabiAction;
 import games.sushigo.actions.PlayCardAction;
@@ -35,7 +36,7 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerChopSticksAmount = new int[firstState.getNPlayers()];
         SGGS.playerScoreToAdd = new int[firstState.getNPlayers()];
         SGGS.playerChopsticksActivated = new boolean[firstState.getNPlayers()];
-        SGGS.playerExtraTurnUsed = new boolean[firstState.getNPlayers()];
+        SGGS.playerExtraTurns = new int[firstState.getNPlayers()];
 
 
         //Setup draw & discard piles
@@ -145,7 +146,7 @@ public class SGForwardModel extends AbstractForwardModel {
         //Rotate deck and reveal cards
         SGGameState SGGS = (SGGameState)currentState;
         int turn = SGGS.getTurnOrder().getTurnCounter();
-        if((turn + 1) % SGGS.getNPlayers() == 0)
+        if((turn + 1) % SGGS.getNPlayers() == 0 && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) <= 0)
         {
             RevealCards(SGGS);
             RotateDecks(SGGS);
@@ -159,7 +160,7 @@ public class SGForwardModel extends AbstractForwardModel {
 
 
         //Check if game/round over
-        if(IsRoundOver(SGGS))
+        if(IsRoundOver(SGGS) && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) <= 0)
         {
             GiveMakiPoints(SGGS);
             if(SGGS.getTurnOrder().getRoundCounter() >= 2)
@@ -175,6 +176,14 @@ public class SGForwardModel extends AbstractForwardModel {
 
         //End turn
         if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            if(SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()) && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) > 0)
+            {
+                SGGS.setPlayerExtraTurns(SGGS.getCurrentPlayer(), SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) - 1);
+                return;
+            }
+
+            //reset chopstick activation and end turn
+            SGGS.setPlayerChopsticksActivated(SGGS.getCurrentPlayer(), false);
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
     }
@@ -485,6 +494,10 @@ public class SGForwardModel extends AbstractForwardModel {
                     actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Pudding));
                     break;
             }
+        }
+        if(SGGS.getPlayerChopSticksAmount(SGGS.getCurrentPlayer()) > 0 && !SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()))
+        {
+            actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
         }
         if(actions.size() <= 0) actions.add(new DebugAction());
         return actions;

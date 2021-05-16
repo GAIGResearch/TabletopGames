@@ -28,7 +28,7 @@ public class SGGameState extends AbstractGameState {
     int[] playerWasabiAvailable;
     int[] playerChopSticksAmount;
     boolean[] playerChopsticksActivated;
-    boolean[] playerExtraTurnUsed;
+    int[] playerExtraTurns;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -62,7 +62,7 @@ public class SGGameState extends AbstractGameState {
         copy.playerWasabiAvailable = playerWasabiAvailable.clone();
         copy.playerChopSticksAmount = playerChopSticksAmount.clone();
         copy.playerChopsticksActivated = playerChopsticksActivated.clone();
-        copy.playerExtraTurnUsed = playerExtraTurnUsed.clone();
+        copy.playerExtraTurns = playerExtraTurns.clone();
 
         copy.cardAmount = cardAmount;
 
@@ -151,9 +151,9 @@ public class SGGameState extends AbstractGameState {
         return playerChopsticksActivated[playerId];
     }
 
-    public boolean getPlayerExtraTurnUsed(int playerId)
+    public int getPlayerExtraTurns(int playerId)
     {
-        return playerExtraTurnUsed[playerId];
+        return playerExtraTurns[playerId];
     }
 
     public void setPlayerScoreToAdd(int playerId, int amount)
@@ -188,9 +188,9 @@ public class SGGameState extends AbstractGameState {
         playerChopsticksActivated[playerId] = value;
     }
 
-    public void setPlayerExtraTurnUsed(int playerId, boolean value)
+    public void setPlayerExtraTurns(int playerId, int value)
     {
-        playerExtraTurnUsed[playerId] = value;
+        playerExtraTurns[playerId] = value;
     }
 
 
@@ -225,7 +225,7 @@ public class SGGameState extends AbstractGameState {
         playerWasabiAvailable = null;
         playerChopSticksAmount = null;
         playerChopsticksActivated = null;
-        playerExtraTurnUsed = null;
+        playerExtraTurns = null;
     }
 
     @Override
@@ -246,6 +246,6 @@ public class SGGameState extends AbstractGameState {
                 Arrays.equals(playerChopSticksAmount, that.playerChopSticksAmount) &&
                 Arrays.equals(playerScoreToAdd, that.playerScoreToAdd) &&
                 Arrays.equals(playerChopsticksActivated, that.playerChopsticksActivated) &&
-                Arrays.equals(playerExtraTurnUsed, that.playerExtraTurnUsed);
+                Arrays.equals(playerExtraTurns, that.playerExtraTurns);
     }
 }
