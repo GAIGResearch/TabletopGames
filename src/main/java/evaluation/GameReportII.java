@@ -5,6 +5,7 @@ import core.Game;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
+import games.sushigo.testing.SGFileWriter;
 import players.PlayerFactory;
 import utilities.Pair;
 
@@ -128,6 +129,10 @@ public class GameReportII {
 
                     game.reset(allPlayers);
                     game.run();
+
+                    //Ta bort
+                    SGFileWriter.WriteWinrateToFile();
+
                 }
                 // Once all games are complete, let the gameTracker know
                 for (IGameListener gameTracker : gameTrackers) {

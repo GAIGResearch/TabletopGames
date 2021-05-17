@@ -10,6 +10,7 @@ import games.sushigo.actions.DebugAction;
 import games.sushigo.actions.NigiriWasabiAction;
 import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
+import games.sushigo.testing.SGFileWriter;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -224,6 +225,7 @@ public class SGForwardModel extends AbstractForwardModel {
         {
             if(SGGS.getGameScore(i) > currentBestScore)
             {
+                currentBestScore = (int) SGGS.getGameScore(i);
                 winners.clear();
                 winners.add(i);
             }
@@ -239,6 +241,7 @@ public class SGForwardModel extends AbstractForwardModel {
             {
                 if (GetPuddingAmount(winners.get(i), SGGS) > bestPuddingScore)
                 {
+                    bestPuddingScore = GetPuddingAmount(winners.get(i), SGGS);
                     trueWinners.clear();
                     trueWinners.add(winners.get(i));
                 }

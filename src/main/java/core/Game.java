@@ -6,6 +6,7 @@ import core.interfaces.IPrintable;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import games.sushigo.testing.SGFileWriter;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
