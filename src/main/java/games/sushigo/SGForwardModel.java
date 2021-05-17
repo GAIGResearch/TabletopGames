@@ -153,8 +153,8 @@ public class SGForwardModel extends AbstractForwardModel {
         if((turn + 1) % SGGS.getNPlayers() == 0 && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) <= 0)
         {
             RevealCards(SGGS);
-            RotateDecks(SGGS);
             RemoveUsedChopsticks(SGGS);
+            RotateDecks(SGGS);
 
             //Clear points
             for(int i = 0; i < SGGS.getNPlayers(); i++)
@@ -201,7 +201,19 @@ public class SGForwardModel extends AbstractForwardModel {
     private void RemoveUsedChopsticks(SGGameState SGGS) {
         for(int i = 0; i < SGGS.getNPlayers(); i++)
         {
-            
+            if(SGGS.getPlayerChopSticksActivated(i))
+            {
+                for (int j = 0; j < SGGS.getPlayerFields().get(i).getSize(); j++)
+                {
+                    if (SGGS.getPlayerFields().get(i).get(j).type == SGCard.SGCardType.Chopsticks)
+                    {
+                        SGGS.getPlayerFields().get(i).remove(j);
+                        SGGS.setPlayerChopSticksAmount(i, SGGS.getPlayerChopSticksAmount(i) - 1);
+                        break;
+                    }
+                }
+                SGGS.getPlayerDecks().get(i).add(new SGCard(SGCard.SGCardType.Chopsticks));
+            }
         }
     }
 
@@ -435,7 +447,8 @@ public class SGForwardModel extends AbstractForwardModel {
         for(int i = 0; i < SGGS.getNPlayers(); i++)
         {
             //Moves the card from the players hand to field
-            if(SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i] || SGGS.getPlayerCardPicks()[i] < 0) continue;
+            if(SGGS.getPlayerCardPicks()[i] < 0) SGGS.setPlayerCardPick(0, i);
+            if(SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i]) continue;
             SGCard cardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerCardPicks()[i]);
             SGGS.getPlayerDecks().get(i).remove(cardToReveal);
             SGGS.getPlayerFields().get(i).add(cardToReveal);
@@ -520,7 +533,9 @@ public class SGForwardModel extends AbstractForwardModel {
                     break;
             }
         }
-        if(SGGS.getPlayerChopSticksAmount(SGGS.getCurrentPlayer()) > 0 && !SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()))
+        if(SGGS.getPlayerChopSticksAmount(SGGS.getCurrentPlayer()) > 0 &&
+                !SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()) &&
+                SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer()).getSize() > 1)
         {
             actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
         }
