@@ -37,6 +37,10 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerScoreToAdd = new int[firstState.getNPlayers()];
         SGGS.playerChopsticksActivated = new boolean[firstState.getNPlayers()];
         SGGS.playerExtraTurns = new int[firstState.getNPlayers()];
+        for (int i = 0; i < SGGS.getPlayerCardPicks().length; i++)
+        {
+            SGGS.getPlayerCardPicks()[i] = -1;
+        }
 
 
         //Setup draw & discard piles
@@ -150,11 +154,17 @@ public class SGForwardModel extends AbstractForwardModel {
         {
             RevealCards(SGGS);
             RotateDecks(SGGS);
+            RemoveUsedChopsticks(SGGS);
 
             //Clear points
             for(int i = 0; i < SGGS.getNPlayers(); i++)
             {
                 SGGS.setPlayerScoreToAdd(i, 0);
+            }
+            //clear picks
+            for (int i = 0; i < SGGS.getPlayerCardPicks().length; i++)
+            {
+                SGGS.getPlayerCardPicks()[i] = -1;
             }
         }
 
@@ -185,6 +195,13 @@ public class SGForwardModel extends AbstractForwardModel {
             //reset chopstick activation and end turn
             SGGS.setPlayerChopsticksActivated(SGGS.getCurrentPlayer(), false);
             currentState.getTurnOrder().endPlayerTurn(currentState);
+        }
+    }
+
+    private void RemoveUsedChopsticks(SGGameState SGGS) {
+        for(int i = 0; i < SGGS.getNPlayers(); i++)
+        {
+            
         }
     }
 
@@ -418,10 +435,17 @@ public class SGForwardModel extends AbstractForwardModel {
         for(int i = 0; i < SGGS.getNPlayers(); i++)
         {
             //Moves the card from the players hand to field
-            if(SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i]) continue;
+            if(SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i] || SGGS.getPlayerCardPicks()[i] < 0) continue;
             SGCard cardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerCardPicks()[i]);
             SGGS.getPlayerDecks().get(i).remove(cardToReveal);
             SGGS.getPlayerFields().get(i).add(cardToReveal);
+
+            if(SGGS.getPlayerChopSticksActivated(i) && SGGS.getPlayerDecks().get(i).getSize() > SGGS.getPlayerExtraCardPicks()[i])
+            {
+                SGCard extraCardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerExtraCardPicks()[i]);
+                SGGS.getPlayerDecks().get(i).remove(extraCardToReveal);
+                SGGS.getPlayerFields().get(i).add(extraCardToReveal);
+            }
 
             //Add points to player
             SGGS.setGameScore(i, (int)SGGS.getGameScore(i) + SGGS.getPlayerScoreToAdd(i));
@@ -450,6 +474,7 @@ public class SGForwardModel extends AbstractForwardModel {
         int deckToId = SGGS.getPlayerFields().get(gameState.getCurrentPlayer()).getComponentID();
         Deck<SGCard> currentPlayerHand = SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer());
         for (int i = 0; i < currentPlayerHand.getSize(); i++){
+            if(SGGS.getPlayerCardPicks()[SGGS.getCurrentPlayer()] == i) continue;
             switch (currentPlayerHand.get(i).type) {
                 case Maki_1:
                     actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), i, SGCard.SGCardType.Maki_1));
