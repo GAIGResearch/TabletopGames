@@ -193,7 +193,6 @@ public class SGForwardModel extends AbstractForwardModel {
             }
 
             //reset chopstick activation and end turn
-            SGGS.setPlayerChopsticksActivated(SGGS.getCurrentPlayer(), false);
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
     }
@@ -213,6 +212,7 @@ public class SGForwardModel extends AbstractForwardModel {
                     }
                 }
                 SGGS.getPlayerDecks().get(i).add(new SGCard(SGCard.SGCardType.Chopsticks));
+                SGGS.setPlayerChopsticksActivated(i, false);
             }
         }
     }
