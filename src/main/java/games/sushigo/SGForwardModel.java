@@ -453,11 +453,15 @@ public class SGForwardModel extends AbstractForwardModel {
             SGGS.getPlayerDecks().get(i).remove(cardToReveal);
             SGGS.getPlayerFields().get(i).add(cardToReveal);
 
-            if(SGGS.getPlayerChopSticksActivated(i) && SGGS.getPlayerDecks().get(i).getSize() > SGGS.getPlayerExtraCardPicks()[i])
+            if(SGGS.getPlayerChopSticksActivated(i))
             {
-                SGCard extraCardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerExtraCardPicks()[i]);
-                SGGS.getPlayerDecks().get(i).remove(extraCardToReveal);
-                SGGS.getPlayerFields().get(i).add(extraCardToReveal);
+                if(SGGS.getPlayerCardPicks()[i] < SGGS.getPlayerExtraCardPicks()[i]) SGGS.setPlayerExtraCardPick(SGGS.getPlayerExtraCardPicks()[i] - 1, i);
+                if(SGGS.getPlayerDecks().get(i).getSize() > SGGS.getPlayerExtraCardPicks()[i])
+                {
+                    SGCard extraCardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerExtraCardPicks()[i]);
+                    SGGS.getPlayerDecks().get(i).remove(extraCardToReveal);
+                    SGGS.getPlayerFields().get(i).add(extraCardToReveal);
+                }
             }
 
             //Add points to player
