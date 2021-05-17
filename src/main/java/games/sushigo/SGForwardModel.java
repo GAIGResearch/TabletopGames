@@ -254,6 +254,7 @@ public class SGForwardModel extends AbstractForwardModel {
                 for (int i = 0; i < trueWinners.size(); i++)
                 {
                     SGGS.setPlayerResult(Utils.GameResult.DRAW , trueWinners.get(i));
+                    SGFileWriter.AddWinner(trueWinners.get(i));
                 }
             }
             else
@@ -263,6 +264,7 @@ public class SGForwardModel extends AbstractForwardModel {
                     SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
                 }
                 SGGS.setPlayerResult(Utils.GameResult.WIN, trueWinners.get(0));
+                SGFileWriter.AddWinner(trueWinners.get(0));
             }
         }
         else
@@ -272,6 +274,7 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
             }
             SGGS.setPlayerResult(Utils.GameResult.WIN, winners.get(0));
+            SGFileWriter.AddWinner(winners.get(0));
         }
     }
 
