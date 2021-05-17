@@ -21,7 +21,11 @@ public class NigiriWasabiAction extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         SGGameState SGGS = (SGGameState) gs;
-        SGGS.setPlayerCardPick(cardIndex, playerId);
+        if(SGGS.getPlayerChopSticksActivated(playerId) && SGGS.getPlayerExtraTurns(playerId) == 0)
+        {
+            SGGS.setPlayerExtraCardPick(cardIndex, playerId);
+        }
+        else SGGS.setPlayerCardPick(cardIndex, playerId);
         SGGS.setPlayerScoreToAdd(playerId,SGGS.getPlayerScoreToAdd(playerId) + GetCardScore(cardType, SGGS, playerId));
         SGGS.setPlayerWasabiAvailable(playerId, SGGS.getPlayerWasabiAvailable(playerId) - 1);
         return true;
