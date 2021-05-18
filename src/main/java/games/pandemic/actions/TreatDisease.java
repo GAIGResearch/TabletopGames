@@ -88,11 +88,7 @@ public class TreatDisease extends AbstractAction {
 
     @Override
     public String  toString() {
-        return "TreatDisease{" +
-                "color='" + color + '\'' +
-                ", city='" + city + '\'' +
-                ", treatAll=" + treatAll +
-                '}';
+        return "Treat Disease " + color + " in " + city + (treatAll? " (all)" : "");
     }
 
     @Override

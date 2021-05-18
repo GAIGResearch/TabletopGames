@@ -183,6 +183,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
                 g.setColor(Color.black);
                 g.drawLine(rect.x, rect.y, rect.x + rect.width - 1, rect.y + rect.height - 1);
             }
+            g.drawRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
         }
 
         int size = g.getFont().getSize();
@@ -192,7 +193,6 @@ public abstract class DeckView<T extends Component> extends ComponentView {
         if (deck != null) {
             g.drawString("" + deck.getSize(), rect.x + 10, rect.y + rect.height - size);
         }
-        g.drawRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
     }
 
     @Override
