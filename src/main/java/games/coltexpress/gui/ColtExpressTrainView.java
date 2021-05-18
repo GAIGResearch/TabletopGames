@@ -31,6 +31,8 @@ public class ColtExpressTrainView extends JComponent {
     // Bottom offset based on asset (to make characters and loot appear inside train)
     int bottomOffset = trainCarHeight/5;
 
+    double scale = 1.0;
+
     public ColtExpressTrainView(List<Compartment> train, String dataPath,
                                 HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         this.train = train;

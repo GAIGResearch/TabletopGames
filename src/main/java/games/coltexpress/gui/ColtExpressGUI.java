@@ -23,7 +23,7 @@ import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class ColtExpressGUI extends AbstractGUI {
     // Settings for display area sizes
-    final static int playerAreaWidth = 250;
+    final static int playerAreaWidth = 400;
     final static int playerAreaWidthScroll = 290;
     final static int playerAreaHeight = 150;
     final static int playerAreaHeightScroll = 150;
@@ -60,23 +60,31 @@ public class ColtExpressGUI extends AbstractGUI {
             if (gameState != null) {
                 activePlayer = gameState.getCurrentPlayer();
                 int nPlayers = gameState.getNPlayers();
-                double nHorizAreas = 1.5 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-                double nVertAreas = 3.5;
-                this.width = (int) (playerAreaWidth * nHorizAreas);
-                this.height = (int) (playerAreaHeight * nVertAreas);
+                this.width = playerAreaWidth*2 + trainCarWidth;
+                this.height = playerAreaHeight * (nPlayers+1) + defaultInfoPanelHeight + defaultActionPanelHeight;
 
                 ColtExpressGameState cegs = (ColtExpressGameState) gameState;
                 ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
 
                 // Create main game area that will hold all game views
                 JPanel mainGameArea = new JPanel();
-                mainGameArea.setLayout(new BorderLayout());
+                JPanel playerViews = new JPanel();
+                playerViews.setLayout(new BoxLayout(playerViews, BoxLayout.Y_AXIS));
+
+                // Planned actions + train + rounds go in the center
+                JPanel centerArea = new JPanel();
+                centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
+                List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
+                trainView = new ColtExpressTrainView(train, cep.getDataPath(), cegs.getPlayerCharacters());
+                plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
+                centerArea.add(trainView);
+                centerArea.add(plannedActions);
+                mainGameArea.add(centerArea);
+                mainGameArea.add(playerViews);
 
                 // Player hands go on the edges
                 playerHands = new ColtExpressPlayerView[nPlayers];
                 playerViewBorders = new Border[nPlayers];
-                String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
-                JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
                     ColtExpressPlayerView playerHand = new ColtExpressPlayerView(i, cep.getDataPath(), cegs.getPlayerCharacters());
@@ -92,27 +100,9 @@ public class ColtExpressGUI extends AbstractGUI {
                     playerViewBorders[i] = title;
                     playerHand.setBorder(title);
 
-                    sides[next].add(playerHand);
-                    sides[next].setLayout(new GridBagLayout());
-                    next = (next + 1) % (locations.length);
+                    playerViews.add(playerHand);
                     playerHands[i] = playerHand;
                 }
-                for (int i = 0; i < locations.length; i++) {
-                    mainGameArea.add(sides[i], locations[i]);
-                }
-
-                // Planned actions + train + rounds go in the center
-                JPanel centerArea = new JPanel();
-                centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
-                trainView = new ColtExpressTrainView(train, cep.getDataPath(), cegs.getPlayerCharacters());
-                plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
-                centerArea.add(trainView);
-                centerArea.add(plannedActions);
-                JPanel jp = new JPanel();
-                jp.setLayout(new GridBagLayout());
-                jp.add(centerArea);
-                mainGameArea.add(jp, BorderLayout.CENTER);
 
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
@@ -122,6 +112,8 @@ public class ColtExpressGUI extends AbstractGUI {
                 getContentPane().add(mainGameArea, BorderLayout.CENTER);
                 getContentPane().add(infoPanel, BorderLayout.NORTH);
                 getContentPane().add(actionPanel, BorderLayout.SOUTH);
+
+                
             }
         }
 
@@ -171,4 +163,8 @@ public class ColtExpressGUI extends AbstractGUI {
         repaint();
     }
 
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height);
+    }
 }
