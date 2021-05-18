@@ -9,12 +9,15 @@ import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import utilities.ImageIO;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,25 +61,34 @@ public class ColtExpressGUI extends AbstractGUI {
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
+
                 activePlayer = gameState.getCurrentPlayer();
                 int nPlayers = gameState.getNPlayers();
                 this.width = playerAreaWidth*2 + trainCarWidth;
                 this.height = playerAreaHeight * (nPlayers+1) + defaultInfoPanelHeight + defaultActionPanelHeight;
+
+                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"), width, height);
+                setContentPane(backgroundImage);
 
                 ColtExpressGameState cegs = (ColtExpressGameState) gameState;
                 ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
 
                 // Create main game area that will hold all game views
                 JPanel mainGameArea = new JPanel();
+                mainGameArea.setOpaque(false);
                 JPanel playerViews = new JPanel();
+                playerViews.setOpaque(false);
                 playerViews.setLayout(new BoxLayout(playerViews, BoxLayout.Y_AXIS));
 
                 // Planned actions + train + rounds go in the center
                 JPanel centerArea = new JPanel();
+                centerArea.setOpaque(false);
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
                 trainView = new ColtExpressTrainView(train, cep.getDataPath(), cegs.getPlayerCharacters());
+                trainView.setOpaque(false);
                 plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
+                plannedActions.setOpaque(false);
                 centerArea.add(trainView);
                 centerArea.add(plannedActions);
                 mainGameArea.add(centerArea);
@@ -88,7 +100,7 @@ public class ColtExpressGUI extends AbstractGUI {
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
                     ColtExpressPlayerView playerHand = new ColtExpressPlayerView(i, cep.getDataPath(), cegs.getPlayerCharacters());
-
+                    playerHand.setOpaque(false);
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
                     String agentName = split[split.length - 1];
@@ -106,18 +118,80 @@ public class ColtExpressGUI extends AbstractGUI {
 
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
+                infoPanel.setOpaque(false);
                 // Bottom area will show actions available
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                actionPanel.setOpaque(false);
 
-                getContentPane().add(mainGameArea, BorderLayout.CENTER);
                 getContentPane().add(infoPanel, BorderLayout.NORTH);
+                getContentPane().add(mainGameArea, BorderLayout.CENTER);
                 getContentPane().add(actionPanel, BorderLayout.SOUTH);
-
-                
             }
         }
 
         setFrameProperties();
+    }
+
+    @Override
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
+        JPanel gameInfo = new JPanel();
+        gameInfo.setOpaque(false);
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
+
+        updateGameStateInfo(gameState);
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
+        gameInfo.add(gamePhase);
+        gameInfo.add(turnOwner);
+        gameInfo.add(turn);
+        gameInfo.add(currentPlayer);
+
+        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+
+        JPanel wrapper = new JPanel();
+        wrapper.setOpaque(false);
+        wrapper.setLayout(new FlowLayout());
+        wrapper.add(gameInfo);
+
+        historyInfo.setOpaque(false);
+        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setOpaque(false);
+        historyContainer.getViewport().setOpaque(false);
+        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        wrapper.add(historyContainer);
+        return wrapper;
+    }
+
+    @Override
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+        JPanel actionPanel = new JPanel();
+        actionPanel.setOpaque(false);
+        if (boxLayout) {
+            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        }
+
+        actionButtons = new ActionButton[maxActionSpace];
+        for (int i = 0; i < maxActionSpace; i++) {
+            ActionButton ab = new ActionButton(ac, highlights);
+            actionButtons[i] = ab;
+            actionButtons[i].setVisible(false);
+            actionPanel.add(actionButtons[i]);
+        }
+        for (ActionButton actionButton : actionButtons) {
+            actionButton.informAllActionButtons(actionButtons);
+        }
+
+        JScrollPane pane = new JScrollPane(actionPanel);
+        pane.setOpaque(false);
+        pane.getViewport().setOpaque(false);
+        pane.setPreferredSize(new Dimension(width, height));
+        if (boxLayout) {
+            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        }
+        return pane;
     }
 
     @Override
@@ -166,5 +240,29 @@ public class ColtExpressGUI extends AbstractGUI {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
+    }
+
+    public static class ScaledImage extends JPanel {
+        Image img;
+        int w, h;
+
+        public ScaledImage(Image img, int w, int h) {
+            this.img = img;
+            this.w = w;
+            this.h = h;
+        }
+
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setComposite(AlphaComposite.SrcOver.derive(0.3f));
+
+            int picW = img.getWidth(null);
+            int picH = img.getHeight(null);
+            double scale = w*1.0/picW;
+            double s2 = h*1.0/picH;
+            if (s2 > scale) scale = s2;
+            g2d.drawImage(img, 0, 0, (int)(picW * scale), (int)(picH * scale), null);
+            g2d.dispose();
+        }
     }
 }
