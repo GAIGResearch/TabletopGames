@@ -16,6 +16,8 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
@@ -67,7 +69,7 @@ public class ColtExpressGUI extends AbstractGUI {
                 this.width = playerAreaWidth*2 + trainCarWidth;
                 this.height = playerAreaHeight * (nPlayers+1) + defaultInfoPanelHeight + defaultActionPanelHeight;
 
-                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"), width, height);
+                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"), width, height, this);
                 setContentPane(backgroundImage);
 
                 ColtExpressGameState cegs = (ColtExpressGameState) gameState;
@@ -245,16 +247,22 @@ public class ColtExpressGUI extends AbstractGUI {
     public static class ScaledImage extends JPanel {
         Image img;
         int w, h;
+        JFrame frame;
 
-        public ScaledImage(Image img, int w, int h) {
+        public ScaledImage(Image img, int w, int h, JFrame frame) {
             this.img = img;
             this.w = w;
             this.h = h;
+            this.frame = frame;
         }
 
         protected void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.setComposite(AlphaComposite.SrcOver.derive(0.3f));
+
+            Rectangle r = frame.getBounds();
+            h = r.height;
+            w = r.width;
 
             int picW = img.getWidth(null);
             int picH = img.getHeight(null);
