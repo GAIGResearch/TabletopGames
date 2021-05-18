@@ -1,7 +1,11 @@
 package games.dotsboxes;
 
+import utilities.Vector2D;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import static core.AbstractGUI.defaultItemSize;
 
@@ -26,16 +30,56 @@ public class DBGridBoardView extends JComponent {
             new Color(103, 50, 155)
     };
 
+    Point start;
+    DBEdge highlight;
+    DBEdge highlightIP;
+
     public DBGridBoardView(DBGameState dbgs) {
         this.dbgs = dbgs;
         DBParameters dbp = (DBParameters) dbgs.getGameParameters();
-        this.width = dbp.gridWidth * defaultItemSize;
-        this.height = dbp.gridHeight * defaultItemSize;
+        this.width = (dbp.gridWidth + 1) * defaultItemSize;
+        this.height = (dbp.gridHeight + 2) * defaultItemSize;
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (start == null) {
+                        start = new Point(e.getX()/defaultItemSize, e.getY()/defaultItemSize);
+                    } else {
+                        // highlight edge and reset
+                        Point end = new Point(e.getX()/defaultItemSize, e.getY()/defaultItemSize);
+                        highlight = new DBEdge(new Vector2D(start.x, start.y), new Vector2D(end.x, end.y));
+                        start = null;
+                        highlightIP = null;
+                    }
+                }
+            }
+        });
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (start != null) {
+                    Point end = new Point(e.getX()/defaultItemSize, e.getY()/defaultItemSize);
+                    highlightIP = new DBEdge(new Vector2D(start.x, start.y), new Vector2D(end.x, end.y));
+                }
+            }
+        });
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, dotSize/2, dotSize/2);
+    protected void paintComponent(Graphics g0) {
+        Graphics2D g = (Graphics2D)g0;
+        drawGridBoard(g, dotSize/2, dotSize/2);
+
+        if (highlightIP != null) {
+            g.setColor(edgeColors[dbgs.getCurrentPlayer()]);
+            Stroke s = g.getStroke();
+            g.setStroke(new BasicStroke(3));
+            g.drawLine(highlightIP.from.getX() * defaultItemSize, highlightIP.from.getY() * defaultItemSize,
+                    highlightIP.to.getX() * defaultItemSize, highlightIP.to.getY() * defaultItemSize);
+            g.setStroke(s);
+        }
     }
 
     public void drawGridBoard(Graphics2D g, int x, int y) {
@@ -86,6 +130,10 @@ public class DBGridBoardView extends JComponent {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(width, height);
+        return new Dimension(width + dotSize, height + dotSize);
+    }
+
+    public DBEdge getHighlight() {
+        return highlight;
     }
 }

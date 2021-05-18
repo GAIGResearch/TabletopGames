@@ -3,12 +3,14 @@ package games.dotsboxes;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
+import java.util.List;
 
 public class DBGUI extends AbstractGUI {
     DBGridBoardView view;
@@ -26,13 +28,30 @@ public class DBGUI extends AbstractGUI {
         view = new DBGridBoardView(((DBGameState)gameState));
 
         JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
-
         getContentPane().add(view, BorderLayout.CENTER);
         getContentPane().add(infoPanel, BorderLayout.NORTH);
-        getContentPane().add(actionPanel, BorderLayout.SOUTH);
+        getContentPane().add(new JLabel("Human player: click on 2 adjacent dots to place your edge."), BorderLayout.SOUTH);
 
         setFrameProperties();
+    }
+
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        DBEdge db = view.getHighlight();
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && db != null) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            boolean found = false;
+            for (AbstractAction a: actions) {
+                AddGridCellEdge aa = (AddGridCellEdge) a;
+                if (aa.edge.equals(db)) {
+                    ac.addAction(a);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) System.out.println("Invalid action, click 2 adjacent dots to select an edge.");
+            view.highlight = null;
+        }
     }
 
     @Override
@@ -46,4 +65,8 @@ public class DBGUI extends AbstractGUI {
         repaint();
     }
 
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(Math.max(width,view.getPreferredSize().width), view.getPreferredSize().height + defaultInfoPanelHeight);
+    }
 }
