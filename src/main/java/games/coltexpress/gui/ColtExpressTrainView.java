@@ -9,12 +9,18 @@ import utilities.ImageIO;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static games.coltexpress.gui.ColtExpressGUI.*;
 
 public class ColtExpressTrainView extends JComponent {
+
+    double scale = 1.0;
+    int panX, panY;
 
     // List of compartments in the train
     List<Compartment> train;
@@ -29,9 +35,7 @@ public class ColtExpressTrainView extends JComponent {
     // View for round cards deck
     ColtExpressDeckView<RoundCard> roundView;
     // Bottom offset based on asset (to make characters and loot appear inside train)
-    int bottomOffset = trainCarHeight/5;
-
-    double scale = 1.0;
+    int bottomOffset = (int)(trainCarHeight/5. * scale);
 
     public ColtExpressTrainView(List<Compartment> train, String dataPath,
                                 HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
@@ -42,14 +46,51 @@ public class ColtExpressTrainView extends JComponent {
         this.dataPath = dataPath;
         this.characters = characters;
         roundView = new ColtExpressDeckView<>(null, true, dataPath, characters);
+
+        addMouseWheelListener(e -> {
+            double amount = 0.2 * Math.abs(e.getPreciseWheelRotation());
+            if (e.getPreciseWheelRotation() > 0) {
+                // Rotated down, zoom out
+                updateScale(scale - amount);
+            } else {
+                updateScale(scale + amount);
+            }
+        });
+        addMouseListener(new MouseAdapter() {
+            Point start;
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    // Middle (wheel) click, pan around
+                    start = e.getPoint();
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON2 && start != null) {
+                    // Middle (wheel) click, pan around
+                    Point end = e.getPoint();
+                    panX += (int) (scale * (end.x - start.x));
+                    panY += (int) (scale * (end.y - start.y));
+                    start = null;
+                }
+            }
+        });
+    }
+
+    private void updateScale(double scale) {
+        this.scale = scale;
+        bottomOffset = (int)(trainCarHeight/5. * scale);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         // Draw train
-        drawTrain((Graphics2D) g, new Rectangle(0, 0, width, height));
-        // Draw round cards
-        roundView.drawDeck((Graphics2D) g, new Rectangle(0, trainCarHeight + playerSize - bottomOffset + 5, width, roundCardHeight), false);
+        drawTrain((Graphics2D) g, new Rectangle(panX, panY, (int)(width*scale), (int)(height*scale)));
+        // Draw round cards TODO pass scale and scale this too
+        roundView.drawDeck((Graphics2D) g, new Rectangle(panX, (int)(panY + trainCarHeight*scale + playerSize*scale - bottomOffset + 5), (int)(width*scale), (int)(roundCardHeight*scale)), false);
     }
 
     /**
@@ -67,17 +108,17 @@ public class ColtExpressTrainView extends JComponent {
             int carWidth;
             if (i == train.size()-1) {
                 car = ImageIO.GetInstance().getImage(dataPath + "locomotive.png");
-                carWidth = trainCarWidth;
+                carWidth = (int)(trainCarWidth*scale);
             } else {
                 car = ImageIO.GetInstance().getImage(dataPath + "wagon.png");
-                carWidth = (int)(2/3.0*trainCarWidth);
+                carWidth = (int)(2/3.0*trainCarWidth*scale);
             }
-            g.drawImage(car, x, y, trainCarWidth, trainCarHeight, null);
+            g.drawImage(car, x, y, (int)(trainCarWidth*scale), (int)(trainCarHeight*scale), null);
 
             // Draw contents in car
             Compartment c = train.get(i);
 
-            int spaceWidth = trainCarWidth*2/3-trainCarWidth/15;
+            int spaceWidth = (int)((trainCarWidth*2/3-trainCarWidth/15)*scale);
             int lootAreaWidth = spaceWidth/2;
             int x1 = x + spaceWidth/2 + 5;
             int offset;
@@ -85,14 +126,14 @@ public class ColtExpressTrainView extends JComponent {
             if (c.lootInside.getSize() > 0) {
                 offset = lootAreaWidth / (c.lootInside.getSize()+1);
                 for (int j = 0; j < c.lootInside.getSize(); j++) {
-                    drawLoot(g, c.lootInside.get(j), new Rectangle(x1 + offset * j, y+trainCarHeight - lootSize - bottomOffset, lootSize, lootSize));
+                    drawLoot(g, c.lootInside.get(j), new Rectangle(x1 + offset * j, (int)(y+trainCarHeight*scale - lootSize*scale - bottomOffset), (int)(lootSize*scale), (int)(lootSize*scale)));
                 }
             }
             // Loot on top
             if (c.lootOnTop.getSize() > 0) {
                 offset = lootAreaWidth / (c.lootOnTop.getSize()+1);
                 for (int j = 0; j < c.lootOnTop.getSize(); j++) {
-                    drawLoot(g, c.lootOnTop.get(j), new Rectangle(x1 + offset * j, 0, lootSize, lootSize));
+                    drawLoot(g, c.lootOnTop.get(j), new Rectangle(x1 + offset * j, 0, (int)(lootSize*scale), (int)(lootSize*scale)));
                 }
             }
             // Players + marshal
@@ -101,18 +142,18 @@ public class ColtExpressTrainView extends JComponent {
             if (c.playersInsideCompartment.size() > 0 || c.containsMarshal) {
                 offset = lootAreaWidth / (c.playersInsideCompartment.size() + 2 + (c.containsMarshal ? 1 : 0));
                 for (int p : c.playersInsideCompartment) {
-                    drawPlayer(g, p, new Rectangle(x1 + offset * j, y + trainCarHeight - playerSize - bottomOffset, playerSize, playerSize));
+                    drawPlayer(g, p, new Rectangle(x1 + offset * j, (int)(y + trainCarHeight*scale - playerSize*scale - bottomOffset), (int)(playerSize*scale), (int)(playerSize*scale)));
                     j++;
                 }
                 if (c.containsMarshal) {
-                    drawPlayer(g, -1, new Rectangle(x1 + offset * j, y + trainCarHeight - playerSize - bottomOffset, playerSize, playerSize));
+                    drawPlayer(g, -1, new Rectangle(x1 + offset * j, (int)(y + trainCarHeight*scale - playerSize*scale - bottomOffset), (int)(playerSize*scale), (int)(playerSize*scale)));
                 }
             }
             if (c.playersOnTopOfCompartment.size() > 0) {
                 offset = lootAreaWidth / (c.playersOnTopOfCompartment.size()+2);
                 j = 0;
                 for (int p : c.playersOnTopOfCompartment) {
-                    drawPlayer(g, p, new Rectangle(x1 + offset * j, 0, playerSize, playerSize));
+                    drawPlayer(g, p, new Rectangle(x1 + offset * j, 0, (int)(playerSize*scale), (int)(playerSize*scale)));
                     j++;
                 }
             }
