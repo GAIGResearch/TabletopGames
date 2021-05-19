@@ -28,10 +28,10 @@ public class ColtExpressRoundView extends JComponent {
     // View for round cards deck
     ColtExpressDeckView<RoundCard> roundView;
 
-    public ColtExpressRoundView(List<Compartment> train, String dataPath,
+    public ColtExpressRoundView(List<Compartment> train, int nRounds, String dataPath,
                                 HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         int nCars = train.size();
-        this.width = trainCarWidth*3/2*nCars;
+        this.width = Math.min(trainCarWidth*3/2*nCars, nRounds*roundCardWidth);
         this.height = (int)((roundCardHeight + 20) * 1.5);
         roundView = new ColtExpressDeckView<>(null, true, dataPath, characters);
 

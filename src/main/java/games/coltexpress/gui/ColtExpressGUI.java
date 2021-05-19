@@ -26,9 +26,9 @@ import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.Execut
 
 public class ColtExpressGUI extends AbstractGUI {
     // Settings for display area sizes
-    final static int playerAreaWidth = 400;
+    final static int playerAreaWidth = 470;
     final static int playerAreaWidthScroll = 290;
-    final static int playerAreaHeight = 150;
+    final static int playerAreaHeight = 100;
     final static int playerAreaHeightScroll = 150;
     final static int ceCardWidth = 50;
     final static int ceCardHeight = 60;
@@ -84,13 +84,13 @@ public class ColtExpressGUI extends AbstractGUI {
                 trainView.setOpaque(false);
                 plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
                 plannedActions.setOpaque(false);
-                roundView = new ColtExpressRoundView(train, cep.getDataPath(), cegs.getPlayerCharacters());
+                roundView = new ColtExpressRoundView(train, cep.nMaxRounds, cep.getDataPath(), cegs.getPlayerCharacters());
                 roundView.setOpaque(false);
 
                 activePlayer = gameState.getCurrentPlayer();
                 int nPlayers = gameState.getNPlayers();
                 this.width = trainCarWidth*3/2*(train.size()+1) + playerAreaWidth;
-                this.height = playerAreaHeight * (nPlayers+1) + defaultInfoPanelHeight + defaultActionPanelHeight;
+                this.height = Math.max(playerAreaHeight * (nPlayers+1), trainView.height + ceCardHeight + 50 + roundView.height) + defaultInfoPanelHeight + defaultActionPanelHeight;
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
                 ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"), width, height, this);
