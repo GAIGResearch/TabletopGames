@@ -2,7 +2,6 @@ package games.coltexpress.gui;
 
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressTypes;
-import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.ImageIO;
@@ -13,7 +12,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static games.coltexpress.gui.ColtExpressGUI.*;
 
@@ -32,8 +30,6 @@ public class ColtExpressTrainView extends JComponent {
     HashMap<Integer, ColtExpressTypes.CharacterType> characters;
     // Current game state
     ColtExpressGameState cegs;
-    // View for round cards deck
-    ColtExpressDeckView<RoundCard> roundView;
     // Bottom offset based on asset (to make characters and loot appear inside train)
     int bottomOffset = (int)(trainCarHeight/5. * scale);
 
@@ -41,11 +37,10 @@ public class ColtExpressTrainView extends JComponent {
                                 HashMap<Integer, ColtExpressTypes.CharacterType> characters) {
         this.train = train;
         int nCars = train.size();
-        this.width = (trainCarWidth*2/3)*(nCars-1) + trainCarWidth;
-        this.height = trainCarHeight+ playerSize - bottomOffset + roundCardHeight + 10;
+        this.width = trainCarWidth*3/2*nCars;
+        this.height = (int)((trainCarHeight+ playerSize - bottomOffset + 20) * 1.5);
         this.dataPath = dataPath;
         this.characters = characters;
-        roundView = new ColtExpressDeckView<>(null, true, dataPath, characters);
 
         addMouseWheelListener(e -> {
             double amount = 0.2 * Math.abs(e.getPreciseWheelRotation());
@@ -89,8 +84,6 @@ public class ColtExpressTrainView extends JComponent {
     protected void paintComponent(Graphics g) {
         // Draw train
         drawTrain((Graphics2D) g, new Rectangle(panX, panY, (int)(width*scale), (int)(height*scale)));
-        // Draw round cards TODO pass scale and scale this too
-        roundView.drawDeck((Graphics2D) g, new Rectangle(panX, (int)(panY + trainCarHeight*scale + playerSize*scale - bottomOffset + 5), (int)(width*scale), (int)(roundCardHeight*scale)), false);
     }
 
     /**
@@ -101,7 +94,7 @@ public class ColtExpressTrainView extends JComponent {
     public void drawTrain(Graphics2D g, Rectangle rect) {
         int size = g.getFont().getSize();
         int x = rect.x;
-        int y = rect.y + playerSize - bottomOffset;
+        int y = rect.y + (int)(playerSize*scale) - bottomOffset;
         for (int i = 0; i < train.size(); i++) {
             // Draw background car
             Image car;
@@ -111,14 +104,14 @@ public class ColtExpressTrainView extends JComponent {
                 carWidth = (int)(trainCarWidth*scale);
             } else {
                 car = ImageIO.GetInstance().getImage(dataPath + "wagon.png");
-                carWidth = (int)(2/3.0*trainCarWidth*scale);
+                carWidth = (int)(trainCarWidth*scale);
             }
-            g.drawImage(car, x, y, (int)(trainCarWidth*scale), (int)(trainCarHeight*scale), null);
+            g.drawImage(car, x, y, (int)(trainCarWidth*3/2*scale), (int)(trainCarHeight*scale), null);
 
             // Draw contents in car
             Compartment c = train.get(i);
 
-            int spaceWidth = (int)((trainCarWidth*2/3-trainCarWidth/15)*scale);
+            int spaceWidth = (int)((trainCarWidth-trainCarWidth/15)*scale);
             int lootAreaWidth = spaceWidth/2;
             int x1 = x + spaceWidth/2 + 5;
             int offset;
@@ -133,7 +126,7 @@ public class ColtExpressTrainView extends JComponent {
             if (c.lootOnTop.getSize() > 0) {
                 offset = lootAreaWidth / (c.lootOnTop.getSize()+1);
                 for (int j = 0; j < c.lootOnTop.getSize(); j++) {
-                    drawLoot(g, c.lootOnTop.get(j), new Rectangle(x1 + offset * j, 0, (int)(lootSize*scale), (int)(lootSize*scale)));
+                    drawLoot(g, c.lootOnTop.get(j), new Rectangle(x1 + offset * j, (int)(playerSize*scale - lootSize*scale), (int)(lootSize*scale), (int)(lootSize*scale)));
                 }
             }
             // Players + marshal
@@ -206,7 +199,5 @@ public class ColtExpressTrainView extends JComponent {
      */
     public void update(ColtExpressGameState cegs) {
         this.cegs = cegs;
-        this.roundView.updateComponent(cegs.getRounds());
-        this.roundView.updateGameState(cegs);
     }
 }

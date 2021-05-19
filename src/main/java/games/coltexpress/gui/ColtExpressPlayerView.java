@@ -63,6 +63,8 @@ public class ColtExpressPlayerView extends JComponent {
         playerLoot = new ColtExpressDeckView(null, false, dataPath, characters);
         playerCard = characters.get(playerId);
         cardBack = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
+
+        setToolTipText(playerCard.getPower());
     }
 
     /**
@@ -79,9 +81,9 @@ public class ColtExpressPlayerView extends JComponent {
 
         // Draw loot, bullets left, points total if game end
         playerLoot.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + 10, border,
-                defaultItemSize*2, defaultItemSize), false);
+                defaultItemSize*4, defaultItemSize), false, 1.0);
         g.setColor(Color.black);
-        g.drawString("Bullets left: " + bulletsLeft, border+ceCardWidth + defaultItemSize*2 + 15, border+ceCardHeight*2/3);
+        g.drawString("Bullets left: " + bulletsLeft, border+ceCardWidth + defaultItemSize*4 + 15, border+ceCardHeight*2/3);
         if (gameEnd) {
             if (lootSum == -1) {
                 lootSum = 0;
@@ -97,16 +99,18 @@ public class ColtExpressPlayerView extends JComponent {
                 endResult += "* ";
             }
             endResult += "Total points: " + lootSum;
-            g.drawString(endResult, border+ceCardWidth + defaultItemSize*2 + 15, border+ceCardHeight/3);
+            g.drawString(endResult, border+ceCardWidth + defaultItemSize*4 + 15, border+ceCardHeight/3);
         }
 
         // Draw player deck
         g.drawImage(cardBack, border, border+ceCardHeight + 5, ceCardWidth, ceCardHeight, null);
-        g.drawString("" + playerDeck.getSize(), border+10, border+ceCardHeight*2 - 5);
+        if (playerDeck != null) {
+            g.drawString("" + playerDeck.getSize(), border + 10, border + ceCardHeight * 2 - 5);
+        }
 
         // Draw player hand
         playerHand.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + 30, border+ceCardHeight + 5,
-                width-ceCardWidth*2-30, ceCardHeight), false);
+                width-ceCardWidth*2-30, ceCardHeight), false, 1.0);
     }
 
     public Dimension getPreferredSize() {

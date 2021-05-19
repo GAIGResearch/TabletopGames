@@ -4,6 +4,7 @@ import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.interfaces.IGamePhase;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
@@ -16,15 +17,12 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.List;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
+import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 
 public class ColtExpressGUI extends AbstractGUI {
     // Settings for display area sizes
@@ -34,8 +32,8 @@ public class ColtExpressGUI extends AbstractGUI {
     final static int playerAreaHeightScroll = 150;
     final static int ceCardWidth = 50;
     final static int ceCardHeight = 60;
-    final static int roundCardWidth = 80;
-    final static int roundCardHeight = 50;
+    final static int roundCardWidth = 100;
+    final static int roundCardHeight = 80;
     final static int trainCarWidth = 130;
     final static int trainCarHeight = 80;
     final static int playerSize = 40;
@@ -47,6 +45,7 @@ public class ColtExpressGUI extends AbstractGUI {
     ColtExpressDeckView plannedActions;
     // Main train view
     ColtExpressTrainView trainView;
+    ColtExpressRoundView roundView;
 
     // Currently active player
     int activePlayer = -1;
@@ -64,16 +63,33 @@ public class ColtExpressGUI extends AbstractGUI {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
 
+                JTabbedPane pane = new JTabbedPane();
+                UIManager.put("TabbedPane.contentOpaque", false);
+                JPanel main = new JPanel();
+                main.setOpaque(false);
+                main.setLayout(new BorderLayout());
+                JPanel rules = new JPanel();
+                pane.add("Main", main);
+                pane.add("Rules", rules);
+
+                ColtExpressGameState cegs = (ColtExpressGameState) gameState;
+                ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
+
+                List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
+                trainView = new ColtExpressTrainView(train, cep.getDataPath(), cegs.getPlayerCharacters());
+                trainView.setOpaque(false);
+                plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
+                plannedActions.setOpaque(false);
+                roundView = new ColtExpressRoundView(train, cep.getDataPath(), cegs.getPlayerCharacters());
+                roundView.setOpaque(false);
+
                 activePlayer = gameState.getCurrentPlayer();
                 int nPlayers = gameState.getNPlayers();
-                this.width = playerAreaWidth*2 + trainCarWidth;
+                this.width = trainCarWidth*3/2*(train.size()+1) + playerAreaWidth;
                 this.height = playerAreaHeight * (nPlayers+1) + defaultInfoPanelHeight + defaultActionPanelHeight;
 
                 ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"), width, height, this);
                 setContentPane(backgroundImage);
-
-                ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-                ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
 
                 // Create main game area that will hold all game views
                 JPanel mainGameArea = new JPanel();
@@ -86,12 +102,8 @@ public class ColtExpressGUI extends AbstractGUI {
                 JPanel centerArea = new JPanel();
                 centerArea.setOpaque(false);
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                List<Compartment> train = ((ColtExpressGameState) gameState).getTrainCompartments();
-                trainView = new ColtExpressTrainView(train, cep.getDataPath(), cegs.getPlayerCharacters());
-                trainView.setOpaque(false);
-                plannedActions = new ColtExpressDeckView(cegs.getPlannedActions(), true, cep.getDataPath(), cegs.getPlayerCharacters());
-                plannedActions.setOpaque(false);
                 centerArea.add(trainView);
+                centerArea.add(roundView);
                 centerArea.add(plannedActions);
                 mainGameArea.add(centerArea);
                 mainGameArea.add(playerViews);
@@ -125,9 +137,12 @@ public class ColtExpressGUI extends AbstractGUI {
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
                 actionPanel.setOpaque(false);
 
-                getContentPane().add(infoPanel, BorderLayout.NORTH);
-                getContentPane().add(mainGameArea, BorderLayout.CENTER);
-                getContentPane().add(actionPanel, BorderLayout.SOUTH);
+
+                main.add(infoPanel, BorderLayout.NORTH);
+                main.add(mainGameArea, BorderLayout.CENTER);
+                main.add(actionPanel, BorderLayout.SOUTH);
+
+                getContentPane().add(pane, BorderLayout.CENTER);
             }
         }
 
@@ -196,12 +211,22 @@ public class ColtExpressGUI extends AbstractGUI {
         return pane;
     }
 
+    IGamePhase currentGamePhase;
+
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 activePlayer = gameState.getCurrentPlayer();
             }
+            if (currentGamePhase == null || currentGamePhase != gameState.getGamePhase()) {
+                if (gameState.getGamePhase() == ExecuteActions) {
+                    JOptionPane.showMessageDialog(this, "Planning phase over, execute actions!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "New round! Time to plan actions!");
+                }
+            }
+            currentGamePhase = gameState.getGamePhase();
 
             // Update decks and visibility
             ColtExpressGameState cegs = (ColtExpressGameState)gameState;
@@ -222,7 +247,7 @@ public class ColtExpressGUI extends AbstractGUI {
             plannedActions.informActivePlayer(player.getPlayerID());
 
             // Show planned actions from the first played
-            if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.ExecuteActions) {
+            if (gameState.getGamePhase() == ExecuteActions) {
                 plannedActions.setFirstOnTop(true);
             } else {
                 plannedActions.setFirstOnTop(false);
@@ -230,6 +255,7 @@ public class ColtExpressGUI extends AbstractGUI {
 
             // Update train view
             trainView.update(cegs);
+            roundView.update(cegs);
 
             // Update actions
             if (player instanceof HumanGUIPlayer) {
