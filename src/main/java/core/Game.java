@@ -244,7 +244,10 @@ public class Game {
                                     action = currentPlayer.getAction(observation, observedActions);
                                     agentTime += (System.nanoTime() - s);
                                     nDecisions++;
+                                    updateGUI(gui);
                                 }
+                            } else {
+                                action = currentPlayer.getAction(observation, observedActions);
                             }
                         }
                         if (COMPETITION_MODE && !observedActions.contains(action)) {
