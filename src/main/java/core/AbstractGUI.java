@@ -23,8 +23,6 @@ public abstract class AbstractGUI extends JFrame {
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
     public static int defaultDisplayWidth = 500, defaultDisplayHeight = 400;
 
-    public boolean actionChosen;
-
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;

@@ -60,7 +60,7 @@ public class TMDeckDisplay extends JComponent {
     }
 
     public void clearHighlights() {
-        for (int i = 0; i < deck.getSize(); i++) {
+        for (int i = 0; i < maxCards; i++) {
             cardViews[i].clicked = false;
         }
     }

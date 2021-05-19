@@ -3,6 +3,7 @@ package games.terraformingmars.gui;
 import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.turnorders.TurnOrder;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -335,12 +336,12 @@ public class TMGUI extends AbstractGUI {
 
             for (AbstractAction aa: actions) {
                 TMAction a = (TMAction) aa;
-                TMAction fullLegalAction = getFullLegalAction(a, legalActions);
                 if (a.actionType == null) {
                     if (a.pass) passAction = a;
                     else if (a instanceof PlaceTile) {
                         placeActions.add(a);
                     } else {
+                        TMAction fullLegalAction = getFullLegalAction(a, legalActions);
                         actionButtons[i].setVisible(true);
                         if (fullLegalAction != null) {
                             actionButtons[i].setButtonAction(fullLegalAction, gs);
@@ -364,7 +365,7 @@ public class TMGUI extends AbstractGUI {
                         TMAction fullLegalAction = getFullLegalAction(action, legalActions);
                         actionButtons[i].setVisible(true);
                         if (fullLegalAction != null) {
-                            actionButtons[i].setButtonAction(action, "Play");
+                            actionButtons[i].setButtonAction(fullLegalAction, "Play");
                         } else {
                             actionButtons[i].setText("Play");
                             actionButtons[i].setEnabled(false);
@@ -447,6 +448,8 @@ public class TMGUI extends AbstractGUI {
         return reason;
     }
 
+    private TurnOrder to;
+
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
@@ -463,26 +466,16 @@ public class TMGUI extends AbstractGUI {
             playerHand.update(gs.getPlayerHands()[focusPlayer], false);
             Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
             playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
-            playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer]);
+            playerCardsPlayed.update(gs.getPlayedCards()[focusPlayer]);
 
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
             playerCorporation.update(gs, corp, -1);
 
             if (player instanceof HumanGUIPlayer) {
-                if (actionChosen) {
-                    resetActionButtons();
-                    firstUpdate = true;
-                } else {
-                    if (firstUpdate) {
-                        createActionMenu(player, gs);
-                        updateActionButtons(player, gameState);
-                        firstUpdate = false;
-                    }
-                    if (updateButtons) {
-                        updateActionButtons(player, gameState);
-                        updateButtons = false;
-                    }
+                if (to == null || !to.equals(gameState.getTurnOrder())) {
+                    createActionMenu(player, gs);
                 }
+                updateActionButtons(player, gameState);
             }
         }
         repaint();
