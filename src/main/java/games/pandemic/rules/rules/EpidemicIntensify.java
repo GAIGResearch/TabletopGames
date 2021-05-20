@@ -3,6 +3,7 @@ package games.pandemic.rules.rules;
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
+import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicGameState;
 
@@ -20,6 +21,15 @@ public class EpidemicIntensify extends RuleNode {
         this.rnd = rnd;
     }
 
+    /**
+     * Copy constructor
+     * @param epidemicIntensify - Node to be copied
+     */
+    public EpidemicIntensify(EpidemicIntensify epidemicIntensify) {
+        super(epidemicIntensify);
+        this.rnd = epidemicIntensify.rnd;
+    }
+
     @Override
     protected boolean run(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
@@ -30,5 +40,10 @@ public class EpidemicIntensify extends RuleNode {
         infectionDeck.add(infectionDiscard);
         infectionDiscard.clear();
         return true;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new EpidemicIntensify(this);
     }
 }
