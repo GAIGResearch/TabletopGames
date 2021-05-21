@@ -215,17 +215,146 @@ public class TMCardView extends JComponent {
             }
         }
         // Draw card effects
+        int yE = ribbonRect.y + ribbonRect.height + spacing;
         if (card.immediateEffects.length > 0) {
-            int yE = ribbonRect.y + ribbonRect.height + spacing;
             int xE = width/2;
             for (TMAction a: card.immediateEffects) {
                 yE = drawCardEffect(g, a, xE, yE);
             }
         }
+        // Draw actions
+        int size = defaultItemSize/3;
+        int yA = yE + spacing;
+        for (TMAction a: card.actions) {
+            int xA = width/2 - defaultItemSize/4 - size;
+            yA += size + spacing / 5;
+            drawAction(g, a, xA, yA, size);
+        }
+        // Draw discounts
+        int yD = yA + spacing;
+        for (Requirement r: card.discountEffects.keySet()) {
+            if (r instanceof TagsPlayedRequirement) {
+                int xD = width/2 - size*6/2;
+                Image from = ImageIO.GetInstance().getImage(((TagsPlayedRequirement)r).tags[0].getImagePath());
+                Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
+                int amount = card.discountEffects.get(r);
+                drawImage(g, from, xD, yD, size, size);
+                drawShadowStringCentered(g, ":", new Rectangle(xD + size, yD, size*2, size));
+                drawShadowStringCentered(g, "-" + amount, new Rectangle(xD + size*3, yD, size*2, size));
+                drawImage(g, to, xD + size * 5, yD, size, size);
+            } else if (r instanceof CounterRequirement) {
+                int xD = width/2 - size*4/2;
+                TMTypes.GlobalParameter gp = utilities.Utils.searchEnum(TMTypes.GlobalParameter.class, ((CounterRequirement)r).counterCode);
+                String imgStr;
+                if (gp == null) {
+                    // A resource or production instead
+                    TMTypes.Resource res = TMTypes.Resource.valueOf(((CounterRequirement)r).counterCode.split("prod")[0]);
+                    imgStr = res.getImagePath();
+                } else {
+                    imgStr = gp.getImagePath();
+                }
+                Image from = ImageIO.GetInstance().getImage(imgStr);
+                drawImage(g, from, xD, yD, size);
+                drawShadowStringCentered(g, ": +/-" + card.discountEffects.get(r), new Rectangle(xD + size, yD, size*3, size));
+            }
+            yD += size + spacing/2;
+        }
+        // Draw resource mappings
+        int yRM = yD + spacing;
+        int xRM = width/2 - size*7/2;
+        for (TMGameState.ResourceMapping rm: card.resourceMappings) {
+            Image from = ImageIO.GetInstance().getImage(rm.from.getImagePath());
+            Image to = ImageIO.GetInstance().getImage(rm.to.getImagePath());
+            drawImage(g, from, xRM, yRM, size, size);
+            drawImage(g, to, xRM + size * 5, yRM, size, size);
+
+            String text;
+            if ((rm.rate == Math.floor(rm.rate)) && !Double.isInfinite(rm.rate)) {
+                text = ": " + (int) rm.rate;
+            } else {
+                text = ": " + rm.rate;
+            }
+            drawShadowStringCentered(g, text, new Rectangle(xRM + size, yRM, size*4, size));
+            yRM += size + spacing/2;
+        }
+        // Draw after-action effects
+        int yEF = yRM + spacing;
+        int xEF = width/2 - size*5/2;
+        for (Effect e: card.persistingEffects) {
+            int leftNumber = -1;
+            int rightNumber = -1;
+            Image from = null;
+            Image to = null;
+            if (e instanceof PayForActionEffect) {
+                from = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
+                leftNumber = ((PayForActionEffect) e).minCost;
+            } else if (e instanceof PlaceTileEffect) {
+                if (((PlaceTileEffect) e).tile != null) {
+                    from = ImageIO.GetInstance().getImage(((PlaceTileEffect) e).tile.getImagePath());
+                } else if (((PlaceTileEffect) e).resourceTypeGained != null) {
+                    // several images separated by slash
+                    int nRes = ((PlaceTileEffect) e).resourceTypeGained.length;
+                    int sectionSize = (nRes-1) * size * 2;
+                    int resX = xEF + size - sectionSize;
+                    int count = 0;
+                    for (TMTypes.Resource r: ((PlaceTileEffect) e).resourceTypeGained) {
+                        Image imgR = ImageIO.GetInstance().getImage(r.getImagePath());
+                        drawResource(g, imgR, production, false, resX, yEF, size, 0.6);
+                        resX += size;
+                        if (count != nRes-1) {
+                            drawShadowStringCentered(g, "/", new Rectangle(resX, yEF, size, size), Color.white, Color.black, 12);
+                            resX += size;
+                        }
+                        count++;
+                    }
+                } else {
+                    from = ImageIO.GetInstance().getImage(TMTypes.Tile.City.getImagePath());
+                }
+            } else if (e instanceof PlayCardEffect) {
+                from = ImageIO.GetInstance().getImage(((PlayCardEffect) e).tagsOnCard.iterator().next().getImagePath());  // TODO display all tags, separate by /
+            }
+            // "to" depends on the action applied as the effect
+            TMAction action = e.effectAction;
+            if (action instanceof ModifyPlayerResource) {
+                drawModifyPlayerResourceAction(g, (ModifyPlayerResource) action, xEF + size * 4, yEF, size);
+            }
+
+            if (!e.mustBeCurrentPlayer) {
+                // draw red outline for the left part
+                g.setColor(anyPlayerColor);
+                int xRect = xEF;
+                int widthRect = size * 2;
+                if (leftNumber == -1) {
+                    xRect = xEF + size;
+                    widthRect = size;
+                }
+                g.fillRoundRect(xRect - 2, yEF - 2, widthRect + 4, size + 4, spacing, spacing);
+            }
+
+            if (leftNumber != -1) {
+                drawShadowStringCentered(g, "" + leftNumber, new Rectangle(xEF, yEF, size, size), Color.white, Color.black, 12);
+            }
+            if (from != null) {
+                drawImage(g, from, xEF + size, yEF, size, size);
+            }
+            drawShadowStringCentered(g, " : ", new Rectangle(xEF + size*2, yEF, size, size));
+            if (rightNumber != -1) {
+                drawShadowStringCentered(g, "" + rightNumber, new Rectangle(xEF + size * 3, yEF, size, size), Color.white, Color.black, 12);
+            }
+            if (to != null) {
+                drawImage(g, to, xEF + size * 4, yEF, size, size);
+            }
+            yEF += size + spacing/2;
+        }
+
+        // TODO
+//        card.nResourcesOnCard; card.resourceOnCard;
     }
 
     private void drawCorporationCard(Graphics2D g) {
         FontMetrics fm = g.getFontMetrics();
+
+        // TODO card.firstAction
 
         Image img = ImageIO.GetInstance().getImage(TMTypes.CardType.Corporation.getImagePath());
         drawImage(g, img, 0, 0, height);
@@ -571,7 +700,7 @@ public class TMCardView extends JComponent {
         int rightNumber = -1;
 
         TMTypes.Resource leftR = a.getCostResource();
-        String left = leftR.getImagePath();
+        String left = leftR != null? leftR.getImagePath() : null;
         int leftNumber = Math.abs(a.getCost());
         boolean played = a.played;
         if (a instanceof PlaceTile) {
