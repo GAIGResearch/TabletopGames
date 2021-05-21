@@ -37,7 +37,7 @@ public class TMGUI extends AbstractGUI {
     TMPlayerView playerView;
     TMDeckDisplay playerHand, playerCardChoice;
     TMCardView playerCorporation;
-    TMDeckDisplay2 playerCardsPlayed;
+    TMDeckDisplay playerCardsPlayed;
     JScrollPane paneHand, paneCardChoice, paneCardsPlayed;
     JPanel infoPanel;
     JLabel generationCount;
@@ -112,20 +112,20 @@ public class TMGUI extends AbstractGUI {
 
         playerView = new TMPlayerView(gameState, focusPlayer);
 
-        playerHand = new TMDeckDisplay(this, gameState, gameState.getPlayerHands()[focusPlayer]);
+        playerHand = new TMDeckDisplay(this, gameState, gameState.getPlayerHands()[focusPlayer], true);
         paneHand = new JScrollPane(playerHand);
         paneHand.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneHand.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
         playerCorporation = new TMCardView(gameState, null, -1, TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight);
 
-        playerCardChoice = new TMDeckDisplay(this, gameState, gameState.getPlayerCardChoice()[focusPlayer]);
+        playerCardChoice = new TMDeckDisplay(this, gameState, gameState.getPlayerCardChoice()[focusPlayer], true);
         paneCardChoice = new JScrollPane(playerCardChoice);
         paneCardChoice.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneCardChoice.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
 
-        playerCardsPlayed = new TMDeckDisplay2(this, gameState, gameState.getPlayerComplicatedPointCards()[focusPlayer]);
+        playerCardsPlayed = new TMDeckDisplay(this, gameState, gameState.getPlayerComplicatedPointCards()[focusPlayer], false);
         paneCardsPlayed = new JScrollPane(playerCardsPlayed);
         paneCardsPlayed.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         paneCardsPlayed.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -485,7 +485,13 @@ public class TMGUI extends AbstractGUI {
             Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
             playerCardChoice.clearHighlights();
             playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
-            playerCardsPlayed.update(gs.getPlayedCards()[focusPlayer]);
+
+            // Display points and resource cards, + most recent card played
+            Deck<TMCard> temp = gs.getPlayerComplicatedPointCards()[focusPlayer].copy();
+            if (gs.getPlayedCards()[focusPlayer].getSize() > 0) {
+                temp.add(gs.getPlayedCards()[focusPlayer].get(0));
+            }
+            playerCardsPlayed.update(temp, false);
 
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
             playerCorporation.update(gs, corp, -1);

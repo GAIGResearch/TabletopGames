@@ -24,23 +24,31 @@ public class TMDeckDisplay extends JComponent implements ScreenHighlight {
     static int cardWidth;
 
     TMCardView[] cardViews;
+    boolean horizontal;
 
-    public TMDeckDisplay(TMGUI gui, TMGameState gs, Deck<TMCard> deck) {
+    public TMDeckDisplay(TMGUI gui, TMGameState gs, Deck<TMCard> deck, boolean horizontal) {
         this.gs = gs;
         this.deck = deck;
+        this.horizontal = horizontal;
 
         Image projCardBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/proj-card-bg.png");
         Vector2D dim = scaleLargestDimImg(projCardBg, cardHeight);
         cardWidth = dim.getX();
         if (deck != null) {
-            width = deck.getSize() * cardWidth;
+            if (horizontal) {
+                width = (deck.getSize() + 1) * cardWidth;
+                height = cardHeight;
+            } else {
+                width = cardWidth;
+                height = (deck.getSize() + 1) * cardHeight;
+            }
         } else {
             width = cardWidth;
+            height = cardHeight;
         }
-        height = cardHeight;
 
         setLayout(new FlowLayout());
-//        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+//        setLayout(new BoxLayout(this, horizontal? BoxLayout.X_AXIS : BoxLayout.Y_AXIS));
 
         cardViews = new TMCardView[maxCards];
         for (int i = 0; i < maxCards; i++) {
@@ -69,7 +77,11 @@ public class TMDeckDisplay extends JComponent implements ScreenHighlight {
 
     public void update(Deck<TMCard> deck, boolean highlightFirst) {
 
-        width = deck.getSize() * cardWidth;
+        if (horizontal) {
+            width = (deck.getSize() + 1) * cardWidth;
+        } else {
+            height = (deck.getSize() + 1) * cardHeight;
+        }
 
         if (deck.getSize() > 0) {
             for (int i = 0; i < deck.getSize(); i++) {

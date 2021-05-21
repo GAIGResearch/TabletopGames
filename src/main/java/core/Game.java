@@ -322,7 +322,7 @@ public class Game {
      */
     private void updateGUI(AbstractGUI gui, boolean actionTaken) {
         if (gui != null) {
-            gui.update(currentPlayer, gameState, actionTaken);
+            gui.update(currentPlayer, gameState.copy(), actionTaken);
             try {
                 Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {
