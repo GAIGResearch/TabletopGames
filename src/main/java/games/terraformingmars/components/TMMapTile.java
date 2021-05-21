@@ -13,7 +13,6 @@ import java.util.Objects;
 import static utilities.Utils.ComponentType.BOARD_NODE;
 
 public class TMMapTile extends Component {
-    int owner = -1;
     int x, y;
     TMTypes.Tile tilePlaced;
 
@@ -30,7 +29,7 @@ public class TMMapTile extends Component {
     }
 
     protected TMMapTile(int x, int y, int componentID) {
-        super(BOARD_NODE, componentID);
+        super(BOARD_NODE, "Tile", componentID);
         this.x = x;
         this.y = y;
     }
@@ -83,17 +82,13 @@ public class TMMapTile extends Component {
         return y;
     }
 
-    public int getOwner() {
-        return owner;
-    }
-
     private void setTilePlaced(TMTypes.Tile which, TMGameState gs) {
         tilePlaced = which;
         int player = gs.getCurrentPlayer();
 
         // Owner is current player
         if (which.canBeOwned()) {
-            owner = player;
+            ownerId = player;
         }
 
         gs.getPlayerTilesPlaced()[player].get(which).increment(1);
@@ -135,14 +130,14 @@ public class TMMapTile extends Component {
     }
 
     public void removeTile() {
-        owner = -1;
+        ownerId = -1;
         tilePlaced = null;
     }
 
     @Override
     public TMMapTile copy() {
         TMMapTile copy = new TMMapTile(x, y, componentID);
-        copy.owner = owner;
+        copyComponentTo(copy);
         copy.tilePlaced = tilePlaced;
         copy.type = type;
         copy.resources = resources.clone();
@@ -190,12 +185,12 @@ public class TMMapTile extends Component {
         if (!(o instanceof TMMapTile)) return false;
         if (!super.equals(o)) return false;
         TMMapTile tmMapTile = (TMMapTile) o;
-        return owner == tmMapTile.owner && x == tmMapTile.x && y == tmMapTile.y && volcanic == tmMapTile.volcanic && reserved == tmMapTile.reserved && tilePlaced == tmMapTile.tilePlaced && type == tmMapTile.type && Arrays.equals(resources, tmMapTile.resources);
+        return ownerId == tmMapTile.ownerId && x == tmMapTile.x && y == tmMapTile.y && volcanic == tmMapTile.volcanic && reserved == tmMapTile.reserved && tilePlaced == tmMapTile.tilePlaced && type == tmMapTile.type && Arrays.equals(resources, tmMapTile.resources);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), owner, x, y, tilePlaced, type, volcanic, reserved);
+        int result = Objects.hash(super.hashCode(), ownerId, x, y, tilePlaced, type, volcanic, reserved);
         result = 31 * result + Arrays.hashCode(resources);
         return result;
     }

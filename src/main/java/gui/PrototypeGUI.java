@@ -14,7 +14,6 @@ import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class PrototypeGUI extends AbstractGUI {
     JComponent view;
@@ -42,7 +41,7 @@ public class PrototypeGUI extends AbstractGUI {
         if (game != null && gameState != null) {
             infoPanel = createGameStateInfoPanel(game.name(), gameState, width, defaultInfoPanelHeight);
         }
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, true);
 
         JPanel deckView = new JPanel();
         componentViews = new ComponentView[maxComponentsInDeck];
@@ -86,7 +85,7 @@ public class PrototypeGUI extends AbstractGUI {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             if (view instanceof AreaView) {
                 ((AreaView) view).updateComponent(gameState.getAllComponents());

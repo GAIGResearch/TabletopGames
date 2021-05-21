@@ -24,8 +24,9 @@ public class Milestone extends Award {
     }
 
     public Milestone copy() {
-        Milestone copy = new Milestone(componentName, min, counterID);
+        Milestone copy = new Milestone(componentName, min, counterID, componentID);
         copy.claimed = claimed;
+        copyComponentTo(copy);
         return copy;
     }
 

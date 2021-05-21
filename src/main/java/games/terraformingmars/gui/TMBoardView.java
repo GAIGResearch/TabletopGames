@@ -7,6 +7,7 @@ import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Bonus;
+import gui.ScreenHighlight;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 import utilities.Vector2D;
@@ -22,7 +23,7 @@ import static core.AbstractGUI.defaultItemSize;
 import static games.terraformingmars.gui.TMCardView.drawResource;
 import static games.terraformingmars.gui.Utils.*;
 
-public class TMBoardView extends ComponentView {
+public class TMBoardView extends ComponentView implements ScreenHighlight {
 
     TMGameState gs;
 
@@ -210,9 +211,9 @@ public class TMBoardView extends ComponentView {
                 // Draw tile here
                 drawImage(g, element.getTilePlaced().getImagePath(), x-defaultItemSize/2, y-defaultItemSize/2, defaultItemSize, defaultItemSize);
                 drawElementName(g, x, y, element);
-                if (element.getOwner() >= 0) {
+                if (element.getOwnerId() >= 0) {
                     // Draw owner
-                    g.setColor(playerColors[element.getOwner()]);
+                    g.setColor(playerColors[element.getOwnerId()]);
                     g.fillRect(x - defaultItemSize/6, y - defaultItemSize/6, defaultItemSize/3, defaultItemSize/3);
                     g.setColor(Color.black);
                     g.drawRect(x - defaultItemSize/6, y - defaultItemSize/6, defaultItemSize/3, defaultItemSize/3);
@@ -343,5 +344,10 @@ public class TMBoardView extends ComponentView {
 
     public void update(TMGameState gs) {
         this.gs = gs;
+    }
+
+    @Override
+    public void clearHighlights() {
+        highlight.clear();
     }
 }

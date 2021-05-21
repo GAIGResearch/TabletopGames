@@ -9,6 +9,7 @@ import core.actions.SetGridValueAction;
 import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Utils;
@@ -16,7 +17,6 @@ import utilities.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class TicTacToeGUI extends AbstractGUI {
@@ -35,7 +35,7 @@ public class TicTacToeGUI extends AbstractGUI {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()},
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view},
                 width, defaultActionPanelHeight, true);
 
         getContentPane().add(view, BorderLayout.CENTER);
@@ -75,7 +75,7 @@ public class TicTacToeGUI extends AbstractGUI {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             view.updateComponent(((TicTacToeGameState)gameState).getGridBoard());
             if (player instanceof HumanGUIPlayer) {

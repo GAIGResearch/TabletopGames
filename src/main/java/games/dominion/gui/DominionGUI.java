@@ -2,13 +2,13 @@ package games.dominion.gui;
 
 import core.*;
 import games.dominion.*;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-import java.util.Collection;
 
 import static core.CoreConstants.*;
 
@@ -98,7 +98,7 @@ public class DominionGUI extends AbstractGUI {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dominion", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false, true);
+            JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
 
             // Add all views to frame
             getContentPane().add(mainGameArea, BorderLayout.CENTER);
@@ -111,12 +111,12 @@ public class DominionGUI extends AbstractGUI {
 
     /**
      * Updates all GUI elements. Must be implemented by subclass.
-     *
-     * @param player    - current player acting.
+     *  @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
+     * @param actionTaken
      */
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerViews[activePlayer].playerHand.setCardHighlight(-1);

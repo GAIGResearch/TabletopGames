@@ -7,6 +7,7 @@ import core.Game;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -15,7 +16,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 import java.util.List;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
@@ -117,7 +117,7 @@ public class ColtExpressGUI extends AbstractGUI {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false, true);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
 
                 getContentPane().add(mainGameArea, BorderLayout.CENTER);
                 getContentPane().add(infoPanel, BorderLayout.NORTH);
@@ -129,7 +129,7 @@ public class ColtExpressGUI extends AbstractGUI {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 activePlayer = gameState.getCurrentPlayer();

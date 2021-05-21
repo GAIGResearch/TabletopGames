@@ -5,6 +5,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.requirements.Requirement;
+import gui.ScreenHighlight;
 import utilities.ImageIO;
 import utilities.Vector2D;
 
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import static core.AbstractGUI.defaultItemSize;
 import static games.terraformingmars.gui.Utils.*;
 
-public class TMDeckDisplay2 extends JComponent {
+public class TMDeckDisplay2 extends JComponent implements ScreenHighlight {
 
     Deck<TMCard> deck;
     TMGameState gs;
@@ -222,5 +223,10 @@ public class TMDeckDisplay2 extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
+    }
+
+    @Override
+    public void clearHighlights() {
+        highlight.clear();
     }
 }

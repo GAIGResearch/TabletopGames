@@ -81,17 +81,18 @@ public class TMGameState extends AbstractGameState {
             add(board);
             add(projectCards);
             add(corpCards);
+            add(discardCards);
             add(nAwardsFunded);
             add(nMilestonesClaimed);
-            this.addAll(extraTiles);
-            this.addAll(milestones);
-            this.addAll(awards);
-            this.addAll(globalParameters.values());
-            this.addAll(Arrays.asList(playerHands));
-            this.addAll(Arrays.asList(playerCardChoice));
-            this.addAll(Arrays.asList(playerComplicatedPointCards));
-            this.addAll(Arrays.asList(playedCards));
-            this.addAll(Arrays.asList(playerCardPoints));
+            addAll(extraTiles);
+            addAll(milestones);
+            addAll(awards);
+            addAll(globalParameters.values());
+            addAll(Arrays.asList(playerHands));
+            addAll(Arrays.asList(playerCardChoice));
+            addAll(Arrays.asList(playerComplicatedPointCards));
+            addAll(Arrays.asList(playedCards));
+            addAll(Arrays.asList(playerCardPoints));
             for (int i = 0; i < getNPlayers(); i++) {
                 addAll(playerResources[i].values());
                 addAll(playerProduction[i].values());
@@ -112,7 +113,16 @@ public class TMGameState extends AbstractGameState {
 
         // General public info
         copy.generation = generation;
-        copy.board = board.copy();  // TODO check deep copy
+        copy.board = new GridBoard<>(board.getGridValues());  // Deep copy of board
+        for (int i = 0; i < board.getHeight(); i++) {
+            for (int j = 0; j < board.getWidth(); j++) {
+                if (board.getElement(j, i) != null) {
+                    copy.board.setElement(j, i, board.getElement(j, i).copy());
+                } else {
+                    copy.board.setElement(j, i, null);
+                }
+            }
+        }
         copy.extraTiles = new HashSet<>();
         for (TMMapTile mt: extraTiles) {
             copy.extraTiles.add(mt.copy());

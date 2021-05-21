@@ -153,7 +153,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     for (Vector2D n : neighbours) {
                         TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
                         if (other != null && other.getTilePlaced() != null) {
-                            adjacentOwners.add(other.getOwner());
+                            adjacentOwners.add(other.getOwnerId());
                         }
                     }
                     if (adjacentOwners.size() > 0) {
@@ -316,7 +316,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
                 TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
-                if (other != null && other.getOwner() == player) {
+                if (other != null && other.getOwnerId() == player) {
                     playerTileNeighbour = true;
                     break;
                 }

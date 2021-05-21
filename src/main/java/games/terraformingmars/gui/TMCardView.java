@@ -81,7 +81,15 @@ public class TMCardView extends JComponent {
         });
     }
 
-    void informGUI (TMGUI gui) { this.gui = gui; }
+    void informGUI (TMGUI gui) {
+        this.gui = gui;
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                gui.stateChange = true;
+            }
+        });
+    }
     void informOtherViews(TMCardView[] views) {
         this.views = views;
     }
@@ -94,22 +102,23 @@ public class TMCardView extends JComponent {
             gs = updateGS;
             update = false;
         }
-        if (card == null) return;
 
         Graphics2D g = (Graphics2D) g1;
+        if (clicked) {
+            g.setStroke(new BasicStroke(3));
+            setBorder(new SoftBevelBorder(BevelBorder.RAISED, Color.lightGray, Color.green, Color.lightGray, Color.darkGray));
+        } else {
+            setBorder(new EmptyBorder(0, 0, 0, 0));
+        }
+
+        if (card == null) return;
+
         g.setFont(TMGUI.defaultFont);
 
         if (card.cardType == TMTypes.CardType.Corporation) {
             drawCorporationCard(g);
         } else {
             drawProjectCard(g);
-        }
-
-        if (clicked) {
-            g.setStroke(new BasicStroke(3));
-            setBorder(new SoftBevelBorder(BevelBorder.RAISED, Color.lightGray, Color.green, Color.lightGray, Color.darkGray));
-        } else {
-            setBorder(new EmptyBorder(0, 0, 0, 0));
         }
     }
 

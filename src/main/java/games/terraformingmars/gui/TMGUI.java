@@ -3,7 +3,6 @@ package games.terraformingmars.gui;
 import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
-import core.turnorders.TurnOrder;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -13,6 +12,8 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.Requirement;
+import gui.ScreenHighlight;
+import gui.TiledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -21,13 +22,12 @@ import utilities.Utils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -69,6 +69,12 @@ public class TMGUI extends AbstractGUI {
 
         TMGameState gameState = (TMGameState) game.getGameState();
         view = new TMBoardView(this, gameState);
+        view.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                stateChange = true;
+            }
+        });
 
         actionMenus = new HashMap<>();
         JMenuBar menuBar = new JMenuBar();
@@ -111,7 +117,6 @@ public class TMGUI extends AbstractGUI {
         paneHand.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         paneHand.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneHand.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
-
         playerCorporation = new TMCardView(gameState, null, -1, TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight);
 
         playerCardChoice = new TMDeckDisplay(this, gameState, gameState.getPlayerCardChoice()[focusPlayer]);
@@ -191,7 +196,7 @@ public class TMGUI extends AbstractGUI {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(Color.white);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -448,11 +453,24 @@ public class TMGUI extends AbstractGUI {
         return reason;
     }
 
-    private TurnOrder to;
+    boolean stateChange;
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
+
+            if (player instanceof HumanGUIPlayer) {
+                if (actionTaken) {
+                    createActionMenu(player, (TMGameState) gameState);
+                }
+                if (actionTaken || stateChange) {
+                    updateActionButtons(player, gameState);
+                    stateChange = false;
+                }
+            } else {
+                resetActionButtons();
+            }
+
             TMGameState gs = ((TMGameState) gameState);
             currentPlayerIdx = gs.getCurrentPlayer();
             focusPlayerButton.setText("Current player: " + currentPlayerIdx);
@@ -465,18 +483,13 @@ public class TMGUI extends AbstractGUI {
             playerView.update(gs);
             playerHand.update(gs.getPlayerHands()[focusPlayer], false);
             Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
+            playerCardChoice.clearHighlights();
             playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
             playerCardsPlayed.update(gs.getPlayedCards()[focusPlayer]);
 
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
             playerCorporation.update(gs, corp, -1);
 
-            if (player instanceof HumanGUIPlayer) {
-                if (to == null || !to.equals(gameState.getTurnOrder())) {
-                    createActionMenu(player, gs);
-                }
-                updateActionButtons(player, gameState);
-            }
         }
         repaint();
     }

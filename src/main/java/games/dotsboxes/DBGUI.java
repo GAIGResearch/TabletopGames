@@ -3,12 +3,12 @@ package games.dotsboxes;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class DBGUI extends AbstractGUI {
     DBGridBoardView view;
@@ -26,7 +26,7 @@ public class DBGUI extends AbstractGUI {
         view = new DBGridBoardView(((DBGameState)gameState));
 
         JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, true);
 
         getContentPane().add(view, BorderLayout.CENTER);
         getContentPane().add(infoPanel, BorderLayout.NORTH);
@@ -36,7 +36,7 @@ public class DBGUI extends AbstractGUI {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             view.updateGameState(((DBGameState)gameState));
             if (player instanceof HumanGUIPlayer) {

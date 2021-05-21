@@ -533,6 +533,7 @@ public class TMCard extends Card {
         copy.resourceOnCard = resourceOnCard;
         copy.nResourcesOnCard = nResourcesOnCard;
         copy.canResourcesBeRemoved = canResourcesBeRemoved;
+        copyComponentTo(copy);
         return copy;
     }
 }

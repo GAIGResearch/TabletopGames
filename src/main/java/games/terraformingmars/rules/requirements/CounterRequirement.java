@@ -108,7 +108,7 @@ public class CounterRequirement implements Requirement<TMGameState> {
         }
 
         if (max && threshold == -1) {
-            threshold = which.getMaximum();
+            threshold = which.getMaximum()-1;
         }
 
         return which;
@@ -124,11 +124,11 @@ public class CounterRequirement implements Requirement<TMGameState> {
         if (this == o) return true;
         if (!(o instanceof CounterRequirement)) return false;
         CounterRequirement that = (CounterRequirement) o;
-        return counterID == that.counterID && threshold == that.threshold && max == that.max && Objects.equals(counterCode, that.counterCode);
+        return that.counterCode.equals(counterCode) && max == that.max;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(counterCode, counterID, threshold, max);
+        return Objects.hash(counterCode, max);
     }
 }

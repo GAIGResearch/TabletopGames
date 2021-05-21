@@ -1,4 +1,4 @@
-package games.terraformingmars.gui;
+package gui;
 
 import javax.swing.*;
 import java.awt.*;

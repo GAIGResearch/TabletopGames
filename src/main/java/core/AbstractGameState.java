@@ -120,7 +120,12 @@ public abstract class AbstractGameState {
         return gamePhase;
     }
     public final Component getComponentById(int id) {
-        return allComponents.getComponent(id);
+        Component c = allComponents.getComponent(id);
+        if (c == null) {
+            addAllComponents();
+            c = allComponents.getComponent(id);
+        }
+        return c;
     }
     public final Area getAllComponents() {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
@@ -176,10 +181,10 @@ public abstract class AbstractGameState {
             // be incorporated in the game-specific data in GameState where the correct hiding protocls can be enforced.
         }
         // TODO: uncomment
-//        s.actionsInProgress = new Stack<>();
-//        actionsInProgress.forEach(
-//                a -> s.actionsInProgress.push(a.copy())
-//        );
+        s.actionsInProgress = new Stack<>();
+        actionsInProgress.forEach(
+                a -> s.actionsInProgress.push(a.copy())
+        );
 
         s.playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++) {

@@ -1,6 +1,7 @@
 package games.terraformingmars.actions;
 
 import core.AbstractGameState;
+import core.components.Component;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -55,7 +56,8 @@ public class BuyCard extends TMAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Buy " + gameState.getComponentById(getCardID()).getComponentName();
+        Component c = gameState.getComponentById(getCardID());
+        return "Buy " + c.getComponentName();
     }
 
     @Override

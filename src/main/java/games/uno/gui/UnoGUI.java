@@ -6,6 +6,7 @@ import core.AbstractPlayer;
 import core.Game;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -14,7 +15,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
@@ -110,7 +110,7 @@ public class UnoGUI extends AbstractGUI {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false, true);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
 
                 // Add all views to frame
                 getContentPane().add(mainGameArea, BorderLayout.CENTER);
@@ -123,7 +123,7 @@ public class UnoGUI extends AbstractGUI {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].playerHandView.setCardHighlight(-1);

@@ -131,7 +131,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                             TMMapTile mt = gs.getBoard().getElement(j, i);
                             if (mt != null && mt.getTilePlaced() == tileToCount) {
                                 if (any) count ++;
-                                else if (opponents && mt.getOwner() != player || !opponents && mt.getOwner() == player) count ++;
+                                else if (opponents && mt.getOwnerId() != player || !opponents && mt.getOwnerId() == player) count ++;
                             }
                         }
                     }

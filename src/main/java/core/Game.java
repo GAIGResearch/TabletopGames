@@ -189,7 +189,7 @@ public class Game {
             }
 
             // GUI update
-            updateGUI(gui);
+            updateGUI(gui, true);
 
             if (!paused) {
 
@@ -240,11 +240,12 @@ public class Game {
                             currentPlayer.registerUpdatedObservation(observation);
                         } else {
                             if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                                updateGUI(gui, true);
                                 while (action == null && gui.isWindowOpen()) {
                                     action = currentPlayer.getAction(observation, observedActions);
                                     agentTime += (System.nanoTime() - s);
                                     nDecisions++;
-                                    updateGUI(gui);
+                                    updateGUI(gui, action != null);
                                 }
                             } else {
                                 action = currentPlayer.getAction(observation, observedActions);
@@ -266,7 +267,7 @@ public class Game {
 
                     if (VERBOSE) {
                         if (action != null) {
-                            System.out.println(action.toString());
+                            System.out.println(action);
                         } else {
                             currentPlayer.registerUpdatedObservation(observation);
                         }
@@ -278,7 +279,7 @@ public class Game {
                     } else {
                         if (VERBOSE) {
                             if (action != null) {
-                                System.out.println(action.toString());
+                                System.out.println(action);
                             } else {
                                 System.out.println("NULL action (player " + activePlayer + ")");
                             }
@@ -319,9 +320,9 @@ public class Game {
      *
      * @param gui - gui to update.
      */
-    private void updateGUI(AbstractGUI gui) {
+    private void updateGUI(AbstractGUI gui, boolean actionTaken) {
         if (gui != null) {
-            gui.update(currentPlayer, gameState);
+            gui.update(currentPlayer, gameState, actionTaken);
             try {
                 Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {

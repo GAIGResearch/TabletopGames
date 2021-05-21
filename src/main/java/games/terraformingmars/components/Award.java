@@ -79,6 +79,7 @@ public class Award extends Token {
     public Award copy() {
         Award copy = new Award(componentName, counterID, componentID);
         copy.claimed = claimed;
+        copyComponentTo(copy);
         return copy;
     }
 

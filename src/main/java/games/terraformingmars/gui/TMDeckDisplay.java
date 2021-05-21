@@ -3,6 +3,7 @@ package games.terraformingmars.gui;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.TMCard;
+import gui.ScreenHighlight;
 import utilities.ImageIO;
 import utilities.Vector2D;
 
@@ -11,7 +12,7 @@ import java.awt.*;
 
 import static games.terraformingmars.gui.Utils.*;
 
-public class TMDeckDisplay extends JComponent {
+public class TMDeckDisplay extends JComponent implements ScreenHighlight {
 
     private Deck<TMCard> deck;
     TMGameState gs;
@@ -62,6 +63,7 @@ public class TMDeckDisplay extends JComponent {
     public void clearHighlights() {
         for (int i = 0; i < maxCards; i++) {
             cardViews[i].clicked = false;
+            cardViews[i].repaint();
         }
     }
 
@@ -78,19 +80,20 @@ public class TMDeckDisplay extends JComponent {
                 }
 //            }
             }
-
-            if (highlightFirst) cardViews[0].clicked = true;
         }
 
         for (int i = deck.getSize(); i < maxCards; i++) {
             cardViews[i].update(gs, null, -1);
-            cardViews[i].clicked = false;
             cardViews[i].repaint();
+        }
+
+        if (highlightFirst && !cardViews[0].clicked) {
+            cardViews[0].clicked = true;
+            cardViews[0].repaint();
         }
 
         this.deck = deck;
         revalidate();
-
     }
 
     @Override
