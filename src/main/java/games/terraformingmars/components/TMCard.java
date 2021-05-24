@@ -292,6 +292,7 @@ public class TMCard extends Card {
                                 if (s.contains("Action:")) {
                                     TMAction a = parseActionOnCard(s.split(":")[1], card, false);
                                     if (a != null) {
+                                        a.actionType = TMTypes.ActionType.ActiveAction;
                                         actions.add(a);
                                     }
                                 } else if (s.contains("stays on this card")) {

@@ -285,7 +285,7 @@ public class TMGUI extends AbstractGUI {
 
             int mnemonicStart = KeyEvent.VK_A;
             for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
-                if (t != TMTypes.ActionType.PlayCard) {
+                if (t != TMTypes.ActionType.PlayCard && t != TMTypes.ActionType.BuyProject) {
                     JMenu menu = actionMenus.get(t);
                     menu.removeAll();
 
