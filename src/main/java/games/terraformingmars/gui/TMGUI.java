@@ -81,6 +81,7 @@ public class TMGUI extends AbstractGUI {
         menuBar.setBackground(Color.black);
         int mnemonicStart = KeyEvent.VK_A;
         for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
+            if (t == TMTypes.ActionType.BuyProject) continue;
             JMenu menu = new JMenu(t.name());
             menu.setMnemonic(mnemonicStart++);
             menu.getAccessibleContext().setAccessibleDescription("Choose an action of type " + t.name());
