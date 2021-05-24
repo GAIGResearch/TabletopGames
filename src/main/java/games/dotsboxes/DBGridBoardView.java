@@ -53,6 +53,10 @@ public class DBGridBoardView extends JComponent {
                         start = null;
                         highlightIP = null;
                     }
+                } else {
+                    start = null;
+                    highlightIP = null;
+                    highlight = null;
                 }
             }
         });
@@ -76,8 +80,8 @@ public class DBGridBoardView extends JComponent {
             g.setColor(edgeColors[dbgs.getCurrentPlayer()]);
             Stroke s = g.getStroke();
             g.setStroke(new BasicStroke(3));
-            g.drawLine(highlightIP.from.getX() * defaultItemSize, highlightIP.from.getY() * defaultItemSize,
-                    highlightIP.to.getX() * defaultItemSize, highlightIP.to.getY() * defaultItemSize);
+            g.drawLine(highlightIP.from.getX() * defaultItemSize + dotSize/2, highlightIP.from.getY() * defaultItemSize + dotSize/2,
+                    highlightIP.to.getX() * defaultItemSize + dotSize/2, highlightIP.to.getY() * defaultItemSize + dotSize/2);
             g.setStroke(s);
         }
     }
@@ -105,13 +109,14 @@ public class DBGridBoardView extends JComponent {
     }
 
     private void drawCell(Graphics2D g, DBCell element, int owner, int x, int y, int offsetX, int offsetY) {
-        // Paint cell background, according to cell owner
-        if (owner == -1) {
-            g.setColor(new Color(228, 228, 228));
-        } else {
+        if (owner != -1) {
+            // Paint cell background, according to cell owner
             g.setColor(colors[owner]);
+            g.fillRect(x, y, defaultItemSize, defaultItemSize);
+            // Draw cell owner
+            g.setColor(Color.black);
+            g.drawString("" + owner, x+defaultItemSize/2, y+defaultItemSize/2);
         }
-        g.fillRect(x, y, defaultItemSize, defaultItemSize);
 
         // Draw 4 dots in the corners of the cell
         g.setColor(Color.black);
@@ -120,8 +125,6 @@ public class DBGridBoardView extends JComponent {
         g.fillOval(x-dotSize/2, y+defaultItemSize-dotSize/2, dotSize, dotSize);
         g.fillOval(x+defaultItemSize-dotSize/2, y+defaultItemSize-dotSize/2, dotSize, dotSize);
 
-        // Draw cell owner
-        g.drawString("" + owner, x+defaultItemSize/2, y+defaultItemSize/2);
     }
 
     public void updateGameState(DBGameState dbgs) {
