@@ -223,7 +223,7 @@ public class TMCardView extends JComponent {
                 }
             }
         }
-        // Draw card effects
+        // Draw card effects TODO: this at the bottom
         int yE = ribbonRect.y + ribbonRect.height + spacing;
         if (card.immediateEffects.length > 0) {
             int xE = width/2;
@@ -356,8 +356,14 @@ public class TMCardView extends JComponent {
             yEF += size + spacing/2;
         }
 
-        // TODO
-//        card.nResourcesOnCard; card.resourceOnCard;
+        // Draw resources on card TODO: this at the top (ideally only if card's been played)
+        if (card.resourceOnCard != null) {
+            int yRC = yEF + spacing;
+            int xRC = width/2 - size*3/2;
+            drawImage(g, ImageIO.GetInstance().getImage(card.resourceOnCard.getImagePath()), xRC, yRC, size, size);
+            drawShadowStringCentered(g, " : ", new Rectangle(xRC + size, yRC, size, size));
+            drawShadowStringCentered(g, "" + card.nResourcesOnCard, new Rectangle(xRC + size*2, yRC, size, size));
+        }
     }
 
     private void drawCorporationCard(Graphics2D g) {

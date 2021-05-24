@@ -36,7 +36,7 @@ public class TMGUI extends AbstractGUI {
     TMBoardView view;
     TMPlayerView playerView;
     TMDeckDisplay playerHand, playerCardChoice;
-    TMCardView playerCorporation;
+    TMCardView playerCorporation, lastCardPlayed;
     TMDeckDisplay playerCardsPlayed;
     JScrollPane paneHand, paneCardChoice, paneCardsPlayed;
     JPanel infoPanel;
@@ -125,11 +125,29 @@ public class TMGUI extends AbstractGUI {
         paneCardChoice.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         paneCardChoice.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth * 4, TMDeckDisplay.cardHeight + 20));
 
+        lastCardPlayed = new TMCardView(gameState, null, -1, TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight);
+        JLabel label = new JLabel("Last card played:");
+        label.setFont(defaultFont);
+        label.setForeground(Color.white);
+        label.setOpaque(false);
+        JPanel wrap = new JPanel();
+        wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));
+        wrap.setOpaque(false);
+        wrap.add(label);
+        wrap.add(lastCardPlayed);
+        wrap.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight + 50));
+
         playerCardsPlayed = new TMDeckDisplay(this, gameState, gameState.getPlayerComplicatedPointCards()[focusPlayer], false);
         paneCardsPlayed = new JScrollPane(playerCardsPlayed);
         paneCardsPlayed.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         paneCardsPlayed.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        paneCardsPlayed.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth + 20, TMDeckDisplay.cardHeight * 4));
+        paneCardsPlayed.setPreferredSize(new Dimension(TMDeckDisplay.cardWidth + 20, TMDeckDisplay.cardHeight * 3));
+
+        JPanel wrap2 = new JPanel();
+        wrap2.setOpaque(false);
+        wrap2.setLayout(new BoxLayout(wrap2, BoxLayout.Y_AXIS));
+        wrap2.add(wrap);
+        wrap2.add(paneCardsPlayed);
 
         JPanel playerMainWrap = new JPanel();
         playerMainWrap.add(playerView);
@@ -239,7 +257,7 @@ public class TMGUI extends AbstractGUI {
         gamePanel.add(main);
         gamePanel.add(actionWrapper);
         gameWrap.add(gamePanel);
-        gameWrap.add(paneCardsPlayed);
+        gameWrap.add(wrap2);
         tabs.add("Game", gameWrap);
 
         JPanel instructionsPanel = new JPanel();
@@ -487,11 +505,12 @@ public class TMGUI extends AbstractGUI {
             playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
 
             // Display points and resource cards, + most recent card played
-            Deck<TMCard> temp = gs.getPlayerComplicatedPointCards()[focusPlayer].copy();
             if (gs.getPlayedCards()[focusPlayer].getSize() > 0) {
-                temp.add(gs.getPlayedCards()[focusPlayer].get(0));
+                lastCardPlayed.update(gs, gs.getPlayedCards()[focusPlayer].get(0).copy(), -1);
+            } else {
+                lastCardPlayed.update(gs, null, -1);
             }
-            playerCardsPlayed.update(temp, false);
+            playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer].copy(), false);
 
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
             playerCorporation.update(gs, corp, -1);

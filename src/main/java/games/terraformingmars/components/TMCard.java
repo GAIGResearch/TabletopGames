@@ -69,7 +69,7 @@ public class TMCard extends Card {
     }
 
     public boolean shouldSaveCard() {
-        return pointsResource != null || pointsTag != null || pointsTile != null || resourceOnCard != null;
+        return pointsResource != null || pointsTag != null || pointsTile != null || resourceOnCard != null || persistingEffects.length > 0 || actions.length > 0 || discountEffects.size() > 0 || resourceMappings.size() > 0;
     }
 
     public static TMCard loadCorporation(JSONObject cardDef) {
