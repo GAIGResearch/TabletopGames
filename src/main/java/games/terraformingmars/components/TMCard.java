@@ -19,6 +19,7 @@ import static games.terraformingmars.actions.TMAction.parseActionOnCard;
 
 public class TMCard extends Card {
     public int number;
+    public String annotation;
     public TMTypes.CardType cardType;
     public int cost;
     public HashSet<Requirement<TMGameState>> requirements;
@@ -187,6 +188,7 @@ public class TMCard extends Card {
         TMCard card = new TMCard();
         String classDef = (String)cardDef.get("@class");
         card.cardType = Utils.searchEnum(TMTypes.CardType.class, classDef.split(" ")[1].trim());
+        card.annotation = (String) cardDef.get("annotation");
         JSONArray div1 = (JSONArray) cardDef.get("div");
         ArrayList<TMTypes.Tag> tempTags = new ArrayList<>();
 
@@ -482,6 +484,7 @@ public class TMCard extends Card {
         TMCard copy = new TMCard(componentName, componentID);
         copy.number = number;
         copy.cardType = cardType;
+        copy.annotation = annotation;
         copy.cost = cost;
         if (requirements != null) {
             copy.requirements = new HashSet<>();

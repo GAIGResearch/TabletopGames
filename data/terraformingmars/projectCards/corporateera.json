@@ -1,21 +1,22 @@
 [
   {
     "@class": "filterDiv automated jovianTag corporate reqs",
+    "annotation": "(Requires that you have titanium production. Decrease any titanium production 1 step and increase your own 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Asteroid Mining Consortium"
+        "#text": "Asteroid Mining Consortium",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "13"
+        "#text": "13",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-jovian"
       },
       {
-        "@class": "number",
-        "#text": "#002"
+        "#text": "#002",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -24,15 +25,16 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big ",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big "
           },
           {
-            "@class": "requirements ",
-            "#text": "1 Titaniumprod"
+            "#text": "1 Titaniumprod",
+            "@class": "requirements "
           },
           {
             "@class": "production-boxprod-box-size1a ",
+            "br": "",
             "div": [
               {
                 "@class": "production-prefix ",
@@ -52,13 +54,12 @@
               {
                 "@class": "titaniumprod-"
               }
-            ],
-            "br": ""
+            ]
           },
           {
+            "#text": "Requires that you have titaniumprod* dec-titaniumprod-1-any * inc-titaniumprod-1",
             "@class": "description ",
-            "@style": "margin-top:0px;",
-            "#text": "Requires that you have titaniumprod* dec-titaniumprod-1-any * inc-titaniumprod-1"
+            "@style": "margin-top:0px;"
           }
         ]
       }
@@ -66,14 +67,15 @@
   },
   {
     "@class": "filterDiv active scienceTag corporate ",
+    "annotation": "ACTION: LOOK AT THE TOP CARD AND EITHER BUY IT OR DISCARD IT",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Inventors' Guild"
+        "#text": "Inventors' Guild",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "9"
+        "#text": "9",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -82,8 +84,8 @@
         "@class": "tag tag1 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#006"
+        "#text": "#006",
+        "@class": "number"
       },
       {
         "@class": "content ",
@@ -91,22 +93,23 @@
           "@class": "red-arrow "
         },
         "span": {
-          "@style": "font-size:14px;font-weight: normal;",
-          "#text": "ACTION: look-1-0-true"
+          "#text": "ACTION: look-1-0-true",
+          "@style": "font-size:14px;font-weight: normal;"
         }
       }
     ]
   },
   {
     "@class": "filterDiv active spaceTag buildingTag corporate ",
+    "annotation": "(Action: Spend 1 steel to gain 5 MC.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Space Elevator"
+        "#text": "Space Elevator",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "27"
+        "#text": "27",
+        "@class": "price"
       },
       {
         "@class": "tag tag2 tag-space "
@@ -115,25 +118,26 @@
         "@class": "tag tag1 tag-building "
       },
       {
-        "@class": "number",
-        "#text": "#013"
+        "#text": "#013",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
         "@class": "content ",
+        "br": "",
         "div": [
           {
-            "@class": "points points-big ",
-            "#text": "2"
+            "#text": "2",
+            "@class": "points points-big "
           },
           {
             "@class": "red-arrow "
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-steel-1 and inc-MegaCredit-5"
+            "#text": "Action: dec-steel-1 and inc-MegaCredit-5",
+            "@class": "description "
           },
           {
             "@class": "production-box ",
@@ -142,8 +146,8 @@
             }
           },
           {
-            "@class": "description ",
-            "#text": "inc-titaniumprod-1 "
+            "#text": "inc-titaniumprod-1 ",
+            "@class": "description "
           }
         ],
         "span": [
@@ -151,24 +155,24 @@
             "@class": " steel resource "
           },
           {
-            "@class": "money resource ",
-            "#text": "5"
+            "#text": "5",
+            "@class": "money resource "
           }
-        ],
-        "br": ""
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag buildingTag corporate ",
+    "annotation": "(Action: Spend 1 Energy to draw a card.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Development Center"
+        "#text": "Development Center",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "11"
+        "#text": "11",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -177,14 +181,23 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#014"
+        "#text": "#014",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
         "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "#text": "Action: dec-Energy-1 and inc-Card-1",
+            "@class": "description "
+          }
+        ],
         "span": [
           {
             "@class": "energy resource "
@@ -192,74 +205,67 @@
           {
             "@class": "card resource "
           }
-        ],
-        "div": [
-          {
-            "@class": "red-arrow "
-          },
-          {
-            "@class": "description ",
-            "#text": "Action: dec-Energy-1 and inc-Card-1"
-          }
         ]
       }
     ]
   },
   {
     "@class": "filterDiv active spaceTag corporate ",
+    "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Space Station"
+        "#text": "Space Station",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "10"
+        "#text": "10",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
       },
       {
-        "@class": "number",
-        "#text": "#025"
+        "#text": "#025",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big ",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big "
           },
           {
             "@class": "resource-tag tag-space"
           },
           {
-            "@class": "money resource ",
-            "#text": "-2"
+            "#text": "-2",
+            "@class": "money resource "
           },
           {
-            "@class": "description ",
-            "#text": "Effect: discount-2-Space"
+            "#text": "Effect: discount-2-Space",
+            "@class": "description "
           }
-        ],
-        "#text": ":"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv eventTag earthTag spaceTag corporate event reqs",
     "@data-science": "5",
+    "annotation": null,
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Interstellar Colony Ship"
+        "#text": "Interstellar Colony Ship",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "24"
+        "#text": "24",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event "
@@ -271,8 +277,8 @@
         "@class": "tag tag3 tag-earth "
       },
       {
-        "@class": "number",
-        "#text": "#027"
+        "#text": "#027",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -281,12 +287,12 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big ",
-            "#text": "4"
+            "#text": "4",
+            "@class": "points points-big "
           },
           {
-            "@class": "requirements ",
-            "#text": "Science Science Science Science Science tags"
+            "#text": "Science Science Science Science Science tags",
+            "@class": "requirements "
           }
         ]
       }
@@ -294,21 +300,22 @@
   },
   {
     "@class": "filterDiv spaceTag corporate active ",
+    "annotation": "(Action: Spend 1 titanium to add 1 fighter resource to this card.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Security Fleet"
+        "#text": "Security Fleet",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "12"
+        "#text": "12",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
       },
       {
-        "@class": "number",
-        "#text": "#028"
+        "#text": "#028",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -317,11 +324,11 @@
         "@class": "content ",
         "div": [
           {
+            "#text": "1/",
             "@class": "points ",
             "div": {
               "@class": "resource fighter"
-            },
-            "#text": "1/"
+            }
           },
           {
             "@class": "resource titanium "
@@ -333,12 +340,12 @@
             "@class": "resource fighter"
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-titanium-1 and add-1-Fighter "
+            "#text": "Action: dec-titanium-1 and add-1-Fighter ",
+            "@class": "description "
           },
           {
-            "@class": "description ",
-            "#text": "1 VP per 1 Fighter "
+            "#text": "1 VP per 1 Fighter ",
+            "@class": "description "
           }
         ]
       }
@@ -347,21 +354,22 @@
   {
     "@class": "filterDiv automated powerTag corporate reqs",
     "@data-science": "3",
+    "annotation": "(Requires 3 Science tags. Increase your Energy production and your MC production up one step each.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Lightning Harvest"
+        "#text": "Lightning Harvest",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "8"
+        "#text": "8",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-power"
       },
       {
-        "@class": "number",
-        "#text": "#046"
+        "#text": "#046",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -370,12 +378,12 @@
         "@class": "content",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
-            "@class": "requirements",
-            "#text": "Science Science Science tags"
+            "#text": "Science Science Science tags",
+            "@class": "requirements"
           },
           {
             "@class": "production-boxprod-box-size2",
@@ -384,14 +392,14 @@
                 "@class": "energyprod"
               },
               {
-                "@class": "moneyprod",
-                "#text": "1"
+                "#text": "1",
+                "@class": "moneyprod"
               }
             ]
           },
           {
-            "@class": "description",
-            "#text": "Requires 3 Science tags* inc-Energyprod-1 * inc-MegaCreditprod-1"
+            "#text": "Requires 3 Science tags* inc-Energyprod-1 * inc-MegaCreditprod-1",
+            "@class": "description"
           }
         ]
       }
@@ -399,34 +407,36 @@
   },
   {
     "@class": "filterDiv corporate active microbeTag ",
+    "annotation": "(Action: Add 1 Microbe to this card. 1 VP per 4 Microbes on this card.)",
     "div": [
       {
-        "@class": "title background-color-active",
-        "#text": "Tardigrades"
+        "#text": "Tardigrades",
+        "@class": "title background-color-active"
       },
       {
-        "@class": "price",
-        "#text": "4"
+        "#text": "4",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-microbe"
       },
       {
-        "@class": "number",
-        "#text": "#049"
+        "#text": "#049",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
         "@class": "content",
+        "br": "",
         "div": [
           {
+            "#text": "1/4",
             "@class": "points",
             "div": {
               "@class": "resource microbe"
-            },
-            "#text": "1/4"
+            }
           },
           {
             "@class": "red-arrow"
@@ -435,29 +445,28 @@
             "@class": "microbe resource"
           },
           {
+            "#text": "Action: add-1-Microbe * 1 VP per 4 Microbe ",
             "@class": "description",
             "br": [
               "",
               ""
-            ],
-            "#text":  "Action: add-1-Microbe * 1 VP per 4 Microbe "
-
+            ]
           }
-        ],
-        "br": ""
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv event microbeTag eventTag corporate",
+    "annotation": "(Remove up to 2 Animals or 5 Plants from any player.)",
     "div": [
       {
-        "@class": "title background-color-event",
-        "#text": "Virus"
+        "#text": "Virus",
+        "@class": "title background-color-event"
       },
       {
-        "@class": "price",
-        "#text": "1"
+        "#text": "1",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event"
@@ -466,13 +475,18 @@
         "@class": "tag tag2 tag-microbe"
       },
       {
-        "@class": "number",
-        "#text": "#050"
+        "#text": "#050",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          "2",
+          "OR",
+          "5"
+        ],
         "@class": "content",
         "div": [
           {
@@ -488,28 +502,24 @@
             "@class": "resource plant red-outline"
           },
           {
-            "@class": "description",
-            "#text": "dec-Animal-2-any or dec-Plant-5-any"
+            "#text": "dec-Animal-2-any or dec-Plant-5-any",
+            "@class": "description"
           }
-        ],
-        "#text": [
-          "2",
-          "OR",
-          "5"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv automated spaceTag jovianTag corporate",
+    "annotation": "(Increase your MC production 1 step for each Earth tag you have.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Miranda Resort"
+        "#text": "Miranda Resort",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "12"
+        "#text": "12",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space"
@@ -518,8 +528,8 @@
         "@class": "tag tag2 tag-jovian"
       },
       {
-        "@class": "number",
-        "#text": "#051"
+        "#text": "#051",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -528,25 +538,25 @@
         "@class": "content",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
+            "#text": "/",
             "@class": "production-boxprod-box-size2a",
             "div": [
               {
-                "@class": "production money",
-                "#text": "1"
+                "#text": "1",
+                "@class": "production money"
               },
               {
                 "@class": "resource-tagprod-tag tag-earth"
               }
-            ],
-            "#text": "/"
+            ]
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-1-Earth "
+            "#text": "inc-MegaCreditprod-1-Earth ",
+            "@class": "description"
           }
         ]
       }
@@ -554,21 +564,22 @@
   },
   {
     "@class": "filterDiv automated buildingTag corporate",
+    "annotation": "(Increase your steel production 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Mine"
+        "#text": "Mine",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "4"
+        "#text": "4",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
       },
       {
-        "@class": "number",
-        "#text": "#056"
+        "#text": "#056",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -583,8 +594,8 @@
             }
           },
           {
-            "@class": "description",
-            "#text": "inc-steelprod-1 "
+            "#text": "inc-steelprod-1 ",
+            "@class": "description"
           }
         ]
       }
@@ -592,14 +603,15 @@
   },
   {
     "@class": "filterDiv automated spaceTag jovianTag corporate",
+    "annotation": "(Increase your titanium production 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Vesta Shipyard"
+        "#text": "Vesta Shipyard",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "15"
+        "#text": "15",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space"
@@ -611,15 +623,15 @@
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#057"
+        "#text": "#057",
+        "@class": "number"
       },
       {
         "@class": "content",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
             "@class": "production-box",
@@ -628,8 +640,8 @@
             }
           },
           {
-            "@class": "description",
-            "#text": "inc-titaniumprod-1 "
+            "#text": "inc-titaniumprod-1 ",
+            "@class": "description"
           }
         ]
       }
@@ -637,19 +649,20 @@
   },
   {
     "@class": "filterDiv automated corporate reqs noneTag",
+    "annotation": "(Requires that you have steel production. Decrease any steel production 1 step and increase your own 1 step.)",
     "div": [
       {
+        "#text": "Great Escarpment Consortium",
         "@class": "title background-color-automated",
-        "@style": "font-size:14px;",
-        "#text": "Great Escarpment Consortium"
+        "@style": "font-size:14px;"
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
-        "@class": "number",
-        "#text": "#061"
+        "#text": "#061",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -658,11 +671,12 @@
         "@class": "content",
         "div": [
           {
-            "@class": "requirements",
-            "#text": "1 Steelprod"
+            "#text": "1 Steelprod",
+            "@class": "requirements"
           },
           {
             "@class": "production-boxprod-box-size1a",
+            "br": "",
             "div": [
               {
                 "@class": "production-prefix",
@@ -682,12 +696,11 @@
               {
                 "@class": "production steel"
               }
-            ],
-            "br": ""
+            ]
           },
           {
-            "@class": "description",
-            "#text": "Requires steelprod-1* dec-steelprod-1-any * inc-steelprod-1"
+            "#text": "Requires steelprod-1* dec-steelprod-1-any * inc-steelprod-1",
+            "@class": "description"
           }
         ]
       }
@@ -695,69 +708,77 @@
   },
   {
     "@class": "filterDiv event eventTag corporate ",
+    "annotation": "(Gain 5 steel.)",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Mineral Deposit"
+        "#text": "Mineral Deposit",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "5"
+        "#text": "5",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event "
       },
       {
-        "@class": "number",
-        "#text": "#062"
+        "#text": "#062",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "5",
         "@class": "content ",
         "div": [
           {
             "@class": "resource steel"
           },
           {
-            "@class": "description ",
-            "#text": "inc-steel-5"
+            "#text": "inc-steel-5",
+            "@class": "description "
           }
-        ],
-        "#text": "5"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated buildingTag corporate",
+    "annotation": "(Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase your production of that resource 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Mining Area"
+        "#text": "Mining Area",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "4"
+        "#text": "4",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
       },
       {
-        "@class": "number",
-        "#text": "#064"
+        "#text": "#064",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          "*",
+          "*"
+        ],
         "@class": "content",
+        "br": "",
         "div": [
           {
-            "@class": "tile special-tile",
-            "#text": "⚒"
+            "#text": "\u2692",
+            "@class": "tile special-tile"
           },
           {
+            "#text": "OR",
             "@class": "production-boxprod-box-size3",
             "div": [
               {
@@ -766,39 +787,34 @@
               {
                 "@class": "titaniumprod"
               }
-            ],
-            "#text": "OR"
+            ]
           },
           {
-            "@class": "description",
-            "#text": "placetile/Mine/Steel-Titanium/true/Owned "
+            "#text": "placetile/Mine/Steel-Titanium/true/Owned ",
+            "@class": "description"
           }
-        ],
-        "br": "",
-        "#text": [
-          "*",
-          "*"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv automated buildingTag corporate",
+    "annotation": "(Decrease your Energy production 1 step and increase your steel production 2 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Building Industries"
+        "#text": "Building Industries",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
       },
       {
-        "@class": "number",
-        "#text": "#065"
+        "#text": "#065",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -808,6 +824,7 @@
         "div": [
           {
             "@class": "production-boxprod-box-size2a",
+            "br": "",
             "div": [
               {
                 "@class": "production-prefix ",
@@ -830,12 +847,11 @@
               {
                 "@class": "steelprod"
               }
-            ],
-            "br": ""
+            ]
           },
           {
-            "@class": "description",
-            "#text": "dec-Energyprod-1  * inc-steelprod-2 "
+            "#text": "dec-Energyprod-1  * inc-steelprod-2 ",
+            "@class": "description"
           }
         ]
       }
@@ -843,49 +859,51 @@
   },
   {
     "@class": "filterDiv event eventTag corporate ",
+    "annotation": "PLACE YOUR MARKER ON A NON-RESERVED AREA. ONLY YOU MAY PLACE A TILE HERE.",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Land Claim"
+        "#text": "Land Claim",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "1"
+        "#text": "1",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event"
       },
       {
-        "@class": "number",
-        "#text": "#066"
+        "#text": "#066",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "reserve/Ground",
         "@class": "content ",
-        "@style": "font-size:14px;font-weight: normal;",
-        "#text": "reserve/Ground"
+        "@style": "font-size:14px;font-weight: normal;"
       }
     ]
   },
   {
     "@class": "filterDiv automated earthTag corporate",
+    "annotation": "(Increase your MC production 2 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Sponsors"
+        "#text": "Sponsors",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth"
       },
       {
-        "@class": "number",
-        "#text": "#068"
+        "#text": "#068",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -896,13 +914,13 @@
           {
             "@class": "production-box",
             "div": {
-              "@class": "moneyprod",
-              "#text": "2"
+              "#text": "2",
+              "@class": "moneyprod"
             }
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-2 "
+            "#text": "inc-MegaCreditprod-2 ",
+            "@class": "description"
           }
         ]
       }
@@ -911,35 +929,38 @@
   {
     "@class": "filterDiv active buildingTag corporate reqs",
     "@data-oxygen": "8",
+    "annotation": "(Action: Spend 1 plant or 1 steel to gain 7MC.)",
     "div": [
       {
-        "@class": "title background-color-active",
-        "#text": "Electro Catapult"
+        "#text": "Electro Catapult",
+        "@class": "title background-color-active"
       },
       {
-        "@class": "price",
-        "#text": "17"
+        "#text": "17",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
       },
       {
-        "@class": "number",
-        "#text": "#069"
+        "#text": "#069",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "/",
         "@class": "content",
+        "br": "",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
-            "@class": "requirements requirements-max",
-            "#text": "max 8 Oxygen"
+            "#text": "max 8 Oxygen",
+            "@class": "requirements requirements-max"
           },
           {
             "@class": "resource plant"
@@ -951,13 +972,13 @@
             "@class": "red-arrow"
           },
           {
-            "@class": "resource money",
-            "#text": "7"
+            "#text": "7",
+            "@class": "resource money"
           },
           {
+            "#text": "Action: dec-Plant-1 and inc-MegaCredit-7 * Action: dec-Steel-1 and inc-MegaCredit-7",
             "@class": "description",
-            "@style": "margin-top:-5px;margin-bottom:2px;",
-            "#text": "Action: dec-Plant-1 and inc-MegaCredit-7 * Action: dec-Steel-1 and inc-MegaCredit-7"
+            "@style": "margin-top:-5px;margin-bottom:2px;"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -974,67 +995,67 @@
             ]
           },
           {
+            "#text": "Oxygen must be 8% or less* dec-energyprod-1 ",
             "@class": "description",
-            "@style": "text-align:left;",
-            "#text": "Oxygen must be 8% or less* dec-energyprod-1 "
+            "@style": "text-align:left;"
           }
-        ],
-        "br": "",
-        "#text": "/"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active earthTag corporate",
+    "annotation": "(Effect: When you play a card, you pay 2 MC less for it.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Earth Catapult"
+        "#text": "Earth Catapult",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "23"
+        "#text": "23",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth"
       },
       {
-        "@class": "number",
-        "#text": "#070"
+        "#text": "#070",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "2"
+            "#text": "2",
+            "@class": "points points-big"
           },
           {
-            "@class": "description ",
-            "#text": "Effect: discount-2"
+            "#text": "Effect: discount-2",
+            "@class": "description "
           }
         ],
         "span": {
-          "@class": "money resource ",
-          "#text": "-2"
-        },
-        "#text": ":"
+          "#text": "-2",
+          "@class": "money resource "
+        }
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag corporate ",
+    "annotation": "(Effect: Each titanium you have is worth 1 MC extra. Each steel you have is worth 1 MC extra. )",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Advanced Alloys"
+        "#text": "Advanced Alloys",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "9"
+        "#text": "9",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1043,49 +1064,50 @@
         "@class": "tag tag1 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#071"
+        "#text": "#071",
+        "@class": "number"
       },
       {
+        "#text": [
+          ": +",
+          ": +"
+        ],
         "@class": "content ",
+        "br": "",
         "div": [
           {
             "@class": "resource titanium"
           },
           {
-            "@class": "resource money",
-            "#text": "1"
+            "#text": "1",
+            "@class": "resource money"
           },
           {
             "@class": "resource steel"
           },
           {
-            "@class": "resource money",
-            "#text": "1"
+            "#text": "1",
+            "@class": "resource money"
           },
           {
-            "@class": "description",
-            "#text": "Effect: resourcemapping-Titanium-MegaCredit-1.0 *Effect: resourcemapping-Steel-MegaCredit-1.0"
+            "#text": "Effect: resourcemapping-Titanium-MegaCredit-1.0 *Effect: resourcemapping-Steel-MegaCredit-1.0",
+            "@class": "description"
           }
-        ],
-        "br": "",
-        "#text": [
-          ": +",
-          ": +"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag buildingTag corporate ",
+    "annotation": "(Effect: When you play a Science tag, including this, you may discard a card from hand to draw a card.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Mars University"
+        "#text": "Mars University",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "8"
+        "#text": "8",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -1094,25 +1116,29 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#073"
+        "#text": "#073",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          ": -",
+          "+"
+        ],
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
             "@class": "resource-tag tag-science"
           },
           {
-            "@class": "description ",
-            "#text": "Effect: playcard(tag-Science) / dec-card-1 and inc-card-1 *dec-card-1 and inc-card-1"
+            "#text": "Effect: playcard(tag-Science) / dec-card-1 and inc-card-1 *dec-card-1 and inc-card-1",
+            "@class": "description "
           }
         ],
         "span": [
@@ -1122,24 +1148,21 @@
           {
             "@class": "card resource "
           }
-        ],
-        "#text": [
-          ": -",
-          "+"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag microbeTag corporate",
+    "annotation": "(Effect: When you play a plant, microbe, or an animal tag, including this, gain 1 plant or add 1 resource to THAT CARD.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Viral Enhancers"
+        "#text": "Viral Enhancers",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "9"
+        "#text": "9",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-microbe"
@@ -1148,14 +1171,23 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#074"
+        "#text": "#074",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          "/",
+          "/",
+          ":",
+          "/",
+          "* /",
+          "*"
+        ],
         "@class": "content ",
+        "br": "",
         "div": [
           {
             "@class": "resource-tag tag-plant"
@@ -1176,18 +1208,9 @@
             "@class": "animal resource"
           },
           {
-            "@class": "description ",
-            "#text": "Effect: playcard(tag-Plant,Microbe,Animal) / inc-Plant-1 or add-1-resource-that * inc-Plant-1 "
+            "#text": "Effect: playcard(tag-Plant,Microbe,Animal) / inc-Plant-1 or add-1-resource-that * inc-Plant-1 ",
+            "@class": "description "
           }
-        ],
-        "br": "",
-        "#text": [
-          "/",
-          "/",
-          ":",
-          "/",
-          "* /",
-          "*"
         ]
       }
     ]
@@ -1195,14 +1218,15 @@
   {
     "@class": "filterDiv active powerTag scienceTag corporate reqs",
     "@data-science": "4",
+    "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Quantum Extractor"
+        "#text": "Quantum Extractor",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "13"
+        "#text": "13",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-power"
@@ -1211,57 +1235,58 @@
         "@class": "tag tag2 tag-science"
       },
       {
-        "@class": "number",
-        "#text": "#079"
+        "#text": "#079",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
         "div": [
           {
-            "@class": "requirements",
-            "#text": "Science Science Science Science tags"
+            "#text": "Science Science Science Science tags",
+            "@class": "requirements"
           },
           {
             "@class": "resource-tag tag-space"
           },
           {
-            "@class": "money resource ",
-            "#text": "-2"
+            "#text": "-2",
+            "@class": "money resource "
           },
           {
-            "@class": "description ",
-            "#text": "Effect: discount-2-Space"
+            "#text": "Effect: discount-2-Space",
+            "@class": "description "
           },
           {
+            "#text": "4",
             "@class": "production-boxprod-box-size1a",
             "@style": "margin-top:10px",
             "div": {
               "@class": "energyprod"
-            },
-            "#text": "4"
+            }
           },
           {
-            "@class": "description ",
-            "#text": "Requires 4 science tags*inc-energyprod-4 "
+            "#text": "Requires 4 science tags*inc-energyprod-4 ",
+            "@class": "description "
           }
-        ],
-        "#text": ":"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated spaceTag jovianTag corporate ",
+    "annotation": "(Increase your MC production 3 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Callisto Penal Mines"
+        "#text": "Callisto Penal Mines",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "24"
+        "#text": "24",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
@@ -1270,8 +1295,8 @@
         "@class": "tag tag2 tag-jovian "
       },
       {
-        "@class": "number",
-        "#text": "#082"
+        "#text": "#082",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1280,19 +1305,19 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "2"
+            "#text": "2",
+            "@class": "points points-big"
           },
           {
             "@class": "production-box",
             "div": {
-              "@class": "production money",
-              "#text": "3"
+              "#text": "3",
+              "@class": "production money"
             }
           },
           {
-            "@class": "description ",
-            "#text": "inc-MegaCreditprod-3 "
+            "#text": "inc-MegaCreditprod-3 ",
+            "@class": "description "
           }
         ]
       }
@@ -1300,14 +1325,15 @@
   },
   {
     "@class": "filterDiv automated spaceTag scienceTag corporate ",
+    "annotation": null,
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Trans-Neptune Probe"
+        "#text": "Trans-Neptune Probe",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
@@ -1316,8 +1342,8 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#084"
+        "#text": "#084",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1325,29 +1351,30 @@
       {
         "@class": "content ",
         "div": {
-          "@class": "points points-big",
-          "#text": "1"
+          "#text": "1",
+          "@class": "points points-big"
         }
       }
     ]
   },
   {
     "@class": "filterDiv automated buildingTag corporate ",
+    "annotation": "(Decrease your energy production 1 step and increase your MC production 4 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Commercial District"
+        "#text": "Commercial District",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "16"
+        "#text": "16",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
       },
       {
-        "@class": "number",
-        "#text": "#085"
+        "#text": "#085",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1356,11 +1383,11 @@
         "@class": "content ",
         "div": [
           {
+            "#text": "1/",
             "@class": "points big",
             "div": {
               "@class": "tile city-tile-small"
-            },
-            "#text": "1/"
+            }
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -1381,26 +1408,25 @@
                 }
               },
               {
-                "@class": "moneyprod",
-                "#text": "4"
+                "#text": "4",
+                "@class": "moneyprod"
               }
             ]
           },
           {
+            "#text": "dec-energyprod-1  *inc-MegaCreditprod-4 ",
             "@class": "description",
-            "@style": "margin-top:-5px",
-            "#text": "dec-energyprod-1  *inc-MegaCreditprod-4 "
+            "@style": "margin-top:-5px"
           },
           {
-            "@class": "tile special-tile",
-            "#text": "€"
+            "#text": "\u20ac",
+            "@class": "tile special-tile"
           },
           {
+            "#text": "placetile/CommercialBuilding/ground/true *1 VP per 1 City Adjacent ",
             "@class": "description",
             "@style": "text-align:left",
-            "br": "",
-            "#text": "placetile/CommercialBuilding/ground/true *1 VP per 1 City Adjacent "
-
+            "br": ""
           }
         ]
       }
@@ -1408,26 +1434,28 @@
   },
   {
     "@class": "filterDiv automated scienceTag corporate ",
+    "annotation": "(Duplicate only the production box of one of your building cards.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Robotic Workforce"
+        "#text": "Robotic Workforce",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "9"
+        "#text": "9",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#086"
+        "#text": "#086",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "COPY A",
         "@class": "content ",
         "div": [
           {
@@ -1437,24 +1465,24 @@
             }
           },
           {
-            "@class": "description",
-            "#text": "duplicate-Building-ModifyPlayerResource-true"
+            "#text": "duplicate-Building-ModifyPlayerResource-true",
+            "@class": "description"
           }
-        ],
-        "#text": "COPY A"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated scienceTag corporate ",
+    "annotation": "(Counts as playing 2 science cards. Draw 2 cards.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Research"
+        "#text": "Research",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "11"
+        "#text": "11",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-science "
@@ -1463,8 +1491,8 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#090"
+        "#text": "#090",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1473,8 +1501,8 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
             "@class": "resource card"
@@ -1483,8 +1511,8 @@
             "@class": "resource card"
           },
           {
-            "@class": "description",
-            "#text": "inc-Card-2"
+            "#text": "inc-Card-2",
+            "@class": "description"
           }
         ]
       }
@@ -1493,21 +1521,22 @@
   {
     "@class": "filterDiv automated scienceTag corporate reqs",
     "@data-science": "3",
+    "annotation": "(Requires 3 science tags. Increase your MC production 2 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Gene Repair"
+        "#text": "Gene Repair",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "12"
+        "#text": "12",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#091"
+        "#text": "#091",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1516,23 +1545,23 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "2"
+            "#text": "2",
+            "@class": "points points-big"
           },
           {
-            "@class": "requirements",
-            "#text": "Science Science Science tags"
+            "#text": "Science Science Science tags",
+            "@class": "requirements"
           },
           {
             "@class": "production-box",
             "div": {
-              "@class": "production money",
-              "#text": "2"
+              "#text": "2",
+              "@class": "production money"
             }
           },
           {
-            "@class": "description",
-            "#text": "Requires 3 science tags*inc-MegaCreditprod-2 "
+            "#text": "Requires 3 science tags*inc-MegaCreditprod-2 ",
+            "@class": "description"
           }
         ]
       }
@@ -1540,14 +1569,15 @@
   },
   {
     "@class": "filterDiv automated spaceTag jovianTag corporate ",
+    "annotation": "(Increase your titanium production 2 steps and your MC production 2 steps. 1 VP per Jovian tag you have.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "IO Mining Industries"
+        "#text": "IO Mining Industries",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "41"
+        "#text": "41",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
@@ -1556,8 +1586,8 @@
         "@class": "tag tag2 tag-jovian "
       },
       {
-        "@class": "number",
-        "#text": "#092"
+        "#text": "#092",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1566,11 +1596,11 @@
         "@class": "content ",
         "div": [
           {
+            "#text": "1/",
             "@class": "points points-big",
             "span": {
               "@class": "tag-jovian resource-tag "
-            },
-            "#text": "1/"
+            }
           },
           {
             "@class": "production-boxprod-box-size3",
@@ -1582,14 +1612,14 @@
                 "@class": "production titanium"
               },
               {
-                "@class": "production money",
-                "#text": "2"
+                "#text": "2",
+                "@class": "production money"
               }
             ]
           },
           {
-            "@class": "description ",
-            "#text": "inc-titaniumprod-2  *inc-MegaCreditprod-2 *1 VP per 1 Jovian tag "
+            "#text": "inc-titaniumprod-2  *inc-MegaCreditprod-2 *1 VP per 1 Jovian tag ",
+            "@class": "description "
           }
         ]
       }
@@ -1598,14 +1628,15 @@
   {
     "@class": "filterDiv active scienceTag powerTag corporate reqs",
     "@data-science": "5",
+    "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Mass Converter"
+        "#text": "Mass Converter",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "8"
+        "#text": "8",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-power "
@@ -1614,57 +1645,58 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#094"
+        "#text": "#094",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
         "div": [
           {
-            "@class": "requirements",
-            "#text": "Science Science Science Science Science tags"
+            "#text": "Science Science Science Science Science tags",
+            "@class": "requirements"
           },
           {
             "@class": "resource-tag tag-space"
           },
           {
-            "@class": "money resource ",
-            "#text": "-2"
+            "#text": "-2",
+            "@class": "money resource "
           },
           {
-            "@class": "description ",
-            "#text": "Effect: discount-2-Space"
+            "#text": "Effect: discount-2-Space",
+            "@class": "description "
           },
           {
+            "#text": "6",
             "@class": "production-boxprod-box-size1a",
             "@style": "margin-top:10px",
             "div": {
               "@class": "energyprod"
-            },
-            "#text": "6"
+            }
           },
           {
-            "@class": "description ",
-            "#text": "Requires 5 science tags*inc-energyprod-6 "
+            "#text": "Requires 5 science tags*inc-energyprod-6 ",
+            "@class": "description "
           }
-        ],
-        "#text": ":"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag buildingTag corporate ",
+    "annotation": "(Action: Spend 6 Energy to add a science resource to this card.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Physics Complex"
+        "#text": "Physics Complex",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "12"
+        "#text": "12",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -1673,21 +1705,27 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#095"
+        "#text": "#095",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "6",
         "@class": "content ",
+        "br": [
+          "",
+          "",
+          ""
+        ],
         "div": [
           {
+            "#text": "2/",
             "@class": "points points-big",
             "div": {
               "@class": "science resource"
-            },
-            "#text": "2/"
+            }
           },
           {
             "@class": "energy resource "
@@ -1699,40 +1737,35 @@
             "@class": "resource science"
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-Energy-6 and add-1-Science "
+            "#text": "Action: dec-Energy-6 and add-1-Science ",
+            "@class": "description "
           },
           {
-            "@class": "description ",
-            "#text": "2 VP per 1 Science "
+            "#text": "2 VP per 1 Science ",
+            "@class": "description "
           }
-        ],
-        "br": [
-          "",
-          "",
-          ""
-        ],
-        "#text": "6"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated buildingTag corporate",
+    "annotation": "(Reduce your heat production 2 steps and increase your MC production 3 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Tropical Resort"
+        "#text": "Tropical Resort",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "13"
+        "#text": "13",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
       },
       {
-        "@class": "number",
-        "#text": "#098"
+        "#text": "#098",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1741,11 +1774,12 @@
         "@class": "content",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "2"
+            "#text": "2",
+            "@class": "points points-big"
           },
           {
             "@class": "production-boxprod-box-size2a",
+            "br": "",
             "div": [
               {
                 "@class": "production-prefix ",
@@ -1766,15 +1800,14 @@
                 }
               },
               {
-                "@class": "moneyprod",
-                "#text": "3"
+                "#text": "3",
+                "@class": "moneyprod"
               }
-            ],
-            "br": ""
+            ]
           },
           {
-            "@class": "description",
-            "#text": "dec-heatprod-2  *inc-MegaCreditprod-3 "
+            "#text": "dec-heatprod-2  *inc-MegaCreditprod-3 ",
+            "@class": "description"
           }
         ]
       }
@@ -1782,21 +1815,22 @@
   },
   {
     "@class": "filterDiv automated spaceTag corporate",
+    "annotation": "(Increase your MC production 1 step for each space tag your OPPONENTS have.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Toll Station"
+        "#text": "Toll Station",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "12"
+        "#text": "12",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space"
       },
       {
-        "@class": "number",
-        "#text": "#099"
+        "#text": "#099",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1805,21 +1839,21 @@
         "@class": "content",
         "div": [
           {
+            "#text": "/",
             "@class": "production-boxprod-box-size2a",
             "div": [
               {
-                "@class": "production money",
-                "#text": "1"
+                "#text": "1",
+                "@class": "production money"
               },
               {
                 "@class": "resource-tagprod-tag tag-space red-outline"
               }
-            ],
-            "#text": "/"
+            ]
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-1-Space-opp "
+            "#text": "inc-MegaCreditprod-1-Space-opp ",
+            "@class": "description"
           }
         ]
       }
@@ -1827,61 +1861,63 @@
   },
   {
     "@class": "filterDiv active earthTag corporate ",
+    "annotation": "(Effect: When you play an Earth card, you pay 3 MC less for it.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Earth Office"
+        "#text": "Earth Office",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "1"
+        "#text": "1",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth "
       },
       {
-        "@class": "number",
-        "#text": "#105"
+        "#text": "#105",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
         "div": [
           {
             "@class": "resource-tag tag-earth"
           },
           {
-            "@class": "money resource ",
-            "#text": "-3"
+            "#text": "-3",
+            "@class": "money resource "
           },
           {
-            "@class": "description ",
-            "#text": "Effect: discount-3-Earth"
+            "#text": "Effect: discount-3-Earth",
+            "@class": "description "
           }
-        ],
-        "#text": ":"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated earthTag corporate",
+    "annotation": "(Increase your MC production 3 steps.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Acquired Company"
+        "#text": "Acquired Company",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "10"
+        "#text": "10",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth"
       },
       {
-        "@class": "number",
-        "#text": "#106"
+        "#text": "#106",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -1892,13 +1928,13 @@
           {
             "@class": "production-box",
             "div": {
-              "@class": "moneyprod",
-              "#text": "3"
+              "#text": "3",
+              "@class": "moneyprod"
             }
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-3 "
+            "#text": "inc-MegaCreditprod-3 ",
+            "@class": "description"
           }
         ]
       }
@@ -1906,94 +1942,97 @@
   },
   {
     "@class": "filterDiv automated earthTag corporate",
+    "annotation": "(Gain 1 MC for each event EVER PLAYED by all players.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Media Archives"
+        "#text": "Media Archives",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "8"
+        "#text": "8",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth"
       },
       {
-        "@class": "number",
-        "#text": "#107"
+        "#text": "#107",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "/",
         "@class": "content",
         "div": [
           {
-            "@class": "money resource",
-            "#text": "1"
+            "#text": "1",
+            "@class": "money resource"
           },
           {
             "@class": "resource-tag tag-event red-outline"
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCredit-X-Event-any"
+            "#text": "inc-MegaCredit-X-Event-any",
+            "@class": "description"
           }
-        ],
-        "#text": "/"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active earthTag corporate ",
+    "annotation": "(Effect: After you play an event card, you gain 3MC.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Media Group"
+        "#text": "Media Group",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth "
       },
       {
-        "@class": "number",
-        "#text": "#109"
+        "#text": "#109",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
         "div": [
           {
             "@class": "resource-tag tag-event"
           },
           {
-            "@class": "money resource ",
-            "#text": "3"
+            "#text": "3",
+            "@class": "money resource "
           },
           {
-            "@class": "description ",
-            "#text": "Effect: playCard(tag-Event) / inc-MegaCredit-3"
+            "#text": "Effect: playCard(tag-Event) / inc-MegaCredit-3",
+            "@class": "description "
           }
-        ],
-        "#text": ":"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active earthTag corporate ",
+    "annotation": "(Decrease your MC production 1 step.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Business Network"
+        "#text": "Business Network",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "4"
+        "#text": "4",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2002,11 +2041,15 @@
         "@class": "tag tag1 tag-earth "
       },
       {
-        "@class": "number",
-        "#text": "#110"
+        "#text": "#110",
+        "@class": "number"
       },
       {
         "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
         "div": [
           {
             "@class": "red-arrow "
@@ -2014,69 +2057,33 @@
           {
             "@class": "production-box",
             "div": {
-              "@class": "production money",
-              "#text": "-1"
+              "#text": "-1",
+              "@class": "production money"
             }
           },
           {
-            "@class": "description ",
-            "#text": "dec-MegaCreditprod-1 "
+            "#text": "dec-MegaCreditprod-1 ",
+            "@class": "description "
           }
         ],
         "span": {
-          "@style": "font-size:14px; ",
-          "#text": "Action: look-1-0-true"
-        },
-        "br": [
-          "",
-          ""
-        ]
-      }
-    ]
-  },
-  {
-    "@class": "filterDiv event earthTag eventTag corporate ",
-    "div": [
-      {
-        "@class": "title background-color-event ",
-        "#text": "Business Contacts"
-      },
-      {
-        "@class": "price",
-        "#text": "7"
-      },
-      {
-        "@class": "corporate-icon project-icon"
-      },
-      {
-        "@class": "tag tag1 tag-event "
-      },
-      {
-        "@class": "tag tag2 tag-earth "
-      },
-      {
-        "@class": "number",
-        "#text": "#111"
-      },
-      {
-        "@class": "content ",
-        "span": {
-          "@style": "font-size:14px; ",
-          "#text": "look-4-2-false"
+          "#text": "Action: look-1-0-true",
+          "@style": "font-size:14px; "
         }
       }
     ]
   },
   {
     "@class": "filterDiv event earthTag eventTag corporate ",
+    "annotation": "LOOK AT THE TOP 4 CARDS FROM THE DECK. TAKE 2 OF THEM INTO HAND AND DISCARD THE OTHER 2",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Bribed Committee"
+        "#text": "Business Contacts",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "7"
+        "#text": "7",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2088,15 +2095,49 @@
         "@class": "tag tag2 tag-earth "
       },
       {
-        "@class": "number",
-        "#text": "#112"
+        "#text": "#111",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "span": {
+          "#text": "look-4-2-false",
+          "@style": "font-size:14px; "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event earthTag eventTag corporate ",
+    "annotation": "(Raise your TR 2 steps.)",
+    "div": [
+      {
+        "#text": "Bribed Committee",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "corporate-icon project-icon"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "#text": "#112",
+        "@class": "number"
       },
       {
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "-2"
+            "#text": "-2",
+            "@class": "points points-big"
           },
           {
             "@class": "tile rating"
@@ -2105,8 +2146,8 @@
             "@class": "tile rating"
           },
           {
-            "@class": "description ",
-            "#text": "inc-TR-2 "
+            "#text": "inc-TR-2 ",
+            "@class": "description "
           }
         ]
       }
@@ -2114,26 +2155,32 @@
   },
   {
     "@class": "filterDiv event  eventTag corporate",
+    "annotation": "(Remove up to 3 titanium from any player, or 4 steel, or 7 MC.)",
     "div": [
       {
-        "@class": "title background-color-event",
-        "#text": "Sabotage"
+        "#text": "Sabotage",
+        "@class": "title background-color-event"
       },
       {
-        "@class": "price",
-        "#text": "1"
+        "#text": "1",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event"
       },
       {
-        "@class": "number",
-        "#text": "#121"
+        "#text": "#121",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          "-3",
+          "OR -4",
+          "OR -"
+        ],
         "@class": "content",
         "div": [
           {
@@ -2143,49 +2190,47 @@
             "@class": "resource steel red-outline"
           },
           {
-            "@class": "resource money red-outline",
-            "#text": "7"
+            "#text": "7",
+            "@class": "resource money red-outline"
           },
           {
-            "@class": "description",
-            "#text": "dec-titanium-3-any or dec-steel-4-any or dec-MegaCredit-7-any"
+            "#text": "dec-titanium-3-any or dec-steel-4-any or dec-MegaCredit-7-any",
+            "@class": "description"
           }
-        ],
-        "#text": [
-          "-3",
-          "OR -4",
-          "OR -"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv active buildingTag corporate ",
+    "annotation": "(Action: Spend 7 MC to increase your steel production 1 step.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Industrial Center"
+        "#text": "Industrial Center",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "4"
+        "#text": "4",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
       },
       {
-        "@class": "number",
-        "#text": "#123"
+        "#text": "#123",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "*",
         "@class": "content ",
+        "br": "",
         "div": [
           {
-            "@class": "money resource ",
-            "#text": "7"
+            "#text": "7",
+            "@class": "money resource "
           },
           {
             "@class": "red-arrow "
@@ -2197,92 +2242,92 @@
             }
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-MegaCredit-7 and inc-steelprod-1 "
+            "#text": "Action: dec-MegaCredit-7 and inc-steelprod-1 ",
+            "@class": "description "
           },
           {
+            "#text": "\ud83c\udfed",
             "@class": "tile special-tile",
-            "@style": "font-size:17px;",
-            "#text": "🏭"
+            "@style": "font-size:17px;"
           },
           {
-            "@class": "description ",
-            "#text": "placetile/IndustrialBuilding/ground/true/City "
+            "#text": "placetile/IndustrialBuilding/ground/true/City ",
+            "@class": "description "
           }
-        ],
-        "br": "",
-        "#text": "*"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv event eventTag corporate",
+    "annotation": "(Steal up to 2 steel, or 3 MC from any player.)",
     "div": [
       {
-        "@class": "title background-color-event",
-        "#text": "Hired Raiders"
+        "#text": "Hired Raiders",
+        "@class": "title background-color-event"
       },
       {
-        "@class": "price",
-        "#text": "1"
+        "#text": "1",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event"
       },
       {
-        "@class": "number",
-        "#text": "#124"
+        "#text": "#124",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          "STEAL 2",
+          "OR STEAL"
+        ],
         "@class": "content",
+        "br": "",
         "div": [
           {
             "@class": "resource steel red-outline"
           },
           {
-            "@class": "resource money red-outline",
-            "#text": "3"
+            "#text": "3",
+            "@class": "resource money red-outline"
           },
           {
-            "@class": "description",
-            "#text": "dec-steel-2-any and inc-steel-2 or dec-MegaCredit-3-any and inc-MegaCredit-3"
+            "#text": "dec-steel-2-any and inc-steel-2 or dec-MegaCredit-3-any and inc-MegaCredit-3",
+            "@class": "description"
           }
-        ],
-        "br": "",
-        "#text": [
-          "STEAL 2",
-          "OR STEAL"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv automated corporate noneTag",
+    "annotation": "(Decrease your energy production 1 step and any MC production 2 steps. increase your MC production 2 steps.",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Hackers"
+        "#text": "Hackers",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "3"
+        "#text": "3",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#125"
+        "#text": "#125",
+        "@class": "number"
       },
       {
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "-1"
+            "#text": "-1",
+            "@class": "points points-big"
           },
           {
             "@class": "production-boxprod-box-size2a ",
@@ -2297,8 +2342,8 @@
                 "@class": "energyprod-"
               },
               {
-                "@class": "moneyprod-red-outline",
-                "#text": "2"
+                "#text": "2",
+                "@class": "moneyprod-red-outline"
               },
               {
                 "@class": "production-prefix ",
@@ -2307,14 +2352,14 @@
                 }
               },
               {
-                "@class": "moneyprod-",
-                "#text": "2"
+                "#text": "2",
+                "@class": "moneyprod-"
               }
             ]
           },
           {
-            "@class": "description ",
-            "#text": "dec-energyprod-1  *dec-MegaCreditprod-2-any*inc-MegaCreditprod-2 "
+            "#text": "dec-energyprod-1  *dec-MegaCreditprod-2-any*inc-MegaCreditprod-2 ",
+            "@class": "description "
           }
         ]
       }
@@ -2322,21 +2367,22 @@
   },
   {
     "@class": "filterDiv automated earthTag corporate",
+    "annotation": "(Increase your MC production 1 step for each Earth tag you have, including this.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Cartel"
+        "#text": "Cartel",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "8"
+        "#text": "8",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-earth"
       },
       {
-        "@class": "number",
-        "#text": "#137"
+        "#text": "#137",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2345,21 +2391,21 @@
         "@class": "content",
         "div": [
           {
+            "#text": "/",
             "@class": "production-boxprod-box-size2a",
             "div": [
               {
-                "@class": "moneyprod",
-                "#text": "1"
+                "#text": "1",
+                "@class": "moneyprod"
               },
               {
                 "@class": "tag-earthprod-tag resource-tag"
               }
-            ],
-            "#text": "/"
+            ]
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-1-Earth "
+            "#text": "inc-MegaCreditprod-1-Earth ",
+            "@class": "description"
           }
         ]
       }
@@ -2367,21 +2413,22 @@
   },
   {
     "@class": "filterDiv automated buildingTag corporate",
+    "annotation": "(Increase your titanium production 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Titanium Mine"
+        "#text": "Titanium Mine",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "7"
+        "#text": "7",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
       },
       {
-        "@class": "number",
-        "#text": "#144"
+        "#text": "#144",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2396,8 +2443,8 @@
             }
           },
           {
-            "@class": "description",
-            "#text": "inc-titaniumprod-1 "
+            "#text": "inc-titaniumprod-1 ",
+            "@class": "description"
           }
         ]
       }
@@ -2405,96 +2452,99 @@
   },
   {
     "@class": "filterDiv event eventTag corporate ",
+    "annotation": "ADD 1 RESOURCE TO A CARD WITH AT LEAST 1 RESOURCE ON IT",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "CEO's Favorite Project"
+        "#text": "CEO's Favorite Project",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "1"
+        "#text": "1",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event"
       },
       {
-        "@class": "number",
-        "#text": "#149"
+        "#text": "#149",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "add-1-resource-another-min1",
         "@class": "content ",
-        "@style": "font-size:14px;font-weight: normal;",
-        "#text": "add-1-resource-another-min1"
+        "@style": "font-size:14px;font-weight: normal;"
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag corporate reqs",
     "@data-science": "7",
+    "annotation": "(Effect: When you play a card, you pay 2 MC less for it.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Anti-gravity Technology"
+        "#text": "Anti-gravity Technology",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "14"
+        "#text": "14",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-science"
       },
       {
-        "@class": "number",
-        "#text": "#150"
+        "#text": "#150",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": ":",
         "@class": "content ",
-        "div": [
-          {
-            "@class": "points points-big",
-            "#text": "3"
-          },
-          {
-            "@class": "requirements",
-            "#text": "Science Science Science Science Science Science Science tags"
-          },
-          {
-            "@class": "description ",
-            "#text": "Effect: discount-2"
-          },
-          {
-            "@class": "description ",
-            "#text": "Requires 7 science tags"
-          }
-        ],
-        "span": {
-          "@class": "money resource ",
-          "#text": "-2"
-        },
         "br": [
           "",
           ""
         ],
-        "#text": ":"
+        "div": [
+          {
+            "#text": "3",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Science Science Science Science Science Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "#text": "Effect: discount-2",
+            "@class": "description "
+          },
+          {
+            "#text": "Requires 7 science tags",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "#text": "-2",
+          "@class": "money resource "
+        }
       }
     ]
   },
   {
     "@class": "filterDiv event earthTag eventTag corporate ",
+    "annotation": "(Decrease your MC production 1 step. Gain 10 MC.)",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Investment Loan"
+        "#text": "Investment Loan",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "3"
+        "#text": "3",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2506,8 +2556,8 @@
         "@class": "tag tag2 tag-earth "
       },
       {
-        "@class": "number",
-        "#text": "#151"
+        "#text": "#151",
+        "@class": "number"
       },
       {
         "@class": "content ",
@@ -2515,18 +2565,18 @@
           {
             "@class": "production-box",
             "div": {
-              "@class": "production money",
-              "#text": "-1"
+              "#text": "-1",
+              "@class": "production money"
             }
           },
           {
+            "#text": "10",
             "@class": "resource money",
-            "@style": "margin-left:20px;",
-            "#text": "10"
+            "@style": "margin-left:20px;"
           },
           {
-            "@class": "description ",
-            "#text": "dec-MegaCreditprod-1 *inc-MegaCredit-10"
+            "#text": "dec-MegaCreditprod-1 *inc-MegaCredit-10",
+            "@class": "description "
           }
         ]
       }
@@ -2535,39 +2585,42 @@
   {
     "@class": "filterDiv active  corporate reqs noneTag",
     "@data-temperature": "0",
+    "annotation": "(Action: Spend 8 heat to increase your terraform rating 1 step.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Caretaker Contract"
+        "#text": "Caretaker Contract",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "3"
+        "#text": "3",
+        "@class": "price"
       },
       {
-        "@class": "number",
-        "#text": "#154"
+        "#text": "#154",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "8",
         "@class": "content ",
+        "br": "",
         "div": [
           {
-            "@class": "requirements",
-            "#text": "0 Temperature"
+            "#text": "0 Temperature",
+            "@class": "requirements"
           },
           {
             "@class": "red-arrow "
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-Heat-8 and inc-TR-1 "
+            "#text": "Action: dec-Heat-8 and inc-TR-1 ",
+            "@class": "description "
           },
           {
-            "@class": "description ",
-            "#text": "Requires 0 C or warmer"
+            "#text": "Requires 0 C or warmer",
+            "@class": "description "
           }
         ],
         "span": [
@@ -2577,22 +2630,21 @@
           {
             "@class": "rating tile "
           }
-        ],
-        "br": "",
-        "#text": "8"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag corporate",
+    "annotation": "(Effect: After you pay for a standard project, except selling patents, you gain 3 MC.)",
     "div": [
       {
-        "@class": "title background-color-active",
-        "#text": "Standard Technology"
+        "#text": "Standard Technology",
+        "@class": "title background-color-active"
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-science"
@@ -2601,46 +2653,47 @@
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#156"
+        "#text": "#156",
+        "@class": "number"
       },
       {
+        "#text": ":",
         "@class": "content",
         "div": [
           {
-            "@class": "tile globals-box",
-            "#text": "Standard projects"
+            "#text": "Standard projects",
+            "@class": "tile globals-box"
           },
           {
-            "@class": "money resource",
-            "#text": "3"
+            "#text": "3",
+            "@class": "money resource"
           },
           {
-            "@class": "description",
-            "#text": "Effect: payforaction(StandardProject) / inc-MegaCredit-3"
+            "#text": "Effect: payforaction(StandardProject) / inc-MegaCredit-3",
+            "@class": "description"
           }
-        ],
-        "#text": ":"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated powerTag corporate reqs",
+    "annotation": "(Requires 2 Power tags. Decrease any Energy production 1 step and increase your own 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Power Supply Consortium"
+        "#text": "Power Supply Consortium",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "5"
+        "#text": "5",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-power"
       },
       {
-        "@class": "number",
-        "#text": "#160"
+        "#text": "#160",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2649,8 +2702,8 @@
         "@class": "content",
         "div": [
           {
-            "@class": "requirements",
-            "#text": "Power Power tags"
+            "#text": "Power Power tags",
+            "@class": "requirements"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -2676,8 +2729,8 @@
             ]
           },
           {
-            "@class": "description",
-            "#text": "Requires 2 Power tags*dec-Energyprod-1-any *inc-Energyprod-1"
+            "#text": "Requires 2 Power tags*dec-Energyprod-1-any *inc-Energyprod-1",
+            "@class": "description"
           }
         ]
       }
@@ -2685,23 +2738,25 @@
   },
   {
     "@class": "filterDiv active corporate noneTag",
+    "annotation": "OPPONENTS MAY NOT REMOVE YOUR",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Protected Habitats"
+        "#text": "Protected Habitats",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "5"
+        "#text": "5",
+        "@class": "price"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#173"
+        "#text": "#173",
+        "@class": "number"
       },
       {
+        "#text": "OPPONENTS MAY NOT REMOVE YOUR",
         "@class": "content",
         "@style": "font-weight: normal;",
         "br": "",
@@ -2715,28 +2770,28 @@
           {
             "@class": "microbe resource"
           }
-        ],
-        "#text": "OPPONENTS MAY NOT REMOVE YOUR"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated spaceTag corporate",
+    "annotation": "(Increase your MC production 1 step for each space tag your have, including this one.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Satellites"
+        "#text": "Satellites",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "10"
+        "#text": "10",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space"
       },
       {
-        "@class": "number",
-        "#text": "#175"
+        "#text": "#175",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2745,21 +2800,21 @@
         "@class": "content",
         "div": [
           {
+            "#text": "/",
             "@class": "production-boxprod-box-size2a",
             "div": [
               {
-                "@class": "production money",
-                "#text": "1"
+                "#text": "1",
+                "@class": "production money"
               },
               {
                 "@class": "resource-tagprod-tag tag-space"
               }
-            ],
-            "#text": "/"
+            ]
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-1-Space "
+            "#text": "inc-MegaCreditprod-1-Space ",
+            "@class": "description"
           }
         ]
       }
@@ -2767,14 +2822,15 @@
   },
   {
     "@class": "filterDiv automated buildingTag corporate ",
+    "annotation": "(Decrease your Energy production 1 step and increase your titanium and your MC production 1 step each.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Fuel Factory"
+        "#text": "Fuel Factory",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -2783,14 +2839,15 @@
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#180"
+        "#text": "#180",
+        "@class": "number"
       },
       {
         "@class": "content ",
         "div": [
           {
             "@class": "production-boxprod-box-size2a",
+            "br": "",
             "div": [
               {
                 "@class": "production-prefix",
@@ -2811,15 +2868,14 @@
                 "@class": "titaniumprod-"
               },
               {
-                "@class": "moneyprod-",
-                "#text": "1"
+                "#text": "1",
+                "@class": "moneyprod-"
               }
-            ],
-            "br": ""
+            ]
           },
           {
-            "@class": "description ",
-            "#text": "dec-Energyprod-1  *inc-titanium-1 *inc-MegaCreditprod-1 "
+            "#text": "dec-Energyprod-1  *inc-titanium-1 *inc-MegaCreditprod-1 ",
+            "@class": "description "
           }
         ]
       }
@@ -2827,14 +2883,15 @@
   },
   {
     "@class": "filterDiv automated cityTag buildingTag corporate ",
+    "annotation": "(Decrease your Energy production 1 step and increase your MC production 3 steps. Place a City tile.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Corporate Stronghold"
+        "#text": "Corporate Stronghold",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "11"
+        "#text": "11",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -2846,15 +2903,16 @@
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#182"
+        "#text": "#182",
+        "@class": "number"
       },
       {
         "@class": "content ",
+        "br": "",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "-2"
+            "#text": "-2",
+            "@class": "points points-big"
           },
           {
             "@class": "production-boxprod-box-size1a ",
@@ -2875,8 +2933,8 @@
                 }
               },
               {
-                "@class": "moneyprod-",
-                "#text": "3"
+                "#text": "3",
+                "@class": "moneyprod-"
               }
             ]
           },
@@ -2885,24 +2943,24 @@
             "@style": "margin-left:20px "
           },
           {
-            "@class": "description ",
-            "#text": "dec-Energyprod-1  *inc-MegaCreditprod-3 *placetile/city/ground/true"
+            "#text": "dec-Energyprod-1  *inc-MegaCreditprod-3 *placetile/city/ground/true",
+            "@class": "description "
           }
-        ],
-        "br": ""
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag buildingTag earthTag corporate ",
+    "annotation": "(When you play a Science tag, including this, either add a Science resource to this card, or remove a Science resource from this card to draw a card.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Olympus Conference"
+        "#text": "Olympus Conference",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "10"
+        "#text": "10",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -2914,18 +2972,23 @@
         "@class": "tag tag3 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#185"
+        "#text": "#185",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": [
+          ":",
+          "OR -",
+          "+"
+        ],
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
             "@class": "resource-tag tag-science"
@@ -2940,32 +3003,28 @@
             "@class": "card resource "
           },
           {
-            "@class": "description ",
-            "#text": "Effect: playcard(tag-Science) / add-1-Science or rem-1-Science and inc-Card-1*add-1-Science "
+            "#text": "Effect: playcard(tag-Science) / add-1-Science or rem-1-Science and inc-Card-1*add-1-Science ",
+            "@class": "description "
           }
-        ],
-        "#text": [
-          ":",
-          "OR -",
-          "+"
         ]
       }
     ]
   },
   {
     "@class": "filterDiv automated  corporate reqs noneTag",
+    "annotation": "(Requires two cities in play. Increase your MC up 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Rad-Suits"
+        "#text": "Rad-Suits",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "6"
+        "#text": "6",
+        "@class": "price"
       },
       {
-        "@class": "number",
-        "#text": "#186"
+        "#text": "#186",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -2974,23 +3033,23 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
-            "@class": "requirements",
-            "#text": "City City tile any"
+            "#text": "City City tile any",
+            "@class": "requirements"
           },
           {
             "@class": "production-box",
             "div": {
-              "@class": "production money",
-              "#text": "1"
+              "#text": "1",
+              "@class": "production money"
             }
           },
           {
-            "@class": "description",
-            "#text": "Requires two cities in play*inc-MegaCredit-1 "
+            "#text": "Requires two cities in play*inc-MegaCredit-1 ",
+            "@class": "description"
           }
         ]
       }
@@ -2998,14 +3057,15 @@
   },
   {
     "@class": "filterDiv event eventTag scienceTag corporate ",
+    "annotation": "LOOK AT THE TOP 3 CARDS FROM THE DECK. TAKE 1 OF THEM INTO HAND AND DISCARD THE OTHER 2",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Invention Contest"
+        "#text": "Invention Contest",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "2"
+        "#text": "2",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event "
@@ -3017,26 +3077,27 @@
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#192"
+        "#text": "#192",
+        "@class": "number"
       },
       {
+        "#text": "look-3-1-false",
         "@class": "content ",
-        "@style": "font-size:14px;font-weight: normal;",
-        "#text": "look-3-1-false"
+        "@style": "font-size:14px;font-weight: normal;"
       }
     ]
   },
   {
     "@class": "filterDiv active powerTag buildingTag corporate ",
+    "annotation": "(Action: Spend any amount of Energy and gain that amount of MC.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Power Infrastructure"
+        "#text": "Power Infrastructure",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "4"
+        "#text": "4",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -3045,13 +3106,14 @@
         "@class": "tag tag2 tag-power "
       },
       {
-        "@class": "number",
-        "#text": "#194"
+        "#text": "#194",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "X",
         "@class": "content ",
         "div": [
           {
@@ -3061,28 +3123,28 @@
             "@class": "red-arrow "
           },
           {
-            "@class": "money resource ",
-            "#text": "X"
+            "#text": "X",
+            "@class": "money resource "
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-Energy-X-MegaCredit"
+            "#text": "Action: dec-Energy-X-MegaCredit",
+            "@class": "description "
           }
-        ],
-        "#text": "X"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv event eventTag corporate ",
+    "annotation": "(The next card you play this generation costs 8 MC less.)",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Indentured Workers"
+        "#text": "Indentured Workers",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "0"
+        "#text": "0",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event "
@@ -3091,42 +3153,43 @@
         "@class": "corporate-icon project-icon"
       },
       {
-        "@class": "number",
-        "#text": "#195"
+        "#text": "#195",
+        "@class": "number"
       },
       {
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "-1"
+            "#text": "-1",
+            "@class": "points points-big"
           },
           {
-            "@class": "resource money",
-            "#text": "-8"
+            "#text": "-8",
+            "@class": "resource money"
           },
           {
-            "@class": "description ",
-            "#text": "The next card you play this generation is discount-8"
+            "#text": "The next card you play this generation is discount-8",
+            "@class": "description "
           }
         ],
         "span": {
-          "@style": "font-size:14px;",
-          "#text": "NEXT CARD:"
+          "#text": "NEXT CARD:",
+          "@style": "font-size:14px;"
         }
       }
     ]
   },
   {
     "@class": "filterDiv automated spaceTag scienceTag corporate ",
+    "annotation": "(Draw 1 card.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Lagrange Observatory"
+        "#text": "Lagrange Observatory",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "9"
+        "#text": "9",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
@@ -3135,8 +3198,8 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#196"
+        "#text": "#196",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -3145,15 +3208,15 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
             "@class": "resource card"
           },
           {
-            "@class": "description",
-            "#text": "inc-Card-1"
+            "#text": "inc-Card-1",
+            "@class": "description"
           }
         ]
       }
@@ -3161,14 +3224,15 @@
   },
   {
     "@class": "filterDiv automated spaceTag jovianTag corporate ",
+    "annotation": "(Raise your TR 1 step for each Jovian tag you have, including this.)",
     "div": [
       {
-        "@class": "title background-color-automated ",
-        "#text": "Terraforming Ganymede"
+        "#text": "Terraforming Ganymede",
+        "@class": "title background-color-automated "
       },
       {
-        "@class": "price",
-        "#text": "33"
+        "#text": "33",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-space "
@@ -3177,18 +3241,19 @@
         "@class": "tag tag2 tag-jovian "
       },
       {
-        "@class": "number",
-        "#text": "#197"
+        "#text": "#197",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
+        "#text": "/",
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "2"
+            "#text": "2",
+            "@class": "points points-big"
           },
           {
             "@class": "tile rating"
@@ -3197,41 +3262,42 @@
             "@class": "resource-tag tag-jovian"
           },
           {
-            "@class": "description ",
-            "#text": "inc-TR-1-Jovian "
+            "#text": "inc-TR-1-Jovian ",
+            "@class": "description "
           }
-        ],
-        "#text": "/"
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv active scienceTag  corporate ",
+    "annotation": "(Action: Spend 2 MC to draw a card.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "Restricted Area"
+        "#text": "Restricted Area",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "11"
+        "#text": "11",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#199"
+        "#text": "#199",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
       },
       {
         "@class": "content ",
+        "br": "",
         "div": [
           {
-            "@class": "money resource ",
-            "#text": "2"
+            "#text": "2",
+            "@class": "money resource "
           },
           {
             "@class": "red-arrow "
@@ -3240,40 +3306,40 @@
             "@class": "card resource "
           },
           {
-            "@class": "description ",
-            "#text": "Action: dec-MegaCredit-2 and inc-Card-1"
+            "#text": "Action: dec-MegaCredit-2 and inc-Card-1",
+            "@class": "description "
           },
           {
+            "#text": "\u20e0",
             "@class": "tile special-tile",
-            "@style": "font-size: 24px;",
-            "#text": "⃠"
+            "@style": "font-size: 24px;"
           },
           {
-            "@class": "description ",
-            "#text": "placetile/Restricted/ground/true"
+            "#text": "placetile/Restricted/ground/true",
+            "@class": "description "
           }
-        ],
-        "br": ""
+        ]
       }
     ]
   },
   {
     "@class": "filterDiv automated powerTag corporate",
+    "annotation": "(Decrease any Energy production 1 step and increase your own 1 step.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Energy Tapping"
+        "#text": "Energy Tapping",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "3"
+        "#text": "3",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-power"
       },
       {
-        "@class": "number",
-        "#text": "#201"
+        "#text": "#201",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -3282,8 +3348,8 @@
         "@class": "content",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "-1"
+            "#text": "-1",
+            "@class": "points points-big"
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -3309,8 +3375,8 @@
             ]
           },
           {
-            "@class": "description",
-            "#text": "dec-Energyprod-1-any *inc-Energyprod-1"
+            "#text": "dec-Energyprod-1-any *inc-Energyprod-1",
+            "@class": "description"
           }
         ]
       }
@@ -3318,14 +3384,15 @@
   },
   {
     "@class": "filterDiv eventTag scienceTag spaceTag corporate event ",
+    "annotation": "(Draw two cards.)",
     "div": [
       {
-        "@class": "title background-color-event ",
-        "#text": "Technology Demonstration"
+        "#text": "Technology Demonstration",
+        "@class": "title background-color-event "
       },
       {
-        "@class": "price",
-        "#text": "5"
+        "#text": "5",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-event "
@@ -3337,8 +3404,8 @@
         "@class": "tag tag3 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#204"
+        "#text": "#204",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -3353,8 +3420,8 @@
             "@class": "resource card"
           },
           {
-            "@class": "description ",
-            "#text": "inc-card-2"
+            "#text": "inc-card-2",
+            "@class": "description "
           }
         ]
       }
@@ -3362,14 +3429,15 @@
   },
   {
     "@class": "filterDiv automated buildingTag scienceTag corporate",
+    "annotation": "(Increase your MC production 1 step for every 2 Building tags you have, including this.)",
     "div": [
       {
-        "@class": "title background-color-automated",
-        "#text": "Medical Lab"
+        "#text": "Medical Lab",
+        "@class": "title background-color-automated"
       },
       {
-        "@class": "price",
-        "#text": "13"
+        "#text": "13",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building"
@@ -3378,8 +3446,8 @@
         "@class": "tag tag2 tag-science"
       },
       {
-        "@class": "number",
-        "#text": "#207"
+        "#text": "#207",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -3388,25 +3456,25 @@
         "@class": "content",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
+            "#text": "/ 2",
             "@class": "production-boxprod-box-size3",
             "div": [
               {
-                "@class": "moneyprod",
-                "#text": "1"
+                "#text": "1",
+                "@class": "moneyprod"
               },
               {
                 "@class": "resource-tagprod-tag tag-building"
               }
-            ],
-            "#text": "/ 2"
+            ]
           },
           {
-            "@class": "description",
-            "#text": "inc-MegaCreditprod-0.5-Building"
+            "#text": "inc-MegaCreditprod-0.5-Building",
+            "@class": "description"
           }
         ]
       }
@@ -3415,14 +3483,15 @@
   {
     "@class": "filterDiv active scienceTag buildingTag corporate reqs",
     "@data-science": "3",
+    "annotation": "(Action: Draw 2 cards.)",
     "div": [
       {
-        "@class": "title background-color-active ",
-        "#text": "AI Central"
+        "#text": "AI Central",
+        "@class": "title background-color-active "
       },
       {
-        "@class": "price",
-        "#text": "21"
+        "#text": "21",
+        "@class": "price"
       },
       {
         "@class": "tag tag1 tag-building "
@@ -3431,8 +3500,8 @@
         "@class": "tag tag2 tag-science "
       },
       {
-        "@class": "number",
-        "#text": "#208"
+        "#text": "#208",
+        "@class": "number"
       },
       {
         "@class": "corporate-icon project-icon"
@@ -3441,19 +3510,19 @@
         "@class": "content ",
         "div": [
           {
-            "@class": "points points-big",
-            "#text": "1"
+            "#text": "1",
+            "@class": "points points-big"
           },
           {
-            "@class": "requirements",
-            "#text": "Science Science Science tags"
+            "#text": "Science Science Science tags",
+            "@class": "requirements"
           },
           {
             "@class": "red-arrow "
           },
           {
-            "@class": "description ",
-            "#text": "Action: inc-card-2"
+            "#text": "Action: inc-card-2",
+            "@class": "description "
           },
           {
             "@class": "production-boxprod-box-size1a",
@@ -3471,9 +3540,9 @@
             ]
           },
           {
+            "#text": "Requires 3 Science tags to play*dec-Energyprod-1 ",
             "@class": "description",
-            "@style": "position:absolute;text-align:left;margin-top:-53px;margin-left:85px;",
-            "#text": "Requires 3 Science tags to play*dec-Energyprod-1 "
+            "@style": "position:absolute;text-align:left;margin-top:-53px;margin-left:85px;"
           }
         ],
         "span": [

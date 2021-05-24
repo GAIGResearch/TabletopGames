@@ -67,6 +67,10 @@ public class TMCardView extends JComponent {
 
         aboveRibbon = new Rectangle(width/5, 0, width - width/5 - spacing/2, height/8);
 
+        if (card != null) {
+            setToolTipText(card.annotation);
+        }
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -101,6 +105,9 @@ public class TMCardView extends JComponent {
             index = updateIndex;
             gs = updateGS;
             update = false;
+            if (card != null) {
+                setToolTipText(card.annotation);
+            }
         }
 
         Graphics2D g = (Graphics2D) g1;
