@@ -107,6 +107,8 @@ public class TMCardView extends JComponent {
             update = false;
             if (card != null) {
                 setToolTipText(card.annotation);
+            } else {
+                setToolTipText(null);
             }
         }
 
