@@ -113,7 +113,7 @@ public class TMGameState extends AbstractGameState {
 
         // General public info
         copy.generation = generation;
-        copy.board = new GridBoard<>(board.getGridValues());  // Deep copy of board
+        copy.board = new GridBoard<>(board.getWidth(), board.getHeight());  // Deep copy of board
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
                 if (board.getElement(j, i) != null) {
