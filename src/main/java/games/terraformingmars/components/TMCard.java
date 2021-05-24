@@ -76,6 +76,7 @@ public class TMCard extends Card {
         TMCard card = new TMCard();
         card.cardType = TMTypes.CardType.Corporation;
         card.number = (int)(long)cardDef.get("id");
+        card.annotation = (String) cardDef.get("annotation");
         card.setComponentName((String)cardDef.get("name"));
 
         JSONArray start = (JSONArray) cardDef.get("start");
