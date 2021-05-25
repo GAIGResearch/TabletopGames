@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
@@ -18,8 +19,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
+import static games.GameType.ColtExpress;
 import static games.GameType.DotsAndBoxes;
 import static games.GameType.TerraformingMars;
+import static games.GameType.Pandemic;
 
 public class Game {
 
@@ -715,7 +718,6 @@ public class Game {
         MCTSParams params1 = new MCTSParams();
 
         players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));

@@ -9,6 +9,7 @@ import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.AbstractGUI;
+import core.interfaces.IGamePhase;
 import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -41,11 +42,14 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
     ArrayList<PandemicCardView>[] playerHands;
     ArrayList<PandemicCardView> bufferDeck;
     PandemicBoardView boardView;
+    PandemicCounterView cY, cR, cB, cK;
 
+    Game game;
     PandemicGameState gameState;
     int nPlayers;
     int maxCards;
     int maxBufferCards = 10;
+    int panelWidth;
 
     ArrayList<Integer>[] handCardHighlights;
     HashSet<Integer> playerHighlights;
@@ -58,6 +62,7 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
         super(ac, 721);
         if (game == null || ac == null) return;
 
+        this.game = game;
         gameState = (PandemicGameState) game.getGameState();
         maxCards = ((PandemicParameters)gameState.getGameParameters()).getMax_cards_per_player() + 2;  // 2 over limit before discard
         nPlayers = gameState.getNPlayers();
@@ -95,7 +100,18 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
         playerCards = new PandemicCardView[nPlayers];
         playerHands = new ArrayList[nPlayers];
 
+        JPanel playerAreas = new JPanel();
+        playerAreas.setLayout(new BoxLayout(playerAreas, BoxLayout.Y_AXIS));
+        JPanel[] playerDefs = new JPanel[nPlayers];
+
         for (int i = 0; i < nPlayers; i++) {
+            playerDefs[i] = new JPanel();
+            playerDefs[i].setLayout(new BoxLayout(playerDefs[i], BoxLayout.Y_AXIS));
+            JPanel playerDef = new JPanel();
+            playerDef.setLayout(new BoxLayout(playerDef, BoxLayout.X_AXIS));
+            playerDefs[i].add(new JLabel("Player " + i + " [" + game.getPlayers().get(i).toString() + "]"));
+            playerDefs[i].add(playerDef);
+
             Card playerCard = (Card) gameState.getComponent(PandemicConstants.playerCardHash, i);
             PandemicCardView cv = new PandemicCardView(playerCard);
             int player = i;
@@ -112,10 +128,10 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
                 }
             });
             playerCards[i] = cv;
-            playerCardsPanel.add(cv);
+            playerDef.add(cv);
 
             JPanel hand = new JPanel();
-            hand.setLayout(new BoxLayout(hand, BoxLayout.Y_AXIS));
+            hand.setLayout(new BoxLayout(hand, BoxLayout.X_AXIS));
             Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(playerHandHash, i);
             playerHands[i] = new ArrayList<>();
             for (int k = 0; k < maxCards; k++) {
@@ -127,18 +143,13 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
                 hand.add(cv2);
             }
             JScrollPane scrollPane = new JScrollPane(hand);
-            scrollPane.setPreferredSize(new Dimension(cardWidth + offset*2, cardHeight *3 + offset));
-            scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-            scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-            playerHandPanel.add(scrollPane);
+            scrollPane.setPreferredSize(new Dimension(cardWidth * 3 + offset, cardHeight + offset*2));
+            scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+            scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
+            playerDef.add(scrollPane);
+            playerAreas.add(playerDefs[i]);
         }
 
-        JPanel playerAreas = new JPanel();
-        playerAreas.setLayout(new BoxLayout(playerAreas, BoxLayout.Y_AXIS));
-        playerAreas.add(new JLabel("Players"));
-        playerAreas.add(playerCardsPanel);
-        playerAreas.add(new JLabel("Cards in players' hands"));
-        playerAreas.add(playerHandPanel);
         cardAreas.add(playerAreas);
 
         // Buffer deck space
@@ -203,18 +214,26 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
         updateGameStateInfo(gameState);
 
         gameInfo.add(gameStatus);
-        gameInfo.add(playerStatus);
         gameInfo.add(gamePhase);
         gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(gameTurnStep);
 
-        gameInfo.setPreferredSize(new Dimension(300, defaultInfoPanelHeight+5));
+        gameInfo.setPreferredSize(new Dimension(220, defaultInfoPanelHeight+5));
+        panelWidth = 220;
 
         JPanel wrapper = new JPanel();
+        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.X_AXIS));
         wrapper.add(gameInfo);
-        wrapper.setLayout(new GridBagLayout());
+
+        historyInfo.setEditable(false);
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+        historyContainer.setPreferredSize(new Dimension(300, 30));
+        panelWidth += 300 + offset;
+        wrapper.add(historyContainer);
+
         return wrapper;
     }
 
@@ -226,32 +245,48 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
     private JPanel createCounterArea() {
         JPanel counterArea = new JPanel();
 
-        Counter cnY = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease yellow"));
-        JComponent cY = new PandemicCounterView(cnY, Color.yellow, null);
+        counterArea.add(new JLabel("Disease Cubes left:"));
+        Counter cnY = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease Cube yellow"));
+        cY = new PandemicCounterView(cnY, Color.yellow, null);
         counterArea.add(cY);
-        Counter cnR = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease red"));
-        JComponent cR = new PandemicCounterView(cnR, Color.red, null);
+        Counter cnR = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease Cube red"));
+        cR = new PandemicCounterView(cnR, Color.red, null);
         counterArea.add(cR);
-        Counter cnB = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease blue"));
-        JComponent cB = new PandemicCounterView(cnB, Color.blue, null);
+        Counter cnB = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease Cube blue"));
+        cB = new PandemicCounterView(cnB, Color.blue, null);
         counterArea.add(cB);
-        Counter cnK = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease black"));
-        JComponent cK = new PandemicCounterView(cnK, Color.black, null);
+        Counter cnK = (Counter) gameState.getComponent(Hash.GetInstance().hash("Disease Cube black"));
+        cK = new PandemicCounterView(cnK, Color.black, null);
         counterArea.add(cK);
 
         return counterArea;
     }
 
+    int activePlayer;
+    IGamePhase currentGamePhase;
+
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken){
         this.gameState = (PandemicGameState) gameState;
         boardView.gameState = this.gameState;
-        int activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        boolean newTurn = gameState.getTurnOrder().getCurrentPlayer(gameState) != activePlayer || currentGamePhase == null || !currentGamePhase.equals(gameState.getGamePhase());
+
+        currentGamePhase = gameState.getGamePhase();
+        activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        // Update counters
+        Counter cnY = (Counter) this.gameState.getComponent(Hash.GetInstance().hash("Disease Cube yellow"));
+        cY.updateComponent(cnY);
+        Counter cnR = (Counter) this.gameState.getComponent(Hash.GetInstance().hash("Disease Cube red"));
+        cR.updateComponent(cnR);
+        Counter cnB = (Counter) this.gameState.getComponent(Hash.GetInstance().hash("Disease Cube blue"));
+        cB.updateComponent(cnB);
+        Counter cnK = (Counter) this.gameState.getComponent(Hash.GetInstance().hash("Disease Cube black"));
+        cK.updateComponent(cnK);
 
         for (int i = 0; i < nPlayers; i++) {
             Card playerCard = (Card) this.gameState.getComponent(PandemicConstants.playerCardHash, i);
             playerCards[i].updateComponent(playerCard);
-            playerCards[i].setUsingSecondary(i == activePlayer);
+//            playerCards[i].setUsingSecondary(i == activePlayer);
             playerCards[i].repaint();
 
             Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(playerHandHash, i);
@@ -276,6 +311,12 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
         if (player instanceof HumanGUIPlayer) {
             updateCardHighlightDisplay();
             updateActionButtons(player, gameState);
+            if (newTurn) {
+                PropertyString playerLocationProperty = (PropertyString) this.gameState.getComponent(playerCardHash, activePlayer)
+                        .getProperty(playerLocationHash);
+                String playerLocationName = playerLocationProperty.value;
+                JOptionPane.showMessageDialog(this, "It's your turn! You are in " + playerLocationName + ". Current game phase: " + this.gameState.getGamePhase());
+            }
         } else {
             // Clear all highlights if it's not human acting
             clearHighlights();
@@ -309,6 +350,7 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         int id = player.getPlayerID();
         List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+        resetActionButtons();
         int k = 0;
 
         Set<String> highlights = boardView.getHighlights().keySet();
@@ -369,7 +411,7 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
                         }
                     }
                 }
-            } else if (action instanceof DoNothing || action instanceof TreatDisease) {
+            } else if (actions.size() > 0 && action instanceof DoNothing || action instanceof TreatDisease) {
                 actionButtons[k].setVisible(true);
                 actionButtons[k++].setButtonAction(action, gameState);
             } else if (action instanceof CureDisease) {
@@ -539,9 +581,11 @@ public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
         return false;
     }
 
-//    @Override
-//    public Dimension getPreferredSize() {
-//        Dimension boardSize = boardView.getPreferredSize();
-//        return new Dimension((int)(boardSize.getWidth() + (cardWidth + offset*2)*(nPlayers+1)), (int)boardSize.getHeight());
-//    }
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension boardSize = boardView.getPreferredSize();
+        return new Dimension((int)(boardSize.getWidth() + panelWidth),
+                Math.max((int)boardSize.getHeight(),
+                        defaultInfoPanelHeight*2+nPlayers*cardHeight+nPlayers*offset*4) + defaultItemSize + offset);
+    }
 }
