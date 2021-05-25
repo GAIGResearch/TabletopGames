@@ -245,27 +245,35 @@ public class TMCardView extends JComponent {
         for (Requirement r: card.discountEffects.keySet()) {
             int amount = card.discountEffects.get(r);
             if (r instanceof TagsPlayedRequirement || r instanceof TagOnCardRequirement) {
-                int nTags;
-                TMTypes.Tag[] tags;
+                int nTags = 0;
+                TMTypes.Tag[] tags = null;
                 if (r instanceof TagsPlayedRequirement) {
-                    nTags = ((TagsPlayedRequirement) r).tags.length;
-                    tags = ((TagsPlayedRequirement) r).tags;
-                } else {
-                    nTags = ((TagOnCardRequirement) r).tags.length;
-                    tags = ((TagOnCardRequirement) r).tags;
-                }
-                int widthSection = nTags * size + (nTags-1)*size;
-                int xD = width/2 - widthSection - size/2;
-                int i = 0;
-                for (TMTypes.Tag t: tags) {
-                    Image from = ImageIO.GetInstance().getImage(t.getImagePath());
-                    drawImage(g, from, xD, yD, size, size);
-                    xD += size;
-                    if (i != nTags-1) {
-                        drawShadowStringCentered(g, "/", new Rectangle(xD, yD, size, size));
-                        xD += size;
+                    if (((TagsPlayedRequirement) r).tags != null) {
+                        nTags = ((TagsPlayedRequirement) r).tags.length;
+                        tags = ((TagsPlayedRequirement) r).tags;
                     }
-                    i++;
+                } else {
+                    if (((TagOnCardRequirement) r).tags != null) {
+                        nTags = ((TagOnCardRequirement) r).tags.length;
+                        tags = ((TagOnCardRequirement) r).tags;
+                    }
+                }
+                if (tags != null) {
+                    int widthSection = nTags * size + (nTags - 1) * size;
+                    int xD = width / 2 - widthSection - size / 2;
+                    int i = 0;
+                    for (TMTypes.Tag t : tags) {
+                        Image from = ImageIO.GetInstance().getImage(t.getImagePath());
+                        drawImage(g, from, xD, yD, size, size);
+                        xD += size;
+                        if (i != nTags - 1) {
+                            drawShadowStringCentered(g, "/", new Rectangle(xD, yD, size, size));
+                            xD += size;
+                        }
+                        i++;
+                    }
+                } else {
+                    int a =0;
                 }
                 drawShadowStringCentered(g, " : ", new Rectangle(width/2 - size/2, yD, size, size));
                 drawShadowStringCentered(g, "-" + amount, new Rectangle(width/2 + size, yD, size, size));

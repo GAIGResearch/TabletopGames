@@ -80,10 +80,11 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
 
         TMCard card = (TMCard) gs.getComponentById(getPlayCardID());
-        int sum = gs.playerResourceSum(player, card, resourcesRemaining, getCostResource());
+        double rate = gs.getResourceMapRate(res, getCostResource());
+        int sum = gs.playerResourceSum(player, card, resourcesRemaining, getCostResource(), false);
         int remaining = getCost() - costPaid - sum;
-        int min = Math.max(0, (int)(Math.ceil(remaining/gs.getResourceMapRate(res, getCostResource()))));
-        int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((getCost() - costPaid)/gs.getResourceMapRate(res, getCostResource()))));
+        int min = Math.max(0, (int)(Math.ceil(remaining/rate)));
+        int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((getCost() - costPaid)/rate)));
 
         // Can pay between min and max of this resource
         ArrayList<AbstractAction> actions = new ArrayList<>();
