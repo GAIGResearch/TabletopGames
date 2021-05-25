@@ -33,6 +33,7 @@ public class Utils {
     }
 
     public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color, Color shadow, int size) {
+
         Font f = g.getFont();
 
         if (size != -1) {
@@ -60,7 +61,7 @@ public class Utils {
         }
         // Get the FontMetrics
         FontMetrics metrics = g.getFontMetrics(g.getFont());
-        // Adjust size of text so it fits in given rect
+        // Adjust size of text so it fits in given rect // TODO or split text over multiple lines if needed
         while (metrics.stringWidth(text) > rectToCenterIn.getWidth()) {
             size -= 1;
             g.setFont(new Font(f.getName(), f.getStyle(), size));

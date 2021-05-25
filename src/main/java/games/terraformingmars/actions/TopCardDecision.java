@@ -15,9 +15,9 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
     int stage;
     int nCardsKept;
 
-    final int nCardsLook;
-    final int nCardsKeep;
-    final boolean buy;
+    public final int nCardsLook;
+    public final int nCardsKeep;
+    public final boolean buy;
 
     public TopCardDecision(int nCardsLook, int nCardsKeep, boolean buy) {
         super(-1, true);

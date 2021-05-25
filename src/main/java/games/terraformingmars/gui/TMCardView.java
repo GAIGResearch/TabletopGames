@@ -155,21 +155,21 @@ public class TMCardView extends JComponent {
             int size = contentRect.width/3;
             int nOther = (int)(1/card.nPoints);
             if (card.pointsResource != null) {
-                drawShadowStringCentered(g, "1/" + (nOther != 1? nOther : ""),
+                drawShadowStringCentered(g, "1/" + (nOther > 1? nOther : ""),
                         new Rectangle(contentRect.x, contentRect.y, contentRect.width/2, contentRect.height),
                         Color.orange, Color.black, 14);
                 drawImage(g, ImageIO.GetInstance().getImage(card.pointsResource.getImagePath()),
                         contentRect.x + contentRect.width/2 + contentRect.width/4 - size/2, contentRect.y + contentRect.height/2 - size/2,
                         size, size);
             } else if (card.pointsTile != null) {
-                drawShadowStringCentered(g, "1/" + (nOther != 1? nOther : ""),
+                drawShadowStringCentered(g, "1/" + (nOther > 1? nOther : ""),
                         new Rectangle(contentRect.x, contentRect.y, contentRect.width/2, contentRect.height),
                         Color.orange, Color.black, 14);
                 drawImage(g, ImageIO.GetInstance().getImage(card.pointsTile.getImagePath()),
                         contentRect.x + contentRect.width/2 + contentRect.width/4 - size/2, contentRect.y + contentRect.height/2 - size/2,
                         size, size);
             } else if (card.pointsTag != null) {
-                drawShadowStringCentered(g, "1/" + (nOther != 1? nOther : ""),
+                drawShadowStringCentered(g, "1/" + (nOther > 1? nOther : ""),
                         new Rectangle(contentRect.x, contentRect.y, contentRect.width/2, contentRect.height),
                         Color.orange, Color.black, 14);
                 drawImage(g, ImageIO.GetInstance().getImage(card.pointsTag.getImagePath()),
@@ -238,7 +238,7 @@ public class TMCardView extends JComponent {
         // Draw actions
         int yA = yRC + spacing;
         for (TMAction a: card.actions) {
-            int xA = width/2 - defaultItemSize/4 - size;
+            int xA = width/2;
             yA += size + spacing / 5;
             drawAction(g, a, xA, yA, size);
         }
@@ -269,6 +269,8 @@ public class TMCardView extends JComponent {
                 drawImage(g, from, xD, yD, size);
                 drawShadowStringCentered(g, ": +/-" + card.discountEffects.get(r), new Rectangle(xD + size, yD, size*3, size));
             }
+            // todo tag on card req
+            // todo ActionTypeRequirement (standard project)
             yD += size + spacing/2;
         }
         // Draw resource mappings
@@ -288,6 +290,7 @@ public class TMCardView extends JComponent {
             }
             drawShadowStringCentered(g, text, new Rectangle(xRM + size, yRM, size*4, size));
             yRM += size + spacing/2;
+            // todo tag req
         }
         // Draw after-action effects
         int yEF = yRM + spacing;
@@ -324,11 +327,6 @@ public class TMCardView extends JComponent {
                     i++;
                 }
             }
-            // "to" depends on the action applied as the effect
-            TMAction action = e.effectAction;
-            if (action instanceof ModifyPlayerResource) {
-                drawModifyPlayerResourceAction(g, (ModifyPlayerResource) action, xEF + size * 4, yEF, size);
-            }
 
             if (!e.mustBeCurrentPlayer) {
                 // draw red outline for the left part
@@ -360,6 +358,11 @@ public class TMCardView extends JComponent {
                 }
             }
             drawShadowStringCentered(g, " : ", new Rectangle(xEF + size*2, yEF, size, size));
+
+            // "to" depends on the action applied as the effect
+            TMAction action = e.effectAction;
+            drawCardEffect(g, action, xEF + size * 4, yEF, size, -1);
+
             yEF += size + spacing/2;
         }
         // Draw card effects
@@ -367,7 +370,7 @@ public class TMCardView extends JComponent {
         if (card.immediateEffects.length > 0) {
             int xE = width/2;
             for (TMAction a: card.immediateEffects) {
-                yE = drawCardEffect(g, a, xE, yE);
+                yE = drawCardEffect(g, a, xE, yE, ribbonRect.width, -1);
             }
         }
     }
@@ -405,7 +408,7 @@ public class TMCardView extends JComponent {
         }
         // Draw first action
         int yA = yRes + spacing;
-        int xA = width / 2 - defaultItemSize / 4 - size;
+        int xA = width / 2;
         if (card.firstAction != null) {
             drawAction(g, card.firstAction, xA, yA, size);
             drawShadowStringCentered(g, "*", new Rectangle(5, yA, size, size));
@@ -443,6 +446,8 @@ public class TMCardView extends JComponent {
                 drawImage(g, from, xD, yD, size);
                 drawShadowStringCentered(g, ": +/-" + card.discountEffects.get(r), new Rectangle(xD + size, yD, size*3, size));
             }
+            // todo ActionTypeRequirement (standard project)
+            // todo TagsOnCard req
             yD += size + spacing/2;
         }
         // Draw resource mappings
@@ -462,6 +467,7 @@ public class TMCardView extends JComponent {
             }
             drawShadowStringCentered(g, text, new Rectangle(xRM + size, yRM, size*4, size));
             yRM += size + spacing/2;
+            // todo TagOnCard requirement
         }
         // Draw after-action effects
         int yEF = yRM + spacing;
@@ -498,11 +504,6 @@ public class TMCardView extends JComponent {
                     i++;
                 }
             }
-            // "to" depends on the action applied as the effect
-            TMAction action = e.effectAction;
-            if (action instanceof ModifyPlayerResource) {
-                drawModifyPlayerResourceAction(g, (ModifyPlayerResource) action, xEF + size * 4, yEF, size);
-            }
 
             if (!e.mustBeCurrentPlayer) {
                 // draw red outline for the left part
@@ -533,6 +534,11 @@ public class TMCardView extends JComponent {
                 }
             }
             drawShadowStringCentered(g, " : ", new Rectangle(xEF + size*2, yEF, size, size));
+
+            // "to" depends on the action applied as the effect
+            TMAction action = e.effectAction;
+            drawCardEffect(g, action, xEF + size * 4, yEF, size, -1);
+
             yEF += size + spacing/2;
         }
     }
@@ -548,7 +554,7 @@ public class TMCardView extends JComponent {
         drawImage(g, resImg, x, y, size);
     }
 
-    private int drawCardEffect(Graphics2D g, TMAction a, int xE, int yE) {
+    private int drawCardEffect(Graphics2D g, TMAction a, int xE, int yE, int width, int height) {
         // xE is the middle
 
         if (a instanceof ModifyPlayerResource) {
@@ -567,7 +573,7 @@ public class TMCardView extends JComponent {
             int widthOne = (width - sepWidth*(nActions-1))/nActions;
             xE = xE - width/2 + widthOne/2;
             for (int i = 0; i < nActions; i++) {
-                drawCardEffect(g, ((ChoiceAction) a).actions[i], xE, yE);
+                drawCardEffect(g, ((ChoiceAction) a).actions[i], xE, yE, width, height);
                 xE += widthOne;
                 if (i != nActions-1) {
                     drawShadowStringCentered(g, " / ", new Rectangle(xE - widthOne/2, yE, sepWidth, defaultItemSize / 2));
@@ -579,8 +585,32 @@ public class TMCardView extends JComponent {
             // Vertical display, one action under the other
             int nActions = ((CompoundAction) a).actions.length;
             for (int i = 0; i < nActions; i++) {
-                yE = drawCardEffect(g, ((CompoundAction) a).actions[i], xE, yE);
+                yE = drawCardEffect(g, ((CompoundAction) a).actions[i], xE, yE, width, height);
             }
+        } else if (a instanceof DiscardCard) {
+            int aaaa = 0;
+        } else if (a instanceof DuplicateImmediateEffect) {
+            drawDuplicateEffect(g, (DuplicateImmediateEffect) a, xE, yE, defaultItemSize/3);
+            yE += defaultItemSize/3 + spacing/5;
+        } else if (a instanceof ModifyGlobalParameter) {
+            drawModifyGlobalParameter(g, (ModifyGlobalParameter) a, xE, yE, defaultItemSize/3);
+            yE += defaultItemSize/3 + spacing/5;
+        } else if (a instanceof  ReserveTile) {
+            String text = "Reserve tile";
+            FontMetrics fm = g.getFontMetrics();
+            int w = fm.stringWidth(text);
+            drawShadowStringCentered(g, text, new Rectangle(xE-w/2, yE, w, defaultItemSize/3));
+        } else if (a instanceof TopCardDecision) {
+            int nCardsLook = ((TopCardDecision) a).nCardsLook;
+            int nCardsKeep = ((TopCardDecision) a).nCardsKeep;
+            boolean buy = ((TopCardDecision) a).buy;
+            String text = "Look at the top " + (nCardsLook > 1? nCardsLook + " cards." : "card.");
+            if (buy) {
+                text += " Buy " + (nCardsKeep > 1? nCardsKeep : "it") + " or discard all.";
+            } else {
+                text += " Take " + nCardsKeep + " of them into your hand and discard the rest.";
+            }
+            drawShadowStringCentered(g, text, new Rectangle(xE - width/2, yE, width, TMDeckDisplay.cardHeight/3));
         } else {
             int b = 0;
         }
@@ -723,43 +753,77 @@ public class TMCardView extends JComponent {
         drawShadowStringCentered(g, amount, new Rectangle(x + size + spacing/5, y, textWidth, size));
     }
 
+    private void drawModifyGlobalParameter(Graphics2D g, ModifyGlobalParameter aa, int x, int y, int size) {
+        // x is the middle of this rectangle
+
+        int amount = (int)aa.change;
+        TMTypes.GlobalParameter param = aa.param;
+        Image resImg = ImageIO.GetInstance().getImage(param.getImagePath());
+        int totalWidth = size * amount + spacing/5 * (amount-1);
+        x -= totalWidth/2;
+
+        for (int i = 0; i < amount; i++) {
+            drawImage(g, resImg, x, y, size);
+            x += size + spacing/5;
+        }
+    }
+
+    private void drawDuplicateEffect(Graphics2D g, DuplicateImmediateEffect aa, int x, int y, int size) {
+        // x is the middle of this rectangle
+
+        String text = "Copy a ";
+        FontMetrics fm = g.getFontMetrics();
+        int textWidth = fm.stringWidth(text);
+        int totalWidth = size + spacing/5 + textWidth;
+        x -= totalWidth/2;
+        drawShadowStringCentered(g, text, new Rectangle(x, y, textWidth, size));
+
+        TMTypes.Tag tag = aa.tagRequirement;
+        Class<? extends TMAction> actionClass = aa.actionClass;
+        if (actionClass.equals(ModifyPlayerResource.class)) {
+            boolean prod = aa.production;
+            Image resImg = ImageIO.GetInstance().getImage(tag.getImagePath());
+            drawResource(g, resImg, production, prod, x + spacing/5 + textWidth, y, size, 0.6);
+        }
+
+    }
+
     private void drawAction(Graphics2D g, TMAction a, int x, int y, int size) {
-        String right = null;
+        // x is center
+
+        // Draw action arrow
+        drawImage(g, actionArrow, x - defaultItemSize/4, y, defaultItemSize/2, size);
+
         TMTypes.Resource leftR = a.getCostResource();
         String left = leftR != null? leftR.getImagePath() : null;
         int leftNumber = Math.abs(a.getCost());
-        boolean played = a.played;
-        if (a instanceof PlaceTile) {
-            // get the tile image
-            TMTypes.Tile t = ((PlaceTile)a).tile;
-            right = t.getImagePath();
-        } else if (a instanceof ModifyPlayerResource) {
-            // get resource image
-            TMTypes.Resource rightR = ((ModifyPlayerResource)a).resource;
-            right = rightR.getImagePath();
-        } else {
-            int b = 0;
-        }
-
-        // Draw left + arrow + right
-        x -= size/2;
-        if (left != null) x -= size/2;
-        if (right != null) x -= size/2;
 
         if (leftNumber > 0) {
-            drawShadowStringCentered(g, "" + leftNumber, new Rectangle(x, y, size, size), Color.white, Color.black, 12);
-            x += size;
+            drawShadowStringCentered(g, "" + leftNumber, new Rectangle(x - defaultItemSize/4 - size*2, y, size, size), Color.white, Color.black, 12);
         }
         if (left != null) {
             Image image = ImageIO.GetInstance().getImage(left);
-            drawImage(g, image, x, y, size, size);
-            x += size;
+            drawImage(g, image, x - defaultItemSize/4 - size, y, size, size);
         }
-        drawImage(g, actionArrow, x + size, y, defaultItemSize/2, size);
-        x += defaultItemSize/2 + size*2;
-        if (right != null) {
-            Image image = ImageIO.GetInstance().getImage(right);
-            drawImage(g, image, x, y, size, size);
+
+        int wR = TMDeckDisplay.cardWidth / 2 - defaultItemSize/4 - spacing;
+        if (a instanceof CompoundAction) {
+            // first part of the action is the left side of the arrow, unless a cost is defined
+            if (left == null) {
+                drawCardEffect(g, ((CompoundAction) a).actions[0], x - defaultItemSize/4 - wR/2, y, TMDeckDisplay.cardWidth / 2, -1);
+            }
+
+            // second part (right) is all other actions
+            int nActions = ((CompoundAction) a).actions.length - 1;
+            int widthOne = wR/nActions;
+            int xStart = x + defaultItemSize/4 + spacing/5;
+            for (int i = 1; i < ((CompoundAction) a).actions.length; i++) {
+                drawCardEffect(g, ((CompoundAction) a).actions[i], xStart + widthOne/2, y, widthOne, -1);
+                xStart += widthOne + spacing/5;
+            }
+        } else {
+            // Otherwise this is the effect
+            drawCardEffect(g, a, x + defaultItemSize/4 + spacing/5 + wR/2, y, wR, -1);
         }
     }
 

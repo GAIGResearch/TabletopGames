@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
-    final TMTypes.Tag tagRequirement;  // tag card chosen must have
-    final Class<? extends TMAction> actionClass;  // what type of effect can be duplicated
-    final boolean production;  // If modify player resource, must it be production?
+    final public TMTypes.Tag tagRequirement;  // tag card chosen must have
+    final public Class<? extends TMAction> actionClass;  // what type of effect can be duplicated
+    final public boolean production;  // If modify player resource, must it be production?
 
     public DuplicateImmediateEffect(TMTypes.Tag tagRequirement, Class<? extends TMAction> actionClass, boolean production) {
         super(-1, true);
@@ -36,10 +36,10 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
     public boolean _execute(TMGameState gameState) {
         if (getCardID() == -1) {
             // Put viable cards in card choice deck
+            boolean found = false;
             for (TMCard card : gameState.getPlayedCards()[player].getComponents()) {
                 for (TMTypes.Tag t : card.tags) {
                     if (t == tagRequirement) {
-                        boolean found = false;
                         for (TMAction action : card.immediateEffects) {
                             if (action.getClass().equals(actionClass) && (!actionClass.equals(ModifyPlayerResource.class) || ((ModifyPlayerResource) action).production == production)) {
                                 gameState.getPlayerCardChoice()[player].add(card);
@@ -47,12 +47,17 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
                                 break;
                             }
                         }
-                        if (found) break;
+                        if (found) {
+                            gameState.setActionInProgress(this);
+                            break;
+                        }
                     }
                 }
+                if (found) break;
             }
-
-            gameState.setActionInProgress(this);
+            if (!found) {
+                int b = 0;
+            }
         } else {
             // Execute all effects that match this on the card
             TMCard card = (TMCard) gameState.getComponentById(getCardID());
