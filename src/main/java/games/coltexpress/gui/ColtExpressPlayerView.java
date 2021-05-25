@@ -58,11 +58,13 @@ public class ColtExpressPlayerView extends JComponent {
         this.playerId = playerId;
         this.dataPath = dataPath;
         this.width = playerAreaWidth + border*2;
-        this.height = playerAreaHeight + borderBottom + border;
+        this.height = playerAreaHeight + border;
         playerHand = new ColtExpressDeckView(null, true, dataPath, characters);
         playerLoot = new ColtExpressDeckView(null, false, dataPath, characters);
         playerCard = characters.get(playerId);
         cardBack = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
+
+        setToolTipText(playerCard.getPower());
     }
 
     /**
@@ -79,9 +81,9 @@ public class ColtExpressPlayerView extends JComponent {
 
         // Draw loot, bullets left, points total if game end
         playerLoot.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + 10, border,
-                defaultItemSize*2, defaultItemSize), false);
+                defaultItemSize*2, defaultItemSize), false, 1.0);
         g.setColor(Color.black);
-        g.drawString("Bullets left: " + bulletsLeft, border+ceCardWidth + defaultItemSize*2 + 15, border+ceCardHeight*2/3);
+        g.drawString("Bullets left: " + bulletsLeft, border, border+ceCardHeight + 15);
         if (gameEnd) {
             if (lootSum == -1) {
                 lootSum = 0;
@@ -97,16 +99,18 @@ public class ColtExpressPlayerView extends JComponent {
                 endResult += "* ";
             }
             endResult += "Total points: " + lootSum;
-            g.drawString(endResult, border+ceCardWidth + defaultItemSize*2 + 15, border+ceCardHeight/3);
+            g.drawString(endResult, border+ceCardWidth*2 + 15, border+ceCardHeight + 15);
         }
 
         // Draw player deck
-        g.drawImage(cardBack, border, border+ceCardHeight + 5, ceCardWidth, ceCardHeight, null);
-        g.drawString("" + playerDeck.getSize(), border+10, border+ceCardHeight*2 - 5);
+        g.drawImage(cardBack, border+ceCardWidth + defaultItemSize*2 + 15, border, ceCardWidth, ceCardHeight, null);
+        if (playerDeck != null) {
+            g.drawString("" + playerDeck.getSize(), border+ceCardWidth + defaultItemSize*2 + 20, ceCardHeight);
+        }
 
         // Draw player hand
-        playerHand.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + 30, border+ceCardHeight + 5,
-                width-ceCardWidth*2-30, ceCardHeight), false);
+        playerHand.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + defaultItemSize*2 + 15+ceCardWidth + 30, border,
+                width-ceCardWidth*2-defaultItemSize*2-45, ceCardHeight), false, 1.0);
     }
 
     public Dimension getPreferredSize() {

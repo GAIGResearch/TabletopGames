@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
+import static games.GameType.ColtExpress;
 import static games.GameType.DotsAndBoxes;
 
 public class Game {
@@ -706,7 +707,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DotsAndBoxes, players, seed, ac, false, null);
+        runOne(ColtExpress, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

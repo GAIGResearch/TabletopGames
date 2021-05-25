@@ -10,7 +10,7 @@ import games.coltexpress.components.Loot;
 
 import java.util.LinkedList;
 
-public class RoundCardTakeItAll extends AbstractAction {
+public class RoundCardTakeItAll extends RoundEvent {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -49,5 +49,10 @@ public class RoundCardTakeItAll extends AbstractAction {
     @Override
     public String toString() {
         return "Take It All";
+    }
+
+    @Override
+    public String getEventText() {
+        return "The Marshall drops a second strongbox.";
     }
 }
