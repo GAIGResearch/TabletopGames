@@ -51,10 +51,7 @@ public class AddResearchStationWithCard extends AddResearchStation {
 
     @Override
     public String toString() {
-        return "AddResearchStationWithCard{" +
-                "toCity='" + city + '\'' +
-                ", cardIdx=" + cardIdx +
-                '}';
+        return "Add Research Station in " + city + " with card";
     }
 
     @Override

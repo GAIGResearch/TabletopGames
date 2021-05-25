@@ -75,10 +75,7 @@ public class MovePlayer extends AbstractAction {
 
     @Override
     public String toString() {
-        return "MovePlayer{" +
-                "playerIdx=" + playerIdx +
-                ", destination='" + destination + '\'' +
-                '}';
+        return "Move Player " + playerIdx + " to " + destination;
     }
 
     public int getPlayerIdx() {
