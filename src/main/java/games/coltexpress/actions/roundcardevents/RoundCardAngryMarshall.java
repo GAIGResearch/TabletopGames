@@ -7,7 +7,7 @@ import games.coltexpress.components.Compartment;
 
 import java.util.LinkedList;
 
-public class RoundCardAngryMarshall extends AbstractAction {
+public class RoundCardAngryMarshall extends RoundEvent {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -51,5 +51,10 @@ public class RoundCardAngryMarshall extends AbstractAction {
     @Override
     public String toString() {
         return "Angry Marshall";
+    }
+
+    @Override
+    public String getEventText() {
+        return "The Marshall shoots all bandits on the roof of his car and then moves one car toward the caboose.";
     }
 }

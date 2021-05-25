@@ -11,7 +11,7 @@ import utilities.Utils;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class EndCardPickPocket extends AbstractAction {
+public class EndCardPickPocket extends RoundEvent {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -72,5 +72,10 @@ public class EndCardPickPocket extends AbstractAction {
     @Override
     public String toString() {
         return "Pick Pocket";
+    }
+
+    @Override
+    public String getEventText() {
+        return "Any bandit alone in or on a car can pick up a purse if there is one.";
     }
 }

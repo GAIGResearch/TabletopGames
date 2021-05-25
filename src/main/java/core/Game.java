@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
+import static games.GameType.ColtExpress;
 import static games.GameType.DotsAndBoxes;
 import static games.GameType.Pandemic;
 
@@ -710,7 +711,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Pandemic, players, seed, ac, false, null);
+        runOne(ColtExpress, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
