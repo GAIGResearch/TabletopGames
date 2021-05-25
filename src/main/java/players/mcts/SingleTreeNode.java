@@ -73,7 +73,7 @@ public class SingleTreeNode {
         decisionPlayer = state.getCurrentPlayer();
         totValue = new double[state.getNPlayers()];
         openLoopState = state;
-        if (player.params.openLoop && player.params.gatherExpertIterationData) {
+        if (player.params.openLoop) {
             // if we're using open loop, then we need to make sure the reference state is never changed
             root.copyCount++;
             this.state = state.copy();

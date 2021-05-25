@@ -16,20 +16,18 @@ public class Advantage003 extends AbstractPlayer {
 
     Random rnd = new Random(System.currentTimeMillis());
 
-    private final double RND_WEIGHT;
+    private double RND_WEIGHT;
 
     double[][] coefficients = new double[300][20];
     Map<Integer, Integer> hashToRowIndex = new HashMap<>();
     List<DiceMonasteryStateAttributes> features;
 
     public Advantage003() {
-        this(0.2);
-    }
-
-    public Advantage003(double rndWeight) {
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader("Advantage003.csv"));
+            String weight = reader.readLine();
+            RND_WEIGHT = Double.parseDouble(weight);
             List<String> header = Arrays.asList(reader.readLine().split(","));
             // assume the first two columns are the Hash and Intercept
             features = header.subList(2, header.size()).stream().map(DiceMonasteryStateAttributes::valueOf).collect(toList());
@@ -52,8 +50,6 @@ public class Advantage003 extends AbstractPlayer {
             e.printStackTrace();
         }
 
-
-        this.RND_WEIGHT = rndWeight;
 
     }
 

@@ -25,7 +25,7 @@ public class AdvantageParams extends TunableParameters {
 
     @Override
     public Advantage002 instantiate() {
-        return new Advantage002(rndWeight);
+        return new Advantage002();
     }
 
     @Override
