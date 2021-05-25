@@ -697,7 +697,7 @@ public class TMGameState extends AbstractGameState {
         public final TMTypes.Resource from;
         public final TMTypes.Resource to;
         public double rate;
-        Requirement<TMCard> requirement;
+        public Requirement<TMCard> requirement;
 
         public ResourceMapping(TMTypes.Resource from, TMTypes.Resource to, double rate, Requirement<TMCard> requirement) {
             this.from = from;

@@ -8,9 +8,7 @@ import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.effects.PayForActionEffect;
 import games.terraformingmars.rules.effects.PlaceTileEffect;
 import games.terraformingmars.rules.effects.PlayCardEffect;
-import games.terraformingmars.rules.requirements.CounterRequirement;
-import games.terraformingmars.rules.requirements.Requirement;
-import games.terraformingmars.rules.requirements.TagsPlayedRequirement;
+import games.terraformingmars.rules.requirements.*;
 import utilities.ImageIO;
 import utilities.Vector2D;
 
@@ -245,15 +243,34 @@ public class TMCardView extends JComponent {
         // Draw discounts
         int yD = yA + spacing;
         for (Requirement r: card.discountEffects.keySet()) {
-            if (r instanceof TagsPlayedRequirement) {
-                int xD = width/2 - size*6/2;
-                Image from = ImageIO.GetInstance().getImage(((TagsPlayedRequirement)r).tags[0].getImagePath());
+            int amount = card.discountEffects.get(r);
+            if (r instanceof TagsPlayedRequirement || r instanceof TagOnCardRequirement) {
+                int nTags;
+                TMTypes.Tag[] tags;
+                if (r instanceof TagsPlayedRequirement) {
+                    nTags = ((TagsPlayedRequirement) r).tags.length;
+                    tags = ((TagsPlayedRequirement) r).tags;
+                } else {
+                    nTags = ((TagOnCardRequirement) r).tags.length;
+                    tags = ((TagOnCardRequirement) r).tags;
+                }
+                int widthSection = nTags * size + (nTags-1)*size;
+                int xD = width/2 - widthSection - size/2;
+                int i = 0;
+                for (TMTypes.Tag t: tags) {
+                    Image from = ImageIO.GetInstance().getImage(t.getImagePath());
+                    drawImage(g, from, xD, yD, size, size);
+                    xD += size;
+                    if (i != nTags-1) {
+                        drawShadowStringCentered(g, "/", new Rectangle(xD, yD, size, size));
+                        xD += size;
+                    }
+                    i++;
+                }
+                drawShadowStringCentered(g, " : ", new Rectangle(width/2 - size/2, yD, size, size));
+                drawShadowStringCentered(g, "-" + amount, new Rectangle(width/2 + size, yD, size, size));
                 Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
-                int amount = card.discountEffects.get(r);
-                drawImage(g, from, xD, yD, size, size);
-                drawShadowStringCentered(g, ":", new Rectangle(xD + size, yD, size*2, size));
-                drawShadowStringCentered(g, "-" + amount, new Rectangle(xD + size*3, yD, size*2, size));
-                drawImage(g, to, xD + size * 5, yD, size, size);
+                drawImage(g, to, width/2 + size * 2, yD, size, size);
             } else if (r instanceof CounterRequirement) {
                 int xD = width/2 - size*4/2;
                 TMTypes.GlobalParameter gp = utilities.Utils.searchEnum(TMTypes.GlobalParameter.class, ((CounterRequirement)r).counterCode);
@@ -267,10 +284,16 @@ public class TMCardView extends JComponent {
                 }
                 Image from = ImageIO.GetInstance().getImage(imgStr);
                 drawImage(g, from, xD, yD, size);
-                drawShadowStringCentered(g, ": +/-" + card.discountEffects.get(r), new Rectangle(xD + size, yD, size*3, size));
+                drawShadowStringCentered(g, ": +/-" + amount, new Rectangle(xD + size, yD, size*3, size));
+            } else if (r instanceof ActionTypeRequirement) {
+                int xD = width/2 - size*4/2;
+                TMTypes.ActionType actionType = ((ActionTypeRequirement) r).actionType;
+                TMTypes.StandardProject project = ((ActionTypeRequirement) r).project;
+                String text = "";
+                if (actionType != null) text = actionType.name();
+                else if (project != null) text = project.name();
+                drawShadowStringCentered(g, text + " : -" + amount, new Rectangle(xD, yD, size*4, size));
             }
-            // todo tag on card req
-            // todo ActionTypeRequirement (standard project)
             yD += size + spacing/2;
         }
         // Draw resource mappings
@@ -279,18 +302,38 @@ public class TMCardView extends JComponent {
         for (TMGameState.ResourceMapping rm: card.resourceMappings) {
             Image from = ImageIO.GetInstance().getImage(rm.from.getImagePath());
             Image to = ImageIO.GetInstance().getImage(rm.to.getImagePath());
-            drawImage(g, from, xRM, yRM, size, size);
-            drawImage(g, to, xRM + size * 5, yRM, size, size);
 
             String text;
             if ((rm.rate == Math.floor(rm.rate)) && !Double.isInfinite(rm.rate)) {
-                text = ": " + (int) rm.rate;
+                text = "" + (int) rm.rate;
             } else {
-                text = ": " + rm.rate;
+                text = "" + rm.rate;
             }
-            drawShadowStringCentered(g, text, new Rectangle(xRM + size, yRM, size*4, size));
+            drawImage(g, from, width/2 - size/2 - spacing/5 - size, yRM, size, size);
+            drawShadowStringCentered(g, " : ", new Rectangle(width/2-size/2, yRM, size, size));
+            drawShadowStringCentered(g, text, new Rectangle(width/2+size/2+ spacing/5, yRM, size, size));
+            drawImage(g, to, width/2+size/2+spacing/5+size, yRM, size, size);
+
+            if (rm.requirement instanceof TagOnCardRequirement) {
+                TMTypes.Tag[] tags = ((TagOnCardRequirement) rm.requirement).tags;
+                int nTags = tags.length;
+                int widthSection = nTags * size/3 + (nTags-1) * size/3;
+                int xStart = width / 2 + size / 2 + spacing / 5 + size * 2;
+                drawShadowStringCentered(g, "(", new Rectangle(xStart, yRM, size / 3, size / 3));
+                int i = 0;
+                for (TMTypes.Tag t: tags) {
+                    drawImage(g, ImageIO.GetInstance().getImage(t.getImagePath()), xStart, yRM, size/3, size/3);
+                    xStart += size/3;
+                    if (i != nTags-1) {
+                        drawShadowStringCentered(g, "/", new Rectangle(xStart, yRM, size / 3, size / 3));
+                        xStart += size/3;
+                    }
+                    i++;
+                }
+                drawShadowStringCentered(g, ")", new Rectangle(xStart, yRM, size / 3, size / 3));
+            }
+
             yRM += size + spacing/2;
-            // todo tag req
         }
         // Draw after-action effects
         int yEF = yRM + spacing;
@@ -422,15 +465,34 @@ public class TMCardView extends JComponent {
         // Draw discounts
         int yD = yA + spacing;
         for (Requirement r: card.discountEffects.keySet()) {
-            if (r instanceof TagsPlayedRequirement) {
-                int xD = width/2 - size*6/2;
-                Image from = ImageIO.GetInstance().getImage(((TagsPlayedRequirement)r).tags[0].getImagePath());
+            int amount = card.discountEffects.get(r);
+            if (r instanceof TagsPlayedRequirement || r instanceof TagOnCardRequirement) {
+                int nTags;
+                TMTypes.Tag[] tags;
+                if (r instanceof TagsPlayedRequirement) {
+                    nTags = ((TagsPlayedRequirement) r).tags.length;
+                    tags = ((TagsPlayedRequirement) r).tags;
+                } else {
+                    nTags = ((TagOnCardRequirement) r).tags.length;
+                    tags = ((TagOnCardRequirement) r).tags;
+                }
+                int widthSection = nTags * size + (nTags-1)*size;
+                int xD = width/2 - widthSection - size/2;
+                int i = 0;
+                for (TMTypes.Tag t: tags) {
+                    Image from = ImageIO.GetInstance().getImage(t.getImagePath());
+                    drawImage(g, from, xD, yD, size, size);
+                    xD += size;
+                    if (i != nTags-1) {
+                        drawShadowStringCentered(g, "/", new Rectangle(xD, yD, size, size));
+                        xD += size;
+                    }
+                    i++;
+                }
+                drawShadowStringCentered(g, " : ", new Rectangle(width/2 - size/2, yD, size, size));
+                drawShadowStringCentered(g, "-" + amount, new Rectangle(width/2 + size, yD, size, size));
                 Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
-                int amount = card.discountEffects.get(r);
-                drawImage(g, from, xD, yD, size, size);
-                drawShadowStringCentered(g, ":", new Rectangle(xD + size, yD, size*2, size));
-                drawShadowStringCentered(g, "-" + amount, new Rectangle(xD + size*3, yD, size*2, size));
-                drawImage(g, to, xD + size * 5, yD, size, size);
+                drawImage(g, to, width/2 + size * 2, yD, size, size);
             } else if (r instanceof CounterRequirement) {
                 int xD = width/2 - size*4/2;
                 TMTypes.GlobalParameter gp = utilities.Utils.searchEnum(TMTypes.GlobalParameter.class, ((CounterRequirement)r).counterCode);
@@ -444,10 +506,16 @@ public class TMCardView extends JComponent {
                 }
                 Image from = ImageIO.GetInstance().getImage(imgStr);
                 drawImage(g, from, xD, yD, size);
-                drawShadowStringCentered(g, ": +/-" + card.discountEffects.get(r), new Rectangle(xD + size, yD, size*3, size));
+                drawShadowStringCentered(g, ": +/-" + amount, new Rectangle(xD + size, yD, size*3, size));
+            } else if (r instanceof ActionTypeRequirement) {
+                int xD = width/2 - size*4/2;
+                TMTypes.ActionType actionType = ((ActionTypeRequirement) r).actionType;
+                TMTypes.StandardProject project = ((ActionTypeRequirement) r).project;
+                String text = "";
+                if (actionType != null) text = actionType.name();
+                else if (project != null) text = project.name();
+                drawShadowStringCentered(g, text + " : -" + amount, new Rectangle(xD, yD, size*4, size));
             }
-            // todo ActionTypeRequirement (standard project)
-            // todo TagsOnCard req
             yD += size + spacing/2;
         }
         // Draw resource mappings
@@ -456,18 +524,38 @@ public class TMCardView extends JComponent {
         for (TMGameState.ResourceMapping rm: card.resourceMappings) {
             Image from = ImageIO.GetInstance().getImage(rm.from.getImagePath());
             Image to = ImageIO.GetInstance().getImage(rm.to.getImagePath());
-            drawImage(g, from, xRM, yRM, size, size);
-            drawImage(g, to, xRM + size * 5, yRM, size, size);
 
             String text;
             if ((rm.rate == Math.floor(rm.rate)) && !Double.isInfinite(rm.rate)) {
-                text = ": " + (int) rm.rate;
+                text = "" + (int) rm.rate;
             } else {
-                text = ": " + rm.rate;
+                text = "" + rm.rate;
             }
-            drawShadowStringCentered(g, text, new Rectangle(xRM + size, yRM, size*4, size));
+            drawImage(g, from, width/2 - size/2 - spacing/5 - size, yRM, size, size);
+            drawShadowStringCentered(g, " : ", new Rectangle(width/2-size/2, yRM, size, size));
+            drawShadowStringCentered(g, text, new Rectangle(width/2+size/2+ spacing/5, yRM, size, size));
+            drawImage(g, to, width/2+size/2+spacing/5+size, yRM, size, size);
+
+            if (rm.requirement instanceof TagOnCardRequirement) {
+                TMTypes.Tag[] tags = ((TagOnCardRequirement) rm.requirement).tags;
+                int nTags = tags.length;
+                int widthSection = nTags * size/3 + (nTags-1) * size/3;
+                int xStart = width / 2 + size / 2 + spacing / 5 + size * 2;
+                drawShadowStringCentered(g, "(", new Rectangle(xStart, yRM, size / 3, size / 3));
+                int i = 0;
+                for (TMTypes.Tag t: tags) {
+                    drawImage(g, ImageIO.GetInstance().getImage(t.getImagePath()), xStart, yRM, size/3, size/3);
+                    xStart += size/3;
+                    if (i != nTags-1) {
+                        drawShadowStringCentered(g, "/", new Rectangle(xStart, yRM, size / 3, size / 3));
+                        xStart += size/3;
+                    }
+                    i++;
+                }
+                drawShadowStringCentered(g, ")", new Rectangle(xStart, yRM, size / 3, size / 3));
+            }
+
             yRM += size + spacing/2;
-            // todo TagOnCard requirement
         }
         // Draw after-action effects
         int yEF = yRM + spacing;
@@ -516,7 +604,7 @@ public class TMCardView extends JComponent {
             }
 
             if (leftNumber != -1) {
-                drawShadowStringCentered(g, "" + leftNumber, new Rectangle(xEF, yEF, size, size), Color.white, Color.black, 12);
+                drawShadowStringCentered(g, "" + leftNumber, new Rectangle(xEF + size, yEF, size, size), Color.white, Color.black, 12);
             }
             if (from != null) {
                 int nImgs = from.length;

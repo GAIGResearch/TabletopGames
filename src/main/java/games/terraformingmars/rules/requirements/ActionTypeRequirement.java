@@ -9,8 +9,8 @@ import java.util.Objects;
 
 public class ActionTypeRequirement implements Requirement<TMAction> {
 
-    final TMTypes.ActionType actionType;
-    final TMTypes.StandardProject project;
+    public final TMTypes.ActionType actionType;
+    public final TMTypes.StandardProject project;
 
     public ActionTypeRequirement(TMTypes.ActionType actionType, TMTypes.StandardProject sp) {
         this.actionType = actionType;
