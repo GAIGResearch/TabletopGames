@@ -115,7 +115,7 @@ public enum GameType {
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
-    TerraformingMars (2, 5,
+    TerraformingMars (1, 5,
             new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
                         add(Cards); add(Strategy); add(Exploration); }},
             new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);

@@ -127,10 +127,18 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         if (mapTileID != -1 && tile != null) {
             TMMapTile mt = (TMMapTile)gs.getComponentById(mapTileID);
             boolean success = mt.placeTile(tile, gs);
-            // Add money earned from adjacent oceans
             if (success && onMars) {
+                if (getCardID() != -1) {
+                    // Save location of tile placed on card
+                    TMCard card = (TMCard) gs.getComponentById(getCardID());
+                    card.mapTileIDTilePlaced = mt.getComponentID();
+                }
+                if (player < 0 || player >= gs.getNPlayers()) return super._execute(gs);
+
+                // Add money earned from adjacent oceans
                 int nOceans = nAdjacentTiles(gs, mt, TMTypes.Tile.Ocean);
                 gs.getPlayerResources()[player].get(TMTypes.Resource.MegaCredit).increment(nOceans * ((TMGameParameters) gs.getGameParameters()).getnMCGainedOcean());
+
                 if (resourcesGainedRestriction != null) {
                     // Production of each resource type gained increased by 1
                     TMTypes.Resource[] gained = mt.getResources();
@@ -141,11 +149,6 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                             typesAdded.add(r);
                         }
                     }
-                }
-                if (getCardID() != -1) {
-                    // Save location of tile placed on card
-                    TMCard card = (TMCard) gs.getComponentById(getCardID());
-                    card.mapTileIDTilePlaced = mt.getComponentID();
                 }
                 if (removeResourcesAdjacentOwner) {
                     HashSet<Integer> adjacentOwners = new HashSet<>();
@@ -164,7 +167,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     }
                 }
             }
-            return success;
+            return success && super._execute(gs);
         }
         gs.setActionInProgress(this);
         return true;

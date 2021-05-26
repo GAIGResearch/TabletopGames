@@ -47,7 +47,10 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             }
             if (canExecute) {
                 TMCard card = (TMCard) gs.getComponentById(getCardID());
-                card.nResourcesOnCard += amount;
+                if (card != null) {
+                    // It's null if solo game and action chosen is for a card of the neutral opponent
+                    card.nResourcesOnCard += amount;
+                }
                 return true;
             }
             return false;
@@ -63,6 +66,9 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         if (chooseAny) {
             for (int i = 0; i < state.getNPlayers(); i++) {
                 addDeckActions(actions, gs, i);
+            }
+            if (state.getNPlayers() == 1) {
+                actions.add(new AddResourceOnCard(player, -2, resource, amount, true));
             }
         } else {
             addDeckActions(actions, gs, player);
@@ -105,7 +111,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         if (action instanceof AddResourceOnCard) {
             setCardID(((AddResourceOnCard) action).getCardID());
         } else {
-            setCardID(0);  // No cards to add resource to
+            setCardID(-2);  // No cards to add resource to
         }
     }
 

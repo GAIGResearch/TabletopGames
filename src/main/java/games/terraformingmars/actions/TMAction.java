@@ -143,6 +143,7 @@ public class TMAction extends AbstractAction {
     public void postExecute(TMGameState gs) {
         int player = this.player;
         if (player == -1) player = gs.getCurrentPlayer();
+        if (player < 0 || player >= gs.getNPlayers()) return;
         if (!freeActionPoint) {
             ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
         }

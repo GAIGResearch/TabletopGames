@@ -106,6 +106,9 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                     targetPlayer = gs.getCurrentPlayer();
                     player = targetPlayer;
                 }
+            } else if (targetPlayer == -3) {
+                // It's -3 in solo play when action is just counted as "done" to the neutral player
+                return super._execute(gs);
             }
             if (production) {
                 counterID = gs.getPlayerProduction()[targetPlayer].get(resource).getComponentID();
@@ -234,6 +237,13 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                     if (a.canBePlayed((TMGameState) state)) {
                         actions.add(a);
                     }
+                }
+                if (state.getNPlayers() == 1) {
+                    // Can do this to neutral opponent (no effect) in solo play
+                    ModifyPlayerResource a = new ModifyPlayerResource(player, -3, change, resource, production, tagToCount, tileToCount,
+                            any, opponents, onMars, counterResource, counterResourceProduction, true);
+                    a.complete = true;
+                    actions.add(a);
                 }
             }
         } else if (counterResource != null) {

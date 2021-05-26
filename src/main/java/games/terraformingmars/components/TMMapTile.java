@@ -82,7 +82,7 @@ public class TMMapTile extends Component {
         return y;
     }
 
-    private void setTilePlaced(TMTypes.Tile which, TMGameState gs) {
+    public void setTilePlaced(TMTypes.Tile which, TMGameState gs) {
         tilePlaced = which;
         int player = gs.getCurrentPlayer();
 
@@ -91,12 +91,14 @@ public class TMMapTile extends Component {
             ownerId = player;
         }
 
-        gs.getPlayerTilesPlaced()[player].get(which).increment(1);
+        if (player >= 0 && player < gs.getNPlayers()) {
+            gs.getPlayerTilesPlaced()[player].get(which).increment(1);
 
-        // Current player gets resources
-        for (TMTypes.Resource res: resources) {
-            gs.getPlayerResources()[player].get(res).increment(1);
-            gs.getPlayerResourceIncreaseGen()[player].put(res, true);
+            // Current player gets resources
+            for (TMTypes.Resource res : resources) {
+                gs.getPlayerResources()[player].get(res).increment(1);
+                gs.getPlayerResourceIncreaseGen()[player].put(res, true);
+            }
         }
     }
 

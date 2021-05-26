@@ -40,7 +40,7 @@ public class ResourceRequirement implements Requirement<TMGameState> {
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 if (gs.canPlayerPay(i, card, null, resource, amount, production)) return true;
             }
-            return false;
+            return gs.getNPlayers() == 1;  // In solo play this is always true
         }
         return gs.canPlayerPay(p, card, null, resource, amount, production);
     }

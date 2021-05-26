@@ -3,13 +3,17 @@ package games.terraformingmars;
 import core.AbstractParameters;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static games.terraformingmars.TMTypes.Expansion.*;
 
 public class TMGameParameters extends AbstractParameters {
 
     int boardSize = 9;
-    TMTypes.Expansion[] expansions = new TMTypes.Expansion[] {Base, CorporateEra};
+    HashSet<TMTypes.Expansion> expansions = new HashSet<TMTypes.Expansion>() {{ add(Base); add(CorporateEra); }};
+    int soloTR = 14;
+    int soloMaxGen = 14;
+    int soloCities = 2;
 
     HashMap<TMTypes.Resource, Integer> minimumProduction = new HashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
@@ -114,7 +118,7 @@ public class TMGameParameters extends AbstractParameters {
         return nProjectsStart;
     }
 
-    public TMTypes.Expansion[] getExpansions() {
+    public HashSet<TMTypes.Expansion> getExpansions() {
         return expansions;
     }
 
@@ -188,5 +192,17 @@ public class TMGameParameters extends AbstractParameters {
 
     public int getnSPCityMCGain() {
         return nSPCityMCGain;
+    }
+
+    public int getSoloCities() {
+        return soloCities;
+    }
+
+    public int getSoloMaxGen() {
+        return soloMaxGen;
+    }
+
+    public int getSoloTR() {
+        return soloTR;
     }
 }

@@ -1,5 +1,6 @@
 package games.terraformingmars.rules.requirements;
 
+import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import utilities.ImageIO;
@@ -36,6 +37,11 @@ public class TilePlacedRequirement implements Requirement<TMGameState> {
         } else {
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 nPlaced = gs.getPlayerTilesPlaced()[i].get(tile).getValue();
+            }
+            if (gs.getNPlayers() == 1) {
+                if (tile == TMTypes.Tile.City || tile == TMTypes.Tile.Greenery) {
+                    nPlaced += ((TMGameParameters) gs.getGameParameters()).getSoloCities();
+                }
             }
         }
         return nPlaced;

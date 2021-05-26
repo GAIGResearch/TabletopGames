@@ -11,12 +11,15 @@ import games.terraformingmars.actions.*;
 import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
 import utilities.Utils;
+import utilities.Vector2D;
 
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
+import static games.terraformingmars.TMTypes.Resource.TR;
 import static games.terraformingmars.TMTypes.StandardProject.*;
 import static games.terraformingmars.TMTypes.ActionType.*;
 
@@ -39,9 +42,15 @@ public class TMForwardModel extends AbstractForwardModel {
             gs.playerProduction[i] = new HashMap<>();
             gs.playerResourceIncreaseGen[i] = new HashMap<>();
             for (TMTypes.Resource res: TMTypes.Resource.values()) {
-                gs.playerResources[i].put(res, new Counter(params.startingResources.get(res), 0, params.maxPoints, res.toString() + "-" + i));
+                int startingRes = params.startingResources.get(res);
+                if (res == TR && gs.getNPlayers() == 1) {
+                    startingRes = params.soloTR;
+                }
+                gs.playerResources[i].put(res, new Counter(startingRes, 0, params.maxPoints, res.toString() + "-" + i));
                 if (params.startingProduction.containsKey(res)) {
-                    gs.playerProduction[i].put(res, new Counter(params.startingProduction.get(res), params.minimumProduction.get(res), params.maxPoints, res.toString() + "-prod-" + i));
+                    int startingProduction = params.startingProduction.get(res);
+                    if (params.expansions.contains(TMTypes.Expansion.CorporateEra)) startingProduction = 0;  // No production in corporate era
+                    gs.playerProduction[i].put(res, new Counter(startingProduction, params.minimumProduction.get(res), params.maxPoints, res + "-prod-" + i));
                 }
                 gs.playerResourceIncreaseGen[i].put(res, false);
             }
@@ -69,6 +78,11 @@ public class TMForwardModel extends AbstractForwardModel {
             e.loadProjectCards(gs.projectCards);
             e.loadCorpCards(gs.corpCards);
             e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
+        }
+        if (gs.getNPlayers() == 1) {
+            // Disable milestones and awards for solo play
+            gs.milestones = new HashSet<>();
+            gs.awards = new HashSet<>();
         }
 
         // Shuffle dekcs
@@ -128,6 +142,33 @@ public class TMForwardModel extends AbstractForwardModel {
             }
         }
 
+        // Solo setup: place X cities randomly, with 1 greenery adjacent each (no oxygen increase)
+        if (gs.getNPlayers() == 1) {
+            int boardH = gs.board.getHeight();
+            int boardW = gs.board.getWidth();
+            gs.getTurnOrder().setTurnOwner(1);
+            for (int i = 0; i < params.soloCities; i++) {
+                // Place city + greenery adjacent
+                PlaceTile pt = new PlaceTile(1, TMTypes.Tile.City, TMTypes.MapTileType.Ground, true);
+                List<AbstractAction> actions = pt._computeAvailableActions(gs);
+                PlaceTile action = (PlaceTile) actions.get(rnd.nextInt(actions.size()));
+                action.execute(gs);
+                TMMapTile mt = (TMMapTile) gs.getComponentById(action.mapTileID);
+                List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));
+                boolean placed = false;
+                while (!placed) {
+                    Vector2D v = neighbours.get(rnd.nextInt(neighbours.size()));
+                    TMMapTile mtn = gs.board.getElement(v.getX(), v.getY());
+                    if (mtn != null && mtn.getOwnerId() == -1 && mtn.getTileType() == TMTypes.MapTileType.Ground) {
+                        mtn.setTilePlaced(TMTypes.Tile.Greenery, gs);
+                        placed = true;
+                    }
+                }
+            }
+            gs.getTurnOrder().setTurnOwner(0);
+            gs.globalParameters.get(TMTypes.GlobalParameter.Oxygen).setValue(0);
+        }
+
         gs.generation = 1;
     }
 
@@ -184,7 +225,7 @@ public class TMForwardModel extends AbstractForwardModel {
                         }
                     }
                     // TR also adds to mega credits
-                    gs.getPlayerResources()[i].get(TMTypes.Resource.MegaCredit).increment(gs.playerResources[i].get(TMTypes.Resource.TR).getValue());
+                    gs.getPlayerResources()[i].get(TMTypes.Resource.MegaCredit).increment(gs.playerResources[i].get(TR).getValue());
                 }
 
                 // Check game end before next research phase
@@ -206,7 +247,7 @@ public class TMForwardModel extends AbstractForwardModel {
                     }
                     // TODO tiebreaker
                     for (int i = 0; i < gs.getNPlayers(); i++) {
-                        if (best.contains(i)) {
+                        if (best.contains(i) && (gs.getNPlayers() != 1 || gs.generation <= params.soloMaxGen)) {
                             gs.setPlayerResult(Utils.GameResult.WIN, i);
                         } else {
                             gs.setPlayerResult(Utils.GameResult.LOSE, i);
@@ -378,8 +419,13 @@ public class TMForwardModel extends AbstractForwardModel {
 
     private boolean checkGameEnd(TMGameState gs) {
         boolean ended = true;
-        for (TMTypes.GlobalParameter p: gs.globalParameters.keySet()) {
-            if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum()) ended = false;
+        if (gs.getNPlayers() == 1) {
+            // If solo, game goes for 14 generations regardless of global parameters
+            if (gs.generation < ((TMGameParameters)gs.getGameParameters()).soloMaxGen) ended = false;
+        } else {
+            for (TMTypes.GlobalParameter p: gs.globalParameters.keySet()) {
+                if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum()) ended = false;
+            }
         }
         return ended;
     }

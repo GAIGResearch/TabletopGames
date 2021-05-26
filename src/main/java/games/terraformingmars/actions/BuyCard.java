@@ -42,6 +42,12 @@ public class BuyCard extends TMAction {
 
             // Add persisting effects
             gs.addPersistingEffects(card.persistingEffects);
+
+            // If solo and Tharsis Republic chosen, player gets the X extra money production from initial neutral cities placed
+            if (gs.getNPlayers() == 1 && card.getComponentName().equals("Tharsis Republic")) {
+                int current = gs.getPlayerProduction()[player].get(TMTypes.Resource.MegaCredit).getValue();
+                gs.getPlayerProduction()[player].get(TMTypes.Resource.MegaCredit).setValue(current + ((TMGameParameters)gs.getGameParameters()).getSoloCities());
+            }
         } else {
             gs.getPlayerHands()[player].add(card);
             gs.getPlayerCardChoice()[player].remove(card);
