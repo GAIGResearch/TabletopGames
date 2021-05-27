@@ -107,6 +107,12 @@ public class TMMapTile extends Component {
         if (tilePlaced == null) {
             TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
             if (gp != null) {
+
+                // Params increase, check bonuses
+                for (Bonus b: gs.getBonuses()) {
+                    b.checkBonus(gs);
+                }
+
                 // increase counter and TR
                 Counter counter = gs.getGlobalParameters().get(gp);
                 boolean succeeded = counter.increment(1);
@@ -116,11 +122,6 @@ public class TMMapTile extends Component {
                     setTilePlaced(which, gs);
                 } else {
                     return false;
-                }
-
-                // Params might have increased, check bonuses
-                for (Bonus b: gs.getBonuses()) {
-                    b.checkBonus(gs);
                 }
             } else {
                 // Just place

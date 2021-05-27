@@ -26,7 +26,7 @@ public class Bonus {
     public void checkBonus(TMGameState gs) {
         if (!executed) {
             Counter c = gs.getGlobalParameters().get(param);
-            if (c.getValue() == threshold) {
+            if (c.getValueIdx() >= threshold-1) {  // -1 because this is checked right before the increase
                 effect.player = gs.getCurrentPlayer();
                 effect.execute(gs);
                 executed = true;

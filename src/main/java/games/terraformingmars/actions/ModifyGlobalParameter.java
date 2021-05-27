@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.requirements.CounterRequirement;
 
 import java.util.Objects;
@@ -32,6 +33,11 @@ public class ModifyGlobalParameter extends TMModifyCounter {
         if (change > 0 && !c.isMaximum() || change < 0 && !c.isMinimum()) {
             gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
             gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
+
+            // Params increase, check bonuses
+            for (Bonus b: gs.getBonuses()) {
+                b.checkBonus(gs);
+            }
         }
         return super._execute(gs);
     }
