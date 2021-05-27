@@ -758,7 +758,7 @@ public class TMCardView extends JComponent {
             drawImage(g, ImageIO.GetInstance().getImage(res.getImagePath()), x + 2, y, size, size);
             x += size + 4;
         } else {
-            int aaa = 0;
+            int aaa = 0;  // TODO: draw wild symbol for "add resource to that* card"
         }
         // Draw other decorators
         if (another) {

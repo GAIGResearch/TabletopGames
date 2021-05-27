@@ -37,13 +37,15 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         // Second: execute action
 
         TMCard card = null;
+        int cost = getCost();
         if (getPlayCardID() > -1) {
             card = (TMCard) gs.getComponentById(getPlayCardID());
-            setCost(getCost() - gs.discountCardCost(card, player));  // Apply card discount
-        } else {
-            // Check action type discounts
-            setCost(getCost() - gs.discountActionTypeCost(this.action, player));
+            cost -= gs.discountCardCost(card, player);  // Apply card discount
         }
+        // Check action type discounts
+        cost -= gs.discountActionTypeCost(this.action, player);
+        setCost(cost);
+
         HashSet<TMTypes.Resource> resources = gs.canPlayerTransform(player, card, null, getCostResource());
         resources.add(getCostResource());  // Can always pay with itself
 
