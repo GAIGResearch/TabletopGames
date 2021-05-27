@@ -593,14 +593,14 @@ public class TMGameState extends AbstractGameState {
                 if (c.getValue() > 0) return true;
             }
         }
-        return false;
+        return getNPlayers() == 1;
     }
 
     public boolean anyTilesPlaced(TMTypes.Tile type) {
         for (int i = 0; i < getNPlayers(); i++) {
             if (playerTilesPlaced[i].get(type).getValue() > 0) return true;
         }
-        return false;
+        return getNPlayers() == 1 && (type == TMTypes.Tile.City || type == TMTypes.Tile.Greenery);
     }
 
     public int countPoints(int player) {
