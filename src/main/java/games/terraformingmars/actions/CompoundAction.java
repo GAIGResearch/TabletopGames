@@ -3,6 +3,7 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 
 import java.util.Arrays;
@@ -30,7 +31,14 @@ public class CompoundAction extends TMAction{
     @Override
     public boolean _execute(TMGameState gameState) {
         boolean s = true;
+        TMCard c = null;
+        if (getCardID() != -1) {
+            c = (TMCard) gameState.getComponentById(getCardID());
+        }
         for (TMAction a: actions) {
+            if (c != null) {
+                c.actionPlayed = false;  // This is set by each action, preventing the next ones, but we want all to be executed before flag is set
+            }
             a.player = player;
             a.setCardID(getCardID());
             s &= a.execute(gameState);
