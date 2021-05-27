@@ -754,8 +754,12 @@ public class TMCardView extends JComponent {
             g.fillRoundRect(x, y - 2, size + 4, size + 4, spacing, spacing);
         }
         // Draw res
-        drawImage(g, ImageIO.GetInstance().getImage(res.getImagePath()), x + 2, y, size, size);
-        x += size + 4;
+        if (res != null) {
+            drawImage(g, ImageIO.GetInstance().getImage(res.getImagePath()), x + 2, y, size, size);
+            x += size + 4;
+        } else {
+            int aaa = 0;
+        }
         // Draw other decorators
         if (another) {
             if (!any) {

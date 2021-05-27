@@ -476,7 +476,7 @@ public class TMGameState extends AbstractGameState {
 
     public boolean canPlayerPay(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, int amount, boolean production) {
         if (player == -3) return true;  // In solo play, this is the neutral player
-        
+
         if (production) {
             Counter c = playerProduction[player].get(to);
             if (c.getMinimum() < 0) return c.getValue() + Math.abs(c.getMinimum()) >= amount;

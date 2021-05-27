@@ -293,7 +293,7 @@ public class TMForwardModel extends AbstractForwardModel {
         // Wrap actions that can actually be played and must be paid for
         for (AbstractAction aa: possibleActions) {
             TMAction a = (TMAction) aa;
-            if (a.canBePlayed(gs)) {
+            if (a != null && a.canBePlayed(gs)) {
                 if (a.getCost() != 0) {
                     actions.add(new PayForAction(player, a));
                 } else {
@@ -352,7 +352,7 @@ public class TMForwardModel extends AbstractForwardModel {
             if (gs.generation == 1) {
                 // Check if any players have decided first action from corporations
                 TMCard corpCard = gs.playerCorporations[player];
-                if (!corpCard.firstActionExecuted) {
+                if (corpCard.firstAction != null && !corpCard.firstActionExecuted) {
                     possibleActions.add(corpCard.firstAction);
                     return possibleActions;
                 }
