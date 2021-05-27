@@ -33,6 +33,7 @@ public class TMModifyCounter extends TMAction {
     @Override
     public boolean _execute(TMGameState gs) {
         Counter c = (Counter)gs.getComponentById(counterID);
+        if (gs.getNPlayers() == 1 && c == null) return true;  // Null if applied to neutral player in solo
         if (change > 0 && !c.isMaximum()) {
             c.increment((int)change);
             return true;

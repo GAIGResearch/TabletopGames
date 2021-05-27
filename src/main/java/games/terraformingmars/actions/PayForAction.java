@@ -119,17 +119,18 @@ public class PayForAction extends TMAction implements IExtendedSequence {
             this.action.player = player;
             this.action.execute(state);
             stage = resourcesToPayWith.length;
-        } else if (stage == resourcesToPayWith.length-1) {
-            List<AbstractAction> actions = _computeAvailableActions(gs);
-            if (actions.size() == 1) {
-                // If only 1 option left, just do it
-                TMAction a = (TMAction) actions.get(0);
-                a.execute(gs);
-                this.action.player = player;
-                this.action.execute(state);
-                stage = resourcesToPayWith.length;
-            }
         }
+//        else if (stage == resourcesToPayWith.length-1) {
+//            List<AbstractAction> actions = _computeAvailableActions(gs);
+//            if (actions.size() == 1) {
+//                // If only 1 option left, just do it
+//                TMAction a = (TMAction) actions.get(0);
+//                a.execute(gs);
+//                this.action.player = player;
+//                this.action.execute(state);
+//                stage = resourcesToPayWith.length;
+//            }
+//        }
     }
 
     @Override
