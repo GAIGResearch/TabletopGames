@@ -367,7 +367,9 @@ public class TMForwardModel extends AbstractForwardModel {
             }
 
             // Buy a standard project
-            // - Discard cards for MC TODO
+            // - Discard cards for MC
+            possibleActions.add(new SellProjects(player));
+            
             // - Increase energy production 1 step for 11 MC
             possibleActions.add(new ModifyPlayerResource(PowerPlant, params.getnCostSPEnergy(), player, 1, TMTypes.Resource.Energy));
 
