@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
 
@@ -42,6 +43,11 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
     @Override
     public boolean canBePlayed(TMGameState gs) {
         // "OR" behaviour on requirements instead of default "AND"
+        boolean played = false;
+        if (getCardID() != -1) {
+            TMCard c = (TMCard) gs.getComponentById(getCardID());
+            if (c != null && c.actionPlayed) played = true;
+        }
         if (played && standardProject == null && basicResourceAction == null) return false;
         if (requirements != null && requirements.size() > 0) {
             for (Requirement r: requirements) {

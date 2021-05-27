@@ -33,7 +33,11 @@ public class BuyCard extends TMAction {
             // Add actions
             for (TMAction a: card.actions) {
                 a.player = player;
+                a.setCardID(card.getComponentID());
                 gs.getPlayerExtraActions()[player].add(a);
+            }
+            if (card.firstAction != null) {
+                card.firstAction.setCardID(card.getComponentID());
             }
 
             // Add discountEffects to player's discounts

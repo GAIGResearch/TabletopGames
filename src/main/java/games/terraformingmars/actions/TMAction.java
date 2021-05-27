@@ -25,7 +25,6 @@ public class TMAction extends AbstractAction {
 
     public Requirement<TMGameState> costRequirement;
     public HashSet<Requirement<TMGameState>> requirements;
-    public boolean played;
 
     public TMTypes.ActionType actionType;
     public TMTypes.StandardProject standardProject;
@@ -118,6 +117,11 @@ public class TMAction extends AbstractAction {
     }
 
     public boolean canBePlayed(TMGameState gs) {
+        boolean played = false;
+        if (getCardID() != -1) {
+            TMCard c = (TMCard) gs.getComponentById(getCardID());
+            if (c != null && c.actionPlayed) played = true;
+        }
         if (played && standardProject == null && basicResourceAction == null) return false;
         if (requirements != null && requirements.size() > 0) {
             for (Requirement r: requirements) {
@@ -147,7 +151,16 @@ public class TMAction extends AbstractAction {
         if (!freeActionPoint) {
             ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
         }
-        played = true;
+        if (getCardID() != -1 && !(this instanceof BuyCard) && !(this instanceof PlayCard)) {
+            TMCard c = (TMCard) gs.getComponentById(getCardID());
+            if (c != null) {
+                if (!c.firstActionExecuted && c.firstAction != null) {
+                    c.firstActionExecuted = true;
+                } else {
+                    c.actionPlayed = true;
+                }
+            }
+        }
 
         // Check persisting effects for all players
         for (int i = 0; i < gs.getNPlayers(); i++) {
@@ -165,9 +178,9 @@ public class TMAction extends AbstractAction {
             }
             c.setValue(0);
         } else if (nCards < 0) {
-            // Player needs to discard nCards TODO: this should be discarding from hand, not card choice
+            // Player needs to discard nCards from hand
             for (int i = 0; i < Math.abs(nCards); i++) {
-                new DiscardCard(player).execute(gs);
+                new DiscardCard(player, false).execute(gs);
             }
         }
     }
@@ -189,7 +202,6 @@ public class TMAction extends AbstractAction {
                 action.requirements.add(r.copy());
             }
         }
-        action.played = played;
         action.actionType = actionType;
         action.standardProject = standardProject;
         action.basicResourceAction = basicResourceAction;
@@ -205,12 +217,12 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass && played == tmAction.played && cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID && Objects.equals(costRequirement, tmAction.costRequirement) && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction && costResource == tmAction.costResource;
+        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass && cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID && Objects.equals(costRequirement, tmAction.costRequirement) && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction && costResource == tmAction.costResource;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirements, played, actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
+        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirements, actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
     }
 
     @Override

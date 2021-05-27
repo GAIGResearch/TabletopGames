@@ -49,7 +49,7 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
             actions.add(new BuyCard(player, cardId, cost));
         }
         if (nCardsLook == 1 || nCardsLook - stage > nCardsKeep - nCardsKept) {
-            actions.add(new DiscardCard(player, cardId));
+            actions.add(new DiscardCard(player, cardId, true));
         }
         return actions;
     }
@@ -68,7 +68,7 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
             TMGameState gs = (TMGameState) state;
             // Discard the rest
             for (TMCard card: gs.getPlayerCardChoice()[player].getComponents()) {
-                new DiscardCard(player, card.getComponentID()).execute(gs);
+                new DiscardCard(player, card.getComponentID(), true).execute(gs);
             }
         }
     }

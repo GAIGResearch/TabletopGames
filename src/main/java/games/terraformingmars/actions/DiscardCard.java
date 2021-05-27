@@ -11,16 +11,20 @@ import games.terraformingmars.components.TMCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DiscardCard extends TMAction implements IExtendedSequence {
+    boolean cardChoice;
 
-    public DiscardCard(int player, int cardID) {
+    public DiscardCard(int player, int cardID, boolean cardChoice) {
         super(player, true);
         setCardID(cardID);
+        this.cardChoice = cardChoice;
     }
 
-    public DiscardCard(int player) {
+    public DiscardCard(int player, boolean cardChoice) {
         super(player, true);
+        this.cardChoice = cardChoice;
     }
 
     @Override
@@ -31,7 +35,11 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
             if (card.cardType != TMTypes.CardType.Corporation) {
                 gs.getDiscardCards().add(card);
             }
-            gs.getPlayerCardChoice()[player].remove(card);
+            if (cardChoice) {
+                gs.getPlayerCardChoice()[player].remove(card);
+            } else {
+                gs.getPlayerHands()[player].remove(card);
+            }
         } else {
             gs.setActionInProgress(this);
         }
@@ -43,9 +51,16 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
         // Choose which card in hand to discard
         List<AbstractAction> actions = new ArrayList<>();
         TMGameState gs = (TMGameState) state;
-        for (int i = 0; i < gs.getPlayerHands()[player].getSize(); i++) {
-            actions.add(new DiscardCard(player, gs.getPlayerHands()[player].get(i).getComponentID()));
+        if (cardChoice) {
+            for (int i = 0; i < gs.getPlayerCardChoice()[player].getSize(); i++) {
+                actions.add(new DiscardCard(player, gs.getPlayerCardChoice()[player].get(i).getComponentID(), cardChoice));
+            }
+        } else {
+            for (int i = 0; i < gs.getPlayerHands()[player].getSize(); i++) {
+                actions.add(new DiscardCard(player, gs.getPlayerHands()[player].get(i).getComponentID(), cardChoice));
+            }
         }
+        if (actions.size() == 0) actions.add(new TMAction(player));
         return actions;
     }
 
@@ -66,7 +81,7 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
 
     @Override
     public DiscardCard _copy() {
-        return new DiscardCard(player, getCardID());
+        return new DiscardCard(player, getCardID(), cardChoice);
     }
 
     @Override
@@ -83,12 +98,21 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
 
     @Override
     public String toString() {
+        if (getCardID() == -1) return "Discard a card";
         return "Discard card id " + getCardID();
     }
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (!(o instanceof DiscardCard)) return false;
-        return super.equals(o);
+        if (!super.equals(o)) return false;
+        DiscardCard that = (DiscardCard) o;
+        return cardChoice == that.cardChoice;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), cardChoice);
     }
 }

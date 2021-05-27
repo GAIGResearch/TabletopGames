@@ -73,13 +73,15 @@ public class TMCardView extends JComponent {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                for (TMCardView view : views) {
-                    view.clicked = false;
+                if (views != null) {
+                    for (TMCardView view : views) {
+                        view.clicked = false;
+                    }
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        clicked = true;
+                    }
+                    gui.updateButtons = true;
                 }
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    clicked = true;
-                }
-                gui.updateButtons = true;
             }
         });
     }
@@ -272,8 +274,6 @@ public class TMCardView extends JComponent {
                         }
                         i++;
                     }
-                } else {
-                    int a =0;
                 }
                 drawShadowStringCentered(g, " : ", new Rectangle(width/2 - size/2, yD, size, size));
                 drawShadowStringCentered(g, "-" + amount, new Rectangle(width/2 + size, yD, size, size));

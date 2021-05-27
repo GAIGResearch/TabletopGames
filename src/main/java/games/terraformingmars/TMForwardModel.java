@@ -264,8 +264,8 @@ public class TMForwardModel extends AbstractForwardModel {
                         gs.playerCardChoice[i].add(gs.projectCards.pick(0));
                     }
                     // Mark player actions unused
-                    for (TMAction a : gs.playerExtraActions[i]) {
-                        a.played = false;
+                    for (TMCard c : gs.playerComplicatedPointCards[i].getComponents()) {
+                        c.actionPlayed = false;
                     }
                     // Reset resource increase
                     for (TMTypes.Resource res: TMTypes.Resource.values()) {
@@ -345,16 +345,15 @@ public class TMForwardModel extends AbstractForwardModel {
                 if (a.canBePlayed(gs)) {
                     possibleActions.add(a);
                 }
-                possibleActions.add(new DiscardCard(player, cardChoice.get(0).getComponentID()));
+                possibleActions.add(new DiscardCard(player, cardChoice.get(0).getComponentID(), true));
             }
         } else {
 
             if (gs.generation == 1) {
                 // Check if any players have decided first action from corporations
                 TMCard corpCard = gs.playerCorporations[player];
-                if (corpCard.firstAction != null) {
+                if (!corpCard.firstActionExecuted) {
                     possibleActions.add(corpCard.firstAction);
-                    corpCard.firstAction = null;
                     return possibleActions;
                 }
             }
@@ -369,7 +368,7 @@ public class TMForwardModel extends AbstractForwardModel {
             // Buy a standard project
             // - Discard cards for MC
             possibleActions.add(new SellProjects(player));
-            
+
             // - Increase energy production 1 step for 11 MC
             possibleActions.add(new ModifyPlayerResource(PowerPlant, params.getnCostSPEnergy(), player, 1, TMTypes.Resource.Energy));
 

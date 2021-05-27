@@ -58,6 +58,7 @@ public class PlayCard extends TMAction {
         // Add actions
         for (TMAction a: card.actions) {
             a.player = player;
+            a.setCardID(card.getComponentID());
             gs.getPlayerExtraActions()[player].add(a);
         }
 
