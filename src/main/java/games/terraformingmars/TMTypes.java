@@ -130,7 +130,8 @@ public class TMTypes {
         Microbe("data/terraformingmars/images/resources/microbe.png", false, true),
         Animal("data/terraformingmars/images/resources/animal.png", false, true),
         Science("data/terraformingmars/images/resources/science.png", false, true),
-        Fighter("data/terraformingmars/images/resources/fighter.png", false, true);
+        Fighter("data/terraformingmars/images/resources/fighter.png", false, true),
+        Floater("data/terraformingmars/images/resources/floater.png", false, true);
 
         String imagePath;
         boolean playerBoardRes;
@@ -257,8 +258,11 @@ public class TMTypes {
             return shortString;
         }
 
-        public static ArrayList<GlobalParameter> getDrawOrder() {
+        public static ArrayList<GlobalParameter> getDrawOrder(TMGameParameters params) {
             ArrayList<GlobalParameter> order = new ArrayList<>();
+            if (params.expansions.contains(Expansion.Venus)) {
+                order.add(Venus);
+            }
             order.add(Temperature);
             order.add(Oxygen);
             order.add(OceanTiles);

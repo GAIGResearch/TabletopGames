@@ -4,7 +4,10 @@ import core.components.Component;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.actions.ModifyGlobalParameter;
 import games.terraformingmars.rules.effects.Bonus;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.effects.GlobalParameterEffect;
 import utilities.Utils;
 
 import java.util.Arrays;
@@ -120,6 +123,14 @@ public class TMMapTile extends Component {
                     gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
                     gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
                     setTilePlaced(which, gs);
+
+                    // Check persisting global param effects for all players
+                    for (int i = 0; i < gs.getNPlayers(); i++) {
+                        for (Effect e: gs.getPlayerPersistingEffects()[i]) {
+                            if (!(e instanceof GlobalParameterEffect)) continue;
+                            e.execute(gs, new ModifyGlobalParameter(gp, 1, true), i);
+                        }
+                    }
                 } else {
                     return false;
                 }

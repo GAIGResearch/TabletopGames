@@ -50,7 +50,9 @@ public class CompoundAction extends TMAction{
     public CompoundAction _copy() {
         TMAction[] acopy = new TMAction[actions.length];
         for (int i = 0; i < actions.length; i++) {
-            acopy[i] = actions[i].copy();
+            if (actions[i] != null) {
+                acopy[i] = actions[i].copy();
+            }
         }
         return new CompoundAction(player, acopy);
     }

@@ -81,7 +81,9 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
     public ChoiceAction _copy() {
         TMAction[] acopy = new TMAction[actions.length];
         for (int i = 0; i < actions.length; i++) {
-            acopy[i] = actions[i].copy();
+            if (actions[i] != null) {
+                acopy[i] = actions[i].copy();
+            }
         }
         ChoiceAction copy = new ChoiceAction(player, acopy);
         copy.finished = finished;

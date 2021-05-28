@@ -51,7 +51,7 @@ public class PlayableActionRequirement implements Requirement<TMGameState> {
 
     @Override
     public PlayableActionRequirement copy() {
-        return new PlayableActionRequirement(action.copy());
+        return new PlayableActionRequirement((action != null? action.copy() : null));
     }
 
     @Override

@@ -445,7 +445,7 @@
             "@style": "margin-left:20px"
           },
           {
-            "#text": "dec-energyprod-1 * inc-titaniumprod-1 * placetile/City/Dawn City",
+            "#text": "dec-energyprod-1 * inc-titaniumprod-1 * placetile/City/Dawn City/false",
             "@class": "description",
             "@style": "margin-top:-5px;"
           }
@@ -1096,7 +1096,7 @@
             "@style": "margin-left:20px"
           },
           {
-            "#text": "dec-energyprod-2  * inc-MegaCreditprod-1-Venus,Earth * placetile/City/Ground ",
+            "#text": "dec-energyprod-2  * inc-MegaCreditprod-1-Venus,Earth * placetile/City/Ground/true ",
             "@class": "description"
           }
         ]
@@ -1439,7 +1439,7 @@
             "@style": "margin-left:20px"
           },
           {
-            "#text": "inc-MegaCreditprod-Earth * placetile/City/Luna Metropolis ",
+            "#text": "inc-MegaCreditprod-Earth * placetile/City/Luna Metropolis/false ",
             "@class": "description"
           }
         ]
@@ -1476,7 +1476,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "Venus Earth Jovian",
+            "#text": "Venus Earth Jovian tags",
             "@class": "requirements"
           }
         ]
@@ -1531,7 +1531,7 @@
             }
           },
           {
-            "#text": "Action: add-1-resource-Venus * dec-energyprod-1 * placetile/City/Maxwell Base ",
+            "#text": "Action: add-1-resource-Venus * dec-energyprod-1 * placetile/City/Maxwell Base/false ",
             "@class": "description ",
             "@style": "margin-top:-5px"
           },
@@ -1586,7 +1586,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "Venus Earth Jovian",
+            "#text": "Venus Earth Jovian tags",
             "@class": "requirements"
           },
           {
@@ -1678,7 +1678,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "Venus Earth Jovian",
+            "#text": "Venus Earth Jovian tags",
             "@class": "requirements"
           },
           {
@@ -1850,7 +1850,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "Venus Earth",
+            "#text": "Venus Earth tags",
             "@class": "requirements"
           },
           {
@@ -1898,7 +1898,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "Venus Earth Jovian",
+            "#text": "Venus Earth Jovian tags",
             "@class": "requirements"
           },
           {
@@ -2062,7 +2062,7 @@
             }
           },
           {
-            "#text": "2 Science",
+            "#text": "Science Science tags",
             "@class": "requirements",
             "@style": "margin-bottom:15px;"
           },
@@ -2098,7 +2098,7 @@
             "@class": "tile city-tile"
           },
           {
-            "#text": "inc-MegaCreditprod-2 * placetile/City/Stratopolis",
+            "#text": "inc-MegaCreditprod-2 * placetile/City/Stratopolis/false",
             "@class": "description ",
             "@style": "text-align:left;margin-top:-54px"
           }
@@ -2470,7 +2470,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "Venus Venus",
+            "#text": "Venus Venus tags",
             "@class": "requirements"
           },
           {

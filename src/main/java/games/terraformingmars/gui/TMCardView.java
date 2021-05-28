@@ -573,6 +573,7 @@ public class TMCardView extends JComponent {
         int yEF = yRM + spacing;
         int xEF = width/2 - size*5/2;
         for (Effect e: card.persistingEffects) {
+            if (e == null) continue;
             int leftNumber = -1;
             Image[] from = null;
             if (e instanceof PayForActionEffect) {

@@ -5,6 +5,8 @@ import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.rules.effects.Bonus;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.effects.GlobalParameterEffect;
 import games.terraformingmars.rules.requirements.CounterRequirement;
 
 import java.util.Objects;
@@ -37,6 +39,14 @@ public class ModifyGlobalParameter extends TMModifyCounter {
             // Params increase, check bonuses
             for (Bonus b: gs.getBonuses()) {
                 b.checkBonus(gs);
+            }
+
+            // Check persisting global param effects for all players
+            for (int i = 0; i < gs.getNPlayers(); i++) {
+                for (Effect e: gs.getPlayerPersistingEffects()[i]) {
+                    if (!(e instanceof GlobalParameterEffect)) continue;
+                    e.execute(gs, this, i);
+                }
             }
         }
         return super._execute(gs);

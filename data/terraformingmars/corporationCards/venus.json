@@ -5,11 +5,11 @@
     "tags": ["plant", "venus"],
     "annotation": "(Effect: Whenever Venus is terraformed 1 step, you gain 2 megacredit. You start with 1 plantprod and 47 megacredit)",
     "effect":
-    {
+    [{
       "type": "effect",
-      "if": "inc-Venus-1",
+      "if": "globalparameter(Venus-any)",
       "then": "inc-megacredit-2"
-    },
+    }],
     "start": ["1 plantprod,47 megacredit"]
   },
   {
@@ -17,11 +17,11 @@
     "name": "celestic",
     "tags": ["venus"],
     "annotation": "(Action: Add a floater to ANY card. (1 VP per 3 floaters on this card.) You start with 42 megacredit. As your first action, reveal cards from the deck until you have revealed 2 cards with a floater icon on it. Take those 2 cards into hand and discard the rest.)",
-    "effect": {
+    "effect": [{
         "type": "action",
         "action": "add-Floater-1-any",
         "cost": "Plant/7"
-        },
+        }],
     "start": ["42 megacredit",
       {
         "type": "first",
@@ -35,11 +35,11 @@
     "name": "MANUTECH",
     "tags": ["building"],
     "annotation": "(Effect: For each step you increase theprod of a resource, including this, you also gain that resource. You start with 1 steelprod, and 35 megacredit)",
-    "effect": {
+    "effect": [{
         "type": "effect",
-        "if": "inc-prod-1",
+        "if": "inc(prod-1)",
         "then": "inc-res-1"
-    },
+    }],
     "start": ["1 steelprod, 35 megacredit"]
   },
   {
@@ -48,11 +48,11 @@
     "annotation": "(Effect: Your Venus requirements are +/- 2 steps, your choice in each case. You start with 50 megacredit. As your first action, reveal cards from the deck until you have revealed 3 Venus-tag cards. Take those into hand and discard the rest.)",
     "tags": ["venus"],
     "effect":
-    {
+    [{
       "type": "discount",
       "counter": ["venus"],
       "amount": 2
-    },
+    }],
     "start": ["50 megacredit",
       {
         "type": "first",
@@ -64,10 +64,10 @@
     "name": "VIRON",
     "annotation": "(Action: Use a blue card action that has already been used this generation. You start with 48 MC.)",
     "tags": ["microbe"],
-    "effect": {
+    "effect": [{
       "type": "action",
       "action": "reuse-active"
-    },
+    }],
     "start": ["48 megacredit"]
   }
 ]

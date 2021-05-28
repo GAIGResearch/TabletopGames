@@ -165,6 +165,7 @@ public class TMAction extends AbstractAction {
         // Check persisting effects for all players
         for (int i = 0; i < gs.getNPlayers(); i++) {
             for (Effect e: gs.getPlayerPersistingEffects()[i]) {
+                if (e == null) continue;
                 e.execute(gs, this, i);
             }
         }

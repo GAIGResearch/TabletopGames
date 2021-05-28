@@ -97,7 +97,8 @@ public class CounterRequirement implements Requirement<TMGameState> {
         if (counterID == -1) {
             which = gs.stringToGPOrPlayerResCounter(counterCode, -1);
             counterID = which.getComponentID();
-            if (which.getComponentName().equalsIgnoreCase("temperature")) {
+            if (which.getComponentName().equalsIgnoreCase("temperature") ||
+                    which.getComponentName().equalsIgnoreCase("venus")) {
                 // Turn to index
                 threshold = Utils.indexOf(which.getValues(), threshold);
             }

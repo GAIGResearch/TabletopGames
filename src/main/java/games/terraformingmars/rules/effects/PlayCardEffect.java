@@ -31,7 +31,7 @@ public class PlayCardEffect extends Effect {
 
     @Override
     public Effect copy() {
-        return new PlayCardEffect(mustBeCurrentPlayer, effectAction.copy(), new HashSet<>(tagsOnCard));
+        return new PlayCardEffect(mustBeCurrentPlayer, (effectAction != null? effectAction.copy() : null), new HashSet<>(tagsOnCard));
     }
 
     @Override

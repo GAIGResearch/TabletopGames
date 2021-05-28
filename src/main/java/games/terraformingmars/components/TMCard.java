@@ -4,10 +4,7 @@ import core.components.Card;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
-import games.terraformingmars.rules.effects.Effect;
-import games.terraformingmars.rules.effects.PayForActionEffect;
-import games.terraformingmars.rules.effects.PlaceTileEffect;
-import games.terraformingmars.rules.effects.PlayCardEffect;
+import games.terraformingmars.rules.effects.*;
 import games.terraformingmars.rules.requirements.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -125,14 +122,21 @@ public class TMCard extends Card {
             if (type.equalsIgnoreCase("action")) {
                 // Parse actions
                 String action = (String) effect.get("action");
-                String[] costStr = ((String) effect.get("cost")).split("/");
-                TMTypes.Resource costResource = TMTypes.Resource.valueOf(costStr[0]);
-                int cost = Integer.parseInt(costStr[1]);
+                String[] costStr;
+                TMTypes.Resource costResource = null;
+                int cost = 0;
+                if (effect.get("cost") != null)  {
+                    costStr = ((String) effect.get("cost")).split("/");
+                    costResource = TMTypes.Resource.valueOf(costStr[0]);
+                    cost = Integer.parseInt(costStr[1]);
+                }
                 TMAction a = TMAction.parseActionOnCard(action, card, false);
                 if (a != null) {
                     actions.add(a);
                     a.actionType = TMTypes.ActionType.ActiveAction;
-                    a.setActionCost(costResource, cost, -1);
+                    if (cost != 0) {
+                        a.setActionCost(costResource, cost, -1);
+                    }
                     a.setCardID(card.getComponentID());
                 }
             } else if (type.equalsIgnoreCase("discount")) {
@@ -273,6 +277,29 @@ public class TMCard extends Card {
                                         }
                                     }
                                     Requirement r = new TilePlacedRequirement(t, nTiles, max, any);
+                                    card.requirements.add(r);
+                                } else if (s.contains("resources")) {
+                                    // Resources on cards requirement
+                                    s = s.replace("resources","").trim();
+                                    String[] split = s.split(" ");
+                                    HashMap<TMTypes.Resource, Integer> resourceCount = new HashMap<>();
+                                    for (String s2: split) {
+                                        TMTypes.Resource t = TMTypes.Resource.valueOf(s2);
+                                        if (resourceCount.containsKey(t)) {
+                                            resourceCount.put(t, resourceCount.get(t) + 1);
+                                        } else {
+                                            resourceCount.put(t, 1);
+                                        }
+                                    }
+                                    TMTypes.Resource[] resources = new TMTypes.Resource[resourceCount.size()];
+                                    int[] min = new int[resourceCount.size()];
+                                    int i = 0;
+                                    for (TMTypes.Resource t: resourceCount.keySet()) {
+                                        resources[i] = t;
+                                        min[i] = resourceCount.get(t);
+                                        i++;
+                                    }
+                                    Requirement r = new ResourcesOnCardsRequirement(resources, min);
                                     card.requirements.add(r);
                                 } else {
                                     // Counter requirement
@@ -459,7 +486,14 @@ public class TMCard extends Card {
                 int minCost = Integer.parseInt(content);
                 return new PayForActionEffect(mustBeCurrentPlayer, then, minCost);
             }
+        } else if (actionTypeCondition.equals("globalparameter")) {
+            // Increase parameter effect
+            TMTypes.GlobalParameter param = Utils.searchEnum(TMTypes.GlobalParameter.class, content.split("-")[0]);
+            if (param != null) {
+                return new GlobalParameterEffect(mustBeCurrentPlayer, then, param);
+            }
         }
+        // todo inc(prod-1)
 
         return null;
     }
@@ -514,7 +548,9 @@ public class TMCard extends Card {
         if (persistingEffects != null) {
             copy.persistingEffects =  new Effect[persistingEffects.length];
             for (int i = 0; i < persistingEffects.length; i++) {
-                copy.persistingEffects[i] = persistingEffects[i].copy();
+                if (persistingEffects[i] != null) {
+                    copy.persistingEffects[i] = persistingEffects[i].copy();
+                }
             }
         }
         if (firstAction != null) {
