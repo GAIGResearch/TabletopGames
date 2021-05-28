@@ -58,7 +58,8 @@ public class TMTypes {
         Asteroid,
         Aquifer,
         Greenery,
-        City
+        City,
+        AirScraping
     }
 
     public enum MapTileType {
@@ -225,7 +226,8 @@ public class TMTypes {
     public enum GlobalParameter {
         Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true, "O2"),
         Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white, true, "°C"),
-        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true, "Ocean");
+        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true, "Ocean"),
+        Venus("data/terraformingmars/images/global-parameters/venus.png", Color.blue, false, "Venus");
 
         String imagePath;
         String shortString;

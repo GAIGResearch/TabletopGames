@@ -46,7 +46,7 @@
             "@class": "card resource"
           },
           {
-            "#text": "(Action: Add 1 Floater to ANY card or spend 1 Floater here to draw 1 card).",
+            "#text": "Action: add-1-Floater-any or rem-1-Floater and inc-Card-1 ",
             "@class": "description"
           }
         ]
@@ -84,7 +84,7 @@
             "@class": "points points-big "
           },
           {
-            "#text": "5 Floaters",
+            "#text": "Floater Floater Floater Floater Floater resources",
             "@class": "requirements "
           },
           {
@@ -95,7 +95,7 @@
             "@class": "tile city-tile-small red-outline"
           },
           {
-            "#text": "(Requires that you have 5 Floaters. Gain 1 MegaCredit per each City tile in play)",
+            "#text": " inc-MegaCredit-1-City ",
             "@class": "description"
           }
         ]
@@ -152,7 +152,7 @@
             }
           },
           {
-            "#text": "(Raise Venus 1 step. Add 3 Floaters to ANY Venus CARD)",
+            "#text": "inc-Venus-1 * add-3-Floater-any-Venus ",
             "@class": "description"
           }
         ]
@@ -193,7 +193,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "3 Science",
+            "#text": "Science Science Science tags",
             "@class": "requirements"
           },
           {
@@ -203,7 +203,7 @@
             "@class": "resource card"
           },
           {
-            "#text": "(Requires 3 science tags. Draw 2 cards.)",
+            "#text": "inc-Card-2",
             "@class": "description"
           }
         ]
@@ -248,7 +248,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "3 Science",
+            "#text": "Science Science Science tags",
             "@class": "requirements"
           },
           {
@@ -271,12 +271,7 @@
             "@class": "resource floater"
           },
           {
-            "#text": [
-              "(Requires 3 Science tags.",
-              "Either raise the temperature",
-              "2 steps, or raise Venus 2 steps.",
-              "Add 2 Floaters to ANY card)."
-            ],
+            "#text": "inc-temperature-2 or inc-Venus-2 * add-2-Floater-any",
             "@class": "description",
             "@style": "text-align:left;position:absolute;margin-top:-25px;",
             "br": [
@@ -330,7 +325,7 @@
             }
           },
           {
-            "#text": "(Raise Venus 1 step. Remove up to 4MegaCredit from any player WITH A VENUS TAG IN PLAY.).",
+            "#text": "inc-venus-1 * dec-MegaCredit-4-opponent-Venus",
             "@class": "description"
           }
         ]
@@ -377,7 +372,7 @@
             }
           },
           {
-            "#text": "(inc-MegaCreditprod-2 steps. Add 1 resource to ANY Venus CARD).",
+            "#text": "inc-MegaCreditprod-2 * add-1-resource-Venus",
             "@class": "description"
           }
         ]
@@ -419,7 +414,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "4 Science",
+            "#text": "Science Science Science Science tags",
             "@class": "requirements"
           },
           {
@@ -450,7 +445,7 @@
             "@style": "margin-left:20px"
           },
           {
-            "#text": "(Requires 4 Science tags. dec-energyprod-1 step. inc-titaniumprod-1 step. Place a City tile on the RESERVED AREA).",
+            "#text": "dec-energyprod-1 * inc-titaniumprod-1 * placetile/City/Dawn City",
             "@class": "description",
             "@style": "margin-top:-5px;"
           }
@@ -511,7 +506,7 @@
             }
           },
           {
-            "#text": "(Action: add 1 Floater to this card OR spend 1 Floater here to inc-energyprod-1 step).",
+            "#text": "Action: add-1-Floater or rem-1-Floater and inc-energyprod-1 ",
             "@class": "description "
           }
         ]
@@ -566,10 +561,8 @@
             "@class": "money resource "
           },
           {
-            "#text": [
-              "(Action: add 1 Floater to ANY card.)",
-              "(Effect: when playing a Venus tag, Floaters here may be used as payment, and are worth 3MegaCredit each)"
-            ],
+            "#text":
+              "Action: add-1-Floater-any * Effect: playcard(tag-Venus) / spend-Floater-3 ",
             "@class": "description ",
             "br": [
               "",
@@ -630,7 +623,7 @@
             "@class": "tile venus-tile "
           },
           {
-            "#text": "(Action: add 1 Floater to this card, or remove 2 Floaters here to raise Venus 1 step).",
+            "#text": "Action: add-1-Floater or rem-2-Floater and inc-Venus-1 * add-3-Floater",
             "@class": "description "
           },
           {
@@ -641,10 +634,6 @@
           },
           {
             "@class": "floater resource "
-          },
-          {
-            "#text": "(Add 3 Floaters to this card).",
-            "@class": "description "
           }
         ]
       }
@@ -689,7 +678,7 @@
             }
           },
           {
-            "#text": "2 Science",
+            "#text": "Science Science tags",
             "@class": "requirements"
           },
           {
@@ -699,11 +688,7 @@
             "@class": "resource microbe"
           },
           {
-            "#text": "(Action: add 1 Microbe to ANY card)",
-            "@class": "description "
-          },
-          {
-            "#text": "(Requires 2 Science tags. 1 VP for every 3rd Microbe on this card).",
+            "#text": "Action: add-1-Microbe-any",
             "@class": "description "
           }
         ]
@@ -746,7 +731,7 @@
             }
           },
           {
-            "#text": "2 Science",
+            "#text": "Science Science tags",
             "@class": "requirements"
           },
           {
@@ -760,11 +745,7 @@
             "@class": "resource floater"
           },
           {
-            "#text": "(Action: spend 2 MegaCredit to add 1 Floater to ANY card).",
-            "@class": "description "
-          },
-          {
-            "#text": "(Requires 2 Science tags. 1 VP for every 2nd Floater on this card).",
+            "#text": "Action: dec-MegaCredit-2 and add-1-Floater-any ",
             "@class": "description "
           }
         ]
@@ -822,7 +803,7 @@
             "@class": "tile venus-tile "
           },
           {
-            "#text": "(Action: Spend 2 MegaCredit to add 1 Floater to this card, OR spend 2 Floaters here to increase Venus 1 step).",
+            "#text": "Action: dec-MegaCredit-2 and add-1-Floater or rem-2-Floater and inc-Venus-1 ",
             "@class": "description "
           }
         ]
@@ -864,7 +845,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "10% Venus",
+            "#text": "10 Venus",
             "@class": "requirements"
           },
           {
@@ -917,16 +898,7 @@
             ]
           },
           {
-            "#text": [
-              "(Requires 10% on the",
-              "Venus track. Add 2",
-              "Microbes or 2 Animals",
-              "to another Venus card.",
-              "dec-energy",
-              "production 1 step and",
-              "inc-MegaCredit",
-              "production 2 steps)."
-            ],
+            "#text": "add-2-Microbe-Venus or add-2-Animal-Venus * dec-energyprod-1 and inc-megacreditprod-2",
             "@class": "description",
             "@style": "position:absolute;margin-top:-90px;margin-left:10px;text-align:left",
             "br": [
@@ -992,7 +964,7 @@
             ]
           },
           {
-            "#text": "(Raise Venus 1 step. inc-heatprod-3 steps).",
+            "#text": "inc-Venus-1 * inc-heatprod-3 ",
             "@class": "description"
           }
         ]
@@ -1037,7 +1009,7 @@
             "@class": "tile venus-tile"
           },
           {
-            "#text": "(Raise Venus 3 steps).",
+            "#text": "inc-Venus-3 ",
             "@class": "description"
           }
         ]
@@ -1124,7 +1096,7 @@
             "@style": "margin-left:20px"
           },
           {
-            "#text": "(dec-energyprod-2 steps. inc-MegaCreditprod-1 step for each Venus and Earth tag you have. Place a City tile).",
+            "#text": "dec-energyprod-2  * inc-MegaCreditprod-1-Venus,Earth * placetile/City/Ground ",
             "@class": "description"
           }
         ]
@@ -1179,7 +1151,7 @@
             "@class": "resource-tag tag-jovian"
           },
           {
-            "#text": "(Raise Venus 1 step. Add 1 Floater to A Venus CARD for each Jovian tag you have).",
+            "#text": " inc-Venus-1 * add-Jovian-Floater-Venus",
             "@class": "description"
           }
         ]
@@ -1249,7 +1221,7 @@
             "@style": "margin-left:-15px;"
           },
           {
-            "#text": "(Draw 1 card, or draw 3 if you have at least 3 Venus tags).",
+            "#text": "inc-Card-1 or inc-Card-3 if at least 3 Venus tags",
             "@class": "description"
           }
         ]
@@ -1283,7 +1255,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "8% Venus",
+            "#text": "8 Venus",
             "@class": "requirements"
           },
           {
@@ -1293,7 +1265,7 @@
             }
           },
           {
-            "#text": "(Requires Venus 8%. inc-titaniumprod-1 step).",
+            "#text": " inc-titaniumprod-1  ",
             "@class": "description"
           }
         ]
@@ -1352,7 +1324,7 @@
             "@class": "tile venus-tile "
           },
           {
-            "#text": "(Action: Spend 1 titanium to add 2 Floaters here, OR spend 2 Floaters here to raise Venus 1 step).",
+            "#text": "Action: dec-titanium-1 and add-2-Floater or rem-2-Floater and inc-Venus-1 ",
             "@class": "description "
           }
         ]
@@ -1406,7 +1378,7 @@
             }
           },
           {
-            "#text": "(Action: add 1 Floater to this card, or spend 1 Floater here to raise your MegaCreditprod-1 step).",
+            "#text": "Action: add-1-Floater or rem-1-Floater and inc-MegaCreditprod-1 ",
             "@class": "description "
           }
         ]
@@ -1467,7 +1439,7 @@
             "@style": "margin-left:20px"
           },
           {
-            "#text": "(inc-MegaCreditprod-1 step for each Earth tag you have, including this. Place a City tile on the RESERVED AREA).",
+            "#text": "inc-MegaCreditprod-Earth * placetile/City/Luna Metropolis ",
             "@class": "description"
           }
         ]
@@ -1546,7 +1518,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "12% Venus",
+            "#text": "12 Venus",
             "@class": "requirements"
           },
           {
@@ -1559,7 +1531,7 @@
             }
           },
           {
-            "#text": "(Action: Add 1 resource to ANOTHER VENUS CARD).",
+            "#text": "Action: add-1-resource-Venus * dec-energyprod-1 * placetile/City/Maxwell Base ",
             "@class": "description ",
             "@style": "margin-top:-5px"
           },
@@ -1580,19 +1552,6 @@
           {
             "@class": "tile city-tile",
             "@style": "margin-left:20px"
-          },
-          {
-            "#text": [
-              "(Requires Venus 12%. dec-energyprod-1 step.",
-              "Place a City tile ON THE",
-              "RESERVED AREA.)"
-            ],
-            "@class": "description ",
-            "@style": "text-align:left;margin-top:-5px",
-            "br": [
-              "",
-              ""
-            ]
           }
         ]
       }
@@ -1642,7 +1601,7 @@
             ]
           },
           {
-            "#text": "(Requires Venus, Earth and Jovian tags. inc-steelprod-2 steps).",
+            "#text": "inc-steelprod-2 ",
             "@class": "description"
           }
         ]
@@ -1676,14 +1635,14 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "10% Venus",
+            "#text": "10 Venus",
             "@class": "requirements"
           },
           {
             "@class": "tile venus-tile"
           },
           {
-            "#text": "(Requires Venus 10%. Increase the Venus track 1 step).",
+            "#text": "inc-Venus-1",
             "@class": "description"
           }
         ]
@@ -1729,7 +1688,7 @@
             "@class": "tile rating"
           },
           {
-            "#text": "(Requires Venus, Earth and Jovian tags. inc-TR 2 steps.)",
+            "#text": "inc-TR-2",
             "@class": "description"
           }
         ]
@@ -1783,7 +1742,7 @@
             ]
           },
           {
-            "#text": "(Raise Venus 2 steps. inc-heatprod-2 steps).",
+            "#text": "inc-Venus-2 * inc-heatprod-2 ",
             "@class": "description"
           }
         ]
@@ -1810,7 +1769,7 @@
         "#text": "#243",
         "@class": "number"
       },
-      {
+       {
         "@class": "venus-icon project-icon"
       },
       {
@@ -1823,7 +1782,7 @@
         "br": "",
         "div": [
           {
-            "#text": "max 14% Venus",
+            "#text": "max 14 Venus",
             "@class": "requirements requirements-max"
           },
           {
@@ -1849,10 +1808,7 @@
             "@class": "tile venus-tile"
           },
           {
-            "#text": [
-              "(Action: spend 6 MegaCredit to add an asteroid resource to this card (TITANIUM MAY BE USED), or spend 1 resource from this card to increase Venus 1 step).",
-              "(Venus must be 14% or lower)."
-            ],
+            "#text": "Action: dec-MegaCredit-6 and add-1-Asteroid (TITANIUM MAY BE USED) or rem-1-Asteroid and inc-Venus-1",
             "@class": "description ",
             "br": [
               "",
@@ -1905,7 +1861,7 @@
             }
           },
           {
-            "#text": "(Requires Venus and Earth tags. inc-MegaCreditprod-3 steps).",
+            "#text": "inc-MegaCreditprod-3",
             "@class": "description"
           }
         ]
@@ -1952,7 +1908,7 @@
             "@class": "resource card"
           },
           {
-            "#text": "(Requires Venus, Earth and Jovian tags. Draw 2 cards).",
+            "#text": "inc-Card-2",
             "@class": "description"
           }
         ]
@@ -1989,7 +1945,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "max 10% Venus",
+            "#text": "max 10 Venus",
             "@class": "requirements requirements-max"
           },
           {
@@ -1999,7 +1955,7 @@
             "@class": "tile venus-tile"
           },
           {
-            "#text": "(Venus must be 10% or lower. Raise Venus 2 steps).",
+            "#text": "inc-Venus-2",
             "@class": "description"
           }
         ]
@@ -2061,7 +2017,7 @@
             "@class": "resource card red-outline"
           },
           {
-            "#text": "(Discard 1 card from your hand and THEN draw 3 cards. All OPPONENTS draw 1 card).",
+            "#text": "dec-Card-1 and inc-Card-2 * inc-Card-1-all",
             "@class": "description"
           }
         ]
@@ -2126,7 +2082,7 @@
             }
           },
           {
-            "#text": "(Action: Add 2 floaters to ANY VENUS CARD.)",
+            "#text": "Action: add-2-Floater-Venus",
             "@class": "description ",
             "@style": "margin-top:-5px"
           },
@@ -2142,27 +2098,9 @@
             "@class": "tile city-tile"
           },
           {
-            "#text": [
-              "(Requires 2",
-              "science tags.",
-              "Increase your",
-              "MegaCreditprod",
-              "2 steps. Place a City tile ON",
-              "THE RESERVED AREA.",
-              "1 VP for every 3rd Floater",
-              "on this card.)"
-            ],
+            "#text": "inc-MegaCreditprod-2 * placetile/City/Stratopolis",
             "@class": "description ",
-            "@style": "text-align:left;margin-top:-54px",
-            "br": [
-              "",
-              "",
-              "",
-              "",
-              "",
-              "",
-              ""
-            ]
+            "@style": "text-align:left;margin-top:-54px"
           }
         ]
       }
@@ -2205,7 +2143,7 @@
             }
           },
           {
-            "#text": "12% Venus",
+            "#text": "12 Venus",
             "@class": "requirements"
           },
           {
@@ -2215,7 +2153,7 @@
             "@class": "resource animal"
           },
           {
-            "#text": "(Action: Add 1 animal to this card.)",
+            "#text": "Action: add-1-Animal ",
             "@class": "description ",
             "@style": "margin-top:-5px"
           },
@@ -2226,7 +2164,7 @@
             "@class": "resource floater"
           },
           {
-            "#text": "(Requires Venus 12% and that you spend 1 Floater from any card. 1 VP for each Animal on this card.)",
+            "#text": "rem-1-Floater-any ",
             "@class": "description "
           }
         ]
@@ -2279,7 +2217,7 @@
             ]
           },
           {
-            "#text": "(Increase Venus 1 step. inc-MegaCreditprod1 step for each Venus tag you have, including this.)",
+            "#text": " inc-Venus-1 * inc-MegaCreditprod-Venus ",
             "@class": "description"
           }
         ]
@@ -2318,7 +2256,7 @@
         "br": "",
         "div": [
           {
-            "#text": "6% Venus",
+            "#text": "6 Venus",
             "@class": "requirements"
           },
           {
@@ -2339,10 +2277,7 @@
             "@class": "resource money "
           },
           {
-            "#text": [
-              "(Action: add 1 Microbe to this card, or spend any number of Microbes here to gain triple amount of MegaCredit).",
-              "(Requires Venus 6%)."
-            ],
+            "#text": "Action: add-1-Microbe or rem-Microbe-X and inc-MegaCredit-X3 ",
             "@class": "description ",
             "br": [
               "",
@@ -2390,7 +2325,7 @@
             }
           },
           {
-            "#text": "(Requires that you have at least 25 TR. inc-MegaCreditprod-4 steps.)",
+            "#text": "inc-MegaCreditprod-4 ",
             "@class": "description"
           }
         ]
@@ -2429,7 +2364,7 @@
         "br": "",
         "div": [
           {
-            "#text": "6% Venus",
+            "#text": "6 Venus",
             "@class": "requirements"
           },
           {
@@ -2455,10 +2390,7 @@
             "@class": "tile venus-tile"
           },
           {
-            "#text": [
-              "(Action: add 1 Microbe to ANY Venus CARD or spend 2 Microbes here to raise Venus 1 step).",
-              "(Requires Venus 6%)."
-            ],
+            "#text":"Action: add-1-Microbe-Venus or rem-2-Microbe and inc-Venus-1",
             "@class": "description ",
             "br": [
               "",
@@ -2501,7 +2433,7 @@
             "@class": "tile venus-tile"
           },
           {
-            "#text": "(Raise Venus 1 step.)",
+            "#text": "inc-venus-1",
             "@class": "description"
           }
         ]
@@ -2549,7 +2481,7 @@
             }
           },
           {
-            "#text": "(Requires 2 Venus tags. inc-MegaCreditprod-2 steps.)",
+            "#text": " inc-MegaCreditprod-2 ",
             "@class": "description"
           }
         ]
@@ -2583,7 +2515,7 @@
         "@class": "content ",
         "div": [
           {
-            "#text": "10% Venus",
+            "#text": "10 Venus",
             "@class": "requirements"
           },
           {
@@ -2604,10 +2536,7 @@
             "@class": "tile venus-tile "
           },
           {
-            "#text": [
-              "(Action: dec-Energyprod-1 step to raise Venus 1 step.)",
-              "(Requires Venus 10%.)"
-            ],
+            "#text": "Action: dec-Energyprod-1 and inc-Venus-1",
             "@class": "description ",
             "br": [
               "",
@@ -2669,7 +2598,7 @@
             "@class": "resource microbe"
           },
           {
-            "#text": "(Raise Venus 1 step. inc-Plantprod-1 step. Add 2 Microbes to ANOTHER card).",
+            "#text": "inc-Venus-1 * inc-Plantprod-1 * add-2-Microbe-Other ",
             "@class": "description"
           }
         ]
@@ -2717,7 +2646,7 @@
             "@class": "money resource "
           },
           {
-            "#text": "(Effect: When you play a Venus tag, you pay 2 MegaCredit less for it.)",
+            "#text": "Effect: discount-2-Venus ",
             "@class": "description "
           }
         ]
@@ -2765,7 +2694,7 @@
             }
           },
           {
-            "#text": "18% Venus",
+            "#text": "18 Venus",
             "@class": "requirements"
           },
           {
@@ -2775,7 +2704,7 @@
             "@class": "animal resource "
           },
           {
-            "#text": "(Effect: when you play a Science tag, including this, add 1 Animal to this card).",
+            "#text": "Effect: playCard(tag-Science) / add-1-Animal * add-1-Animal",
             "@class": "description "
           }
         ]
@@ -2820,7 +2749,7 @@
             }
           },
           {
-            "#text": "12% Venus",
+            "#text": "12 Venus",
             "@class": "requirements"
           },
           {
@@ -2830,11 +2759,7 @@
             "@class": "resource microbe"
           },
           {
-            "#text": "(Action: add 1 Microbe to this card.)",
-            "@class": "description "
-          },
-          {
-            "#text": "(Requires Venus 12%. 1 VP for every 2nd Microbe on this card.)",
+            "#text": "Action: add-1-Microbe ",
             "@class": "description "
           }
         ]
@@ -2877,7 +2802,7 @@
             "@class": "points points-big"
           },
           {
-            "#text": "16% Venus",
+            "#text": "16 Venus",
             "@class": "requirements"
           },
           {
@@ -2896,7 +2821,7 @@
             }
           },
           {
-            "#text": "(Requires Venus 16%. Raise Venus 1 step. Add 1 Microbe or 1 Animal to ANOTHER VENUS CARD).",
+            "#text": "inc-venus-1 * add-1-Microbe-Venus or add-1-Animal-Venus ",
             "@class": "description"
           }
         ]

@@ -19,6 +19,7 @@ import utilities.Vector2D;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
+import static games.terraformingmars.TMTypes.Resource.MegaCredit;
 import static games.terraformingmars.TMTypes.Resource.TR;
 import static games.terraformingmars.TMTypes.StandardProject.*;
 import static games.terraformingmars.TMTypes.ActionType.*;
@@ -412,6 +413,11 @@ public class TMForwardModel extends AbstractForwardModel {
             TMAction a1 = new PlaceTile(player, TMTypes.Tile.City, TMTypes.MapTileType.Ground, true);
             TMAction a2 = new ModifyPlayerResource(player, params.nSPCityMCGain, TMTypes.Resource.MegaCredit, true);
             possibleActions.add(new CompoundAction(StandardProject, player, new TMAction[]{a1, a2}, params.nCostSPCity));
+
+            // - Air Scraping, increase Venus parameter for 15MC, if Venus expansion enabled
+            if (params.expansions.contains(TMTypes.Expansion.Venus)) {
+                possibleActions.add(new ModifyGlobalParameter(StandardProject, MegaCredit, params.nCostVenus, TMTypes.GlobalParameter.Venus, 1, false));
+            }
 
             // Claim a milestone
             int nMilestonesClaimed = gs.getnMilestonesClaimed().getValue();
