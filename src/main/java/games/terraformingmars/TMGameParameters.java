@@ -10,7 +10,7 @@ import static games.terraformingmars.TMTypes.Expansion.*;
 public class TMGameParameters extends AbstractParameters {
 
     int boardSize = 9;
-    HashSet<TMTypes.Expansion> expansions = new HashSet<TMTypes.Expansion>() {{ add(CorporateEra); add(Elysium); }};
+    HashSet<TMTypes.Expansion> expansions = new HashSet<TMTypes.Expansion>() {{ add(CorporateEra); add(Elysium); add(Venus); }};
     int soloTR = 14;
     int soloMaxGen = 14;
     int soloCities = 2;
@@ -56,6 +56,7 @@ public class TMGameParameters extends AbstractParameters {
     int nCostSPGreenery = 23;
     int nCostSPCity = 25;
     int nSPCityMCGain = 1;
+    int nCostVenus = 15;
 
     // Resource actions
     int nCostGreeneryPlant = 8;
