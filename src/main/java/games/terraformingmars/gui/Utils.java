@@ -1,15 +1,11 @@
 package games.terraformingmars.gui;
 
+import org.davidmoten.text.utils.WordWrap;
 import utilities.ImageIO;
 import utilities.Vector2D;
 
 import java.awt.*;
 import java.awt.font.TextLayout;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
-
-import static games.terraformingmars.TMTypes.neighbor_directions;
 
 public class Utils {
 
@@ -32,15 +28,61 @@ public class Utils {
         textLayout.draw(g, x, y);
     }
 
-    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color, Color shadow, int size) {
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, Color shadow, int size) {
+        drawShadowStringCentered(g, text, rectToCenterIn, color, shadow, size, false);
+    }
 
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, Color shadow, int size, boolean split) {
         Font f = g.getFont();
 
         if (size != -1) {
             g.setFont(new Font(f.getName(), f.getStyle(), size));
+        } else {
+            size = f.getSize();
         }
         // Get the FontMetrics
         FontMetrics metrics = g.getFontMetrics(g.getFont());
+
+        if (split) {
+            // Split text on multiple lines to fit in width of rect, then adjust font size to fit in height of rect
+            String wrapped = WordWrap.from(text)
+                            .maxWidth(rectToCenterIn.getWidth()/metrics.stringWidth("o"))
+                            .insertHyphens(false) // true is the default
+                            .wrap();
+            String[] wraps = wrapped.split("\n");
+            int h = metrics.getHeight() * wraps.length;
+            while (h > rectToCenterIn.getHeight()) {
+                // reduce font size until text fits in width & height
+                size -= 1;
+                g.setFont(new Font(f.getName(), f.getStyle(), size));
+                metrics = g.getFontMetrics(g.getFont());
+
+                wrapped = WordWrap.from(text)
+                                .maxWidth(rectToCenterIn.getWidth()/metrics.stringWidth("o"))
+                                .insertHyphens(false) // true is the default
+                                .wrap();
+                wraps = wrapped.split("\n");
+                h = metrics.getHeight() * wraps.length;
+            }
+            int i = 0;
+            int y = rectToCenterIn.y;
+            for (String s : wraps) {
+                drawShadowStringCentered(g, wraps[i], new Rectangle(rectToCenterIn.x, y, rectToCenterIn.width, metrics.getHeight()));
+                y += metrics.getHeight();
+                i++;
+            }
+
+            g.setFont(f);
+            return;
+        } else {
+            // Adjust size of text so it fits in given width of rect
+            while (metrics.stringWidth(text) > rectToCenterIn.getWidth()) {
+                size -= 1;
+                g.setFont(new Font(f.getName(), f.getStyle(), size));
+                metrics = g.getFontMetrics(g.getFont());
+            }
+        }
+
         // Determine the X coordinate for the text
         int xText = (int)(rectToCenterIn.getX() + (rectToCenterIn.getWidth() - metrics.stringWidth(text)) / 2);
         int yText = (int)(rectToCenterIn.getY() + ((rectToCenterIn.getHeight() - metrics.getHeight()) / 2) + metrics.getAscent());
@@ -49,23 +91,67 @@ public class Utils {
         g.setFont(f);
     }
 
-    public static void drawStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color) {
-        drawStringCentered(g, text, rectToCenterIn, color, -1);
+    public static void drawStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, boolean split) {
+        drawStringCentered(g, text, rectToCenterIn, color, -1, split);
     }
 
-    public static void drawStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color, int size) {
+    public static void drawStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color) {
+        drawStringCentered(g, text, rectToCenterIn, color, -1, false);
+    }
+
+    public static void drawStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, int size) {
+        drawStringCentered(g, text, rectToCenterIn, color, size, false);
+    }
+    public static void drawStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, int size, boolean split) {
         Font f = g.getFont();
 
         if (size != -1) {
             g.setFont(new Font(f.getName(), f.getStyle(), size));
+        } else {
+            size = f.getSize();
         }
         // Get the FontMetrics
         FontMetrics metrics = g.getFontMetrics(g.getFont());
-        // Adjust size of text so it fits in given rect // TODO or split text over multiple lines if needed
-        while (metrics.stringWidth(text) > rectToCenterIn.getWidth()) {
-            size -= 1;
-            g.setFont(new Font(f.getName(), f.getStyle(), size));
-            metrics = g.getFontMetrics(g.getFont());
+
+        if (split) {
+            // Split text on multiple lines to fit in width of rect, then adjust font size to fit in height of rect
+
+            String wrapped = WordWrap.from(text)
+                    .maxWidth(rectToCenterIn.getWidth()/metrics.stringWidth("o"))
+                    .insertHyphens(false) // true is the default
+                    .wrap();
+            String[] wraps = wrapped.split("\n");
+            int h = metrics.getHeight() * wraps.length;
+            while (h > rectToCenterIn.getHeight()) {
+                // reduce font size until text fits in width & height
+                size -= 1;
+                g.setFont(new Font(f.getName(), f.getStyle(), size));
+                metrics = g.getFontMetrics(g.getFont());
+
+                wrapped = WordWrap.from(text)
+                        .maxWidth(rectToCenterIn.getWidth()/metrics.stringWidth("o"))
+                        .insertHyphens(false) // true is the default
+                        .wrap();
+                wraps = wrapped.split("\n");
+                h = metrics.getHeight() * wraps.length;
+            }
+            int i = 0;
+            int y = rectToCenterIn.y;
+            for (String s : wraps) {
+                drawShadowStringCentered(g, wraps[i], new Rectangle(rectToCenterIn.x, y, rectToCenterIn.width, metrics.getHeight()));
+                y += metrics.getHeight();
+                i++;
+            }
+
+            g.setFont(f);
+            return;
+        } else {
+            // Adjust size of text so it fits in given width of rect
+            while (metrics.stringWidth(text) > rectToCenterIn.getWidth()) {
+                size -= 1;
+                g.setFont(new Font(f.getName(), f.getStyle(), size));
+                metrics = g.getFontMetrics(g.getFont());
+            }
         }
         // Determine the X coordinate for the text
         int xText = (int)(rectToCenterIn.getX() + (rectToCenterIn.getWidth() - metrics.stringWidth(text)) / 2);
@@ -77,14 +163,24 @@ public class Utils {
         g.setFont(f);
     }
 
-    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn) {
-        drawShadowStringCentered(g, text, rectToCenterIn, null, null, -1);
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn) {
+        drawShadowStringCentered(g, text, rectToCenterIn, null, null, -1, false);
     }
-    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color) {
-        drawShadowStringCentered(g, text, rectToCenterIn, color, null, -1);
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color) {
+        drawShadowStringCentered(g, text, rectToCenterIn, color, null, -1, false);
     }
-    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle2D rectToCenterIn, Color color, Color shadow) {
-        drawShadowStringCentered(g, text, rectToCenterIn, color, shadow, -1);
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, Color shadow) {
+        drawShadowStringCentered(g, text, rectToCenterIn, color, shadow, -1, false);
+    }
+
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, boolean split) {
+        drawShadowStringCentered(g, text, rectToCenterIn, null, null, -1, split);
+    }
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, boolean split) {
+        drawShadowStringCentered(g, text, rectToCenterIn, color, null, -1, split);
+    }
+    public static void drawShadowStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, Color shadow, boolean split) {
+        drawShadowStringCentered(g, text, rectToCenterIn, color, shadow, -1, split);
     }
 
     public static void drawImage(Graphics2D g, String path, int x, int y, int width, int height) {

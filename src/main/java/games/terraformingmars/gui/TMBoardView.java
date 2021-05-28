@@ -111,7 +111,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
         for (int i = 0; i < gs.getNPlayers(); i++) {
             Rectangle r = drawImage(g, tr, offsetX + i*defaultItemSize*3, offsetY, defaultItemSize);
             drawShadowStringCentered(g, "p" + i + ": " +gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue(),
-                    new Rectangle.Double(offsetX + i*defaultItemSize*3 + defaultItemSize, offsetY, defaultItemSize*2, r.getHeight()),
+                    new Rectangle(offsetX + i*defaultItemSize*3 + defaultItemSize, offsetY, defaultItemSize*2, r.height),
                     playerColors[i], Color.darkGray);
             if (i == 0) {
                 height += spacing + r.getHeight() + spacing;
@@ -227,7 +227,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
         if (element.getTileType() == TMTypes.MapTileType.City) {
             // Draw city name
             drawShadowStringCentered(g, element.getComponentName(),
-                    new Rectangle.Double(x-defaultItemSize/2., y-defaultItemSize/2., defaultItemSize, defaultItemSize),
+                    new Rectangle(x-defaultItemSize/2, y-defaultItemSize/2, defaultItemSize, defaultItemSize),
                     Color.lightGray, null, 10);
             return true;
         }
@@ -246,7 +246,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
                 // Draw symbol and value
                 drawImage(g, p.getImagePath(), x, y, counterWidth, counterWidth);
                 String text = "" + c.getValue() + "/" + c.getMaximum();
-                drawShadowStringCentered(g, text, new Rectangle.Double(x, y, counterWidth, counterWidth), Color.yellow);
+                drawShadowStringCentered(g, text, new Rectangle(x, y, counterWidth, counterWidth), Color.yellow);
                 rect.setRect(x, y, counterWidth, counterWidth);
             } else {
                 // Some vars

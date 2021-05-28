@@ -457,7 +457,7 @@ public class TMGUI extends AbstractGUI {
     private TMAction getFullLegalAction(TMAction a, List<AbstractAction> legalActions) {
         for (AbstractAction aa: legalActions) {
             if (aa instanceof PayForAction && a.equals(((PayForAction) aa).action)) return (TMAction) aa;
-            if (!(aa instanceof PayForAction) && a.equals(aa)) return (TMAction) aa;
+            if (a.equals(aa)) return (TMAction) aa;
         }
         return null;
     }

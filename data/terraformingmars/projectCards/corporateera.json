@@ -89,13 +89,12 @@
       },
       {
         "@class": "content ",
-        "div": {
-          "@class": "red-arrow "
-        },
-        "span": {
-          "#text": "ACTION: look-1-0-true",
-          "@style": "font-size:14px;font-weight: normal;"
-        }
+        "div": [
+          {
+            "#text": "ACTION: look-1-0-true",
+            "@class": "description "
+          }
+        ]
       }
     ]
   },
@@ -2024,7 +2023,7 @@
   },
   {
     "@class": "filterDiv active earthTag corporate ",
-    "annotation": "(Decrease your MC production 1 step.)",
+    "annotation": "(Decrease your MC production 1 step. Action: look at the top card and either buy it or discard it.)",
     "div": [
       {
         "#text": "Business Network",
@@ -2062,14 +2061,10 @@
             }
           },
           {
-            "#text": "dec-MegaCreditprod-1 ",
+            "#text": "dec-MegaCreditprod-1 * Action: look-1-0-true ",
             "@class": "description "
           }
-        ],
-        "span": {
-          "#text": "Action: look-1-0-true",
-          "@style": "font-size:14px; "
-        }
+        ]
       }
     ]
   },
@@ -2100,10 +2095,12 @@
       },
       {
         "@class": "content ",
-        "span": {
-          "#text": "look-4-2-false",
-          "@style": "font-size:14px; "
-        }
+        "div": [
+          {
+            "#text": "look-4-2-false",
+            "@class": "description "
+          }
+        ]
       }
     ]
   },
@@ -2238,7 +2235,7 @@
           {
             "@class": "production-box",
             "div": {
-              "@class": "steelprod-"
+              "@class": "steelprod-1"
             }
           },
           {
@@ -3081,9 +3078,13 @@
         "@class": "number"
       },
       {
-        "#text": "look-3-1-false",
         "@class": "content ",
-        "@style": "font-size:14px;font-weight: normal;"
+        "div": [
+          {
+            "#text": "look-3-1-false",
+            "@class": "description "
+          }
+        ]
       }
     ]
   },

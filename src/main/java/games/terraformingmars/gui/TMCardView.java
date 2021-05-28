@@ -294,13 +294,15 @@ public class TMCardView extends JComponent {
                 drawImage(g, from, xD, yD, size);
                 drawShadowStringCentered(g, ": +/-" + amount, new Rectangle(xD + size, yD, size*3, size));
             } else if (r instanceof ActionTypeRequirement) {
-                int xD = width/2 - size*4/2;
+                int xD = spacing/2;
                 TMTypes.ActionType actionType = ((ActionTypeRequirement) r).actionType;
                 TMTypes.StandardProject project = ((ActionTypeRequirement) r).project;
                 String text = "";
                 if (actionType != null) text = actionType.name();
                 else if (project != null) text = project.name();
-                drawShadowStringCentered(g, text + " : -" + amount, new Rectangle(xD, yD, size*4, size));
+                drawShadowStringCentered(g, text + " : -" + amount, new Rectangle(xD, yD, width-spacing-size, size));
+                Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
+                drawImage(g, to, width - size - spacing/2, yD, size, size);
             }
             yD += size + spacing/2;
         }
@@ -516,13 +518,15 @@ public class TMCardView extends JComponent {
                 drawImage(g, from, xD, yD, size);
                 drawShadowStringCentered(g, ": +/-" + amount, new Rectangle(xD + size, yD, size*3, size));
             } else if (r instanceof ActionTypeRequirement) {
-                int xD = width/2 - size*4/2;
+                int xD = spacing/2;
                 TMTypes.ActionType actionType = ((ActionTypeRequirement) r).actionType;
                 TMTypes.StandardProject project = ((ActionTypeRequirement) r).project;
                 String text = "";
                 if (actionType != null) text = actionType.name();
                 else if (project != null) text = project.name();
-                drawShadowStringCentered(g, text + " : -" + amount, new Rectangle(xD, yD, size*4, size));
+                drawShadowStringCentered(g, text + " : -" + amount, new Rectangle(xD, yD, width-spacing-size, size));
+                Image to = ImageIO.GetInstance().getImage(TMTypes.Resource.MegaCredit.getImagePath());
+                drawImage(g, to, width - size - spacing/2, yD, size, size);
             }
             yD += size + spacing/2;
         }
@@ -706,7 +710,7 @@ public class TMCardView extends JComponent {
             } else {
                 text += " Take " + nCardsKeep + " of them into your hand and discard the rest.";
             }
-            drawShadowStringCentered(g, text, new Rectangle(xE - width/2, yE, width, TMDeckDisplay.cardHeight/3));
+            drawShadowStringCentered(g, text, new Rectangle(xE - width/2, yE - TMDeckDisplay.cardHeight/6, width, TMDeckDisplay.cardHeight/3), true);
         } else {
             int b = 0;
         }

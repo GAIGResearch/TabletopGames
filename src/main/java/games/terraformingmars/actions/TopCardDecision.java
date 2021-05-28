@@ -43,10 +43,13 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
         List<AbstractAction> actions = new ArrayList<>();
         TMGameState gs = (TMGameState) state;
         int cardId = gs.getPlayerCardChoice()[player].get(0).getComponentID();
-        if (nCardsLook == 1 || nCardsKept <= nCardsKeep) {
-            int cost = 0;
-            if (buy) cost = ((TMGameParameters)gs.getGameParameters()).getProjectPurchaseCost();
-            actions.add(new BuyCard(player, cardId, cost));
+        if (nCardsLook == 1 || nCardsKept < nCardsKeep) {
+            if (buy) {
+                int cost = ((TMGameParameters)gs.getGameParameters()).getProjectPurchaseCost();
+                actions.add(new PayForAction(player, new BuyCard(player, cardId, cost)));
+            } else {
+                actions.add(new BuyCard(player, cardId, 0));
+            }
         }
         if (nCardsLook == 1 || nCardsLook - stage > nCardsKeep - nCardsKept) {
             actions.add(new DiscardCard(player, cardId, true));
@@ -64,18 +67,18 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
         stage++;
         if (action instanceof BuyCard) nCardsKept++;
 
-        if (nCardsKept == nCardsKeep && stage != nCardsLook) {
-            TMGameState gs = (TMGameState) state;
-            // Discard the rest
-            for (TMCard card: gs.getPlayerCardChoice()[player].getComponents()) {
-                new DiscardCard(player, card.getComponentID(), true).execute(gs);
-            }
-        }
+//        if (nCardsKept == nCardsKeep && stage != nCardsLook) {
+//            TMGameState gs = (TMGameState) state;
+//            // Discard the rest
+//            for (TMCard card: gs.getPlayerCardChoice()[player].getComponents()) {
+//                new DiscardCard(player, card.getComponentID(), true).execute(gs);
+//            }
+//        }
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return nCardsKept == nCardsKeep || stage == nCardsLook;
+        return ((TMGameState)state).getPlayerCardChoice()[player].getSize() == 0;
     }
 
     @Override
@@ -103,5 +106,21 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), stage, nCardsKept, nCardsLook, nCardsKeep, buy);
+    }
+
+    @Override
+    public String toString() {
+        String text = "Look at the top " + (nCardsLook > 1? nCardsLook + " cards." : "card.");
+        if (buy) {
+            text += " Buy " + (nCardsKeep > 1? nCardsKeep : "it") + " or discard all.";
+        } else {
+            text += " Take " + nCardsKeep + " of them into your hand and discard the rest.";
+        }
+        return text;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

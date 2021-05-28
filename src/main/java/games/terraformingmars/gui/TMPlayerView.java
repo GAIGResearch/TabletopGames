@@ -31,10 +31,6 @@ public class TMPlayerView extends ComponentView {
     int offsetX = 10;
     int spacing = 10;
 
-    // TODO: standard actions with resources
-    // Effects cards played  // TODO
-    // Actions cards played  // TODO
-
     public TMPlayerView(TMGameState gs, int player) {
         super(gs.getBoard(), 0, 0);
         this.gs = gs;
@@ -81,10 +77,10 @@ public class TMPlayerView extends ComponentView {
                 Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
                 drawImage(g, resImg, offsetX + spacing / 5 + k * defaultItemSize * 2, offsetX + spacing / 5, defaultItemSize, defaultItemSize);
                 drawShadowStringCentered(g, "" + gs.getPlayerResources()[focusPlayer].get(res).getValue(),
-                        new Rectangle2D.Double(offsetX + spacing / 5. + defaultItemSize + k * defaultItemSize * 2, offsetX + spacing / 5., defaultItemSize, defaultItemSize));
+                        new Rectangle(offsetX + spacing / 5 + defaultItemSize + k * defaultItemSize * 2, offsetX + spacing / 5, defaultItemSize, defaultItemSize));
                 drawImage(g, production, offsetX + spacing / 5 + defaultItemSize / 2 + k * defaultItemSize * 2, offsetX + spacing / 5 + defaultItemSize, defaultItemSize, defaultItemSize);
                 drawShadowStringCentered(g, "" + gs.getPlayerProduction()[focusPlayer].get(res).getValue(),
-                        new Rectangle2D.Double(offsetX + spacing / 5. + defaultItemSize / 2. + k * defaultItemSize * 2, offsetX + spacing / 5. + defaultItemSize, defaultItemSize, defaultItemSize));
+                        new Rectangle(offsetX + spacing / 5 + defaultItemSize / 2 + k * defaultItemSize * 2, offsetX + spacing / 5 + defaultItemSize, defaultItemSize, defaultItemSize));
 
                 g.setColor(playerColors[focusPlayer]);
                 g.drawRect(offsetX + k * defaultItemSize * 2, offsetX, defaultItemSize * 2, defaultItemSize * 2);
@@ -96,14 +92,14 @@ public class TMPlayerView extends ComponentView {
         k = 0;
         int startX = offsetX;
         int startY = offsetX*2 + defaultItemSize*2;
-        drawShadowStringCentered(g, "Tags played:", new Rectangle2D.Double(startX, startY, defaultItemSize*2, defaultItemSize/3.), null, null, 12);
+        drawShadowStringCentered(g, "Tags played:", new Rectangle(startX, startY, defaultItemSize*2, defaultItemSize/3), null, null, 12);
         startX += defaultItemSize*2;
         for (TMTypes.Tag t: TMTypes.Tag.values()) {
             int nCards = gs.getPlayerCardsPlayedTags()[focusPlayer].get(t).getValue();
             Image img = ImageIO.GetInstance().getImage(t.getImagePath());
             drawImage(g, img, startX + k*spacing/2 + k*2*defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3);
             drawShadowStringCentered(g, "" + nCards,
-                    new Rectangle2D.Double(startX + k*spacing/2. + k*2*defaultItemSize/3. + defaultItemSize/3., startY, defaultItemSize/3., defaultItemSize/3.));
+                    new Rectangle(startX + k*spacing/2 + k*2*defaultItemSize/3 + defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3));
             k++;
         }
 
@@ -115,14 +111,14 @@ public class TMPlayerView extends ComponentView {
         g.setFont(new Font(f.getName(), f.getStyle(), 12));
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         String text = "Card types played:";
-        drawShadowStringCentered(g, text, new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize/3.), null, null, 12);
+        drawShadowStringCentered(g, text, new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize/3), null, null, 12);
         startX += metrics.stringWidth(text) + spacing*2;
         for (TMTypes.CardType t: TMTypes.CardType.values()) {
             if (t.isPlayableStandard()) {
                 int nCards = gs.getPlayerCardsPlayedTypes()[focusPlayer].get(t).getValue();
                 text = t.name() + ": " + nCards;
                 drawShadowStringCentered(g, text,
-                        new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), t.getColor(), null, 12);
+                        new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize / 3), t.getColor(), null, 12);
                 startX += metrics.stringWidth(text) + spacing*2;
                 k++;
             }
@@ -132,14 +128,14 @@ public class TMPlayerView extends ComponentView {
         k = 0;
         startX = offsetX;
         startY = offsetX*4 + defaultItemSize*2 + 2*defaultItemSize/3;
-        drawShadowStringCentered(g, "Tiles placed:", new Rectangle2D.Double(startX, startY, defaultItemSize*2, defaultItemSize/3.), null, null, 12);
+        drawShadowStringCentered(g, "Tiles placed:", new Rectangle(startX, startY, defaultItemSize*2, defaultItemSize/3), null, null, 12);
         startX += defaultItemSize*2;
         for (TMTypes.Tile t: TMTypes.Tile.values()) {
             int nTiles = gs.getPlayerTilesPlaced()[focusPlayer].get(t).getValue();
             Image img = ImageIO.GetInstance().getImage(t.getImagePath());
             drawImage(g, img, startX + k*spacing/2 + k*2*defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3);
             drawShadowStringCentered(g, "" + nTiles,
-                    new Rectangle2D.Double(startX + k*spacing/2. + k*2*defaultItemSize/3. + defaultItemSize/3., startY, defaultItemSize/3., defaultItemSize/3.));
+                    new Rectangle(startX + k*spacing/2 + k*2*defaultItemSize/3 + defaultItemSize/3, startY, defaultItemSize/3, defaultItemSize/3));
             k++;
         }
 
@@ -148,7 +144,7 @@ public class TMPlayerView extends ComponentView {
         startX = offsetX;
         startY = offsetX*5 + defaultItemSize*2 + defaultItemSize;
         text = "Milestones:";
-        drawShadowStringCentered(g, text, new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize/3.), null, null, 12);
+        drawShadowStringCentered(g, text, new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize/3), null, null, 12);
         startX += metrics.stringWidth(text) + spacing;
         for (Milestone m: gs.getMilestones()) {
             Color color = Color.white;
@@ -157,7 +153,7 @@ public class TMPlayerView extends ComponentView {
             int progress = m.checkProgress(gs, focusPlayer);
             text = m.getComponentName() + ": " + progress + "/" + m.min;
             drawShadowStringCentered(g, text,
-                    new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), color, null, 12);
+                    new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize / 3), color, null, 12);
             startX += metrics.stringWidth(text) + spacing;
             k++;
         }
@@ -167,7 +163,7 @@ public class TMPlayerView extends ComponentView {
         startX = offsetX;
         startY = offsetX*6 + defaultItemSize*2 + defaultItemSize*4/3;
         text = "Awards:";
-        drawShadowStringCentered(g, text, new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize/3.), null, null, 12);
+        drawShadowStringCentered(g, text, new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize/3), null, null, 12);
         startX += metrics.stringWidth(text) + spacing;
         for (Award a: gs.getAwards()) {
             Color color = Color.white;
@@ -176,7 +172,7 @@ public class TMPlayerView extends ComponentView {
             int progress = a.checkProgress(gs, focusPlayer);
             text = a.getComponentName() + ": " + progress;
             drawShadowStringCentered(g, text,
-                    new Rectangle2D.Double(startX, startY, metrics.stringWidth(text), defaultItemSize / 3.), color, null, 12);
+                    new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize / 3), color, null, 12);
             startX += metrics.stringWidth(text) + spacing;
             k++;
         }
