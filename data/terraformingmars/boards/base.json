@@ -1,13 +1,13 @@
 {
-  "board": [["0", "0", "Ground-Steel-Steel", "Ocean-Steel-Steel", "Ground", "Ocean-Card", "Ocean", "0", "0"],
-            ["0", "Ground", "Volcanic-Steel", "Ground", "Ground", "Ground", "Ocean-Card-Card", "0", "0"],
-            ["0", "Volcanic-Card", "Ground", "Ground", "Ground", "Ground", "Ground", "Ground-Steel", "0"],
-            ["Volcanic-Plant-Titanium", "Ground-Plant", "Ground-Plant", "Ground-Plant", "Ground-Plant-Plant", "Ground-Plant", "Ground-Plant", "Ocean-Plant-Plant", "0"],
-            ["Volcanic-Plant-Plant", "Ground-Plant-Plant", "Noctis-Plant-Plant", "Ocean-Plant-Plant", "Ocean-Plant-Plant", "Ocean-Plant-Plant", "Ground-Plant-Plant", "Ground-Plant-Plant", "Ground-Plant-Plant"],
-            ["Ground-Plant", "Ground-Plant-Plant", "Ground-Plant", "Ground-Plant", "Ground-Plant", "Ocean-Plant", "Ocean-Plant", "Ocean-Plant", "0"],
-            ["0", "Ground", "Ground", "Ground", "Ground", "Ground", "Ground-Plant", "Ground", "0"],
-            ["0", "Ground-Steel-Steel", "Ground", "Ground-Card", "Ground-Card", "Ground", "Ground-Titanium", "0", "0"],
-            ["0", "0", "Ground-Steel", "Ground-Steel-Steel", "Ground", "Ground", "Ocean-Titanium-Titanium", "0", "0"]],
+  "board": [["0", "0", "Ground:Steel:Steel", "Ocean:Steel:Steel", "Ground", "Ocean:Card", "Ocean", "0", "0"],
+            ["0", "Ground", "Volcanic:Steel", "Ground", "Ground", "Ground", "Ocean:Card:Card", "0", "0"],
+            ["0", "Volcanic:Card", "Ground", "Ground", "Ground", "Ground", "Ground", "Ground:Steel", "0"],
+            ["Volcanic:Plant:Titanium", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant:Plant", "Ground:Plant", "Ground:Plant", "Ocean:Plant:Plant", "0"],
+            ["Volcanic:Plant:Plant", "Ground:Plant:Plant", "Noctis:Plant:Plant", "Ocean:Plant:Plant", "Ocean:Plant:Plant", "Ocean:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant"],
+            ["Ground:Plant", "Ground:Plant:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ocean:Plant", "Ocean:Plant", "Ocean:Plant", "0"],
+            ["0", "Ground", "Ground", "Ground", "Ground", "Ground", "Ground:Plant", "Ground", "0"],
+            ["0", "Ground:Steel:Steel", "Ground", "Ground:Card", "Ground:Card", "Ground", "Ground:Titanium", "0", "0"],
+            ["0", "0", "Ground:Steel", "Ground:Steel:Steel", "Ground", "Ground", "Ocean:Titanium:Titanium", "0", "0"]],
   "extra": ["Phobos", "Ganymede"],
   "globalParameters": [
     {

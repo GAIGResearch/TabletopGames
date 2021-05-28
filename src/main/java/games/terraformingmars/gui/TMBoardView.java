@@ -199,13 +199,15 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
                 TMTypes.Resource[] resources = element.getResources();
                 int resSize = defaultItemSize/4;
                 for (int i = 0; i < resources.length; i++) {
-                    int yDraw = y+i*resSize - defaultItemSize/3;
-                    int xDraw = x+i*resSize - defaultItemSize/3;
-                    if (drew) {
-                        yDraw = y - defaultItemSize/3;
-                        xDraw = x+i*resSize + i*2 - defaultItemSize/3;
+                    if (resources[i] != null) {
+                        int yDraw = y + i * resSize - defaultItemSize / 3;
+                        int xDraw = x + i * resSize - defaultItemSize / 3;
+                        if (drew) {
+                            yDraw = y - defaultItemSize / 3;
+                            xDraw = x + i * resSize + i * 2 - defaultItemSize / 3;
+                        }
+                        drawImage(g, resources[i].getImagePath(), xDraw, yDraw, resSize, resSize);
                     }
-                    drawImage(g, resources[i].getImagePath(), xDraw, yDraw, resSize, resSize);
                 }
             } else {
                 // Draw tile here

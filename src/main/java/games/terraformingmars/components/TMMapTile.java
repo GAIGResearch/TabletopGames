@@ -158,7 +158,7 @@ public class TMMapTile extends Component {
 
         TMMapTile mt = new TMMapTile(x, y);
 
-        String[] split = s.split("-");
+        String[] split = s.split(":");
 
         // First element is tile type
         TMTypes.MapTileType type = Utils.searchEnum(TMTypes.MapTileType.class, split[0]);
@@ -175,7 +175,12 @@ public class TMMapTile extends Component {
         int nResources = split.length-1;
         TMTypes.Resource[] resources = new TMTypes.Resource[nResources];
         for (int i = 1; i < split.length; i++) {
-            resources[i-1] = TMTypes.Resource.valueOf(split[i]);
+            TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, split[i]);
+            if (res != null) {
+                resources[i - 1] = res;
+            } else {
+                // TODO: Ocean (place tile), MegaCredit/-6 (reduce MC by 6)
+            }
         }
         mt.setResources(resources);
 

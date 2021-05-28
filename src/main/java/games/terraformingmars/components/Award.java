@@ -14,14 +14,24 @@ public class Award extends Token {
 
     public Award(String name, String counterID) {
         super(name);
-        this.componentName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+        String[] splitN = name.split("-");
+        this.componentName = "";
+        for (int i = 0; i < splitN.length; i++) {
+            this.componentName += splitN[i].substring(0, 1).toUpperCase() + splitN[i].substring(1).toLowerCase();
+            if (i != splitN.length-1) this.componentName += " ";
+        }
         this.counterID = counterID;
         this.claimed = -1;
     }
 
     protected Award(String name, String counterID, int componentID) {
         super(name, componentID);
-        this.componentName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+        String[] splitN = name.split("-");
+        this.componentName = "";
+        for (int i = 0; i < splitN.length; i++) {
+            this.componentName += splitN[i].substring(0, 1).toUpperCase() + splitN[i].substring(1).toLowerCase();
+            if (i != splitN.length-1) this.componentName += " ";
+        }
         this.counterID = counterID;
         this.claimed = -1;
     }
@@ -35,6 +45,7 @@ public class Award extends Token {
             TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, s);
             if (t != null) {
                 sum += gs.getPlayerTilesPlaced()[player].get(t).getValue();
+                // TODO  if (counterID.contains("adjacent")), then tiles adjacent to this type
             } else {
                 // Try resource
                 TMTypes.Resource r = Utils.searchEnum(TMTypes.Resource.class, s.replace("prod", ""));
@@ -53,6 +64,15 @@ public class Award extends Token {
                     TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, s);
                     if (tag != null) {
                         sum += gs.getPlayerCardsPlayedTags()[player].get(tag).getValue();
+                    } else {
+                        // todo:
+                        // - "x-prod" (X productions at minimum value given)
+                        // - card type (automated, active, event)
+                        // - "card-X" (cards played with minimum cost X)
+                        // - "bottom-X" (tiles placed in the bottom X rows of the map)
+                        // - "tag" (number of tag types with at least 1 played)
+                        // - "req" (number of cards played with requirements)
+                        // - "resource" (number of resources on cards)
                     }
                 }
             }

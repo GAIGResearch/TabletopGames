@@ -74,9 +74,24 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.milestones = new HashSet<>();
         gs.awards = new HashSet<>();
         gs.globalParameters = new HashMap<>();
+
+        // Load base
+        TMTypes.Expansion.Base.loadProjectCards(gs.projectCards);
+        TMTypes.Expansion.Base.loadCorpCards(gs.corpCards);
+        TMTypes.Expansion.Base.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
+
+        if (params.expansions.contains(TMTypes.Expansion.Hellas) || params.expansions.contains(TMTypes.Expansion.Elysium)) {
+            // Clear milestones and awards, they'll be replaced by these expansions
+            gs.milestones.clear();
+            gs.awards.clear();
+        }
+
         for (TMTypes.Expansion e: params.expansions) {
-            e.loadProjectCards(gs.projectCards);
-            e.loadCorpCards(gs.corpCards);
+            if (e != TMTypes.Expansion.Hellas && e!= TMTypes.Expansion.Elysium) {
+                // Hellas and Elysium don't have project or corporation cards
+                e.loadProjectCards(gs.projectCards);
+                e.loadCorpCards(gs.corpCards);
+            }
             e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
         }
         if (gs.getNPlayers() == 1) {
@@ -137,6 +152,12 @@ public class TMForwardModel extends AbstractForwardModel {
         // First thing to do is select corporations
         gs.setGamePhase(CorporationSelect);
         for (int i = 0; i < gs.getNPlayers(); i++) {
+            // TODO: remove, used for testing corps
+//            for (TMCard c: gs.corpCards.getComponents()) {
+//                if (c.getComponentName().equals("Thorgate")) {
+//                    gs.playerCardChoice[i].add(c);
+//                }
+//            }
             for (int j = 0; j < params.nCorpChoiceStart; j++) {
                 gs.playerCardChoice[i].add(gs.corpCards.pick(0));
             }
@@ -196,6 +217,12 @@ public class TMForwardModel extends AbstractForwardModel {
                     for (int j = 0; j < params.nProjectsStart; j++) {
                         gs.playerCardChoice[i].add(gs.projectCards.pick(0));
                     }
+                    // TODO: remove, used for testing specific cards
+//                    for (TMCard c: gs.projectCards.getComponents()) {
+//                        if (c.getComponentName().equals("Invention Contest") || c.getComponentName().equals("Business Network")) {
+//                            gs.playerCardChoice[i].add(c);
+//                        }
+//                    }
                 }
             }
         } else if (gs.getGamePhase() == Research) {

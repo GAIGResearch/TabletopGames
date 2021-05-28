@@ -271,7 +271,9 @@ public class TMTypes {
         Venus,
         Turmoil,
         Colonies,
-        Promo;
+        Promo,
+        Hellas,
+        Elysium;
 
         public String getBoardPath() {
             return "data/terraformingmars/boards/" + this.name().toLowerCase() + ".json";
