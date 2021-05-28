@@ -156,7 +156,7 @@ public class TMAction extends AbstractAction {
             if (c != null) {
                 if (!c.firstActionExecuted && c.firstAction != null) {
                     c.firstActionExecuted = true;
-                } else {
+                } else if (c.cardType == TMTypes.CardType.Active) {
                     c.actionPlayed = true;
                 }
             }

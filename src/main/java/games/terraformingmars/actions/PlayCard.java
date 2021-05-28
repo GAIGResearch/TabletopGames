@@ -70,9 +70,11 @@ public class PlayCard extends TMAction {
 
         // Execute on-play effects
         for (TMAction aa: card.immediateEffects) {
+            card.actionPlayed = false;  // This is set by each action, preventing the next ones, but we want all to be executed
             aa.player = player;
             aa.execute(gs);
         }
+        card.actionPlayed = false;  // We've not executed the active card action
     }
 
     @Override
