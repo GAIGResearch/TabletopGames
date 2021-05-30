@@ -18,7 +18,8 @@ public class BattleloreGameState extends AbstractGameState{
      * @param turnOrder      - turn order for this game.
      * @param gameType
      */
-    GridBoard<Token> gridBoard;
+
+    GridBoard<Token> hexBoard;
 
     public BattleloreGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
         super(gameParameters, turnOrder, GameType.Battlelore);

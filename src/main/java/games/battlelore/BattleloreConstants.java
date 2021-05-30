@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class BattleloreConstants
 {
-    public static final ArrayList<Token> itemMapping = new ArrayList<Token>()
+    public static final ArrayList<Token> itemList = new ArrayList<Token>() //TODO_Ertugrul Temp values, change later!
     {{
        add(new Token("-"));
     }};

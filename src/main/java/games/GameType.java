@@ -4,7 +4,7 @@ import core.*;
 import core.turnorders.AlternatingTurnOrder;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameState;
-import games.battlelore.BattleloreParameters;
+import games.battlelore.BattleloreGameParameters;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -42,7 +42,6 @@ import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.dominion.*;
 import gui.PrototypeGUI;
-import org.apache.commons.math3.random.StableRandomGenerator;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -230,7 +229,7 @@ public enum GameType {
                 gameState = new DominionGameState(params, nPlayers);
                 break;
             case Battlelore:
-                params = new BattleloreParameters(seed);
+                params = new BattleloreGameParameters(seed);
                 forwardModel = new BattleloreForwardModel();
                 //TODO_Ertugrul: Check params_
                 gameState = new BattleloreGameState(params, new AlternatingTurnOrder(nPlayers), GameType.Battlelore);
