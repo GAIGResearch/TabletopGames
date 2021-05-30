@@ -28,7 +28,8 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
     }
 
     @Override
-    public void _reset() {
+    public void _reset()
+    {
 
     }
 }

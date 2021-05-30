@@ -3,6 +3,8 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
+import core.components.GridBoard;
+import core.components.Token;
 import core.turnorders.TurnOrder;
 import games.GameType;
 
@@ -16,7 +18,7 @@ public class BattleloreGameState extends AbstractGameState{
      * @param turnOrder      - turn order for this game.
      * @param gameType
      */
-
+    GridBoard<Token> gridBoard;
 
     public BattleloreGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
         super(gameParameters, turnOrder, GameType.Battlelore);
