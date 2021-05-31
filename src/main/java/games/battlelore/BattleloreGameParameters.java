@@ -53,7 +53,7 @@ public class BattleloreGameParameters extends AbstractParameters
     {
         return Objects.hash(super.hashCode(), hexWidth, hexHeight);
     }
-
+/*
     @Override
     public String getParameterName(int parameterId)
     {
@@ -66,4 +66,6 @@ public class BattleloreGameParameters extends AbstractParameters
     public BattleloreGame instantiate() {
         return new BattleloreGame(this);
     }
+
+ */
 }

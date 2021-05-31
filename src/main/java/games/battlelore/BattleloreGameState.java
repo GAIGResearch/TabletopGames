@@ -8,9 +8,12 @@ import core.components.Token;
 import core.turnorders.TurnOrder;
 import games.GameType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class BattleloreGameState extends AbstractGameState{
+public class BattleloreGameState extends AbstractGameState
+{
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -21,18 +24,26 @@ public class BattleloreGameState extends AbstractGameState{
 
     GridBoard<Token> hexBoard;
 
-    public BattleloreGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
+    public BattleloreGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType)
+    {
         super(gameParameters, turnOrder, GameType.Battlelore);
     }
 
     @Override
-    protected List<Component> _getAllComponents() {
-        return null;
+    protected List<Component> _getAllComponents()
+    {
+        return new ArrayList<Component>()
+        {{
+            add(hexBoard);
+        }};
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
-        return null;
+    protected AbstractGameState _copy(int playerId)
+    {
+        BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), turnOrder, GameType.Battlelore);
+        state.hexBoard = hexBoard.copy();
+        return state;
     }
 
     @Override
@@ -45,6 +56,7 @@ public class BattleloreGameState extends AbstractGameState{
          * @param playerId
          * @return - double, score of current state
          */
+        //TODO_ERTUGRUL: Add the heuristic
         return 0;
     }
 
@@ -55,11 +67,29 @@ public class BattleloreGameState extends AbstractGameState{
 
     @Override
     protected void _reset() {
-
+        hexBoard = null;
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        return false;
+    protected boolean _equals(Object o)
+    {
+        if (this== o)
+        {
+            return true;
+        }
+
+        if (!(o instanceof BattleloreGameState))
+        {
+            return false;
+        }
+
+        if (!super.equals(o))
+        {
+            return false;
+        }
+
+        BattleloreGameState other = (BattleloreGameState) o;
+        return Objects.equals(hexBoard, other.hexBoard);
     }
+
 }
