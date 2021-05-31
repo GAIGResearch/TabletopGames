@@ -360,8 +360,10 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
                             if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
-                                actions.add(new GuardAction(playerDeck.getComponentID(),
-                                        playerDiscardPile.getComponentID(), card, targetPlayer, type));
+                                if (type != LoveLetterCard.CardType.Guard) {
+                                    actions.add(new GuardAction(playerDeck.getComponentID(),
+                                            playerDiscardPile.getComponentID(), card, targetPlayer, type));
+                                }
                         }
                         break;
 

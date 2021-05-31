@@ -73,7 +73,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         if (PARTIAL_OBSERVABLE && playerId != -1) {
             // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
+                if (i != playerId && !llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
                     // Hide!
                     llgs.drawPile.add(llgs.playerHandCards.get(i));
                     llgs.playerHandCards.get(i).clear();
@@ -88,7 +88,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             Random r = new Random(llgs.getGameParameters().getRandomSeed());
             llgs.drawPile.shuffle(r);
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
+                if (i != playerId && !llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
                     // New random cards
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
                         llgs.playerHandCards.get(i).add(llgs.drawPile.draw());
