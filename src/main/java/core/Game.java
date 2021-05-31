@@ -9,19 +9,20 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.ColtExpress;
-import static games.GameType.DotsAndBoxes;
-import static games.GameType.Pandemic;
+import static games.GameType.*;
 
 public class Game {
 
@@ -705,6 +706,7 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
+//        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
@@ -712,19 +714,19 @@ public class Game {
 
         /* 4. Run! */
         runOne(ColtExpress, players, seed, ac, false, null);
-        //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
 //        games.add(LoveLetter);
-//        runMany(games, players, null, 50, null, false, false);
+//        runMany(games, players, 100L,100, null, false, false, null);
+//        runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, null, 100, ac, false, true);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
+//        runMany(games, players, 100L, 100, null, false, false, null);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
 
     }
 }
