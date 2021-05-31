@@ -11,7 +11,7 @@ import games.loveletter.cards.LoveLetterCard;
 import java.util.Objects;
 
 /**
- * The King lets two player's swap their hand cards.
+ * The King lets two players swap their hand cards.
  */
 public class KingAction extends DrawCard implements IPrintable {
 

@@ -4,10 +4,16 @@ import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.actions.AbstractAction;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.actions.BaronAction;
+import games.loveletter.cards.LoveLetterCard;
+import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import utilities.ImageIO;
+import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,6 +21,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
+import java.util.List;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
@@ -32,7 +39,7 @@ public class LoveLetterGUI extends AbstractGUI {
     LoveLetterPlayerView[] playerHands;
     // Draw pile view
     LoveLetterDeckView drawPile;
-    LoveLetterDeckView reserve;  // TODO
+    LoveLetterDeckView reserve;
 
     // Currently active player
     int activePlayer = -1;
@@ -47,18 +54,37 @@ public class LoveLetterGUI extends AbstractGUI {
         super(ac, 50);
         this.humanID = humanID;
 
+        UIManager.put("TabbedPane.contentOpaque", false);
+        UIManager.put("TabbedPane.opaque", false);
+        UIManager.put("TabbedPane.tabsOpaque", false);
+
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
+                JTabbedPane pane = new JTabbedPane();
+                JPanel main = new JPanel();
+                main.setOpaque(false);
+                main.setLayout(new BorderLayout());
+                JPanel rules = new JPanel();
+                pane.add("Main", main);
+                pane.add("Rules", rules);
+                JLabel ruleText = new JLabel(getRuleText());
+                rules.add(ruleText);
+
+
                 // Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
 
                 // Find required size of window
                 int nPlayers = gameState.getNPlayers();
                 int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-                double nVertAreas = 3.5;
+                double nVertAreas = 4;
                 this.width = playerAreaWidth * nHorizAreas;
                 this.height = (int) (playerAreaHeight * nVertAreas);
+                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
+
+                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/loveletter/bg.png"), width, height, this);
+                setContentPane(backgroundImage);
 
                 LoveLetterGameState llgs = (LoveLetterGameState) gameState;
                 LoveLetterParameters llp = (LoveLetterParameters) gameState.getGameParameters();
@@ -68,6 +94,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 playerViewBorders = new Border[nPlayers];
                 JPanel mainGameArea = new JPanel();
                 mainGameArea.setLayout(new BorderLayout());
+                mainGameArea.setOpaque(false);
 
                 // Player hands go on the edges
                 String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
@@ -88,10 +115,25 @@ public class LoveLetterGUI extends AbstractGUI {
                     playerViewBorders[i] = title;
                     playerHand.setBorder(title);
 
+                    sides[next].setOpaque(false);
                     sides[next].add(playerHand);
                     sides[next].setLayout(new GridBagLayout());
                     next = (next + 1) % (locations.length);
                     playerHands[i] = playerHand;
+                }
+                if (gameState.getNPlayers() == 2) {
+                    // Add reserve
+                    JLabel label = new JLabel("Reserve cards:");
+                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
+                            new Rectangle(0, 0, playerAreaWidth, llCardHeight));
+                    JPanel wrap = new JPanel();
+                    wrap.setOpaque(false);
+                    wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));
+                    wrap.add(label);
+                    wrap.add(reserve);
+                    sides[next].setOpaque(false);
+                    sides[next].add(wrap);
+                    sides[next].setLayout(new GridBagLayout());
                 }
                 for (int i = 0; i < locations.length; i++) {
                     mainGameArea.add(sides[i], locations[i]);
@@ -99,28 +141,118 @@ public class LoveLetterGUI extends AbstractGUI {
 
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
+                centerArea.setOpaque(false);
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
                         new Rectangle(0, 0, playerAreaWidth, llCardHeight));
+                centerArea.add(new JLabel("Draw pile:"));
                 centerArea.add(drawPile);
                 JPanel jp = new JPanel();
+                jp.setOpaque(false);
                 jp.setLayout(new GridBagLayout());
                 jp.add(centerArea);
                 mainGameArea.add(jp, BorderLayout.CENTER);
 
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Love Letter", gameState, width, defaultInfoPanelHeight);
+                infoPanel.setOpaque(false);
                 // Bottom area will show actions available
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                actionPanel.setOpaque(false);
 
-                // Add all views to frame
-                getContentPane().add(mainGameArea, BorderLayout.CENTER);
-                getContentPane().add(infoPanel, BorderLayout.NORTH);
-                getContentPane().add(actionPanel, BorderLayout.SOUTH);
+                main.add(infoPanel, BorderLayout.NORTH);
+                main.add(mainGameArea, BorderLayout.CENTER);
+                main.add(actionPanel, BorderLayout.SOUTH);
+
+                getContentPane().add(pane, BorderLayout.CENTER);
             }
         }
 
         setFrameProperties();
+    }
+
+
+    @Override
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
+        JPanel gameInfo = new JPanel();
+        gameInfo.setOpaque(false);
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
+
+        updateGameStateInfo(gameState);
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
+        gameInfo.add(gamePhase);
+        gameInfo.add(turnOwner);
+        gameInfo.add(turn);
+        gameInfo.add(currentPlayer);
+
+        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+
+        JPanel wrapper = new JPanel();
+        wrapper.setOpaque(false);
+        wrapper.setLayout(new FlowLayout());
+        wrapper.add(gameInfo);
+
+        historyInfo.setOpaque(false);
+        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setOpaque(false);
+        historyContainer.getViewport().setOpaque(false);
+        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        wrapper.add(historyContainer);
+        return wrapper;
+    }
+
+    @Override
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+        JPanel actionPanel = new JPanel();
+        actionPanel.setOpaque(false);
+        if (boxLayout) {
+            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        }
+
+        actionButtons = new ActionButton[maxActionSpace];
+        for (int i = 0; i < maxActionSpace; i++) {
+            ActionButton ab = new ActionButton(ac, highlights);
+            actionButtons[i] = ab;
+            actionButtons[i].setVisible(false);
+            actionPanel.add(actionButtons[i]);
+        }
+        for (ActionButton actionButton : actionButtons) {
+            actionButton.informAllActionButtons(actionButtons);
+        }
+
+        JScrollPane pane = new JScrollPane(actionPanel);
+        pane.setOpaque(false);
+        pane.getViewport().setOpaque(false);
+        pane.setPreferredSize(new Dimension(width, height));
+        if (boxLayout) {
+            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        }
+        return pane;
+    }
+
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            resetActionButtons();
+            int highlight = playerHands[activePlayer].handCards.getCardHighlight();
+            if (highlight == -1) {
+                playerHands[activePlayer].handCards.setCardHighlight(0);
+                highlight = 0;
+            }
+            LoveLetterCard hCard = ((LoveLetterGameState)gameState).getPlayerHandCards().get(activePlayer).get(highlight);
+
+            for (int i = 0; i < actions.size(); i++) {
+                if (gameState.getGamePhase() == LoveLetterGameState.LoveLetterGamePhase.Draw || actions.get(i).getClass().equals(hCard.cardType.getActionClass())) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setButtonAction(actions.get(i), gameState);
+                }
+            }
+        }
     }
 
     @Override
@@ -136,15 +268,10 @@ public class LoveLetterGUI extends AbstractGUI {
             // Update decks and visibility
             LoveLetterGameState llgs = (LoveLetterGameState)gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update(llgs);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                boolean front = i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-                    playerHands[i].handCards.setFront(true);
-                    playerHands[i].setFocusable(true);
-                } else {
-                    playerHands[i].handCards.setFront(false);
-                }
+                        || ALWAYS_DISPLAY_FULL_OBSERVABLE;
+                playerHands[i].update(llgs, front);
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {
@@ -155,9 +282,11 @@ public class LoveLetterGUI extends AbstractGUI {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
+            reserve.updateComponent(llgs.getReserveCards());
             drawPile.updateComponent(llgs.getDrawPile());
             if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
                 drawPile.setFront(true);
+                reserve.setFront(true);
             }
 
             // Update actions
@@ -171,5 +300,24 @@ public class LoveLetterGUI extends AbstractGUI {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+    }
+
+    private String getRuleText() {
+        String rules = "<html><center><h1>Love Letter</h1></center><br/><hr><br/>";
+        rules += "<p>You try to earn the favour of the princess and get your love letter delivered to her. The closer you are (the higher your card number) at the end, the better. The closest player, or the only one left in the game, is the winner of the round. Win most rounds to win the game.</p><br/>";
+        rules += "<p>On your turn, you draw a card to have 2 in hand, and then play one of the cards, discarding it and executing its effect.</p>";
+        rules += "<p><b>Types of cards</b>: " +
+                "<ul><li>Guard (1; x5): guess another player's card; if correct, that player has to discard their card and is eliminated.</li>" +
+                "<li>Priest (2; x2): see another player's card.</li>" +
+                "<li>Baron (3; x2): compare cards with another player; the player with the lower card is eliminated.</li>" +
+                "<li>Handmaid (4; x2): the player is protected for 1 round and cannot be targeted by others' actions.</li>" +
+                "<li>Prince (5; x2): choose a player to discard their card and draw another (can be yourself).</li>" +
+                "<li>King (6; x1): choose a player to swap cards with.</li>" +
+                "<li>Countess (7; x1): must be discarded if the other card in hand is a King or a Prince.</li>" +
+                "<li>Princess (8; x1): player is eliminated if they discard this card.</li>" +
+                "</ul></p><br/>";
+        rules += "<hr><p><b>INTERFACE: </b> Find actions available at any time at the bottom of the screen. Each player has 2 components in their area: their hand (hidden; left) and their cards played/discarded (right). Click on cards in a deck to see them better.</p>";
+        rules += "</html>";
+        return rules;
     }
 }

@@ -205,6 +205,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     public LoveLetterCard getReserveCard(){
         return reserveCards.draw();
     }
+    public PartialObservableDeck<LoveLetterCard> getReserveCards() {
+        return reserveCards;
+    }
     public boolean isNotProtected(int playerID){
         return !effectProtection[playerID];
     }

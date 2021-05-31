@@ -15,13 +15,12 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.ColtExpress;
-import static games.GameType.DotsAndBoxes;
-import static games.GameType.Pandemic;
+import static games.GameType.*;
 
 public class Game {
 
@@ -702,8 +701,8 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
@@ -711,8 +710,8 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(ColtExpress, players, seed, ac, false, null);
-        //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
+        runOne(LoveLetter, players, seed, ac, false, null);
+//       runMany(Collections.singletonList(LoveLetter), players, 100L,100, null, false, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);

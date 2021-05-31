@@ -8,6 +8,7 @@ import core.interfaces.IGamePhase;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
+import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -273,36 +274,6 @@ public class ColtExpressGUI extends AbstractGUI {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
-    }
-
-    public static class ScaledImage extends JPanel {
-        Image img;
-        int w, h;
-        JFrame frame;
-
-        public ScaledImage(Image img, int w, int h, JFrame frame) {
-            this.img = img;
-            this.w = w;
-            this.h = h;
-            this.frame = frame;
-        }
-
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setComposite(AlphaComposite.SrcOver.derive(0.3f));
-
-            Rectangle r = frame.getBounds();
-            h = r.height;
-            w = r.width;
-
-            int picW = img.getWidth(null);
-            int picH = img.getHeight(null);
-            double scale = w*1.0/picW;
-            double s2 = h*1.0/picH;
-            if (s2 > scale) scale = s2;
-            g2d.drawImage(img, 0, 0, (int)(picW * scale), (int)(picH * scale), null);
-            g2d.dispose();
-        }
     }
 
     private String getRuleText() {
