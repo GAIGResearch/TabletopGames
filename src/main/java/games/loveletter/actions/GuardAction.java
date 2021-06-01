@@ -73,4 +73,8 @@ public class GuardAction extends DrawCard implements IPrintable {
     public AbstractAction copy() {
         return new GuardAction(deckFrom, deckTo, fromIndex, opponentID, cardType);
     }
+
+    public int getOpponentID() {
+        return opponentID;
+    }
 }

@@ -84,4 +84,8 @@ public class PrinceAction extends DrawCard implements IPrintable {
     public AbstractAction copy() {
         return new PrinceAction(deckFrom, deckTo, fromIndex, opponentID);
     }
+
+    public int getOpponentID() {
+        return opponentID;
+    }
 }

@@ -5,9 +5,10 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
-import games.loveletter.actions.BaronAction;
+import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 import gui.ScaledImage;
 import players.human.ActionController;
@@ -20,6 +21,8 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,9 +49,11 @@ public class LoveLetterGUI extends AbstractGUI {
     // ID of human player
     int humanID;
 
+    int highlightPlayerIdx = 0;
+
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 27, 67), 3);
-    Border[] playerViewBorders;
+    Border[] playerViewBorders, playerViewBordersHighlight;
 
     public LoveLetterGUI(Game game, ActionController ac, int humanID) {
         super(ac, 50);
@@ -71,7 +76,6 @@ public class LoveLetterGUI extends AbstractGUI {
                 JLabel ruleText = new JLabel(getRuleText());
                 rules.add(ruleText);
 
-
                 // Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
 
@@ -92,6 +96,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 // Create main game area that will hold all game views
                 playerHands = new LoveLetterPlayerView[nPlayers];
                 playerViewBorders = new Border[nPlayers];
+                playerViewBordersHighlight = new Border[nPlayers];
                 JPanel mainGameArea = new JPanel();
                 mainGameArea.setLayout(new BorderLayout());
                 mainGameArea.setOpaque(false);
@@ -113,6 +118,7 @@ public class LoveLetterGUI extends AbstractGUI {
                             BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + agentName + "]",
                             TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
                     playerViewBorders[i] = title;
+                    playerViewBordersHighlight[i] = BorderFactory.createCompoundBorder(highlightActive, playerViewBorders[i]);
                     playerHand.setBorder(title);
 
                     sides[next].setOpaque(false);
@@ -120,6 +126,13 @@ public class LoveLetterGUI extends AbstractGUI {
                     sides[next].setLayout(new GridBagLayout());
                     next = (next + 1) % (locations.length);
                     playerHands[i] = playerHand;
+                    int p = i;
+                    playerHands[i].addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            highlightPlayerIdx = p;
+                        }
+                    });
                 }
                 if (gameState.getNPlayers() == 2) {
                     // Add reserve
@@ -227,7 +240,7 @@ public class LoveLetterGUI extends AbstractGUI {
 
         JScrollPane pane = new JScrollPane(actionPanel);
         pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
+        pane.getViewport().setBackground(new Color(229, 218, 209, 255));
         pane.setPreferredSize(new Dimension(width, height));
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -238,17 +251,37 @@ public class LoveLetterGUI extends AbstractGUI {
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
-            resetActionButtons();
-            int highlight = playerHands[activePlayer].handCards.getCardHighlight();
-            if (highlight == -1) {
-                playerHands[activePlayer].handCards.setCardHighlight(0);
-                highlight = 0;
-            }
-            LoveLetterCard hCard = ((LoveLetterGameState)gameState).getPlayerHandCards().get(activePlayer).get(highlight);
+//            resetActionButtons();
 
-            for (int i = 0; i < actions.size(); i++) {
-                if (gameState.getGamePhase() == LoveLetterGameState.LoveLetterGamePhase.Draw || actions.get(i).getClass().equals(hCard.cardType.getActionClass())) {
+            activePlayer = gameState.getCurrentPlayer();
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            int highlight = playerHands[activePlayer].handCards.getCardHighlight();
+            Deck<LoveLetterCard> deck = ((LoveLetterGameState)gameState).getPlayerHandCards().get(activePlayer);
+            if (deck.getSize() > 0) {
+                if (highlight == -1 || highlight >= deck.getSize()) {
+                    highlight = 0;
+                    playerHands[activePlayer].handCards.setCardHighlight(highlight);
+                }
+                LoveLetterCard hCard = deck.get(highlight);
+
+                int k = 0;
+                for (AbstractAction action : actions) {
+                    if (gameState.getGamePhase() == LoveLetterGameState.LoveLetterGamePhase.Draw ||
+                            action.getClass().equals(hCard.cardType.getActionClass()) &&
+                                    (action instanceof GuardAction && ((GuardAction) action).getOpponentID() == highlightPlayerIdx ||
+                                            action instanceof PriestAction && ((PriestAction) action).getOpponentID() == highlightPlayerIdx ||
+                                            action instanceof BaronAction && ((BaronAction) action).getOpponentID() == highlightPlayerIdx ||
+                                            action instanceof PrinceAction && ((PrinceAction) action).getOpponentID() == highlightPlayerIdx ||
+                                            action instanceof KingAction && ((KingAction) action).getOpponentID() == highlightPlayerIdx ||
+                                            action instanceof HandmaidAction || action instanceof CountessAction || action instanceof PrincessAction)) {
+
+                        actionButtons[k].setVisible(true);
+                        actionButtons[k].setButtonAction(action, gameState);
+                        k++;
+                    }
+                }
+            } else {
+                for (int i = 0; i < actions.size(); i++) {
                     actionButtons[i].setVisible(true);
                     actionButtons[i].setButtonAction(actions.get(i), gameState);
                 }
@@ -276,9 +309,7 @@ public class LoveLetterGUI extends AbstractGUI {
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {
-                    Border compound = BorderFactory.createCompoundBorder(
-                            highlightActive, playerViewBorders[i]);
-                    playerHands[i].setBorder(compound);
+                    playerHands[i].setBorder(playerViewBordersHighlight[i]);
                 } else {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
@@ -317,7 +348,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 "<li>Countess (7; x1): must be discarded if the other card in hand is a King or a Prince.</li>" +
                 "<li>Princess (8; x1): player is eliminated if they discard this card.</li>" +
                 "</ul></p><br/>";
-        rules += "<hr><p><b>INTERFACE: </b> Find actions available at any time at the bottom of the screen. Each player has 2 components in their area: their hand (hidden; left) and their cards played/discarded (right). Click on cards in a deck to see them better.</p>";
+        rules += "<hr><p><b>INTERFACE: </b> Find actions available at any time at the bottom of the screen. Each player has 2 components in their area: their hand (hidden; left) and their cards played/discarded (right). Click on cards in a deck to see them better / select them to see actions associated. Click on player areas (e.g. player names) to see actions targetting them.</p>";
         rules += "</html>";
         return rules;
     }

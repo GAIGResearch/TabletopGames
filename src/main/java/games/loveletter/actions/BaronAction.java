@@ -81,4 +81,8 @@ public class BaronAction extends DrawCard implements IPrintable {
     public AbstractAction copy() {
         return new BaronAction(deckFrom, deckTo, fromIndex, opponentID);
     }
+
+    public int getOpponentID() {
+        return opponentID;
+    }
 }

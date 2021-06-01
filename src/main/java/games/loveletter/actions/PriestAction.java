@@ -25,7 +25,7 @@ public class PriestAction extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        int playerID = gs.getCurrentPlayer();
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
         // Set all cards to be visible by the current player
@@ -69,5 +69,9 @@ public class PriestAction extends DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new PriestAction(deckFrom, deckTo, fromIndex, opponentID);
+    }
+
+    public int getOpponentID() {
+        return opponentID;
     }
 }

@@ -78,4 +78,8 @@ public class KingAction extends DrawCard implements IPrintable {
     public AbstractAction copy() {
         return new KingAction(deckFrom, deckTo, fromIndex, opponentID);
     }
+
+    public int getOpponentID() {
+        return opponentID;
+    }
 }
