@@ -5,12 +5,16 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.components.Token;
+import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.TurnOrder;
 import games.GameType;
+import games.dominion.DominionParameters;
+import games.dominion.DominionTurnOrder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 public class BattleloreGameState extends AbstractGameState
 {
@@ -24,9 +28,9 @@ public class BattleloreGameState extends AbstractGameState
 
     GridBoard<Token> hexBoard;
 
-    public BattleloreGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType)
+    public BattleloreGameState(AbstractParameters gameParameters, int nPlayers)
     {
-        super(gameParameters, turnOrder, GameType.Battlelore);
+        super(gameParameters, new AlternatingTurnOrder(nPlayers) ,GameType.Battlelore);
     }
 
     @Override
@@ -41,7 +45,7 @@ public class BattleloreGameState extends AbstractGameState
     @Override
     protected AbstractGameState _copy(int playerId)
     {
-        BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), turnOrder, GameType.Battlelore);
+        BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), 2);
         state.hexBoard = hexBoard.copy();
         return state;
     }

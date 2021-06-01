@@ -229,10 +229,8 @@ public enum GameType {
                 gameState = new DominionGameState(params, nPlayers);
                 break;
             case Battlelore:
-                params = new BattleloreGameParameters(seed);
                 forwardModel = new BattleloreForwardModel();
-                //TODO_Ertugrul: Check params_
-                gameState = new BattleloreGameState(params, new AlternatingTurnOrder(nPlayers), GameType.Battlelore);
+                gameState = new BattleloreGameState(params, nPlayers);
                 break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
@@ -267,6 +265,8 @@ public enum GameType {
                 return DominionParameters.sizeDistortion(seed);
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
+            case Battlelore:
+                return new BattleloreGameParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
