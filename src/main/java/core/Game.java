@@ -9,6 +9,8 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
@@ -703,27 +705,21 @@ public class Game {
 
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-//        players.add(new RMHCPlayer());
+//        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer(params1));
+        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
         runOne(LoveLetter, players, seed, ac, false, null);
-//       runMany(Collections.singletonList(LoveLetter), players, 100L,100, null, false, false, null);
-//        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(TicTacToe);
-//        games.add(ExplodingKittens);
-//        games.add(LoveLetter);
-//        runMany(games, players, null, 50, null, false, false);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
 //        runMany(games, players, null, 100, ac, false, true);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
-
+//        runMany(Collections.singletonList(LoveLetter), players, 100L,100, null, false, false, null);
     }
 }
