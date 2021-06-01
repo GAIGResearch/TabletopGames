@@ -180,7 +180,7 @@ public class ColtExpressGUI extends AbstractGUI {
         historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
         historyContainer = new JScrollPane(historyInfo);
         historyContainer.setOpaque(false);
-        historyContainer.getViewport().setOpaque(false);
+//        historyContainer.getViewport().setOpaque(false);
         historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
         wrapper.add(historyContainer);
         return wrapper;

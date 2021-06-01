@@ -98,7 +98,7 @@ public class DBGUI extends AbstractGUI {
         wrapper.add(historyContainer);
         historyInfo.setOpaque(false);
         historyContainer.setOpaque(false);
-        historyContainer.getViewport().setOpaque(false);
+//        historyContainer.getViewport().setOpaque(false);
         historyInfo.setEditable(false);
         return wrapper;
     }
