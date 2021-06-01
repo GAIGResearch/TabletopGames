@@ -10,7 +10,7 @@ import static games.terraformingmars.TMTypes.Expansion.*;
 public class TMGameParameters extends AbstractParameters {
 
     int boardSize = 9;
-    HashSet<TMTypes.Expansion> expansions = new HashSet<TMTypes.Expansion>() {{ add(CorporateEra); add(Elysium);  }};
+    HashSet<TMTypes.Expansion> expansions = new HashSet<TMTypes.Expansion>() {{ add(CorporateEra); }};  // Elysium, Hellas and Venus compiling, but not fully parsed yet
     int soloTR = 14;
     int soloMaxGen = 14;
     int soloCities = 2;
