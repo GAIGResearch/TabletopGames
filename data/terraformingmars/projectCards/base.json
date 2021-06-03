@@ -245,7 +245,7 @@
             "@style": "filter:brightness0.8 drop-shadow1px 0px 1px #c33 drop-shadow-1px 0px 1px #c33 drop-shadow0px 1px 1px #c33 drop-shadow0px -1px 1px #c33"
           },
           {
-            "#text": "Action: dec-Energy-1 and inc-MegaCredit-1-City-true-any ",
+            "#text": "Action: dec-Energy-1 and inc-MegaCredit-1-tile+City-true-any ",
             "@class": "description "
           }
         ],
@@ -3434,7 +3434,7 @@
             "@class": "tile city-tile red-outline"
           },
           {
-            "#text": "inc-plant-1-City-false-any",
+            "#text": "inc-plant-1-tile+City-false-any",
             "@class": "description "
           }
         ]
@@ -3622,7 +3622,7 @@
             ]
           },
           {
-            "#text": "inc-Energyprod-X-Power",
+            "#text": "inc-Energyprod-1-tag+Power",
             "@class": "description"
           }
         ]
@@ -4417,7 +4417,7 @@
             ]
           },
           {
-            "#text": "Requires 5% oxygen* inc-MegaCreditprod-1-City-true-any ",
+            "#text": "Requires 5% oxygen* inc-MegaCreditprod-1-tile+City-true-any ",
             "@class": "description "
           }
         ]
@@ -4465,7 +4465,7 @@
             ]
           },
           {
-            "#text": "Requires 4% oxygen* inc-Plantprod-0.5-Microbe",
+            "#text": "Requires 4% oxygen* inc-Plantprod-0.5-tag+Microbe",
             "@class": "description "
           }
         ]
@@ -5325,7 +5325,7 @@
             ]
           },
           {
-            "#text": "Requires 6% oxygen* inc-Plantprod-1-Plant ",
+            "#text": "Requires 6% oxygen* inc-Plantprod-1-tag+Plant ",
             "@class": "description "
           }
         ]
@@ -6863,7 +6863,7 @@
             ]
           },
           {
-            "#text": "inc-Energyprod-1-City-false-any ",
+            "#text": "inc-Energyprod-1-tile+City-false-any ",
             "@class": "description"
           }
         ]

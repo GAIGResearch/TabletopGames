@@ -301,9 +301,9 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     public String getString(AbstractGameState gameState) {
         TMMapTile mt = (TMMapTile) gameState.getComponentById(mapTileID);
         if (mt != null) {
-            return "Place " + tile.name() + " on " + mt.getTileType();  // TODO restrictions and stuff
+            return "Place " + (tileName != null? tileName : (tile.name() + " on " + mt.getTileType()));  // TODO restrictions and stuff
         } else {
-            return "Place " + tile.name();
+            return "Place " + (tileName != null? tileName : tile.name());
         }
     }
 
@@ -342,7 +342,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             }
             return false;
         }
-        return true;
+        return false;
     }
 
     public static int nAdjacentTiles(TMGameState gs, TMMapTile mt) {

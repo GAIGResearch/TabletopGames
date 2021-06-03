@@ -151,7 +151,7 @@ public class TMAction extends AbstractAction {
         if (!freeActionPoint) {
             ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
         }
-        if (getCardID() != -1 && !(this instanceof BuyCard) && !(this instanceof PlayCard)) {
+        if (getCardID() != -1 && !(this instanceof BuyCard) && !(this instanceof PlayCard) && !(this instanceof DiscardCard)) {
             TMCard c = (TMCard) gs.getComponentById(getCardID());
             if (c != null) {
                 if (!c.firstActionExecuted && c.firstAction != null) {
@@ -341,7 +341,7 @@ public class TMAction extends AbstractAction {
         int player = -1;
 
         if (encoding.contains("inc") || encoding.contains("dec")) {
-            // Increase/Decrease counter action, format: "inc-Res-Amount(-Any)" or "inc-Res-Amount-Tag(-Any)" or "inc-Res-Amount-Tile(-Any)" or "dec-Res-Amount..."
+            // Increase/Decrease counter action, format: "inc-Res-Amount(-Any)" or "inc-Res-Amount-tag:Tag(-Any)" or "inc-Res-Amount-tile:Tile(-Any)" or "dec-Res-Amount..."
             String[] split2 = encoding.split("-");
             try {
                 // Find how much
@@ -353,27 +353,14 @@ public class TMAction extends AbstractAction {
                 effectString = split2[1];
 
                 if (increment == null) {
-                    // 2 formats:
-                    // - inc-Resource-X-tag(-any): X = Event tags played by any player
                     // - dec-Resource1-X-Resource2 : X = chosen by player from 0 to N first resource, decrease first resource that, increase second resource that
                     increment = 1.0;
                     String resString = split2[1].split("prod")[0];
                     TMTypes.Resource res1 = Utils.searchEnum(TMTypes.Resource.class, resString);
                     TMTypes.Resource res2 = Utils.searchEnum(TMTypes.Resource.class, split2[3].replace("prod", ""));
                     effect = new ModifyPlayerResource(player, player, increment, res1, split2[1].contains("prod"), free);
-                    if (res2 != null) {
-                        ((ModifyPlayerResource) effect).counterResource = res2;
-                        ((ModifyPlayerResource) effect).counterResourceProduction = split2[3].contains("prod");
-                    } else {
-                        // A tag to count
-                        TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3]);
-                        if (tag != null) {
-                            ((ModifyPlayerResource) effect).tagToCount = tag;
-                            if (split2.length > 4 && split2[4].equalsIgnoreCase("any")) {
-                                ((ModifyPlayerResource) effect).any = true;
-                            }
-                        }
-                    }
+                    ((ModifyPlayerResource) effect).counterResource = res2;
+                    ((ModifyPlayerResource) effect).counterResourceProduction = split2[3].contains("prod");
                 } else {
                     // Find which counter
                     TMTypes.GlobalParameter which = Utils.searchEnum(TMTypes.GlobalParameter.class, split2[1]);
@@ -390,19 +377,21 @@ public class TMAction extends AbstractAction {
                         effect = new ModifyPlayerResource(player, targetPlayer, increment, res, split2[1].contains("prod"), free);
                         if (split2.length > 3) {
                             if (!split2[3].equalsIgnoreCase("any")) {
-                                TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3]);
-                                if (tag != null) {
-                                    ((ModifyPlayerResource) effect).tagToCount = tag;
-                                    if (split2.length > 4) {
-                                        if (split2[4].equalsIgnoreCase("any")) {
-                                            ((ModifyPlayerResource) effect).any = true;
-                                        } else if (split2[4].equalsIgnoreCase("opp")) {
-                                            ((ModifyPlayerResource) effect).opponents = true;
+                                if (split2[3].contains("tag")) {
+                                    TMTypes.Tag tag = Utils.searchEnum(TMTypes.Tag.class, split2[3].split("\\+")[1]);
+                                    if (tag != null) {
+                                        ((ModifyPlayerResource) effect).tagToCount = tag;
+                                        if (split2.length > 4) {
+                                            if (split2[4].equalsIgnoreCase("any")) {
+                                                ((ModifyPlayerResource) effect).any = true;
+                                            } else if (split2[4].equalsIgnoreCase("opp")) {
+                                                ((ModifyPlayerResource) effect).opponents = true;
+                                            }
                                         }
                                     }
-                                } else {
+                                } else if (split2[3].contains("tile")) {
                                     // A tile
-                                    TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, split2[3]);
+                                    TMTypes.Tile t = Utils.searchEnum(TMTypes.Tile.class, split2[3].split("\\+")[1]);
                                     if (t != null) {
                                         ((ModifyPlayerResource) effect).tileToCount = t;
                                         ((ModifyPlayerResource) effect).onMars = Boolean.parseBoolean(split2[4]);

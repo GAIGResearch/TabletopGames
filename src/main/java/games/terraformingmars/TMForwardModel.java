@@ -220,7 +220,7 @@ public class TMForwardModel extends AbstractForwardModel {
                     }
                     // TODO: remove, used for testing specific cards
 //                    for (TMCard c: gs.projectCards.getComponents()) {
-//                        if (c.getComponentName().equals("Invention Contest") || c.getComponentName().equals("Business Network")) {
+//                        if (c.getComponentName().equals("Power Grid")) {
 //                            gs.playerCardChoice[i].add(c);
 //                        }
 //                    }

@@ -554,7 +554,7 @@
             ]
           },
           {
-            "#text": "inc-MegaCreditprod-1-Earth ",
+            "#text": "inc-MegaCreditprod-1-tag+Earth ",
             "@class": "description"
           }
         ]
@@ -1851,7 +1851,7 @@
             ]
           },
           {
-            "#text": "inc-MegaCreditprod-1-Space-opp ",
+            "#text": "inc-MegaCreditprod-1-tag+Space-opp ",
             "@class": "description"
           }
         ]
@@ -1973,7 +1973,7 @@
             "@class": "resource-tag tag-event red-outline"
           },
           {
-            "#text": "inc-MegaCredit-X-Event-any",
+            "#text": "inc-MegaCredit-1-Event-any",
             "@class": "description"
           }
         ]
@@ -2401,7 +2401,7 @@
             ]
           },
           {
-            "#text": "inc-MegaCreditprod-1-Earth ",
+            "#text": "inc-MegaCreditprod-1-tag+Earth ",
             "@class": "description"
           }
         ]
@@ -2810,7 +2810,7 @@
             ]
           },
           {
-            "#text": "inc-MegaCreditprod-1-Space ",
+            "#text": "inc-MegaCreditprod-1-tag+Space ",
             "@class": "description"
           }
         ]
@@ -3263,7 +3263,7 @@
             "@class": "resource-tag tag-jovian"
           },
           {
-            "#text": "inc-TR-1-Jovian ",
+            "#text": "inc-TR-1-tag+Jovian ",
             "@class": "description "
           }
         ]

@@ -361,20 +361,25 @@ public class TMGUI extends AbstractGUI {
             for (AbstractAction aa: actions) {
                 TMAction a = (TMAction) aa;
                 if (a.actionType == null) {
-                    if (a.pass) passAction = a;
-                    else if (a instanceof PlaceTile) {
+                    if (a instanceof PlaceTile && ((PlaceTile) a).mapTileID != -1 && ((PlaceTile) a).tile != null) {
                         placeActions.add(a);
                     } else {
-                        TMAction fullLegalAction = getFullLegalAction(a, legalActions);
-                        actionButtons[i].setVisible(true);
-                        if (fullLegalAction != null) {
-                            actionButtons[i].setButtonAction(fullLegalAction, gs);
+                        if (a.pass) {
+                            actionButtons[i].setVisible(true);
+                            actionButtons[i].setButtonAction(a, "Pass");
+                            i++;
                         } else {
-                            actionButtons[i].setText(a.getString(gs));
-                            actionButtons[i].setEnabled(false);
-                            actionButtons[i].setToolTipText(getInvalidActionReason(a, gs));
+                            TMAction fullLegalAction = getFullLegalAction(a, legalActions);
+                            actionButtons[i].setVisible(true);
+                            if (fullLegalAction != null) {
+                                actionButtons[i].setButtonAction(fullLegalAction, gs);
+                            } else {
+                                actionButtons[i].setText(a.getString(gs));
+                                actionButtons[i].setEnabled(false);
+                                actionButtons[i].setToolTipText(getInvalidActionReason(a, gs));
+                            }
+                            i++;
                         }
-                        i++;
                     }
                 } else if (a.actionType == TMTypes.ActionType.PlayCard) {
                     playCardActions.add(a);
@@ -399,12 +404,6 @@ public class TMGUI extends AbstractGUI {
                         break;
                     }
                 }
-            } else {
-                if (passAction != null) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setButtonAction(passAction, "Pass");
-                    i++;
-                }
             }
             if (view.highlight.size() > 0) {
                 for (Rectangle r: view.highlight) {
@@ -421,23 +420,23 @@ public class TMGUI extends AbstractGUI {
                                 if (mt.getX() == x && mt.getY() == y) {
                                     actionButtons[i].setVisible(true);
                                     if (fullLegalAction != null) {
-                                        actionButtons[i].setButtonAction(fullLegalAction, "Place " + ((PlaceTile) a).tile);
+                                        actionButtons[i].setButtonAction(fullLegalAction, gs);
                                     } else {
-                                        actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
+                                        actionButtons[i].setButtonAction(a, gs);
                                     }
                                     i++;
                                 }
                             } else if (code.contains("+") || code.contains("-")) {
                                 // ?
-                            } else {
+                            } else if (mt != null) {
                                 // An extra tile
                                 for (TMMapTile mt2: gs.getExtraTiles()) {
-                                    if (mt2 != null && mt2.getComponentName().equalsIgnoreCase(code)) {
+                                    if (mt2 != null && mt2.getComponentName().equalsIgnoreCase(code) && mt2.getComponentName().equalsIgnoreCase(mt.getComponentName())) {
                                         actionButtons[i].setVisible(true);
                                         if (fullLegalAction != null) {
-                                            actionButtons[i].setButtonAction(fullLegalAction, "Place " + ((PlaceTile) a).tile);
+                                            actionButtons[i].setButtonAction(fullLegalAction, gs);
                                         } else {
-                                            actionButtons[i].setButtonAction(a, "Place " + ((PlaceTile) a).tile);
+                                            actionButtons[i].setButtonAction(a, gs);
                                         }
                                         i++;
                                     }

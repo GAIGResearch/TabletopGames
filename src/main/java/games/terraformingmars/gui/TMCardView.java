@@ -829,33 +829,51 @@ public class TMCardView extends JComponent {
     }
 
     private void drawModifyPlayerResourceAction(Graphics2D g, ModifyPlayerResource aa, int x, int y, int size) {
-        // x is the middle of this rectangle
+        // x is the middle of this rectangle TODO change to X if tags or tiles to count, display tags or tiles
         String amount;
         if ((aa.change == Math.floor(aa.change)) && !Double.isInfinite(aa.change)) {
             amount = "" + (int)aa.change;
         } else {
             amount = "" + aa.change;
         }
+        if (aa.counterResource != null) amount = "-X";
         FontMetrics fm = g.getFontMetrics();
         int textWidth = fm.stringWidth(amount);
-        int totalWidth = size + spacing/5 + textWidth;
+        int totalWidth = size + spacing/5 + textWidth + (aa.counterResource != null? textWidth + 3*spacing/5 + defaultItemSize/2 + size : 0);
         x -= totalWidth/2;
 
         TMTypes.Resource res = aa.resource;
         boolean prod = aa.production;
         Image resImg = ImageIO.GetInstance().getImage(res.getImagePath());
 
+        // Draw red bg if this applies to other players
         if (aa.targetPlayer == -2) {
             g.setColor(anyPlayerColor);
-            g.fillRoundRect(x - 2, y - 2, size + 4, size + 4, spacing, spacing);
+            g.fillRoundRect(x + textWidth + spacing/5 - 2, y - 2, size + 4, size + 4, spacing, spacing);
         }
 
-        drawResource(g, resImg, production, prod, x, y, size, 0.6);
-        if (aa.opponents) {
-            drawShadowStringCentered(g, "*", new Rectangle(x + size + 2, y, fm.stringWidth("*"), size));
-            x += fm.stringWidth("*");
+        // Draw resource and amount
+        drawShadowStringCentered(g, amount, new Rectangle(x, y, textWidth, size));
+        if (aa.tileToCount != null) {
+            drawShadowStringCentered(g, "/", new Rectangle(x + textWidth, y, fm.stringWidth("/"), size));
+            drawImage(g, ImageIO.GetInstance().getImage(aa.tileToCount.getImagePath()), x + textWidth + fm.stringWidth("/"), y, size);
+            x += fm.stringWidth("/") + size;
+        } else if (aa.tagToCount != null) {
+            drawShadowStringCentered(g, "/", new Rectangle(x + textWidth, y, fm.stringWidth("/"), size));
+            drawImage(g, ImageIO.GetInstance().getImage(aa.tagToCount.getImagePath()), x + textWidth + fm.stringWidth("/"), y, size);
+            x += fm.stringWidth("/") + size;
         }
-        drawShadowStringCentered(g, amount, new Rectangle(x + size + spacing/5, y, textWidth, size));
+        drawResource(g, resImg, production, prod, x + textWidth + spacing/5, y, size, 0.6);
+        if (aa.opponents) {
+            drawShadowStringCentered(g, "*", new Rectangle(x + size + textWidth + spacing/5 + 2, y, fm.stringWidth("*"), size));
+        }
+
+        // Draw counter resource
+        if (aa.counterResource != null) {
+            int rightX = x + size + textWidth + 2*spacing / 5 + defaultItemSize/2;
+            drawShadowStringCentered(g, "X", new Rectangle(rightX, y, fm.stringWidth("X"), size));
+            drawResource(g, ImageIO.GetInstance().getImage(aa.counterResource.getImagePath()), production, prod, rightX + spacing/5 + fm.stringWidth("X"), y, size, 0.6);
+        }
     }
 
     private void drawModifyGlobalParameter(Graphics2D g, ModifyGlobalParameter aa, int x, int y, int size) {
@@ -899,6 +917,7 @@ public class TMCardView extends JComponent {
         // Draw action arrow
         drawImage(g, actionArrow, x - defaultItemSize/4, y, defaultItemSize/2, size);
 
+        // Draw left side if cost resource is given for action
         TMTypes.Resource leftR = a.getCostResource();
         String left = leftR != null? leftR.getImagePath() : null;
         int leftNumber = Math.abs(a.getCost());
@@ -915,20 +934,28 @@ public class TMCardView extends JComponent {
         if (a instanceof CompoundAction) {
             // first part of the action is the left side of the arrow, unless a cost is defined
             if (left == null) {
-                drawCardEffect(g, ((CompoundAction) a).actions[0], x - defaultItemSize/4 - wR/2, y, TMDeckDisplay.cardWidth / 2, -1);
+                TMAction act = ((CompoundAction) a).actions[0];
+                drawCardEffect(g, act, x - defaultItemSize/4 - wR/2, y, TMDeckDisplay.cardWidth / 2, -1);
             }
 
             // second part (right) is all other actions
             int nActions = ((CompoundAction) a).actions.length - 1;
             int widthOne = wR/nActions;
             int xStart = x + defaultItemSize/4 + spacing/5;
-            for (int i = 1; i < ((CompoundAction) a).actions.length; i++) {
+            int startI = 0;
+            if (left == null) startI = 1;
+            for (int i = startI; i < ((CompoundAction) a).actions.length; i++) {
                 drawCardEffect(g, ((CompoundAction) a).actions[i], xStart + widthOne/2, y, widthOne, -1);
                 xStart += widthOne + spacing/5;
             }
         } else {
             // Otherwise this is the effect
-            drawCardEffect(g, a, x + defaultItemSize/4 + spacing/5 + wR/2, y, wR, -1);
+            if (a instanceof ModifyPlayerResource && ((ModifyPlayerResource) a).counterResource != null) {
+                // Give more space to this action
+                drawCardEffect(g, a, x, y, TMDeckDisplay.cardWidth, -1);
+            } else {
+                drawCardEffect(g, a, x + defaultItemSize / 4 + spacing / 5 + wR / 2, y, wR, -1);
+            }
         }
     }
 

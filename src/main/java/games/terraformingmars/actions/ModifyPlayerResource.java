@@ -160,10 +160,12 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                 } else {
                     c = gs.getPlayerResources()[targetPlayer].get(counterResource);
                 }
-                c.increment(Math.abs((int)change));
-                gs.getPlayerResourceIncreaseGen()[targetPlayer].put(counterResource, true);
+                c.increment((int)(-1 * change));
+                if (-1 * change > 0 && !counterResourceProduction) {
+                    gs.getPlayerResourceIncreaseGen()[targetPlayer].put(counterResource, true);
+                }
             }
-            if (change > 0) {
+            if (change > 0 && !production) {
                 gs.getPlayerResourceIncreaseGen()[targetPlayer].put(resource, true);
             }
             return super._execute(gs);
@@ -186,12 +188,33 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Modify p" + targetPlayer + " " + resource + (production? " production " : "") + " by " + change;
+        return toString();
     }
 
     @Override
     public String toString() {
-        return "Modify p" + targetPlayer + " " + resource + (production? " production " : "") + " by " + change;
+        String s = "Modify ";
+        if (targetPlayer == -1) {
+            s += "your ";
+        } else if (targetPlayer == -2) {
+            s += "any ";
+        } else {
+            s += "p" + targetPlayer + " ";
+        }
+        s += resource + (production? " production " : " ");
+        if (counterResource != null) {
+            if (!complete) s += "by -X and " + counterResource + (counterResourceProduction? " production " : " ") + "by X";
+            else s += "by " + change + " and " + counterResource + (counterResourceProduction? " production " : " ") + "by " + (-1 * change);
+        } else {
+            s += "by " + change;
+        }
+        if (tagToCount != null) {
+            s += " for each " + tagToCount + (any? " ever played" : opponents? " opponents played" : " you played");
+        }
+        if (tileToCount != null) {
+            s += " for each " + tileToCount + (onMars? " (on Mars)" : "") + (any? " ever played" : opponents? " opponents played" : " you played");
+        }
+        return s;
     }
 
     @Override
@@ -256,7 +279,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                 c = gs.getPlayerResources()[player].get(resource);
             }
             int max = (c.getMinimum() < 0? c.getValue() + Math.abs(c.getMinimum()) : c.getValue());
-            for (int i = 0; i < max; i++) {
+            for (int i = 0; i <= max; i++) {
                 ModifyPlayerResource a = new ModifyPlayerResource(player, targetPlayer, -i, resource, production, tagToCount, tileToCount,
                         any, opponents, onMars, counterResource, counterResourceProduction, true);
                 a.complete = true;
