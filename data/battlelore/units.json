@@ -1,0 +1,44 @@
+[
+  {
+	"id":"blood_harvesters", 
+    "name": "Blood Harvesters",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 3],
+    "health": ["Integer", 3],
+	"type": "soldier",
+	"special": "rage"
+  },
+  {
+	"id":"decoy", 
+    "name": "Decoy",
+    "move": ["Integer", 0],
+    "strength": ["Integer", 0],
+    "health": ["Integer", 0],
+	"type": "soldier",
+	"special": ""
+  },
+  {
+	"id":"viper_legion", 
+    "name": "Viper Legion",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 2],
+    "health": ["Integer", 3],
+	"special": "bite"
+  },
+    {
+	"id":"citadel_guard", 
+    "name": "Citadel Guard",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 3],
+    "health": ["Integer", 3],
+	"special": "pursue"
+  },  
+  {
+	"id":"yeoman_archers", 
+    "name": "Yeoman Archers",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 2],
+    "health": ["Integer", 3],
+	"special": "doubleshot"
+  }
+]

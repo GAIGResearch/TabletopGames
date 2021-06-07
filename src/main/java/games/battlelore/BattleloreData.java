@@ -25,27 +25,7 @@ public class BattleloreData extends AbstractGameData
     public void load(String dataPath)
     {
         //units = Unit.parseComponent();
-
+        units = Unit.loadUnits(dataPath + "units.json");
     }
 
-    public static List<Component> loadUnits(String filename)
-    {
-        JSONParser jsonParser = new JSONParser();
-        ArrayList<Component> units = new ArrayList<>();
-
-        try (FileReader reader = new FileReader(filename)) {
-
-            JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for(Object o : data) {
-                //Component newGraphBoard = new Component();
-                //newGraphBoard.loadBoard((JSONObject) o);
-                //Component.add(newGraphBoard);
-            }
-
-        }catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-
-        return units;
-    }
 }

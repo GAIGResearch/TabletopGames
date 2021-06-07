@@ -5,6 +5,7 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import games.battlelore.BattleloreGame;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
+import static games.GameType.Battlelore;
 import static games.GameType.DotsAndBoxes;
 
 public class Game {
@@ -706,7 +708,8 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DotsAndBoxes, players, seed, ac, false, null);
+        //runOne(DotsAndBoxes, players, seed, ac, false, null);
+        runOne(Battlelore, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

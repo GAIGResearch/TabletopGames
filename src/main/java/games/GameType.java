@@ -5,6 +5,7 @@ import core.turnorders.AlternatingTurnOrder;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.BattleloreGameParameters;
+import games.battlelore.gui.BattleloreGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -328,7 +329,7 @@ public enum GameType {
             // TODO: Diamant GUI
 
             case Battlelore:
-                gui = new PrototypeGUI(game.getGameType(), game.getGameState(), ac, 100);
+                gui = new BattleloreGUI(ac, 100);
         }
 
         return gui;
