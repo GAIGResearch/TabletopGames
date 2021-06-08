@@ -225,6 +225,16 @@ public class TMGameState extends AbstractGameState {
         return copy;
     }
 
+    public TMCard drawCard() {
+        // Reshuffle discards into draw pile if empty
+        if (projectCards.getSize() == 0) {
+            projectCards.add(discardCards);
+            discardCards.clear();
+            projectCards.shuffle(new Random(getGameParameters().getRandomSeed()));
+        }
+        return projectCards.draw();
+    }
+
     @Override
     protected double _getHeuristicScore(int playerId) {
         return 0;

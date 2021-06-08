@@ -91,8 +91,8 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        if (getCardID() == -1) return "Discard a card";
         Component c = gameState.getComponentById(getCardID());
+        if (c == null) return "Discard a card";
         return "Discard " + c.getComponentName();
     }
 

@@ -28,8 +28,8 @@ public class Bonus {
             Counter c = gs.getGlobalParameters().get(param);
             if (c.getValueIdx() >= threshold-1) {  // -1 because this is checked right before the increase
                 effect.player = gs.getCurrentPlayer();
-                effect.execute(gs);
                 executed = true;
+                effect.execute(gs);
             }
         }
     }

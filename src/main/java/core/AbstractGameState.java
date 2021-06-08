@@ -122,8 +122,10 @@ public abstract class AbstractGameState {
     public final Component getComponentById(int id) {
         Component c = allComponents.getComponent(id);
         if (c == null) {
-            addAllComponents();
-            c = allComponents.getComponent(id);
+            try {
+                addAllComponents();
+                c = allComponents.getComponent(id);
+            } catch (Exception ignored) {}  // Can crash from concurrent modifications if running with GUI TODO: this is an ugly fix
         }
         return c;
     }

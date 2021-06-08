@@ -216,7 +216,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 gs.getTurnOrder().endRound(gs);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsStart; j++) {
-                        gs.playerCardChoice[i].add(gs.projectCards.pick(0));
+                        gs.playerCardChoice[i].add(gs.drawCard());
                     }
                     // TODO: remove, used for testing specific cards
 //                    for (TMCard c: gs.projectCards.getComponents()) {
@@ -289,7 +289,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 gs.setGamePhase(Research);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsResearch; j++) {
-                        gs.playerCardChoice[i].add(gs.projectCards.pick(0));
+                        gs.playerCardChoice[i].add(gs.drawCard());
                     }
                     // Mark player actions unused
                     for (TMCard c : gs.playerComplicatedPointCards[i].getComponents()) {
