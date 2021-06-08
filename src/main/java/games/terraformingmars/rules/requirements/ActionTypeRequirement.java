@@ -23,7 +23,9 @@ public class ActionTypeRequirement implements Requirement<TMAction> {
 
     @Override
     public boolean testCondition(TMAction o) {
-        return o.actionType == actionType && (o.standardProject == null || (project == null || o.standardProject == project));
+        return o.actionType == actionType
+                && (project == null && o.standardProject == null
+                    || o.standardProject == project);
     }
 
     @Override

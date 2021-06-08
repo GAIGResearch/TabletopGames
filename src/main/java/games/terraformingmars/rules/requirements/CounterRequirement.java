@@ -14,22 +14,22 @@ public class CounterRequirement implements Requirement<TMGameState> {
     public String counterCode;
 
     int counterID = -1;
-    int threshold;
+    int thresholdIdx;
     public boolean max;  // if true, value of counter must be <= threshold, if false >=
 
     public CounterRequirement(String code, int threshold, boolean max) {
         this.counterCode = code;
-        this.threshold = threshold;
+        this.thresholdIdx = threshold;
         this.max = max;
     }
 
     @Override
     public boolean testCondition(TMGameState gs) {
-        int value = getCounter(gs).getValue();
+        int value = getCounter(gs).getValueIdx();
         int discount = discount(gs);
 
-        if (max && (value - discount <= threshold)) return true;
-        return !max && (value + discount >= threshold);
+        if (max && (value - discount <= thresholdIdx)) return true;
+        return !max && (value + discount >= thresholdIdx);
     }
 
     private int discount(TMGameState gs) {
@@ -61,7 +61,7 @@ public class CounterRequirement implements Requirement<TMGameState> {
         String text;
         TMTypes.GlobalParameter p = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
         if (p != null) {
-            text = c.getValues()[threshold] + " " + p.getShortString();
+            text = c.getValues()[thresholdIdx] + " " + p.getShortString();
         } else {
             text = c.getValue() + " " + c.getComponentName();
         }
@@ -87,7 +87,7 @@ public class CounterRequirement implements Requirement<TMGameState> {
 
     @Override
     public CounterRequirement copy() {
-        CounterRequirement copy = new CounterRequirement(counterCode, threshold, max);
+        CounterRequirement copy = new CounterRequirement(counterCode, thresholdIdx, max);
         copy.counterID = counterID;
         return copy;
     }
@@ -100,16 +100,15 @@ public class CounterRequirement implements Requirement<TMGameState> {
             if (which.getComponentName().equalsIgnoreCase("temperature") ||
                     which.getComponentName().equalsIgnoreCase("venus")) {
                 // Turn to index
-                threshold = Utils.indexOf(which.getValues(), threshold);
+                thresholdIdx = Utils.indexOf(which.getValues(), thresholdIdx);
             }
         } else {
             gs.getAllComponents();
             which = (Counter) gs.getComponentById(counterID);
-            int a = 0;
         }
 
-        if (max && threshold == -1) {
-            threshold = which.getMaximum()-1;
+        if (max && thresholdIdx == -1) {
+            thresholdIdx = which.getMaximum()-1;
         }
 
         return which;
