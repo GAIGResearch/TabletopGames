@@ -7,6 +7,7 @@ import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
 
+import games.battlelore.components.Unit;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
         int hexHeight = gameParams.hexHeight;
         int hexWidth = gameParams.hexWidth;
         BattleloreGameState gameState = (BattleloreGameState)initialState;
-        gameState.hexBoard = new GridBoard<>(hexWidth, hexHeight, new Token(BattleloreConstants.emptyHex));
+        gameState.hexBoard = new GridBoard<Unit>(hexWidth, hexHeight, new Unit());
     }
 
     @Override

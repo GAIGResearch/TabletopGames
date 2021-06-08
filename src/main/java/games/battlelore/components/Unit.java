@@ -21,6 +21,7 @@ public class Unit extends Component
     //Variables
     private String id;
     private String name;
+    public int faction;
     public int move;
     public int strength;
     public int health;
@@ -34,9 +35,10 @@ public class Unit extends Component
         this.move = 0;
         this.strength = 0;
         this.health = 0;
+        this.faction = -1;
     }
 
-    public Unit(Utils.ComponentType type, String id, String name, int move, int strength, int health)
+    public Unit(Utils.ComponentType type, String id, String name, int move, int strength, int health, int faction)
     {
         super(type, name);
         this.name = name;
@@ -44,13 +46,14 @@ public class Unit extends Component
         this.move = move;
         this.strength = strength;
         this.health = health;
+        this.faction = faction;
     }
 
 
     @Override
     public Component copy()
     {
-        return new Unit(type, id, name, move, strength, health);
+        return new Unit(type, id, name, move, strength, health, faction);
     }
 
     @Override
@@ -76,7 +79,8 @@ public class Unit extends Component
                 name == unit.name &&
                 move == unit.move &&
                 strength == unit.strength &&
-                health == unit.health;
+                health == unit.health &&
+                faction == unit.faction;
     }
 
     public static List<Unit> loadUnits(String filename)
@@ -101,10 +105,6 @@ public class Unit extends Component
         return units;
     }
 
-    /**
-     * Creates a new Counter object from a JSON object.
-     * @param unit - JSON to parse into a Unit object.
-     */
     public void loadUnit(JSONObject unit)
     {
         this.move = ((Long) ( (JSONArray) unit.get("move")).get(1)).intValue();
@@ -112,6 +112,7 @@ public class Unit extends Component
         this.health = ((Long) ( (JSONArray) unit.get("health")).get(1)).intValue();
         this.componentName = (String) unit.get("id");
         this.name = (String) unit.get("name");
+        this.faction = ((Long) ( (JSONArray) unit.get("faction")).get(1)).intValue();;
 
         //this.type = (String) unit.get("type");
         //this.special = (String) unit.get("special");

@@ -1,6 +1,7 @@
 [
   {
-	"id":"blood_harvesters", 
+	"id":"blood_harvesters",
+    "faction": ["Integer", 0],
     "name": "Blood Harvesters",
     "move": ["Integer", 2],
     "strength": ["Integer", 3],
@@ -9,7 +10,8 @@
 	"special": "rage"
   },
   {
-	"id":"decoy", 
+	"id":"decoy",
+    "faction": ["Integer", -1],
     "name": "Decoy",
     "move": ["Integer", 0],
     "strength": ["Integer", 0],
@@ -18,7 +20,8 @@
 	"special": ""
   },
   {
-	"id":"viper_legion", 
+	"id":"viper_legion",
+    "faction": ["Integer", 0],
     "name": "Viper Legion",
     "move": ["Integer", 2],
     "strength": ["Integer", 2],
@@ -26,7 +29,8 @@
 	"special": "bite"
   },
     {
-	"id":"citadel_guard", 
+	"id":"citadel_guard",
+    "faction": ["Integer", 1],
     "name": "Citadel Guard",
     "move": ["Integer", 2],
     "strength": ["Integer", 3],
@@ -34,7 +38,8 @@
 	"special": "pursue"
   },  
   {
-	"id":"yeoman_archers", 
+	"id":"yeoman_archers",
+    "faction": ["Integer", 1],
     "name": "Yeoman Archers",
     "move": ["Integer", 2],
     "strength": ["Integer", 2],

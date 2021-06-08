@@ -329,7 +329,7 @@ public enum GameType {
             // TODO: Diamant GUI
 
             case Battlelore:
-                gui = new BattleloreGUI(ac, 100);
+                gui = new BattleloreGUI(game, ac);
         }
 
         return gui;

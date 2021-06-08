@@ -8,6 +8,7 @@ import core.components.Token;
 import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.TurnOrder;
 import games.GameType;
+import games.battlelore.components.Unit;
 import games.dominion.DominionParameters;
 import games.dominion.DominionTurnOrder;
 
@@ -26,11 +27,15 @@ public class BattleloreGameState extends AbstractGameState
      * @param gameType
      */
 
-    GridBoard<Token> hexBoard;
+    GridBoard<Unit> hexBoard;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers)
     {
         super(gameParameters, new AlternatingTurnOrder(nPlayers) ,GameType.Battlelore);
+    }
+
+    public GridBoard<Unit> getBoard() {
+        return hexBoard;
     }
 
     @Override
