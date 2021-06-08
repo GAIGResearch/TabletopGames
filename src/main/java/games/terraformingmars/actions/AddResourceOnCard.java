@@ -36,7 +36,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             boolean canExecute = true;
             if (tagTopCardDrawDeck != null) {
                 canExecute = false;
-                TMCard topCard = gs.getProjectCards().pick(0);
+                TMCard topCard = gs.drawCard();
                 for (TMTypes.Tag t: topCard.tags) {
                     if (t == tagTopCardDrawDeck) {
                         canExecute = true;

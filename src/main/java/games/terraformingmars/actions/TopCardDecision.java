@@ -29,7 +29,7 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
     @Override
     public boolean _execute(TMGameState gameState) {
         for (int i = 0; i < nCardsLook; i++) {
-            gameState.getPlayerCardChoice()[player].add(gameState.getProjectCards().pick(0));
+            gameState.getPlayerCardChoice()[player].add(gameState.drawCard());
         }
         stage = 0;
         nCardsKept = 0;

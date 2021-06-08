@@ -682,7 +682,7 @@ public class TMGameState extends AbstractGameState {
                 } else if (card.pointsTag != null) {
                     points += card.nPoints * playerCardsPlayedTags[player].get(card.pointsTag).getValue();
                 } else if (card.pointsTile != null) {
-                    if (card.pointsTileAdjacent) {
+                    if (card.pointsTileAdjacent && card.mapTileIDTilePlaced >= 0) {  // TODO: mapTileIDPlaced should have been set in this case, bug
                         // only adjacent tiles count
                         TMMapTile mt = (TMMapTile) getComponentById(card.mapTileIDTilePlaced);
                         List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));

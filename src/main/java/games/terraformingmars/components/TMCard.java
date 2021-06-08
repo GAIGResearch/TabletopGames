@@ -32,7 +32,7 @@ public class TMCard extends Card {
     public TMAction[] actions;  // new actions available to the player
     public TMAction[] immediateEffects; // effect of this card, executed immediately
 
-    public int mapTileIDTilePlaced;  // Location where tile was placed, ID of grid cell
+    public int mapTileIDTilePlaced = -1;  // Location where tile was placed, ID of grid cell
 
     public double nPoints;
     public TMTypes.Resource pointsResource;  // Type of resource placed on this card earning points, number of points will be nPoints * nResources
