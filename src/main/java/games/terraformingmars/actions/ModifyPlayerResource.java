@@ -98,8 +98,8 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
             return true;
         } else {
             // Just execute
-            if (targetPlayer == -1) {
-                if (player != -1) {
+            if (targetPlayer == -1 || targetPlayer == -2) { // TODO: why targetplayer remains -2 when in this branch?
+                if (player != -1 && player != -2) {
                     targetPlayer = player;
                 } else {
                     // current player

@@ -21,6 +21,9 @@ import utilities.Vector2D;
 
 import java.util.*;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static games.terraformingmars.TMGameState.TMPhase.CorporationSelect;
+
 public class TMGameState extends AbstractGameState {
 
     enum TMPhase implements IGamePhase {
@@ -148,9 +151,7 @@ public class TMGameState extends AbstractGameState {
 
         // Face-down decks
         copy.projectCards = projectCards.copy();
-        copy.projectCards.shuffle(rnd);
         copy.corpCards = corpCards.copy();
-        copy.corpCards.shuffle(rnd);
         copy.discardCards = discardCards.copy(); // TODO: some of these are unknown
 
         // Player-specific public info
@@ -217,9 +218,38 @@ public class TMGameState extends AbstractGameState {
         // Player-specific hidden info
         copy.playerHands = new Deck[getNPlayers()];
         copy.playerCardChoice = new Deck[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++) {
-            copy.playerHands[i] = playerHands[i].copy();
-            copy.playerCardChoice[i] = playerCardChoice[i].copy();
+        if (playerId != -1 && PARTIAL_OBSERVABLE) {
+            for (int i = 0; i < getNPlayers(); i++) {
+                copy.playerHands[i] = playerHands[i].copy();
+                copy.playerCardChoice[i] = playerCardChoice[i].copy();
+                if (i != playerId) {  // Player knows what cards they have, but shuffle for opponents, all project cards together and deal new
+                    copy.projectCards.add(copy.playerHands[i]);
+                    if (gamePhase != CorporationSelect) {  // corporation selection is public info, card choice only hidden afterwards
+                        copy.projectCards.add(copy.playerCardChoice[i]);
+                        copy.playerCardChoice[i].clear();
+                    }
+                    copy.playerHands[i].clear();
+                }
+            }
+            copy.corpCards.shuffle(rnd);
+            copy.projectCards.shuffle(rnd);
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerHands[i].getSize(); j++) {
+                        copy.playerHands[i].add(copy.drawCard());
+                    }
+                    if (gamePhase != CorporationSelect) {
+                        for (int j = 0; j < playerCardChoice[i].getSize(); j++) {
+                            copy.playerCardChoice[i].add(copy.drawCard());
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < getNPlayers(); i++) {
+                copy.playerHands[i] = playerHands[i].copy();
+                copy.playerCardChoice[i] = playerCardChoice[i].copy();
+            }
         }
 
         return copy;
@@ -237,7 +267,8 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return 0;
+        return getGameScore(playerId);
+//        return countPoints(playerId);
     }
 
     @Override

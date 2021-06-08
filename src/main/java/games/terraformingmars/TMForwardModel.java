@@ -232,6 +232,7 @@ public class TMForwardModel extends AbstractForwardModel {
             for (Deck<TMCard> deck: gs.getPlayerCardChoice()) {
                 if (deck.getSize() > 0) {
                     allDone = false;
+                    break;
                 }
             }
             if (allDone) {
@@ -461,6 +462,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum()) ended = false;
             }
         }
+        if (!ended && gs.generation >= 50) ended = true;  // set max generation threshold
         return ended;
     }
 
