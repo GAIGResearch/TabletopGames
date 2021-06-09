@@ -109,12 +109,10 @@ public class TMMapTile extends Component {
         int player = gs.getCurrentPlayer();
         if (tilePlaced == null) {
             TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
+            setTilePlaced(which, gs);
             if (gp != null) {
                 // Increase global parameter
                 return new ModifyGlobalParameter(gp, 1, true).execute(gs);
-            } else {
-                // Just place
-                setTilePlaced(which, gs);
             }
             return true;
         }

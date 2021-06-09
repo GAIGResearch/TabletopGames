@@ -154,11 +154,11 @@ public class TMForwardModel extends AbstractForwardModel {
         gs.setGamePhase(CorporationSelect);
         for (int i = 0; i < gs.getNPlayers(); i++) {
             // TODO: remove, used for testing corps
-            for (TMCard c: gs.corpCards.getComponents()) {
-                if (c.getComponentName().equals("UNITED NATIONS MARS INITIATIVE")) {
-                    gs.playerCardChoice[i].add(c);
-                }
-            }
+//            for (TMCard c: gs.corpCards.getComponents()) {
+//                if (c.getComponentName().equals("UNITED NATIONS MARS INITIATIVE")) {
+//                    gs.playerCardChoice[i].add(c);
+//                }
+//            }
             for (int j = 0; j < params.nCorpChoiceStart; j++) {
                 gs.playerCardChoice[i].add(gs.corpCards.pick(0));
             }
