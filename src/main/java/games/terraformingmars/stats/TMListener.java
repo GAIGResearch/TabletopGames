@@ -31,7 +31,6 @@ public class TMListener implements IGameListener {
 
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        // nothing
     }
 
     @Override
