@@ -164,6 +164,9 @@ public class TMAction extends AbstractAction {
                         }
                     }
 //                    c.actionPlayed = true;
+                } else if (c.cardType == TMTypes.CardType.Corporation) {
+                    // Actions for corporations are updated later with correct parameters and will not match on an equal check
+                    c.actionPlayed = true;
                 }
             }
         }

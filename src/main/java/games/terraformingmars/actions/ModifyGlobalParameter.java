@@ -33,14 +33,6 @@ public class ModifyGlobalParameter extends TMModifyCounter {
         Counter c = gs.getGlobalParameters().get(param);
         if (counterID == -1) counterID = c.getComponentID();
         if (change > 0 && !c.isMaximum() || change < 0 && !c.isMinimum()) {
-            gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
-            gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
-
-            // Params increase, check bonuses
-            for (Bonus b: gs.getBonuses()) {
-                b.checkBonus(gs);
-            }
-
             // Check persisting global param effects for all players
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 for (Effect e: gs.getPlayerPersistingEffects()[i]) {

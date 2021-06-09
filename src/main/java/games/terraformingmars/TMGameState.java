@@ -173,7 +173,7 @@ public class TMGameState extends AbstractGameState {
             copy.playerPersistingEffects[i] = new HashSet<>();
             copy.playerDiscountEffects[i] = new HashMap<>();
             copy.playerResources[i] = new HashMap<>();
-            copy.playerResourceIncreaseGen[i] = new HashMap<>(playerResourceIncreaseGen[i]);
+            copy.playerResourceIncreaseGen[i] = new HashMap<>();
             copy.playerProduction[i] = new HashMap<>();
             copy.playerCardsPlayedTags[i] = new HashMap<>();
             copy.playerCardsPlayedTypes[i] = new HashMap<>();
@@ -198,6 +198,7 @@ public class TMGameState extends AbstractGameState {
             }
             for (TMTypes.Resource r: playerResources[i].keySet()) {
                 copy.playerResources[i].put(r, playerResources[i].get(r).copy());
+                copy.playerResourceIncreaseGen[i].put(r, playerResourceIncreaseGen[i].get(r));
             }
             for (TMTypes.Resource r: playerProduction[i].keySet()) {
                 copy.playerProduction[i].put(r, playerProduction[i].get(r).copy());

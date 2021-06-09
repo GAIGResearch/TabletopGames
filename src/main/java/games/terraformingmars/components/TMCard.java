@@ -138,6 +138,16 @@ public class TMCard extends Card {
                         a.setActionCost(costResource, cost, -1);
                     }
                     a.setCardID(card.getComponentID());
+                    if (effect.get("if") != null) {
+                        // Requirement
+                        String reqStr = (String) effect.get("if");
+                        if (reqStr.contains("incgen")) {
+                            TMTypes.Resource res = Utils.searchEnum(TMTypes.Resource.class, reqStr.split("-")[1]);
+                            if (res != null) {
+                                a.requirements.add(new ResourceIncGenRequirement(res));
+                            }
+                        }
+                    }
                 }
             } else if (type.equalsIgnoreCase("discount")) {
                 // Parse discounts

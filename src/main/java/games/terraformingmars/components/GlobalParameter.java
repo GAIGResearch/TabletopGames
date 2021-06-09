@@ -1,6 +1,11 @@
 package games.terraformingmars.components;
 
 import core.components.Counter;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTypes;
+import games.terraformingmars.rules.effects.Bonus;
+import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.effects.GlobalParameterEffect;
 import utilities.Pair;
 
 import java.util.ArrayList;
@@ -28,12 +33,26 @@ public class GlobalParameter extends Counter {
         increases = new ArrayList<>();
     }
 
-    public boolean increment(int amount, int generation, int player) {
-        boolean s = super.increment(amount);
-        if (s) {
-            increases.add(new Pair<>(generation, player));
+    public boolean increment(int amount, TMGameState gs) {
+        boolean success = true;
+        for (int i = 0; i < amount; i++) {  // TODO: could be reducing instead
+            boolean s = super.increment(1);
+            success &= s;
+            if (s) {
+                int player = gs.getCurrentPlayer();
+                increases.add(new Pair<>(gs.getGeneration(), player));
+
+                // Player gets TR
+                gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
+                gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
+
+                // Params increase, check bonuses
+                for (Bonus b : gs.getBonuses()) {
+                    b.checkBonus(gs);
+                }
+            }
         }
-        return s;
+        return success;
     }
 
     @Override

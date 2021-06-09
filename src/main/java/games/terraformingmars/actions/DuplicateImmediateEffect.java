@@ -55,9 +55,6 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
                 }
                 if (found) break;
             }
-            if (!found) {
-                int b = 0;
-            }
         } else {
             // Execute all effects that match this on the card
             TMCard card = (TMCard) gameState.getComponentById(getCardID());

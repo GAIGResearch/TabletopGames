@@ -95,6 +95,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         }
         if (actions.size() == 0) {
             int a = 0;  // TODO: bad, this shouldn't happen
+            actions.add(action);
         }
         return actions;
     }
