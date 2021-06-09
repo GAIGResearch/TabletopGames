@@ -462,7 +462,7 @@ public class TMForwardModel extends AbstractForwardModel {
                 if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum()) ended = false;
             }
         }
-        if (!ended && gs.generation >= 50) ended = true;  // set max generation threshold
+//        if (!ended && gs.generation >= 50) ended = true;  // set max generation threshold
         return ended;
     }
 

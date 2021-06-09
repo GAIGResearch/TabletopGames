@@ -4,10 +4,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.GridBoard;
 import games.terraformingmars.actions.TMAction;
-import games.terraformingmars.components.TMCard;
-import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.components.Award;
-import games.terraformingmars.components.Milestone;
+import games.terraformingmars.components.*;
 import games.terraformingmars.rules.effects.Bonus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -297,7 +294,7 @@ public class TMTypes {
         /* custom loading info from json */
 
         public void loadBoard(GridBoard<TMMapTile> board, HashSet<TMMapTile> extraTiles, HashSet<Bonus> bonuses,
-                              HashSet<Milestone> milestones, HashSet<Award> awards, HashMap<GlobalParameter, Counter> globalParameters) {
+                              HashSet<Milestone> milestones, HashSet<Award> awards, HashMap<GlobalParameter, games.terraformingmars.components.GlobalParameter> globalParameters) {
             JSONParser jsonParser = new JSONParser();
             try (FileReader reader = new FileReader(getBoardPath())) {
                 JSONObject data = (JSONObject) jsonParser.parse(reader);
@@ -352,7 +349,7 @@ public class TMTypes {
                         for (int i = 0; i < valuesJSON.size(); i++) {
                             values[i] = (int)(long)valuesJSON.get(i);
                         }
-                        globalParameters.put(p, new Counter(values, p.name()));
+                        globalParameters.put(p, new games.terraformingmars.components.GlobalParameter(values, p.name()));
 
                         // Process bonuses for this game when counters reach specific points
                         if (gp.get("bonus") != null) {

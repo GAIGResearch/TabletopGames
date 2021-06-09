@@ -7,15 +7,13 @@ import core.interfaces.IGamePhase;
 import games.GameType;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
-import games.terraformingmars.components.Award;
-import games.terraformingmars.components.Milestone;
-import games.terraformingmars.components.TMCard;
-import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.components.*;
 import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.ActionTypeRequirement;
 import games.terraformingmars.rules.requirements.Requirement;
 import games.terraformingmars.rules.requirements.TagsPlayedRequirement;
+import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -37,7 +35,7 @@ public class TMGameState extends AbstractGameState {
     int generation;
     GridBoard<TMMapTile> board;
     HashSet<TMMapTile> extraTiles;
-    HashMap<TMTypes.GlobalParameter, Counter> globalParameters;
+    HashMap<TMTypes.GlobalParameter, GlobalParameter> globalParameters;
     HashSet<Bonus> bonuses;
     Deck<TMCard> projectCards, corpCards, discardCards;  // Face-down decks
 
@@ -332,7 +330,7 @@ public class TMGameState extends AbstractGameState {
         return bonuses;
     }
 
-    public HashMap<TMTypes.GlobalParameter, Counter> getGlobalParameters() {
+    public HashMap<TMTypes.GlobalParameter, GlobalParameter> getGlobalParameters() {
         return globalParameters;
     }
 
@@ -647,42 +645,84 @@ public class TMGameState extends AbstractGameState {
     }
 
     public int countPoints(int player) {
+        // Add TR
         int points = playerResources[player].get(TMTypes.Resource.TR).getValue();
-        TMGameParameters params = (TMGameParameters) gameParameters;
         // Add milestones
+        points += countPointsMilestones(player);
+        // Add awards
+        points += countPointsAwards(player);
+        // Add points from board
+        points += countPointsBoard(player);
+        // Add points on cards
+        points += countPointsCards(player);
+        return points;
+    }
+
+    public int countPointsMilestones(int player) {
+        TMGameParameters params = (TMGameParameters) gameParameters;
+        int points = 0;
         for (Milestone m: milestones) {
             if (m.isClaimed() && m.claimed == player) {
                 points += params.nPointsMilestone;
             }
         }
-        // Add awards
+        return points;
+    }
+
+    public int countPointsAwards(int player) {
+        TMGameParameters params = (TMGameParameters) gameParameters;
+        int points = 0;
         for (Award a: awards) {
-            if (a.isClaimed()) {
-                int best = -1;
-                HashSet<Integer> bestPlayer = new HashSet<>();
-                HashSet<Integer> secondBestPlayer = new HashSet<>();
-                for (int i = 0; i < getNPlayers(); i++) {
-                    int playerPoints = a.checkProgress(this, i);
+            Pair<HashSet<Integer>, HashSet<Integer>> winners = awardWinner(a);
+            if (winners != null) {
+                if (winners.a.contains(player)) points += params.nPointsAwardFirst;
+                if (winners.b.contains(player) && winners.a.size() == 1)
+                    points += params.nPointsAwardSecond;
+            }
+        }
+        return points;
+    }
+
+    public Pair<HashSet<Integer>, HashSet<Integer>> awardWinner(Award a) {
+        if (a.isClaimed()) {
+            int best = -1;
+            int secondBest = -1;
+            HashSet<Integer> bestPlayer = new HashSet<>();
+            HashSet<Integer> secondBestPlayer = new HashSet<>();
+            for (int i = 0; i < getNPlayers(); i++) {
+                int playerPoints = a.checkProgress(this, i);
+                if (playerPoints >= best) {
                     if (playerPoints > best) {
                         secondBestPlayer = new HashSet<>(bestPlayer);
+                        secondBest = best;
                         bestPlayer.clear();
                         bestPlayer.add(i);
                         best = playerPoints;
                     }
+                } else if (playerPoints > secondBest) {
+                    secondBestPlayer.clear();
+                    secondBestPlayer.add(i);
+                    secondBest = playerPoints;
                 }
-                for (int i = 0; i < getNPlayers(); i++) {
-                    int playerPoints = a.checkProgress(this, i);
-                    if (playerPoints == best) {
-                        bestPlayer.add(i);
-                    }
-                }
-                if (bestPlayer.contains(player)) points += params.nPointsAwardFirst;
-                if (getNPlayers() > 2 && secondBestPlayer.contains(player) && bestPlayer.size() == 1) points += params.nPointsAwardSecond;
             }
+            for (int i = 0; i < getNPlayers(); i++) {
+                int playerPoints = a.checkProgress(this, i);
+                if (playerPoints == best) {
+                    bestPlayer.add(i);
+                } else if (playerPoints == secondBest) {
+                    secondBestPlayer.add(i);
+                }
+            }
+            if (getNPlayers() <= 2 || bestPlayer.size() > 1) secondBestPlayer.clear();  // No second-best awarded unless there are 3 or more players, and only 1 got first place
+            return new Pair<>(bestPlayer, secondBestPlayer);
         }
-        // Add greeneries on board
-        points += playerTilesPlaced[player].get(TMTypes.Tile.Greenery).getValue();
+        return null;
+    }
 
+    public int countPointsBoard(int player) {
+        int points = 0;
+        // Greeneries
+        points += playerTilesPlaced[player].get(TMTypes.Tile.Greenery).getValue();
         // Add cities on board
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
@@ -693,10 +733,15 @@ public class TMGameState extends AbstractGameState {
                 }
             }
         }
+        return points;
+    }
 
-        // Add points on cards
+    public int countPointsCards(int player) {
+        int points = 0;
+
+        // Normal points
         points += playerCardPoints[player].getValue();
-
+        // Complicated points
         for (TMCard card: playerComplicatedPointCards[player].getComponents()) {
             if (card == null) {
                 continue;

@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Counter extends Component {
-    private int[] values;
+    protected int[] values;
 
-    private int valueIdx;  // Current value of this counter
-    private int minimum;  // Minimum value (inclusive)
-    private int maximum;  // Maximum value (inclusive)
+    protected int valueIdx;  // Current value of this counter
+    protected int minimum;  // Minimum value (inclusive)
+    protected int maximum;  // Maximum value (inclusive)
 
     public Counter() {
         this(0, 0, 0, "");
@@ -34,7 +34,7 @@ public class Counter extends Component {
         this.values = values;
     }
 
-    private Counter(int[] values, int valueIdx, int minimum, int maximum, String name, int ID) {
+    protected Counter(int[] values, int valueIdx, int minimum, int maximum, String name, int ID) {
         super(ComponentType.COUNTER, name, ID);
         this.values = values;
         this.valueIdx = valueIdx;

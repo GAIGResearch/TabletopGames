@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.GlobalParameter;
 
 import java.util.Objects;
 
@@ -34,14 +35,8 @@ public class TMModifyCounter extends TMAction {
     public boolean _execute(TMGameState gs) {
         Counter c = (Counter)gs.getComponentById(counterID);
         if (gs.getNPlayers() == 1 && c == null) return true;  // Null if applied to neutral player in solo
-        if (change > 0 && !c.isMaximum()) {
-            c.increment((int)change);
-            return true;
-        } else if (change < 0 && !c.isMinimum()) {
-            c.increment((int)change);
-            return true;
-        }
-        return false;
+        if (c instanceof GlobalParameter) return ((GlobalParameter) c).increment((int)change, gs.getGeneration(), gs.getCurrentPlayer());
+        return c.increment((int)change);
     }
 
     @Override

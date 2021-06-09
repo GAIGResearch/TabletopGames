@@ -7,7 +7,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
-import games.terraformingmars.TMGameState;
 
 import java.util.Arrays;
 import java.util.Map;

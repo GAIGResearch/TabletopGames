@@ -110,30 +110,8 @@ public class TMMapTile extends Component {
         if (tilePlaced == null) {
             TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
             if (gp != null) {
-
-                // Params increase, check bonuses
-                for (Bonus b: gs.getBonuses()) {
-                    b.checkBonus(gs);
-                }
-
-                // increase counter and TR
-                Counter counter = gs.getGlobalParameters().get(gp);
-                boolean succeeded = counter.increment(1);
-                if (succeeded) {
-                    gs.getPlayerResources()[player].get(TMTypes.Resource.TR).increment(1);
-                    gs.getPlayerResourceIncreaseGen()[player].put(TMTypes.Resource.TR, true);
-                    setTilePlaced(which, gs);
-
-                    // Check persisting global param effects for all players
-                    for (int i = 0; i < gs.getNPlayers(); i++) {
-                        for (Effect e: gs.getPlayerPersistingEffects()[i]) {
-                            if (!(e instanceof GlobalParameterEffect)) continue;
-                            e.execute(gs, new ModifyGlobalParameter(gp, 1, true), i);
-                        }
-                    }
-                } else {
-                    return false;
-                }
+                // Increase global parameter
+                return new ModifyGlobalParameter(gp, 1, true).execute(gs);
             } else {
                 // Just place
                 setTilePlaced(which, gs);
