@@ -414,9 +414,9 @@ public class TMForwardModel extends AbstractForwardModel {
 
             // Buy a standard project
             // - Discard cards for MC
-//            if (gs.playerHands[player].getSize() > 0) {
-//                possibleActions.add(new SellProjects(player));
-//            }
+            if (gs.playerHands[player].getSize() > 0) {
+                possibleActions.add(new SellProjects(player));
+            }
 
             // - Increase energy production 1 step for 11 MC
             possibleActions.add(new ModifyPlayerResource(PowerPlant, params.getnCostSPEnergy(), player, 1, TMTypes.Resource.Energy));

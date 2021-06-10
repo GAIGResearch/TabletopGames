@@ -56,7 +56,9 @@ public class SellProjects extends TMAction implements IExtendedSequence {
                 actions.add(new SellProjects(player, id));
             }
         }
-        actions.add(new TMAction(player));  // Pass to stop the action
+        if (!cardIDsSold.isEmpty()) {
+            actions.add(new TMAction(player));  // Pass to stop the action, unless you haven't picked any card yet
+        }
         return actions;
     }
 
