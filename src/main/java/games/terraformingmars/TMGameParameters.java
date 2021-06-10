@@ -36,6 +36,7 @@ public class TMGameParameters extends AbstractParameters {
         }
     }};
     int maxPoints = 500;
+    int maxCards = 250;  // TODO based on expansions
 
     int projectPurchaseCost = 3;
     int nCorpChoiceStart = 2;

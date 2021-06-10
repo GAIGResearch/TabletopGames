@@ -156,16 +156,7 @@ public class TMAction extends AbstractAction {
             if (c != null) {
                 if (!c.firstActionExecuted && c.firstAction != null) {
                     c.firstActionExecuted = true;
-                } else if (c.cardType == TMTypes.CardType.Active) {
-                    for (TMAction a: c.actions) {
-                        if (a.equals(this)) {
-                            c.actionPlayed = true;
-                            break;
-                        }
-                    }
-//                    c.actionPlayed = true;
-                } else if (c.cardType == TMTypes.CardType.Corporation) {
-                    // Actions for corporations are updated later with correct parameters and will not match on an equal check
+                } else if (c.cardType == TMTypes.CardType.Active || c.cardType == TMTypes.CardType.Corporation) {
                     c.actionPlayed = true;
                 }
             }

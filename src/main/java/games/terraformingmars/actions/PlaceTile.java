@@ -111,7 +111,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     private void setTile(TMTypes.Tile tile, String name) {
         this.tile = tile;
-        if (tile == City && name != null) {
+        if (tile == City && name == null) {
             // Cities can't be adjacent to other cities, unless named
             adjacencyRequirement = new AdjacencyRequirement(new HashMap<TMTypes.Tile, Integer>() {{ put(City, 1);}});
             adjacencyRequirement.reversed = true;

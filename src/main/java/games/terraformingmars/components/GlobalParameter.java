@@ -65,7 +65,11 @@ public class GlobalParameter extends Counter {
         return copy;
     }
 
-    public String getIncreases() {
+    public ArrayList<Pair<Integer, Integer>> getIncreases() {
+        return increases;
+    }
+
+    public String getIncreasesString() {
         String s = "[";
         for (Pair<Integer, Integer> p: increases) {
             s += "(" + p.a + "," + p.b + "),";

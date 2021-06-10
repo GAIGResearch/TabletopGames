@@ -11,7 +11,7 @@ public class Bonus {
     public TMTypes.GlobalParameter param;
     public TMAction effect;
 
-    public boolean executed;  // Can only execute once
+    public int claimed = -1;  // Can only execute once
 
     public Bonus(TMTypes.GlobalParameter p, int threshold, TMAction effect) {
         this.param = p;
@@ -24,11 +24,11 @@ public class Bonus {
     }
 
     public void checkBonus(TMGameState gs) {
-        if (!executed) {
+        if (claimed == -1) {
             Counter c = gs.getGlobalParameters().get(param);
             if (c.getValueIdx() >= threshold-1) {  // -1 because this is checked right before the increase
                 effect.player = gs.getCurrentPlayer();
-                executed = true;
+                claimed = effect.player;
                 effect.execute(gs);
             }
         }
@@ -36,7 +36,7 @@ public class Bonus {
 
     public Bonus copy() {
         Bonus b = new Bonus(param, threshold, effect);
-        b.executed = executed;
+        b.claimed = claimed;
         return b;
     }
 
@@ -45,11 +45,11 @@ public class Bonus {
         if (this == o) return true;
         if (!(o instanceof Bonus)) return false;
         Bonus bonus = (Bonus) o;
-        return threshold == bonus.threshold && executed == bonus.executed && param == bonus.param && Objects.equals(effect, bonus.effect);
+        return threshold == bonus.threshold && claimed == bonus.claimed && param == bonus.param && Objects.equals(effect, bonus.effect);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(threshold, param, effect, executed);
+        return Objects.hash(threshold, param, effect, claimed);
     }
 }

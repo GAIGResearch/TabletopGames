@@ -24,9 +24,9 @@ public enum TMGameAttributes implements IGameAttribute {
 //    PLAYER((s, a) -> s.getCurrentPlayer()),
 //    ACTION_TYPE((s, a) -> a == null ? "NONE" : a.getClass().getSimpleName()),
 //    ACTION_DESCRIPTION((s, a) ->  a == null ? "NONE" : a.getString(s)),
-    GP_OCEAN((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).getIncreases()),  // Pairs are (generation,player)
-    GP_TEMPERATURE((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Temperature).getIncreases()),
-    GP_OXYGEN((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen).getIncreases()),
+    GP_OCEAN((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).getIncreasesString()),  // Pairs are (generation,player)
+    GP_TEMPERATURE((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Temperature).getIncreasesString()),
+    GP_OXYGEN((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen).getIncreasesString()),
     CORP_CARDS((s,a) -> {
         String ss = "[";
         for(TMCard c: s.getPlayerCorporations()) {

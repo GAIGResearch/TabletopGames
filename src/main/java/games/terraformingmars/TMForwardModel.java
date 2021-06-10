@@ -260,28 +260,39 @@ public class TMForwardModel extends AbstractForwardModel {
                 // Check game end before next research phase
                 if (checkGameEnd(gs)) {
                     gs.setGameStatus(Utils.GameResult.GAME_END);
-                    ArrayList<Integer> best = new ArrayList<>();
-                    int bestPoints = 0;
-                    for (int i = 0; i < gs.getNPlayers(); i++) {
-                        int points = gs.countPoints(i);
-                        if (points > bestPoints) {
-                            bestPoints = points;
+
+                    if (gs.getNPlayers() == 1) {
+                        // If solo, game goes for 14 generations regardless of global parameters
+                        Utils.GameResult won = Utils.GameResult.WIN;
+                        for (TMTypes.GlobalParameter p: gs.globalParameters.keySet()) {
+                            if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum()) won = Utils.GameResult.LOSE;
+                        }
+                        gs.setPlayerResult(won, 0);
+                    } else {
+                        ArrayList<Integer> best = new ArrayList<>();
+                        int bestPoints = 0;
+                        for (int i = 0; i < gs.getNPlayers(); i++) {
+                            int points = gs.countPoints(i);
+                            if (points > bestPoints) {
+                                bestPoints = points;
+                            }
+                        }
+                        for (int i = 0; i < gs.getNPlayers(); i++) {
+                            int points = gs.countPoints(i);
+                            if (points == bestPoints) {
+                                best.add(i);
+                            }
+                        }
+                        // TODO tiebreaker
+                        for (int i = 0; i < gs.getNPlayers(); i++) {
+                            if (best.contains(i) && (gs.getNPlayers() != 1 || gs.generation <= params.soloMaxGen)) {
+                                gs.setPlayerResult(Utils.GameResult.WIN, i);
+                            } else {
+                                gs.setPlayerResult(Utils.GameResult.LOSE, i);
+                            }
                         }
                     }
-                    for (int i = 0; i < gs.getNPlayers(); i++) {
-                        int points = gs.countPoints(i);
-                        if (points == bestPoints) {
-                            best.add(i);
-                        }
-                    }
-                    // TODO tiebreaker
-                    for (int i = 0; i < gs.getNPlayers(); i++) {
-                        if (best.contains(i) && (gs.getNPlayers() != 1 || gs.generation <= params.soloMaxGen)) {
-                            gs.setPlayerResult(Utils.GameResult.WIN, i);
-                        } else {
-                            gs.setPlayerResult(Utils.GameResult.LOSE, i);
-                        }
-                    }
+
                     return;
                 }
 
@@ -396,7 +407,9 @@ public class TMForwardModel extends AbstractForwardModel {
 
             // Buy a standard project
             // - Discard cards for MC
-            possibleActions.add(new SellProjects(player));
+//            if (gs.playerHands[player].getSize() > 0) {
+//                possibleActions.add(new SellProjects(player));
+//            }
 
             // - Increase energy production 1 step for 11 MC
             possibleActions.add(new ModifyPlayerResource(PowerPlant, params.getnCostSPEnergy(), player, 1, TMTypes.Resource.Energy));

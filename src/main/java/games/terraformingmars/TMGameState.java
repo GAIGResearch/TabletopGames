@@ -266,8 +266,9 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return getGameScore(playerId);
-//        return countPoints(playerId);
+//        return new TMHeuristic().evaluateState(this, playerId);
+//        return getGameScore(playerId);
+        return countPoints(playerId);
     }
 
     @Override

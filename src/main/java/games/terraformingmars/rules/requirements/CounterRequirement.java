@@ -58,7 +58,8 @@ public class CounterRequirement implements Requirement<TMGameState> {
     @Override
     public String getDisplayText(TMGameState gs) {
         Counter c = getCounter(gs);
-        String text;
+        String text = "";
+        if (c == null) return text;
         TMTypes.GlobalParameter p = Utils.searchEnum(TMTypes.GlobalParameter.class, c.getComponentName());
         if (p != null) {
             text = c.getValues()[thresholdIdx] + " " + p.getShortString();
