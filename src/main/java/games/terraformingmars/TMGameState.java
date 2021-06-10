@@ -530,7 +530,7 @@ public class TMGameState extends AbstractGameState {
     public int playerResourceSum(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, boolean itself) {
         if (from == null || from.size() > 0) {
             int sum = 0;
-            if (itself) sum = playerResources[player].get(to).getValue();  // All resources can be exchanged for themselves at rate 1.0
+            if (itself || from != null && from.contains(to)) sum = playerResources[player].get(to).getValue();  // All resources can be exchanged for themselves at rate 1.0
 
             // Add resources that this player can use as the "to" resource for this action
             for (ResourceMapping resMap : playerResourceMap[player]) {
