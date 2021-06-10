@@ -175,7 +175,12 @@ public class TMAction extends AbstractAction {
         int nCards = c.getValue();
         if (nCards > 0) {
             for (int i = 0; i < nCards; i++) {
-                gs.getPlayerHands()[player].add(gs.drawCard());
+                TMCard card = gs.drawCard();
+                if (card != null) {
+                    gs.getPlayerHands()[player].add(card);
+                } else {
+                    break;
+                }
             }
             c.setValue(0);
         } else if (nCards < 0) {

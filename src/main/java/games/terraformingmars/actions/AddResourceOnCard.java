@@ -37,13 +37,15 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             if (tagTopCardDrawDeck != null) {
                 canExecute = false;
                 TMCard topCard = gs.drawCard();
-                for (TMTypes.Tag t: topCard.tags) {
-                    if (t == tagTopCardDrawDeck) {
-                        canExecute = true;
-                        break;
+                if (topCard != null) {
+                    for (TMTypes.Tag t : topCard.tags) {
+                        if (t == tagTopCardDrawDeck) {
+                            canExecute = true;
+                            break;
+                        }
                     }
+                    gs.getDiscardCards().add(topCard);
                 }
-                gs.getDiscardCards().add(topCard);
             }
             if (canExecute) {
                 TMCard card = (TMCard) gs.getComponentById(getCardID());

@@ -299,16 +299,23 @@ public class TMForwardModel extends AbstractForwardModel {
                 // Move to research phase
                 gs.getTurnOrder().endRound(gs);
                 gs.setGamePhase(Research);
-                for (int i = 0; i < gs.getNPlayers(); i++) {
-                    for (int j = 0; j < params.nProjectsResearch; j++) {
-                        gs.playerCardChoice[i].add(gs.drawCard());
+                for (int j = 0; j < params.nProjectsResearch; j++) {
+                    for (int i = 0; i < gs.getNPlayers(); i++) {
+                        TMCard c = gs.drawCard();
+                        if (c != null) {
+                            gs.playerCardChoice[i].add(c);
+                        } else {
+                            break;
+                        }
                     }
+                }
+                for (int i = 0; i < gs.getNPlayers(); i++) {
                     // Mark player actions unused
                     for (TMCard c : gs.playerComplicatedPointCards[i].getComponents()) {
                         c.actionPlayed = false;
                     }
                     // Reset resource increase
-                    for (TMTypes.Resource res: TMTypes.Resource.values()) {
+                    for (TMTypes.Resource res : TMTypes.Resource.values()) {
                         gs.playerResourceIncreaseGen[i].put(res, false);
                     }
                 }
