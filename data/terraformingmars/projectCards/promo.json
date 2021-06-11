@@ -1,0 +1,2201 @@
+[
+  {
+    "@class": "filterDiv automated promo spaceTag reqs ",
+    "@data-science": "2",
+    "annotation": "(Requires 2 Science tags. Decrease your energy production 1 step, and increase your titanium production 1 step. Gain 4 titanium.)",
+    "div": [
+      {
+        "#text": "Dusk Laser Mining",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "#text": "#X01",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "Science Science",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "production energy"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "production titanium"
+              }
+            ]
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "#text": "(Requires 2 Science tags.\r\n                        dec-energyprod-1 step, and inc-titaniumprod-1 step.\r\n                        Gain 4 titanium.)",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "#text": "4",
+          "@style": "margin-left: 20px;font-size: 20px;"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event promo eventTag",
+    "annotation": "USE A CARD ACTION THAT HAS ALREADY BEEN USED THIS GENERATION",
+    "div": [
+      {
+        "#text": "Project Inspection",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "0",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "#text": "#X02",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "span": {
+          "#text": "USE A CARD ACTION THAT HAS ALREADY BEEN USED THIS GENERATION",
+          "@style": "font-weight:normal"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active powerTag promo ",
+    "annotation": "(Action: Spend 2X MC to gain X energy, or decrease energy production 1 step to gain 8 MC.)",
+    "div": [
+      {
+        "#text": "Energy Market",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power "
+      },
+      {
+        "#text": "#X03",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": [
+          "X",
+          "OR"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "2X",
+            "@class": "money resource "
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "energy resource "
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production energy "
+            }
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "#text": "8",
+            "@class": "money resource"
+          },
+          {
+            "#text": "(Action: Spend 2X MegaCredit to gain X energy, or decrease energyprod-1 step to gain 8 MegaCredit.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag buildingTag promo ",
+    "annotation": "(Action: Spend any amount of energy to draw the same number of cards. TAKE 1 INTO HAND AND DISCARD THE REST.)",
+    "div": [
+      {
+        "#text": "Hi-Tech Lab",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "17",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "#text": "#X04",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": [
+          "X",
+          "X",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "energy resource "
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "card resource "
+          },
+          {
+            "#text": "(Action: Spend any amount of energy to draw the same number of cards. TAKE 1 INTO HAND AND DISCARD THE REST.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag promo ",
+    "annotation": "(Increase your MC production 1 step per different tag you have in play, including this.)",
+    "div": [
+      {
+        "#text": "Interplanetary Trade",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "27",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "#text": "#X05",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "production money"
+            }
+          },
+          {
+            "@class": "resource-tag",
+            "@style": "background: linear-gradient(to bottom right, green, yellow, red);"
+          },
+          {
+            "#text": "(inc-MegaCreditprod-1 step per different tag you have in play, including this.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag earthTag promo ",
+    "annotation": "(Steal 3 MC from a player that REMOVED YOUR RESOURCES OR DECREASED YOUR PRODUCTION this generation. Place this card face down in THAT PLAYER'S EVENT PILE.)",
+    "div": [
+      {
+        "#text": "Law Suit",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "2",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "#text": "#X06",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": [
+          "STEAL",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "-1",
+            "@class": "points points-big red-outline"
+          },
+          {
+            "#text": "3",
+            "@class": "resource money red-outline"
+          },
+          {
+            "#text": "(Steal 3 MegaCredit from a player that REMOVED YOUR RESOURCES OR DECREASED YOURprod-this generation.\r\n                        Place this card face down in THAT PLAYER'S EVENT PILE.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active promo reqs spaceTag",
+    "@data-science": "2",
+    "annotation": "(Effect: Your titanium resources are worth 1 MC extra.)",
+    "div": [
+      {
+        "#text": "Mercurian Alloys",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X07",
+        "@class": "number"
+      },
+      {
+        "#text": ": +",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "2 Science",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "#text": "(Effect: Your titanium resources are worth 1 MegaCredit extra.)",
+            "@class": "description "
+          },
+          {
+            "#text": "(Requires 2 Science tags.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  spaceTag earthTag promo",
+    "annotation": "(Action: Gain 1 MC per Science tag you have.)",
+    "div": [
+      {
+        "#text": "Orbital Cleanup",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "#text": "#X08",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "#text": "1",
+            "@class": "money resource "
+          },
+          {
+            "@class": "resource-tag tag-science "
+          },
+          {
+            "#text": "(Action: Gain 1 MegaCredit per Science tag you have.)",
+            "@class": "description ",
+            "@style": "margin-bottom:10px;"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "#text": "-2",
+              "@class": "moneyprod-"
+            }
+          },
+          {
+            "#text": "(dec-MegaCreditprod-2 steps.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event promo eventTag reqs",
+    "annotation": "(Requires that you have 2 Party Leaders. Gain 1 TR.)",
+    "div": [
+      {
+        "#text": "Political Alliance",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "#text": "#X09",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "@class": "turmoil-icon project-icon",
+        "@style": "margin-top: -25px; margin-left: 241px;"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": [
+              {
+                "@class": "leader",
+                "@style": "margin-top:-6px;"
+              },
+              {
+                "@class": "leader",
+                "@style": "margin-top:-6px;"
+              }
+            ]
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "(Requires that you have 2 Party Leaders. Gain 1 TR.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active promo buildingTag",
+    "annotation": "(Effect: Your steel resources are worth 1 MC extra.)",
+    "div": [
+      {
+        "#text": "Rego Plastics",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X10",
+        "@class": "number"
+      },
+      {
+        "#text": ": +",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "#text": "(Effect: Your steel resources are worth 1 MegaCredit extra.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active jovianTag earthTag promo",
+    "annotation": "(Action: Spend 1 floater from here to gain 1 MC for each floater here, INCLUDING THE PAID FLOATER (max 5).)",
+    "div": [
+      {
+        "#text": "Saturn Surfing",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "#text": "#X11",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": [
+          "/",
+          "* (max 5)",
+          "/"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "#text": "1",
+            "@class": "money resource "
+          },
+          {
+            "@class": "resource floater "
+          },
+          {
+            "#text": "(Action: Spend 1 floater from here to gain 1 MegaCredit for each floater here, INCLUDING THE PAID FLOATER (max 5).)",
+            "@class": "description ",
+            "@style": "margin-bottom:10px;"
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "resource-tag tag-earth "
+          },
+          {
+            "#text": "(Add 1 floater here for every Earth tag you have, including this.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag spaceTag promo ",
+    "annotation": "(Place a city tile IN SPACE, outside and separate from the planet.)",
+    "div": [
+      {
+        "#text": "Stanford Torus",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#X12",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "tile city-tile"
+          },
+          {
+            "#text": "(Place a city tile IN SPACE, outside and separate from the planet.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  spaceTag  promo ",
+    "annotation": "(Action: Spend 1 titanium to add 1 asteroid resource here and increase MC production 1 step.)",
+    "div": [
+      {
+        "#text": "Asteroid Hollowing",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X13",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points",
+            "div": {
+              "@class": "resource asteroid",
+              "@style": "vertical-align: middle;"
+            }
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "production money"
+            }
+          },
+          {
+            "#text": "(Action: Spend 1 titanium to add 1 asteroid resource here and increase MegaCreditprod-1 step.)",
+            "@class": "description"
+          },
+          {
+            "#text": "(1VP for each 2 asteroids on this card.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  earthTag  promo ",
+    "annotation": "(Effect: When you play a card with basic cost of 20MC or more, increase your MC production 1 step.)",
+    "div": [
+      {
+        "#text": "Advertising",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X14",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content",
+        "div": [
+          {
+            "@class": "resource card",
+            "div": {
+              "#text": "20",
+              "@class": "card-icon money",
+              "@style": "\r\n                border-radius: 4px;\r\n                margin-left: -7px;\r\n                font-size: 12px;\r\n                "
+            }
+          },
+          {
+            "@class": "production-box",
+            "@style": "margin-left: 5px;",
+            "div": {
+              "#text": "1",
+              "@class": "production money"
+            }
+          },
+          {
+            "#text": "(Effect: When you play a card with basic cost of 20MegaCredit or more, inc-MegaCreditprod-1 step.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  spaceTag  promo ",
+    "annotation": "(Action: Spend 1 titanium to add 1 asteroid resource to ANY CARD or remove 1 asteroid here to place an ocean.)",
+    "div": [
+      {
+        "#text": "Comet Aiming",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "17",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X15",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "*",
+          "OR"
+        ],
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "tile ocean-tile"
+          },
+          {
+            "#text": "(Action: Spend 1 titanium to add 1 asteroid resource to ANY CARD or remove 1 asteroid here to place an ocean.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event promo eventTag reqs",
+    "annotation": "(REQUIRES THAT A PLAYER REMOVED ANOTHER PLAYER'S PLANTS THIS GENERATION. Gain 1 titanium or 2 steel.)",
+    "div": [
+      {
+        "#text": "Crash site Cleanup",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "#text": "#X16",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "- Plant",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "#text": "(REQUIRES THAT A PLAYER REMOVED ANOTHER PLAYER'S Plant THIS GENERATION. Gain 1 titanium or 2 steel.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  scienceTag  promo ",
+    "annotation": "(Effect: When playing a card with a requirement, pay 2MC less.)",
+    "div": [
+      {
+        "#text": "Cutting Edge Technology",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X17",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "resource card",
+            "div": {
+              "#text": "REQ",
+              "@class": "card-icon",
+              "@style": "background: linear-gradient(to right, #e28c22, rgb(255,204,100),rgb(255,204,100), #e28c22);\r\n                border-radius: 1px;\r\n                margin-left: 3px;\r\n                font-size: 11px;\r\n                width: 24px;\r\n                margin-top: 10px;\r\n                line-height: 22px;\r\n                "
+            }
+          },
+          {
+            "#text": "-2",
+            "@class": "resource money"
+          },
+          {
+            "#text": "(Effect: When playing a card with a requirement, pay 2MegaCredit less.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag promo ",
+    "annotation": "(Action: Spend 6 MC to add 1 asteroid to ANY CARD (titanium may be used to pay for this), or remove 1 asteroid here to raise temperature 1 step).",
+    "div": [
+      {
+        "#text": "Directed Impactors",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "#text": "#X18",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": [
+          "(",
+          ")",
+          "*",
+          "OR"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "6",
+            "@class": " money resource "
+          },
+          {
+            "@class": "titanium resource"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "#text": "(Action: Spend 6 MegaCredit to add 1 asteroid to ANY CARD (titanium may be used to pay for this),\r\n                  or remove 1 asteroid here to raise temperature 1 step).",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag cityTag powerTag promo ",
+    "annotation": "(Increase your MC production 2 steps, increase your energy production 1 step, gain 3 plants, and place a city tile.)",
+    "div": [
+      {
+        "#text": "Field-Capped City",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "29",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-city"
+      },
+      {
+        "@class": "tag tag3 tag-power"
+      },
+      {
+        "#text": "#X19",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "#text": "2",
+                "@class": "production money"
+              },
+              {
+                "@class": "production energy"
+              }
+            ]
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "tile city-tile"
+          },
+          {
+            "#text": "(inc-MegaCreditprod-2 steps, inc-energyprod-1 step, gain 3 Plant, and place a city tile.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag promo reqs",
+    "@data-power": "2",
+    "annotation": "(Requires 2 power tags. Raise your TR 4 steps.)",
+    "div": [
+      {
+        "#text": "Magnetic Shield",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "26",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X20",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "Power Power",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "(Requires 2 power tags. Raise your TR 4 steps.)",
+            "@class": "description"
+          }
+        ],
+        "span": {
+          "#text": "4",
+          "@style": "font-size:20px;"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag promo ",
+    "annotation": "(Action: Spend 5 heat to gain 3 steel.)",
+    "div": [
+      {
+        "#text": "Meltworks",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X21",
+        "@class": "number"
+      },
+      {
+        "#text": "5",
+        "@class": "content",
+        "div": [
+          {
+            "@class": "resource heat"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "#text": "(Action: Spend 5 heat to gain 3 steel.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag promo ",
+    "annotation": "(Action: Add a microbe or animal to ANOTHER card.)",
+    "div": [
+      {
+        "#text": "Mohole Lake",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "31",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X22",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "* OR",
+          "*"
+        ],
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "#text": "(Action: Add a microbe or animal to ANOTHER card.)",
+            "@class": "description"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile ocean-tile"
+          },
+          {
+            "#text": "(Effect: Gain 3 plant. Raise temperature 1 step, and place 1 ocean tile.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event promo eventTag reqs",
+    "annotation": "(Requires that you have 9 different types of resources. Gain 1 TR.)",
+    "div": [
+      {
+        "#text": "Diversity Support",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "1",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "#text": "#X23",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "9 different resources",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "(Requires that you have 9 different types of resources. Gain 1 TR.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated jovianTag buildingTag promo ",
+    "annotation": "(Raise your TR 1 step.)",
+    "div": [
+      {
+        "#text": "Jovian Embassy",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "#text": "#X24",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "(Raise your TR 1 step.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active microbeTag earthTag promo ",
+    "annotation": "(Effect: When you gain a microbe to ANY CARD, also gain 1MC.)",
+    "div": [
+      {
+        "#text": "Topsoil Contract",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X25",
+        "@class": "number"
+      },
+      {
+        "#text": "* :",
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "#text": "(Effect: When you gain a microbe to ANY CARD, also gain 1MegaCredit.)",
+            "@class": "description"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "#text": "(Gain 3 Plant.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event promo eventTag spacetag earthTag ",
+    "annotation": "(Gain 4 plants and add 4 microbes to ANOTHER CARD.)",
+    "div": [
+      {
+        "#text": "Imported Nutrients",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "@class": "tag tag2 tag-space"
+      },
+      {
+        "@class": "tag tag3 tag-earth"
+      },
+      {
+        "#text": "#X26",
+        "@class": "number"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": [
+          "4",
+          "4",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "resource plant",
+            "@style": "margin-right: 20px;"
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "#text": "(Gain 4 Plant and add 4 microbes to ANOTHER CARD.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag spaceTag earthTag promo ",
+    "annotation": "(Action: REVEAL AND DISCARD the top card of the deck. If it has a space tag, add an asteroid here.)",
+    "div": [
+      {
+        "#text": "Asteroid Deflection System",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-space"
+      },
+      {
+        "@class": "tag tag3 tag-earth"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X27",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "*",
+          ":"
+        ],
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points points-big",
+            "div": {
+              "@class": "resource asteroid",
+              "@style": "vertical-align: middle;"
+            }
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource-tag tag-space",
+            "@style": "margin-left:20px;margin-right:5px;"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "#text": "(Action: REVEAL AND DISCARD the top card of the deck. If it has a space tag, add an asteroid here.)",
+            "@class": "description"
+          },
+          {
+            "#text": "OPPONENTS MAY NOT REMOVE YOUR Plant",
+            "@style": "font-weight:normal;line-height: 15px;margin-bottom: 5px;"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "@style": "position: absolute;margin-left:-110px;",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "production energy"
+              }
+            ]
+          },
+          {
+            "#text": "(dec-energyprod-1 step. 1VP per asteroid on this card.)",
+            "@class": "description",
+            "@style": "margin-left: 80px;text-align: left;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag scienceTag earthTag promo reqs",
+    "@data-science": "2",
+    "annotation": "(Action: Draw a card.)",
+    "div": [
+      {
+        "#text": "Sub-Crust Measurements",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "@class": "tag tag3 tag-earth"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X28",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Science Science",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "#text": "(Action: Draw a card.)",
+            "@class": "description"
+          },
+          {
+            "#text": "(Requires 2 science tags.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag promo",
+    "annotation": "(Lose 2 plants. Increase your MC production 2 steps)",
+    "div": [
+      {
+        "#text": "Potatoes",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "2",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X29",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "2",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": "(Lose 2 Plant. inc-MegaCreditprod-2 steps)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag promo",
+    "annotation": "(Effect: When you gain an animal to ANY CARD, gain 2MC.)",
+    "div": [
+      {
+        "#text": "Meat Industries",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X30",
+        "@class": "number"
+      },
+      {
+        "#text": "* :",
+        "@class": "content",
+        "div": [
+          {
+            "@class": "resource animal"
+          },
+          {
+            "#text": "2",
+            "@class": "resource money"
+          },
+          {
+            "#text": "(Effect: When you gain an animal to ANY CARD, gain 2MegaCredit.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag promo",
+    "annotation": "(Decrease your Energy production 4 steps and increase your Plant production 2 steps. Raise your TR 3 steps.)",
+    "div": [
+      {
+        "#text": "Magnetic Field Generators",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "22",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#X31",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "4",
+            "@class": "production-boxprod-box-size2a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "#text": "\ud83d\udce1\ufe0e",
+            "@class": "tile special-tile",
+            "@style": "font-size: 24px;margin-left: 16px;"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "(dec-Energyprod-4 steps and inc-Plantprod-2 steps. Raise your TR 3 steps. Place this tile.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag promo",
+    "annotation": "(Raise temperature 3 steps and gain 4 steel. Remove up to 8 Plants from any player.)",
+    "div": [
+      {
+        "#text": "Deimos Down",
+        "@class": "title background-color-event"
+      },
+      {
+        "#text": "31",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "@class": "tag tag2 tag-space"
+      },
+      {
+        "#text": "#X32",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "*",
+          "6"
+        ],
+        "@class": "content",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "#text": "\u2737",
+            "@class": "tile special-tile",
+            "@style": "font-size:28px;"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "#text": "(Raise temperature 3 steps and gain 4 steel.\r\n                Place this tile ADJACENT TO no other city tile.\r\n                Remove up to 6 Plant from any player.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag promo reqs",
+    "@data-Ocean": "4",
+    "annotation": "(Requires 4 ocean tiles. Increase your Energy production 2 steps.)",
+    "div": [
+      {
+        "#text": "Great Dam",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#X33",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "4 Ocean",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "\ud83c\udf0a\ufe0e",
+            "@class": "tile special-tile",
+            "@style": "font-size:18px;"
+          },
+          {
+            "#text": "(Requires 4 oceanTiles. inc-Energyprod-2 steps. Place this tile ADJECENT TO an ocean tile.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag earthTag promo",
+    "annotation": "(Action: Spend 1 MC to add 1 asteroid to ANY card, OR spend 1 asteroid here to raise your MC production 1 step or gain 2 titanium.)",
+    "div": [
+      {
+        "#text": "Asteroid Rights",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X34",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "*",
+          "OR"
+        ],
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "resource asteroid",
+            "@style": "margin-left: 0px;"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "production money"
+            }
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "#text": "(Action: Spend 1 MegaCredit to add 1 asteroid to ANY card, OR spend 1 asteroid here to raise your MegaCreditprod-1 step or gain 2 titanium.)",
+            "@class": "description"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "#text": "(Gain 2 asteroids to this card.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag promo",
+    "annotation": "(Action: Spend 2 energy to gain 2 plants OR to add 1 animal to ANOTHER card.)",
+    "div": [
+      {
+        "#text": "Bio Printing Facility",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#X36",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "resource energy"
+          },
+          {
+            "@class": "resource energy"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "#text": "(Action: Spend 2 energy to gain 2 Plant OR to add 1 animal to ANOTHER card.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag promo ",
+    "annotation": "(Increase temperature 1 step. Remove up to 2 plants from any player.)",
+    "div": [
+      {
+        "#text": "Small Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#209",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "#text": "(Increase temperature 1 step. Remove up to 2 Plant from any player.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active promo reqs noneTag",
+    "@data-science": "2",
+    "annotation": "(Action: Reveal and place a SPACE OR BUILDING card here from hand, and place 2 resources on it, OR double the resources on a card here. Effect: Cards here may be played as if from hand with its cost reduced by the number of resources on it. Requires 2 Science tags.)",
+    "div": [
+      {
+        "#text": "Self-replicating robots",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#210",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "OR",
+          "x2"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2 Science",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left: -6px;"
+          },
+          {
+            "@class": "resource card",
+            "div": [
+              {
+                "#text": "2",
+                "@class": "production",
+                "@style": "    position: absolute;\r\n                background: white;\r\n                color: black;\r\n                margin-left: -12px;\r\n                width: 24px;\r\n                height: 20px;\r\n                line-height: 20px;\r\n                margin-top: 16px;\r\n                border-radius: 5px;"
+              },
+              {
+                "@class": "card-icon tag-space"
+              },
+              {
+                "@class": "card-icon tag-building",
+                "@style": "margin-left:37px"
+              }
+            ]
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "#text": "X",
+            "@class": "production",
+            "@style": "background: white;\r\n                color: black;\r\n                vertical-align: middle;\r\n                border-radius: 7px;\r\n                width: 36px;\r\n                "
+          },
+          {
+            "#text": [
+              "(Action: Reveal and place a SPACE OR BUILDING card here from hand, and place 2 resources on it, OR double the resources on a card here.)",
+              "(Effect: Cards here may be played as if from hand with its cost reduced by the number of resources on it.)",
+              "(Requires 2 Science tags.)"
+            ],
+            "@class": "description",
+            "br": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag promo reqs",
+    "@data-Ocean": "2",
+    "annotation": "(Requires 2 oceans. Increase your Plant production and your heat production 1 step each.)",
+    "div": [
+      {
+        "#text": "Snow Algae",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#211",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "2 Ocean",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "(Requires 2 Ocean. inc-Plantprod-and your heatprod-1 step each.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag promo reqs",
+    "@data-Ocean": "8",
+    "annotation": "(Action: Add 1 animal to this card.)",
+    "div": [
+      {
+        "#text": "Penguins",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal "
+      },
+      {
+        "@class": "promo-icon project-icon"
+      },
+      {
+        "#text": "#212",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points ",
+            "div": {
+              "@class": "animal resource "
+            }
+          },
+          {
+            "#text": "8 Ocean",
+            "@class": "requirements "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "animal resource "
+          },
+          {
+            "#text": "(Action: Add 1 animal to this card.)",
+            "@class": "description "
+          },
+          {
+            "#text": "(Requires 8 Ocean. 1 VP for each animal on this card.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  }
+]

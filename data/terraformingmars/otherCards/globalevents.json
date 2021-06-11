@@ -1,0 +1,1867 @@
+[
+    {
+      "@id": "#GE02",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-three background-color-global",
+            "#text": "Improved Energy Template"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-kelvinists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production energy"
+              }
+            },
+            {
+              "@class": "resource-tag tag-power"
+            },
+            {
+              "@class": "resource-tag tag-power"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase energy production 1 step per 2 power tags (no limit). Influence counts as power tags.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE03",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "#text": "Scientific Communities"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-reds"
+        },
+        {
+          "@class": "party party-bottom party-scientists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "1"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 1 MC for each card in hand (no limit) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE04",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Eco",
+              "Sabotage"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-greens"
+        },
+        {
+          "@class": "party party-bottom party-reds"
+        },
+        {
+          "@class": "content",
+          "span": {
+            "@style": "font-size: 22px;",
+            "#text": "max 3"
+          },
+          "div": [
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose all plants except 3 + influence.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@id": "#GE05",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Productivity"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-mars-first"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production steel"
+              }
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 1 steel for each steel production (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE06",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Red",
+              "Influence"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-reds"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "@style": "margin-left:-2px",
+              "#text": "-3"
+            },
+            {
+              "@class": "tile rating",
+              "@style": "line-height: 39px;\r\nfont-size: 30px;\r\ncolor: #eee;\r\ntext-shadow: 0 0 5px black;",
+              "#text": "5"
+            },
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production money",
+                "#text": "1"
+              }
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@style": "    margin-left: -61px;\r\nfont-size: 14px;\r\nmargin-top: -14px;\r\nmargin-bottom: 5px;",
+              "#text": "OVER 10"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 3 MC for each set of 5TR over 10 (max 5 sets.). Increase MC production 1 step per influence.)"
+            }
+          ],
+          "#text": [
+            "/",
+            "/"
+          ]
+        }
+      ]
+    },
+    {
+      "@id": "#GE07",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Generous",
+              "Funding"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "@style": "margin-bottom: 5px;",
+              "#text": "2"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "plus"
+            },
+            {
+              "@class": "tile rating",
+              "@style": "line-height: 39px;\r\nfont-size: 30px;\r\ncolor: #eee;\r\ntext-shadow: 0 0 5px black;",
+              "#text": "5"
+            },
+            {
+              "@style": "margin-left: 110px;\r\nfont-size: 14px;\r\nmargin-top: -12px;\r\nmargin-bottom: 5px;",
+              "#text": "OVER 15"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC for each influence and each complete set of 5 TR over 15 (max 5 sets).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE08",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Miners on",
+              "Strike"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "minus"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource-tag tag-jovian"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 1 titanium for each Jovian tag (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE07",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Asteroid",
+              "Mining"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-reds"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource-tag tag-jovian"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 1 titanium for each Jovian tag (max 5) and influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE10",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "#text": "Strong Society"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-reds"
+        },
+        {
+          "@class": "party party-bottom party-mars-first"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "tile city-tile"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC for each city tile (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE11",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Diversity"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-scientists"
+        },
+        {
+          "@class": "content",
+          "span": {
+            "@style": "font-size: 22px;",
+            "#text": "9"
+          },
+          "div": [
+            {
+              "@class": "resource-tag",
+              "@style": "background:linear-gradient(to bottom right, green, yellow, red)"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "resource money",
+              "#text": "10"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 10 MC if you have 9 or more different tags. Influence counts as unique tags.)"
+            }
+          ],
+          "#text": ":"
+        }
+      ]
+    },
+    {
+      "@id": "#GE12",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "@style": "font-size: 12px;\r\nline-height: 17px;",
+            "#text": "Interplanetary Trade"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-unity"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "resource-tag tag-space"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC for each space tag (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE13",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Sabotage"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-unity"
+        },
+        {
+          "@class": "party party-bottom party-reds"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2a",
+              "div": [
+                {
+                  "@class": "minus"
+                },
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production steel"
+                }
+              ]
+            },
+            {
+              "@class": "resource steel",
+              "@style": "margin-left: 15px;"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(Decrease steel and energy production 1 step each. Gain 1 steel per influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE14",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Snow",
+              "Cover"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-kelvinists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "minus"
+            },
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "resource card",
+              "@style": "margin-left: 15px;"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(Decrease temperature 2 steps. Draw 1 card per influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE15",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Mud",
+              "Slides"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "-4"
+            },
+            {
+              "@class": "tile ocean-tile"
+            },
+            {
+              "@class": "tile",
+              "@style": "margin-left:-5px"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 4 MC for each tile adjacent to ocean (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE16",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Dry",
+              "Deserts"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-reds"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "minus"
+            },
+            {
+              "@class": "tile ocean-tile"
+            },
+            {
+              "@class": "resource wild",
+              "@style": "margin-left:20px"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(First player removes 1 ocean tile from the gameboard. Gain 1 standard resource per influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE17",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Homeworld",
+              "Support"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-reds"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "resource-tag tag-earth"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC for each Earth tag (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE18",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Solar",
+              "Flare"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-unity"
+        },
+        {
+          "@class": "party party-bottom party-kelvinists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "-3"
+            },
+            {
+              "@class": "resource-tag tag-space"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 3 MC for each Space tag (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE19",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Spin-off",
+              "Products"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-greens"
+        },
+        {
+          "@class": "party party-bottom party-scientists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "resource-tag tag-science"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC for each Science tag (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE20",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "War on",
+              "Earth"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-kelvinists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "minus"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Reduce TR 4 steps. Eech influence prevents 1 step.)"
+            }
+          ],
+          "span": {
+            "@style": "font-size:22px;",
+            "#text": "4"
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#GE21",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Global",
+              "Dust Storm"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource heat",
+              "@style": "font-family: Arial, Helvetica, sans-serif;font-size: 40px;",
+              "#text": "X"
+            },
+            {
+              "@class": "resource money",
+              "@style": "margin-left: 20px;",
+              "#text": "-2"
+            },
+            {
+              "@class": "resource-tag tag-building"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose all heat. Lose 2 MC for each building tag (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE22",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Sponsored",
+              "Projects"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource card-face",
+              "#text": "RES"
+            },
+            {
+              "@class": "plus"
+            },
+            {
+              "@class": "resource wild"
+            },
+            {
+              "@class": "resource card",
+              "@style": "margin-left: 20px;"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(All cards with resources on them gain 1 resource. Draw 1 card for each influence.)"
+            }
+          ],
+          "#text": [
+            ":",
+            "/"
+          ]
+        }
+      ]
+    },
+    {
+      "@id": "#GE23",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Pandemic"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-greens"
+        },
+        {
+          "@class": "party party-bottom party-mars-first"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "-3"
+            },
+            {
+              "@class": "resource-tag tag-building"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 3 MC for each building tag (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE24",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Successful",
+              "Organisms"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-scientists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production plant"
+              }
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 1 plant for each plant production (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE25",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Paradigm",
+              "Breakdown"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-reds"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "minus"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource money",
+              "@style": "margin-left: 20px;",
+              "#text": "2"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(Discard 2 cards from hand. Gain 2 MC per influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE26",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Revolution"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-unity"
+        },
+        {
+          "@class": "party party-bottom party-mars-first"
+        },
+        {
+          "@class": "content",
+          "@style": "margin-top:-15px",
+          "div": [
+            {
+              "@class": "resource-tag tag-earth"
+            },
+            {
+              "@class": "plus"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "minus"
+            },
+            {
+              "@style": "position:absolute;margin-top:-25px;margin-left: -3px;",
+              "#text": "1st"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "tile rating",
+              "@style": "margin-left:-5px;margin-right: 20px;"
+            },
+            {
+              "@class": "minus"
+            },
+            {
+              "@style": "position:absolute;margin-top:-25px;margin-left: 134px;",
+              "#text": "2nd"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "description",
+              "br": [
+                "",
+                ""
+              ],
+              "#text": [
+                "(Count Earth tags and ADD influence.",
+                "The player(s) with most (at least 1) loses 2 TR, and 2nd most (at least 1) loses 1 TR.",
+                "SOLO: Lose 2 TR if the sum is 4 or more.)"
+              ]
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#GE27",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "#text": "Solarnet Shutdown"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-mars-first"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "@style": "margin-left:-3px;",
+              "#text": "-3"
+            },
+            {
+              "@class": "resource card-face"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 3 MC for each blue card (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE28",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Volcanic",
+              "Eruptions"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-kelvinists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "production-box",
+              "@style": "margin-left: 15px;",
+              "div": {
+                "@class": "production heat"
+              }
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase temperature 2 steps. Increase heat production 1 step per influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE29",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "br": "",
+            "#text": [
+              "Celebrity",
+              "Leaders"
+            ]
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-unity"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "resource-tag tag-event"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC for each event played (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE30",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Riots"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-reds"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "-4"
+            },
+            {
+              "@class": "tile city-tile"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 4 MC for each city tile (max 5, then reduced by influence).)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE31",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-three background-color-global",
+            "#text": "Aquifer Released by Public Council"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile ocean-tile",
+              "@style": "margin-right: 25px;"
+            },
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(First player places an ocean tile. Gain 1 plant and 1 steel per influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE01",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-one background-color-global",
+            "#text": "Election"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "party party-top party-greens"
+        },
+        {
+          "@class": "party party-bottom party-mars-first"
+        },
+        {
+          "@class": "content",
+          "@style": "margin-top:-15px",
+          "div": [
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "plus"
+            },
+            {
+              "@class": "resource-tag tag-building"
+            },
+            {
+              "@class": "plus"
+            },
+            {
+              "@class": "tile city-tile"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "tile rating",
+              "@style": "margin-left:-5px"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "description",
+              "br": "",
+              "#text": [
+                "(Count your influence plus building tags and city tiles (no limits).\r\nThe player with most (or 10 in solo) gains 2 TR, the 2nd (or counting 5 in solo)\r\ngains 1 TR.)",
+                "(ties are friendly)"
+              ]
+            }
+          ],
+          "br": "",
+          "#text": [
+            "1st",
+            "2nd"
+          ]
+        }
+      ]
+    },
+    {
+      "@id": "#GE32",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "@style": "font-size: 12px;\r\nline-height: 17px;",
+            "#text": "Venus Infrastructure"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "venus-icon",
+          "@style": "position: absolute;margin-top: 135px;margin-left: 9px;"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "resource-tag tag-venus"
+            },
+            {
+              "@class": "influence-top"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 2 MC per Venus Tag (max 5) and influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE33",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil colonies",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "#text": "Jovian Tax Rights"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "colonies-icon",
+          "@style": "position: absolute;margin-top: 135px;margin-left: 9px;"
+        },
+        {
+          "@class": "promo-icon",
+          "@style": "position: absolute;margin-top: 111px;margin-left: 9px;"
+        },
+        {
+          "@class": "party party-top party-scientists"
+        },
+        {
+          "@class": "party party-bottom party-unity"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production money",
+                "#text": "1"
+              }
+            },
+            {
+              "@class": "tile colony",
+              "@style": "margin-right: 20px;margin-left: -10px;"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase MC production 1 step for each colony. Gain 1 titanium for each influence.)"
+            }
+          ],
+          "#text": [
+            "/",
+            "/"
+          ]
+        }
+      ]
+    },
+    {
+      "@id": "#GE34",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil colonies venusNext",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-three background-color-global",
+            "#text": "Microgravity Health Problems"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "colonies-icon",
+          "@style": "position: absolute;margin-top: 135px;margin-left: 9px;"
+        },
+        {
+          "@class": "promo-icon",
+          "@style": "position: absolute;margin-top: 111px;margin-left: 9px;"
+        },
+        {
+          "@class": "party party-top party-mars-first"
+        },
+        {
+          "@class": "party party-bottom party-scientists"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "-3"
+            },
+            {
+              "@class": "tile colony"
+            },
+            {
+              "@class": "influence-top",
+              "@style": "margin-left: -15px;"
+            },
+            {
+              "@class": "description",
+              "#text": "(Lose 3 MC for each colony (max 5), then reduced by influence.)"
+            }
+          ],
+          "#text": "/"
+        }
+      ]
+    },
+    {
+      "@id": "#GE35",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil colonies venusNext promo",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "#text": "Cloud Societies"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "venus-icon",
+          "@style": "position: absolute;margin-top: 135px;margin-left: 9px;"
+        },
+        {
+          "@class": "colonies-icon",
+          "@style": "position: absolute;margin-top: 111px;margin-left: 9px;"
+        },
+        {
+          "@class": "promo-icon",
+          "@style": "position: absolute;margin-top: 87px;margin-left: 9px;"
+        },
+        {
+          "@class": "party party-top party-unity"
+        },
+        {
+          "@class": "party party-bottom party-reds"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource card-face",
+              "div": {
+                "@class": "card-icon floater",
+                "@style": "border-radius: 0;"
+              }
+            },
+            {
+              "@class": "resource floater"
+            },
+            {
+              "@class": "resource floater",
+              "@style": "margin-left: 20px;"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "br": [
+                "",
+                "",
+                ""
+              ],
+              "#text": [
+                "(Add a floater to each card",
+                "that can collect floaters.",
+                "Add 1 floater for each",
+                "influence to a card.)"
+              ]
+            }
+          ],
+          "#text": [
+            ":",
+            "/"
+          ]
+        }
+      ]
+    },
+    {
+      "@id": "#GE36",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv global-card turmoil venusNext colonies promo",
+      "div": [
+        {
+          "@class": "title-global",
+          "div": {
+            "@class": "title-global-sub-section-two background-color-global",
+            "#text": "Corrosive Rain"
+          }
+        },
+        {
+          "@class": "turmoil-icon global-icon"
+        },
+        {
+          "@class": "venus-icon",
+          "@style": "position: absolute;margin-top: 135px;margin-left: 9px;"
+        },
+        {
+          "@class": "colonies-icon",
+          "@style": "position: absolute;margin-top: 111px;margin-left: 9px;"
+        },
+        {
+          "@class": "promo-icon",
+          "@style": "position: absolute;margin-top: 87px;margin-left: 9px;"
+        },
+        {
+          "@class": "party party-top party-kelvinists"
+        },
+        {
+          "@class": "party party-bottom party-greens"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "minus"
+            },
+            {
+              "@class": "resource floater"
+            },
+            {
+              "@class": "resource floater"
+            },
+            {
+              "@class": "resource money",
+              "#text": "-10"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "influence"
+            },
+            {
+              "@class": "description",
+              "br": [
+                "",
+                ""
+              ],
+              "#text": [
+                "(Lose 2 floaters from a card,",
+                "or lose 10MC.",
+                "Draw 1 card for each influence.)"
+              ]
+            }
+          ],
+          "br": "",
+          "#text": [
+            "OR",
+            "/"
+          ]
+        }
+      ]
+    }
+  ]

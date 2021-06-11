@@ -1,0 +1,13 @@
+{
+  "board": [["0", "0", "Ocean", "Ocean:Titanium", "Ocean:Card", "Ocean:Steel", "Ground:Card", "0", "0"],
+            ["0", "Volcanic:Titanium", "Ground", "Ground", "Ocean", "Ocean", "Ground:Steel:Steel", "0", "0"],
+            ["0", "Volcanic:Titanium:Titanium", "Ground", "Ground:Card", "Ground", "Ocean:Plant", "Ocean", "Volcanic:Card:Card:Card", "0"],
+            ["Ground:Plant", "Ground:Plant", "Ground:Plant", "Ocean:Plant:Plant", "Ground:Plant", "Ocean:Plant", "Ocean:Plant", "Ground:Steel:Plant", "0"],
+            ["Ground:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant", "Ocean:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant", "Volcanic:Plant:Titanium"],
+            ["Ground:Steel", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ground", "0"],
+            ["0", "Ground:Titanium", "Ground:Steel", "Ground", "Ground", "Ground:Steel", "Ground", "Ground", "0"],
+            ["0", "Ground:Steel:Steel", "Ground", "Ground", "Ground", "Ground:Steel:Steel", "Ground", "0", "0"],
+            ["0", "0", "Ground:Steel", "Ground", "Ground:Card", "Ground:Card", "Ground:Steel:Steel", "0", "0"]],
+  "milestones": ["generalist:6-prod:1", "specialist:1-prod:10", "ecologist:animal-plant-microbe:4", "tycoon:automated-active:15", "legend:event:5"],
+  "awards": ["celebrity:card-20", "industrialist:steel-energy", "desert-settler:bottom-4", "estate-dealer:adjacent-ocean", "benefactor:TR"]
+}

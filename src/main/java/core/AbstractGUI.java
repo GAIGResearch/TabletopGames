@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import gui.ScreenHighlight;
 import gui.WindowInput;
 import players.human.ActionController;
 import utilities.Utils;
@@ -8,9 +9,7 @@ import utilities.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -66,8 +65,9 @@ public abstract class AbstractGUI extends JFrame {
      * Updates all GUI elements. Must be implemented by subclass.
      * @param player - current player acting.
      * @param gameState - current game state to be used in updating visuals.
+     * @param actionTaken - true if an action was taken and game state updated, false otherwise
      */
-    protected abstract void _update(AbstractPlayer player, AbstractGameState gameState);
+    protected abstract void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken);
 
     /**
      * Updates which action buttons should be visible to the players, and which should not.
@@ -95,12 +95,13 @@ public abstract class AbstractGUI extends JFrame {
      *                   highlights maintained by the GUI. Can be null if not used.
      * @param width - width of this panel.
      * @param height - height of this panel.
+     * @param opaque - true by default. if false, all panels created are not opaque (transparent).
      * @return - JComponent containing all action buttons.
      */
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
-        return createActionPanel(highlights, width, height, true);
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean opaque) {
+        return createActionPanel(highlights, width, height, true, opaque);
     }
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
             actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
@@ -122,6 +123,11 @@ public abstract class AbstractGUI extends JFrame {
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }
+
+        actionPanel.setOpaque(opaque);
+        pane.setOpaque(opaque);
+        pane.getViewport().setOpaque(opaque);
+
         return pane;
     }
 
@@ -152,11 +158,15 @@ public abstract class AbstractGUI extends JFrame {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
-        historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        createActionHistoryPanel(width/2 - 10, height);
         wrapper.add(historyContainer);
         return wrapper;
+    }
+
+    protected void createActionHistoryPanel(int width, int height) {
+        historyInfo.setPreferredSize(new Dimension(width, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setPreferredSize(new Dimension(width - 15, height));
     }
 
     /**
@@ -192,10 +202,10 @@ public abstract class AbstractGUI extends JFrame {
      * @param player - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState){
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken){
         updateGameStateInfo(gameState);
 //        resetActionButtons();
-        _update(player, gameState);
+        _update(player, gameState, actionTaken);
     }
 
     protected void resetActionButtons() {
@@ -224,12 +234,12 @@ public abstract class AbstractGUI extends JFrame {
         AbstractAction action;
         ActionButton[] actionButtons;
 
-        public ActionButton(ActionController ac, Collection[] highlights) {
+        public ActionButton(ActionController ac, ScreenHighlight[] highlights) {
             addActionListener(e -> {
                 ac.addAction(action);
                 if (highlights != null) {
-                    for (Collection c : highlights) {
-                        c.clear();
+                    for (ScreenHighlight c : highlights) {
+                        c.clearHighlights();
                     }
                 }
                 resetActionButtons();
@@ -260,10 +270,5 @@ public abstract class AbstractGUI extends JFrame {
                 actionButton.setButtonAction(null, "");
             }
         }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
     }
 }

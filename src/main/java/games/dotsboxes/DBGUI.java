@@ -3,6 +3,7 @@ package games.dotsboxes;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import gui.ScreenHighlight;
 import core.actions.AbstractAction;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -122,7 +123,7 @@ public class DBGUI extends AbstractGUI {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             view.updateGameState(((DBGameState)gameState));
             if (player instanceof HumanGUIPlayer) {
@@ -136,7 +137,6 @@ public class DBGUI extends AbstractGUI {
     public Dimension getPreferredSize() {
         return new Dimension(Math.max(width,view.getPreferredSize().width), view.getPreferredSize().height + defaultInfoPanelHeight);
     }
-
 
     public static class ScaledImage extends JPanel {
         Image img;

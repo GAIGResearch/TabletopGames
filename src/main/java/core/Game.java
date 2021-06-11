@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.*;
+import static games.GameType.TerraformingMars;
 
 public class Game {
 
@@ -54,6 +54,8 @@ public class Game {
 
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     private int gameID;
+
+    public boolean paused;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -189,113 +191,118 @@ public class Game {
                 break;
             }
 
-            // Get player to ask for actions next
-            boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
-                    && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
-            int activePlayer = gameState.getCurrentPlayer();
-
-            // Check if this is the same player as last, count number of actions per turn
-            if (!reacting) {
-                if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
-                    nActionsPerTurn++;
-                } else {
-                    nActionsPerTurnSum += nActionsPerTurn;
-                    nActionsPerTurn = 1;
-                    nActionsPerTurnCount++;
-                }
-            }
-
-            // This is the next player to be asked for a decision
-            currentPlayer = players.get(activePlayer);
-
-            // Get player observation, and time how long it takes
-            double s = System.nanoTime();
-            AbstractGameState observation = gameState.copy(activePlayer);
-            copyTime += (System.nanoTime() - s);
-
-            // Get actions for the player
-            s = System.nanoTime();
-            List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-            actionComputeTime += (System.nanoTime() - s);
-            actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-
             // GUI update
-            updateGUI(gui);
+            updateGUI(gui, true);
 
-            if (gameState.isNotTerminal()) {
-                if (VERBOSE) {
-                    System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-                }
+            if (!paused) {
 
-                if (observation instanceof IPrintable && VERBOSE) {
-                    ((IPrintable) observation).printToConsole();
-                }
+                // Get player to ask for actions next
+                boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
+                int activePlayer = gameState.getCurrentPlayer();
 
-                // Start the timer for this decision
-                gameState.playerTimer[activePlayer].resume();
-
-                // Either ask player which action to use or, in case no actions are available, report the updated observation
-                AbstractAction action = null;
-                if (observedActions.size() > 0) {
-                    if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
-                        // Can only do 1 action, so do it.
-                        action = observedActions.get(0);
-                        currentPlayer.registerUpdatedObservation(observation);
+                // Check if this is the same player as last, count number of actions per turn
+                if (!reacting) {
+                    if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
+                        nActionsPerTurn++;
                     } else {
-                        if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
-                            while (action == null && gui.isWindowOpen()) {
-                                action = currentPlayer.getAction(observation, observedActions);
-                                updateGUI(gui);
-                            }
+                        nActionsPerTurnSum += nActionsPerTurn;
+                        nActionsPerTurn = 1;
+                        nActionsPerTurnCount++;
+                    }
+                }
+
+                // This is the next player to be asked for a decision
+                currentPlayer = players.get(activePlayer);
+
+                // Get player observation, and time how long it takes
+                double s = System.nanoTime();
+                AbstractGameState observation = gameState.copy(activePlayer);
+                copyTime += (System.nanoTime() - s);
+
+                // Get actions for the player
+                s = System.nanoTime();
+                List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+                actionComputeTime += (System.nanoTime() - s);
+                actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
+
+                if (gameState.isNotTerminal()) {
+                    if (VERBOSE) {
+                        System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+                    }
+
+                    // Start the timer for this decision
+                    gameState.playerTimer[activePlayer].resume();
+
+                    // Either ask player which action to use or, in case no actions are available, report the updated observation
+                    AbstractAction action = null;
+                    if (observedActions.size() > 0) {
+                        if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
+                            // Can only do 1 action, so do it.
+                            action = observedActions.get(0);
+                            currentPlayer.registerUpdatedObservation(observation);
                         } else {
-                            // Get action from player, and time it
-                            s = System.nanoTime();
-                            action = currentPlayer.getAction(observation, observedActions);
-                            agentTime += (System.nanoTime() - s);
-                            nDecisions++;
+                            if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                                updateGUI(gui, true);
+                                while (action == null && gui.isWindowOpen()) {
+                                    action = currentPlayer.getAction(observation, observedActions);
+                                    agentTime += (System.nanoTime() - s);
+                                    nDecisions++;
+                                    updateGUI(gui, action != null);
+                                }
+                            } else {
+                                action = currentPlayer.getAction(observation, observedActions);
+                            }
+                        }
+                        if (COMPETITION_MODE && !observedActions.contains(action)) {
+                            System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                            action = null;
+                        }
+                        AbstractAction finalAction = action;
+                        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+                    } else {
+                        currentPlayer.registerUpdatedObservation(observation);
+                    }
+
+                    // End the timer for this decision
+                    gameState.playerTimer[activePlayer].pause();
+                    gameState.playerTimer[activePlayer].incrementAction();
+
+                    if (VERBOSE) {
+                        if (action != null) {
+                            System.out.println(action);
+                        } else {
+                            currentPlayer.registerUpdatedObservation(observation);
                         }
                     }
-                    if (COMPETITION_MODE && !observedActions.contains(action)) {
-                        System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
-                        action = null;
-                    }
-                    AbstractAction finalAction = action;
-                    listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
-                } else {
-                    currentPlayer.registerUpdatedObservation(observation);
-                }
 
-                // End the timer for this decision
-                gameState.playerTimer[activePlayer].pause();
-                gameState.playerTimer[activePlayer].incrementAction();
-
-                if (VERBOSE) {
-                    if (action != null) {
-                        System.out.println(action.toString());
+                    // Check player timeout
+                    if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                        forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
                     } else {
-                        System.out.println("NULL action (player " + activePlayer + ")");
+                        if (VERBOSE) {
+                            if (action != null) {
+                                System.out.println(action);
+                            } else {
+                                System.out.println("NULL action (player " + activePlayer + ")");
+                            }
+                        }
+                        // Resolve action and game rules, time it
+                        s = System.nanoTime();
+                        forwardModel.next(gameState, action);
+                        nextTime += (System.nanoTime() - s);
                     }
-                }
-
-                // Check player timeout
-                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-                    forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
                 } else {
-                    // Resolve action and game rules, time it
-                    s = System.nanoTime();
-                    forwardModel.next(gameState, action);
-                    nextTime += (System.nanoTime() - s);
-                }
-            } else {
-                if (firstEnd) {
-                    if (VERBOSE) {
-                        System.out.println("Ended");
+                    if (firstEnd) {
+                        if (VERBOSE) {
+                            System.out.println("Ended");
+                        }
+                        terminate();
+                        firstEnd = false;
                     }
-                    terminate();
-                    firstEnd = false;
                 }
+                tick++;
             }
-            tick++;
         }
 
         if (gui == null) {
@@ -316,9 +323,9 @@ public class Game {
      *
      * @param gui - gui to update.
      */
-    private void updateGUI(AbstractGUI gui) {
+    private void updateGUI(AbstractGUI gui, boolean actionTaken) {
         if (gui != null) {
-            gui.update(currentPlayer, gameState);
+            gui.update(currentPlayer, gameState.copy(), actionTaken);
             try {
                 Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {
@@ -490,6 +497,13 @@ public class Game {
         return gameType.toString();
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void flipPaused() {
+        this.paused = !this.paused;
+    }
 
     /**
      * Runs one game.
@@ -704,8 +718,6 @@ public class Game {
         MCTSParams params1 = new MCTSParams();
 
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
@@ -713,7 +725,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(ColtExpress, players, seed, ac, false, null);
+        runOne(TerraformingMars, players, seed, ac, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);

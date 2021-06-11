@@ -41,6 +41,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         this(id, -1, new boolean[nPlayers]);
     }
 
+    public PartialObservableDeck(String id, int ownerID, VisibilityMode visibilityMode) {
+        super(id, ownerID, visibilityMode);
+    }
+
     public PartialObservableDeck(String id, int ownerID, int nPlayers) {
         this(id, ownerID, new boolean[nPlayers]);
     }

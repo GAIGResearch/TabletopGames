@@ -1,0 +1,885 @@
+[
+  {
+    "@class": "filterDiv automated turmoil reqs noneTag",
+    "annotation": "(Requires that Kelvinists are ruling or that you have 2 delegates there. Remove up to 2 plants from any player. Increase your heat production 2 steps.)",
+    "div": [
+      {
+        "#text": "Aerial Lenses",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "2",
+        "@class": "price"
+      },
+      {
+        "#text": "#T01",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "-1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-kelvinists"
+            }
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "(Requires that Kelvinists are ruling or that you have 2 delegates there. Remove up to 2 Plant from any player. inc-heatprod-2 steps.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag turmoil reqs",
+    "annotation": "(Requires that you are Chairman. Remove any NON-LEADER delegate.)",
+    "div": [
+      {
+        "#text": "Banned Delegate",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "0",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#T02",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "requirements",
+            "@style": "margin-bottom: 20px;",
+            "div": {
+              "@class": "chairman",
+              "@style": "margin-top: -6px;"
+            }
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "delegate red-outline"
+          },
+          {
+            "#text": "(Requires that you are Chairman. Remove any NON-LEADER delegate.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag turmoil reqs",
+    "annotation": "(Requires that Unity is ruling or that you have 2 delegates there. Decrease your energy production 1 step and increase your MC production 3 steps. Place a city tile. Place 2 delegates in 1 party.)",
+    "div": [
+      {
+        "#text": "Cultural Metropolis",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#T03",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-unity"
+            }
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "3",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:10px "
+          },
+          {
+            "@class": "delegate"
+          },
+          {
+            "@class": "delegate",
+            "@style": "margin-left:5px"
+          },
+          {
+            "#text": "(Requires that Unity is ruling or that you have 2 delegates there. dec-energyprod-1 step and inc-MegaCreditprod-3 steps.\r\n                        Place a city tile. Place 2 delegates in 1 party.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated turmoil jovianTag reqs",
+    "annotation": "(Requires that Reds are ruling or that you have 2 delegates there. Gain 1MC for each Jovian tag in play.)",
+    "div": [
+      {
+        "#text": "Diaspora Movement",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "#text": "#T04",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-reds"
+            }
+          },
+          {
+            "#text": "1",
+            "@class": "money resource"
+          },
+          {
+            "@class": "resource-tag tag-jovian red-outline"
+          },
+          {
+            "#text": "(Requires that Reds are ruling or that you have 2 delegates there. Gain 1MegaCredit for each Jovian tag in play.)",
+            "@class": "description",
+            "@style": "margin-top:5px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag turmoil ",
+    "annotation": "(Effect: You have influence +1. )",
+    "div": [
+      {
+        "#text": "Event Analysts",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "tag tag1 tag-science "
+      },
+      {
+        "#text": "#T05",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-scientists"
+            }
+          },
+          {
+            "@class": "plus"
+          },
+          {
+            "@class": "influence"
+          },
+          {
+            "#text": "(Effect: You have influence +1. )",
+            "@class": "description",
+            "@style": "margin-top:5px;"
+          },
+          {
+            "#text": "(Requires that Scientists are ruling or that you have 2 delegates there.)",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active microbeTag scienceTag turmoil reqs",
+    "annotation": "(Effect: Each time you play a plant,animal, or microbe tag, including this, gain 2MC.)",
+    "div": [
+      {
+        "#text": "GMO Contract",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "#text": "#T06",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "/",
+          "/",
+          ":"
+        ],
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-greens"
+            }
+          },
+          {
+            "@class": "tag-animal resource-tag"
+          },
+          {
+            "@class": "tag-plant resource-tag"
+          },
+          {
+            "@class": "tag-microbe resource-tag"
+          },
+          {
+            "#text": "2",
+            "@class": "money resource"
+          },
+          {
+            "#text": "(Effect: Each time you play a plant,animal, or microbe tag, including this, gain 2MegaCredit.)",
+            "@class": "description"
+          },
+          {
+            "#text": "(Requires that Greens are ruling or that you have 2 delegates there.)",
+            "@class": "description",
+            "@style": "margin-top:10px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  buildingTag turmoil reqs",
+    "annotation": "(Action: Pay 3 MC to add a delegate to any party.)",
+    "div": [
+      {
+        "#text": "Martian Media Center",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#T07",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-mars-first"
+            }
+          },
+          {
+            "#text": "3",
+            "@class": "money resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "delegate"
+          },
+          {
+            "#text": "(Action: Pay 3 MegaCredit to add a delegate to any party.)",
+            "@class": "description ",
+            "@style": "margin-bottom:10px;"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "#text": "2",
+              "@class": "moneyprod-"
+            }
+          },
+          {
+            "#text": "(Requires that Mars First is ruling or that you have 2 delegates there.inc-MegaCreditprod-2 steps.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated turmoil buildingTag reqs ",
+    "annotation": "(Requires that Mars First are ruling or that you have 2 delegates there. Increase your MC production 1 step for every 3 Building tag you have, including this.)",
+    "div": [
+      {
+        "#text": "Parliament Hall",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#T08",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-mars-first"
+            }
+          },
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size4a",
+            "div": [
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-building"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-building"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-building"
+              }
+            ]
+          },
+          {
+            "#text": "(Requires that Mars First are ruling or that you have 2 delegates there.\r\n                        inc-MegaCreditprod-1 step for every 3 Building tag you have, including this.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated turmoil earthTag reqs ",
+    "annotation": "(Requires that Unity are ruling or that you have 2 delegates there. Gain 1 TR. Gain 1 MC for each Earth tag you have, including this.)",
+    "div": [
+      {
+        "#text": "PR Office",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth "
+      },
+      {
+        "#text": "#T09",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-unity"
+            }
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "@class": "resource-tag tag-earth"
+          },
+          {
+            "#text": "(Requires that Unity are ruling or that you have 2 delegates there.\r\n                        Gain 1 TR. Gain 1 MegaCredit for each Earth tag you have, including this.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event turmoil eventTag reqs ",
+    "annotation": "(Requires that you are Chairman.)",
+    "div": [
+      {
+        "#text": "Public Celebrations",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#T10",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "chairman",
+              "@style": "margin-top: -6px;"
+            }
+          },
+          {
+            "#text": "(Requires that you are Chairman.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event turmoil eventTag",
+    "annotation": "(Exchange one NEUTRAL NON-LEADER delegate with one of your own from the reserve.)",
+    "div": [
+      {
+        "#text": "Recruitment",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "2",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#T11",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "#text": "* \u00a0\u00a0 +",
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "delegate red-outline"
+          },
+          {
+            "@class": "delegate"
+          },
+          {
+            "#text": "(Exchange one NEUTRAL NON-LEADER delegate with one of your own from the reserve.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event turmoil eventTag earthTag reqs ",
+    "annotation": "(Requires that Reds are ruling or that you have 2 delegates there. Gain 1 MC from each EMPTY AREA ADJACENT TO YOUR TILES.)",
+    "div": [
+      {
+        "#text": "Red Tourism Wave",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "#text": "#T12",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "#text": [
+          "/",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-reds"
+            }
+          },
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "@class": "tile empty-tile-small"
+          },
+          {
+            "#text": "(Requires that Reds are ruling or that you have 2 delegates there.\r\n                        Gain 1 MegaCredit from each EMPTY AREA ADJACENT TO YOUR TILES.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated turmoil buildingTag reqs ",
+    "annotation": "(Requires that Kelvinists are ruling or that you have 2 delegates there. Increase your heat production 2 steps.)",
+    "div": [
+      {
+        "#text": "Sponsored Mohole",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#T13",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-kelvinists"
+            }
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "(Requires that Kelvinists are ruling or that you have 2 delegates there.\r\n                        inc-heatprod-2 steps.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated turmoil scienceTag reqs ",
+    "annotation": "(Requires that Scientists are ruling or that you have 2 delegates there. Draw 2 cards.)",
+    "div": [
+      {
+        "#text": "Supported Research",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science "
+      },
+      {
+        "#text": "#T14",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-scientists"
+            }
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "#text": "(Requires that Scientists are ruling or that you have 2 delegates there.\r\n                        Draw 2 cards.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated turmoil buildingTag animalTag plantTag reqs ",
+    "annotation": "(Requires that Greens are ruling or that you have 2 delegates there. Place a greenery tile and raise oxygen 1 step.)",
+    "div": [
+      {
+        "#text": "Wildlife Dome",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-plant"
+      },
+      {
+        "@class": "tag tag3 tag-animal"
+      },
+      {
+        "#text": "#T15",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "party party-greens"
+            }
+          },
+          {
+            "@class": "tile greenery-tile"
+          },
+          {
+            "#text": "(Requires that Greens are ruling or that you have 2 delegates there.\r\n                        Place a greenery tile and raise oxygen 1 step.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event turmoil eventTag reqs",
+    "annotation": "(Requires that you have a Party Leader in any party and that the sitting Chairman is neutral. Remove the NEUTRAL Chairman and move your own delegate(from the reserve) there instead. Gain 1 TR.)",
+    "div": [
+      {
+        "#text": "Vote of no Confidence",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#T16",
+        "@class": "number"
+      },
+      {
+        "@class": "turmoil-icon project-icon"
+      },
+      {
+        "#text": [
+          "-",
+          "* \u00a0\u00a0 +"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "requirements",
+            "div": {
+              "@class": "leader",
+              "@style": "margin-top: -6px;"
+            }
+          },
+          {
+            "@class": "chairman red-outline"
+          },
+          {
+            "@class": "leader"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "(Requires that you have a Party Leader in any party and that the sitting Chairman is neutral.\r\n                        Remove the NEUTRAL Chairman and move your own delegate(from the reserve) there instead.\r\n                        Gain 1 TR.)",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  }
+]

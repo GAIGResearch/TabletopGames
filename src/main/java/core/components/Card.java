@@ -32,7 +32,7 @@ public class Card extends Component {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return super.hashCode();
     }
 }

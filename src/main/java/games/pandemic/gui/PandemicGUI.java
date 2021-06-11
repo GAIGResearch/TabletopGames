@@ -16,6 +16,7 @@ import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Hash;
@@ -36,7 +37,7 @@ import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("rawtypes")
-public class PandemicGUI extends AbstractGUI {
+public class PandemicGUI extends AbstractGUI implements ScreenHighlight {
     PandemicCardView[] playerCards;
     ArrayList<PandemicCardView>[] playerHands;
     ArrayList<PandemicCardView> bufferDeck;
@@ -73,16 +74,12 @@ public class PandemicGUI extends AbstractGUI {
         for (int i = 0; i < nPlayers; i++) {
             handCardHighlights[i] = new ArrayList<>();
         }
-        Collection[] highlights = new Collection[2+nPlayers];
-        highlights[0] = playerHighlights;
-        highlights[1] = boardView.getHighlights().keySet();
-        System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
         gameTurnStep = new JLabel();
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel(highlights, 300, 80);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{this}, 300, 80, true);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(gameStateInfo);
@@ -269,7 +266,7 @@ public class PandemicGUI extends AbstractGUI {
     IGamePhase currentGamePhase;
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState){
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken){
         this.gameState = (PandemicGameState) gameState;
         boardView.gameState = this.gameState;
         boolean newTurn = gameState.getTurnOrder().getCurrentPlayer(gameState) != activePlayer || currentGamePhase == null || !currentGamePhase.equals(gameState.getGamePhase());
@@ -322,7 +319,7 @@ public class PandemicGUI extends AbstractGUI {
             }
         } else {
             // Clear all highlights if it's not human acting
-            clearAllHighlights();
+            clearHighlights();
             updateCardHighlightDisplay();
         }
 
@@ -342,7 +339,7 @@ public class PandemicGUI extends AbstractGUI {
         }
     }
 
-    protected void clearAllHighlights() {
+    public void clearHighlights() {
         playerHighlights.clear();
         for (int i = 0; i < playerCards.length; i++) {
             handCardHighlights[i].clear();

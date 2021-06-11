@@ -1,0 +1,1761 @@
+[
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card earthTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Allied Banks"
+        },
+        {
+          "@class": "tag tag1 tag-earth"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P01"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production money",
+                "#text": "4"
+              }
+            },
+            {
+              "@class": "resource money",
+              "#text": "3"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your MC production 4 steps. Gain 3 MC .)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card powerTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Aquifer Turbines"
+        },
+        {
+          "@class": "tag tag1 tag-power"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P02"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile ocean-tile"
+            },
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production energy"
+                }
+              ]
+            },
+            {
+              "@class": "resource money",
+              "#text": "3"
+            },
+            {
+              "@class": "description",
+              "#text": "(Place an Ocean. Increase your energy production 2 steps. Pay 3 MC .)"
+            }
+          ],
+          "br": "",
+          "#text": "-"
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card microbeTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Biofuels"
+        },
+        {
+          "@class": "tag tag1 tag-microbe"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P03"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production plant"
+                }
+              ]
+            },
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your energy and plant production 1 step. Gain 2 plants.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card scienceTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Biolab"
+        },
+        {
+          "@class": "tag tag1 tag-science"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P04"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box ",
+              "div": {
+                "@class": "production plant"
+              }
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your plant production 1 step. Draw 3 cards.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card plantTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Biosphere Support"
+        },
+        {
+          "@class": "tag tag1 tag-plant"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P05"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2a",
+              "div": [
+                {
+                  "@class": "production-prefix ",
+                  "div": {
+                    "@class": "minus"
+                  }
+                },
+                {
+                  "@class": "production money",
+                  "#text": "1"
+                },
+                {
+                  "@class": "production-prefix ",
+                  "div": {
+                    "@class": "plus"
+                  }
+                },
+                {
+                  "@class": "production plant"
+                },
+                {
+                  "@class": "production plant"
+                }
+              ],
+              "br": ""
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your plant production 2 steps. Decrease your MC production 1 step.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card earthTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Business Empire"
+        },
+        {
+          "@class": "tag tag1 tag-earth"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P06"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production money",
+                "#text": "6"
+              }
+            },
+            {
+              "@class": "resource money",
+              "#text": "6"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your MC production 6 steps. Pay 6 MC.)"
+            }
+          ],
+          "br": "",
+          "#text": "-"
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag plantTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Dome Farming"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P07"
+        },
+        {
+          "@class": "tag tag2 tag-plant"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": [
+                {
+                  "@class": "production money",
+                  "#text": "2"
+                },
+                {
+                  "@class": "production plant"
+                }
+              ]
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your MC production 2 steps and plant production 1 step.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Donation"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P08"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "21"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 21 MC.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag cityTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Early Settlement"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P09"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "tag tag2 tag-city"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production plant"
+              }
+            },
+            {
+              "@class": "tile city-tile"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your plant production 1 step. Place a city tile.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card plantTag microbeTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Ecology Experts"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P10"
+        },
+        {
+          "@class": "tag tag1 tag-microbe"
+        },
+        {
+          "@class": "tag tag2 tag-plant"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production plant"
+              }
+            },
+            {
+              "@class": "requirements",
+              "@style": "margin-left:31px; width:70%;",
+              "div": [
+                {
+                  "@style": "color:red;font-size:56px;display:inline-block;",
+                  "#text": "X"
+                },
+                {
+                  "@style": "position:absolute;margin-top:-40px;margin-left:6px;",
+                  "#text": "Project Requirements"
+                }
+              ]
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your plant production 1 step. Play a card from hand, ignoring global requirements.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Excentric Sponsor"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P11"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource money",
+              "#text": "-25"
+            },
+            {
+              "@class": "description",
+              "#text": "(Play 1 card from hand with a 25 MC reduction.)"
+            }
+          ],
+          "#text": ":"
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card plantTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Experimental Forest"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P12"
+        },
+        {
+          "@class": "tag tag1 tag-plant"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile greenery-tile"
+            },
+            {
+              "@class": "resource card",
+              "div": {
+                "@class": "card-icon tag-plant"
+              }
+            },
+            {
+              "@class": "resource card",
+              "div": {
+                "@class": "card-icon tag-plant"
+              }
+            },
+            {
+              "@class": "description",
+              "#text": "( Place 1 Greenery Tile. Reveal cards until you reveal two cards with plant tags on them. Take them into your hand and discard the rest.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card jovianTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Galilean Mining"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P13"
+        },
+        {
+          "@class": "tag tag1 tag-jovian"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production titanium"
+                },
+                {
+                  "@class": "production titanium"
+                }
+              ]
+            },
+            {
+              "@class": "resource money",
+              "#text": "5"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your titanium production 2 steps. Pay 5 MC.)"
+            }
+          ],
+          "br": "",
+          "#text": "-"
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Great Aquifer"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P14"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile ocean-tile"
+            },
+            {
+              "@class": "tile ocean-tile"
+            },
+            {
+              "@class": "description",
+              "#text": "(Place 2 Ocean tiles.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Huge Asteroid"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P15"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "resource money",
+              "#text": "5"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase Temperature 3 steps. Pay 5 MC.)"
+            }
+          ],
+          "br": "",
+          "#text": "-"
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card jovianTag scienceTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "IO Research Outpost"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P16"
+        },
+        {
+          "@class": "tag tag1 tag-jovian"
+        },
+        {
+          "@class": "tag tag2 tag-science"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production titanium"
+              }
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your titanium production 1 step. Draw a card.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Loan"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P17"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size1a",
+              "div": [
+                {
+                  "@class": "production-prefix",
+                  "div": {
+                    "@class": "minus"
+                  }
+                },
+                {
+                  "@class": "money production",
+                  "#text": "2"
+                }
+              ]
+            },
+            {
+              "@class": "resource money",
+              "#text": "30"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 30 MC. Decrease your MC production 2 steps.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Martian Industries"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P18"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "@style": "vertical-align: bottom;",
+              "div": [
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production steel"
+                }
+              ]
+            },
+            {
+              "@class": "resource money",
+              "#text": "6"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your energy and steel production 1 step. Gain 6 MC.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Metal-rich Asteroid"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P19"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile temperature-tile"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase temperature 1 step. Gain 4 titanium and 4 steel.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Metals Company"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P20"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size3",
+              "div": [
+                {
+                  "@class": "production money",
+                  "#text": "1"
+                },
+                {
+                  "@class": "production steel"
+                },
+                {
+                  "@class": "production titanium"
+                }
+              ]
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your MC, steel and titanium production 1 step.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Mining Operations"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P21"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production steel"
+                },
+                {
+                  "@class": "production steel"
+                }
+              ]
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your steel production 2 steps. Gain 4 steel.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Mohole"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P22"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size3",
+              "div": [
+                {
+                  "@class": "production heat"
+                },
+                {
+                  "@class": "production heat"
+                },
+                {
+                  "@class": "production heat"
+                }
+              ]
+            },
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your heat production 3 steps. Gain 3 heat.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Mohole Excavation"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P23"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production steel"
+                },
+                {
+                  "@class": "production heat"
+                },
+                {
+                  "@class": "production heat"
+                }
+              ],
+              "br": ""
+            },
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your steel production 1 step and heat production 2 steps. Gain 2 heat.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Nitrogen Shipment"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P24"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box ",
+              "div": {
+                "@class": "production plant"
+              }
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "resource money",
+              "#text": "5"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your plant production 1 step. Increase your TR 1 step. Gain 5 MC.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card spaceTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Orbital Construction Yard"
+        },
+        {
+          "@class": "tag tag1 tag-space"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P25"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box",
+              "div": {
+                "@class": "production titanium"
+              }
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your titanium production 1 step. Gain 4 titanium.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Polar Industries"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P26"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production heat"
+                },
+                {
+                  "@class": "production heat"
+                }
+              ]
+            },
+            {
+              "@class": "tile ocean-tile"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your heat production 2 steps. Place an Ocean tile.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card powerTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Power Generation"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P27"
+        },
+        {
+          "@class": "tag tag1 tag-power"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size3",
+              "div": [
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production energy"
+                }
+              ]
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your energy production 3 steps.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card wildTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Research Network"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P28"
+        },
+        {
+          "@class": "tag tag1 tag-wild"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box ",
+              "div": {
+                "@class": "production money",
+                "#text": "1"
+              }
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your money production 1 step. Draw 3 cards.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card cityTag buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Self-Sufficient Settlement"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P29"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "tag tag2 tag-city"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box ",
+              "div": {
+                "@class": "production money",
+                "#text": "2"
+              }
+            },
+            {
+              "@class": "tile city-tile"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your money production 2 step. Place a City tile.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card buildingTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Smelting Plant"
+        },
+        {
+          "@class": "tag tag1 tag-building"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P30"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile oxygen-tile"
+            },
+            {
+              "@class": "tile oxygen-tile"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "description",
+              "#text": "(Raise oxygen 2 steps. Gain 5 steel.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Society Support"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P31"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production money",
+                  "#text": "-1"
+                },
+                {
+                  "@class": "production plant"
+                },
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production heat"
+                }
+              ],
+              "br": ""
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your plant, energy and heat production 1 step. Decrease money production 1 step.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card powerTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Supplier"
+        },
+        {
+          "@class": "tag tag1 tag-power"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P32"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "production-box production-box-size2",
+              "div": [
+                {
+                  "@class": "production energy"
+                },
+                {
+                  "@class": "production energy"
+                }
+              ]
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your energy production 2 steps. Gain 4 steel.)"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card  noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Supply Drop"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P33"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 3 titanium, 8 steel and 3 plants.)"
+            }
+          ],
+          "#text": [
+            "3",
+            "8",
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card earthTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "UNMI Contractor"
+        },
+        {
+          "@class": "tag tag1 tag-earth"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P34"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "tile rating"
+            },
+            {
+              "@class": "resource card"
+            },
+            {
+              "@class": "description",
+              "#text": "(Increase your TR 3 steps. Draw a card.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv prelude prelude-card noneTag",
+      "div": [
+        {
+          "@class": "title background-color-prelude",
+          "#text": "Acquired Space Agency"
+        },
+        {
+          "@class": "prelude-label",
+          "#text": "PRELUDE"
+        },
+        {
+          "@class": "number",
+          "@style": "margin-left:99px;",
+          "#text": "#P35"
+        },
+        {
+          "@class": "prelude-icon preludeCard-icon"
+        },
+        {
+          "@class": "content",
+          "div": [
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource card",
+              "div": {
+                "@class": "card-icon tag-space"
+              }
+            },
+            {
+              "@class": "resource card",
+              "div": {
+                "@class": "card-icon tag-space"
+              }
+            },
+            {
+              "@class": "description",
+              "#text": "(Gain 6 titanium. Reveal cards until you reveal two cards with Space Tags. Take them into your hand, discard the rest.)"
+            }
+          ]
+        }
+      ]
+    }
+  ]

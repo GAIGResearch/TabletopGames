@@ -8,6 +8,7 @@ import core.interfaces.IGamePhase;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -17,7 +18,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 import java.util.List;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
@@ -139,9 +139,8 @@ public class ColtExpressGUI extends AbstractGUI {
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
                 actionPanel.setOpaque(false);
-
 
                 main.add(infoPanel, BorderLayout.NORTH);
                 main.add(mainGameArea, BorderLayout.CENTER);
@@ -188,7 +187,7 @@ public class ColtExpressGUI extends AbstractGUI {
     }
 
     @Override
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
         if (boxLayout) {
@@ -219,7 +218,7 @@ public class ColtExpressGUI extends AbstractGUI {
     IGamePhase currentGamePhase;
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 activePlayer = gameState.getCurrentPlayer();

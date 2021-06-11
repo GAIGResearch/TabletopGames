@@ -1,0 +1,2831 @@
+[
+  {
+    "@class": "filterDiv venusNext active venusTag ",
+    "annotation": "(Action: Add 1 Floater to ANY card or spend 1 Floater here to draw 1 card).",
+    "div": [
+      {
+        "#text": "Aerial Mappers",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus"
+      },
+      {
+        "#text": "#213",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "* OR",
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "floater resource"
+          },
+          {
+            "@class": "floater resource"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "card resource"
+          },
+          {
+            "#text": "Action: add-1-Floater-any or rem-1-Floater and inc-Card-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext event reqs",
+    "annotation": "(Requires that you have 5 Floaters. Gain 1 MC per each City tile in play)",
+    "div": [
+      {
+        "#text": "Aerosport Tournament",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#214",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "Floater Floater Floater Floater Floater resources",
+            "@class": "requirements "
+          },
+          {
+            "#text": "1",
+            "@class": "resource money"
+          },
+          {
+            "@class": "tile city-tile-small red-outline"
+          },
+          {
+            "#text": " inc-MegaCredit-1-City ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext venusTag event ",
+    "annotation": "(Raise Venus 1 step. Add 3 Floaters to ANY Venus CARD)",
+    "div": [
+      {
+        "#text": "Air-Scrapping Expedition",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#215",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "#text": "inc-Venus-1 * add-3-Floater-any-Venus ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated scienceTag venusTag venusNext reqs",
+    "@data-science": "3",
+    "annotation": "(Requires 3 science tags. Draw 2 cards.)",
+    "div": [
+      {
+        "#text": "Atalanta Planitia Lab",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#216",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Science Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "#text": "inc-Card-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated jovianTag spaceTag venusNext reqs",
+    "@data-science": "3",
+    "annotation": "(Requires 3 Science tags. Either raise the temperature 2 steps, or raise Venus 2 steps. Add 2 Floaters to ANY card).",
+    "div": [
+      {
+        "#text": "Atmoscoop",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "22",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "#text": "#217",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": [
+          "OR",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Science Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "resource floater",
+            "@style": "margin-left:140px;"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "#text": "inc-temperature-2 or inc-Venus-2 * add-2-Floater-any",
+            "@class": "description",
+            "@style": "text-align:left;position:absolute;margin-top:-25px;",
+            "br": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext spaceTag event ",
+    "annotation": "(Raise Venus 1 step. Remove up to 4MC from any player WITH A VENUS TAG IN PLAY.).",
+    "div": [
+      {
+        "#text": "Comet for Venus",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#218",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "-",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "4",
+            "@class": "resource money red-outline",
+            "div": {
+              "@class": "card-icon tag-venus",
+              "@style": "color: white;margin-top: -39px;"
+            }
+          },
+          {
+            "#text": "inc-venus-1 * dec-MegaCredit-4-opponent-Venus",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag venusNext ",
+    "annotation": "(Increase your MC production 2 steps. Add 1 resource to ANY Venus CARD).",
+    "div": [
+      {
+        "#text": "Corroder Suits",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#219",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "2",
+              "@class": "production money"
+            }
+          },
+          {
+            "@class": "resource wild",
+            "@style": "margin-left:20px;",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "#text": "inc-MegaCreditprod-2 * add-1-resource-Venus",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag cityTag venusNext reqs",
+    "@data-science": "4",
+    "annotation": "(Requires 4 Science tags. Decrease your energy production 1 step. Increase your titanium production 1 step. Place a City tile on the RESERVED AREA).",
+    "div": [
+      {
+        "#text": "Dawn City",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-city "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#220",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "3",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Science Science Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "titaniumprod"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile",
+            "@style": "margin-left:20px"
+          },
+          {
+            "#text": "dec-energyprod-1 * inc-titaniumprod-1 * placetile/City/Dawn City/false",
+            "@class": "description",
+            "@style": "margin-top:-5px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag powerTag venusTag venusNext ",
+    "annotation": "(Action: add 1 Floater to this card OR spend 1 Floater here to increase your energy production 1 step).",
+    "div": [
+      {
+        "#text": "Deuterium Export",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "@class": "tag tag3 tag-venus "
+      },
+      {
+        "#text": "#221",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left:53px;"
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod-"
+            }
+          },
+          {
+            "#text": "Action: add-1-Floater or rem-1-Floater and inc-energyprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag venusNext ",
+    "annotation": "(Action: add 1 Floater to ANY card. Effect: when playing a Venus tag, Floaters here may be used as payment, and are worth 3MC each)",
+    "div": [
+      {
+        "#text": "Dirigibles",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#222",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": [
+          "*",
+          ":",
+          "="
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "resource-tag tag-venus"
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "#text": "3",
+            "@class": "money resource "
+          },
+          {
+            "#text":
+              "Action: add-1-Floater-any * Effect: playcard(tag-Venus) / spend-Floater-3 ",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag venusNext ",
+    "annotation": "(Action: add 1 Floater to this card, or remove 2 Floaters here to raise Venus 1 step).",
+    "div": [
+      {
+        "#text": "Extractor Balloons",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "21",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#223",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left:95px"
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile venus-tile "
+          },
+          {
+            "#text": "Action: add-1-Floater or rem-2-Floater and inc-Venus-1 * add-3-Floater",
+            "@class": "description "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag microbeTag venusNext reqs",
+    "@data-science": "2",
+    "annotation": "(Action: add 1 Microbe to ANY card)",
+    "div": [
+      {
+        "#text": "Extremophiles",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#224",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1/3",
+            "@class": "points",
+            "div": {
+              "@class": "resource microbe"
+            }
+          },
+          {
+            "#text": "Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "#text": "Action: add-1-Microbe-any",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag  venusNext reqs",
+    "@data-science": "2",
+    "annotation": "(Action: spend 2 MC to add 1 Floater to ANY card).",
+    "div": [
+      {
+        "#text": "Floating Habs",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#225",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points",
+            "div": {
+              "@class": "resource floater"
+            }
+          },
+          {
+            "#text": "Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "#text": "2",
+            "@class": "resource money"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "#text": "Action: dec-MegaCredit-2 and add-1-Floater-any ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag venusNext ",
+    "annotation": "(Action: Spend 2 MC to add 1 Floater to this card, OR spend 2 Floaters here to increase Venus 1 step).",
+    "div": [
+      {
+        "#text": "Forced Precipitation",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#226",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "money resource ",
+            "@style": "margin-left: 60px;"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile venus-tile "
+          },
+          {
+            "#text": "Action: dec-MegaCredit-2 and add-1-Floater or rem-2-Floater and inc-Venus-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag plantTag venusNext reqs",
+    "@data-venus": "10",
+    "annotation": "(Requires 10% on the Venus track. Add 2 Microbes or 2 Animals to another Venus card. Decrease your energy production 1 step and increase your MC production 2 steps).",
+    "div": [
+      {
+        "#text": "Freyja Biodomes",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#227",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "10 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource microbe",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource microbe",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource animal",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource animal",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "@style": "margin-left:135px;",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              }
+            ]
+          },
+          {
+            "#text": "add-2-Microbe-Venus or add-2-Animal-Venus * dec-energyprod-1 and inc-megacreditprod-2",
+            "@class": "description",
+            "@style": "position:absolute;margin-top:-90px;margin-left:10px;text-align:left",
+            "br": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext venusTag spaceTag event ",
+    "annotation": "(Raise Venus 1 step. Increase your heat production 3 steps).",
+    "div": [
+      {
+        "#text": "GHG Import From Venus",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "23",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-venus "
+      },
+      {
+        "#text": "#228",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "production heat"
+              },
+              {
+                "@class": "production heat"
+              },
+              {
+                "@class": "production heat"
+              }
+            ]
+          },
+          {
+            "#text": "inc-Venus-1 * inc-heatprod-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag spaceTag venusNext ",
+    "annotation": "(Raise Venus 3 steps).",
+    "div": [
+      {
+        "#text": "Giant Solar Shade",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "27",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#229",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "inc-Venus-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag venusNext ",
+    "annotation": "(Decrease your energy production 2 steps. Increase your MC production 1 step for each Venus and Earth tag you have. Place a City tile).",
+    "div": [
+      {
+        "#text": "Gyropolis",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#230",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": [
+              "/",
+              "/"
+            ],
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "resource-tag tag-venus"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "resource-tag tag-earth"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile",
+            "@style": "margin-left:20px"
+          },
+          {
+            "#text": "dec-energyprod-2  * inc-MegaCreditprod-1-Venus,Earth * placetile/City/Ground/true ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext  spaceTag event ",
+    "annotation": "(Raise Venus 1 step. Add 1 Floater to A Venus CARD for each Jovian tag you have).",
+    "div": [
+      {
+        "#text": "Hydrogen to Venus",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#231",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "br": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource-tag tag-jovian"
+          },
+          {
+            "#text": " inc-Venus-1 * add-Jovian-Floater-Venus",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated jovianTag scienceTag venusNext ",
+    "annotation": "(Draw 1 card, or draw 3 if you have at least 3 Venus tags).",
+    "div": [
+      {
+        "#text": "IO Sulphur Research",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "17",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-jovian "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "#text": "#232",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": [
+          "OR",
+          ":"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource-tag tag-venus"
+          },
+          {
+            "@class": "resource-tag tag-venus",
+            "@style": "margin-left:-15px;"
+          },
+          {
+            "@class": "resource-tag tag-venus",
+            "@style": "margin-left:-15px;"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card",
+            "@style": "margin-left:-15px;"
+          },
+          {
+            "@class": "resource card",
+            "@style": "margin-left:-15px;"
+          },
+          {
+            "#text": "inc-Card-1 or inc-Card-3 if at least 3 Venus tags",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag venusNext reqs",
+    "@data-venus": "8",
+    "annotation": "(Requires Venus 8%. Increase your titanium production 1 step).",
+    "div": [
+      {
+        "#text": "Ishtar Mining",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#233",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "8 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "titaniumprod"
+            }
+          },
+          {
+            "#text": " inc-titaniumprod-1  ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag venusNext ",
+    "annotation": "(Action: Spend 1 titanium to add 2 Floaters here, OR spend 2 Floaters here to raise Venus 1 step).",
+    "div": [
+      {
+        "#text": "Jet Stream Microscrappers",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#234",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile venus-tile "
+          },
+          {
+            "#text": "Action: dec-titanium-1 and add-2-Floater or rem-2-Floater and inc-Venus-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag venusNext ",
+    "annotation": "(Action: add 1 Floater to this card, or spend 1 Floater here to raise your MC production 1 step).",
+    "div": [
+      {
+        "#text": "Local Shading",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#235",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "floater resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": "Action: add-1-Floater or rem-1-Floater and inc-MegaCreditprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated earthTag spaceTag cityTag venusNext ",
+    "annotation": "(Increase your MC production 1 step for each Earth tag you have, including this. Place a City tile on the RESERVED AREA).",
+    "div": [
+      {
+        "#text": "Luna Metropolis",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "21",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-city "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "@class": "tag tag3 tag-space "
+      },
+      {
+        "#text": "#236",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-earth"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile",
+            "@style": "margin-left:20px"
+          },
+          {
+            "#text": "inc-MegaCreditprod-Earth * placetile/City/Luna Metropolis/false ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated  venusNext reqs noneTag",
+    "@data-earth": "1",
+    "@data-jovian": "1",
+    "@data-venustag": "1",
+    "annotation": null,
+    "div": [
+      {
+        "#text": "Luxury Foods",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "#text": "#237",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Venus Earth Jovian tags",
+            "@class": "requirements"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active cityTag venusTag venusNext reqs",
+    "@data-venus": "12",
+    "annotation": "(Action: Add 1 resource to ANOTHER VENUS CARD).",
+    "div": [
+      {
+        "#text": "Maxwell Base",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-city "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#238",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "3",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "12 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource wild",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "#text": "Action: add-1-resource-Venus * dec-energyprod-1 * placetile/City/Maxwell Base/false ",
+            "@class": "description ",
+            "@style": "margin-top:-5px"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile",
+            "@style": "margin-left:20px"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag venusNext reqs",
+    "@data-earth": "1",
+    "@data-jovian": "1",
+    "@data-venustag": "1",
+    "annotation": "(Requires Venus, Earth and Jovian tags. Increase your steel production 2 steps).",
+    "div": [
+      {
+        "#text": "Mining Quota",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#239",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "Venus Earth Jovian tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "steelprod"
+              },
+              {
+                "@class": "steelprod"
+              }
+            ]
+          },
+          {
+            "#text": "inc-steelprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag venusNext reqs",
+    "@data-venus": "10",
+    "annotation": "(Requires Venus 10%. Increase the Venus track 1 step).",
+    "div": [
+      {
+        "#text": "Neutralizer Factory",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus"
+      },
+      {
+        "#text": "#240",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "10 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "inc-Venus-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag venusNext reqs",
+    "@data-earth": "1",
+    "@data-jovian": "1",
+    "@data-venustag": "1",
+    "annotation": "(Requires Venus, Earth and Jovian tags. Increase your TR 2 steps.)",
+    "div": [
+      {
+        "#text": "Omnicourt",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#241",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "Venus Earth Jovian tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "inc-TR-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag spaceTag venusNext ",
+    "annotation": "(Raise Venus 2 steps. Increase your heat production 2 steps).",
+    "div": [
+      {
+        "#text": "Orbital Reflectors",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "26",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-venus"
+      },
+      {
+        "#text": "#242",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "inc-Venus-2 * inc-heatprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag venusNext reqs",
+    "@data-venus": "14",
+    "annotation": "(Action: spend 6 MC to add an asteroid resource to this card (TITANIUM MAY BE USED), or spend 1 resource from this card to increase Venus 1 step). (Venus must be 14% or lower).",
+    "div": [
+      {
+        "#text": "Rotator Impacts",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "#text": "#243",
+        "@class": "number"
+      },
+       {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": [
+          "(",
+          ")",
+          "OR"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "max 14 Venus",
+            "@class": "requirements requirements-max"
+          },
+          {
+            "#text": "6",
+            "@class": " money resource "
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "Action: dec-MegaCredit-6 and add-1-Asteroid (TITANIUM MAY BE USED) or rem-1-Asteroid and inc-Venus-1",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag earthTag venusNext reqs",
+    "@data-earth": "1",
+    "@data-venustag": "1",
+    "annotation": "(Requires Venus and Earth tags. Increase your MC production 3 steps).",
+    "div": [
+      {
+        "#text": "Sister Planet Support",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "tag tag2 tag-venus"
+      },
+      {
+        "#text": "#244",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "Venus Earth tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "3",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": "inc-MegaCreditprod-3",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated  venusNext reqs",
+    "@data-earth": "1",
+    "@data-jovian": "1",
+    "@data-venustag": "1",
+    "annotation": "(Requires Venus, Earth and Jovian tags. Draw 2 cards).",
+    "div": [
+      {
+        "#text": "Solarnet",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "#text": "#245",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Venus Earth Jovian tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "#text": "inc-Card-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext spaceTag event reqs",
+    "@data-venus": "10",
+    "annotation": "(Venus must be 10% or lower. Raise Venus 2 steps).",
+    "div": [
+      {
+        "#text": "Spin-Inducing Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#246",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "max 10 Venus",
+            "@class": "requirements requirements-max"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "inc-Venus-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated scienceTag earthTag venusNext ",
+    "annotation": "(Discard 1 card from your hand and THEN draw 3 cards. All OPPONENTS draw 1 card).",
+    "div": [
+      {
+        "#text": "Sponsored Academies",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "#text": "#247",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": [
+          "-",
+          "+",
+          "* +",
+          "*"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource card red-outline"
+          },
+          {
+            "#text": "dec-Card-1 and inc-Card-2 * inc-Card-1-all",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active cityTag venusTag venusNext reqs",
+    "@data-science": "2",
+    "annotation": "(Action: Add 2 floaters to ANY VENUS CARD.)",
+    "div": [
+      {
+        "#text": "Stratopolis",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "22",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-city "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#248",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/3",
+            "@class": "points",
+            "div": {
+              "@class": "resource floater"
+            }
+          },
+          {
+            "#text": "Science Science tags",
+            "@class": "requirements",
+            "@style": "margin-bottom:15px;"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "resource floater",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "#text": "Action: add-2-Floater-Venus",
+            "@class": "description ",
+            "@style": "margin-top:-5px"
+          },
+          {
+            "@class": "production-box",
+            "@style": "margin-left:85px",
+            "div": {
+              "#text": "2",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "@class": "tile city-tile"
+          },
+          {
+            "#text": "inc-MegaCreditprod-2 * placetile/City/Stratopolis/false",
+            "@class": "description ",
+            "@style": "text-align:left;margin-top:-54px"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag venusTag venusNext reqs",
+    "@data-venus": "12",
+    "annotation": "(Action: Add 1 animal to this card.)",
+    "div": [
+      {
+        "#text": "Stratospheric Birds",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#249",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points",
+            "div": {
+              "@class": "resource animal"
+            }
+          },
+          {
+            "#text": "12 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "#text": "Action: add-1-Animal ",
+            "@class": "description ",
+            "@style": "margin-top:-5px"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource floater"
+          },
+          {
+            "#text": "rem-1-Floater-any ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag spaceTag  venusNext ",
+    "annotation": "(Increase Venus 1 step. Increase your MC production1 step for each Venus tag you have, including this.)",
+    "div": [
+      {
+        "#text": "Sulphur Exports",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "21",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#250",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-venus"
+              }
+            ]
+          },
+          {
+            "#text": " inc-Venus-1 * inc-MegaCreditprod-Venus ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active microbeTag venusTag venusNext reqs",
+    "@data-venus": "6",
+    "annotation": "(Action: add 1 Microbe to this card, or spend any number of Microbes here to gain triple amount of MC). (Requires Venus 6%).",
+    "div": [
+      {
+        "#text": "Sulphur-eating Bacteria",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#251",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR X",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "6 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left:76px;"
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "#text": "3X",
+            "@class": "resource money "
+          },
+          {
+            "#text": "Action: add-1-Microbe or rem-Microbe-X and inc-MegaCredit-X3 ",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated  earthTag venusNext reqs",
+    "annotation": "(Requires that you have at least 25 TR. Increase your MC production 4 steps.)",
+    "div": [
+      {
+        "#text": "Terraforming Contract",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "#text": "#252",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "25 TR",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "4",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": "inc-MegaCreditprod-4 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active microbeTag venusTag venusNext reqs",
+    "@data-venus": "6",
+    "annotation": "(Action: add 1 Microbe to ANY Venus CARD or spend 2 Microbes here to raise Venus 1 step). (Requires Venus 6%).",
+    "div": [
+      {
+        "#text": "Thermophiles",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#253",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "6 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left:76px;"
+          },
+          {
+            "@class": "resource microbe",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text":"Action: add-1-Microbe-Venus or rem-2-Microbe and inc-Venus-1",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv eventTag venusNext spaceTag event ",
+    "annotation": "(Raise Venus 1 step.)",
+    "div": [
+      {
+        "#text": "Water to Venus",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#254",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "#text": "inc-venus-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag venusNext reqs",
+    "@data-venustag": "2",
+    "annotation": "(Requires 2 Venus tags. Increase your MC production 2 steps.)",
+    "div": [
+      {
+        "#text": "Venus Governor",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus"
+      },
+      {
+        "@class": "tag tag2 tag-venus"
+      },
+      {
+        "#text": "#255",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "Venus Venus tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "2",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": " inc-MegaCreditprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active venusTag venusNext reqs",
+    "@data-venus": "10",
+    "annotation": "(Action: Decrease your Energy production 1 step to raise Venus 1 step. Requires Venus 10%.)",
+    "div": [
+      {
+        "#text": "Venus Magnetizer",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-venus "
+      },
+      {
+        "#text": "#256",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "10 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile venus-tile "
+          },
+          {
+            "#text": "Action: dec-Energyprod-1 and inc-Venus-1",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ],
+        "span": {
+          "@class": "red-arrow ",
+          "@style": "margin-left:5px; "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag plantTag venusNext ",
+    "annotation": "(Raise Venus 1 step. Increase your Plant production 1 step. Add 2 Microbes to ANOTHER card).",
+    "div": [
+      {
+        "#text": "Venus Soils",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "@class": "tag tag2 tag-venus"
+      },
+      {
+        "#text": "#257",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "@class": "resource microbe",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "#text": "inc-Venus-1 * inc-Plantprod-1 * add-2-Microbe-Other ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag venusTag venusNext ",
+    "annotation": "(Effect: When you play a Venus tag, you pay 2 MC less for it.)",
+    "div": [
+      {
+        "#text": "Venus Waystation",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#258",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "@class": "resource-tag tag-venus"
+          },
+          {
+            "#text": "-2",
+            "@class": "money resource "
+          },
+          {
+            "#text": "Effect: discount-2-Venus ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag venusTag scienceTag venusNext reqs",
+    "@data-venus": "18",
+    "annotation": "(Effect: when you play a Science tag, including this, add 1 Animal to this card).",
+    "div": [
+      {
+        "#text": "Venusian Animals",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "@class": "tag tag3 tag-venus "
+      },
+      {
+        "#text": "#259",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points",
+            "div": {
+              "@class": "animal resource "
+            }
+          },
+          {
+            "#text": "18 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource-tag tag-science"
+          },
+          {
+            "@class": "animal resource "
+          },
+          {
+            "#text": "Effect: playCard(tag-Science) / add-1-Animal * add-1-Animal",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active  venusTag microbeTag venusNext reqs",
+    "@data-venus": "12",
+    "annotation": "(Action: add 1 Microbe to this card.)",
+    "div": [
+      {
+        "#text": "Venusian Insects",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "@class": "tag tag2 tag-venus "
+      },
+      {
+        "#text": "#260",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points",
+            "div": {
+              "@class": "resource microbe"
+            }
+          },
+          {
+            "#text": "12 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "resource microbe"
+          },
+          {
+            "#text": "Action: add-1-Microbe ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated venusTag plantTag venusNext reqs",
+    "@data-venus": "16",
+    "annotation": null,
+    "div": [
+      {
+        "#text": "Venusian Plant",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "@class": "tag tag2 tag-venus"
+      },
+      {
+        "#text": "#261",
+        "@class": "number"
+      },
+      {
+        "@class": "venus-icon project-icon"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "16 Venus",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile venus-tile"
+          },
+          {
+            "@class": "microbe resource",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "@class": "animal resource",
+            "div": {
+              "@class": "card-icon tag-venus"
+            }
+          },
+          {
+            "#text": "inc-venus-1 * add-1-Microbe-Venus or add-1-Animal-Venus ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  }
+]

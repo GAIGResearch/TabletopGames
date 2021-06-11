@@ -1,0 +1,164 @@
+[
+  {
+    "id": 1,
+    "name": "credicor",
+    "annotation": "(Effect: After you pay for a card or standard project with a basic cost of 20MC or more, you gain 4MC. You start with 57 MC.)",
+    "effect": [
+      {
+        "type": "effect",
+        "if": "payforaction(20)",
+        "then": "inc-megacredit-4"
+      }
+    ],
+    "start": ["57 megacredit"]
+  },
+  {
+    "id": 2,
+    "name": "ecoline",
+    "annotation": "(Effect: You may always pay 7 plants, instead of 8, to place greenery.)",
+    "tags" : ["plant"],
+    "effect" : [
+      {
+        "type": "action",
+        "action": "placetile/Greenery/Ground/true",
+        "cost": "Plant/7"
+      }
+    ],
+    "start": ["2 plantprod, 3 plant, 36 megacredit"]
+  },
+  {
+    "id": 3,
+    "name": "Helion",
+    "annotation": "(Effect: Your may use heat as MC. You may not use MC as heat. You start with 3 heat production and 42 MC.)",
+    "tags": ["space"],
+    "effect" : [
+      {
+        "type": "resourcemapping",
+        "from": "Heat",
+        "to": "MegaCredit",
+        "rate": 1.0
+      }
+    ],
+    "start": ["3 heatprod, 42 megacredit"]
+  },
+  {
+    "id": 4,
+    "name": "Mining Guild",
+    "annotation": "(Effect: Each time you get any steel or titanium as a placement bonus on the map, increase your steel production 1 step. You start with 30 MC, 5 steel, and 1 steel production)",
+    "tags": ["building", "building"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "placetile(gain Steel/Titanium)",
+        "then": "inc-steelprod-1"
+      }
+    ],
+    "start": ["30 megacredit, 5 steel, 1 steelprod"]
+  },
+  {
+    "id": 5,
+    "name": "INTERPLANETARY CINEMATICS",
+    "annotation": "(Effect: Each time you play an event, you gain 2 MC. You start with 20 steel and 30 MC.)",
+    "tags": ["building"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "playcard(tag-Event)",
+        "then": "inc-megacredit-2"
+      }
+    ],
+    "start": ["20 steel, 30 megacredit"]
+  },
+  {
+    "id": 6,
+    "name": "Inventrix",
+    "annotation": "(Effect: Your temperature, oxygen and ocean requirements are +2 or -2 steps, your choice in each case. As you first action in the game, draw 3 cards. Start with 45MC.)",
+    "tags": ["science"],
+    "effect": [
+      {
+        "type": "discount",
+        "counter": ["temperature", "oxygen", "oceanTiles"],
+        "amount": 2
+      }
+    ],
+    "start": ["45 megacredit",
+      {
+      "type": "first",
+      "action": "inc-Card-3"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Phoblog",
+    "annotation": "(Effect: Your titanium resources are each worth 1 MC extra. You start with 10 titanium and 23 MC.)",
+    "tags": ["space"],
+    "effect": [
+      {
+        "type": "resourcemapping",
+        "from": "Titanium",
+        "to": "MegaCredit",
+        "rate": 1.0
+      }
+    ],
+    "start": ["10 titanium, 23 megacredit"]
+  },
+  {
+    "id": 8,
+    "name": "Tharsis Republic",
+    "annotation": "(Effect: When any city tile is placed ON MARS, increase your MC production 1 step. When you place a city tile, gain 3 MC. You start with 40 MC. As your first action in the game, place a city tile.)",
+    "tags": ["building"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "placetile(City,onMars,any)",
+        "then": "inc-megacreditprod-1"
+      },
+      {
+        "type": "effect",
+        "if": "placetile(City,)",
+        "then": "inc-megacredit-3"
+      }
+    ],
+    "start": ["40 megacredit",
+      {
+        "type": "first",
+        "action": "placetile/City/Ground/true"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Thorgate",
+    "annotation": "(Effect: When playing a power card OR THE STANDARD PROJECT POWER PLANT, you pay 3 MC less for it. You start with 1 energy production and 48 MC.)",
+    "tags": ["power"],
+    "effect": [
+      {
+        "type": "discount",
+        "tag": "Power",
+        "amount": 3
+      },
+      {
+        "type": "discount",
+        "standardproject": "PowerPlant",
+        "amount": 3
+      }
+    ],
+    "start":  ["1 energyprod, 48 megacredit"]
+  },
+  {
+    "id": 10,
+    "name": "UNITED NATIONS MARS INITIATIVE",
+    "annotation": "(Action:If your Terraform Rating was raised this generation, you may pay 3 MC to raise it 1 step more. You start with 40 MC.)",
+    "tags": ["earth"],
+    "effect": [
+      {
+        "type": "action",
+        "action": "inc-TR-1",
+        "cost": "MegaCredit/3",
+        "if": "incgen-TR"
+      }
+    ],
+    "start":  ["40 megacredit"]
+  }
+]

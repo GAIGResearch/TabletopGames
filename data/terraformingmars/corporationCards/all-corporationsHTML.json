@@ -1,0 +1,1807 @@
+[
+  {
+    "@id": "#CORP18",
+    "@class": "filterDiv corporation buildingTag prelude",
+    "div": [
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "prelude-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag tag-building"
+              },
+              {
+                "@class": "resource money",
+                "#text": "-2"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Effect: When you play a building tag, you pay 2 megacredit less for it.)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@style": "margin-top:20px;width:50px;display:inline-block;",
+            "span": {
+              "@style": "color:red;border:4px solid red;border-radius:50%;padding:3px 5px 3px 5px;font-size:30px;line-height:14px;box-shadow: 3px 3px 3px grey, inset 0 0 3px 3px grey;text-shadow: 3px 3px 3px grey;",
+              "#text": "㨐"
+            }
+          },
+          {
+            "@style": "display: inline-block; width:140px; font-size:19px; line-height: 22px; vertical-align: middle; margin-bottom: 15px;\r\n                            font-family: 'Prototype';\r\n                            font-weight:normal;\r\n                            ",
+            "br": "",
+            "div": {
+              "@style": "margin-left:10px",
+              "#text": "■■MARS■■"
+            },
+            "#text": "Cheung Shing"
+          },
+          {
+            "@class": "production-box",
+            "@style": "margin-left:45px;margin-top:-10px;",
+            "div": {
+              "@class": "production money",
+              "#text": "3"
+            }
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:20px;",
+            "#text": "44"
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;",
+            "#text": "(You start with 3 megacreditprod and 44 megacredit.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP19",
+    "@class": "filterDiv corporation prelude earthTag spaceTag",
+    "div": [
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "@class": "prelude-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation ",
+        "div": [
+          {
+            "@class": "corporationEffectBox ",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel ",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag tag-earth"
+              },
+              {
+                "@class": "resource card"
+              },
+              {
+                "@class": "description ",
+                "@style": "text-align:center;margin-top:0px; ",
+                "#text": "(Effect: When you play an Earth tag, including this, draw a card.)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@class": "point luna",
+            "@style": "font-size:22px;\r\n                font-family: Prototype;\r\n                font-weight: normal;\r\n                display:inline-block;\r\n                margin-top: 35px;\r\n                margin-bottom: 10px;\r\n                text-decoration: underline;\r\n                margin-left: 40px;\r\n                -webkit-transform:scale(1.5,1); /* Safari and Chrome */\r\n                -moz-transform:scale(1.5,1); /* Firefox */\r\n                -ms-transform:scale(1.5,1); /* IE 9 */\r\n                -o-transform:scale(1.5,1); /* Opera */\r\n                transform:scale(1.5,1); /* W3C */\r\n                ",
+            "span": "",
+            "#text": [
+              "POINT",
+              "LUNA"
+            ]
+          },
+          {
+            "@class": "production-box",
+            "@style": "margin-left:30px;margin-top:-5px;margin-bottom:-5px;",
+            "div": {
+              "@class": "production titanium"
+            }
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:20px",
+            "#text": "38"
+          },
+          {
+            "@class": "description ",
+            "@style": "text-align:center;margin-left:80px",
+            "#text": "(You start with 1 titaniumprod and 38 megacredit.)"
+          }
+        ],
+        "br": ""
+      }
+    ]
+  },
+  {
+    "@id": "#CORP20",
+    "@class": "filterDiv corporation prelude noneTag",
+    "div": [
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "prelude-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "ACTION"
+              },
+              {
+                "@class": "resource money",
+                "#text": "4"
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "production-box",
+                "div": {
+                  "@class": "production wild"
+                }
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Action: Spend 4 megacredit to increase (one of) your LOWESTprod 1 step.)"
+              }
+            ]
+          },
+          {
+            "@class": "robinson",
+            "@style": "letter-spacing:4px;border-bottom:3px solid #ccc;margin-top:5px;",
+            "#text": "ROBINSON"
+          },
+          {
+            "@class": "robinson",
+            "@style": "border-bottom:3px solid #ccc;",
+            "#text": "•—•—•—•—•—•—•"
+          },
+          {
+            "@class": "robinson",
+            "@style": "letter-spacing:2px;",
+            "#text": "INDUSTRIES"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:59px;margin-top:20px;",
+            "#text": "47"
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;",
+            "#text": "(You start with 47 megacredit.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP21",
+    "@class": "filterDiv corporation prelude earthTag ",
+    "div": [
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "prelude-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation ",
+        "div": [
+          {
+            "@class": "corporationEffectBox ",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel ",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag tag-science"
+              },
+              {
+                "@class": "resource money",
+                "#text": "-2"
+              },
+              {
+                "@class": "description ",
+                "@style": "text-align:center;margin-top:0px; ",
+                "#text": "(Effect: When you play an Science tag, you pay 2megacredit less for it.)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@style": "color:rgb(2,125,195);background:linear-gradient(to right,rgb(2,125,195) 10%,white,white,white, white,white,white, white);box-shadow:3px 3px 10px 1px rgb(58,58,58);width:135px;line-height:24px;border-radius:10px 0px 0px 10px",
+            "div": {
+              "@style": "display:inline-block;margin-left:25px;margin-top: 3px;font-size:26px;text-shadow: 2px 2px #ccc;text-align:center",
+              "#text": "VALLEY TRUST"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;",
+            "div": [
+              {
+                "@class": "resource money",
+                "@style": "margin-left:12px;margin-top:10px;",
+                "#text": "37"
+              },
+              {
+                "@class": "resource card-corporation",
+                "@style": "margin-left:50px",
+                "span": {
+                  "@style": "background:linear-gradient(to right, rgb(235,118,171), #e64d91);padding-left:4px;padding-right:4px;border-radius:2px;",
+                  "#text": "PREL"
+                }
+              },
+              {
+                "@class": "description",
+                "@style": "margin-top:-2px;",
+                "#text": "(You start with 37 megacredit. As your first action, draw 3 Prelude cards, and play one of them. Discard the other two.)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP22",
+    "@class": "filterDiv corporation prelude earthTag",
+    "div": [
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "prelude-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation ",
+        "div": [
+          {
+            "@class": "corporationEffectBox ",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel ",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "points",
+                "@style": "position: relative;\r\n                                  margin-top: 0;\r\n                                  margin-left: 0;\r\n                                  display: inline-block;\r\n                                  width: 60px;",
+                "#text": "?"
+              },
+              {
+                "@class": "resource money",
+                "#text": "3"
+              },
+              {
+                "@class": "description ",
+                "@style": "text-align:center;margin-top:0px; ",
+                "#text": "(Effect: When you play a card with a NON-NEGATIVE VP icon, including this, gain 3megacredit.)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@class": "vitor",
+            "@style": "font-size:24px;\r\n                margin-top:10px;\r\n                margin-left:50px;\r\n                margin-bottom:35px;\r\n                display:inline-block;\r\n                box-shadow:6px 6px 6px grey;\r\n                -webkit-transform:scale(2,1); /* Safari and Chrome */\r\n                -moz-transform:scale(2,1); /* Firefox */\r\n                -ms-transform:scale(2,1); /* IE 9 */\r\n                -o-transform:scale(2,1); /* Opera */\r\n                transform:scale(2,1); /* W3C */\r\n                ;",
+            "span": [
+              {
+                "@style": "color:white;background:orangered;padding-left:3px;",
+                "#text": "VIT"
+              },
+              {
+                "@style": "background:linear-gradient(to right, orangered,white);margin-left:-8px;",
+                "#text": "O"
+              },
+              {
+                "@style": "margin-left:-7px;background:white;padding-right:3px;",
+                "#text": "R"
+              }
+            ]
+          },
+          {
+            "@class": "description ",
+            "@style": "text-align:center;margin-top:-5px ",
+            "div": {
+              "@class": "resource money",
+              "#text": "45"
+            },
+            "span": {
+              "@style": "background:orange;padding:2px;padding-left:25px;padding-right:25px;\r\n                font-size:14px;font-weight:bold;margin-left:20px;border-radius:3px;box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 0 0 2px rgba(0,0,0,0.3);",
+              "#text": "AWARDS"
+            },
+            "br": "",
+            "#text": "(You start with 45 megacredit. As your first action, fund an award for free.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP23",
+    "@class": "filterDiv corporation colonies noneTag",
+    "div": [
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "colonies-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "production-box",
+                "div": {
+                  "@class": "production money",
+                  "#text": "1"
+                }
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(When you get a new type of tag in play (event cards do not count), increase your megacreditprod 1 step.)"
+              }
+            ],
+            "span": {
+              "@class": "resource-tag",
+              "@style": "background:linear-gradient(to bottom right, green, yellow, red)"
+            },
+            "#text": ":"
+          },
+          {
+            "@class": "aridor",
+            "#text": "ARIDOR"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:20px;",
+            "#text": "40"
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;margin-top:0px;",
+            "#text": "(You start with 40megacredit. As your first action add a colony tile.)"
+          }
+        ],
+        "span": {
+          "@style": "background:#444;color:#eee;padding:4px;padding-left: 8px;padding-right: 8px; border-radius:20px;font-weight:normal;margin-left:20px;\r\n            box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 0 0 2px rgba(0,0,0,0.3); border:1px solid #eee;",
+          "#text": "COLONY"
+        }
+      }
+    ]
+  },
+  {
+    "@id": "#CORP24",
+    "@class": "filterDiv corporation animalTag colonies",
+    "div": [
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "colonies-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "points",
+            "@style": "z-index:1;margin-top:236px;margin-left:124px;",
+            "div": {
+              "@class": "resource animal"
+            },
+            "#text": "1/2"
+          },
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag tag-animal"
+              },
+              {
+                "@class": "resource-tag tag-plant"
+              },
+              {
+                "@class": "resource animal"
+              },
+              {
+                "@class": "description",
+                "@style": "margin-top:0px;text-align:left;margin-left:20px;",
+                "br": [
+                  "",
+                  "",
+                  ""
+                ],
+                "#text": [
+                  "(Effect: When you play an animal or plant tag, including",
+                  "this, add 1 animal",
+                  "to this card.)"
+                ]
+              }
+            ],
+            "#text": [
+              "/",
+              ":"
+            ]
+          },
+          {
+            "@class": "arklight",
+            "@style": "font-size:19px;\r\n              font-family: Prototype;\r\n              margin-left: 74px;\r\n              letter-spacing: 1px;\r\n              background: linear-gradient(to right,#000089, lightblue, white);\r\n              -webkit-background-clip: text;\r\n              -webkit-text-fill-color: transparent;\r\n              -webkit-transform:scale(2,1); /* Safari and Chrome */\r\n              -moz-transform:scale(2,1); /* Firefox */\r\n              -ms-transform:scale(2,1); /* IE 9 */\r\n              -o-transform:scale(2,1); /* Opera */\r\n              transform:scale(2,1); /* W3C */\r\n              margin-top: 3px;\r\n              margin-bottom: -12px;\r\n              ",
+            "#text": "ARKLIGHT"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-right:30px;margin-left:30px;",
+            "#text": "45"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "moneyprod ",
+              "#text": "2"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;",
+            "#text": "(You start with 45 megacredit. Increase your megacreditprod 2 steps. 1 VP per 2 animals on this card.)"
+          }
+        ],
+        "br": ""
+      }
+    ]
+  },
+  {
+    "@id": "#CORP25",
+    "@class": "filterDiv corporation colonies noneTag",
+    "div": [
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "colonies-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource card"
+              },
+              {
+                "@class": "resource money",
+                "#text": "5"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Effect: When you buy a card to hand, pay 5megacredit instead of 3, including the starting hand.)"
+              }
+            ],
+            "#text": "*  :"
+          },
+          {
+            "@class": "polyphemos",
+            "span": {
+              "@class": "polyphemos2",
+              "#text": "POL"
+            },
+            "#text": "YPHEMOS"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:20px;",
+            "#text": "50"
+          },
+          {
+            "@style": "margin-left:15px;margin-right:15px",
+            "@class": "production-box",
+            "div": {
+              "@class": "production money",
+              "#text": "5"
+            }
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;margin-top:0px;",
+            "#text": "(You start with 50megacredit. Increase your megacreditprod 5 steps. Gain 5 titanium.)"
+          }
+        ],
+        "#text": "5"
+      }
+    ]
+  },
+  {
+    "@id": "#CORP26",
+    "@class": "filterDiv corporation colonies noneTag",
+    "div": [
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "colonies-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "tile colony red-outline"
+              },
+              {
+                "@class": "production-box",
+                "div": {
+                  "@class": "production money",
+                  "#text": "1"
+                }
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Effect: When any colony is placed, including this, raise your megacreditprod 1 step.)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@class": "poseidon",
+            "#text": "POSEIDON"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:50px;margin-right:20px;",
+            "#text": "45"
+          },
+          {
+            "@class": "tile colony"
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;margin-top:-8px;",
+            "#text": "(You start with 45megacredit. As your first action, place a colony.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP27",
+    "@class": "filterDiv corporation jovianTag colonies",
+    "div": [
+      {
+        "@class": "tag tag1 tag-jovian"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "colonies-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:5px;",
+                "#text": "ACTION"
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "resource floater",
+                "@style": "margin-bottom:5px;"
+              },
+              {
+                "@class": "resource floater"
+              },
+              {
+                "@class": "resource heat"
+              },
+              {
+                "@class": "resource heat"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:-5px;",
+                "br": [
+                  "",
+                  ""
+                ],
+                "#text": [
+                  "(Action: Add a floater to ANY card.",
+                  "Effect: Floaters on this card may be used as 2 heat each.)"
+                ]
+              }
+            ],
+            "br": "",
+            "#text": [
+              "*",
+              "="
+            ]
+          },
+          {
+            "@class": "stormegacreditraft1",
+            "#text": "STORM"
+          },
+          {
+            "@class": "stormegacreditraft2",
+            "#text": "CRAFT"
+          },
+          {
+            "@class": "stormegacreditraft3",
+            "#text": "INCOR"
+          },
+          {
+            "@class": "stormegacreditraft4",
+            "#text": "PORATED"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:60px;",
+            "#text": "48"
+          },
+          {
+            "@class": "description",
+            "@style": "margin-left: 20px",
+            "#text": "(You start with 48 megacredit.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP28",
+    "@class": "filterDiv corporation buildingTag turmoil",
+    "div": [
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "turmoil-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation ",
+        "div": [
+          {
+            "@class": "corporationEffectBox ",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:0px;",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource ocean-resource red-outline"
+              },
+              {
+                "@class": "production-box",
+                "@style": "margin-top: 10px;",
+                "div": {
+                  "@class": "production money",
+                  "#text": "1"
+                }
+              },
+              {
+                "@class": "resource ocean-resource",
+                "@style": "margin-left:-7px"
+              },
+              {
+                "@class": "tile empty-tile-small",
+                "@style": "margin-left: -8px;margin-right: 2px;"
+              },
+              {
+                "@class": "resource money",
+                "#text": "3"
+              },
+              {
+                "@class": "description ",
+                "@style": "text-align:center;margin-top:0px; ",
+                "#text": "(Effect: When any ocean tile is placed, increase your megacreditprod 1 step. Your bonus for placing adjacent to oceans is 3megacredit instead of 2megacredit.)"
+              }
+            ],
+            "#text": [
+              "*:",
+              ":"
+            ]
+          },
+          {
+            "@style": "font-size:22px;margin-top:10px;margin-left:10px;font-family:Times;color:white;\r\n                text-shadow:0 1px 0px #444, 0px -1px 0px #444, -1px 0px 0px #444, 1px 0px 0px #444;letter-spacing:4px;",
+            "br": "",
+            "#text": [
+              "LAKEFRONT",
+              "RESORTS"
+            ]
+          },
+          {
+            "@class": "resource money ",
+            "@style": "margin-left:75px;margin-top:10px;",
+            "#text": "54"
+          },
+          {
+            "@class": "description ",
+            "@style": "text-align:center;margin-left:15px;",
+            "#text": "(You start with 54 megacredit.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP29",
+    "@class": "filterDiv corporation  turmoil",
+    "div": [
+      {
+        "@class": "turmoil-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation ",
+        "div": [
+          {
+            "@class": "points",
+            "@style": "z-index:1;margin-top:245px;margin-left:130px;",
+            "div": {
+              "@class": "resource pristar"
+            },
+            "#text": "1/"
+          },
+          {
+            "@class": "corporationEffectBox ",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:5px;",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "tile rating",
+                "div": [
+                  {
+                    "@class": "left-line"
+                  },
+                  {
+                    "@class": "right-line"
+                  }
+                ]
+              },
+              {
+                "@class": "resource pristar"
+              },
+              {
+                "@class": "resource money",
+                "#text": "6"
+              },
+              {
+                "@class": "description ",
+                "@style": "text-align:center;text-align:left;",
+                "br": [
+                  "",
+                  "",
+                  ""
+                ],
+                "#text": [
+                  "(Effect: Duringprod phase, if you did not get TR so far this",
+                  "generation, add one",
+                  "preservation resource",
+                  "here and gain 6megacredit.)"
+                ]
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@style": "color:#ff5d21;text-shadow: 3px 3px 3px black;font-size:30px;transform:scaleX(0.8);letter-spacing:1px;",
+            "#text": "PRISTAR"
+          },
+          {
+            "@class": "resource money ",
+            "@style": "margin-left:10px;margin-right:15px;",
+            "#text": "53"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "description ",
+            "@style": "text-align:center;",
+            "br": "",
+            "#text": [
+              "(You start with 53 megacredit. Decrease your TR 2 steps.",
+              "1 VP per preservation resource here.)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP30",
+    "@class": "filterDiv corporation wildTag turmoil",
+    "div": [
+      {
+        "@class": "tag tag1 tag-wild"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "turmoil-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "ACTION"
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "resource money",
+                "#text": "2"
+              },
+              {
+                "@class": "delegate"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Action: Gain 2megacredit for EACH PARTY WHERE YOU HAVE AT LEAST 1 DELEGATE.)"
+              }
+            ],
+            "#text": [
+              "/",
+              "*"
+            ]
+          },
+          {
+            "@class": "septem",
+            "#text": "Septem Tribus"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:70px;margin-right:20px;margin-top:20px;",
+            "#text": "36"
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:0px;text-align:center;",
+            "#text": "(You start with 36 megacredit. When you perform an action, the wild tag counts as any tag of your choice.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP31",
+    "@class": "filterDiv corporation earthTag scienceTag turmoil",
+    "div": [
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "@class": "turmoil-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation ",
+        "div": [
+          {
+            "@class": "corporationEffectBox ",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource card"
+              },
+              {
+                "@class": "resource money",
+                "#text": "1"
+              },
+              {
+                "@class": "description ",
+                "@style": "text-align:center;margin-top:0px; ",
+                "#text": "(Effect: Buying cards to hand costs 1megacredit.)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@style": "font-size:16px;margin-top:33px;margin-left:75px;margin-bottom:5px; font-family:Prototype;color:#222;transform:scale(2,1)",
+            "#text": "TERRALABS"
+          },
+          {
+            "@style": "font-size:8px;letter-spacing:2px;font-family:Prototype;margin-left:100px;margin-top:-5px;transform:scale(2,1)",
+            "#text": "RESEARCH"
+          },
+          {
+            "@class": "resource money ",
+            "@style": "margin-left:25px;margin-right:15px;",
+            "#text": "14"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "description ",
+            "@style": "text-align:center;",
+            "#text": "(You start with 14 megacredit. Lower your TR 1 step.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP32",
+    "@class": "filterDiv corporation buildingTag turmoil",
+    "div": [
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "turmoil-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "ACTION"
+              },
+              {
+                "@class": "production-box",
+                "div": {
+                  "@class": "production wild"
+                }
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "resource wild"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Action: Decrease anyprod to gain 4 resources of that kind.)"
+              }
+            ],
+            "#text": "4"
+          },
+          {
+            "@class": "utopia",
+            "div": [
+              {
+                "@class": "utopia1",
+                "#text": "UTOPIA"
+              },
+              {
+                "@class": "utopia2",
+                "#text": "INVEST"
+              }
+            ]
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:35px;margin-right:20px;",
+            "#text": "40"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "production steel"
+              },
+              {
+                "@class": "production titanium"
+              }
+            ]
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:-5px;text-align:center;",
+            "#text": "(You start with 40 megacredit. Increase your steel and titaniumprod 1 step each.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP33",
+    "@class": "filterDiv corporation buildingTag powerTag promo",
+    "div": [
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "ACTION"
+              },
+              {
+                "@class": "red-arrow",
+                "@style": "margin-left: -12px;"
+              },
+              {
+                "@class": "production-box",
+                "div": {
+                  "@class": "production energy"
+                }
+              },
+              {
+                "@class": "resource money",
+                "#text": "3"
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "resource card",
+                "div": {
+                  "@class": "card-icon tag-building"
+                }
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Action: Increase your energyprod 1 step IF YOU HAVE NO ENERGY RESOURCES, or spend 3megacredit to draw a building card.)"
+              }
+            ],
+            "#text": "* OR"
+          },
+          {
+            "@class": "factorum",
+            "#text": "FACTORUM"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:35px;margin-right:20px;",
+            "#text": "37"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production steel"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "text-align:center;",
+            "#text": "(You start with 37 megacredit. Increase your steelprod 1 step.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP34",
+    "@class": "filterDiv corporation promo",
+    "div": [
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "production-box",
+                "@style": "width:50px;",
+                "div": {
+                  "@class": "production red-outline wild"
+                },
+                "#text": "-"
+              },
+              {
+                "@class": "resource red-outline wild"
+              },
+              {
+                "@class": "resource money",
+                "#text": "3"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Effect: When a player causes another player to decreaseprod or lose resources, pay 3megacredit to the victim,\r\n                or as much as possible.)"
+              }
+            ],
+            "#text": [
+              "OR -",
+              ":\r\n              PAY"
+            ]
+          },
+          {
+            "@class": "mons",
+            "div": [
+              {
+                "@class": "mons0",
+                "#text": "▲"
+              },
+              {
+                "@class": "mons1",
+                "#text": "mons"
+              },
+              {
+                "@class": "mons2",
+                "#text": "INSURANCE"
+              }
+            ]
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left: 145px;\r\n                  margin-right: 20px;\r\n                  margin-top: -80px;\r\n                  position: absolute;",
+            "#text": "48"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "@style": "\r\n                  position: absolute;\r\n                  margin-top: -46px;\r\n                  margin-left: 92px;",
+            "div": [
+              {
+                "@class": "production money",
+                "#text": "4"
+              },
+              {
+                "@class": "production money red-outline",
+                "#text": "-2"
+              }
+            ],
+            "#text": "*"
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:2px;text-align:center;",
+            "#text": "(You start with 48 megacredit. Increase your megacreditprod 4 steps. ALL OPPONENTS DECREASE THEIR megacreditprod 2 STEPS.\r\n              THIS DOES NOT TRIGGER THE EFFECT BELOW.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP35",
+    "@class": "filterDiv corporation buildingTag promo",
+    "div": [
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "tile empty-tile-small red-outline",
+                "@style": "margin-right: -3px;\r\n              "
+              },
+              {
+                "@class": "tile empty-tile-small"
+              },
+              {
+                "@class": "resource wild"
+              },
+              {
+                "@class": "description",
+                "@style": "text-align:center;margin-top:0px;",
+                "#text": "(Effect: Each new adjacency between your tile and an opponent's tile gives you a standard resource of your choice (regardless of who just placed a tile).)"
+              }
+            ],
+            "#text": ":"
+          },
+          {
+            "@class": "philares",
+            "span": {
+              "@style": "color:#ff5858",
+              "#text": "A"
+            },
+            "#text": [
+              "PHIL",
+              "RES"
+            ]
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:35px;margin-right:20px;",
+            "#text": "47"
+          },
+          {
+            "@class": "tile greenery-tile"
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:-5px;text-align:center;",
+            "#text": "(You start with 47 megacredit. As your first action, place a greenery tile and raise the oxygen 1 step.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP36",
+    "@class": "filterDiv corporation promo noneTag",
+    "div": [
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "#text": "ACTION"
+              },
+              {
+                "@style": "font-size:10px;line-height:12px;margin-top:-5px;margin-bottom:10px;",
+                "span": {
+                  "@class": "red-arrow"
+                },
+                "#text": "ACTION: PLACE A PLAYER MARKER ON A NON-RESERVED AREA ADJACENT TO ONE OF YOUR TILES OR MARKED AREAS"
+              },
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-top: 0px;",
+                "#text": "EFFECT"
+              },
+              {
+                "@style": "font-size:10px;line-height:12px;margin-top:-5px;",
+                "#text": "EFFECT: MARKED AREAS ARE RESERVED FOR YOU. WHEN YOU PLACE A TILE THERE, GAIN 3 megacredit"
+              }
+            ]
+          },
+          {
+            "@style": "font-size:20px;\r\n            padding-left:3px;width:147px;background:#eeeeee;box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 3px 3px 3px grey;margin-left:10px;border-radius:5px;\r\n            border-top: 2px solid rgb(221,221,221);\r\n            border-left: 2px solid rgb(221,221,221);\r\n            border-bottom: 2px solid rgb(137,137,137);\r\n            border-right: 2px solid rgb(137,137,137);\r\n            font-family: Arial;\r\n            ",
+            "br": "",
+            "#text": [
+              "ARCADIAN",
+              "COMMUNITIES"
+            ]
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:15px;margin-right:15px;",
+            "#text": "40"
+          },
+          {
+            "@class": "resource steel",
+            "@style": "margin-right:20px;"
+          },
+          {
+            "@class": "resource",
+            "@style": "background: linear-gradient(orange, orangered);"
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:-5px;text-align:center;",
+            "br": "",
+            "#text": [
+              "(You start with 40 megacredit and 10 steel.",
+              "AS YOUR FIRST ACTION, PLACE A COMMUNITY (PLAYER MARKER) ON A NON-RESERVED AREA.)"
+            ]
+          }
+        ],
+        "#text": [
+          "10",
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP37",
+    "@class": "filterDiv corporation buildingTag microbeTag  promo",
+    "div": [
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-microbe"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:10px",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag tag-building",
+                "@style": "margin-left:-2px"
+              },
+              {
+                "@class": "resource microbe"
+              },
+              {
+                "@class": "resource microbe"
+              },
+              {
+                "@class": "production-box",
+                "@style": "margin-left:5px;",
+                "div": {
+                  "@class": "production plant"
+                }
+              },
+              {
+                "@class": "description",
+                "@style": "margin-top:-3px;text-align:center;",
+                "#text": "(Effect: When you play a building tag, including this, gain 1 microbe to this card, or remove 2 microbes here and raise your plantprod 1 step.)"
+              }
+            ],
+            "br": "",
+            "#text": [
+              ":",
+              "OR\r\n              2",
+              ":"
+            ]
+          },
+          {
+            "@style": "font-size:20px;margin-top:5px;margin-bottom:5px; border-radius:25px;padding:10px;\r\n              background:red;color:white; box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 0 0 2px rgba(0,0,0,0.3), 3px 3px 3px #444; font-family: Prototype;\r\n              font-weight: normal;text-shadow: 0 0 1px black;width: 100px;",
+            "#text": "RECYCLON"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:50px;margin-right:25px;",
+            "#text": "38"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "production steel"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:0px;text-align:center;",
+            "#text": "(You start with 38 megacredit and 1 steelprod.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP38",
+    "@class": "filterDiv corporation microbeTag  promo",
+    "div": [
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:2px",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag tag-microbe red-outline"
+              },
+              {
+                "@class": "resource money red-outline",
+                "#text": "2"
+              },
+              {
+                "@class": "resource microbe red-outline"
+              },
+              {
+                "@class": "resource-tag tag-microbe red-outline",
+                "@style": "margin-top:-4px;"
+              },
+              {
+                "@class": "resource money",
+                "@style": "margin-right: 97px;\r\n              margin-top: 2px;",
+                "#text": "2"
+              },
+              {
+                "@class": "description",
+                "@style": "margin-top:-3px;text-align:center;",
+                "#text": "(Effect: when a microbe tag is played, incl. this, THAT PLAYER gains 2 megacredit, or adds a microbe to THAT card, and you gain 2 megacredit.)"
+              }
+            ],
+            "br": [
+              "",
+              ""
+            ],
+            "#text": [
+              ":",
+              "* OR",
+              "*",
+              ":"
+            ]
+          },
+          {
+            "@class": "splice",
+            "@style": "margin-left: 19px;\r\n              font-size:29px;\r\n              font-family: Arial;\r\n              font-weight:bold;\r\n              width:109px;\r\n              background:#eeeeee;\r\n              box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 3px 3px 3px grey;",
+            "div": [
+              {
+                "@style": "margin-left:2px",
+                "span": {
+                  "@style": "color:red",
+                  "#text": "C"
+                },
+                "#text": [
+                  "SPLI",
+                  "E"
+                ]
+              },
+              {
+                "@style": "height:3px;background:red;margin-top:-3px;"
+              },
+              {
+                "@style": "font-size:10px",
+                "#text": "TACTICAL GENOMICS"
+              }
+            ]
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:60px;margin-right:25px;",
+            "#text": "44"
+          },
+          {
+            "@class": "resource card",
+            "@style": "margin-left:20px;",
+            "div": {
+              "@class": "card-icon tag-microbe"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top:-8px;text-align:center;",
+            "#text": "(You start with 44 megacredit. As your first action, reveal cards until you have revealed a microbe tag. Take that card into hand, and discard the rest.)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "#CORP39",
+    "@class": "filterDiv corporation spaceTag  promo",
+    "div": [
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:2px",
+                "#text": "ACTION"
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "resource asteroid"
+              },
+              {
+                "@class": "resource wild"
+              },
+              {
+                "@class": "resource asteroid"
+              },
+              {
+                "@class": "red-arrow"
+              },
+              {
+                "@class": "resource titanium"
+              },
+              {
+                "@class": "description",
+                "#text": "(Action: Either add 1 asteroid to ANY CARD or gain any standard resource OR remove 1 asteroid here to gain 3 titanium.)"
+              }
+            ],
+            "br": "",
+            "#text": [
+              "* /",
+              "OR",
+              "3"
+            ]
+          },
+          {
+            "@class": "astrodrill",
+            "#text": "ASTRODRILL"
+          },
+          {
+            "@class": "astrodrill",
+            "@style": "margin-top:-5px;margin-bottom:-20px"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-left:40px;margin-right:25px;",
+            "#text": "38"
+          },
+          {
+            "@class": "resource asteroid"
+          },
+          {
+            "@class": "description",
+            "@style": "text-align: center;",
+            "#text": "(You start with 38megacredit, and 3 asteroid resources here.)"
+          }
+        ],
+        "#text": "3"
+      }
+    ]
+  },
+  {
+    "@id": "#CORP40",
+    "@class": "filterDiv corporation microbeTag  promo",
+    "div": [
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "tag tag2 tag-microbe"
+      },
+      {
+        "@class": "corporationLabel",
+        "#text": "CORPORATION"
+      },
+      {
+        "@class": "promo-icon corporation-icon"
+      },
+      {
+        "@class": "contentCorporation",
+        "div": [
+          {
+            "@class": "corporationEffectBox",
+            "@style": "margin-top:85px; height: 213px;text-align: left;padding-left: 5px;",
+            "div": [
+              {
+                "@class": "corporationEffectBoxLabel",
+                "@style": "margin-bottom:2px",
+                "#text": "EFFECT"
+              },
+              {
+                "@class": "resource-tag red-outline tag-microbe",
+                "@style": "margin-left:3px"
+              },
+              {
+                "@class": "resource biohazard",
+                "@style": "margin-left:9px"
+              },
+              {
+                "@class": "resource money",
+                "#text": "-4"
+              },
+              {
+                "@class": "resource-tag tag-science",
+                "@style": "margin-left:3px"
+              },
+              {
+                "@class": "resource biohazard"
+              },
+              {
+                "@class": "tile rating",
+                "@style": "margin-left: -10px;\r\n              transform: scale(0.7);"
+              },
+              {
+                "@class": "tile rating",
+                "@style": "margin-left: -7px;\r\n              transform: scale(0.7);"
+              },
+              {
+                "@class": "down-arrow"
+              },
+              {
+                "@class": "description",
+                "@style": "position: absolute;\r\n              margin-top: -142px;\r\n              margin-left: 125px;",
+                "#text": "(Effect: When ANY microbe is played, including these, add a disease here and lose 4megacredit or as much as possible.\r\n                When you play a science tag, remove 1 disease"
+              },
+              {
+                "@class": "description",
+                "@style": "margin-top:-10px;",
+                "#text": "from here and raise your TR 1 step, OR, if there are no diseases here,\r\n                you MAY raise your TR 3 steps and TURN THIS CARD FACE DOWN\r\n                (lose this card tags/effects).)"
+              }
+            ],
+            "br": [
+              "",
+              ""
+            ],
+            "#text": [
+              ":",
+              ":-",
+              "OR 3"
+            ]
+          },
+          {
+            "@style": "font-size:16px;margin-bottom: 5px;",
+            "#text": "PHARMACY UNION"
+          },
+          {
+            "@class": "resource money",
+            "@style": "margin-right:5px;",
+            "#text": "54"
+          },
+          {
+            "@class": "resource card",
+            "div": {
+              "@class": "card-icon tag-science",
+              "@style": "color:black;font-size: 20px;"
+            }
+          },
+          {
+            "@class": "description",
+            "@style": "margin-top: -40px;\r\n            margin-left: 90px;\r\n            width: 110px;",
+            "#text": "(You start with 54 megacredit. Draw a science card.)"
+          }
+        ]
+      }
+    ]
+  }
+]
