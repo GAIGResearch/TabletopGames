@@ -7,10 +7,14 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import players.human.ActionController;
+import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
+import players.simple.SameActionPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
+import static games.GameType.Blackjack;
 import static games.GameType.ColtExpress;
 
 public class Game {
@@ -705,15 +710,17 @@ public class Game {
 
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
+        players.add(new SameActionPlayer());
+//        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(ColtExpress, players, seed, ac, false, null);
+        runOne(Blackjack, players, seed, ac, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);

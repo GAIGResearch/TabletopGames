@@ -31,3 +31,5 @@ target/classes/META-INF/ModernBoardGame.kotlin_module
 out/production/ModernBoardGame/META-INF/
 
 javadoc/
+src/main/java/core/components/FrenchCard.java
+src/main/java/core/components/FrenchCard.java
