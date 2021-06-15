@@ -4,18 +4,15 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.components.Token;
 import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
+import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import games.dominion.DominionParameters;
-import games.dominion.DominionTurnOrder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class BattleloreGameState extends AbstractGameState
 {
@@ -27,15 +24,25 @@ public class BattleloreGameState extends AbstractGameState
      * @param gameType
      */
 
-    GridBoard<Unit> hexBoard;
+    GridBoard<MapTile> gameBoard;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers)
     {
         super(gameParameters, new AlternatingTurnOrder(nPlayers) ,GameType.Battlelore);
     }
 
-    public GridBoard<Unit> getBoard() {
-        return hexBoard;
+    public void AddUnit(int locX, int locY, Unit unit)
+    {
+        MapTile tile = gameBoard.getElement(locX, locY);
+        if (tile != null)
+        {
+            //if()//TODO ADD UNIT
+            //gameBoard.getElement(locX, locY).SetUnits();
+        }
+    }
+
+    public GridBoard<MapTile> getBoard() {
+        return gameBoard;
     }
 
     @Override
@@ -43,7 +50,7 @@ public class BattleloreGameState extends AbstractGameState
     {
         return new ArrayList<Component>()
         {{
-            add(hexBoard);
+            add(gameBoard);
         }};
     }
 
@@ -51,7 +58,7 @@ public class BattleloreGameState extends AbstractGameState
     protected AbstractGameState _copy(int playerId)
     {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), 2);
-        state.hexBoard = hexBoard.copy();
+        state.gameBoard = gameBoard.copy();
         return state;
     }
 
@@ -76,7 +83,7 @@ public class BattleloreGameState extends AbstractGameState
 
     @Override
     protected void _reset() {
-        hexBoard = null;
+        gameBoard = null;
     }
 
     @Override
@@ -98,7 +105,7 @@ public class BattleloreGameState extends AbstractGameState
         }
 
         BattleloreGameState other = (BattleloreGameState) o;
-        return Objects.equals(hexBoard, other.hexBoard);
+        return Objects.equals(gameBoard, other.gameBoard);
     }
 
 }

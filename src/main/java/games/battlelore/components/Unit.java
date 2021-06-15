@@ -18,14 +18,22 @@ import java.util.function.Function;
 
 public class Unit extends Component
 {
+
+    //Each unit consist of 3 soldiers. Since a unit can only have one type of soldier, there is no need to create different classes.
     //Variables
     private String id;
     private String name;
-    public int faction;
+    public Faction faction;
     public int move;
     public int strength;
     public int health;
+    //protected int unitCount;
     //Add special power
+
+    public enum Faction
+    {
+        NA, Dakhan_Lords, Uthuk_Yllan
+    }
 
     public Unit()
     {
@@ -35,10 +43,11 @@ public class Unit extends Component
         this.move = 0;
         this.strength = 0;
         this.health = 0;
-        this.faction = -1;
+        //this.unitCount = 0;
+        this.faction = Faction.NA;
     }
 
-    public Unit(Utils.ComponentType type, String id, String name, int move, int strength, int health, int faction)
+    public Unit(Utils.ComponentType type, String id, String name, int move, int strength, int health, Faction faction)//, int unitCount)
     {
         super(type, name);
         this.name = name;
@@ -47,13 +56,24 @@ public class Unit extends Component
         this.strength = strength;
         this.health = health;
         this.faction = faction;
+        //this.unitCount = unitCount;
     }
 
+
+    public int getTotalStrength()
+    {
+        return strength; //* unitCount;
+    }
+
+    public int getTotalHealth()
+    {
+        return health;// * unitCount;
+    }
 
     @Override
     public Component copy()
     {
-        return new Unit(type, id, name, move, strength, health, faction);
+        return new Unit(type, id, name, move, strength, health, faction);//, unitCount);
     }
 
     @Override
@@ -80,7 +100,8 @@ public class Unit extends Component
                 move == unit.move &&
                 strength == unit.strength &&
                 health == unit.health &&
-                faction == unit.faction;
+                faction == unit.faction;//&&
+                //unitCount == unit.unitCount;
     }
 
     public static List<Unit> loadUnits(String filename)
@@ -112,13 +133,30 @@ public class Unit extends Component
         this.health = ((Long) ( (JSONArray) unit.get("health")).get(1)).intValue();
         this.componentName = (String) unit.get("id");
         this.name = (String) unit.get("name");
-        this.faction = ((Long) ( (JSONArray) unit.get("faction")).get(1)).intValue();;
+        this.faction = parseFaction(((Long) ( (JSONArray) unit.get("faction")).get(1)).intValue());
+        //this.unitCount = ((Long) ( (JSONArray) unit.get("unitCount")).get(1)).intValue();
 
         //this.type = (String) unit.get("type");
         //this.special = (String) unit.get("special");
         //this.id =  (String) unit.get("id");
 
         parseComponent(this, unit);
+    }
+
+    private Faction parseFaction(int faction)
+    {
+        if(faction == 1)
+        {
+            return Faction.Dakhan_Lords;
+        }
+        else if (faction == 0)
+        {
+            return Faction.Uthuk_Yllan;
+        }
+        else
+        {
+            return Faction.NA;
+        }
     }
 
     @Override

@@ -7,7 +7,8 @@
     "strength": ["Integer", 3],
     "health": ["Integer", 3],
 	"type": "soldier",
-	"special": "rage"
+	"special": "rage",
+    "unitCount": ["Integer", 3]
   },
   {
 	"id":"decoy",
@@ -17,7 +18,8 @@
     "strength": ["Integer", 0],
     "health": ["Integer", 0],
 	"type": "soldier",
-	"special": ""
+	"special": "",
+    "unitCount": ["Integer", 1]
   },
   {
 	"id":"viper_legion",
@@ -26,7 +28,8 @@
     "move": ["Integer", 2],
     "strength": ["Integer", 2],
     "health": ["Integer", 3],
-	"special": "bite"
+	"special": "bite",
+    "unitCount": ["Integer", 3]
   },
     {
 	"id":"citadel_guard",
@@ -35,8 +38,9 @@
     "move": ["Integer", 2],
     "strength": ["Integer", 3],
     "health": ["Integer", 3],
-	"special": "pursue"
-  },  
+	"special": "pursue",
+    "unitCount": ["Integer", 3]
+    },
   {
 	"id":"yeoman_archers",
     "faction": ["Integer", 1],
@@ -44,6 +48,7 @@
     "move": ["Integer", 2],
     "strength": ["Integer", 2],
     "health": ["Integer", 3],
-	"special": "doubleshot"
+	"special": "doubleshot",
+    "unitCount": ["Integer", 3]
   }
 ]

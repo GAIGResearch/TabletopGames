@@ -7,7 +7,7 @@ import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
 
-import games.battlelore.components.Unit;
+import games.battlelore.components.MapTile;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -25,7 +25,11 @@ public class BattleloreForwardModel extends AbstractForwardModel
         int hexHeight = gameParams.hexHeight;
         int hexWidth = gameParams.hexWidth;
         BattleloreGameState gameState = (BattleloreGameState)initialState;
-        gameState.hexBoard = new GridBoard<Unit>(hexWidth, hexHeight, new Unit());
+        //MapTile[][] mapTiles= new MapTile[hexWidth][hexHeight];
+
+        gameState.gameBoard = new GridBoard<MapTile>(hexWidth, hexHeight, new MapTile());
+        //Loadhere???
+
     }
 
     @Override
@@ -35,11 +39,11 @@ public class BattleloreForwardModel extends AbstractForwardModel
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getTurnOrder().getCurrentPlayer(gameState);//TODO_Ertugrul might be used later
 
-        for (int x = 0; x < state.hexBoard.getWidth(); x++)
+        for (int x = 0; x < state.gameBoard.getWidth(); x++)
         {
-            for (int y = 0; y < state.hexBoard.getHeight(); y++)
+            for (int y = 0; y < state.gameBoard.getHeight(); y++)
             {
-                actions.add(new SetGridValueAction(state.hexBoard.getComponentID(), x, y, BattleloreConstants.itemList.get(0)));
+                actions.add(new SetGridValueAction(state.gameBoard.getComponentID(), x, y, BattleloreConstants.itemList.get(0)));
             }
         }
         return actions;
