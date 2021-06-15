@@ -1,5 +1,14 @@
 package evaluation;
 
+import core.*;
+import core.interfaces.IStatisticLogger;
+import evodef.*;
+import games.GameType;
+import utilities.SummaryLogger;
+
+import java.util.*;
+import java.util.stream.*;
+import static java.util.stream.Collectors.*;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;

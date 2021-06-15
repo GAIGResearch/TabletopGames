@@ -3,6 +3,13 @@ package games.dotsboxes;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Collection;
+
 import core.actions.AbstractAction;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
