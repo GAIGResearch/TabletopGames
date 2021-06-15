@@ -1,17 +1,18 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
-import games.blackjack.BlackjackGameState;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import players.simple.SameActionPlayer;
 import utilities.Pair;
@@ -19,12 +20,14 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.*;
+import static games.GameType.Blackjack;
+import static games.GameType.ColtExpress;
 
 public class Game {
 
@@ -239,7 +242,7 @@ public class Game {
                 // Either ask player which action to use or, in case no actions are available, report the updated observation
                 AbstractAction action = null;
                 if (observedActions.size() > 0) {
-                    if (observedActions.size() == 1 && !(currentPlayer instanceof HumanGUIPlayer)) {
+                    if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
                         // Can only do 1 action, so do it.
                         action = observedActions.get(0);
                         currentPlayer.registerUpdatedObservation(observation);
@@ -695,8 +698,7 @@ public class Game {
      */
     public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        //ActionController ac = new ActionController(); //null;
-        ActionController ac = null;
+        ActionController ac = new ActionController(); //null;
 
         /* 2. Game seed */
         long seed = System.currentTimeMillis(); //0;
@@ -706,44 +708,32 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-        long seeds[] = new long[10];
-
-        for (int i = 0; i < 10; i++) {
-            try {
-                Thread.sleep((long)(Math.random() * 1000));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            seeds[i] = System.currentTimeMillis();
-        }
-
-        //players.add(new RandomPlayer());
-        players.add(new RMHCPlayer());
-//       players.add(new MCTSPlayer(params1));
-        //players.add(new HumanGUIPlayer(ac));
-        //players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
         players.add(new SameActionPlayer());
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        //runOne(Blackjack, players, seed, ac, false, null);
-        runMany(new ArrayList<GameType>() {{add(Poker);}}, players, 10, seeds, null, false, null);
-        //runMany(Collections.singletonList(Blackjack), players, 100L,100, null, false, false, null);
+        runOne(Blackjack, players, seed, ac, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
 //        games.add(LoveLetter);
-//        runMany(games, players, null, 50, null, false, false);
+//        runMany(games, players, 100L,100, null, false, false, null);
+//        runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, null, 100, ac, false, true);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
+//        runMany(games, players, 100L, 100, null, false, false, null);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
 
     }
 }

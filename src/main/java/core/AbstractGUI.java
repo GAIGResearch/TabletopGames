@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.*;
 public abstract class AbstractGUI extends JFrame {
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
-    public static int defaultInfoPanelHeight = 160;
+    public static int defaultInfoPanelHeight = 180;
     public static int defaultCardWidth = 100, defaultCardHeight = 80;
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
     public static int defaultDisplayWidth = 500, defaultDisplayHeight = 400;

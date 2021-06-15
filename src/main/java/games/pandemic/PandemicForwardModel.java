@@ -14,6 +14,7 @@ import games.pandemic.rules.conditions.*;
 import games.pandemic.rules.gameOver.*;
 import games.pandemic.rules.rules.*;
 import games.pandemic.rules.rules.DrawCards;
+import gui.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
@@ -111,7 +112,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         nextRule = root;
 
         // Draw game tree from root
-//        new GameFlowDiagram(root);
+        new GameFlowDiagram(root);
     }
 
     /**
@@ -188,7 +189,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             hash = Hash.GetInstance().hash("Disease Cube " + color);
             Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
             diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
-            diseaseCubeCounter.setValue(0);
+            diseaseCubeCounter.setValue(pp.n_initial_disease_cubes);
             gameArea.putComponent(hash, diseaseCubeCounter);
         }
 
@@ -302,7 +303,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
     @Override
     protected AbstractForwardModel _copy() {
-        return new PandemicForwardModel(root);
+        return new PandemicForwardModel(copyRoot());
     }
 
     @Override
