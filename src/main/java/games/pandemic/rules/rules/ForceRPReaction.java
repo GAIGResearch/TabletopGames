@@ -1,6 +1,7 @@
 package games.pandemic.rules.rules;
 
 import core.AbstractGameState;
+import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicTurnOrder;
 import core.components.Card;
@@ -14,6 +15,18 @@ import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class ForceRPReaction extends RuleNode {
+
+    public ForceRPReaction() {
+        super();
+    }
+
+    /**
+     * Copy constructor
+     * @param forceRPReaction - Node to be copied
+     */
+    public ForceRPReaction(ForceRPReaction forceRPReaction) {
+        super(forceRPReaction);
+    }
 
     @Override
     protected boolean run(AbstractGameState gs) {
@@ -33,5 +46,10 @@ public class ForceRPReaction extends RuleNode {
             }
         }
         return true;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new ForceRPReaction(this);
     }
 }

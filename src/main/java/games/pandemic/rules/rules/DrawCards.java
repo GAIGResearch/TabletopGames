@@ -5,6 +5,7 @@ import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import core.properties.PropertyString;
+import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -13,6 +14,18 @@ import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 
 public class DrawCards extends RuleNode {
+
+    public DrawCards() {
+        super();
+    }
+
+    /**
+     * Copy constructor
+     * @param drawCards - Node to be copied
+     */
+    public DrawCards(DrawCards drawCards) {
+        super(drawCards);
+    }
 
     @Override
     public boolean run(AbstractGameState gs) {
@@ -43,5 +56,10 @@ public class DrawCards extends RuleNode {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new DrawCards(this);
     }
 }
