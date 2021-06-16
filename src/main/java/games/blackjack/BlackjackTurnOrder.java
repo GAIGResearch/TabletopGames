@@ -3,43 +3,14 @@ package games.blackjack;
 import core.turnorders.AlternatingTurnOrder;
 import core.AbstractGameState;
 import core.turnorders.TurnOrder;
-import games.uno.UnoTurnOrder;
+import utilities.Utils;
 
-import java.util.Objects;
-import static utilities.Utils.GameResult.GAME_END;
-import static utilities.Utils.GameResult.GAME_ONGOING;
-
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.*;
 
 public class BlackjackTurnOrder extends AlternatingTurnOrder {
-    private boolean skipTurn;
-
 
     public BlackjackTurnOrder(int nPlayers) {
         super(nPlayers);
-        skipTurn = false;
-        nMaxRounds = 1;
-    }
-
-    @Override
-    protected void _reset(){
-        super._reset();
-        skipTurn = false;
-    }
-
-    public void skip(){
-        skipTurn = true;
-    }
-
-    @Override
-    public int nextPlayer(AbstractGameState gameState){
-        int nextOwner = (nPlayers + turnOwner + direction) % nPlayers;
-        if (skipTurn){
-            skipTurn = false;
-            return (nPlayers + nextOwner + direction) % nPlayers;
-        }
-        else
-            return nextOwner;
     }
 
     @Override
@@ -47,43 +18,55 @@ public class BlackjackTurnOrder extends AlternatingTurnOrder {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
         turnCounter++;
-        if (turnCounter >= nPlayers) endRound(gameState);
+        if (turnCounter >= nPlayers) {
+            // Everyone finished, game is over, assign results
+            gameState.setGameStatus(GAME_END);
+
+            BlackjackGameState bjgs = (BlackjackGameState) gameState;
+            BlackjackParameters params = (BlackjackParameters) bjgs.getGameParameters();
+
+            int[] score = new int[bjgs.getNPlayers()];
+            for (int j = 0; j < bjgs.getNPlayers(); j++){
+                if (bjgs.getPlayerResults()[j] != LOSE) {
+                    score[j] = bjgs.calculatePoints(j);
+                }
+            }
+            bjgs.setPlayerResult(GAME_END, bjgs.dealerPlayer);
+            if (score[bjgs.dealerPlayer] > params.winScore) {
+                // Dealer went bust, everyone else wins
+                bjgs.setPlayerResult(Utils.GameResult.LOSE, bjgs.dealerPlayer);
+            }
+
+            for (int i = 0; i < bjgs.getNPlayers()-1; i++) {  // Check all players and compare to dealer
+                if (bjgs.getPlayerResults()[i] != LOSE) {
+                    if (score[bjgs.dealerPlayer] > params.winScore) {
+                        // Dealer went bust, everyone else wins
+                        bjgs.setPlayerResult(Utils.GameResult.WIN, i);
+                    } else if (score[bjgs.dealerPlayer] > score[i]) {
+                        bjgs.setPlayerResult(Utils.GameResult.LOSE, i);
+                    } else if (score[bjgs.dealerPlayer] < score[i]) {
+                        bjgs.setPlayerResult(Utils.GameResult.WIN, i);
+                    } else if (score[bjgs.dealerPlayer] == score[i]) {
+                        bjgs.setPlayerResult(Utils.GameResult.DRAW, i);
+                    }
+                }
+            }
+
+            for (int i = 0; i < bjgs.getNPlayers(); i++) {
+                if (bjgs.getPlayerResults()[i] == GAME_ONGOING) {
+                    bjgs.setPlayerResult(LOSE, i);
+                }
+            }
+        }
         else {
             moveToNextPlayer(gameState, nextPlayer(gameState));
         }
     }
 
     @Override
-    public void endRound(AbstractGameState gameState) {
-        roundCounter++;
-        if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
-            gameState.setGameStatus(GAME_END);
-        }
-        else {
-            turnCounter = 0;
-            moveToNextPlayer(gameState, firstPlayer);
-        }
-    }
-
-    @Override
     protected TurnOrder _copy(){
         BlackjackTurnOrder bjto = new BlackjackTurnOrder(nPlayers);
-        bjto.skipTurn = skipTurn;
         bjto.direction = direction;
         return bjto;
-    }
-
-    @Override
-    public boolean equals(Object o){
-        if (this == o) return true;
-        if (!(o instanceof BlackjackTurnOrder)) return false;
-        if (!super.equals(o)) return false;
-        BlackjackTurnOrder that = (BlackjackTurnOrder) o;
-        return skipTurn == that.skipTurn;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), skipTurn);
     }
 }

@@ -112,7 +112,7 @@ public enum GameType {
                 add(LoseATurn);
                 add(TakeThat);
             }}),
-    Blackjack(2, 2,
+    Blackjack(2, 7,
             new ArrayList<games.GameType.Category>() {{
                 add(Cards);
                 add(ComicBook);

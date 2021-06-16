@@ -2,6 +2,7 @@ package games.blackjack.gui;
 
 import core.components.Deck;
 import core.components.FrenchCard;
+import core.components.PartialObservableDeck;
 import gui.views.CardView;
 import gui.views.ComponentView;
 import utilities.ImageIO;
@@ -16,22 +17,15 @@ import static games.blackjack.gui.BlackjackGUI.*;
 
 public class BlackjackDeckView extends ComponentView {
 
-    protected boolean front;
     Image backOfCard;
-
     String dataPath;
-
     int minimumCardOffset = 5;
-
     Rectangle[] rects;
-
     int cardHighlight = -1;
-
     boolean highlighting;
 
-    public BlackjackDeckView(Deck<FrenchCard> d, boolean visible, String dataPath){
+    public BlackjackDeckView(Deck<FrenchCard> d, String dataPath){
         super(d, playerWidth, cardHeight);
-        this.front = visible;
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "gray_back.png");
         this.dataPath = dataPath;
 
@@ -94,7 +88,7 @@ public class BlackjackDeckView extends ComponentView {
 
     public void drawDeck(Graphics2D g, Rectangle rect){
         int size = g.getFont().getSize();
-        @SuppressWarnings("Unchecked") Deck<FrenchCard> deck = (Deck<FrenchCard>) component;
+        @SuppressWarnings("Unchecked") PartialObservableDeck<FrenchCard> deck = (PartialObservableDeck<FrenchCard>) component;
 
         if (deck != null){
             int offset = Math.max((rect.width-cardWidth) / deck.getSize(), minimumCardOffset);
@@ -104,13 +98,15 @@ public class BlackjackDeckView extends ComponentView {
                 Image cardFace = getCardImage(card);
                 Rectangle r = new Rectangle(rect.x + offset * i, rect.y, cardWidth, cardHeight);
                 rects[i] = r;
-                CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+                CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, deck.isComponentVisible(i, 0));
+                g.drawRoundRect(r.x, r.y, r.width, r.height, 5, 5);
             }
             if (cardHighlight != -1){
                 FrenchCard card = deck.get(cardHighlight);
                 Image cardFace = getCardImage(card);
                 Rectangle r = rects[cardHighlight];
-                CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+                CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, deck.isComponentVisible(cardHighlight, 0));
+                g.drawRoundRect(r.x, r.y, r.width, r.height, 5, 5);
             }
             g.drawString(""+deck.getSize(), rect.x+10, rect.y+cardHeight - size);
         }
@@ -126,17 +122,11 @@ public class BlackjackDeckView extends ComponentView {
         //String coloName = card.
         switch(card.type){
             case Number:
-                img = ImageIO.GetInstance().getImage(dataPath + card.drawN + card.suite + ".png");
+                img = ImageIO.GetInstance().getImage(dataPath + card.number + card.suite + ".png");
                 break;
             case Jack:
-                img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
-                break;
             case Queen:
-                img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
-                break;
             case King:
-                img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
-                break;
             case Ace:
                 img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
                 break;
@@ -151,11 +141,5 @@ public class BlackjackDeckView extends ComponentView {
     }
     public Rectangle[] getRects() {
         return rects;
-    }
-    public void setFront(boolean visible) {
-        this.front = visible;
-    }
-    public void flip() {
-        front = !front;
     }
 }

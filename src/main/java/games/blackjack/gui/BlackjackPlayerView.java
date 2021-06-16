@@ -16,7 +16,7 @@ public class BlackjackPlayerView extends BlackjackDeckView{
     int borderBottom = 20;
 
     public BlackjackPlayerView(Deck<FrenchCard>d, int playerID, String dataPath){
-        super(d, false, dataPath);
+        super(d, dataPath);
         this.width = playerWidth + border*2;
         this.height = playerHeight + border + borderBottom;
         this.playerID = playerID;
@@ -33,7 +33,7 @@ public class BlackjackPlayerView extends BlackjackDeckView{
     public Dimension getPreferredSize(){ return new Dimension(width, height); }
 
     public void update(BlackjackGameState gamestate){
-        this.component = gamestate.PlayerDecks().get(playerID);
-        Points = gamestate.calcPoint(playerID);
+        this.component = gamestate.getPlayerDecks().get(playerID);
+        Points = gamestate.calculatePoints(playerID);
     }
 }

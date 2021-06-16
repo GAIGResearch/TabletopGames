@@ -5,9 +5,9 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
+import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
-
 
 import java.util.ArrayList;
 import java.util.*;
@@ -15,12 +15,9 @@ import java.util.*;
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
 public class BlackjackGameState extends AbstractGameState implements IPrintable {
-    List<Deck<FrenchCard>>  playerDecks;
+    List<PartialObservableDeck<FrenchCard>>  playerDecks;
     Deck<FrenchCard>        drawDeck;
-    Deck<FrenchCard>        tableDeck;
-    String                  currentSuite;
-    int []                  Score;
-    int                     point;
+    int dealerPlayer;
 
 
     /**
@@ -38,55 +35,55 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
         return new ArrayList<Component>(){{
             addAll(playerDecks);
             add(drawDeck);
-            add(tableDeck);
         }};
     }
 
 
-    public Deck<FrenchCard> DrawDeck() {  return drawDeck;}
+    public Deck<FrenchCard> getDrawDeck() {  return drawDeck;}
 
-    public List<Deck<FrenchCard>> PlayerDecks() { return playerDecks; }
+    public List<PartialObservableDeck<FrenchCard>> getPlayerDecks() { return playerDecks; }
 
-    public int point() {  return Score[0]; }
+    public int getDealerPlayer() {
+        return dealerPlayer;
+    }
 
-    public Deck<FrenchCard> getTableDeck() { return tableDeck;}
-
-    public int calcPoint(int PlayerID){
+    public int calculatePoints(int playerID){
+        BlackjackParameters params = (BlackjackParameters) gameParameters;
         int points = 0;
-        int ace = 0;
-        for (int other = 0; other < getNPlayers(); other++){
-            if (other != PlayerID){
-                for (FrenchCard card : playerDecks.get(PlayerID).getComponents()){
-                    switch (card.type){
-                        case Number:
-                            points += card.drawN;
-                            break;
-                        case Jack:
-                            points += 10;
-                            break;
-                        case Queen:
-                            points += 10;
-                            break;
-                        case King:
-                            points += 10;
-                            break;
-                        case Ace:
-                            ace += 1;
-                            break;
-                    }
-                }
-                for (int i = 0; i < ace; i++){
-                    if(points > 10){
-                        points +=1;
-                    }
-                    else{
-                        points += 11;
-                    }
-                }
+        int aces = 0;
+
+        for (FrenchCard card : playerDecks.get(playerID).getComponents()){
+            switch (card.type){
+                case Number:
+                    points += card.number;
+                    break;
+                case Jack:
+                    points += params.jackCard;
+                    break;
+                case Queen:
+                    points += params.queenCard;
+                    break;
+                case King:
+                    points += params.kingCard;
+                    break;
+                case Ace:
+                    aces ++;
+                    break;
             }
         }
-        point = points;
-        return point;
+        if (aces > 0) {
+            int nAcePointMin = aces * params.aceCardBelowThreshold;
+            int nAcePointMax = aces * params.aceCardAboveThreshold;
+            if (points + nAcePointMax > params.winScore) {
+                points += nAcePointMin;
+            } else if (points + nAcePointMax >= params.dealerStand) {
+                points += nAcePointMax;
+            } else {
+                points += nAcePointMin;
+            }
+        }
+
+        return points;
     }
 
 
@@ -94,26 +91,35 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     protected AbstractGameState _copy(int playerId) {
         BlackjackGameState copy = new BlackjackGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
-
-        for (Deck<FrenchCard> d : playerDecks){
+        for (PartialObservableDeck<FrenchCard> d : playerDecks){
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
-        copy.tableDeck = tableDeck.copy();
-        copy.currentSuite = currentSuite;
-        copy.Score = Score.clone();
-        copy.point = point;
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
+            // some cards in dealer's deck are hidden
+            for (int i = 0; i < copy.playerDecks.get(dealerPlayer).getSize(); i++) {
+                if (!copy.playerDecks.get(dealerPlayer).getVisibilityForPlayer(i, playerId)) {
+                    copy.drawDeck.add(copy.playerDecks.get(dealerPlayer).pick(i));
+                }
+            }
+            copy.drawDeck.shuffle(new Random(copy.gameParameters.getRandomSeed()));
+            for (int i = 0; i < copy.playerDecks.get(dealerPlayer).getSize(); i++) {
+                if (!copy.playerDecks.get(dealerPlayer).getVisibilityForPlayer(i, playerId)) {
+                    copy.playerDecks.get(dealerPlayer).add(copy.drawDeck.draw());
+                }
+            }
+        }
         return copy;
     }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return 0;
+        return getGameScore(playerId);
     }
 
     @Override
     public double getGameScore(int playerId) {
-        return calcPoint(playerId);
+        return calculatePoints(playerId);
     }
 
     @Override
@@ -123,12 +129,9 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
             for (Component c: drawDeck.getComponents()){
                 add(c.getComponentID());
             }
-            for (int i = 0; i < getNPlayers(); i++){
-                if (i != playerId){
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component c: playerDecks.get(i).getComponents()){
-                        add(c.getComponentID());
-                    }
+            for (int i = 0; i < playerDecks.get(dealerPlayer).getSize(); i++){
+                if (!playerDecks.get(dealerPlayer).isComponentVisible(i, playerId)){
+                    add(playerDecks.get(dealerPlayer).get(i).getComponentID());
                 }
             }
         }};
@@ -136,39 +139,31 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     protected void _reset() {
-        playerDecks = new ArrayList<>();
         drawDeck = null;
         playerDecks = null;
-        tableDeck = null;
-
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BlackjackGameState)) return false;
         if (!super.equals(o)) return false;
         BlackjackGameState that = (BlackjackGameState) o;
-        return Objects.equals(playerDecks, that.playerDecks) &&
-                Objects.equals(drawDeck, that.drawDeck) &&
-                Objects.equals(tableDeck, that.drawDeck) &&
-                Objects.equals(point, that.point) &&
-                Arrays.equals(Score, that.Score);
+        return dealerPlayer == that.dealerPlayer && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, tableDeck);
-        result = 31 * result + Arrays.hashCode(Score);
-        return result;
+        return Objects.hash(super.hashCode(), playerDecks, drawDeck, dealerPlayer);
     }
 
     @Override
     public void printToConsole(){
+        // TODO fix
         String[] strings = new String[4];
 
         strings[0] = "Player      : " + getCurrentPlayer();
-        strings[1] = "Points      : " +  calcPoint(getCurrentPlayer());
+        strings[1] = "Points      : " +  calculatePoints(getCurrentPlayer());
         StringBuilder sb = new StringBuilder();
         sb.append("Player Hand : ");
 

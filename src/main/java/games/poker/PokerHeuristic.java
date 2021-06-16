@@ -46,7 +46,7 @@ public class PokerHeuristic implements IStateHeuristic {
             FrenchCard.FrenchCardType player = localPlayerHand.get(i).type;
             switch (localPlayerHand.get(i).type) { //should be the player's card instead instead of card.type, replace with the actual card from the player
                 case Number:
-                    value += localPlayerHand.get(i).drawN;
+                    value += localPlayerHand.get(i).number;
                     break;
                 case Jack:
                     if (localPlayerHand.get(i).suite == "Spades") {

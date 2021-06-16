@@ -146,7 +146,7 @@ public class PokerDeckView extends ComponentView {
         //String cardName = card.suite.substring(0, 1).toUpperCase() + card.suite.substring(1).toLowerCase();
         switch(card.type) {
             case Number:
-                img = ImageIO.GetInstance().getImage(dataPath + card.drawN + card.suite + ".png");
+                img = ImageIO.GetInstance().getImage(dataPath + card.number + card.suite + ".png");
                 break;
             case Jack:
                 img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");

@@ -2,22 +2,21 @@ package games.blackjack;
 
 import core.AbstractParameters;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class BlackjackParameters extends AbstractParameters {
     public String dataPath = "data/FrenchCards/";
 
-    public int deckCards = 52;
-    public int totalNumberCards = 10;
     public int nCardsPerPlayer = 2;
-    public int aceCard = 1;
     public int jackCard = 10;
     public int queenCard = 10;
     public int kingCard = 10;
-    public int blackJack = 21;
-    public int bust = 22;
+    public int aceCardBelowThreshold = 1;
+    public int aceCardAboveThreshold = 11;
+    public int pointThreshold = 10;
     public int winScore = 21;
-
-    public boolean push = false;
+    public int dealerStand = 17;
+    public int nDealerCardsHidden = 1;
 
     public int[] numberCards = {2,3,4,5,6,7,8,9,10};
 
@@ -27,7 +26,6 @@ public class BlackjackParameters extends AbstractParameters {
             "Hearts",
             "Diamonds"
     };
-
 
     public BlackjackParameters(long seed) {
         super(seed);
@@ -41,36 +39,35 @@ public class BlackjackParameters extends AbstractParameters {
     protected AbstractParameters _copy() {
         BlackjackParameters bjgp = new BlackjackParameters(System.currentTimeMillis());
         bjgp.dataPath = dataPath;
-        bjgp.totalNumberCards = totalNumberCards;
-        bjgp.deckCards = deckCards;
         bjgp.nCardsPerPlayer = nCardsPerPlayer;
-        bjgp.aceCard = aceCard;
         bjgp.jackCard = jackCard;
         bjgp.queenCard = queenCard;
         bjgp.kingCard = kingCard;
-        bjgp.push = push;
-        bjgp.numberCards = numberCards;
+        bjgp.numberCards = numberCards.clone();
         bjgp.suite = suite;
+        bjgp.aceCardBelowThreshold = aceCardBelowThreshold;
+        bjgp.aceCardAboveThreshold = aceCardAboveThreshold;
+        bjgp.pointThreshold = pointThreshold;
+        bjgp.winScore = winScore;
+        bjgp.dealerStand = dealerStand;
+        bjgp.nDealerCardsHidden = nDealerCardsHidden;
         return bjgp;
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BlackjackParameters)) return false;
         if (!super.equals(o)) return false;
         BlackjackParameters that = (BlackjackParameters) o;
-        return deckCards == that.deckCards &&
-                nCardsPerPlayer == that.nCardsPerPlayer &&
-                aceCard == that.aceCard &&
-                jackCard == that.jackCard &&
-                queenCard == that.queenCard &&
-                kingCard == that.kingCard &&
-                blackJack == that.blackJack &&
-                bust == that.bust &&
-                winScore == that.winScore &&
-                push == that.push &&
-                Arrays.equals(numberCards, that.numberCards) &&
-                Arrays.equals(suite, that.suite);
+        return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold && winScore == that.winScore && dealerStand == that.dealerStand && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath) && Arrays.equals(numberCards, that.numberCards) && Arrays.equals(suite, that.suite);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, jackCard, queenCard, kingCard, aceCardBelowThreshold, aceCardAboveThreshold, pointThreshold, winScore, dealerStand, nDealerCardsHidden);
+        result = 31 * result + Arrays.hashCode(numberCards);
+        result = 31 * result + Arrays.hashCode(suite);
+        return result;
     }
 }

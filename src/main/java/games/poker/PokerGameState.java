@@ -232,38 +232,26 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                 if (i < 2) {
                     switch (localPlayerHand.get(i).type) {
                         case Number:
-                            currentPlayerCards.add(Integer.toString(localPlayerHand.get(i).drawN) + "-" + localPlayerHand.get(i).suite);
+                            currentPlayerCards.add(localPlayerHand.get(i).number + "-" + localPlayerHand.get(i).suite);
                             break;
                         case Jack:
-                            currentPlayerCards.add("Jack-" + localPlayerHand.get(i).suite);
-                            break;
                         case Queen:
-                            currentPlayerCards.add("Queen-" + localPlayerHand.get(i).suite);
-                            break;
                         case King:
-                            currentPlayerCards.add("King-" + localPlayerHand.get(i).suite);
-                            break;
                         case Ace:
-                            currentPlayerCards.add("Ace-" + localPlayerHand.get(i).suite);
+                            currentPlayerCards.add(localPlayerHand.get(i).type.name() + "-" + localPlayerHand.get(i).suite);
                             break;
                     }
                 }
                 else {
                     switch (localCommunityCards.get(i-2).type) {
                         case Number:
-                            currentPlayerCards.add(Integer.toString(localCommunityCards.get(i-2).drawN) + "-" + localCommunityCards.get(i-2).suite);
+                            currentPlayerCards.add(localCommunityCards.get(i-2).number + "-" + localCommunityCards.get(i-2).suite);
                             break;
                         case Jack:
-                            currentPlayerCards.add("Jack-" + localCommunityCards.get(i-2).suite);
-                            break;
                         case Queen:
-                            currentPlayerCards.add("Queen-" + localCommunityCards.get(i-2).suite);
-                            break;
                         case King:
-                            currentPlayerCards.add("King-" + localCommunityCards.get(i-2).suite);
-                            break;
                         case Ace:
-                            currentPlayerCards.add("Ace-" + localCommunityCards.get(i-2).suite);
+                            currentPlayerCards.add(localCommunityCards.get(i-2).type.name() + "-" + localCommunityCards.get(i-2).suite);
                             break;
                     }
                 }/*
