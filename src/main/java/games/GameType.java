@@ -99,7 +99,7 @@ public enum GameType {
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
             }}),
-    Poker(2, 2,
+    Poker(2, 14,
             new ArrayList<Category>() {{
                 add(Cards);
                 add(ComicBook);

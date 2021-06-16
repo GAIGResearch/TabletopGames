@@ -16,27 +16,17 @@ import java.util.Random;
 
 public class Fold extends AbstractAction implements IPrintable {
 
-    private int playerHandId;
-    private int money = 0;
+    int playerId;
 
-    public Fold(int deckFrom) {
-        this.playerHandId = deckFrom;
-        //super(deckFrom);
-    }
-
-    public Fold(int deckFrom, int money) {
-        this.playerHandId = deckFrom;
-        this.money = money;
-        //super(deckFrom, money);
+    public Fold(int playerId) {
+        this.playerId = playerId;
     }
 
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
-        //super.execute(gameState);
-
-        Random r = new Random(pgs.getGameParameters().getRandomSeed() + pgs.getTurnOrder().getRoundCounter());
-        pgs.setPlayerResult(Utils.GameResult.LOSE, pgs.getCurrentPlayer());
+        pgs.getPlayerFold()[playerId] = true;
+        pgs.getPlayerNeedsToCall()[playerId] = false;
         return true;
     }
 
@@ -55,18 +45,18 @@ public class Fold extends AbstractAction implements IPrintable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Fold)) return false;
-        Fold that = (Fold) o;
-        return Objects.equals(money, that.money);
+        Fold fold = (Fold) o;
+        return playerId == fold.playerId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(money);
+        return Objects.hash(playerId);
     }
 
     @Override
     public AbstractAction copy() {
-        return new Fold(playerHandId, money);
+        return new Fold(playerId);
     }
 
 }

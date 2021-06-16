@@ -18,15 +18,6 @@ public class BlackjackParameters extends AbstractParameters {
     public int dealerStand = 17;
     public int nDealerCardsHidden = 1;
 
-    public int[] numberCards = {2,3,4,5,6,7,8,9,10};
-
-    public String[] suite = new String[]{
-            "Spades",
-            "Clubs",
-            "Hearts",
-            "Diamonds"
-    };
-
     public BlackjackParameters(long seed) {
         super(seed);
     }
@@ -43,8 +34,6 @@ public class BlackjackParameters extends AbstractParameters {
         bjgp.jackCard = jackCard;
         bjgp.queenCard = queenCard;
         bjgp.kingCard = kingCard;
-        bjgp.numberCards = numberCards.clone();
-        bjgp.suite = suite;
         bjgp.aceCardBelowThreshold = aceCardBelowThreshold;
         bjgp.aceCardAboveThreshold = aceCardAboveThreshold;
         bjgp.pointThreshold = pointThreshold;
@@ -60,14 +49,11 @@ public class BlackjackParameters extends AbstractParameters {
         if (!(o instanceof BlackjackParameters)) return false;
         if (!super.equals(o)) return false;
         BlackjackParameters that = (BlackjackParameters) o;
-        return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold && winScore == that.winScore && dealerStand == that.dealerStand && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath) && Arrays.equals(numberCards, that.numberCards) && Arrays.equals(suite, that.suite);
+        return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold && winScore == that.winScore && dealerStand == that.dealerStand && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, jackCard, queenCard, kingCard, aceCardBelowThreshold, aceCardAboveThreshold, pointThreshold, winScore, dealerStand, nDealerCardsHidden);
-        result = 31 * result + Arrays.hashCode(numberCards);
-        result = 31 * result + Arrays.hashCode(suite);
-        return result;
+        return Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, jackCard, queenCard, kingCard, aceCardBelowThreshold, aceCardAboveThreshold, pointThreshold, winScore, dealerStand, nDealerCardsHidden);
     }
 }

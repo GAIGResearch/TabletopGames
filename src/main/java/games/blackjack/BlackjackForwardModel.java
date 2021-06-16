@@ -24,8 +24,7 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         bjgs.playerDecks = new ArrayList<>();
 
         //create the playing deck
-        bjgs.drawDeck = new Deck<>("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        createCards(bjgs);
+        bjgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         //shuffle the cards
         bjgs.drawDeck.shuffle(new Random((bjgs.getGameParameters().getRandomSeed())));
 
@@ -42,21 +41,6 @@ public class BlackjackForwardModel extends AbstractForwardModel {
                     new Hit(i, false, true).execute(bjgs);
                 } else {
                     new Hit(i).execute(bjgs);
-                }
-            }
-        }
-    }
-
-    private void createCards(BlackjackGameState bjgs) {
-        BlackjackParameters bjgp = (BlackjackParameters) bjgs.getGameParameters();
-        for (String suite: bjgp.suite){
-            for (FrenchCard.FrenchCardType type: FrenchCard.FrenchCardType.values()) {
-                if (type == FrenchCard.FrenchCardType.Number) {
-                    for (int number : bjgp.numberCards) {
-                        bjgs.drawDeck.add(new FrenchCard(FrenchCard.FrenchCardType.Number, suite, number));
-                    }
-                } else {
-                    bjgs.getDrawDeck().add(new FrenchCard(type, suite));
                 }
             }
         }

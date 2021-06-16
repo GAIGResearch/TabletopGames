@@ -5,66 +5,39 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
-//import games.poker.actions.NoCards;
 import games.poker.actions.*;
 import games.poker.actions.Fold;
-import games.poker.actions.Raise;
-import games.poker.actions.NoCards;
 import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
+import static games.poker.PokerGameState.PokerGamePhase.*;
+
 
 public class PokerForwardModel extends AbstractForwardModel {
-
-    boolean[] playerCheck;
-    int[] playerPoints;
-    boolean checkBets = false;
 
     @Override
     protected void _setup(AbstractGameState firstState) {
         PokerGameState pgs = (PokerGameState) firstState;
+        PokerGameParameters params = (PokerGameParameters) firstState.getGameParameters();
 
-        // Set up scores for all players, initially 0
-        playerPoints = new int[pgs.getNPlayers()];
-        pgs.playerHand = new int[firstState.getNPlayers()];
-        pgs.communityCards = new FrenchCard[5];
         pgs.currentMoney = new int[firstState.getNPlayers()];
-        pgs.playerCheck = new boolean[firstState.getNPlayers()];
+        pgs.playerNeedsToCall = new boolean[firstState.getNPlayers()];
+        pgs.playerFold = new boolean[firstState.getNPlayers()];
+        pgs.bets = new int[firstState.getNPlayers()];
         pgs.totalPotMoney = 0;
-        pgs.turnNumber = 0;
-        pgs.previousBet = 0;
-        pgs.smallBlind = 0;
-        pgs.bigBlind = 1;
-        pgs.equalBets = false;
-        playerCheck = new boolean[firstState.getNPlayers()];
-        //pgs.blindsFinished = false;
-
-        for (int i = 0; i < firstState.getNPlayers(); i++) {
-            pgs.currentMoney[i] = 0;
-        }
-
-        for (int i = 0; i < firstState.getNPlayers(); i++) {
-            playerCheck[i] = false;
-        }
 
         pgs.playerDecks = new ArrayList<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             pgs.playerDecks.add(new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            pgs.currentMoney[i] = params.nStartingMoney;
         }
 
-
-
-
-
         // Create the draw deck with all the cards
-        pgs.drawDeck = new Deck<>("DrawDeck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-        createCards(pgs);
+        pgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Create the discard deck, at the beginning it is empty
-        pgs.discardDeck = new Deck<>("DiscardDeck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-        //pgs.communityCards = new Deck<>("CommunityCards");
+        pgs.communityCards = new Deck<>("CommunityCards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         // Player 0 starts the game
         pgs.getTurnOrder().setStartingPlayer(0);
@@ -74,33 +47,44 @@ public class PokerForwardModel extends AbstractForwardModel {
     }
 
     /**
-     * Create all the cards and include them into the drawPile.
+     * Sets up a round for the game, including draw pile, discard deck and player decks, all reset.
      * @param pgs - current game state.
      */
-    private void createCards(PokerGameState pgs) {
-        PokerGameParameters pgp = (PokerGameParameters)pgs.getGameParameters();
-        for (String suite : pgp.suite) {
+    private void setupRound(PokerGameState pgs) {
+        PokerGameParameters params = (PokerGameParameters) pgs.getGameParameters();
+        Random r = new Random(params.getRandomSeed() + pgs.getTurnOrder().getRoundCounter());
 
-            // Create the number cards for each suite
-            for (int number = 2; number <= pgp.nNumberCards; number++) {
-                pgs.drawDeck.add(new FrenchCard(FrenchCard.FrenchCardType.Number, suite, number));
-            }
-            // Create the Ace, Queen, King and Jack cards for each suite
-            for (int i = 0; i < pgp.AceCards; i++) {
-                pgs.drawDeck.add(new FrenchCard(FrenchCard.FrenchCardType.Ace, suite));
-            }
-            for (int i = 0; i < pgp.QueenCards; i++) {
-                pgs.drawDeck.add(new FrenchCard(FrenchCard.FrenchCardType.Queen, suite));
-            }
-            for (int i = 0; i < pgp.KingCards; i++) {
-                pgs.drawDeck.add(new FrenchCard(FrenchCard.FrenchCardType.King, suite));
-            }
-            for (int i = 0; i < pgp.JackCards; i++) {
-                pgs.drawDeck.add(new FrenchCard(FrenchCard.FrenchCardType.Jack, suite));
+        // Refresh player decks
+        for (int i = 0; i < pgs.getNPlayers(); i++) {
+            pgs.drawDeck.add(pgs.playerDecks.get(i));
+            pgs.playerDecks.get(i).clear();
+            pgs.playerNeedsToCall[i] = false;
+            pgs.playerFold[i] = false;
+        }
+        pgs.drawDeck.add(pgs.communityCards);
+        pgs.communityCards.clear();
+
+        // Refresh draw deck and shuffle
+        pgs.drawDeck.shuffle(r);
+
+        // Draw new cards for players
+        drawCardsToPlayers(pgs);
+
+        // Blinds
+        int smallId = pgs.getTurnOrder().getFirstPlayer();
+        int bigId = (pgs.getNPlayers() + smallId + 1) % pgs.getNPlayers();
+        pgs.currentMoney[smallId] -= params.smallBlind;
+        pgs.currentMoney[bigId] -= params.bigBlind;
+        pgs.totalPotMoney = params.smallBlind + params.bigBlind;
+        pgs.getBets()[smallId] = params.smallBlind;
+        pgs.getBets()[bigId] = params.bigBlind;
+        for (int i = 0; i < pgs.getNPlayers(); i++) {
+            if (i != bigId) {
+                pgs.playerNeedsToCall[i] = true;
             }
         }
 
-
+        pgs.setGamePhase(Preflop);
     }
 
     private void drawCardsToPlayers(PokerGameState pgs) {
@@ -111,281 +95,204 @@ public class PokerForwardModel extends AbstractForwardModel {
         }
     }
 
-    public boolean getCheck(int player) {
-        return playerCheck[player];
-    }
-
-    public boolean isCheckEqual(int getNPlayers) {
-        for (int i = 0; i < getNPlayers; i++) {
-            if (getCheck(0) != getCheck(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Sets up a round for the game, including draw pile, discard deck and player decks, all reset.
-     * @param pgs - current game state.
-     */
-    private void setupRound(PokerGameState pgs) {
-        Random r = new Random(pgs.getGameParameters().getRandomSeed() + pgs.getTurnOrder().getRoundCounter());
-
-        // Refresh player decks
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            pgs.drawDeck.add(pgs.playerDecks.get(i));
-            pgs.playerDecks.get(i).clear();
-        }
-
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            pgs.playerCheck[i] = false;
-        }
-
-        // Refresh draw deck and shuffle
-        pgs.drawDeck.add(pgs.discardDeck);
-        pgs.discardDeck.clear();
-        pgs.drawDeck.shuffle(r);
-
-        for (int i = 0; i < 5; i++) {
-            pgs.communityCards[i] = pgs.drawDeck.draw();
-        }
-
-        // Draw new cards for players
-        drawCardsToPlayers(pgs);
-
-        pgs.currentCard = pgs.drawDeck.draw();
-        pgs.currentSuite = pgs.currentCard.suite;
-        if (VERBOSE) {
-            System.out.println("First card " + pgs.currentSuite);
-        }
-
-        // add current card to discard deck
-        pgs.discardDeck.add(pgs.currentCard);
-    }
-
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
         action.execute(gameState);
-        if (checkRoundEnd((PokerGameState)gameState)) {
-            return;
-        }
 
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            gameState.getTurnOrder().endPlayerTurn(gameState);
-        }
-    }
-
-    /**
-     * Checks if the round ended (when one player the max number of cards). On round end, points for all players are added up
-     * and next round is set up.
-     * @param pgs - current game state
-     * @return true if round ended, false otherwise
-     */
-    private boolean checkRoundEnd(PokerGameState pgs) {
-        // Did any player run out of cards?
-        boolean roundEnd = false;
-        boolean maxRounds = false;
-        /*System.out.println(pgs.getTurnOrder().getRoundCounter());
-        System.out.println(pgs.turnNumber);*/
-        int[] playerDeckSize = new int[pgs.getNPlayers()];
-
-        if (pgs.getNPlayers() == 2) {
-            for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                if (pgs.getPlayerResults()[playerID] == Utils.GameResult.LOSE && pgs.getNPlayers() == 2) {
-                    if (playerID == 0) {
-                        pgs.setPlayerResult(Utils.GameResult.WIN, 1);
-                    } else {
-                        pgs.setPlayerResult(Utils.GameResult.WIN, 0);
-                    }
-                    pgs.setGameStatus(Utils.GameResult.GAME_END);
-                    return true;
-                }
-        }
-
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            pgs.updateTotalPot(pgs.getPlayerMoney(i));
-        }
-
-        if (pgs.getTurnOrder().getRoundCounter() == 4 && pgs.getCurrentPlayer() == (pgs.playerDecks.size() - 1)) {
-            maxRounds = true;
-        }
-
-        for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-            if (pgs.getPlayerResults()[playerID] == Utils.GameResult.LOSE && pgs.getNPlayers() == 2) {
-                if (playerID == 0) {
-                    pgs.setPlayerResult(Utils.GameResult.WIN, 1);
-                }
-                else {
-                    pgs.setPlayerResult(Utils.GameResult.WIN, 0);
-                }
-                roundEnd = true;
-                break;
-            }
-        }
-
-        if (maxRounds) {
-            for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                if (pgs.getPlayerResults()[playerID] == Utils.GameResult.GAME_ONGOING) {
-                    roundEnd = true;
+        // Check end of street to add more community cards
+        PokerGameState pgs = (PokerGameState) gameState;
+        PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
+        int turn = gameState.getTurnOrder().getTurnCounter();
+        if (turn != 0 && turn % (gameState.getNPlayers()+1) == 0) {
+            boolean remainingDecisions = false;
+            for (int i = 0; i < gameState.getNPlayers(); i++) {
+                if (!pgs.playerFold[i] && pgs.playerNeedsToCall[i]) {
+                    remainingDecisions = true;
                     break;
                 }
             }
+            if (!remainingDecisions) {
+                // Add community cards
+                if (gameState.getGamePhase() == Preflop) {
+                    // Add flop
+                    for (int i = 0; i < pgp.nFlopCards; i++) {
+                        pgs.communityCards.add(pgs.drawDeck.draw());
+                    }
+                    gameState.setGamePhase(Flop);
+                } else if (gameState.getGamePhase() == Flop) {
+                    // Add turn
+                    for (int i = 0; i < pgp.nTurnCards; i++) {
+                        pgs.communityCards.add(pgs.drawDeck.draw());
+                    }
+                    gameState.setGamePhase(Turn);
+                } else if (gameState.getGamePhase() == Turn) {
+                    // Add river
+                    for (int i = 0; i < pgp.nRiverCards; i++) {
+                        pgs.communityCards.add(pgs.drawDeck.draw());
+                    }
+                    gameState.setGamePhase(River);
+                } else if (gameState.getGamePhase() == River) {
+                    // Round is over
+                    roundEnd(pgs);
+                    return;
+                }
+            }
         }
 
-        if (roundEnd) {
-            pgs.getTurnOrder().endRound(pgs);
-
-            // Did this player just hit N points to win? Win condition check!
-            if (checkGameEnd(pgs, pgs.playerHand)) return true;
-
-
-            // Reset cards for the new round
-            setupRound(pgs);
-
-            return false;
-        }
-
-        }
-
-        return false;
+        gameState.getTurnOrder().endPlayerTurn(gameState);
     }
 
-    private boolean checkGameEnd(PokerGameState pgs, int[] playerScores) {
+    /**
+     * Called when round is over. Calculate winner of round and distribute money.
+     * @param pgs - current game state
+     */
+    private void roundEnd(PokerGameState pgs) {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
-
-        playerPoints = pgs.calculatePlayerHand();
-        int max = 0;
-        int idMaxScore = -1;
-
-        for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-            if (playerPoints[playerID] > max){
-                max = playerPoints[playerID];
-                idMaxScore = playerID;
+        // Calculate winner of round, they earn the money. Ties split money equally.
+        int[] ranks = new int[pgs.getNPlayers()];
+        int smallestRank = 10;
+        for (int i = 0; i < pgs.getNPlayers(); i++) {
+            pgs.playerDecks.get(i).add(pgs.communityCards);
+            ranks[i] = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i)).rank;
+            if (ranks[i] < smallestRank) {
+                smallestRank = ranks[i];
             }
         }
-        // A winner!
+        HashSet<Integer> winners = new HashSet<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (i == idMaxScore){
-                pgs.setPlayerResult(Utils.GameResult.WIN, i);
+            if (ranks[i] == smallestRank) winners.add(i);
+        }
+        if (winners.size() > 1) {
+            // A tie in rank, check card values
+            ArrayList<Integer>[] cardValues = new ArrayList[pgs.getNPlayers()];
+            for (int i: winners) {
+                HashSet<Integer> numbers = new HashSet<>();
+                for (FrenchCard card : pgs.playerDecks.get(i).getComponents()) {
+                    numbers.add(card.number);
+                }
+                cardValues[i] = new ArrayList<>(numbers);
+                cardValues[i].sort(Collections.reverseOrder());
             }
-            else {
+            int nCards = cardValues[0].size();
+            for (int j = 0; j < nCards; j++) {
+                // Checking card by card, once one player is found the winner we break; could still be a tie
+                int maxValue = 0;
+                for (int i: winners) {
+                    if (cardValues[i].get(j) > maxValue) maxValue = cardValues[i].get(j);
+                }
+                HashSet<Integer> actualWinners = new HashSet<>();
+                for (int i: winners) {
+                    if (cardValues[i].get(j) == maxValue) actualWinners.add(i);
+                }
+                if (actualWinners.size() == 1 || j == nCards-1) {
+                    for (int i : actualWinners) {
+                        pgs.currentMoney[i] += pgs.totalPotMoney/actualWinners.size();
+                    }
+                    break;
+                }
+            }
+        } else {
+            for (int i : winners) {
+                pgs.currentMoney[i] += pgs.totalPotMoney;
+            }
+        }
+
+        for (int i = 0; i < pgs.getNPlayers(); i++) {
+            if (pgs.currentMoney[i] == 0) {
+                // Player is out of the game
                 pgs.setPlayerResult(Utils.GameResult.LOSE, i);
             }
         }
 
-        pgs.setGameStatus(Utils.GameResult.GAME_END);
-        //System.out.println(Arrays.toString(playerPoints));
-        return true;
+        if (checkGameEnd(pgs)) return;
+
+        pgs.getTurnOrder().endRound(pgs);
+
+        // Reset cards for the new round
+        setupRound(pgs);
+    }
+
+    /**
+     * Game ends when a player has the minimum money required to win. Player with most money wins.
+     * @param pgs - game state
+     * @return - true if game ended, false otherwise
+     */
+    private boolean checkGameEnd(PokerGameState pgs) {
+        PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
+
+        if (pgp.endMinMoney) {
+
+            int maxMoney = 0;
+            for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
+                if (pgs.currentMoney[playerID] >= pgp.nWinMoney && pgs.currentMoney[playerID] > maxMoney) {
+                    maxMoney = pgs.currentMoney[playerID];
+                }
+            }
+            if (maxMoney > 0) {
+                // Game ended
+                for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
+                    if (pgs.currentMoney[playerID] == maxMoney) {
+                        pgs.setPlayerResult(Utils.GameResult.WIN, playerID);
+                    } else {
+                        pgs.setPlayerResult(Utils.GameResult.LOSE, playerID);
+                    }
+                }
+                pgs.setGameStatus(Utils.GameResult.GAME_END);
+                return true;
+            }
+        } else {
+            int stillAlive = 0;
+            int id = -1;
+            for (int i = 0; i < pgs.getNPlayers(); i++) {
+                if (pgs.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING) {
+                    stillAlive ++;
+                    id = i;
+                    if (stillAlive > 1) break;
+                }
+            }
+            if (stillAlive == 1) {
+                pgs.setPlayerResult(Utils.GameResult.WIN, id);
+                pgs.setGameStatus(Utils.GameResult.GAME_END);
+                return true;
+            }
+        }
+        return false;
     }
 
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState)gameState;
+        PokerGameParameters pgp = (PokerGameParameters)gameState.getGameParameters();
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = pgs.getCurrentPlayer();
 
-        Deck<FrenchCard> playerHand = pgs.playerDecks.get(player);
-        if (pgs.checkBets) { //check if there have been ANY checks done
-            if (pgs.playerCheck[pgs.getCurrentPlayer()]) { //goes through an array of the players, stopping at each player that has done a check
-                actions.add(new Call(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Raise(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new RaiseBy4(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new RaiseBy8(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Fold(playerHand.getComponentID()));
-                pgs.playerCheck[pgs.getCurrentPlayer()] = false; //sets that players check value to false as they have placed a bet
+        // Check if player can afford to: Bet, Call, Raise. Can also Check, Fold.
+        if (player == pgs.getTurnOrder().getFirstPlayer() && !pgs.playerNeedsToCall[player]) {
+            if (pgs.currentMoney[player] >= pgp.bet) {
+                actions.add(new Bet(player, pgp.bet));
             }
-        }
-        else {
-            if (pgs.getTurnOrder().getRoundCounter() == 0 && pgs.getCurrentPlayer() == 0){ //small blind
-                actions.add(new Blind(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Fold(playerHand.getComponentID()));
+        } else {
+            int previousPlayer = (gameState.getNPlayers() + player - 1) % gameState.getNPlayers();
+            int previousBet = pgs.getBets()[previousPlayer];
+            int diff = previousBet - pgs.getBets()[player];
+            if (pgs.currentMoney[player] >= diff) {
+                actions.add(new Call(player));
             }
-
-            else if (pgs.getTurnOrder().getRoundCounter() == 0 && pgs.getCurrentPlayer() == 1){ //big blind
-                actions.add(new Blind(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Fold(playerHand.getComponentID()));
-                pgs.updateBlindsFinished();
-            }
-            else { //if it a normal round and they have not checked (done when betting the first time)
-                actions.add(new Call(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Check(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Raise(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new RaiseBy4(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new RaiseBy8(playerHand.getComponentID(), pgs.discardDeck.getComponentID(), pgs.playerDecks.get(player).getComponents().size(), pgs.currentMoney[pgs.getCurrentPlayer()]));
-                actions.add(new Fold(playerHand.getComponentID()));
-            }
-        }
-
-        if (!pgs.isEqualBets() && player == (pgs.getNPlayers() - 1)) { //checks if bets are equal, if not then it redoes the round so bets can be equal
-            pgs.turnNumber = pgs.turnNumber - 1;
-        }
-
-        if (!pgs.isCheckEqual() && player == (pgs.getNPlayers() - 1)) { //checks if any player has checked, and if they have then it sets a flag which redoes the round
-            pgs.checkBets = true;
-            pgs.playerCheck[pgs.getCurrentPlayer()] = checkBets;
-            pgs.turnNumber = pgs.turnNumber - 1;
-        }
-
-        else if (pgs.isCheckEqual() && player == (pgs.getNPlayers() - 1)) { //if no checks happened then resets all the flags
-            pgs.checkBets = false;
-            pgs.setCheckToFalse(pgs.getNPlayers());
-        }
-
-        if (actions.isEmpty()) { //done in case error in the actions
-            actions.add(new NoCards());
-        }
-
-        if (player <= 0) { //increments the player counter which is needed to keep track of bets and checks
-            pgs.turnNumber += 1;
-        }
-
-        return actions;
-    }
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        PokerGameState pgs = (PokerGameState)gameState;
-        System.out.println(Arrays.toString(playerPoints));
-
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < 2; i++) {
-            sb.append("Player " + i + " Hand: ");
-            for (FrenchCard card : pgs.playerDecks.get(i).getComponents()) {
-                sb.append(card.toString());
-                sb.append(" ");
-            }
-            sb.append("\n");
-            sb.append("Total Pot: " + pgs.getTotalPot());
-            //sb.append("Player " + i + " Money: " + pgs.getPlayerMoney(i));
-            sb.append("\n");
-        }
-
-        System.out.println(sb.toString());
-
-
-        if (VERBOSE) {
-            System.out.println("Game Results:");
-            for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-                if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
-                    System.out.println("The winner is the player : " + (playerID + 1));
-                    //break;
+            for (int r: pgp.raiseMultipliers) {
+                diff = previousBet * r - pgs.getBets()[player];
+                if (pgs.currentMoney[player] >= diff) {
+                    actions.add(new Raise(player, r));
                 }
             }
         }
-        //System.out.println("Game Results:");
-        //System.out.println(gameState.getPlayerResults()[0]);
-        //System.out.println(gameState.getPlayerResults()[1]);
-        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
-                System.out.println("The winner is the player : " + (playerID +1));
-                //break;
-            }
+        if (!pgs.playerNeedsToCall[player]) {
+            actions.add(new Check(player));
         }
+        actions.add(new Fold(player));
 
-
+        return actions;
     }
 
     @Override

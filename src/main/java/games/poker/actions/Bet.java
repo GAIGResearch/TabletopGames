@@ -7,24 +7,23 @@ import games.poker.PokerGameState;
 
 import java.util.Objects;
 
-public class Raise extends AbstractAction implements IPrintable {
+public class Bet extends AbstractAction implements IPrintable {
 
     private final int playerId;
-    private final int multiplier;
+    private final int amount;
 
-    public Raise(int id, int multiplier) {
+    public Bet(int id, int amount) {
         this.playerId = id;
-        this.multiplier = multiplier;
+        this.amount = amount;
     }
+
 
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
-        int previousPlayer = (gameState.getNPlayers() + playerId - 1) % gameState.getNPlayers();
-        int diff = pgs.getBets()[previousPlayer] * multiplier - pgs.getBets()[playerId];
-        pgs.getCurrentMoney()[playerId] -= diff;
-        pgs.updateTotalPotMoney(diff);
-        pgs.getBets()[playerId] = pgs.getBets()[previousPlayer] * multiplier;
+        pgs.getCurrentMoney()[playerId] -= amount;
+        pgs.updateTotalPotMoney(amount);
+        pgs.getBets()[playerId] = amount;
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {
@@ -43,25 +42,25 @@ public class Raise extends AbstractAction implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Raise " + multiplier;
+        return "Bet " + amount;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Raise)) return false;
-        Raise raise = (Raise) o;
-        return playerId == raise.playerId && multiplier == raise.multiplier;
+        if (!(o instanceof Bet)) return false;
+        Bet bet = (Bet) o;
+        return playerId == bet.playerId && amount == bet.amount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, multiplier);
+        return Objects.hash(playerId, amount);
     }
 
     @Override
-    public Raise copy() {
-        return new Raise(playerId, multiplier);
+    public Bet copy() {
+        return new Bet(playerId, amount);
     }
 
 }

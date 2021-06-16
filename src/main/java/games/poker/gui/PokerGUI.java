@@ -6,9 +6,10 @@ import core.AbstractPlayer;
 import core.Game;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
-import games.poker.PokerGameState;
+import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import utilities.ImageIO;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -31,10 +32,7 @@ public class PokerGUI extends AbstractGUI {
     int width, height;
     // List of player hand views
     PokerPlayerView[] playerHands;
-    // Discard pile view
-    PokerDeckView discardPile;
     // Draw pile view
-    PokerDeckView drawPile;
     PokerDeckView communityPile;
 
     // Currently active player
@@ -49,10 +47,25 @@ public class PokerGUI extends AbstractGUI {
     public PokerGUI(Game game, ActionController ac, int humanID) {
         super(ac, 15);
         this.humanID = humanID;
+        UIManager.put("TabbedPane.contentOpaque", false);
+        UIManager.put("TabbedPane.opaque", false);
+        UIManager.put("TabbedPane.tabsOpaque", false);
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
+                JTabbedPane pane = new JTabbedPane();
+                JPanel main = new JPanel();
+                main.setOpaque(false);
+                main.setLayout(new BorderLayout());
+                JPanel rules = new JPanel();
+                pane.add("Main", main);
+                pane.add("Rules", rules);
+                JLabel ruleText = new JLabel(getRuleText());
+                rules.add(ruleText);
+                rules.setBackground(new Color(43, 108, 25, 111));
+
+
                 // Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
 
@@ -65,11 +78,16 @@ public class PokerGUI extends AbstractGUI {
 
                 PokerGameState pgs = (PokerGameState) gameState;
                 PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
+                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
+
+                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"), width, height, this);
+                setContentPane(backgroundImage);
 
                 // Create main game area that will hold all game views
                 playerHands = new PokerPlayerView[nPlayers];
                 playerViewBorders = new Border[nPlayers];
                 JPanel mainGameArea = new JPanel();
+                mainGameArea.setOpaque(false);
                 mainGameArea.setLayout(new BorderLayout());
 
                 // Player hands go on the edges
@@ -78,6 +96,7 @@ public class PokerGUI extends AbstractGUI {
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
                     PokerPlayerView playerHand = new PokerPlayerView(pgs.getPlayerDecks().get(i), i, pgp.getDataPath());
+                    playerHand.setOpaque(false);
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -92,6 +111,7 @@ public class PokerGUI extends AbstractGUI {
 
                     sides[next].add(playerHand);
                     sides[next].setLayout(new GridBagLayout());
+                    sides[next].setOpaque(false);
                     next = (next + 1) % (locations.length);
                     playerHands[i] = playerHand;
                 }
@@ -101,15 +121,15 @@ public class PokerGUI extends AbstractGUI {
 
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
+                centerArea.setOpaque(false);
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                discardPile = new PokerDeckView(pgs.getDiscardDeck(), true, pgp.getDataPath());
-                drawPile = new PokerDeckView(pgs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, pgp.getDataPath());
                 communityPile = new PokerDeckView(pgs.getCommunityCards(), true, pgp.getDataPath());
 
                 //centerArea.add(drawPile);
                 //centerArea.add(discardPile);
                 centerArea.add(communityPile);
                 JPanel jp = new JPanel();
+                jp.setOpaque(false);
                 jp.setLayout(new GridBagLayout());
                 jp.add(centerArea);
                 mainGameArea.add(jp, BorderLayout.CENTER);
@@ -120,13 +140,85 @@ public class PokerGUI extends AbstractGUI {
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
-                getContentPane().add(mainGameArea, BorderLayout.CENTER);
-                getContentPane().add(infoPanel, BorderLayout.NORTH);
-                getContentPane().add(actionPanel, BorderLayout.SOUTH);
+                main.add(mainGameArea, BorderLayout.CENTER);
+                main.add(infoPanel, BorderLayout.NORTH);
+                main.add(actionPanel, BorderLayout.SOUTH);
+
+                pane.add("Main", main);
+                pane.add("Rules", rules);
+                setLayout(new BorderLayout());
+                getContentPane().add(pane, BorderLayout.CENTER);
             }
         }
 
         setFrameProperties();
+    }
+
+
+    @Override
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
+        JPanel gameInfo = new JPanel();
+        gameInfo.setOpaque(false);
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
+
+        updateGameStateInfo(gameState);
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
+        gameInfo.add(playerScores);
+        gameInfo.add(gamePhase);
+        gameInfo.add(turnOwner);
+        gameInfo.add(turn);
+        gameInfo.add(currentPlayer);
+
+        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+
+        JPanel wrapper = new JPanel();
+        wrapper.setOpaque(false);
+        wrapper.setLayout(new FlowLayout());
+        wrapper.add(gameInfo);
+
+        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        wrapper.add(historyContainer);
+        historyInfo.setOpaque(false);
+        historyContainer.setOpaque(false);
+        historyContainer.getViewport().setBackground(new Color(43, 108, 25, 111));
+//        historyContainer.getViewport().setOpaque(false);
+        historyInfo.setEditable(false);
+        return wrapper;
+    }
+
+
+    @Override
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+        JPanel actionPanel = new JPanel();
+        actionPanel.setOpaque(false);
+        if (boxLayout) {
+            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
+        }
+
+        actionButtons = new ActionButton[maxActionSpace];
+        for (int i = 0; i < maxActionSpace; i++) {
+            ActionButton ab = new ActionButton(ac, highlights);
+            actionButtons[i] = ab;
+            actionButtons[i].setVisible(false);
+            actionPanel.add(actionButtons[i]);
+        }
+        for (ActionButton actionButton : actionButtons) {
+            actionButton.informAllActionButtons(actionButtons);
+        }
+
+        JScrollPane pane = new JScrollPane(actionPanel);
+        pane.setOpaque(false);
+        pane.getViewport().setOpaque(false);
+        pane.setPreferredSize(new Dimension(width, height));
+        if (boxLayout) {
+            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        }
+        return pane;
     }
 
     @Override
@@ -159,13 +251,9 @@ public class PokerGUI extends AbstractGUI {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
-            discardPile.updateComponent(pgs.getDiscardDeck());
-            discardPile.setFocusable(true);
-            drawPile.updateComponent(pgs.getDrawDeck());
             communityPile.updateComponent(pgs.getCommunityCards());
             communityPile.setFocusable(true);
             if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-                drawPile.setFront(true);
                 communityPile.setFront(true);
             }
 
@@ -180,5 +268,16 @@ public class PokerGUI extends AbstractGUI {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+    }
+
+
+    private String getRuleText() {
+        String rules = "<html><center><h1>Poker</h1></center><br/><hr><br/>";
+        rules += "<p>Coming soon ...</p>";
+
+
+        rules += "<hr><p><b>INTERFACE: </b> Choose action at the bottom of the screen.</p>";
+        rules += "</html>";
+        return rules;
     }
 }

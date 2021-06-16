@@ -9,20 +9,17 @@ import java.util.Objects;
 public class PokerGameParameters extends AbstractParameters {
     public String dataPath = "data/FrenchCards/";
 
-    public double money = 0.00;
+    public int nStartingMoney = 50;
+    public int nWinMoney = 80;
+    public int nFlopCards = 3;
+    public int nTurnCards = 1;
+    public int nRiverCards = 1;
     public int nCardsPerPlayer = 2;
-    public int nNumberCards = 10;
-    public int QueenCards = 1;
-    public int KingCards = 1;
-    public int JackCards = 1;
-    public int AceCards = 1;
-    public int MaxCards = 7;
-    public String[] suite = new String[]{
-            "Diamonds",
-            "Hearts",
-            "Clubs",
-            "Spades"
-    };
+    public int smallBlind = 5;
+    public int bigBlind = 10;
+    public int[] raiseMultipliers = new int[]{2, 3, 4};
+    public int bet = 5;
+    public boolean endMinMoney = false;  // if true, ends when a player gets at least nWinMoney; if false, ends when all but 1 have 0 money
 
     public PokerGameParameters(long seed) {
         super(seed);
@@ -37,36 +34,34 @@ public class PokerGameParameters extends AbstractParameters {
         PokerGameParameters pgp = new PokerGameParameters(System.currentTimeMillis());
         pgp.dataPath = dataPath;
         pgp.nCardsPerPlayer = nCardsPerPlayer;
-        pgp.QueenCards = QueenCards;
-        pgp.KingCards = KingCards;
-        pgp.JackCards = JackCards;
-        pgp.AceCards = AceCards;
-        pgp.suite = suite.clone();
+
+        pgp.nStartingMoney = nStartingMoney;
+        pgp.nWinMoney = nWinMoney;
+        pgp.nFlopCards = nFlopCards;
+        pgp.nTurnCards = nTurnCards;
+        pgp.nRiverCards = nRiverCards;
+        pgp.smallBlind = smallBlind;
+        pgp.bigBlind = bigBlind;
+        pgp.raiseMultipliers = raiseMultipliers.clone();
+        pgp.bet = bet;
+        pgp.endMinMoney = endMinMoney;
+
         return pgp;
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PokerGameParameters)) return false;
         if (!super.equals(o)) return false;
         PokerGameParameters that = (PokerGameParameters) o;
-        return nCardsPerPlayer == that.nCardsPerPlayer &&
-                nNumberCards == that.nNumberCards &&
-                QueenCards == that.QueenCards &&
-                KingCards == that.KingCards &&
-                JackCards == that.JackCards &&
-                AceCards == that.AceCards &&
-                Objects.equals(dataPath, that.dataPath) &&
-                Arrays.equals(suite, that.suite);
+        return nStartingMoney == that.nStartingMoney && nWinMoney == that.nWinMoney && nFlopCards == that.nFlopCards && nTurnCards == that.nTurnCards && nRiverCards == that.nRiverCards && nCardsPerPlayer == that.nCardsPerPlayer && smallBlind == that.smallBlind && bigBlind == that.bigBlind && bet == that.bet && endMinMoney == that.endMinMoney && Objects.equals(dataPath, that.dataPath) && Arrays.equals(raiseMultipliers, that.raiseMultipliers);
     }
-    /*
-    @Override
-    protected boolean _equals(Object o) {
-        int result = Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, diamondNumberCards, spadeNumberCards, heartNumberCards, clubNumberCards, QueenCards, KingCards, JackCards, AceCards);
 
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dataPath, nStartingMoney, nWinMoney, nFlopCards, nTurnCards, nRiverCards, nCardsPerPlayer, smallBlind, bigBlind, bet, endMinMoney);
+        result = 31 * result + Arrays.hashCode(raiseMultipliers);
         return result;
     }
-   */
-
 }

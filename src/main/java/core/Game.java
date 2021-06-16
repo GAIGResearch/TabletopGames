@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.Blackjack;
+import static games.GameType.Poker;
 
 public class Game {
 
@@ -713,7 +714,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Blackjack, players, seed, ac, false, null);
+        runOne(Poker, players, seed, ac, false, null);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);
 //        games.add(ExplodingKittens);

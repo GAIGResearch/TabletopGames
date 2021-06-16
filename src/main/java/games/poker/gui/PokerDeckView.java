@@ -109,7 +109,7 @@ public class PokerDeckView extends ComponentView {
         int size = g.getFont().getSize();
         @SuppressWarnings("unchecked") Deck<FrenchCard> deck = (Deck<FrenchCard>) component;
 
-        if (deck != null) {
+        if (deck != null && deck.getSize() > 0) {
             // Draw cards, 0 index on top
             int offset = Math.max((rect.width-pokerCardWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
@@ -127,7 +127,6 @@ public class PokerDeckView extends ComponentView {
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
             }
-            g.drawString(""+deck.getSize(), rect.x+10, rect.y+pokerCardHeight - size);
         }
     }
 
@@ -149,14 +148,8 @@ public class PokerDeckView extends ComponentView {
                 img = ImageIO.GetInstance().getImage(dataPath + card.number + card.suite + ".png");
                 break;
             case Jack:
-                img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
-                break;
             case Queen:
-                img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
-                break;
             case King:
-                img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
-                break;
             case Ace:
                 img = ImageIO.GetInstance().getImage(dataPath + card.type + card.suite + ".png");
                 break;

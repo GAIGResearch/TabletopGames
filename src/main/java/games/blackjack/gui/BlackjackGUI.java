@@ -31,7 +31,7 @@ public class BlackjackGUI extends AbstractGUI {
     int activePlayer = -1;
     int humanID;
 
-    Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220, 225));
+    Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220), 3);
     Border[] playerViewBorders;
 
     public BlackjackGUI(Game game, ActionController ac, int humanID) {

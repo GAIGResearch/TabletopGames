@@ -1,74 +1,55 @@
 package games.poker;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
-import games.uno.UnoTurnOrder;
-
-import java.util.Objects;
 
 import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class PokerTurnOrder extends AlternatingTurnOrder {
 
-    private boolean skipTurn;
-
     public PokerTurnOrder(int nPlayers) {
         super(nPlayers);
-        skipTurn = false;
-    }
-
-    @Override
-    protected void _reset() {
-        super._reset();
-        skipTurn = false;
-    }
-
-    public void skip()
-    {
-        skipTurn = true;
-        //turnOwner = (nPlayers + turnOwner + direction) % nPlayers;
-    }
-
-    @Override
-    public int nextPlayer(AbstractGameState gameState) {
-        int nextOwner = (nPlayers + turnOwner + direction) % nPlayers;
-        if (skipTurn) {
-            skipTurn = false;
-            return (nPlayers + nextOwner + direction) % nPlayers;
-        }
-        else
-            return nextOwner;
     }
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
 
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }
 
     @Override
-    protected TurnOrder _copy() {
-        PokerTurnOrder pto = new PokerTurnOrder(nPlayers);
-        pto.skipTurn = skipTurn;
-        pto.direction = direction;
-        return pto;
+    public int nextPlayer(AbstractGameState gameState) {
+        int next = (nPlayers + turnOwner + direction) % nPlayers;
+        PokerGameState pgs = (PokerGameState) gameState;
+        while (pgs.playerFold[next]) {
+            next = (nPlayers + next + direction) % nPlayers;
+        }
+        return next;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UnoTurnOrder)) return false;
-        if (!super.equals(o)) return false;
-        PokerTurnOrder that = (PokerTurnOrder) o;
-        return skipTurn == that.skipTurn;
-    }
+    public void endRound(AbstractGameState gameState) {
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), skipTurn);
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
+
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+
+        roundCounter++;
+        if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
+            gameState.setGameStatus(GAME_END);
+        }
+        else {
+            turnCounter = 0;
+            turnOwner = firstPlayer;
+            firstPlayer = nextPlayer(gameState);
+            moveToNextPlayer(gameState, firstPlayer);
+        }
     }
 }
