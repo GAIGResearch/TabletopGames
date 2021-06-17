@@ -23,7 +23,8 @@ public class Bet extends AbstractAction implements IPrintable {
         PokerGameState pgs = (PokerGameState) gameState;
         pgs.getCurrentMoney()[playerId] -= amount;
         pgs.updateTotalPotMoney(amount);
-        pgs.getBets()[playerId] = amount;
+        pgs.getBets()[playerId] += amount;
+        pgs.setBet(true);
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {

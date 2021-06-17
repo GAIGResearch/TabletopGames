@@ -32,6 +32,16 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
         return next;
     }
 
+    public void fold(PokerGameState pgs, int player) {
+        if (player == firstPlayer) {
+            // Move first player to next one
+            firstPlayer = (nPlayers + firstPlayer + direction) % nPlayers;
+            while (pgs.playerFold[firstPlayer]) {
+                firstPlayer = (nPlayers + firstPlayer + direction) % nPlayers;
+            }
+        }
+    }
+
     @Override
     public void endRound(AbstractGameState gameState) {
 

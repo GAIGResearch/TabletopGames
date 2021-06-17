@@ -26,6 +26,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     boolean[]               playerNeedsToCall;
     boolean[]               playerFold;
     int                     totalPotMoney;
+    boolean                 bet;
 
     enum PokerGamePhase implements IGamePhase {
         Preflop,
@@ -94,7 +95,13 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         return bets;
     }
 
+    public boolean isBet() {
+        return bet;
+    }
 
+    public void setBet(boolean bet) {
+        this.bet = bet;
+    }
 
     /*
               #    spacer,  A,  K,  Q,  J, 10, 9,  8,  7,  6,  5,  4,  3,  2
@@ -132,6 +139,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         copy.playerFold = playerFold.clone();
         copy.communityCards = communityCards.copy();
         copy.totalPotMoney = totalPotMoney;
+        copy.bet = bet;
         return copy;
     }
 
@@ -175,12 +183,12 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return totalPotMoney == that.totalPotMoney && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold);
+        return totalPotMoney == that.totalPotMoney && bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, totalPotMoney);
+        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, totalPotMoney, bet);
         result = 31 * result + Arrays.hashCode(currentMoney);
         result = 31 * result + Arrays.hashCode(bets);
         result = 31 * result + Arrays.hashCode(playerNeedsToCall);

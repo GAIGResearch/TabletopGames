@@ -85,6 +85,7 @@ public class PokerForwardModel extends AbstractForwardModel {
         }
 
         pgs.setGamePhase(Preflop);
+        pgs.setBet(false);
     }
 
     private void drawCardsToPlayers(PokerGameState pgs) {
@@ -103,7 +104,8 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameState pgs = (PokerGameState) gameState;
         PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
         int turn = gameState.getTurnOrder().getTurnCounter();
-        if (turn != 0 && turn % (gameState.getNPlayers()+1) == 0) {
+
+        if (turn != 0 && gameState.getTurnOrder().getTurnOwner() == gameState.getTurnOrder().getFirstPlayer()) {
             boolean remainingDecisions = false;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 if (!pgs.playerFold[i] && pgs.playerNeedsToCall[i]) {
@@ -113,24 +115,29 @@ public class PokerForwardModel extends AbstractForwardModel {
             }
             if (!remainingDecisions) {
                 // Add community cards
+                gameState.getTurnOrder().setTurnOwner(gameState.getTurnOrder().getFirstPlayer());
+
                 if (gameState.getGamePhase() == Preflop) {
                     // Add flop
                     for (int i = 0; i < pgp.nFlopCards; i++) {
                         pgs.communityCards.add(pgs.drawDeck.draw());
                     }
                     gameState.setGamePhase(Flop);
+                    pgs.setBet(false);
                 } else if (gameState.getGamePhase() == Flop) {
                     // Add turn
                     for (int i = 0; i < pgp.nTurnCards; i++) {
                         pgs.communityCards.add(pgs.drawDeck.draw());
                     }
                     gameState.setGamePhase(Turn);
+                    pgs.setBet(false);
                 } else if (gameState.getGamePhase() == Turn) {
                     // Add river
                     for (int i = 0; i < pgp.nRiverCards; i++) {
                         pgs.communityCards.add(pgs.drawDeck.draw());
                     }
                     gameState.setGamePhase(River);
+                    pgs.setBet(false);
                 } else if (gameState.getGamePhase() == River) {
                     // Round is over
                     roundEnd(pgs);
@@ -269,20 +276,24 @@ public class PokerForwardModel extends AbstractForwardModel {
         int player = pgs.getCurrentPlayer();
 
         // Check if player can afford to: Bet, Call, Raise. Can also Check, Fold.
-        if (player == pgs.getTurnOrder().getFirstPlayer() && !pgs.playerNeedsToCall[player]) {
+        if (!pgs.playerNeedsToCall[player] && !pgs.isBet()) {
             if (pgs.currentMoney[player] >= pgp.bet) {
                 actions.add(new Bet(player, pgp.bet));
             }
         } else {
-            int previousPlayer = (gameState.getNPlayers() + player - 1) % gameState.getNPlayers();
-            int previousBet = pgs.getBets()[previousPlayer];
-            int diff = previousBet - pgs.getBets()[player];
-            if (pgs.currentMoney[player] >= diff) {
+
+            int biggestBet = 0;
+            for (int i = 0; i < gameState.getNPlayers(); i++) {
+                if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
+            }
+            int diff = biggestBet - pgs.getBets()[player];
+
+            if (pgs.playerNeedsToCall[player] && pgs.currentMoney[player] >= diff) {
                 actions.add(new Call(player));
             }
+
             for (int r: pgp.raiseMultipliers) {
-                diff = previousBet * r - pgs.getBets()[player];
-                if (pgs.currentMoney[player] >= diff) {
+                if (pgs.currentMoney[player] >= biggestBet * r) {
                     actions.add(new Raise(player, r));
                 }
             }

@@ -20,11 +20,15 @@ public class Raise extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
-        int previousPlayer = (gameState.getNPlayers() + playerId - 1) % gameState.getNPlayers();
-        int diff = pgs.getBets()[previousPlayer] * multiplier - pgs.getBets()[playerId];
-        pgs.getCurrentMoney()[playerId] -= diff;
-        pgs.updateTotalPotMoney(diff);
-        pgs.getBets()[playerId] = pgs.getBets()[previousPlayer] * multiplier;
+        int biggestBet = 0;
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
+            if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
+        }
+
+        int bet = biggestBet * multiplier;
+        pgs.getCurrentMoney()[playerId] -= bet;
+        pgs.updateTotalPotMoney(bet);
+        pgs.getBets()[playerId] += bet;
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {
@@ -43,7 +47,7 @@ public class Raise extends AbstractAction implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Raise " + multiplier;
+        return "Raise x" + multiplier;
     }
 
     @Override

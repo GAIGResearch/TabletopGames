@@ -8,6 +8,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
+import games.poker.PokerTurnOrder;
 import utilities.Utils;
 
 import java.util.List;
@@ -27,6 +28,9 @@ public class Fold extends AbstractAction implements IPrintable {
         PokerGameState pgs = (PokerGameState) gameState;
         pgs.getPlayerFold()[playerId] = true;
         pgs.getPlayerNeedsToCall()[playerId] = false;
+
+        ((PokerTurnOrder)pgs.getTurnOrder()).fold(pgs, playerId);
+
         return true;
     }
 

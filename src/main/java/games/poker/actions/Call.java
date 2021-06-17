@@ -26,14 +26,15 @@ public class Call extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
-        int previousPlayer = (gameState.getNPlayers() + playerId - 1) % gameState.getNPlayers();
-        int diff = pgs.getBets()[previousPlayer] - pgs.getBets()[playerId];
-        if (diff > 0) {
-            pgs.getCurrentMoney()[playerId] -= diff;
-            pgs.updateTotalPotMoney(diff);
-            pgs.getBets()[playerId] = pgs.getBets()[previousPlayer];
+        int biggestBet = 0;
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
+            if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
         }
+        int diff = biggestBet - pgs.getBets()[playerId];
 
+        pgs.getCurrentMoney()[playerId] -= diff;
+        pgs.updateTotalPotMoney(diff);
+        pgs.getBets()[playerId] = biggestBet;
         pgs.getPlayerNeedsToCall()[playerId] = false;
 
         return true;
