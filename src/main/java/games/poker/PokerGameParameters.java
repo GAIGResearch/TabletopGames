@@ -17,7 +17,7 @@ public class PokerGameParameters extends AbstractParameters {
     public int nCardsPerPlayer = 2;
     public int smallBlind = 5;
     public int bigBlind = 10;
-    public int[] raiseMultipliers = new int[]{1, 2, 3, 4};
+    public double[] raiseMultipliers = new double[]{0.5, 1., 2., 3., 4.};
     public int bet = 5;
     public boolean endMinMoney = false;  // if true, ends when a player gets at least nWinMoney; if false, ends when all but 1 have 0 money
 

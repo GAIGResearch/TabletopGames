@@ -10,6 +10,7 @@ import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
+import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -42,13 +43,15 @@ public class PokerGUI extends AbstractGUI {
 
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
-    Border highlightFirst = BorderFactory.createLineBorder(new Color(229, 186, 31), 3);
+    Border highlightFirst = BorderFactory.createLineBorder(new Color(246, 209, 72), 3);
     Border highlightFold = BorderFactory.createLineBorder(new Color(150, 162, 170), 3);
+    Border highlightEliminated = BorderFactory.createLineBorder(new Color(236, 72, 126), 3);
 
     Border[] playerViewBorders;
     Border[] playerViewCompoundBordersHighlight;
     Border[] playerViewCompoundBordersFold;
     Border[] playerViewCompoundBordersFirst;
+    Border[] playerViewCompoundBordersEliminated;
 
     JLabel potMoney;
 
@@ -98,6 +101,7 @@ public class PokerGUI extends AbstractGUI {
                 playerViewCompoundBordersHighlight = new Border[nPlayers];
                 playerViewCompoundBordersFold = new Border[nPlayers];
                 playerViewCompoundBordersFirst = new Border[nPlayers];
+                playerViewCompoundBordersEliminated = new Border[nPlayers];
                 JPanel mainGameArea = new JPanel();
                 mainGameArea.setOpaque(false);
                 mainGameArea.setLayout(new BorderLayout());
@@ -124,10 +128,14 @@ public class PokerGUI extends AbstractGUI {
                     TitledBorder titleFirst = BorderFactory.createTitledBorder(
                             BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + agentName + "] - First",
                             TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
+                    TitledBorder titleEliminated = BorderFactory.createTitledBorder(
+                            BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + agentName + "] - Eliminated",
+                            TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
                     playerViewBorders[i] = title;
                     playerViewCompoundBordersHighlight[i] = BorderFactory.createCompoundBorder(highlightActive, playerViewBorders[i]);
                     playerViewCompoundBordersFold[i] = BorderFactory.createCompoundBorder(highlightFold, titleFold);
                     playerViewCompoundBordersFirst[i] = BorderFactory.createCompoundBorder(highlightFirst, titleFirst);
+                    playerViewCompoundBordersEliminated[i] = BorderFactory.createCompoundBorder(highlightEliminated, titleEliminated);
                     playerHand.setBorder(title);
 
                     sides[next].add(playerHand);
@@ -270,7 +278,9 @@ public class PokerGUI extends AbstractGUI {
                 }
 
                 // Highlight active, first and fold players
-                if (i == gameState.getTurnOrder().getFirstPlayer()) {
+                if (gameState.getPlayerResults()[i] == Utils.GameResult.LOSE) {
+                    playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
+                } else if (i == gameState.getTurnOrder().getFirstPlayer()) {
                     playerHands[i].setBorder(playerViewCompoundBordersFirst[i]);
                 } else if (pgs.getPlayerFold()[i]) {
                     playerHands[i].setBorder(playerViewCompoundBordersFold[i]);

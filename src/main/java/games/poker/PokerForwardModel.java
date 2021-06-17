@@ -7,11 +7,13 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import games.poker.actions.*;
 import games.poker.actions.Fold;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
 
 import static games.poker.PokerGameState.PokerGamePhase.*;
+import static utilities.Utils.GameResult.LOSE;
 
 
 public class PokerForwardModel extends AbstractForwardModel {
@@ -33,9 +35,6 @@ public class PokerForwardModel extends AbstractForwardModel {
             pgs.currentMoney[i] = params.nStartingMoney;
         }
 
-        // Create the draw deck with all the cards
-        pgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-
         // Create the discard deck, at the beginning it is empty
         pgs.communityCards = new Deck<>("CommunityCards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
@@ -56,15 +55,14 @@ public class PokerForwardModel extends AbstractForwardModel {
 
         // Refresh player decks
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            pgs.drawDeck.add(pgs.playerDecks.get(i));
             pgs.playerDecks.get(i).clear();
             pgs.playerNeedsToCall[i] = false;
             pgs.playerFold[i] = false;
         }
-        pgs.drawDeck.add(pgs.communityCards);
         pgs.communityCards.clear();
 
         // Refresh draw deck and shuffle
+        pgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         pgs.drawDeck.shuffle(r);
 
         // Draw new cards for players
@@ -103,17 +101,24 @@ public class PokerForwardModel extends AbstractForwardModel {
         // Check end of street to add more community cards
         PokerGameState pgs = (PokerGameState) gameState;
         PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
-        int turn = gameState.getTurnOrder().getTurnCounter();
 
-        if (turn != 0 && gameState.getTurnOrder().getTurnOwner() == gameState.getTurnOrder().getFirstPlayer()) {
+        if (!(action instanceof Fold || action instanceof Check || action instanceof Call)) {
+            gameState.getTurnOrder().endPlayerTurn(gameState);
+        } else {
             boolean remainingDecisions = false;
+            int stillAlive = 0;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                if (!pgs.playerFold[i] && pgs.playerNeedsToCall[i]) {
-                    remainingDecisions = true;
-                    break;
+                if (pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i]) {
+                    stillAlive++;
+                    if (pgs.playerNeedsToCall[i]){
+                        remainingDecisions = true;
+                    }
                 }
             }
-            if (!remainingDecisions) {
+            if (stillAlive == 1) {
+                // Round is over
+                roundEnd(pgs);
+            } else if (!remainingDecisions) {
                 // Add community cards
                 gameState.getTurnOrder().setTurnOwner(gameState.getTurnOrder().getFirstPlayer());
 
@@ -124,6 +129,7 @@ public class PokerForwardModel extends AbstractForwardModel {
                     }
                     gameState.setGamePhase(Flop);
                     pgs.setBet(false);
+                    pgs.getTurnOrder().setTurnOwner(pgs.getTurnOrder().getFirstPlayer());
                 } else if (gameState.getGamePhase() == Flop) {
                     // Add turn
                     for (int i = 0; i < pgp.nTurnCards; i++) {
@@ -131,6 +137,7 @@ public class PokerForwardModel extends AbstractForwardModel {
                     }
                     gameState.setGamePhase(Turn);
                     pgs.setBet(false);
+                    pgs.getTurnOrder().setTurnOwner(pgs.getTurnOrder().getFirstPlayer());
                 } else if (gameState.getGamePhase() == Turn) {
                     // Add river
                     for (int i = 0; i < pgp.nRiverCards; i++) {
@@ -138,15 +145,13 @@ public class PokerForwardModel extends AbstractForwardModel {
                     }
                     gameState.setGamePhase(River);
                     pgs.setBet(false);
+                    pgs.getTurnOrder().setTurnOwner(pgs.getTurnOrder().getFirstPlayer());
                 } else if (gameState.getGamePhase() == River) {
                     // Round is over
                     roundEnd(pgs);
-                    return;
                 }
             }
         }
-
-        gameState.getTurnOrder().endPlayerTurn(gameState);
     }
 
     /**
@@ -157,30 +162,36 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
         // Calculate winner of round, they earn the money. Ties split money equally.
         int[] ranks = new int[pgs.getNPlayers()];
-        int smallestRank = 10;
+        HashSet<Integer>[] hands = new HashSet[pgs.getNPlayers()];
+        int smallestRank = 11;
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            pgs.playerDecks.get(i).add(pgs.communityCards);
-            ranks[i] = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i)).rank;
-            if (ranks[i] < smallestRank) {
-                smallestRank = ranks[i];
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+                pgs.playerDecks.get(i).add(pgs.communityCards.copy());
+                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
+                if (hand != null) {
+                    ranks[i] = hand.a.rank;
+                    hands[i] = hand.b;
+                    if (ranks[i] < smallestRank) {
+                        smallestRank = ranks[i];
+                    }
+                }
             }
         }
         HashSet<Integer> winners = new HashSet<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (ranks[i] == smallestRank) winners.add(i);
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+                if (ranks[i] == smallestRank) winners.add(i);
+            }
         }
         if (winners.size() > 1) {
             // A tie in rank, check card values
             ArrayList<Integer>[] cardValues = new ArrayList[pgs.getNPlayers()];
+            int nCards = 0;
             for (int i: winners) {
-                HashSet<Integer> numbers = new HashSet<>();
-                for (FrenchCard card : pgs.playerDecks.get(i).getComponents()) {
-                    numbers.add(card.number);
-                }
-                cardValues[i] = new ArrayList<>(numbers);
+                cardValues[i] = new ArrayList<>(hands[i]);
                 cardValues[i].sort(Collections.reverseOrder());
+                nCards = cardValues[i].size();
             }
-            int nCards = cardValues[0].size();
             for (int j = 0; j < nCards; j++) {
                 // Checking card by card, once one player is found the winner we break; could still be a tie
                 int maxValue = 0;
@@ -205,18 +216,21 @@ public class PokerForwardModel extends AbstractForwardModel {
         }
 
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (pgs.currentMoney[i] == 0) {
+            if (pgs.currentMoney[i] <= 0) {
                 // Player is out of the game
-                pgs.setPlayerResult(Utils.GameResult.LOSE, i);
+                pgs.currentMoney[i] = 0;
+                pgs.setPlayerResult(LOSE, i);
             }
         }
 
+        // Check if game is over
         if (checkGameEnd(pgs)) return;
-
-        pgs.getTurnOrder().endRound(pgs);
 
         // Reset cards for the new round
         setupRound(pgs);
+
+        // End previous round
+        pgs.getTurnOrder().endRound(pgs);
     }
 
     /**
@@ -241,7 +255,7 @@ public class PokerForwardModel extends AbstractForwardModel {
                     if (pgs.currentMoney[playerID] == maxMoney) {
                         pgs.setPlayerResult(Utils.GameResult.WIN, playerID);
                     } else {
-                        pgs.setPlayerResult(Utils.GameResult.LOSE, playerID);
+                        pgs.setPlayerResult(LOSE, playerID);
                     }
                 }
                 pgs.setGameStatus(Utils.GameResult.GAME_END);
@@ -292,8 +306,9 @@ public class PokerForwardModel extends AbstractForwardModel {
                 actions.add(new Call(player));
             }
 
-            for (int r: pgp.raiseMultipliers) {
-                if (pgs.currentMoney[player] >= biggestBet * r) {
+            for (double r: pgp.raiseMultipliers) {
+                diff = biggestBet + (int) (biggestBet * r) - pgs.getBets()[player];
+                if (pgs.currentMoney[player] >= diff) {
                     actions.add(new Raise(player, r));
                 }
             }

@@ -10,9 +10,9 @@ import java.util.Objects;
 public class Raise extends AbstractAction implements IPrintable {
 
     private final int playerId;
-    private final int multiplier;
+    private final double multiplier;
 
-    public Raise(int id, int multiplier) {
+    public Raise(int id, double multiplier) {
         this.playerId = id;
         this.multiplier = multiplier;
     }
@@ -25,10 +25,11 @@ public class Raise extends AbstractAction implements IPrintable {
             if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
         }
 
-        int bet = biggestBet * multiplier;
-        pgs.getCurrentMoney()[playerId] -= bet;
-        pgs.updateTotalPotMoney(bet);
-        pgs.getBets()[playerId] += bet;
+        int bet = biggestBet + (int)(biggestBet * multiplier);  // First call, then raise
+        int diff = bet - pgs.getBets()[playerId];
+        pgs.getCurrentMoney()[playerId] -= diff;
+        pgs.updateTotalPotMoney(diff);
+        pgs.getBets()[playerId] += diff;
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {

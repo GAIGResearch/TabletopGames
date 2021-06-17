@@ -36,6 +36,7 @@ public class Call extends AbstractAction implements IPrintable {
         pgs.updateTotalPotMoney(diff);
         pgs.getBets()[playerId] = biggestBet;
         pgs.getPlayerNeedsToCall()[playerId] = false;
+        pgs.getTurnOrder().endPlayerTurn(pgs);
 
         return true;
     }

@@ -72,7 +72,7 @@ public class FrenchCard extends Card {
     }
 
     @Override
-    public Card copy() {
+    public FrenchCard copy() {
         return new FrenchCard(type, suite, number, componentID);
     }
 
@@ -82,13 +82,10 @@ public class FrenchCard extends Card {
             case Number:
                 return "{" + suite + " " + number + "}";
             case Queen:
-                return "{" + "Queen " + suite + "}";
             case King:
-                return "{" + "King " + suite + "}";
             case Jack:
-                return "{" + "Jack " + suite + "}";
             case Ace:
-                return "{" + "Ace " + suite + "}";
+                return "{" + type.name() + " " + suite + "}";
         }
         return null;
     }

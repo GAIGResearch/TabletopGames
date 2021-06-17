@@ -3,9 +3,9 @@ package games.poker;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 
-import static utilities.Utils.GameResult.GAME_END;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.*;
 
 public class PokerTurnOrder extends AlternatingTurnOrder {
 
@@ -26,8 +26,13 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
     public int nextPlayer(AbstractGameState gameState) {
         int next = (nPlayers + turnOwner + direction) % nPlayers;
         PokerGameState pgs = (PokerGameState) gameState;
-        while (pgs.playerFold[next]) {
+        int nTries = 1;
+        while ((pgs.playerFold[next] || pgs.getPlayerResults()[next] == LOSE) && nTries <= gameState.getNPlayers()) {
             next = (nPlayers + next + direction) % nPlayers;
+            nTries++;
+        }
+        if (nTries > gameState.getNPlayers()) {
+            gameState.setGameStatus(GAME_END);
         }
         return next;
     }
@@ -36,10 +41,16 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
         if (player == firstPlayer) {
             // Move first player to next one
             firstPlayer = (nPlayers + firstPlayer + direction) % nPlayers;
-            while (pgs.playerFold[firstPlayer]) {
+            int nTries = 1;
+            while ((pgs.playerFold[firstPlayer] || pgs.getPlayerResults()[firstPlayer] == LOSE) && nTries <= pgs.getNPlayers()) {
                 firstPlayer = (nPlayers + firstPlayer + direction) % nPlayers;
+                nTries++;
+            }
+            if (nTries > pgs.getNPlayers()) {
+                pgs.setGameStatus(GAME_END);
             }
         }
+        endPlayerTurn(pgs);
     }
 
     @Override
@@ -61,5 +72,12 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
             firstPlayer = nextPlayer(gameState);
             moveToNextPlayer(gameState, firstPlayer);
         }
+    }
+
+    @Override
+    protected PokerTurnOrder _copy() {
+        PokerTurnOrder to = new PokerTurnOrder(nPlayers);
+        to.direction = direction;
+        return to;
     }
 }

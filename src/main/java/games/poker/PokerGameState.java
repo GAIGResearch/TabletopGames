@@ -6,15 +6,17 @@ import java.util.List;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
+import utilities.Pair;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static utilities.Utils.generateCombinations;
 
 
 public class PokerGameState extends AbstractGameState implements IPrintable {
@@ -26,7 +28,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     boolean[]               playerNeedsToCall;
     boolean[]               playerFold;
     int                     totalPotMoney;
-    boolean                 bet;
+    boolean                 bet;  // True if a bet was made this street
 
     enum PokerGamePhase implements IGamePhase {
         Preflop,
@@ -129,7 +131,9 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             copy.drawDeck.shuffle(new Random(copy.gameParameters.getRandomSeed()));
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
-                    copy.playerDecks.get(i).add(copy.drawDeck.draw());
+                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
+                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
+                    }
                 }
             }
         }
@@ -208,12 +212,64 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         OnePair (9),
         HighCard (10);
 
+        static int pokerHandSize = 5;
         int rank;
         PokerHand(int rank) {
             this.rank = rank;
         }
 
-        static PokerHand translateHand(Deck<FrenchCard> deck) {
+        static Pair<PokerHand, HashSet<Integer>> translateHand(Deck<FrenchCard> deck) {
+            if (deck.getSize() > pokerHandSize) {
+                // Make combinations, translate each hand and return the best hand (lowest rank; if tied, highest card values)
+                int[] indx = new int[deck.getSize()];
+                for (int i = 0; i < indx.length; i++) {
+                    indx[i] = i;
+                }
+                ArrayList<int[]> combinations = generateCombinations(indx, pokerHandSize);
+                ArrayList<Pair<PokerHand,ArrayList<Integer>>> handOptions = new ArrayList<>();
+                int smallestRank = 11;
+                for (int[] combo : combinations) {
+                    Deck<FrenchCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+                    for (int j : combo) {
+                        temp.add(deck.get(j).copy());
+                    }
+                    Pair<PokerHand, ArrayList<Integer>> hand = _translateHand(temp);
+                    if (hand.a.rank < smallestRank) {
+                        handOptions.clear();
+                        handOptions.add(hand);
+                    } else if (hand.a.rank == smallestRank) {
+                        handOptions.add(hand);
+                    }
+                }
+                if (handOptions.size() == 1) return new Pair<>(handOptions.get(0).a, new HashSet<>(handOptions.get(0).b));
+                else {
+                    // Choose the one with highest card values
+                    for (int i = 0; i < pokerHandSize; i++) {
+                        int maxValue = 0;
+                        for (Pair<PokerHand, ArrayList<Integer>> handOption : handOptions) {
+                            int value = handOption.b.get(i);
+                            if (value > maxValue) maxValue = value;
+                        }
+                        HashSet<Integer> best = new HashSet<>();
+                        for (int j = 0; j < handOptions.size(); j++) {
+                            int value = handOptions.get(j).b.get(i);
+                            if (value == maxValue) best.add(j);
+                        }
+                        if (best.size() == 1 || i == pokerHandSize-1) {
+                            int option = best.iterator().next();
+                            return new Pair<>(handOptions.get(option).a, new HashSet<>(handOptions.get(option).b));
+                        }
+                    }
+                    return null;
+                }
+            } else {
+                // Only one combination, just return its rank
+                Pair<PokerHand, ArrayList<Integer>> hand = _translateHand(deck);
+                return new Pair<>(hand.a, new HashSet<>(hand.b));
+            }
+        }
+
+        static Pair<PokerHand, ArrayList<Integer>> _translateHand(Deck<FrenchCard> deck) {
             HashSet<FrenchCard.Suite> suites = new HashSet<>();
             HashSet<Integer> numberSet = new HashSet<>();
             HashMap<Integer, Integer> numberCount = new HashMap<>();
@@ -236,29 +292,29 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                 if (consecutive) {
                     // Check royal
                     if (numberSet.contains(FrenchCard.FrenchCardType.Ace.getNumber())) {
-                        return RoyalFlush;
+                        return new Pair<>(RoyalFlush, numbers);
                     } else {
-                        return StraightFlush;
+                        return new Pair<>(StraightFlush, numbers);
                     }
                 } else {
-                    return Flush;
+                    return new Pair<>(Flush, numbers);
                 }
             }
             if (numberSet.size() == 2) {
                 // Full house or four of a kind
                 int maxCount = maxCount(numberCount);
-                if (maxCount == 4) return FourOfAKind;
-                else return FullHouse;
+                if (maxCount == 4) return new Pair<>(FourOfAKind, numbers);
+                else return new Pair<>(FullHouse, numbers);
             } else if (numberSet.size() == 3) {
                 // Three of a kind or two pair
                 int maxCount = maxCount(numberCount);
-                if (maxCount == 3) return ThreeOfAKind;
-                else return TwoPair;
+                if (maxCount == 3) return new Pair<>(ThreeOfAKind, numbers);
+                else return new Pair<>(TwoPair, numbers);
             } else if (numberSet.size() == 4) {
-                return OnePair;
+                return new Pair<>(OnePair, numbers);
             } else {
-                if (consecutive) return Straight;
-                else return HighCard;
+                if (consecutive) return new Pair<>(Straight, numbers);
+                else return new Pair<>(HighCard, numbers);
             }
         }
 
