@@ -3,14 +3,22 @@ package games.poker;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
+
+import java.util.Arrays;
 
 import static utilities.Utils.GameResult.*;
 
 public class PokerTurnOrder extends AlternatingTurnOrder {
+    int roundFirstPlayer;
 
     public PokerTurnOrder(int nPlayers) {
         super(nPlayers);
+    }
+
+    @Override
+    protected void _reset() {
+        super._reset();
+        roundFirstPlayer = 0;
     }
 
     @Override
@@ -53,6 +61,10 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
         endPlayerTurn(pgs);
     }
 
+    public int getRoundFirstPlayer() {
+        return roundFirstPlayer;
+    }
+
     @Override
     public void endRound(AbstractGameState gameState) {
 
@@ -62,15 +74,19 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
 
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
 
+        PokerGameState pgs = (PokerGameState) gameState;
+        Arrays.fill(pgs.playerFold, false);
+
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
             gameState.setGameStatus(GAME_END);
         }
         else {
             turnCounter = 0;
-            turnOwner = firstPlayer;
-            firstPlayer = nextPlayer(gameState);
-            moveToNextPlayer(gameState, firstPlayer);
+            turnOwner = roundFirstPlayer;
+            roundFirstPlayer = nextPlayer(gameState);
+            firstPlayer = roundFirstPlayer;
+            moveToNextPlayer(gameState, roundFirstPlayer);
         }
     }
 
@@ -78,6 +94,7 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
     protected PokerTurnOrder _copy() {
         PokerTurnOrder to = new PokerTurnOrder(nPlayers);
         to.direction = direction;
+        to.roundFirstPlayer = roundFirstPlayer;
         return to;
     }
 }

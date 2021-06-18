@@ -17,6 +17,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collection;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
@@ -54,6 +55,7 @@ public class PokerGUI extends AbstractGUI {
     Border[] playerViewCompoundBordersEliminated;
 
     JLabel potMoney;
+    JLabel currentBets;
 
     public PokerGUI(Game game, ActionController ac, int humanID) {
         super(ac, 15);
@@ -77,6 +79,7 @@ public class PokerGUI extends AbstractGUI {
                 rules.setBackground(new Color(43, 108, 25, 111));
 
                 potMoney = new JLabel();
+                currentBets = new JLabel();
 
                 // Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
@@ -164,7 +167,7 @@ public class PokerGUI extends AbstractGUI {
                 mainGameArea.add(jp, BorderLayout.CENTER);
 
                 // Top area will show state information
-                JPanel infoPanel = createGameStateInfoPanel("Poker", gameState, width, defaultInfoPanelHeight);
+                JPanel infoPanel = createGameStateInfoPanel("Poker", gameState, width, defaultInfoPanelHeight +15);
                 // Bottom area will show actions available
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
@@ -187,6 +190,7 @@ public class PokerGUI extends AbstractGUI {
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
         potMoney.setText("Pot: " + ((PokerGameState)gameState).getTotalPotMoney());
+        currentBets.setText("Bets: " + Arrays.toString(((PokerGameState) gameState).getBets()));
     }
 
     @Override
@@ -206,6 +210,7 @@ public class PokerGUI extends AbstractGUI {
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(potMoney);
+        gameInfo.add(currentBets);
 
         gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
 
@@ -306,7 +311,7 @@ public class PokerGUI extends AbstractGUI {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 35);
     }
 
 

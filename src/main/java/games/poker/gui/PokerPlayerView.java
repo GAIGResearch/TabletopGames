@@ -3,6 +3,7 @@ package games.poker.gui;
 import core.components.Deck;
 import games.poker.PokerGameState;
 import core.components.FrenchCard;
+import games.poker.PokerTurnOrder;
 
 import java.awt.*;
 
@@ -12,12 +13,12 @@ public class PokerPlayerView extends PokerDeckView {
 
     // ID of player showing
     int playerId;
-    // Number of points player has
-    //int nPoints;
 
     // Border offsets
     int border = 5;
     int borderBottom = 20;
+
+    boolean firstPlayerOfRound = false;
 
     public PokerPlayerView(Deck<FrenchCard> d, int playerId, String dataPath) {
         super(d, false, dataPath);
@@ -33,8 +34,12 @@ public class PokerPlayerView extends PokerDeckView {
     @Override
     protected void paintComponent(Graphics g) {
         drawDeck((Graphics2D) g, new Rectangle(border, border, playerAreaWidth, pokerCardHeight));
-        g.setColor(Color.black);
-        //g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border+pokerCardHeight + 10);
+        if (firstPlayerOfRound) {
+            g.setColor(new Color(87, 37, 25));
+            Font f = g.getFont();
+            g.setFont(new Font(f.getName(), Font.BOLD, 30));
+            g.drawString("*", border + playerAreaWidth / 2 - 20, border + pokerCardHeight + 25);
+        }
     }
 
     @Override
@@ -48,7 +53,7 @@ public class PokerPlayerView extends PokerDeckView {
      */
     public void update(PokerGameState gameState) {
         this.component = gameState.getPlayerDecks().get(playerId);
-        //nPoints = gameState.getPlayerScore()[playerId];
+        firstPlayerOfRound = ((PokerTurnOrder) gameState.getTurnOrder()).getRoundFirstPlayer() == playerId;
     }
 
     // Getters, setters

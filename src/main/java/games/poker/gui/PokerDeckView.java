@@ -113,12 +113,13 @@ public class PokerDeckView extends ComponentView {
             // Draw cards, 0 index on top
             int offset = Math.max((rect.width-pokerCardWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
-            for (int i = deck.getSize()-1; i >= 0; i--) {
+            for (int i = 0; i < deck.getSize(); i++) {
                 FrenchCard card = deck.get(i);
                 Image cardFace = getCardImage(card);
                 Rectangle r = new Rectangle(rect.x + offset * i, rect.y, pokerCardWidth, pokerCardHeight);
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+                g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
@@ -126,6 +127,7 @@ public class PokerDeckView extends ComponentView {
                 Image cardFace = getCardImage(card);
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
+                g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
         }
     }

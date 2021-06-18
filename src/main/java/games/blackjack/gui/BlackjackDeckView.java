@@ -93,20 +93,20 @@ public class BlackjackDeckView extends ComponentView {
         if (deck != null){
             int offset = Math.max((rect.width-cardWidth) / deck.getSize(), minimumCardOffset);
             rects = new Rectangle[deck.getSize()];
-            for (int i = deck.getSize()-1; i >= 0; i--){
+            for (int i = 0; i < deck.getSize(); i++){
                 FrenchCard card = deck.get(i);
                 Image cardFace = getCardImage(card);
                 Rectangle r = new Rectangle(rect.x + offset * i, rect.y, cardWidth, cardHeight);
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, deck.isComponentVisible(i, 0));
-                g.drawRoundRect(r.x, r.y, r.width, r.height, 5, 5);
+                g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
             if (cardHighlight != -1){
                 FrenchCard card = deck.get(cardHighlight);
                 Image cardFace = getCardImage(card);
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, deck.isComponentVisible(cardHighlight, 0));
-                g.drawRoundRect(r.x, r.y, r.width, r.height, 5, 5);
+                g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
             g.drawString(""+deck.getSize(), rect.x+10, rect.y+cardHeight - size);
         }

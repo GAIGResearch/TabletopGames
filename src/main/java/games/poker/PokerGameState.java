@@ -27,6 +27,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     int[]                   bets;
     boolean[]               playerNeedsToCall;
     boolean[]               playerFold;
+    boolean[]               playerActStreet;  // true if player acted this street, false otherwise
     int                     totalPotMoney;
     boolean                 bet;  // True if a bet was made this street
 
@@ -144,6 +145,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         copy.communityCards = communityCards.copy();
         copy.totalPotMoney = totalPotMoney;
         copy.bet = bet;
+        copy.playerActStreet = playerActStreet.clone();
         return copy;
     }
 
@@ -187,7 +189,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return totalPotMoney == that.totalPotMoney && bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold);
+        return totalPotMoney == that.totalPotMoney && bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet);
     }
 
     @Override
@@ -197,6 +199,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         result = 31 * result + Arrays.hashCode(bets);
         result = 31 * result + Arrays.hashCode(playerNeedsToCall);
         result = 31 * result + Arrays.hashCode(playerFold);
+        result = 31 * result + Arrays.hashCode(playerActStreet);
         return result;
     }
 
