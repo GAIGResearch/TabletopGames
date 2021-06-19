@@ -4,17 +4,21 @@ package games.dicemonastery.test;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
+import games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
+import games.dicemonastery.DiceMonasteryConstants.Season;
+import games.dicemonastery.DiceMonasteryConstants.TREASURE;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
 import java.util.*;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
+import static games.dicemonastery.DiceMonasteryConstants.GOSPEL_REWARD;
 import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.*;
+import static games.dicemonastery.DiceMonasteryConstants.PSALM_REWARDS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
@@ -77,10 +81,14 @@ public class ActionTests {
     @Test
     public void meadowActionsCorrectSpring() {
         startOfUseMonkPhaseForAreaAfterBonusToken(MEADOW, SPRING);
-        assertEquals(4, fm.computeAvailableActions(state).size());
+        int ap = turnOrder.getActionPointsLeft();
+
+        assertEquals(ap >= 5 ? 5 : 4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
-        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
+        if (ap >= 5)
+            assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
         assertTrue(fm.computeAvailableActions(state).contains(new PlaceSkep()));
     }
 
@@ -97,12 +105,16 @@ public class ActionTests {
         if (state.isActionInProgress())
             fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
 
+        int ap = turnOrder.getActionPointsLeft();
+
         // Now check we move straight on to actions
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PRAYER, STOREROOM));
-        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertEquals(ap >= 5 ? 5 : 4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
-        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
+        if (ap >= 5)
+            assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
         assertTrue(fm.computeAvailableActions(state).contains(new PlaceSkep()));
     }
 
@@ -175,20 +187,28 @@ public class ActionTests {
         while (state.getResource(state.getCurrentPlayer(), SKEP, MEADOW) > 0)
             state.moveCube(state.getCurrentPlayer(), SKEP, MEADOW, SUPPLY);
 
-        assertEquals(2, fm.computeAvailableActions(state).size());
+        int ap = turnOrder.getActionPointsLeft();
+
+        assertEquals(ap >= 5 ? 3 : 2, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
+        if (ap >= 5)
+            assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
 
         state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(ap >= 5 ? 4 : 3, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
+        if (ap >= 5)
+            assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
         assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat()));
 
         state.moveCube(state.getCurrentPlayer(), SKEP, SUPPLY, MEADOW);
-        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertEquals(ap >= 5 ? 5 : 4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        assertTrue(fm.computeAvailableActions(state).contains(new Forage()));
+        assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
+        if (ap >= 5)
+            assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
         assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat()));
         assertTrue(fm.computeAvailableActions(state).contains(new CollectSkep()));
     }
@@ -244,13 +264,13 @@ public class ActionTests {
         state.useAP(-100);
         int player = state.getCurrentPlayer();
         assertEquals(0, state.getStores(player, r -> r.isPigment).size());
-        for (int i = 0; i < 100; i++)
-            (new Forage()).execute(state);
+        for (int i = 0; i < 20; i++)
+            (new Forage(5)).execute(state);
         assertEquals(3, state.getStores(player, r -> r.isPigment).size()); // all three basic types
-        assertEquals(200.0/9.0, state.getResource(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, STOREROOM), 10);
-        assertEquals(200.0/9.0, state.getResource(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, STOREROOM), 10);
-        assertEquals(200.0/9.0, state.getResource(state.getCurrentPlayer(), PALE_RED_PIGMENT, STOREROOM), 10);
-        assertEquals(100.0/6.0, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
+        assertEquals(200.0 / 9.0, state.getResource(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, STOREROOM), 10);
+        assertEquals(200.0 / 9.0, state.getResource(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, STOREROOM), 10);
+        assertEquals(200.0 / 9.0, state.getResource(state.getCurrentPlayer(), PALE_RED_PIGMENT, STOREROOM), 10);
+        assertEquals(100.0 / 6.0, state.getResource(state.getCurrentPlayer(), BERRIES, STOREROOM), 10);
     }
 
     @Test
@@ -483,7 +503,7 @@ public class ActionTests {
 
         assertEquals(3, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        assertTrue(fm.computeAvailableActions(state).contains(new BegForAlms()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BegForAlms(1)));
         assertTrue(fm.computeAvailableActions(state).contains(new VisitMarket()));
 
         state.useAP(-1);
@@ -600,10 +620,10 @@ public class ActionTests {
     @Test
     public void begForAlms() {
         int player = state.getCurrentPlayer();
-        state.useAP(-1);
+        state.useAP(-2);
         assertEquals(6, state.getResource(player, SHILLINGS, STOREROOM));
-        fm.next(state, (new BegForAlms()));
-        assertEquals(7, state.getResource(player, SHILLINGS, STOREROOM));
+        fm.next(state, (new BegForAlms(2)));
+        assertEquals(8, state.getResource(player, SHILLINGS, STOREROOM));
         assertEquals(0, turnOrder.getActionPointsLeft());
     }
 

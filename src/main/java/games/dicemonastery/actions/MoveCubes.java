@@ -4,15 +4,16 @@ import games.dicemonastery.DiceMonasteryGameState;
 
 import java.util.Objects;
 
-import static games.dicemonastery.DiceMonasteryConstants.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
+import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
-public class MoveCubes extends UseMonk{
+public class MoveCubes extends UseMonk {
 
     Resource resource;
     ActionArea from, to;
 
-    public MoveCubes(int actionPoints, Resource resource, ActionArea from, ActionArea to) {
-        super(actionPoints);
+    public MoveCubes(int cubes, Resource resource, ActionArea from, ActionArea to) {
+        super(cubes);
         this.from = from;
         this.to = to;
         this.resource = resource;
@@ -20,7 +21,8 @@ public class MoveCubes extends UseMonk{
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
-        state.moveCube(state.getCurrentPlayer(), resource, from, to);
+        for (int i = 0; i < actionPoints; i++)
+            state.moveCube(state.getCurrentPlayer(), resource, from, to);
         return true;
     }
 

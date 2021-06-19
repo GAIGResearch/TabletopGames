@@ -21,7 +21,8 @@ import static java.util.stream.Collectors.toSet;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
-    public final AbstractAction FORAGE = new Forage();
+    public final AbstractAction FORAGE_1 = new Forage(1);
+    public final AbstractAction FORAGE_5 = new Forage(5);
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat();
     public final AbstractAction PLACE_SKEP = new PlaceSkep();
@@ -33,7 +34,8 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     public final AbstractAction WEAVE_SKEP = new WeaveSkep();
     public final AbstractAction MAKE_CANDLE = new MakeCandle();
     public final AbstractAction PREPARE_VELLUM = new PrepareVellum();
-    public final AbstractAction BEG = new BegForAlms();
+    public final AbstractAction BEG_1 = new BegForAlms(1);
+    public final AbstractAction BEG_5 = new BegForAlms(5);
     public final AbstractAction HIRE_NOVICE = new HireNovice();
 
     @Override
@@ -152,7 +154,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     retValue.add(PASS);
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
-                            retValue.add(FORAGE);
+                            retValue.add(FORAGE_1);
+                            if (turnOrder.getActionPointsLeft() >= 5)
+                                retValue.add(FORAGE_5);
                             if (turnOrder.season == SPRING) {
                                 retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
@@ -190,7 +194,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             }
                             break;
                         case GATEHOUSE:
-                            retValue.add(BEG);
+                            retValue.add(BEG_1);
+                            if (turnOrder.getActionPointsLeft() >= 5)
+                                retValue.add(BEG_5);
                             retValue.add(new VisitMarket());
                             if (turnOrder.getActionPointsLeft() > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);

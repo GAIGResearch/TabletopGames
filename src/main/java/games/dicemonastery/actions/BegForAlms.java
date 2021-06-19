@@ -5,8 +5,8 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
 public class BegForAlms extends MoveCubes {
 
-    public BegForAlms() {
-        super(1, SHILLINGS, SUPPLY, STOREROOM);
+    public BegForAlms(int times) {
+        super(times, SHILLINGS, SUPPLY, STOREROOM);
     }
 
     @Override
