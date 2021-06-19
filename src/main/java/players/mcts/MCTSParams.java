@@ -12,6 +12,7 @@ import players.simple.RandomPlayer;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
@@ -138,9 +139,15 @@ public class MCTSParams extends PlayerParameters {
             case MAST:
                 return new MASTPlayer(new Random(getRandomSeed()));
             case CLASS:
+                String[] classAndParams = rolloutClass.split(Pattern.quote("|"));
+                if (classAndParams.length > 2)
+                    throw new IllegalArgumentException("Only a single string parameter is currently supported");
                 try {
-                    Class<?> rollout = Class.forName(rolloutClass);
-                    return (AbstractPlayer) rollout.getConstructor().newInstance();
+                    Class<?> rollout = Class.forName(classAndParams[0]);
+                    if (classAndParams.length == 1)
+                        return (AbstractPlayer) rollout.getConstructor().newInstance();
+                    return (AbstractPlayer) rollout.getConstructor(String.class).newInstance(classAndParams[1]);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

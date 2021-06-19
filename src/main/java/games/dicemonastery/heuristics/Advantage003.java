@@ -22,10 +22,14 @@ public class Advantage003 extends AbstractPlayer {
     Map<Integer, Integer> hashToRowIndex = new HashMap<>();
     List<DiceMonasteryStateAttributes> features;
 
+
     public Advantage003() {
+        this("Advantage003.csv");
+    }
+    public Advantage003(String filename) {
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("Advantage003.csv"));
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
             String weight = reader.readLine();
             RND_WEIGHT = Double.parseDouble(weight);
             List<String> header = Arrays.asList(reader.readLine().split(","));

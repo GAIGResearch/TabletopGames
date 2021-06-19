@@ -19,9 +19,13 @@ public class Advantage002 extends AbstractPlayer {
     Map<Integer, Double> actionAdvantage = new HashMap<>();
 
     public Advantage002() {
+        this("Advantage002.csv");
+    }
+
+    public Advantage002(String filename) {
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("Advantage002.csv"));
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
             String weight = reader.readLine();
             RND_WEIGHT = Double.parseDouble(weight);
             reader.readLine();
