@@ -30,7 +30,7 @@ public class MoveCubes extends UseMonk {
     public boolean equals(Object obj) {
         if (obj instanceof MoveCubes) {
             MoveCubes other = (MoveCubes) obj;
-            return other.resource == resource && other.from == from && other.to == to;
+            return other.resource == resource && other.from == from && other.to == to && actionPoints == other.actionPoints;
         }
         return false;
     }
