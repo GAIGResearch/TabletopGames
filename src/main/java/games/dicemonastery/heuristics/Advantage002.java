@@ -7,10 +7,11 @@ import core.actions.AbstractAction;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
+import java.util.function.ToDoubleBiFunction;
 
 import static java.util.stream.Collectors.toList;
 
-public class Advantage002 extends AbstractPlayer {
+public class Advantage002 extends AbstractPlayer implements ToDoubleBiFunction<AbstractAction, AbstractGameState> {
 
     Random rnd = new Random(System.currentTimeMillis());
 
@@ -61,5 +62,10 @@ public class Advantage002 extends AbstractPlayer {
             }
         }
         return retValue;
+    }
+
+    @Override
+    public double applyAsDouble(AbstractAction abstractAction, AbstractGameState gameState) {
+        return actionAdvantage.getOrDefault(abstractAction.hashCode(), 0.0);
     }
 }

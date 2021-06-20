@@ -318,6 +318,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                 return retValue;
             } catch (Exception e) {
                 System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
+                e.printStackTrace();
                 throw new AssertionError("Error loading Class");
             }
         }

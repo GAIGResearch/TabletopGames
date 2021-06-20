@@ -11,6 +11,7 @@ import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.ToDoubleBiFunction;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -281,26 +282,36 @@ public class SingleTreeNode {
      * @return - new child node.
      */
     private SingleTreeNode expand() {
-        // Find random child not already created
-        // pick a random unchosen action
+        // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
+        // else pick a random unchosen action
+
         List<AbstractAction> notChosen = unexpandedActions();
+        Collections.shuffle(notChosen);
         AbstractAction chosen = null;
+
+        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = player.advantageFunction;
         if (player.params.expansionPolicy == MCTSEnums.Strategies.MAST) {
-            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
-            double bestValue = Double.NEGATIVE_INFINITY;
-            for (AbstractAction action : unexpandedActions()) {
-                double estimate = rnd.nextDouble() / 100.0;
-                if (MAST.containsKey(action)) {
-                    Pair<Integer, Double> stats = MAST.get(action);
-                    estimate = stats.b / stats.a;
+            valueFunction = (a, s) -> {
+                Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
+                if (MAST.containsKey(a)) {
+                    Pair<Integer, Double> stats = MAST.get(a);
+                    return stats.b / stats.a;
                 }
+                return 0.0;
+            };
+        }
+
+        if (valueFunction != null) {
+            double bestValue = Double.NEGATIVE_INFINITY;
+            for (AbstractAction action : notChosen) {
+                double estimate = player.advantageFunction.applyAsDouble(action, state);
                 if (estimate > bestValue) {
                     bestValue = estimate;
                     chosen = action;
                 }
             }
         } else {
-            chosen = notChosen.get(rnd.nextInt(notChosen.size()));
+            chosen = notChosen.get(0);
         }
         if (chosen == null)
             throw new AssertionError("We have somehow failed to pick an action to expand");
@@ -415,7 +426,8 @@ public class SingleTreeNode {
         // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
-        // TODO: Need to distinguish between paranoid and Max^N MCTS. But that needs a vector reward to be back-propagated
+
+        double nodeValue = totValue[decisionPlayer] / nVisits;
 
         for (AbstractAction action : actionsFromState) {
             SingleTreeNode[] childArray = children.get(action);
@@ -426,6 +438,12 @@ public class SingleTreeNode {
             double hvVal = actionTotValue(action, decisionPlayer);
             int actionVisits = actionVisits(action);
             double childValue = hvVal / (actionVisits + player.params.epsilon);
+
+            // consider any progressive bias term
+            if (player.advantageFunction != null && player.params.biasVisits > 0) {
+                double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits));
+                childValue = (1.0 - beta) * childValue + beta * (player.advantageFunction.applyAsDouble(action, state) + nodeValue);
+            }
 
             // default to standard UCB
             double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (actionVisits + player.params.epsilon));
@@ -487,7 +505,16 @@ public class SingleTreeNode {
             default:
                 throw new AssertionError("Should not be any other options!");
         }
+        double nodeValue = totValue[decisionPlayer] / nVisits;
         Map<AbstractAction, Double> actionToValueMap = actionsFromState.stream().collect(toMap(Function.identity(), valueFn));
+        // consider any progressive bias term
+        if (player.advantageFunction != null && player.params.biasVisits > 0) {
+            for (AbstractAction action : actionToValueMap.keySet()) {
+                double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits(action)));
+                actionToValueMap.computeIfPresent(action,
+                        (a, value) -> (1.0 - beta) * value + beta * (nodeValue + player.advantageFunction.applyAsDouble(action, state)));
+            }
+        }
 
         // then we normalise to a pdf
         actionToValueMap = Utils.normaliseMap(actionToValueMap);

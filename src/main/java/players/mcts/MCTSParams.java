@@ -3,6 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
@@ -12,6 +13,7 @@ import players.simple.RandomPlayer;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.ToDoubleBiFunction;
 import java.util.regex.Pattern;
 
 import static players.mcts.MCTSEnums.MASTType.Rollout;
@@ -42,6 +44,8 @@ public class MCTSParams extends PlayerParameters {
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
+    public String advantageFunction = "";
+    public int biasVisits = 0;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -67,6 +71,9 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutClass", "");
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
+        addTunableParameter("progressiveBias", "0.0");
+        addTunableParameter("advantageFunction", "");
+        addTunableParameter("biasVisits", 0);
     }
 
     @Override
@@ -90,6 +97,8 @@ public class MCTSParams extends PlayerParameters {
         rolloutClass = (String) getParameterValue("rolloutClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
         expertIterationFileStem = (String) getParameterValue("expIterFile");
+        advantageFunction = (String) getParameterValue("advantageFunction");
+        biasVisits = (int) getParameterValue("biasVisits");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
             useMAST = true;
         }
@@ -154,6 +163,26 @@ public class MCTSParams extends PlayerParameters {
             default:
                 throw new AssertionError("Unknown rollout type : " + rolloutType);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public ToDoubleBiFunction<AbstractAction, AbstractGameState> getAdvantageFunction() {
+        if (advantageFunction.isEmpty())
+            return null;
+        String[] classAndParams = advantageFunction.split(Pattern.quote("|"));
+        if (classAndParams.length > 2)
+            throw new IllegalArgumentException("Only a single string parameter is currently supported");
+        try {
+            Class<?> rollout = Class.forName(classAndParams[0]);
+            if (classAndParams.length == 1)
+                return (ToDoubleBiFunction<AbstractAction, AbstractGameState>) rollout.getConstructor().newInstance();
+            return (ToDoubleBiFunction<AbstractAction, AbstractGameState>) rollout.getConstructor(String.class).newInstance(classAndParams[1]);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        throw new AssertionError("Not reachable");
     }
 
     public AbstractPlayer getOpponentModel() {

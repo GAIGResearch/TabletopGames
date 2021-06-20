@@ -9,10 +9,11 @@ import games.dicemonastery.DiceMonasteryStateAttributes;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
+import java.util.function.ToDoubleBiFunction;
 
 import static java.util.stream.Collectors.toList;
 
-public class Advantage003 extends AbstractPlayer {
+public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<AbstractAction, AbstractGameState> {
 
     Random rnd = new Random(System.currentTimeMillis());
 
@@ -80,7 +81,7 @@ public class Advantage003 extends AbstractPlayer {
             int hash = action.hashCode();
             double actionValue = 0.0;
             if (hashToRowIndex.containsKey(hash)) {
-                double[] coeffs = coefficients[hashToRowIndex.get(action.hashCode())];
+                double[] coeffs = coefficients[hashToRowIndex.get(hash)];
                 actionValue = coeffs[0]; // the intercept
                 for (int i = 1; i <= features.size(); i++) {
                     actionValue += coeffs[i] * featureVal[i - 1];
@@ -93,5 +94,31 @@ public class Advantage003 extends AbstractPlayer {
             }
         }
         return retValue;
+    }
+
+    @Override
+    public double applyAsDouble(AbstractAction abstractAction, AbstractGameState gameState) {
+
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
+        int player = state.getCurrentPlayer();
+
+        // first we calculate each feature for the state
+        double[] featureVal = features.stream().mapToDouble(f -> {
+            Object obj = f.get(state, player);
+            if (obj instanceof Number) return ((Number) obj).doubleValue();
+            return 0.0;
+        }).toArray();
+
+        int hash = abstractAction.hashCode();
+        double actionValue = 0.0;
+        if (hashToRowIndex.containsKey(hash)) {
+            double[] coeffs = coefficients[hashToRowIndex.get(hash)];
+            actionValue = coeffs[0]; // the intercept
+            for (int i = 1; i <= features.size(); i++) {
+                actionValue += coeffs[i] * featureVal[i - 1];
+            }
+        }
+
+        return actionValue;
     }
 }

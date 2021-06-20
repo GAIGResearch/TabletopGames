@@ -249,14 +249,14 @@ public class CoreGameLoop {
 
 
     @Test
-    public void gameEndsAfterThreeYears() {
+    public void gameEndsAfterFourYears() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
         } while (state.isNotTerminal());
 
-        assertEquals(3, turnOrder.getYear());
+        assertEquals(4, turnOrder.getYear());
         assertEquals(WINTER, turnOrder.getSeason());
         assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == Utils.GameResult.GAME_ONGOING));
     }

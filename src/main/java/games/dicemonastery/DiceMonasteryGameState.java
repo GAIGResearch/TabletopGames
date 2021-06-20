@@ -480,7 +480,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         retValue.treasuresCommissioned.putAll(treasuresCommissioned);
 
         retValue.marketCards = marketCards.copy();
-        if (playerId != -1) { // shuffle all except the top card
+        if (playerId != -1 && marketCards.getSize() > 1) { // shuffle all except the top card
             MarketCard topCard = retValue.marketCards.draw();
             retValue.marketCards.shuffle(rnd);
             retValue.marketCards.add(topCard);
@@ -492,11 +492,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
         for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
             Deck<Pilgrimage> thisDeck = pilgrimageDecks.get(destination);
             Deck<Pilgrimage> copyDeck = thisDeck.copy();
-            if (playerId != -1) {// only top card is visible, so shuffle if copied from any player's perspective
+            if (playerId != -1 && copyDeck.getSize() > 1) {// only top card is visible, so shuffle if copied from any player's perspective
                 Pilgrimage topCard = copyDeck.draw();
                 copyDeck.shuffle(rnd);
-                if (topCard != null)
-                    copyDeck.add(topCard);
+                copyDeck.add(topCard);
             }
             retValue.pilgrimageDecks.put(destination, copyDeck);
         }
