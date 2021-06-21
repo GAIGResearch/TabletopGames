@@ -12,7 +12,7 @@ import static games.poker.gui.PokerGUI.*;
 public class PokerPlayerView extends PokerDeckView {
 
     // ID of player showing
-    int playerId;
+    int playerId, bet;
 
     // Border offsets
     int border = 5;
@@ -34,12 +34,14 @@ public class PokerPlayerView extends PokerDeckView {
     @Override
     protected void paintComponent(Graphics g) {
         drawDeck((Graphics2D) g, new Rectangle(border, border, playerAreaWidth, pokerCardHeight));
+        g.setColor(new Color(87, 37, 25));
+        Font f = g.getFont();
+        g.setFont(new Font(f.getName(), Font.BOLD, 30));
         if (firstPlayerOfRound) {
-            g.setColor(new Color(87, 37, 25));
-            Font f = g.getFont();
-            g.setFont(new Font(f.getName(), Font.BOLD, 30));
             g.drawString("*", border + playerAreaWidth / 2 - 20, border + pokerCardHeight + 25);
         }
+        g.drawString("" + bet, playerAreaWidth - 50, playerAreaHeight/2);
+        g.setFont(f);
     }
 
     @Override
@@ -54,6 +56,7 @@ public class PokerPlayerView extends PokerDeckView {
     public void update(PokerGameState gameState) {
         this.component = gameState.getPlayerDecks().get(playerId);
         firstPlayerOfRound = ((PokerTurnOrder) gameState.getTurnOrder()).getRoundFirstPlayer() == playerId;
+        bet = gameState.getBets()[playerId];
     }
 
     // Getters, setters

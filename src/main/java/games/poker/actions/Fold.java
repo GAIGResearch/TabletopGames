@@ -2,18 +2,11 @@ package games.poker.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DrawCard;
-import core.components.Card;
-import core.components.Deck;
-import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
 import games.poker.PokerTurnOrder;
-import utilities.Utils;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class Fold extends AbstractAction implements IPrintable {
 

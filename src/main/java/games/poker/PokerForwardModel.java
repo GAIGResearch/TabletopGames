@@ -3,6 +3,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import core.components.Counter;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.poker.actions.*;
@@ -28,7 +29,7 @@ public class PokerForwardModel extends AbstractForwardModel {
         pgs.playerFold = new boolean[firstState.getNPlayers()];
         pgs.bets = new int[firstState.getNPlayers()];
         pgs.playerActStreet = new boolean[pgs.getNPlayers()];
-        pgs.totalPotMoney = 0;
+        pgs.moneyPots = new HashMap<>();
 
         pgs.playerDecks = new ArrayList<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
@@ -54,6 +55,9 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameParameters params = (PokerGameParameters) pgs.getGameParameters();
         Random r = new Random(params.getRandomSeed() + pgs.getTurnOrder().getRoundCounter());
 
+        pgs.moneyPots.clear();
+        pgs.moneyPots.put(Integer.MAX_VALUE, new Counter(0, 0, Integer.MAX_VALUE, ""));
+
         // Refresh player info
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             pgs.playerDecks.get(i).clear();
@@ -70,23 +74,14 @@ public class PokerForwardModel extends AbstractForwardModel {
         // Draw new cards for players
         drawCardsToPlayers(pgs);
 
-        // Blinds TODO all-in & secondary pot if player can't afford blind
+        // Blinds
         int smallId = ((PokerTurnOrder)pgs.getTurnOrder()).getRoundFirstPlayer();
         int bigId = (pgs.getNPlayers() + smallId + 1) % pgs.getNPlayers();
         while ((pgs.playerFold[bigId] || pgs.getPlayerResults()[bigId] == LOSE)) {
             bigId = (pgs.getNPlayers() + bigId + 1) % pgs.getNPlayers();
         }
-
-        pgs.currentMoney[smallId] -= params.smallBlind;
-        pgs.currentMoney[bigId] -= params.bigBlind;
-        pgs.totalPotMoney = params.smallBlind + params.bigBlind;
-        pgs.bets[smallId] = params.smallBlind;
-        pgs.bets[bigId] = params.bigBlind;
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (i != bigId) {
-                pgs.playerNeedsToCall[i] = true;
-            }
-        }
+        new Bet(smallId, params.smallBlind).execute(pgs);
+        new Bet(bigId, params.bigBlind).execute(pgs);
 
         pgs.setGamePhase(Preflop);
         pgs.setBet(false);
@@ -164,58 +159,70 @@ public class PokerForwardModel extends AbstractForwardModel {
      */
     private void roundEnd(PokerGameState pgs) {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
-        // Calculate winner of round, they earn the money. Ties split money equally.
-        int[] ranks = new int[pgs.getNPlayers()];
-        HashSet<Integer>[] hands = new HashSet[pgs.getNPlayers()];
-        int smallestRank = 11;
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
-                pgs.playerDecks.get(i).add(pgs.communityCards.copy());
-                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
-                if (hand != null) {
-                    ranks[i] = hand.a.rank;
-                    hands[i] = hand.b;
-                    if (ranks[i] < smallestRank) {
-                        smallestRank = ranks[i];
+        // Calculate winner of round for each of the pots, they earn the money. Ties split money equally.
+
+        for (Counter c: pgs.moneyPots.values()) {
+            ArrayList<Integer> playersInPot = new ArrayList<>();
+            String[] nameSplit = c.getComponentName().split(" ");
+            for (String p : nameSplit) {
+                if (!p.equals("")) {
+                    playersInPot.add(Integer.parseInt(p));
+                }
+            }
+            int nPlayers = playersInPot.size();
+
+            HashMap<Integer, Integer> ranks = new HashMap<>();
+            HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
+            int smallestRank = 11;
+            for (int i: playersInPot) {
+                if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+                    pgs.playerDecks.get(i).add(pgs.communityCards.copy());
+                    Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
+                    if (hand != null) {
+                        ranks.put(i, hand.a.rank);
+                        hands.put(i, hand.b);
+                        if (hand.a.rank < smallestRank) {
+                            smallestRank = hand.a.rank;
+                        }
                     }
                 }
             }
-        }
-        HashSet<Integer> winners = new HashSet<>();
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
-                if (ranks[i] == smallestRank) winners.add(i);
-            }
-        }
-        if (winners.size() > 1) {
-            // A tie in rank, check card values
-            ArrayList<Integer>[] cardValues = new ArrayList[pgs.getNPlayers()];
-            int nCards = 0;
-            for (int i: winners) {
-                cardValues[i] = new ArrayList<>(hands[i]);
-                cardValues[i].sort(Collections.reverseOrder());
-                nCards = cardValues[i].size();
-            }
-            for (int j = 0; j < nCards; j++) {
-                // Checking card by card, once one player is found the winner we break; could still be a tie
-                int maxValue = 0;
-                for (int i: winners) {
-                    if (cardValues[i].get(j) > maxValue) maxValue = cardValues[i].get(j);
+            HashSet<Integer> winners = new HashSet<>();
+            for (int i: playersInPot) {
+                if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+                    if (ranks.get(i) == smallestRank) winners.add(i);
                 }
-                HashSet<Integer> actualWinners = new HashSet<>();
-                for (int i: winners) {
-                    if (cardValues[i].get(j) == maxValue) actualWinners.add(i);
+            }
+            if (winners.size() > 1) {
+                // A tie in rank, check card values
+                ArrayList<Integer>[] cardValues = new ArrayList[pgs.getNPlayers()];
+                int nCards = 0;
+                for (int i : winners) {
+                    cardValues[i] = new ArrayList<>(hands.get(i));
+                    cardValues[i].sort(Collections.reverseOrder());
+                    nCards = cardValues[i].size();
                 }
-                if (actualWinners.size() == 1 || j == nCards-1) {
-                    for (int i : actualWinners) {
-                        pgs.currentMoney[i] += pgs.totalPotMoney/actualWinners.size();
+                for (int j = 0; j < nCards; j++) {
+                    // Checking card by card, once one player is found the winner we break; could still be a tie
+                    int maxValue = 0;
+                    for (int i : winners) {
+                        if (cardValues[i].get(j) > maxValue) maxValue = cardValues[i].get(j);
                     }
-                    break;
+                    HashSet<Integer> actualWinners = new HashSet<>();
+                    for (int i : winners) {
+                        if (cardValues[i].get(j) == maxValue) actualWinners.add(i);
+                    }
+                    if (actualWinners.size() == 1 || j == nCards - 1) {
+                        for (int i : actualWinners) {
+                            pgs.currentMoney[i] += c.getValue() / actualWinners.size();
+                        }
+                        break;
+                    }
                 }
-            }
-        } else {
-            for (int i : winners) {
-                pgs.currentMoney[i] += pgs.totalPotMoney;
+            } else {
+                for (int i : winners) {
+                    pgs.currentMoney[i] += c.getValue();
+                }
             }
         }
 
@@ -293,12 +300,9 @@ public class PokerForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = pgs.getCurrentPlayer();
 
-        // Check if player can afford to: Bet, Call, Raise. Can also Check, Fold. TODO: if on 0 money, it's all-in.
-        if (!pgs.playerNeedsToCall[player] && !pgs.isBet()) {
-            if (pgs.currentMoney[player] >= pgp.bet) {
-                actions.add(new Bet(player, pgp.bet));
-            }
-        } else {
+        // Check if player can afford to: Bet, Call, Raise. Can also Check, Fold.
+
+        if (pgs.playerNeedsToCall[player]) {
 
             int biggestBet = 0;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
@@ -306,21 +310,27 @@ public class PokerForwardModel extends AbstractForwardModel {
             }
             int diff = biggestBet - pgs.getBets()[player];
 
-            if (pgs.playerNeedsToCall[player] && pgs.currentMoney[player] >= diff) {
+            if (pgs.currentMoney[player] >= diff) {
                 actions.add(new Call(player));
-            }
 
-            for (double r: pgp.raiseMultipliers) {
-                diff = biggestBet + (int) (biggestBet * r) - pgs.getBets()[player];
-                if (pgs.currentMoney[player] >= diff) {
-                    actions.add(new Raise(player, r));
+                for (double r: pgp.raiseMultipliers) {
+                    int diffR = diff + (int) (biggestBet * r);
+                    if (pgs.currentMoney[player] >= diffR) {
+                        actions.add(new Raise(player, r));
+                    }
+                }
+            }
+        } else {
+            actions.add(new Check(player));
+
+            if (!pgs.isBet()) {
+                if (pgs.currentMoney[player] >= pgp.bet) {
+                    actions.add(new Bet(player, pgp.bet));
                 }
             }
         }
-        if (!pgs.playerNeedsToCall[player]) {
-            actions.add(new Check(player));
-        }
         actions.add(new Fold(player));
+        actions.add(new AllIn(player));
 
         return actions;
     }

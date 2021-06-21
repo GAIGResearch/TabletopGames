@@ -4,6 +4,7 @@ import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.components.Counter;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
 import gui.ScaledImage;
@@ -189,7 +190,11 @@ public class PokerGUI extends AbstractGUI {
     @Override
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
-        potMoney.setText("Pot: " + ((PokerGameState)gameState).getTotalPotMoney());
+        StringBuilder pots = new StringBuilder();
+        for (Counter c: ((PokerGameState)gameState).getMoneyPots().values()) {
+            pots.append(c.getValue()).append(" / ");
+        }
+        potMoney.setText("Pot: " + pots);
         currentBets.setText("Bets: " + Arrays.toString(((PokerGameState) gameState).getBets()));
     }
 

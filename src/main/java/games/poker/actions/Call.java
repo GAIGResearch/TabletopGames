@@ -2,17 +2,10 @@ package games.poker.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DrawCard;
-import core.components.Card;
-import core.components.Deck;
-import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class Call extends AbstractAction implements IPrintable {
 
@@ -32,9 +25,7 @@ public class Call extends AbstractAction implements IPrintable {
         }
         int diff = biggestBet - pgs.getBets()[playerId];
 
-        pgs.getCurrentMoney()[playerId] -= diff;
-        pgs.updateTotalPotMoney(diff);
-        pgs.getBets()[playerId] = biggestBet;
+        pgs.placeBet(diff, playerId);
         pgs.getPlayerNeedsToCall()[playerId] = false;
         pgs.getTurnOrder().endPlayerTurn(pgs);
 

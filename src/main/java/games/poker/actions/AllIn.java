@@ -2,30 +2,23 @@ package games.poker.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Counter;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
-public class Bet extends AbstractAction implements IPrintable {
+public class AllIn extends AbstractAction implements IPrintable {
 
     private final int playerId;
-    private final int amount;
 
-    public Bet(int id, int amount) {
+    public AllIn(int id) {
         this.playerId = id;
-        this.amount = amount;
     }
-
 
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
-        pgs.placeBet(amount, playerId);
+        pgs.placeBet(pgs.getCurrentMoney()[playerId], playerId);
         pgs.setBet(true);
         pgs.getPlayerNeedsToCall()[playerId] = false;
 
@@ -46,25 +39,25 @@ public class Bet extends AbstractAction implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Bet " + amount;
+        return "All in";
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Bet)) return false;
-        Bet bet = (Bet) o;
-        return playerId == bet.playerId && amount == bet.amount;
+        if (!(o instanceof AllIn)) return false;
+        AllIn bet = (AllIn) o;
+        return playerId == bet.playerId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, amount);
+        return Objects.hash(playerId);
     }
 
     @Override
-    public Bet copy() {
-        return new Bet(playerId, amount);
+    public AllIn copy() {
+        return new AllIn(playerId);
     }
 
 }

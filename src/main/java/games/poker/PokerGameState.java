@@ -8,6 +8,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
+import core.components.Counter;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
@@ -28,7 +29,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     boolean[]               playerNeedsToCall;
     boolean[]               playerFold;
     boolean[]               playerActStreet;  // true if player acted this street, false otherwise
-    int                     totalPotMoney;
+    HashMap<Integer, Counter> moneyPots;  // mapping from all-in bet amount (max a player can put in the pot) to pot counter; -1 for default with no limits
     boolean                 bet;  // True if a bet was made this street
 
     enum PokerGamePhase implements IGamePhase {
@@ -55,19 +56,68 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             addAll(playerDecks);
             add(drawDeck);
             add(communityCards);
+            addAll(moneyPots.values());
         }};
     }
 
-    public void updateTotalPotMoney(int money) {
-        totalPotMoney += money;
+    public void placeBet(int amount, int player) {
+        // Check which pot this player is participating in, update the one that's not reached max
+        int m = amount;
+        for (int max : moneyPots.keySet()) {
+            Counter c = moneyPots.get(max);
+            if (max != Integer.MAX_VALUE) {
+                // First distribute in money pots that this player has not filled yet
+                int capacityLeft = max - bets[player];
+                if (capacityLeft > 0) {
+                    int betAdded = Math.min(m, capacityLeft);
+                    bets[player] += betAdded;
+                    currentMoney[player] -= betAdded;
+                    c.increment(betAdded);
+                    String playerNames = c.getComponentName();
+                    if (!playerNames.contains(player + " ")) {
+                        c.setComponentName(playerNames + player + " ");
+                    }
+                    m -= betAdded;
+                    if (m <= 0) break;
+                }
+            }
+        }
+        if (m > 0) {
+            // Add the rest in no-limit pot
+            Counter c = moneyPots.get(Integer.MAX_VALUE);
+            bets[player] += m;
+            currentMoney[player] -= m;
+            c.increment(m);
+            String playerNames = c.getComponentName();
+            if (!playerNames.contains(player + " ")) {
+                c.setComponentName(playerNames + player + " ");
+            }
+        }
+
+        if (currentMoney[player] == 0) {
+            // All in!
+            // Set maximum for all pots this player is part of, if not already set
+            HashMap<Integer, Counter> pots = (HashMap<Integer, Counter>) moneyPots.clone();
+            moneyPots.clear();
+            for (int max: pots.keySet()) {
+                Counter c = pots.get(max);
+                if (c.getComponentName().contains(player + " ")) {
+                    if (max == Integer.MAX_VALUE) {
+                        moneyPots.put(amount, c);
+                    } else {
+                        moneyPots.put(max, c);
+                    }
+                } else {
+                    moneyPots.put(max, c);
+                }
+            }
+            // Create new pot with no maximum
+            moneyPots.put(Integer.MAX_VALUE, new Counter(0, 0, Integer.MAX_VALUE, ""));
+        }
     }
 
-    public void setTotalPotMoney(int totalPotMoney) {
-        this.totalPotMoney = totalPotMoney;
-    }
-
-    public int getTotalPotMoney() {
-        return totalPotMoney;
+    public HashMap<Integer, Counter> getMoneyPots() {
+        return moneyPots;
     }
 
     public Deck<FrenchCard> getCommunityCards() {
@@ -143,7 +193,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         copy.playerNeedsToCall = playerNeedsToCall.clone();
         copy.playerFold = playerFold.clone();
         copy.communityCards = communityCards.copy();
-        copy.totalPotMoney = totalPotMoney;
+        copy.moneyPots = new HashMap<>();
+        for (int key: moneyPots.keySet()) {
+            copy.moneyPots.put(key, moneyPots.get(key).copy());
+        }
         copy.bet = bet;
         copy.playerActStreet = playerActStreet.clone();
         return copy;
@@ -189,12 +242,12 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return totalPotMoney == that.totalPotMoney && bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet);
+        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet) && Objects.equals(moneyPots, that.moneyPots);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, totalPotMoney, bet);
+        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, moneyPots, bet);
         result = 31 * result + Arrays.hashCode(currentMoney);
         result = 31 * result + Arrays.hashCode(bets);
         result = 31 * result + Arrays.hashCode(playerNeedsToCall);
