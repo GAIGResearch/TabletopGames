@@ -3,11 +3,11 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.components.Counter;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.poker.actions.*;
 import games.poker.actions.Fold;
+import games.poker.components.MoneyPot;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -29,7 +29,7 @@ public class PokerForwardModel extends AbstractForwardModel {
         pgs.playerFold = new boolean[firstState.getNPlayers()];
         pgs.bets = new int[firstState.getNPlayers()];
         pgs.playerActStreet = new boolean[pgs.getNPlayers()];
-        pgs.moneyPots = new HashMap<>();
+        pgs.moneyPots = new ArrayList<>();
 
         pgs.playerDecks = new ArrayList<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
@@ -56,7 +56,7 @@ public class PokerForwardModel extends AbstractForwardModel {
         Random r = new Random(params.getRandomSeed() + pgs.getTurnOrder().getRoundCounter());
 
         pgs.moneyPots.clear();
-        pgs.moneyPots.put(Integer.MAX_VALUE, new Counter(0, 0, Integer.MAX_VALUE, ""));
+        pgs.moneyPots.add(new MoneyPot());
 
         // Refresh player info
         for (int i = 0; i < pgs.getNPlayers(); i++) {
@@ -161,14 +161,8 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
         // Calculate winner of round for each of the pots, they earn the money. Ties split money equally.
 
-        for (Counter c: pgs.moneyPots.values()) {
-            ArrayList<Integer> playersInPot = new ArrayList<>();
-            String[] nameSplit = c.getComponentName().split(" ");
-            for (String p : nameSplit) {
-                if (!p.equals("")) {
-                    playersInPot.add(Integer.parseInt(p));
-                }
-            }
+        for (MoneyPot c: pgs.moneyPots) {
+            HashSet<Integer> playersInPot = new HashSet<>(c.getPlayerContribution().keySet());
             int nPlayers = playersInPot.size();
 
             HashMap<Integer, Integer> ranks = new HashMap<>();
@@ -302,35 +296,42 @@ public class PokerForwardModel extends AbstractForwardModel {
 
         // Check if player can afford to: Bet, Call, Raise. Can also Check, Fold.
 
-        if (pgs.playerNeedsToCall[player]) {
+        int biggestBet = 0;
+        boolean othersAllIn = true;  // True if all others are all in / out of the game, false otherwise
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
+            if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
+            if (i != player && pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i] && pgs.currentMoney[i] > 0) othersAllIn = false;
+        }
 
-            int biggestBet = 0;
-            for (int i = 0; i < gameState.getNPlayers(); i++) {
-                if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
-            }
+        if (pgs.playerNeedsToCall[player] && pgs.getCurrentMoney()[player] > 0) {
             int diff = biggestBet - pgs.getBets()[player];
 
             if (pgs.currentMoney[player] >= diff) {
                 actions.add(new Call(player));
 
-                for (double r: pgp.raiseMultipliers) {
-                    int diffR = diff + (int) (biggestBet * r);
-                    if (pgs.currentMoney[player] >= diffR) {
-                        actions.add(new Raise(player, r));
+                if (!othersAllIn) {
+                    // Only raise if it makes sense
+                    for (double r : pgp.raiseMultipliers) {
+                        int diffR = diff + (int) (biggestBet * r);
+                        if (pgs.currentMoney[player] >= diffR) {
+                            actions.add(new Raise(player, r));
+                        }
                     }
                 }
             }
         } else {
             actions.add(new Check(player));
 
-            if (!pgs.isBet()) {
+            if (!pgs.isBet() && !othersAllIn) {
                 if (pgs.currentMoney[player] >= pgp.bet) {
                     actions.add(new Bet(player, pgp.bet));
                 }
             }
         }
         actions.add(new Fold(player));
-        actions.add(new AllIn(player));
+        if (pgs.currentMoney[player] > 0) {
+            actions.add(new AllIn(player));
+        }
 
         return actions;
     }

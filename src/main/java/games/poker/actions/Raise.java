@@ -32,7 +32,7 @@ public class Raise extends AbstractAction implements IPrintable {
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (i != playerId && !pgs.getPlayerFold()[i]) {
+            if (i != playerId && !pgs.getPlayerFold()[i] && pgs.getCurrentMoney()[i] > 0) {
                 pgs.getPlayerNeedsToCall()[i] = true;
             }
         }

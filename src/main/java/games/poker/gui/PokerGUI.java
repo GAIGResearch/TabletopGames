@@ -7,6 +7,7 @@ import core.Game;
 import core.components.Counter;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
+import games.poker.components.MoneyPot;
 import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -191,7 +192,7 @@ public class PokerGUI extends AbstractGUI {
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
         StringBuilder pots = new StringBuilder();
-        for (Counter c: ((PokerGameState)gameState).getMoneyPots().values()) {
+        for (MoneyPot c: ((PokerGameState)gameState).getMoneyPots()) {
             pots.append(c.getValue()).append(" / ");
         }
         potMoney.setText("Pot: " + pots);

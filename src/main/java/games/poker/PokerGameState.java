@@ -14,6 +14,7 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.poker.components.MoneyPot;
 import utilities.Pair;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
@@ -29,7 +30,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     boolean[]               playerNeedsToCall;
     boolean[]               playerFold;
     boolean[]               playerActStreet;  // true if player acted this street, false otherwise
-    HashMap<Integer, Counter> moneyPots;  // mapping from all-in bet amount (max a player can put in the pot) to pot counter; -1 for default with no limits
+    List<MoneyPot>          moneyPots;  // mapping from all-in bet amount (max a player can put in the pot) to pot counter; -1 for default with no limits
     boolean                 bet;  // True if a bet was made this street
 
     enum PokerGamePhase implements IGamePhase {
@@ -56,67 +57,72 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             addAll(playerDecks);
             add(drawDeck);
             add(communityCards);
-            addAll(moneyPots.values());
+            addAll(moneyPots);
         }};
     }
 
     public void placeBet(int amount, int player) {
         // Check which pot this player is participating in, update the one that's not reached max
         int m = amount;
-        for (int max : moneyPots.keySet()) {
-            Counter c = moneyPots.get(max);
-            if (max != Integer.MAX_VALUE) {
+        MoneyPot noLimitPot = null;
+        for (MoneyPot pot : moneyPots) {
+            if (!pot.isNoLimit() && m > 0) {
                 // First distribute in money pots that this player has not filled yet
-                int capacityLeft = max - bets[player];
+                int capacityLeft = pot.getLimit() - pot.getPlayerContribution(player);
                 if (capacityLeft > 0) {
                     int betAdded = Math.min(m, capacityLeft);
-                    bets[player] += betAdded;
-                    currentMoney[player] -= betAdded;
-                    c.increment(betAdded);
-                    String playerNames = c.getComponentName();
-                    if (!playerNames.contains(player + " ")) {
-                        c.setComponentName(playerNames + player + " ");
-                    }
+                    pot.increment(betAdded, player);
                     m -= betAdded;
-                    if (m <= 0) break;
                 }
+            } else {
+                noLimitPot = pot;
             }
         }
-        if (m > 0) {
+        if (m > 0 && noLimitPot != null) {
             // Add the rest in no-limit pot
-            Counter c = moneyPots.get(Integer.MAX_VALUE);
-            bets[player] += m;
-            currentMoney[player] -= m;
-            c.increment(m);
-            String playerNames = c.getComponentName();
-            if (!playerNames.contains(player + " ")) {
-                c.setComponentName(playerNames + player + " ");
-            }
+            noLimitPot.increment(m, player);
         }
 
+        bets[player] += amount;
+        currentMoney[player] -= amount;
+
         if (currentMoney[player] == 0) {
-            // All in!
-            // Set maximum for all pots this player is part of, if not already set
-            HashMap<Integer, Counter> pots = (HashMap<Integer, Counter>) moneyPots.clone();
-            moneyPots.clear();
-            for (int max: pots.keySet()) {
-                Counter c = pots.get(max);
-                if (c.getComponentName().contains(player + " ")) {
-                    if (max == Integer.MAX_VALUE) {
-                        moneyPots.put(amount, c);
-                    } else {
-                        moneyPots.put(max, c);
+            // Check all money pots and balance them out by adding more if needed (caused by all-ins)
+            List<MoneyPot> newPots = new ArrayList<>();
+            for (MoneyPot pot : moneyPots) {
+                int current = pot.getPlayerContribution(player);
+                int highest = pot.getHighestContribution();
+                if (current != highest) {
+                    // Pot is not balanced. Make new pot with limit at lowest contribution, and keep here only overflow
+                    MoneyPot newPot = new MoneyPot();
+                    newPot.setLimit(current);
+                    HashSet<Integer> contributorsToRemove = new HashSet<>();
+                    for (int contributor : pot.getPlayerContribution().keySet()) {
+                        if (pot.getPlayerContribution(contributor) == 0) {
+                            contributorsToRemove.add(contributor);
+                            continue;
+                        }
+                        int overflow = pot.getPlayerContribution(contributor) - current;
+                        if (overflow > 0) {
+                            // Player bet more than limit, overflow remains here, limit transferred to new pot
+                            pot.getPlayerContribution().put(contributor, overflow);
+                        } else {
+                            // Player bet equal to or less than limit, transfer all to new pot, remove from current pot
+                            contributorsToRemove.add(contributor);
+                        }
+                        newPot.increment(current, contributor);
                     }
-                } else {
-                    moneyPots.put(max, c);
+                    for (int contributor : contributorsToRemove) {
+                        pot.getPlayerContribution().remove(contributor);
+                    }
+                    newPots.add(newPot);
                 }
             }
-            // Create new pot with no maximum
-            moneyPots.put(Integer.MAX_VALUE, new Counter(0, 0, Integer.MAX_VALUE, ""));
+            moneyPots.addAll(newPots);
         }
     }
 
-    public HashMap<Integer, Counter> getMoneyPots() {
+    public List<MoneyPot> getMoneyPots() {
         return moneyPots;
     }
 
@@ -193,9 +199,9 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         copy.playerNeedsToCall = playerNeedsToCall.clone();
         copy.playerFold = playerFold.clone();
         copy.communityCards = communityCards.copy();
-        copy.moneyPots = new HashMap<>();
-        for (int key: moneyPots.keySet()) {
-            copy.moneyPots.put(key, moneyPots.get(key).copy());
+        copy.moneyPots = new ArrayList<>();
+        for (MoneyPot pot: moneyPots) {
+            copy.moneyPots.add(pot.copy());
         }
         copy.bet = bet;
         copy.playerActStreet = playerActStreet.clone();
