@@ -267,7 +267,7 @@ public enum GameType {
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
             case Battlelore:
-                return new BattleloreGameParameters(seed);
+                return new BattleloreGameParameters("data/battlelore",seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }

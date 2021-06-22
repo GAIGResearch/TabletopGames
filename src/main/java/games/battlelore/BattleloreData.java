@@ -25,7 +25,15 @@ public class BattleloreData extends AbstractGameData
     public void load(String dataPath)
     {
         //units = Unit.parseComponent();
-        units = Unit.loadUnits(dataPath + "units.json");
+        units = Unit.loadUnits(dataPath + "\\units.json");
+
     }
+
+    public List<Unit> getUnits()
+    {
+        return units;
+    }
+
+
 
 }

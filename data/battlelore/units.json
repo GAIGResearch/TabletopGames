@@ -1,5 +1,17 @@
 [
   {
+    "id":"decoy",
+    "faction": ["Integer", -1],
+    "name": "Decoy",
+    "move": ["Integer", 0],
+    "strength": ["Integer", 0],
+    "health": ["Integer", 0],
+    "type": "soldier",
+    "special": "",
+    "unitCount": ["Integer", 1],
+    "shortname": "D"
+  },
+  {
 	"id":"blood_harvesters",
     "faction": ["Integer", 0],
     "name": "Blood Harvesters",
@@ -8,18 +20,8 @@
     "health": ["Integer", 3],
 	"type": "soldier",
 	"special": "rage",
-    "unitCount": ["Integer", 3]
-  },
-  {
-	"id":"decoy",
-    "faction": ["Integer", -1],
-    "name": "Decoy",
-    "move": ["Integer", 0],
-    "strength": ["Integer", 0],
-    "health": ["Integer", 0],
-	"type": "soldier",
-	"special": "",
-    "unitCount": ["Integer", 1]
+    "unitCount": ["Integer", 3],
+    "shortname": "BH"
   },
   {
 	"id":"viper_legion",
@@ -29,7 +31,8 @@
     "strength": ["Integer", 2],
     "health": ["Integer", 3],
 	"special": "bite",
-    "unitCount": ["Integer", 3]
+    "unitCount": ["Integer", 3],
+    "shortname": "VL"
   },
     {
 	"id":"citadel_guard",
@@ -39,7 +42,8 @@
     "strength": ["Integer", 3],
     "health": ["Integer", 3],
 	"special": "pursue",
-    "unitCount": ["Integer", 3]
+    "unitCount": ["Integer", 3],
+    "shortname": "CG"
     },
   {
 	"id":"yeoman_archers",
@@ -49,6 +53,7 @@
     "strength": ["Integer", 2],
     "health": ["Integer", 3],
 	"special": "doubleshot",
-    "unitCount": ["Integer", 3]
+    "unitCount": ["Integer", 3],
+    "shortname": "YA"
   }
 ]

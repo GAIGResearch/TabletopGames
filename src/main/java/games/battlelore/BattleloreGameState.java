@@ -3,32 +3,92 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
+import core.components.Deck;
 import core.components.GridBoard;
-import core.turnorders.AlternatingTurnOrder;
+import core.components.PartialObservableDeck;
+import core.interfaces.IGamePhase;
+import core.interfaces.IStateHeuristic;
 import games.GameType;
+import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class BattleloreGameState extends AbstractGameState
 {
-    /**
-     * Constructor. Initialises some generic game state variables.
-     *
-     * @param gameParameters - game parameters.
-     * @param turnOrder      - turn order for this game.
-     * @param gameType
-     */
+
+    public enum BattleloreGamePhase implements IGamePhase
+    {
+        CommandAndOrderStep,//Player Plays One Command Card
+        MoveStep,
+        AttackStep,
+        VictoryPointStep,
+        DrawStep,
+        LoreStep
+    }
+
+    public enum UnitType
+    {
+        Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher;
+    }
+
+    int playerCount;
+    Random random;
+    BattleloreGameParameters parameters;
+    PartialObservableDeck<CommandCard>[] playerHands;
+    Deck<CommandCard>[] playerDiscards;
+    //Deck<CommandCard>[] playerActi;
 
     GridBoard<MapTile> gameBoard;
+    List<Unit> unitTypes;
+    int[] orderableUnitCount;
+
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers)
     {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers) ,GameType.Battlelore);
+        super(gameParameters, new BattleloreTurnOrder(nPlayers), GameType.Battlelore);
+        data = new BattleloreData();
+        playerCount = nPlayers;
+        orderableUnitCount = new int[playerCount];
+        parameters = (BattleloreGameParameters) gameParameters;
+        data.load(parameters.getDataPath());
+
+    }
+
+    public void SetOrderableUnitCount(int playerID, int value)
+    {
+        orderableUnitCount[playerID] = value;
+    }
+
+    public int GetOrderableUnitCount(int playerID)
+    {
+        return orderableUnitCount[playerID];
+    }
+
+    public Unit GetUnitFromType(UnitType type)
+    {
+        int unitType = 0;
+        switch (type)
+        {
+            case BloodHarvester:
+                unitType = 1;
+                break;
+            case ViperLegion:
+                unitType = 2;
+                break;
+            case CitadelGuard:
+                unitType = 3;
+                break;
+            case YeomanArcher:
+                unitType = 4;
+                break;
+            default:
+                unitType = 0;
+                break;
+        }
+        Unit unit = (Unit)unitTypes.get(unitType).copy();
+        return unit;
     }
 
     public void AddUnit(int locX, int locY, Unit unit)
@@ -36,13 +96,88 @@ public class BattleloreGameState extends AbstractGameState
         MapTile tile = gameBoard.getElement(locX, locY);
         if (tile != null)
         {
-            //if()//TODO ADD UNIT
-            //gameBoard.getElement(locX, locY).SetUnits();
+            gameBoard.getElement(locX, locY).AddUnit(unit);
         }
     }
 
-    public GridBoard<MapTile> getBoard() {
+    public void ToggleUnitsOrderable(boolean isOrderable, int locX, int locY)
+    {
+        MapTile tile = gameBoard.getElement(locX, locY);
+        if (tile != null)
+        {
+            gameBoard.getElement(locX, locY).ToggleOrderable(isOrderable);
+        }
+
+    }
+
+    public void RemoveUnit(int locX, int locY)
+    {
+        MapTile tile = gameBoard.getElement(locX, locY);
+        if (tile != null)
+        {
+            gameBoard.getElement(locX, locY).RemoveUnit();
+        }
+    }
+
+    public ArrayList<MapTile> GetMoveableUnitsFromTile(Unit.Faction faction)
+    {
+        ArrayList<MapTile> tiles = new ArrayList<MapTile>();
+        for (int x = 0; x < gameBoard.getWidth(); x++)
+        {
+            for (int y = 0; y < gameBoard.getHeight(); y++)
+            {
+                MapTile tile = gameBoard.getElement(x, y);
+                if (tile.GetUnits() != null && tile.GetFaction() == faction &&
+                        tile.GetUnits().get(0).getIsOrderable())
+                {
+                    tiles.add(tile);
+                }
+            }
+        }
+        return tiles;
+    }
+
+    public int[][] GetPossibleLocationsForUnits(MapTile tile)
+    {
+        int[][] possibleLocations = new int[gameBoard.getWidth()][2];
+        int moveRange = tile.GetUnits().get(0).moveRange;
+        int counter = 0;
+        for (int x = 0; x < gameBoard.getWidth(); x++)
+        {
+            for (int y = 0; y < gameBoard.getHeight(); y++)
+            {
+                possibleLocations[x][0] = -1;
+                possibleLocations[x][1] = -1;
+
+                MapTile possibleTile = gameBoard.getElement(x, y);
+                if (possibleTile.GetUnits() == null)
+                {
+
+                    double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - tile.getLocationX()), 2) +
+                            Math.pow(Math.abs(possibleTile.getLocationY() - tile.getLocationY()), 2));
+                    if (distance <= moveRange)
+                    {
+                       //Maybe add if blocked check
+                        possibleLocations[counter][0] = possibleTile.getLocationX();
+                        possibleLocations[counter][1] = possibleTile.getLocationY();
+                        counter++;
+                    }
+
+                }
+            }
+        }
+        return possibleLocations;
+    }
+
+    public GridBoard<MapTile> getBoard()
+    {
         return gameBoard;
+    }
+
+    BattleloreData getData()
+    {
+        // Only FM should have access to this for initialisation
+        return (BattleloreData)data;
     }
 
     @Override
@@ -53,6 +188,7 @@ public class BattleloreGameState extends AbstractGameState
             add(gameBoard);
         }};
     }
+
 
     @Override
     protected AbstractGameState _copy(int playerId)
@@ -72,8 +208,7 @@ public class BattleloreGameState extends AbstractGameState
          * @param playerId
          * @return - double, score of current state
          */
-        //TODO_ERTUGRUL: Add the heuristic
-        return 0;
+        return new BattleloreHeuristic().evaluateState(this, playerId);
     }
 
     @Override

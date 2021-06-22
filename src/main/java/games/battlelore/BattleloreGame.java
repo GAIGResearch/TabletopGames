@@ -3,7 +3,11 @@ package games.battlelore;
 import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
+import players.human.ActionController;
+import players.human.HumanConsolePlayer;
+import players.human.HumanGUIPlayer;
 import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +27,10 @@ public class BattleloreGame extends Game
     public static void main(String[] args)
     {
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new OSLAPlayer());
+        ActionController ac = new ActionController();
+        agents.add(new RandomPlayer());
+        agents.add(new RandomPlayer());
+        //agents.add(new HumanGUIPlayer(ac));
         //
         // TODO_Ertugrul Add param constructor
         // agents.add(new RandomPlayer());

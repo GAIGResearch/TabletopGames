@@ -3,9 +3,9 @@ package games.battlelore.components;
 import core.components.Component;
 //import sun.jvm.hotspot.ui.tree.BooleanTreeNodeAdapter;
 //import sun.security.util.Debug;
+import games.battlelore.BattleloreGame;
 import utilities.Utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -20,6 +20,16 @@ public class MapTile extends Component
     public enum TileArea
     {
         NA, left, mid, right;
+    }
+
+    public int getLocationX()
+    {
+        return locationX;
+    }
+
+    public int getLocationY()
+    {
+        return locationY;
     }
 
     public MapTile(int locationX, int locationY, ArrayList<Unit> units, Terrain terrain, int componentID)
@@ -53,6 +63,88 @@ public class MapTile extends Component
         }
     }
 
+    public Unit.Faction GetFaction()
+    {
+        if(!units.isEmpty())
+        {
+            return units.get(0).faction;
+        }
+
+        return Unit.Faction.NA;
+    }
+    public String GetUnitNames()
+    {
+        if(units.isEmpty())
+        {
+            return " ";
+        }
+        else
+        {
+            String str = "";
+
+            String unitName = units.get(0).shortName;
+
+            String isOrderable = units.get(0).getIsOrderable() ? "*" : "";
+
+            return units.size() + " " + isOrderable + unitName;
+        }
+    }
+
+    public Boolean AddUnit(Unit unit)
+    {
+        if (terrain == null)
+        {
+            units.add(unit);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public Boolean ToggleOrderable(boolean isOrderable)
+    {
+        if (!units.isEmpty())
+        {
+            for (int i = 0; i < units.size(); i++)
+            {
+                units.get(i).setIsOrderable(isOrderable);
+            }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public Boolean RemoveUnit()
+    {
+        if (terrain == null && !units.isEmpty())
+        {
+            units.remove(units.size()-1);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public ArrayList<Unit> GetUnits()
+    {
+        if (terrain == null && !units.isEmpty())
+        {
+            return units;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+
     public String GetLocation()
     {
         return locationX + " , " + locationY;
@@ -62,22 +154,22 @@ public class MapTile extends Component
     {
         if (area == TileArea.left)
         {
-            return locationY <= 3;
+            return locationX <= 3;
         }
-        else if (area == TileArea.mid)
+        if (area == TileArea.mid)
         {
-            return ((locationY <= 7) &&
-                ((locationX % 2 == 0 && locationY > 3) || (locationX % 2 == 1 && locationY >= 3)));
+            return ((locationX <= 7) &&
+                ((locationY % 2 == 0 && locationX > 3) || (locationY % 2 == 1 && locationX >= 3)));
         }
-        else if (area == TileArea.right)
+        if (area == TileArea.right)
         {
-            return ((locationX % 2 == 0 && locationY > 7) || (locationX % 2 == 1 && locationY >= 7));
+            return ((locationY % 2 == 0 && locationX > 7) || (locationY % 2 == 1 && locationX >= 7));
         }
-        else
-        {
-            System.out.println("Checking N/A Area!" );
-            return false;
-        }
+
+
+        System.out.println("Checking N/A Area!" );
+        return false;
+
     }
 
     public Boolean SetTerrain(Terrain newTerrain)

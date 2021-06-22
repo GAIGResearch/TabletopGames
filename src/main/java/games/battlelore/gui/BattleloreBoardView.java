@@ -46,7 +46,7 @@ public class BattleloreBoardView extends ComponentView
         int offSetX = 25;
         int offSetY = 60;
 
-        // Draw cells
+        // Draw hexes
         for (int i = 0; i < gridBoard.getHeight(); i++)
         {
             for (int j = 0; ((i % 2 == 0 && j < gridBoard.getWidth()) || (i % 2 == 1 && j < gridBoard.getWidth()-1)); j++)
@@ -133,7 +133,17 @@ public class BattleloreBoardView extends ComponentView
 
     private boolean drawElementName(Graphics2D g, int x, int y, MapTile element)
     {
-            drawShadowString(g, element.GetLocation(), x, y, Color.black, Color.white);
+            Color factionColor = Color.black;
+
+            if (element.GetFaction() == Unit.Faction.Uthuk_Yllan)
+            {
+                factionColor = Color.red;
+            }
+            else if (element.GetFaction() == Unit.Faction.Dakhan_Lords)
+            {
+                factionColor = Color.blue;
+            }
+            drawShadowString(g, element.GetUnitNames(), x, y, factionColor, Color.white);
             return true;
 
     }
