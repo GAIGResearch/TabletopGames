@@ -161,62 +161,15 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
         // Calculate winner of round for each of the pots, they earn the money. Ties split money equally.
 
-        for (MoneyPot c: pgs.moneyPots) {
-            HashSet<Integer> playersInPot = new HashSet<>(c.getPlayerContribution().keySet());
-            int nPlayers = playersInPot.size();
+        Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translated = translatePokerHands(pgs);
+        HashMap<Integer, Integer> ranks = translated.a;
+        HashMap<Integer, HashSet<Integer>> hands = translated.b;
 
-            HashMap<Integer, Integer> ranks = new HashMap<>();
-            HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
-            int smallestRank = 11;
-            for (int i: playersInPot) {
-                if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
-                    pgs.playerDecks.get(i).add(pgs.communityCards.copy());
-                    Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
-                    if (hand != null) {
-                        ranks.put(i, hand.a.rank);
-                        hands.put(i, hand.b);
-                        if (hand.a.rank < smallestRank) {
-                            smallestRank = hand.a.rank;
-                        }
-                    }
-                }
-            }
-            HashSet<Integer> winners = new HashSet<>();
-            for (int i: playersInPot) {
-                if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
-                    if (ranks.get(i) == smallestRank) winners.add(i);
-                }
-            }
-            if (winners.size() > 1) {
-                // A tie in rank, check card values
-                ArrayList<Integer>[] cardValues = new ArrayList[pgs.getNPlayers()];
-                int nCards = 0;
-                for (int i : winners) {
-                    cardValues[i] = new ArrayList<>(hands.get(i));
-                    cardValues[i].sort(Collections.reverseOrder());
-                    nCards = cardValues[i].size();
-                }
-                for (int j = 0; j < nCards; j++) {
-                    // Checking card by card, once one player is found the winner we break; could still be a tie
-                    int maxValue = 0;
-                    for (int i : winners) {
-                        if (cardValues[i].get(j) > maxValue) maxValue = cardValues[i].get(j);
-                    }
-                    HashSet<Integer> actualWinners = new HashSet<>();
-                    for (int i : winners) {
-                        if (cardValues[i].get(j) == maxValue) actualWinners.add(i);
-                    }
-                    if (actualWinners.size() == 1 || j == nCards - 1) {
-                        for (int i : actualWinners) {
-                            pgs.currentMoney[i] += c.getValue() / actualWinners.size();
-                        }
-                        break;
-                    }
-                }
-            } else {
-                for (int i : winners) {
-                    pgs.currentMoney[i] += c.getValue();
-                }
+        for (MoneyPot pot: pgs.moneyPots) {
+            // Calculate winners separately for each money pot
+            HashSet<Integer> winners = getWinner(pgs, pot, ranks, hands);
+            for (int i : winners) {
+                pgs.currentMoney[i] += pot.getValue() / winners.size();
             }
         }
 
@@ -236,6 +189,67 @@ public class PokerForwardModel extends AbstractForwardModel {
 
         // Reset cards for the new round
         setupRound(pgs);
+    }
+
+    public Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translatePokerHands(PokerGameState pgs) {
+        HashMap<Integer, Integer> ranks = new HashMap<>();
+        HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
+        for (int i = 0; i < pgs.getNPlayers(); i++) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+                pgs.playerDecks.get(i).add(pgs.communityCards.copy());
+                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
+                if (hand != null) {
+                    ranks.put(i, hand.a.rank);
+                    hands.put(i, hand.b);
+                }
+            }
+        }
+        return new Pair<>(ranks, hands);
+    }
+
+    public HashSet<Integer> getWinner(PokerGameState pgs, MoneyPot pot,
+                                       HashMap<Integer, Integer> ranks, HashMap<Integer, HashSet<Integer>> hands) {
+        // Calculate winners separately for each money pot
+        HashSet<Integer> playersInPot = new HashSet<>(pot.getPlayerContribution().keySet());
+        int nPlayers = playersInPot.size();
+
+        int smallestRank = 11;
+        for (int i: playersInPot) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE && ranks.containsKey(i) && ranks.get(i) < smallestRank) {
+                smallestRank = ranks.get(i);
+            }
+        }
+        HashSet<Integer> winners = new HashSet<>();
+        for (int i: playersInPot) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+                if (ranks.get(i) == smallestRank) winners.add(i);
+            }
+        }
+        if (winners.size() > 1) {
+            // A tie in rank, check card values
+            ArrayList<Integer>[] cardValues = new ArrayList[pgs.getNPlayers()];
+            int nCards = 0;
+            for (int i : winners) {
+                cardValues[i] = new ArrayList<>(hands.get(i));
+                cardValues[i].sort(Collections.reverseOrder());
+                nCards = cardValues[i].size();
+            }
+            for (int j = 0; j < nCards; j++) {
+                // Checking card by card, once one player is found the winner we break; could still be a tie
+                int maxValue = 0;
+                for (int i : winners) {
+                    if (cardValues[i].get(j) > maxValue) maxValue = cardValues[i].get(j);
+                }
+                HashSet<Integer> actualWinners = new HashSet<>();
+                for (int i : winners) {
+                    if (cardValues[i].get(j) == maxValue) actualWinners.add(i);
+                }
+                if (actualWinners.size() == 1 || j == nCards - 1) {
+                    return actualWinners;
+                }
+            }
+        }
+        return winners;
     }
 
     /**

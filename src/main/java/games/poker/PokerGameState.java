@@ -8,7 +8,6 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
-import core.components.Counter;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
@@ -162,14 +161,6 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         this.bet = bet;
     }
 
-    /*
-              #    spacer,  A,  K,  Q,  J, 10, 9,  8,  7,  6,  5,  4,  3,  2
-               spade : [ 0, 0,  4,  8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48 ],
-                heart: [ 0, 1,  5, 9,  13, 17, 21, 25, 29, 33, 37, 41, 45, 49 ],
-              diamond: [ 0, 2,  6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50 ],
-                 club: [ 0, 3,  7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51 ],
-         */
-
     @Override
     protected AbstractGameState _copy(int playerId) {
         PokerGameState copy = new PokerGameState(gameParameters.copy(), getNPlayers());
@@ -288,7 +279,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     indx[i] = i;
                 }
                 ArrayList<int[]> combinations = generateCombinations(indx, pokerHandSize);
-                ArrayList<Pair<PokerHand,ArrayList<Integer>>> handOptions = new ArrayList<>();
+                ArrayList<Pair<Pair<PokerHand,ArrayList<Integer>>, Deck<FrenchCard>>> handOptions = new ArrayList<>();
                 int smallestRank = 11;
                 for (int[] combo : combinations) {
                     Deck<FrenchCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -298,28 +289,38 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     Pair<PokerHand, ArrayList<Integer>> hand = _translateHand(temp);
                     if (hand.a.rank < smallestRank) {
                         handOptions.clear();
-                        handOptions.add(hand);
+                        handOptions.add(new Pair<>(hand, temp));
                     } else if (hand.a.rank == smallestRank) {
-                        handOptions.add(hand);
+                        handOptions.add(new Pair<>(hand, temp));
                     }
                 }
-                if (handOptions.size() == 1) return new Pair<>(handOptions.get(0).a, new HashSet<>(handOptions.get(0).b));
+                if (handOptions.size() == 1) {
+                    deck.clear();
+                    for (FrenchCard c: handOptions.get(0).b.getComponents()) {
+                        deck.add(c);
+                    }
+                    return new Pair<>(handOptions.get(0).a.a, new HashSet<>(handOptions.get(0).a.b));
+                }
                 else {
                     // Choose the one with highest card values
                     for (int i = 0; i < pokerHandSize; i++) {
                         int maxValue = 0;
-                        for (Pair<PokerHand, ArrayList<Integer>> handOption : handOptions) {
-                            int value = handOption.b.get(i);
+                        for (Pair<Pair<PokerHand,ArrayList<Integer>>, Deck<FrenchCard>> handOption : handOptions) {
+                            int value = handOption.a.b.get(i);
                             if (value > maxValue) maxValue = value;
                         }
                         HashSet<Integer> best = new HashSet<>();
                         for (int j = 0; j < handOptions.size(); j++) {
-                            int value = handOptions.get(j).b.get(i);
+                            int value = handOptions.get(j).a.b.get(i);
                             if (value == maxValue) best.add(j);
                         }
                         if (best.size() == 1 || i == pokerHandSize-1) {
                             int option = best.iterator().next();
-                            return new Pair<>(handOptions.get(option).a, new HashSet<>(handOptions.get(option).b));
+                            deck.clear();
+                            for (FrenchCard c: handOptions.get(option).b.getComponents()) {
+                                deck.add(c);
+                            }
+                            return new Pair<>(handOptions.get(option).a.a, new HashSet<>(handOptions.get(option).a.b));
                         }
                     }
                     return null;
