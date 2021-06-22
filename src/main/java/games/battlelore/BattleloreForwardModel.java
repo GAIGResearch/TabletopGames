@@ -86,6 +86,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
 
 
         int playerId = state.getCurrentPlayer();
+        Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
         switch (state.getGamePhase().toString())
         {
@@ -93,17 +94,13 @@ public class BattleloreForwardModel extends AbstractForwardModel
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
                 break;
             case "MoveStep":
-                if(state.GetOrderableUnitCount(playerId) > 0){
-
-                }
-                else
+                if (state.GetMoveableUnitsFromTile(playerFaction).isEmpty())
                 {
-                    //currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
+                    currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
                 }
-
                 break;
             case "AttackStep":
-                state.getTurnOrder().endPlayerTurn(state);
+                //state.getTurnOrder().endPlayerTurn(state);
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
             /*
             case "VictoryPointStep":
@@ -130,8 +127,6 @@ public class BattleloreForwardModel extends AbstractForwardModel
 
     private void PutLearningScenarioUnits(BattleloreGameState gameState)
     {
-        gameState.gameBoard.getElement(1, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
-        gameState.gameBoard.getElement(1, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
         gameState.gameBoard.getElement(1, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
         gameState.gameBoard.getElement(3, 1).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
         gameState.gameBoard.getElement(3, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
@@ -181,6 +176,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
                 for (MapTile tile : moveableUnitTiles)
                 {
                     possibleLocations = state.GetPossibleLocationsForUnits(tile);
+                    //check possible locations size
                     for (int i = 0 ; i< state.getBoard().getWidth(); i++)
                     {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1)

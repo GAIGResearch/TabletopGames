@@ -42,7 +42,6 @@ public class BattleloreGameState extends AbstractGameState
 
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
-    int[] orderableUnitCount;
 
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers)
@@ -50,20 +49,8 @@ public class BattleloreGameState extends AbstractGameState
         super(gameParameters, new BattleloreTurnOrder(nPlayers), GameType.Battlelore);
         data = new BattleloreData();
         playerCount = nPlayers;
-        orderableUnitCount = new int[playerCount];
         parameters = (BattleloreGameParameters) gameParameters;
         data.load(parameters.getDataPath());
-
-    }
-
-    public void SetOrderableUnitCount(int playerID, int value)
-    {
-        orderableUnitCount[playerID] = value;
-    }
-
-    public int GetOrderableUnitCount(int playerID)
-    {
-        return orderableUnitCount[playerID];
     }
 
     public Unit GetUnitFromType(UnitType type)
@@ -100,14 +87,13 @@ public class BattleloreGameState extends AbstractGameState
         }
     }
 
-    public void ToggleUnitsOrderable(boolean isOrderable, int locX, int locY)
+    public void SetUnitsAsOrderable(int locX, int locY)
     {
         MapTile tile = gameBoard.getElement(locX, locY);
         if (tile != null)
         {
-            gameBoard.getElement(locX, locY).ToggleOrderable(isOrderable);
+            gameBoard.getElement(locX, locY).SetAsOrderable();
         }
-
     }
 
     public void RemoveUnit(int locX, int locY)
@@ -128,7 +114,7 @@ public class BattleloreGameState extends AbstractGameState
             {
                 MapTile tile = gameBoard.getElement(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
-                        tile.GetUnits().get(0).getIsOrderable())
+                        tile.GetUnits().get(0).CanMove())
                 {
                     tiles.add(tile);
                 }

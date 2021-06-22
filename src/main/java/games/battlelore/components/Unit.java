@@ -77,16 +77,30 @@ public class Unit extends Component
         return health;// * unitCount;
     }
 
-    public void setIsOrderable(boolean isOrderable)
+    public void SetAsOrderable()
     {
-        this.isOrderable = isOrderable;
-        this.canMove = isOrderable;
-        this.canAttack = isOrderable;
+        this.canMove = true;
+        this.canAttack = true;
     }
 
-    public boolean getIsOrderable()
+    public boolean CanMove()
     {
-        return this.isOrderable;
+        return this.canMove;
+    }
+
+    public boolean CanAttack()
+    {
+        return this.canAttack;
+    }
+
+    public void SetCanMove(boolean moveable)
+    {
+        this.canMove = moveable;
+    }
+
+    public void SetCanAttack(boolean canAttack)
+    {
+        this.canMove = canAttack;
     }
 
     @Override

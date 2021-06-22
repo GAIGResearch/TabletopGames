@@ -3,13 +3,9 @@ package games.battlelore.components;
 import core.components.Component;
 //import sun.jvm.hotspot.ui.tree.BooleanTreeNodeAdapter;
 //import sun.security.util.Debug;
-import games.battlelore.BattleloreGame;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Objects;
 
 public class MapTile extends Component
 {
@@ -84,7 +80,7 @@ public class MapTile extends Component
 
             String unitName = units.get(0).shortName;
 
-            String isOrderable = units.get(0).getIsOrderable() ? "*" : "";
+            String isOrderable = units.get(0).CanMove() ? "*" : "";
 
             return units.size() + " " + isOrderable + unitName;
         }
@@ -103,13 +99,13 @@ public class MapTile extends Component
         }
     }
 
-    public Boolean ToggleOrderable(boolean isOrderable)
+    public Boolean SetAsOrderable()
     {
         if (!units.isEmpty())
         {
             for (int i = 0; i < units.size(); i++)
             {
-                units.get(i).setIsOrderable(isOrderable);
+                units.get(i).SetAsOrderable();
             }
             return true;
         }

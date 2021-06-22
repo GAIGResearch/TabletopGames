@@ -11,6 +11,7 @@ import games.battlelore.BattleloreGameState;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
+import games.battlelore.gui.BattleloreGUI;
 import games.dominion.cards.CardType;
 
 import java.util.ArrayList;
@@ -45,13 +46,16 @@ public class MoveUnitsAction extends AbstractAction
         else
         {
             ArrayList<Unit> units = state.getBoard().getElement(tile.getLocationX(), tile.getLocationY()).GetUnits();
-            state.RemoveUnit(tile.getLocationX(), tile.getLocationY());
             for(Unit unit : units)
             {
-                state.getBoard().getElement(locationX, locationY).AddUnit(unit);
-            }
 
-            //state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
+                state.getBoard().getElement(locationX, locationY).AddUnit(unit);
+                unit.SetCanMove(false);
+            }
+            state.RemoveUnit(tile.getLocationX(), tile.getLocationY());
+
+            // state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
+
             return true;
         }
 

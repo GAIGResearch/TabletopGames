@@ -39,27 +39,21 @@ public class PlayCommandCardAction extends AbstractAction
                 for (int y = 0; y < state.getBoard().getHeight(); y++)
                 {
                     MapTile tile = state.getBoard().getElement(x, y);
-                    boolean r = tile.IsInArea(MapTile.TileArea.right);
-                    boolean m = tile.IsInArea(MapTile.TileArea.mid);
-                    boolean l = tile.IsInArea(MapTile.TileArea.left);
+
                     if (type == CommandCard.CommandType.AttackRight && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.right))
                     {
-                        state.ToggleUnitsOrderable(true, x, y);
-                        state.SetOrderableUnitCount(playerID, state.GetOrderableUnitCount(playerID) + 1);
-
+                        state.SetUnitsAsOrderable( x, y);
                     }
                     else if (type == CommandCard.CommandType.PatrolLeft && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.left))
                     {
-                        state.ToggleUnitsOrderable(true, x, y);
-                        state.SetOrderableUnitCount(playerID, state.GetOrderableUnitCount(playerID) + 1);
+                        state.SetUnitsAsOrderable(x, y);
                     }
                     else if (type == CommandCard.CommandType.BattleMarch && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.mid))
                     {
-                        state.ToggleUnitsOrderable(true, x, y);
-                        state.SetOrderableUnitCount(playerID, state.GetOrderableUnitCount(playerID) + 1);
+                        state.SetUnitsAsOrderable(x, y);
                     }
                 }
             }
