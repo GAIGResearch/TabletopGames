@@ -9,6 +9,8 @@ import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import players.simple.FirstActionPlayer;
 import utilities.Pair;
@@ -704,13 +706,14 @@ public class Game {
 
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
-        players.add(new FirstActionPlayer());
+//        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */

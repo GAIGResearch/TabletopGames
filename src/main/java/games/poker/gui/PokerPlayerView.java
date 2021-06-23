@@ -56,7 +56,7 @@ public class PokerPlayerView extends PokerDeckView {
     public void update(PokerGameState gameState) {
         this.component = gameState.getPlayerDecks().get(playerId);
         firstPlayerOfRound = ((PokerTurnOrder) gameState.getTurnOrder()).getRoundFirstPlayer() == playerId;
-        bet = gameState.getBets()[playerId];
+        bet = gameState.getPlayerBet()[playerId].getValue();
     }
 
     // Getters, setters

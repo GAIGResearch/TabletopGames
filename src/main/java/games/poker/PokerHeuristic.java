@@ -84,7 +84,7 @@ public class PokerHeuristic implements IStateHeuristic {
                     break;
             }
         }
-        return value * 1.0 / (pgs.currentMoney[playerId] + 1);
+        return value * 1.0 / (pgs.playerMoney[playerId].getValue() + 1);
     }
 
 }

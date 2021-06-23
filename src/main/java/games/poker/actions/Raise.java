@@ -22,17 +22,17 @@ public class Raise extends AbstractAction implements IPrintable {
         PokerGameState pgs = (PokerGameState) gameState;
         int biggestBet = 0;
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
+            if (pgs.getPlayerBet()[i].getValue() > biggestBet) biggestBet = pgs.getPlayerBet()[i].getValue();
         }
 
-        int diff = biggestBet + (int)(biggestBet * multiplier)- pgs.getBets()[playerId];  // First call, then raise
+        int diff = biggestBet + (int)(biggestBet * multiplier)- pgs.getPlayerBet()[playerId].getValue();  // First call, then raise
         pgs.placeBet(diff, playerId);
         pgs.setBet(true);
         pgs.getPlayerNeedsToCall()[playerId] = false;
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (i != playerId && !pgs.getPlayerFold()[i] && pgs.getCurrentMoney()[i] > 0) {
+            if (i != playerId && !pgs.getPlayerFold()[i] && !pgs.getPlayerMoney()[i].isMinimum()) {
                 pgs.getPlayerNeedsToCall()[i] = true;
             }
         }

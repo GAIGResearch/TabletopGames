@@ -204,7 +204,7 @@ public class PokerGUI extends AbstractGUI {
             pots.append(c.getValue()).append(" / ");
         }
         potMoney.setText("Pot: " + pots);
-        currentBets.setText("Bets: " + Arrays.toString(((PokerGameState) gameState).getBets()));
+        currentBets.setText("Bets: " + Arrays.toString(((PokerGameState) gameState).getPlayerBet()));
     }
 
     @Override

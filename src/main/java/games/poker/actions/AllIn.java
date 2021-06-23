@@ -18,13 +18,13 @@ public class AllIn extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
-        pgs.placeBet(pgs.getCurrentMoney()[playerId], playerId);
+        pgs.placeBet(pgs.getPlayerMoney()[playerId].getValue(), playerId);
         pgs.setBet(true);
         pgs.getPlayerNeedsToCall()[playerId] = false;
 
         // Others can't check, unless all in
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (i != playerId && !pgs.getPlayerFold()[i] && pgs.getCurrentMoney()[i] > 0) {
+            if (i != playerId && !pgs.getPlayerFold()[i] && !pgs.getPlayerMoney()[i].isMinimum()) {
                 pgs.getPlayerNeedsToCall()[i] = true;
             }
         }

@@ -4,12 +4,10 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import games.blackjack.actions.Hit;
 import games.blackjack.actions.Stand;
-import utilities.Utils;
 import java.util.ArrayList;
 import java.util.*;
 
@@ -76,27 +74,27 @@ public class BlackjackForwardModel extends AbstractForwardModel {
         return actions;
     }
 
-    @Override
-    protected void endGame(AbstractGameState gameState){
-        BlackjackGameState bjgs = (BlackjackGameState) gameState;
-        System.out.println("Game Results:");
-        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++){
-
-            StringBuilder sb = new StringBuilder();
-            sb.append(playerID == bjgs.dealerPlayer ? "Dealer" : "Player").append(" Hand: ");
-            for (FrenchCard card : bjgs.playerDecks.get(playerID).getComponents()){
-                sb.append(card.toString());
-                sb.append(" ");
-            }
-            System.out.println(sb);
-
-            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN){
-                System.out.println("The winner is player : " + playerID);
-            } else if(gameState.getPlayerResults()[playerID] == Utils.GameResult.DRAW){
-                System.out.println("Push");
-            }
-        }
-    }
+//    @Override
+//    protected void endGame(AbstractGameState gameState){
+//        BlackjackGameState bjgs = (BlackjackGameState) gameState;
+//        System.out.println("Game Results:");
+//        for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++){
+//
+//            StringBuilder sb = new StringBuilder();
+//            sb.append(playerID == bjgs.dealerPlayer ? "Dealer" : "Player").append(" Hand: ");
+//            for (FrenchCard card : bjgs.playerDecks.get(playerID).getComponents()){
+//                sb.append(card.toString());
+//                sb.append(" ");
+//            }
+//            System.out.println(sb);
+//
+//            if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN){
+//                System.out.println("The winner is player : " + playerID);
+//            } else if(gameState.getPlayerResults()[playerID] == Utils.GameResult.DRAW){
+//                System.out.println("Push");
+//            }
+//        }
+//    }
 
     @Override
     protected AbstractForwardModel _copy() {

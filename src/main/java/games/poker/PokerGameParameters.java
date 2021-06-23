@@ -9,17 +9,21 @@ import java.util.Objects;
 public class PokerGameParameters extends AbstractParameters {
     public String dataPath = "data/FrenchCards/";
 
-    public int nStartingMoney = 50;
+    // Game over condition parameters
+    public int maxRounds = 10;
+    public boolean endMinMoney = false;  // if true, ends when a player gets at least nWinMoney; if false, ends when all but 1 have 0 money
     public int nWinMoney = 80;
+
+    // Other parameters
+    public int nStartingMoney = 50;
     public int nFlopCards = 3;
     public int nTurnCards = 1;
     public int nRiverCards = 1;
     public int nCardsPerPlayer = 2;
     public int smallBlind = 5;
     public int bigBlind = 10;
-    public double[] raiseMultipliers = new double[]{0.5, 1., 2., 3., 4.};
+    public double[] raiseMultipliers = new double[]{1., 2., 3., 4.};
     public int bet = 5;
-    public boolean endMinMoney = false;  // if true, ends when a player gets at least nWinMoney; if false, ends when all but 1 have 0 money
 
     public PokerGameParameters(long seed) {
         super(seed);

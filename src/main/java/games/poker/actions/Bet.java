@@ -2,13 +2,9 @@ package games.poker.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Counter;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 public class Bet extends AbstractAction implements IPrintable {
@@ -31,7 +27,7 @@ public class Bet extends AbstractAction implements IPrintable {
 
         // Others can't check
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (i != playerId && !pgs.getPlayerFold()[i] && pgs.getCurrentMoney()[i] > 0) {
+            if (i != playerId && !pgs.getPlayerFold()[i] && !pgs.getPlayerMoney()[i].isMinimum()) {
                 pgs.getPlayerNeedsToCall()[i] = true;
             }
         }

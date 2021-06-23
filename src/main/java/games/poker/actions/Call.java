@@ -21,9 +21,9 @@ public class Call extends AbstractAction implements IPrintable {
         PokerGameState pgs = (PokerGameState) gameState;
         int biggestBet = 0;
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
+            if (pgs.getPlayerBet()[i].getValue() > biggestBet) biggestBet = pgs.getPlayerBet()[i].getValue();
         }
-        int diff = biggestBet - pgs.getBets()[playerId];
+        int diff = biggestBet - pgs.getPlayerBet()[playerId].getValue();
 
         pgs.placeBet(diff, playerId);
         pgs.getPlayerNeedsToCall()[playerId] = false;

@@ -8,6 +8,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
+import core.components.Counter;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
@@ -22,14 +23,16 @@ import static utilities.Utils.generateCombinations;
 
 public class PokerGameState extends AbstractGameState implements IPrintable {
     List<Deck<FrenchCard>>  playerDecks;
+    Counter[]               playerMoney;
+    Counter[]               playerBet;
+
     Deck<FrenchCard>        drawDeck;
     Deck<FrenchCard>        communityCards;
-    int[]                   currentMoney;
-    int[]                   bets;
-    boolean[]               playerNeedsToCall;
-    boolean[]               playerFold;
-    boolean[]               playerActStreet;  // true if player acted this street, false otherwise
     List<MoneyPot>          moneyPots;  // mapping from all-in bet amount (max a player can put in the pot) to pot counter; -1 for default with no limits
+
+    boolean[]               playerNeedsToCall;  // True if player needs to call (can't just check)
+    boolean[]               playerFold;  // True if player folded
+    boolean[]               playerActStreet;  // true if player acted this street, false otherwise
     boolean                 bet;  // True if a bet was made this street
 
     enum PokerGamePhase implements IGamePhase {
@@ -57,6 +60,8 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             add(drawDeck);
             add(communityCards);
             addAll(moneyPots);
+            this.addAll(Arrays.asList(playerMoney));
+            this.addAll(Arrays.asList(playerBet));
         }};
     }
 
@@ -82,10 +87,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             noLimitPot.increment(m, player);
         }
 
-        bets[player] += amount;
-        currentMoney[player] -= amount;
+        playerBet[player].increment(amount);
+        playerMoney[player].decrement(amount);
 
-        if (currentMoney[player] == 0) {
+        if (playerMoney[player].isMinimum()) {
             // Check all money pots and balance them out by adding more if needed (caused by all-ins)
             List<MoneyPot> newPots = new ArrayList<>();
             for (MoneyPot pot : moneyPots) {
@@ -145,12 +150,16 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         return playerFold;
     }
 
-    public int[] getCurrentMoney() {
-        return currentMoney;
+    public Counter[] getPlayerMoney() {
+        return playerMoney;
     }
 
-    public int[] getBets() {
-        return bets;
+    public Counter[] getPlayerBet() {
+        return playerBet;
+    }
+
+    public boolean[] getPlayerActStreet() {
+        return playerActStreet;
     }
 
     public boolean isBet() {
@@ -164,9 +173,18 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     @Override
     protected AbstractGameState _copy(int playerId) {
         PokerGameState copy = new PokerGameState(gameParameters.copy(), getNPlayers());
+        copy.communityCards = communityCards.copy();
+        copy.moneyPots = new ArrayList<>();
+        for (MoneyPot pot: moneyPots) {
+            copy.moneyPots.add(pot.copy());
+        }
         copy.playerDecks = new ArrayList<>();
-        for (Deck<FrenchCard> d : playerDecks) {
-            copy.playerDecks.add(d.copy());
+        copy.playerMoney = new Counter[getNPlayers()];
+        copy.playerBet = new Counter[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            copy.playerDecks.add(playerDecks.get(i).copy());
+            copy.playerMoney[i] = playerMoney[i].copy();
+            copy.playerBet[i] = playerBet[i].copy();
         }
         copy.drawDeck = drawDeck.copy();
         if (PARTIAL_OBSERVABLE && playerId != -1) {
@@ -185,17 +203,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                 }
             }
         }
-        copy.currentMoney = currentMoney.clone();
-        copy.bets = bets.clone();
         copy.playerNeedsToCall = playerNeedsToCall.clone();
         copy.playerFold = playerFold.clone();
-        copy.communityCards = communityCards.copy();
-        copy.moneyPots = new ArrayList<>();
-        for (MoneyPot pot: moneyPots) {
-            copy.moneyPots.add(pot.copy());
-        }
-        copy.bet = bet;
         copy.playerActStreet = playerActStreet.clone();
+        copy.bet = bet;
         return copy;
     }
 
@@ -206,7 +217,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public double getGameScore(int playerId) {
-        return currentMoney[playerId];
+        return playerMoney[playerId].getValue();
     }
 
     @Override
@@ -239,14 +250,14 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(currentMoney, that.currentMoney) && Arrays.equals(bets, that.bets) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet) && Objects.equals(moneyPots, that.moneyPots);
+        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(playerMoney, that.playerMoney) && Arrays.equals(playerBet, that.playerBet) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet) && Objects.equals(moneyPots, that.moneyPots);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, moneyPots, bet);
-        result = 31 * result + Arrays.hashCode(currentMoney);
-        result = 31 * result + Arrays.hashCode(bets);
+        result = 31 * result + Arrays.hashCode(playerMoney);
+        result = 31 * result + Arrays.hashCode(playerBet);
         result = 31 * result + Arrays.hashCode(playerNeedsToCall);
         result = 31 * result + Arrays.hashCode(playerFold);
         result = 31 * result + Arrays.hashCode(playerActStreet);

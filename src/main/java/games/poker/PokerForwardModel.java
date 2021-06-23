@@ -3,6 +3,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import core.components.Counter;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.poker.actions.*;
@@ -24,17 +25,18 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameState pgs = (PokerGameState) firstState;
         PokerGameParameters params = (PokerGameParameters) firstState.getGameParameters();
 
-        pgs.currentMoney = new int[firstState.getNPlayers()];
+        pgs.playerMoney = new Counter[firstState.getNPlayers()];
         pgs.playerNeedsToCall = new boolean[firstState.getNPlayers()];
         pgs.playerFold = new boolean[firstState.getNPlayers()];
-        pgs.bets = new int[firstState.getNPlayers()];
+        pgs.playerBet = new Counter[firstState.getNPlayers()];
         pgs.playerActStreet = new boolean[pgs.getNPlayers()];
         pgs.moneyPots = new ArrayList<>();
 
         pgs.playerDecks = new ArrayList<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             pgs.playerDecks.add(new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            pgs.currentMoney[i] = params.nStartingMoney;
+            pgs.playerMoney[i] = new Counter(params.nStartingMoney, 0, Integer.MAX_VALUE, "Player " + i + " money");
+            pgs.playerBet[i] = new Counter(0, 0, Integer.MAX_VALUE, "Player " + i + " money");
         }
 
         // Create the discard deck, at the beginning it is empty
@@ -63,7 +65,7 @@ public class PokerForwardModel extends AbstractForwardModel {
             pgs.playerDecks.get(i).clear();
             pgs.playerNeedsToCall[i] = false;
             pgs.playerFold[i] = false;
-            pgs.bets[i] = 0;
+            pgs.playerBet[i].setValue(0);
         }
         pgs.communityCards.clear();
 
@@ -169,14 +171,13 @@ public class PokerForwardModel extends AbstractForwardModel {
             // Calculate winners separately for each money pot
             HashSet<Integer> winners = getWinner(pgs, pot, ranks, hands);
             for (int i : winners) {
-                pgs.currentMoney[i] += pot.getValue() / winners.size();
+                pgs.playerMoney[i].increment(pot.getValue() / winners.size());
             }
         }
 
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (pgs.currentMoney[i] <= 0) {
+            if (pgs.playerMoney[i].isMinimum()) {
                 // Player is out of the game
-                pgs.currentMoney[i] = 0;
                 pgs.setPlayerResult(LOSE, i);
             }
         }
@@ -261,17 +262,17 @@ public class PokerForwardModel extends AbstractForwardModel {
         PokerGameParameters pgp = (PokerGameParameters) pgs.getGameParameters();
 
         if (pgp.endMinMoney) {
-
             int maxMoney = 0;
             for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                if (pgs.currentMoney[playerID] >= pgp.nWinMoney && pgs.currentMoney[playerID] > maxMoney) {
-                    maxMoney = pgs.currentMoney[playerID];
+                int money = pgs.playerMoney[playerID].getValue();
+                if (money >= pgp.nWinMoney && money > maxMoney) {
+                    maxMoney = money;
                 }
             }
             if (maxMoney > 0) {
                 // Game ended
                 for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                    if (pgs.currentMoney[playerID] == maxMoney) {
+                    if (pgs.playerMoney[playerID].getValue() == maxMoney) {
                         pgs.setPlayerResult(Utils.GameResult.WIN, playerID);
                     } else {
                         pgs.setPlayerResult(LOSE, playerID);
@@ -281,19 +282,39 @@ public class PokerForwardModel extends AbstractForwardModel {
                 return true;
             }
         } else {
-            int stillAlive = 0;
-            int id = -1;
-            for (int i = 0; i < pgs.getNPlayers(); i++) {
-                if (pgs.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING) {
-                    stillAlive ++;
-                    id = i;
-                    if (stillAlive > 1) break;
+            if (pgs.getTurnOrder().getRoundCounter() >= pgp.maxRounds) {
+                // Max rounds reached, the player with most money wins
+                int maxMoney = 0;
+                for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
+                    int money = pgs.playerMoney[playerID].getValue();
+                    if (money > maxMoney) {
+                        maxMoney = money;
+                    }
                 }
-            }
-            if (stillAlive == 1) {
-                pgs.setPlayerResult(Utils.GameResult.WIN, id);
+                for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
+                    if (pgs.playerMoney[playerID].getValue() == maxMoney) {
+                        pgs.setPlayerResult(Utils.GameResult.WIN, playerID);
+                    } else {
+                        pgs.setPlayerResult(LOSE, playerID);
+                    }
+                }
                 pgs.setGameStatus(Utils.GameResult.GAME_END);
                 return true;
+            } else {
+                int stillAlive = 0;
+                int id = -1;
+                for (int i = 0; i < pgs.getNPlayers(); i++) {
+                    if (pgs.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING) {
+                        stillAlive++;
+                        id = i;
+                        if (stillAlive > 1) break;
+                    }
+                }
+                if (stillAlive == 1) {
+                    pgs.setPlayerResult(Utils.GameResult.WIN, id);
+                    pgs.setGameStatus(Utils.GameResult.GAME_END);
+                    return true;
+                }
             }
         }
         return false;
@@ -313,21 +334,21 @@ public class PokerForwardModel extends AbstractForwardModel {
         int biggestBet = 0;
         boolean othersAllIn = true;  // True if all others are all in / out of the game, false otherwise
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (pgs.getBets()[i] > biggestBet) biggestBet = pgs.getBets()[i];
-            if (i != player && pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i] && pgs.currentMoney[i] > 0) othersAllIn = false;
+            if (pgs.getPlayerBet()[i].getValue() > biggestBet) biggestBet = pgs.getPlayerBet()[i].getValue();
+            if (i != player && pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i] && !pgs.playerMoney[i].isMinimum()) othersAllIn = false;
         }
 
-        if (pgs.playerNeedsToCall[player] && pgs.getCurrentMoney()[player] > 0) {
-            int diff = biggestBet - pgs.getBets()[player];
+        if (pgs.playerNeedsToCall[player] && !pgs.getPlayerMoney()[player].isMinimum()) {
+            int diff = biggestBet - pgs.getPlayerBet()[player].getValue();
 
-            if (pgs.currentMoney[player] >= diff) {
+            if (pgs.playerMoney[player].getValue() >= diff) {
                 actions.add(new Call(player));
 
                 if (!othersAllIn) {
                     // Only raise if it makes sense
                     for (double r : pgp.raiseMultipliers) {
                         int diffR = diff + (int) (biggestBet * r);
-                        if (pgs.currentMoney[player] >= diffR) {
+                        if (pgs.playerMoney[player].getValue() >= diffR) {
                             actions.add(new Raise(player, r));
                         }
                     }
@@ -337,13 +358,13 @@ public class PokerForwardModel extends AbstractForwardModel {
             actions.add(new Check(player));
 
             if (!pgs.isBet() && !othersAllIn) {
-                if (pgs.currentMoney[player] >= pgp.bet) {
+                if (pgs.playerMoney[player].getValue() >= pgp.bet) {
                     actions.add(new Bet(player, pgp.bet));
                 }
             }
         }
         actions.add(new Fold(player));
-        if (pgs.currentMoney[player] > 0) {
+        if (!pgs.playerMoney[player].isMinimum()) {
             actions.add(new AllIn(player));
         }
 
