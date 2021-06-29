@@ -6,6 +6,9 @@ import games.battlelore.BattleloreGameState;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
+import games.dominion.DominionGameState;
+
+import java.util.List;
 
 public class PlayCommandCardAction extends AbstractAction
 {
@@ -21,6 +24,7 @@ public class PlayCommandCardAction extends AbstractAction
         this.playerID = playerID;
         //this.orderedTiles = orderedTiles;
     }
+
 
 
     @Override
@@ -43,7 +47,7 @@ public class PlayCommandCardAction extends AbstractAction
                     if (type == CommandCard.CommandType.AttackRight && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.right))
                     {
-                        state.SetUnitsAsOrderable( x, y);
+                        state.SetUnitsAsOrderable(x, y);
                     }
                     else if (type == CommandCard.CommandType.PatrolLeft && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.left))

@@ -27,7 +27,7 @@ public class Unit extends Component
     public int health;
     protected boolean canMove;
     protected boolean canAttack;
-    private boolean isOrderable;
+    public boolean isMelee;
     //protected int unitCount;
     //Add special power
 
@@ -46,13 +46,13 @@ public class Unit extends Component
         this.health = 0;
         //this.unitCount = 0;
         this.faction = Faction.NA;
-        this.isOrderable = false;
         this.shortName = "";
         this.canAttack = false;
         this.canMove = false;
+        this.isMelee = true;
     }
 
-    public Unit(Utils.ComponentType type, String id, String name, int moveRange, int strength, int health, Faction faction, String shortName)//, int unitCount)
+    public Unit(Utils.ComponentType type, String id, String name, int moveRange, int strength, int health, Faction faction, String shortName, boolean isMelee)//, int unitCount)
     {
         super(type, name);
         this.name = name;
@@ -62,8 +62,8 @@ public class Unit extends Component
         this.health = health;
         this.faction = faction;
         //this.unitCount = unitCount;
-        this.isOrderable = false;
         this.shortName = shortName;
+        this.isMelee = isMelee;
     }
 
 
@@ -75,12 +75,6 @@ public class Unit extends Component
     public int getTotalHealth()
     {
         return health;// * unitCount;
-    }
-
-    public void SetAsOrderable()
-    {
-        this.canMove = true;
-        this.canAttack = true;
     }
 
     public boolean CanMove()
@@ -100,13 +94,13 @@ public class Unit extends Component
 
     public void SetCanAttack(boolean canAttack)
     {
-        this.canMove = canAttack;
+        this.canAttack = canAttack;
     }
 
     @Override
     public Component copy()
     {
-        return new Unit(type, id, name, moveRange, strength, health, faction, shortName);//, unitCount);
+        return new Unit(type, id, name, moveRange, strength, health, faction, shortName, isMelee);//, unitCount);
     }
 
     @Override
@@ -134,7 +128,7 @@ public class Unit extends Component
                 strength == unit.strength &&
                 health == unit.health &&
                 faction == unit.faction &&
-                isOrderable == isOrderable &&
+                isMelee == isMelee &&
                 shortName == shortName;
                 //unitCount == unit.unitCount;
     }
@@ -170,6 +164,7 @@ public class Unit extends Component
         this.name = (String) unit.get("name");
         this.faction = parseFaction(((Long) ( (JSONArray) unit.get("faction")).get(1)).intValue());
         this.shortName = (String) unit.get("shortname");
+        this.isMelee = ((Boolean) ( (JSONArray) unit.get("isMelee")).get(1)).booleanValue();
         //this.unitCount = ((Long) ( (JSONArray) unit.get("unitCount")).get(1)).intValue();
 
         //this.type = (String) unit.get("type");

@@ -105,7 +105,9 @@ public class MapTile extends Component
         {
             for (int i = 0; i < units.size(); i++)
             {
-                units.get(i).SetAsOrderable();
+                units.get(i).SetCanMove(true);
+                units.get(i).SetCanAttack(true);
+
             }
             return true;
         }

@@ -42,6 +42,7 @@ public class BattleloreGameState extends AbstractGameState
 
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
+    int[] playerScores;
 
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers)
@@ -51,6 +52,7 @@ public class BattleloreGameState extends AbstractGameState
         playerCount = nPlayers;
         parameters = (BattleloreGameParameters) gameParameters;
         data.load(parameters.getDataPath());
+        playerScores = new int[nPlayers];
     }
 
     public Unit GetUnitFromType(UnitType type)
@@ -85,6 +87,16 @@ public class BattleloreGameState extends AbstractGameState
         {
             gameBoard.getElement(locX, locY).AddUnit(unit);
         }
+    }
+
+    public void AddScore(int playerId, int score)
+    {
+        playerScores[playerId] += score;
+    }
+
+    public int GetPlayerScore(int playerId)
+    {
+        return playerScores[playerId];
     }
 
     public void SetUnitsAsOrderable(int locX, int locY)
@@ -123,6 +135,24 @@ public class BattleloreGameState extends AbstractGameState
         return tiles;
     }
 
+    public ArrayList<MapTile> GetReadyForAttackUnitsFromTile(Unit.Faction faction)
+    {
+        ArrayList<MapTile> tiles = new ArrayList<MapTile>();
+        for (int x = 0; x < gameBoard.getWidth(); x++)
+        {
+            for (int y = 0; y < gameBoard.getHeight(); y++)
+            {
+                MapTile tile = gameBoard.getElement(x, y);
+                if (tile.GetUnits() != null && tile.GetFaction() == faction &&
+                        tile.GetUnits().get(0).CanAttack())
+                {
+                    tiles.add(tile);
+                }
+            }
+        }
+        return tiles;
+    }
+
     public int[][] GetPossibleLocationsForUnits(MapTile tile)
     {
         int[][] possibleLocations = new int[gameBoard.getWidth()][2];
@@ -142,6 +172,39 @@ public class BattleloreGameState extends AbstractGameState
                     double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - tile.getLocationX()), 2) +
                             Math.pow(Math.abs(possibleTile.getLocationY() - tile.getLocationY()), 2));
                     if (distance <= moveRange)
+                    {
+                       //Maybe add if blocked check
+                        possibleLocations[counter][0] = possibleTile.getLocationX();
+                        possibleLocations[counter][1] = possibleTile.getLocationY();
+                        counter++;
+                    }
+
+                }
+            }
+        }
+        return possibleLocations;
+    }
+
+    public int[][] GetPossibleTargetUnits(MapTile attackUnit)
+    {
+        int[][] possibleLocations = new int[gameBoard.getWidth()][2];
+        boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
+
+        int counter = 0;
+        int range = isMelee ? 1 : 5;
+        for (int x = 0; x < gameBoard.getWidth(); x++)
+        {
+            for (int y = 0; y < gameBoard.getHeight(); y++)
+            {
+                possibleLocations[x][0] = -1;
+                possibleLocations[x][1] = -1;
+
+                MapTile possibleTile = gameBoard.getElement(x, y);
+                if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction())
+                {
+                    double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - attackUnit.getLocationX()), 2) +
+                            Math.pow(Math.abs(possibleTile.getLocationY() - attackUnit.getLocationY()), 2));
+                    if (distance <= range)
                     {
                        //Maybe add if blocked check
                         possibleLocations[counter][0] = possibleTile.getLocationX();
@@ -198,7 +261,8 @@ public class BattleloreGameState extends AbstractGameState
     }
 
     @Override
-    public double getGameScore(int playerId) {
+    public double getGameScore(int playerId)
+    {
         return 0;
     }
 

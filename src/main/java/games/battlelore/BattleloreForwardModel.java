@@ -4,17 +4,16 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
-import core.components.Token;
 
 import core.interfaces.IGamePhase;
-import de.erichseifert.vectorgraphics2d.intermediate.commands.Command;
+import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
+import games.battlelore.actions.SkipTurnAction;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicTurnOrder;
+
 import utilities.Utils;
 
 import java.util.*;
@@ -84,7 +83,6 @@ public class BattleloreForwardModel extends AbstractForwardModel
         BattleloreGameParameters gameParams = (BattleloreGameParameters) currentState.getGameParameters();
         action.execute(currentState);//todo
 
-
         int playerId = state.getCurrentPlayer();
         Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
@@ -100,8 +98,16 @@ public class BattleloreForwardModel extends AbstractForwardModel
                 }
                 break;
             case "AttackStep":
-                //state.getTurnOrder().endPlayerTurn(state);
-                currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
+                if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty())
+                {
+                    //state.getTurnOrder().endPlayerTurn(state);
+                    int player = state.getCurrentPlayer();
+                    state.getTurnOrder().endPlayerTurn(state);
+
+                    currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
+                }
+                break;
+
             /*
             case "VictoryPointStep":
                 break;
@@ -114,9 +120,12 @@ public class BattleloreForwardModel extends AbstractForwardModel
                 break;
         }
 
-        if (checkGameEnd((BattleloreGameState) currentState))
+        if (checkGameEnd((BattleloreGameState) currentState, playerId))
         {
+
             currentState.setGameStatus(Utils.GameResult.GAME_END);
+            //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
+            registerWinner(state, playerId);
             return;
         }
 
@@ -167,7 +176,6 @@ public class BattleloreForwardModel extends AbstractForwardModel
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep)
         {
-            //gameState.
             ArrayList<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
             int[][] possibleLocations = new int[state.getBoard().getWidth()][2];
 
@@ -184,15 +192,47 @@ public class BattleloreForwardModel extends AbstractForwardModel
                             actions.add(new MoveUnitsAction(tile, playerFaction, possibleLocations[i][0], possibleLocations[i][1]));
                         }
                     }
-
+                    if (actions.isEmpty())
+                    {
+                        actions.add(new SkipTurnAction(tile, playerFaction, true, false));
+                    }
                 }
             }
 
-            //if moveable unit count has readched the end finish the state
+            //if moveable unit count has reached the end, finish the state
+        }
+        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.AttackStep)
+        {
+            ArrayList<MapTile> readyToAttackUnits = state.GetReadyForAttackUnitsFromTile(playerFaction);
+            int[][] possibleLocations = new int[state.getBoard().getWidth()][2];
+
+            if (!readyToAttackUnits.isEmpty())
+            {
+                for (MapTile attacker : readyToAttackUnits)
+                {
+                    possibleLocations = state.GetPossibleTargetUnits(attacker);
+
+                    for (int i = 0 ; i< state.getBoard().getWidth(); i++)
+                    {
+                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1)
+                        {
+                            actions.add(new AttackUnitsAction(attacker, state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]), attacker.GetFaction(), player));
+                        }
+                    }
+                    if (actions.isEmpty())
+                    {
+                        actions.add(new SkipTurnAction(attacker, playerFaction, false, true));
+                    }
+                }
+            }
         }
 
         //registerWinner(state, new Token("winner is: " + player));
-
+    if (actions.isEmpty())
+    {
+        int i = 0;
+        actions.add(new SkipTurnAction());
+    }
         return actions;
     }
 
@@ -207,10 +247,9 @@ public class BattleloreForwardModel extends AbstractForwardModel
      * Checks if the game ended.
      * @param gameState - game state to check game end.
      */
-    private boolean checkGameEnd(BattleloreGameState gameState)
+    private boolean checkGameEnd(BattleloreGameState gameState, int playerId)
     {
-        //TODO_Ertugrul
-        return false;
+        return gameState.GetPlayerScore(playerId) > 5;
     }
 
     @Override
@@ -222,15 +261,12 @@ public class BattleloreForwardModel extends AbstractForwardModel
         }
     }
 
-    /**
-     * Inform the game this player has won.
-     * @param winnerSymbol - which player won.
-     */
-    private void registerWinner(BattleloreGameState gameState, Token winnerSymbol)
+
+    private void registerWinner(BattleloreGameState gameState, int winnerD)
     {
         gameState.setGameStatus(Utils.GameResult.GAME_END);
         //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
-        //gameState.setPlayerResult(Utils.GameResult.WIN, winningPlayer);
-        //gameState.setPlayerResult(Utils.GameResult.LOSE, 1-winningPlayer);
+        gameState.setPlayerResult(Utils.GameResult.WIN, winnerD);
+        gameState.setPlayerResult(Utils.GameResult.LOSE, winnerD == 0 ? 1 : 0);
     }
 }

@@ -9,7 +9,8 @@
     "type": "soldier",
     "special": "",
     "unitCount": ["Integer", 1],
-    "shortname": "D"
+    "shortname": "D",
+    "isMelee": ["Boolean", true]
   },
   {
 	"id":"blood_harvesters",
@@ -21,7 +22,8 @@
 	"type": "soldier",
 	"special": "rage",
     "unitCount": ["Integer", 3],
-    "shortname": "BH"
+    "shortname": "BH",
+    "isMelee": ["Boolean", true]
   },
   {
 	"id":"viper_legion",
@@ -32,10 +34,11 @@
     "health": ["Integer", 3],
 	"special": "bite",
     "unitCount": ["Integer", 3],
-    "shortname": "VL"
+    "shortname": "VL",
+    "isMelee": ["Boolean", false]
   },
-    {
-	"id":"citadel_guard",
+  {
+    "id":"citadel_guard",
     "faction": ["Integer", 1],
     "name": "Citadel Guard",
     "move": ["Integer", 2],
@@ -43,8 +46,9 @@
     "health": ["Integer", 3],
 	"special": "pursue",
     "unitCount": ["Integer", 3],
-    "shortname": "CG"
-    },
+    "shortname": "CG",
+    "isMelee": ["Boolean", true]
+  },
   {
 	"id":"yeoman_archers",
     "faction": ["Integer", 1],
@@ -54,6 +58,7 @@
     "health": ["Integer", 3],
 	"special": "doubleshot",
     "unitCount": ["Integer", 3],
-    "shortname": "YA"
+    "shortname": "YA",
+    "isMelee": ["Boolean", false]
   }
 ]
