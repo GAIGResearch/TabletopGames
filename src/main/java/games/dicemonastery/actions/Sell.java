@@ -5,8 +5,6 @@ import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryGameState;
 
-import java.util.Objects;
-
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.SHILLINGS;
 
@@ -48,7 +46,7 @@ public class Sell extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource, price);
+        return resource.ordinal() * 7369 + price * 83 + 3479823;
     }
 
     @Override

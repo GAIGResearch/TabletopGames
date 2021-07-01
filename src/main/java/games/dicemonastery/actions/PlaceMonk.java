@@ -7,7 +7,6 @@ import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.Monk;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
@@ -81,7 +80,7 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(monkChosen, destination, playerId);
+        return (monkChosen ? 97 : 0) + playerId + destination.ordinal() * -2777 - 5827;
     }
 
     @Override

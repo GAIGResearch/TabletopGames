@@ -4,8 +4,6 @@ import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.Monk;
 import games.dicemonastery.Pilgrimage;
 
-import java.util.Objects;
-
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.GATEHOUSE;
 import static java.util.stream.Collectors.toList;
 
@@ -36,7 +34,7 @@ public class GoOnPilgrimage extends UseMonk {
 
     @Override
     public int hashCode() {
-        return Objects.hash(destination, actionPoints);
+        return actionPoints + destination.ordinal() * 1481 - 168729;
     }
 
     @Override

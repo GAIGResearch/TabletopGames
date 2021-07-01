@@ -33,7 +33,7 @@ public class PayTreasure extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 8341 + payment.hashCode();
+        return 8341 + payment.ordinal();
     }
 
     @Override

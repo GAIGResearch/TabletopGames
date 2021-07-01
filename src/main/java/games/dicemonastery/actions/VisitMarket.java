@@ -9,7 +9,6 @@ import games.dicemonastery.MarketCard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
@@ -91,7 +90,7 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(traded, player);
+        return (traded ? 2411 : 0) + player * 3023 + 43;
     }
 
     @Override

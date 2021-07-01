@@ -2,8 +2,6 @@ package games.dicemonastery.actions;
 
 import games.dicemonastery.DiceMonasteryGameState;
 
-import java.util.Objects;
-
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
@@ -37,7 +35,7 @@ public class MoveCubes extends UseMonk {
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource, from, to, actionPoints);
+        return -1580077 + from.ordinal() * -1543 + to.ordinal() * 7883 * actionPoints * 7;
     }
 
 

@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.Monk;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
@@ -52,9 +51,8 @@ public class PromoteMonk extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pietyLevelToPromote, location) + 97;
+        return 97 + pietyLevelToPromote * 1487 + location.ordinal() * 2777;
     }
-    // +97 is to avoid hashcode clashes with ChooseMonk
 
     @Override
     public String getString(AbstractGameState gameState) {

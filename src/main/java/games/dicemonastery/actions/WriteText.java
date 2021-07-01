@@ -65,7 +65,7 @@ public class WriteText extends UseMonk {
 
     @Override
     public int hashCode() {
-        return textType.hashCode();
+        return textType.ordinal()  * -6907 + 7187;
     }
 
     @Override

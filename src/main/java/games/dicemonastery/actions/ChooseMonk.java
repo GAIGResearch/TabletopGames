@@ -6,7 +6,6 @@ import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.Monk;
 
 import java.util.List;
-import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static java.util.stream.Collectors.toList;
@@ -57,7 +56,7 @@ public class ChooseMonk extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(piety, destination);
+        return 101 + piety * 1487 + destination.ordinal() * -6373;
     }
 
     @Override

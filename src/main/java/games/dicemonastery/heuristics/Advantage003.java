@@ -22,12 +22,15 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
     double[][] coefficients = new double[300][20];
     Map<Integer, Integer> hashToRowIndex = new HashMap<>();
     List<DiceMonasteryStateAttributes> features;
+    String name;
 
+    Set<Integer> unknownHashCodes = new HashSet<>();
 
     public Advantage003() {
         this("Advantage003.csv");
     }
     public Advantage003(String filename) {
+        name = filename;
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -74,7 +77,6 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
             return 0.0;
         }).toArray();
 
-
         double bestValue = Double.NEGATIVE_INFINITY;
         AbstractAction retValue = possibleActions.get(0);
         for (AbstractAction action : possibleActions) {
@@ -117,8 +119,16 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
             for (int i = 1; i <= features.size(); i++) {
                 actionValue += coeffs[i] * featureVal[i - 1];
             }
+        } else if (!unknownHashCodes.contains(hash)) {
+            unknownHashCodes.add(hash);
+            System.out.println("Action not found : " + hash + " " + abstractAction.toString() );
         }
 
         return actionValue;
+    }
+
+    @Override
+    public String toString() {
+        return "Advantage003 : " + name;
     }
 }

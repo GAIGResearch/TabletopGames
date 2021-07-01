@@ -41,7 +41,7 @@ public class KillMonk extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return piety * 389 + 61;
+        return piety * 389 - 4093421;
     }
 
     @Override

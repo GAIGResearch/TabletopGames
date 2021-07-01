@@ -478,6 +478,10 @@ public class SingleTreeNode {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
         double meanAdvantageFromAction = (actionValue / actionVisits) - (totValue[decisionPlayer] / nVisits);
+        if (player.advantageFunction != null && player.params.biasVisits > 0) {
+            double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits));
+            meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * player.advantageFunction.applyAsDouble(action, state);
+        }
         return Math.exp(meanAdvantageFromAction);
     }
 
@@ -486,6 +490,10 @@ public class SingleTreeNode {
         // TODO: (see comment in checkActions() - to be enhanced to keep track of this at some future point)
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (player.advantageFunction != null && player.params.biasVisits > 0) {
+            double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits));
+            actionValue = (1.0 - beta) * actionValue + beta * ((totValue[decisionPlayer] / nVisits) + player.advantageFunction.applyAsDouble(action, state));
+        }
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits / actionVisits;
         double regret = potentialValue - totValue[decisionPlayer];
@@ -505,16 +513,8 @@ public class SingleTreeNode {
             default:
                 throw new AssertionError("Should not be any other options!");
         }
-        double nodeValue = totValue[decisionPlayer] / nVisits;
+
         Map<AbstractAction, Double> actionToValueMap = actionsFromState.stream().collect(toMap(Function.identity(), valueFn));
-        // consider any progressive bias term
-        if (player.advantageFunction != null && player.params.biasVisits > 0) {
-            for (AbstractAction action : actionToValueMap.keySet()) {
-                double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits(action)));
-                actionToValueMap.computeIfPresent(action,
-                        (a, value) -> (1.0 - beta) * value + beta * (nodeValue + player.advantageFunction.applyAsDouble(action, state)));
-            }
-        }
 
         // then we normalise to a pdf
         actionToValueMap = Utils.normaliseMap(actionToValueMap);

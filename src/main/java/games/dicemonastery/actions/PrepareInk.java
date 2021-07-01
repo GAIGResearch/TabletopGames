@@ -37,7 +37,7 @@ public class PrepareInk extends UseMonk {
 
     @Override
     public int hashCode() {
-        return pigment.hashCode();
+        return pigment.ordinal() - 2957;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class BuyTreasure extends UseMonk{
 
     @Override
     public int hashCode() {
-        return treasure.hashCode() * 7;
+        return treasure.ordinal() * 7 - 29291430;
     }
 
     @Override

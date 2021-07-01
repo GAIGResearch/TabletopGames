@@ -2,13 +2,11 @@ package games.dicemonastery.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.dicemonastery.DiceMonasteryConstants.*;
+import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryGameState;
 
-import java.util.Objects;
-
-import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
+import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.SHILLINGS;
 
 public class Buy extends AbstractAction {
 
@@ -48,7 +46,7 @@ public class Buy extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource, cost);
+        return resource.ordinal() * 11 + cost - 7867;
     }
 
     @Override

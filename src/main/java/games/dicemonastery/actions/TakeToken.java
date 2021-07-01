@@ -9,7 +9,6 @@ import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.Monk;
 
 import java.util.List;
-import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.Resource.PRAYER;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.SHILLINGS;
@@ -104,7 +103,7 @@ public class TakeToken extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(token, fromArea, monkPromoted);
+        return token.ordinal() * -3163 + fromArea.ordinal() * 947 + (monkPromoted ? 3559 : 877);
     }
 
     @Override

@@ -42,6 +42,7 @@ public class DiceMonasteryConstants {
                     throw new AssertionError("Should not be processing " + this);
             }
         }
+
     }
 
     public enum InkColour {

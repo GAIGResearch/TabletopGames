@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
@@ -71,7 +72,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutClass", "");
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
-        addTunableParameter("progressiveBias", "0.0");
         addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0);
     }
@@ -167,7 +167,7 @@ public class MCTSParams extends PlayerParameters {
 
     @SuppressWarnings("unchecked")
     public ToDoubleBiFunction<AbstractAction, AbstractGameState> getAdvantageFunction() {
-        if (advantageFunction.isEmpty())
+        if (advantageFunction.isEmpty() || advantageFunction.equalsIgnoreCase("none"))
             return null;
         String[] classAndParams = advantageFunction.split(Pattern.quote("|"));
         if (classAndParams.length > 2)
@@ -176,7 +176,8 @@ public class MCTSParams extends PlayerParameters {
             Class<?> rollout = Class.forName(classAndParams[0]);
             if (classAndParams.length == 1)
                 return (ToDoubleBiFunction<AbstractAction, AbstractGameState>) rollout.getConstructor().newInstance();
-            return (ToDoubleBiFunction<AbstractAction, AbstractGameState>) rollout.getConstructor(String.class).newInstance(classAndParams[1]);
+            Constructor<ToDoubleBiFunction<AbstractAction, AbstractGameState>> con = (Constructor<ToDoubleBiFunction<AbstractAction, AbstractGameState>>) rollout.getConstructor(String.class);
+            return con.newInstance(classAndParams[1]);
 
         } catch (Exception e) {
             e.printStackTrace();

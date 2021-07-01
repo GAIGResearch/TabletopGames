@@ -11,6 +11,6 @@ public class BegForAlms extends MoveCubes {
 
     @Override
     public String toString() {
-        return "Beg for Alms";
+        return "Beg for Alms " + actionPoints ;
     }
 }

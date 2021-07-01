@@ -6,8 +6,6 @@ import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.Monk;
 
-import java.util.Objects;
-
 import static java.util.stream.Collectors.joining;
 
 public class PromoteAllMonks extends AbstractAction {
@@ -46,7 +44,7 @@ public class PromoteAllMonks extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(location);
+        return location.ordinal() + 3301;
     }
 
     @Override
