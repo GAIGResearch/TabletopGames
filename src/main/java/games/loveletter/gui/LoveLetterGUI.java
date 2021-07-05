@@ -6,6 +6,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
@@ -24,6 +25,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
@@ -56,6 +58,7 @@ public class LoveLetterGUI extends AbstractGUI {
     Border[] playerViewBorders, playerViewBordersHighlight;
 
     LoveLetterGameState llgs;
+    LoveLetterForwardModel fm;
 
     public LoveLetterGUI(Game game, ActionController ac, int humanID) {
         super(ac, 50);
@@ -67,6 +70,7 @@ public class LoveLetterGUI extends AbstractGUI {
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
+            fm = (LoveLetterForwardModel) game.getForwardModel();
             if (gameState != null) {
                 llgs = (LoveLetterGameState)gameState;
                 JTabbedPane pane = new JTabbedPane();
@@ -307,18 +311,30 @@ public class LoveLetterGUI extends AbstractGUI {
             if (llgs.getTurnOrder().getRoundCounter() != gameState.getTurnOrder().getRoundCounter()) {
                 // New round
                 // Paint final state of previous round, showing all hands
-                String winnerString = "";
+
+                // Execute last action in the previous game state without any end of round computations to get final state of round
+                gameState.getHistory().get(gameState.getHistory().size()-1).execute(llgs);
+
+                // Get winners
+                int playersAlive = 0;
+                int soleWinner = -1;
                 for (int i = 0; i < llgs.getNPlayers(); i++) {
-                    playerHands[i].update(llgs, true);
-                    if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
-                        winnerString += i + ","; // TODO this not set
+                    if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE && llgs.getPlayerHandCards().get(i).getSize() > 0) {
+                        playersAlive += 1;
+                        soleWinner = i;
                     }
                 }
+                HashSet<Integer> winners = fm.getWinners(llgs, playersAlive, soleWinner);
+
+                // Show all hands
+                for (int i = 0; i < llgs.getNPlayers(); i++) {
+                    playerHands[i].update(llgs, true);
+                }
+                // Repaint
                 repaint();
 
-                winnerString += ". ";
-                winnerString = winnerString.replace(",. ", ". ");
-                JOptionPane.showMessageDialog(this, "Round over! Winners: " + winnerString + "Next round begins!");
+                // Message for pause and clarity
+                JOptionPane.showMessageDialog(this, "Round over! Winners: " + winners.toString() + ". Next round begins!");
             }
             
             if (gameState.getCurrentPlayer() != activePlayer) {
