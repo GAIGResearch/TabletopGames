@@ -13,7 +13,7 @@ import java.util.Objects;
  * The Priest allows a player to see another player's hand cards.
  * This has no effect in case the game is fully observable.
  */
-public class PriestAction extends DrawCard implements IPrintable {
+public class PriestAction extends core.actions.DrawCard implements IPrintable {
 
     private final int opponentID;
 

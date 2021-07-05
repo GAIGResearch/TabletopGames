@@ -55,6 +55,8 @@ public class LoveLetterGUI extends AbstractGUI {
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 27, 67), 3);
     Border[] playerViewBorders, playerViewBordersHighlight;
 
+    LoveLetterGameState llgs;
+
     public LoveLetterGUI(Game game, ActionController ac, int humanID) {
         super(ac, 50);
         this.humanID = humanID;
@@ -66,6 +68,7 @@ public class LoveLetterGUI extends AbstractGUI {
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
+                llgs = (LoveLetterGameState)gameState;
                 JTabbedPane pane = new JTabbedPane();
                 JPanel main = new JPanel();
                 main.setOpaque(false);
@@ -280,10 +283,18 @@ public class LoveLetterGUI extends AbstractGUI {
                         k++;
                     }
                 }
+                for (int i = k; i < actionButtons.length; i++) {
+                    actionButtons[i].setVisible(false);
+                    actionButtons[i].setButtonAction(null, "");
+                }
             } else {
                 for (int i = 0; i < actions.size(); i++) {
                     actionButtons[i].setVisible(true);
                     actionButtons[i].setButtonAction(actions.get(i), gameState);
+                }
+                for (int i = actions.size(); i < actionButtons.length; i++) {
+                    actionButtons[i].setVisible(false);
+                    actionButtons[i].setButtonAction(null, "");
                 }
             }
         }
@@ -292,7 +303,23 @@ public class LoveLetterGUI extends AbstractGUI {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            // TODO: pause after round finished, full display
+            // Pause after round finished, full display
+            if (llgs.getTurnOrder().getRoundCounter() != gameState.getTurnOrder().getRoundCounter()) {
+                // New round
+                // Paint final state of previous round, showing all hands
+                String winnerString = "";
+                for (int i = 0; i < llgs.getNPlayers(); i++) {
+                    playerHands[i].update(llgs, true);
+                    if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
+                        winnerString += i + ","; // TODO this not set
+                    }
+                }
+                repaint();
+
+                winnerString += ". ";
+                winnerString = winnerString.replace(",. ", ". ");
+                JOptionPane.showMessageDialog(this, "Round over! Winners: " + winnerString + "Next round begins!");
+            }
             
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].handCards.setCardHighlight(-1);
@@ -300,7 +327,7 @@ public class LoveLetterGUI extends AbstractGUI {
             }
 
             // Update decks and visibility
-            LoveLetterGameState llgs = (LoveLetterGameState)gameState;
+            llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 boolean front = i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
                         || i == humanID

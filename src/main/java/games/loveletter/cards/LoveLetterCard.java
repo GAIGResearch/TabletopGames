@@ -1,5 +1,6 @@
 package games.loveletter.cards;
 
+import core.actions.AbstractAction;
 import core.components.Card;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
@@ -19,14 +20,14 @@ public class LoveLetterCard extends Card {
 
         private final String cardText;
         private final int value;
-        private final Class<? extends DrawCard> actionClass;
-        CardType(int value, String text, Class<? extends DrawCard> action){
+        private final Class<? extends AbstractAction> actionClass;
+        CardType(int value, String text, Class<? extends AbstractAction> action){
             this.value = value;
             this.cardText = text;
             this.actionClass = action;
         }
 
-        public Class<? extends DrawCard> getActionClass() {
+        public Class<? extends AbstractAction> getActionClass() {
             return actionClass;
         }
 

@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * The King lets two players swap their hand cards.
  */
-public class KingAction extends DrawCard implements IPrintable {
+public class KingAction extends core.actions.DrawCard implements IPrintable {
 
     private final int opponentID;
 

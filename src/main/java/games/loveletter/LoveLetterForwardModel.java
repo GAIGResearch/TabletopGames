@@ -314,7 +314,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             actions = new ArrayList<>();
             actions.add(new DrawCard(llgs.drawPile.getComponentID(), llgs.playerHandCards.get(player).getComponentID(), 0));
         } else {
-            throw new IllegalArgumentException(gameState.getGamePhase().toString() + " is unknown to LoveLetterGameState");
+            throw new IllegalArgumentException(gameState.getGamePhase() + " is unknown to LoveLetterGameState");
         }
 
         return actions;
@@ -383,7 +383,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             actions.add(new PrinceAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));

@@ -14,7 +14,7 @@ import java.util.Objects;
 /**
  * The Baron lets two players compare their hand card. The player with the lesser valued card is removed from the game.
  */
-public class BaronAction extends DrawCard implements IPrintable {
+public class BaronAction extends core.actions.DrawCard implements IPrintable {
     private final int opponentID;
 
     public BaronAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
