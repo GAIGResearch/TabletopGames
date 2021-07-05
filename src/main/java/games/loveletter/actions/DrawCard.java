@@ -2,8 +2,10 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.LoveLetterCard;
 
 /**
  * At the beginning of each round the player draws a card and loses its protection status.
@@ -16,7 +18,8 @@ public class DrawCard extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), false);
+        // Player is no longer protected
+        ((LoveLetterGameState)gs).setProtection(gs.getCurrentPlayer(), false);
         return super.execute(gs);
     }
 

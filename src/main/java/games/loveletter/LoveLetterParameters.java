@@ -15,7 +15,7 @@ public class LoveLetterParameters extends AbstractParameters {
     String dataPath = "data/loveletter/";
 
     // Occurrence count for each card
-    HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{
+    public HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{
         put(LoveLetterCard.CardType.Princess, 1);
         put(LoveLetterCard.CardType.Countess, 1);
         put(LoveLetterCard.CardType.King, 1);

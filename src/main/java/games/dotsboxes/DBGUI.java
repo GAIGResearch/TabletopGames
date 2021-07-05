@@ -12,6 +12,7 @@ import java.awt.*;
 import java.util.Collection;
 
 import core.actions.AbstractAction;
+import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;

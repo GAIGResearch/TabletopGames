@@ -18,12 +18,12 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.Blackjack;
-import static games.GameType.Poker;
+import static games.GameType.*;
 
 public class Game {
 
@@ -704,26 +704,19 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer(params1));
+        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(Poker, players, seed, ac, false, null);
-//        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(TicTacToe);
-//        games.add(ExplodingKittens);
-//        games.add(LoveLetter);
-//        runMany(games, players, 100L,100, null, false, false, null);
-//        runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
+        runOne(LoveLetter, players, seed, ac, false, null);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
