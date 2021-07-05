@@ -1,6 +1,7 @@
 package core.rules.rulenodes;
 
 import core.AbstractGameState;
+import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 
 /**
@@ -12,10 +13,23 @@ public class EndPlayerTurn extends RuleNode {
         setNextPlayerNode();
     }
 
+    /**
+     * Copy constructor
+     * @param endPlayerTurn - Node to be copied
+     */
+    public EndPlayerTurn(EndPlayerTurn endPlayerTurn) {
+        super(endPlayerTurn);
+    }
+
     @Override
     protected boolean run(AbstractGameState gs) {
         gs.getTurnOrder().endPlayerTurn(gs);
         gs.setMainGamePhase();
         return true;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new EndPlayerTurn(this);
     }
 }

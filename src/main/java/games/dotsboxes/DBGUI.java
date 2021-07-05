@@ -3,6 +3,14 @@ package games.dotsboxes;
 import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import gui.ScaledImage;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Collection;
+
 import core.actions.AbstractAction;
 import gui.ScaledImage;
 import players.human.ActionController;
@@ -98,7 +106,7 @@ public class DBGUI extends AbstractGUI {
         wrapper.add(historyContainer);
         historyInfo.setOpaque(false);
         historyContainer.setOpaque(false);
-        historyContainer.getViewport().setOpaque(false);
+//        historyContainer.getViewport().setOpaque(false);
         historyInfo.setEditable(false);
         return wrapper;
     }

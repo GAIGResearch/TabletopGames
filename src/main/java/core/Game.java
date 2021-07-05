@@ -12,6 +12,7 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
+import players.simple.FirstActionPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
@@ -711,6 +712,8 @@ public class Game {
 //        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
         runOne(LoveLetter, players, seed, ac, false, null);
@@ -719,7 +722,8 @@ public class Game {
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, null, 100, ac, false, true);
-//        runMany(Collections.singletonList(LoveLetter), players, 100L,100, null, false, false, null);
+//        runMany(games, players, 100L, 100, null, false, false, null);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
+
     }
 }

@@ -303,7 +303,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
     @Override
     protected AbstractForwardModel _copy() {
-        return new PandemicForwardModel(root);
+        return new PandemicForwardModel(copyRoot());
     }
 
     @Override

@@ -1,6 +1,10 @@
 package games;
 
 import core.*;
+import games.blackjack.BlackjackForwardModel;
+import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
+import games.blackjack.gui.BlackjackGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -25,6 +29,10 @@ import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUI;
+import games.poker.PokerForwardModel;
+import games.poker.PokerGameParameters;
+import games.poker.PokerGameState;
+import games.poker.gui.PokerGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -91,6 +99,31 @@ public enum GameType {
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
             }}),
+    Poker(2, 14,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(ComicBook);
+                add(Number);
+                add(MoviesTVRadio);
+            }},
+
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(LoseATurn);
+                add(TakeThat);
+            }}),
+    Blackjack(2, 7,
+            new ArrayList<games.GameType.Category>() {{
+                add(Cards);
+                add(ComicBook);
+                add(Number);
+                add(MoviesTVRadio);
+            }},
+            new ArrayList<games.GameType.Mechanic>() {{
+                add(HandManagement);
+                add(LoseATurn);
+                add(TakeThat);
+            }}),
     Diamant( 2, 6,
             new ArrayList<Category>() {{
                 add(Adventure);
@@ -136,6 +169,8 @@ public enum GameType {
                 return LoveLetter;
             case "uno":
                 return Uno;
+            case "blackjack":
+                return Blackjack;
             case "virus":
                 return Virus;
             case "coltexpress":
@@ -144,6 +179,8 @@ public enum GameType {
                 return DotsAndBoxes;
             case "diamant":
                 return Diamant;
+            case "poker":
+                return Poker;
             case "dominion":
                 return Dominion;
             case "dominionsizedistortion":
@@ -196,6 +233,14 @@ public enum GameType {
                 forwardModel = new UnoForwardModel();
                 gameState = new UnoGameState(params, nPlayers);
                 break;
+            case Blackjack:
+                forwardModel = new BlackjackForwardModel();
+                gameState = new BlackjackGameState(params, nPlayers);
+                break;
+            case Poker:
+                forwardModel = new PokerForwardModel();
+                gameState = new PokerGameState(params, nPlayers);
+                break;
             case Virus:
                 forwardModel = new VirusForwardModel();
                 gameState = new VirusGameState(params, nPlayers);
@@ -237,6 +282,10 @@ public enum GameType {
                 return new LoveLetterParameters(seed);
             case Uno:
                 return new UnoGameParameters(seed);
+            case Blackjack:
+                return new BlackjackParameters(seed);
+            case Poker:
+                return new PokerGameParameters(seed);
             case Virus:
                 return new VirusGameParameters(seed);
             case ColtExpress:
@@ -284,6 +333,12 @@ public enum GameType {
                 break;
             case Uno:
                 gui = new UnoGUI(game, ac, human);
+                break;
+            case Blackjack:
+                gui = new BlackjackGUI(game, ac, human);
+                break;
+            case Poker:
+                gui = new PokerGUI(game, ac, human);
                 break;
             case ColtExpress:
                 gui = new ColtExpressGUI(game, ac, human);
@@ -409,8 +464,8 @@ public enum GameType {
         MovementPoints,
         MultipleMaps,
         Campaign,
-        MoveThroughDeck,
         Enclosure,
+        MoveThroughDeck,
         DeckManagement;
 
         /**
@@ -455,25 +510,30 @@ public enum GameType {
     public int getMinPlayers() {
         return minPlayers;
     }
+
     public int getMaxPlayers() {
         return maxPlayers;
     }
+
     public ArrayList<Category> getCategories() {
         return categories;
     }
+
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
+
     public static int getMinPlayersAllGames() {
         int min = Integer.MAX_VALUE;
-        for (GameType gt: GameType.values()) {
+        for (GameType gt : GameType.values()) {
             if (gt.minPlayers < min) min = gt.minPlayers;
         }
         return min;
     }
+
     public static int getMaxPlayersAllGames() {
         int max = Integer.MIN_VALUE;
-        for (GameType gt: GameType.values()) {
+        for (GameType gt : GameType.values()) {
             if (gt.minPlayers > max) max = gt.minPlayers;
         }
         return max;
@@ -481,6 +541,7 @@ public enum GameType {
 
     /**
      * Creates an instance of the given game type with nPlayers number of players and a new random seed.
+     *
      * @param nPlayers - number of players for the game.
      * @return - instance of Game object; null if game not implemented.
      */
