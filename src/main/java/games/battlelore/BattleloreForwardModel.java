@@ -171,9 +171,18 @@ public class BattleloreForwardModel extends AbstractForwardModel
 
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep)
         {
-            actions.add(new PlayCommandCardAction(CommandCard.CommandType.AttackRight, playerFaction, player));
-            actions.add(new PlayCommandCardAction(CommandCard.CommandType.BattleMarch, playerFaction, player));
-            actions.add(new PlayCommandCardAction(CommandCard.CommandType.PatrolLeft, playerFaction, player));
+            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.right))
+            {
+                actions.add(new PlayCommandCardAction(CommandCard.CommandType.AttackRight, playerFaction, player));
+            }
+            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.mid))
+            {
+                actions.add(new PlayCommandCardAction(CommandCard.CommandType.BattleMarch, playerFaction, player));
+            }
+            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.left))
+            {
+                actions.add(new PlayCommandCardAction(CommandCard.CommandType.PatrolLeft, playerFaction, player));
+            }
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep)
         {
@@ -237,6 +246,33 @@ public class BattleloreForwardModel extends AbstractForwardModel
         return actions;
     }
 
+    private boolean CheckUnitRemainingAtRight(BattleloreGameState gameState, int playerId, MapTile.TileArea area)
+    {
+        boolean allyUnitsRemainInArea = false;
+        boolean enemyUnitsRemainInArea = false;
+
+        for (int x = 0; x < gameState.gameBoard.getWidth(); x++)
+        {
+            for(int y = 0; y < gameState.gameBoard.getHeight(); y++)
+            {
+                MapTile tile = gameState.gameBoard.getElement(x, y);
+                Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
+                if (tile != null && tile.GetUnits() != null && tile.GetUnits().size() > 0 && tile.IsInArea(area))
+                {
+                    if (tile.GetFaction() == playerFaction)
+                    {
+                        allyUnitsRemainInArea = true;
+                    }
+                    if (tile.GetFaction() != playerFaction)
+                    {
+                        enemyUnitsRemainInArea = true;
+                    }
+                }
+            }
+        }
+        return allyUnitsRemainInArea && enemyUnitsRemainInArea;
+    }
+
     @Override
     protected AbstractForwardModel _copy()
     {
@@ -249,9 +285,9 @@ public class BattleloreForwardModel extends AbstractForwardModel
      */
     private boolean checkGameEnd(BattleloreGameState gameState, int playerId)
     {
-        return gameState.GetPlayerScore(playerId) > 5;
+        int WIN_SCORE = 5;
+        return gameState.GetPlayerScore(playerId) >= WIN_SCORE;
     }
-
 
 
     @Override

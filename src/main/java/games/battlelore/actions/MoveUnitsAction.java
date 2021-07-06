@@ -49,7 +49,7 @@ public class MoveUnitsAction extends AbstractAction
         {
             ArrayList<Unit> units = state.getBoard().getElement(tile.getLocationX(), tile.getLocationY()).GetUnits();
 
-            if(units == null)
+            if (units == null)
             {
                 state.getBoard().getElement(locationX, locationY);
 

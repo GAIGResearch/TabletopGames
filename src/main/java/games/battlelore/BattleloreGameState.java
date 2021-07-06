@@ -250,7 +250,6 @@ public class BattleloreGameState extends AbstractGameState
             for(int y = 0; y < gameBoard.getHeight(); y++)
             {
                 clonedBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
-
             }
         }
 

@@ -70,7 +70,7 @@ public class AttackUnitsAction extends AbstractAction
                 if (defenderUnits.size() > 0)
                 {
                     defenderUnits.remove(defenderUnits.size() - 1);
-                    state.AddScore(playerID, 2);
+                    state.AddScore(playerID, 1);
                 }
             }
             if (defenderUnits.isEmpty())
