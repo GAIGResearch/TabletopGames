@@ -2,22 +2,15 @@ package games.battlelore.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DrawCard;
-import core.components.Area;
-import core.rules.rulenodes.EndPlayerTurn;
-import de.erichseifert.vectorgraphics2d.intermediate.commands.Command;
-import games.battlelore.BattleloreForwardModel;
-import games.battlelore.BattleloreGame;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.CombatDice;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import games.battlelore.gui.BattleloreGUI;
-import games.dominion.cards.CardType;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 public class AttackUnitsAction extends AbstractAction
@@ -106,19 +99,25 @@ public class AttackUnitsAction extends AbstractAction
     @Override
     public AbstractAction copy()
     {
-        return null;
+        return new AttackUnitsAction(attacker.copy(), defender.copy(), playerFaction, playerID);
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(Object o)
     {
-        return false;
+        if (this == o) return true;
+        if (!(o instanceof AttackUnitsAction)) return false;
+        AttackUnitsAction that = (AttackUnitsAction) o;
+        return Objects.equals(attacker, that.attacker) &&
+                Objects.equals(defender, that.defender) &&
+                playerFaction == that.playerFaction &&
+                playerID == that.playerID;
     }
 
     @Override
     public int hashCode()
     {
-        return 0;
+        return Objects.hash(attacker, defender, playerFaction, playerID);
     }
 
     @Override

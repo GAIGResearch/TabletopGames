@@ -14,8 +14,10 @@ import games.battlelore.components.Unit;
 import games.battlelore.gui.BattleloreGUI;
 import games.dominion.cards.CardType;
 
+
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 public class MoveUnitsAction extends AbstractAction
 {
@@ -46,9 +48,14 @@ public class MoveUnitsAction extends AbstractAction
         else
         {
             ArrayList<Unit> units = state.getBoard().getElement(tile.getLocationX(), tile.getLocationY()).GetUnits();
+
+            if(units == null)
+            {
+                state.getBoard().getElement(locationX, locationY);
+
+            }
             for(Unit unit : units)
             {
-
                 state.getBoard().getElement(locationX, locationY).AddUnit(unit);
                 unit.SetCanMove(false);
             }
@@ -62,18 +69,26 @@ public class MoveUnitsAction extends AbstractAction
     }
 
     @Override
-    public AbstractAction copy() {
-        return null;
+    public AbstractAction copy()
+    {
+        return new MoveUnitsAction(tile.copy(), playerFaction, locationX, locationY);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return false;
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (!(o instanceof MoveUnitsAction)) return false;
+        MoveUnitsAction that = (MoveUnitsAction) o;
+        return Objects.equals(tile, that.tile) &&
+                playerFaction == that.playerFaction &&
+                locationX == that.locationX &&
+                locationY == that.locationY;
     }
 
-    @Override
-    public int hashCode() {
-        return 0;
+    public int hashCode()
+    {
+        return Objects.hash(tile, playerFaction, locationX, locationY);
     }
 
     @Override

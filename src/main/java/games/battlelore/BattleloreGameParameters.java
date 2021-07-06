@@ -17,13 +17,8 @@ public class BattleloreGameParameters extends AbstractParameters
     {
         super(seed);
         this.dataPath = dataPath;
-        //addTunableParameter()
-    }
 
-    //@Override
-    //public void reset() {
-    //
-    //}
+    }
 
     @Override
     protected AbstractParameters _copy()
@@ -39,37 +34,20 @@ public class BattleloreGameParameters extends AbstractParameters
     @Override
     protected boolean _equals(Object o)
     {
-        if (this == o)
-        {
-            return true;
-        }
+        if (this == o) { return true; }
+        if (!(o instanceof BattleloreGameParameters)) { return false; }
+        if (super.equals(o)) return false;
 
-        if (!(o instanceof BattleloreGameParameters))
-        {
-            return false;
-        }
-
-        return super.equals(o);
+        BattleloreGameParameters that = (BattleloreGameParameters) o;
+        return hexWidth == that.hexWidth &&
+                hexHeight == that.hexHeight &&
+                dataPath == that.dataPath;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(super.hashCode(), hexWidth, hexHeight);
-    }
-/*
-    @Override
-    public String getParameterName(int parameterId)
-    {
-        //if (parameterId == 0) return "HexWidth";
-
-        return null;
+        return Objects.hash(super.hashCode(), hexWidth, hexHeight, dataPath);
     }
 
-    @Override
-    public BattleloreGame instantiate() {
-        return new BattleloreGame(this);
-    }
-
- */
 }

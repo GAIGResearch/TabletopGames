@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
+import utilities.Utils;
 
 public class BattleloreHeuristic extends TunableParameters implements IStateHeuristic
 {
@@ -18,7 +19,27 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
     }
 
     @Override
-    public double evaluateState(AbstractGameState gs, int playerId) {
+    public double evaluateState(AbstractGameState gs, int playerId)
+    {
+        BattleloreGameState gameState = (BattleloreGameState) gs;
+        BattleloreGameParameters gameParams = (BattleloreGameParameters) gameState.getGameParameters();
+        Utils.GameResult playerResult = gameState.getPlayerResults()[playerId];
+
+        if (playerResult == Utils.GameResult.LOSE)
+        {
+            return -1;
+        }
+        if (playerResult == Utils.GameResult.WIN)
+        {
+            return 1;
+        }
+
+        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep)
+        {
+
+        }
+
+
         return 0;
     }
 

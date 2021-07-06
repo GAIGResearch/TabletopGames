@@ -3,6 +3,8 @@ package games.battlelore;
 import core.AbstractGameData;
 import core.components.*;
 import games.battlelore.components.Unit;
+import games.battlelore.gui.BattleloreGUI;
+import games.pandemic.PandemicData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,6 +36,13 @@ public class BattleloreData extends AbstractGameData
         return units;
     }
 
+    public BattleloreData copy()
+    {
+        BattleloreData data = new BattleloreData();
+        data.units = new ArrayList<>();
+        for(Unit i : units) data.units.add((Unit)i.copy());
 
+        return data;
+    }
 
 }

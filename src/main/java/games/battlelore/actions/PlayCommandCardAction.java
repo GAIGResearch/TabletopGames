@@ -7,8 +7,10 @@ import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 import games.dominion.DominionGameState;
+import games.dotsboxes.AddGridCellEdge;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PlayCommandCardAction extends AbstractAction
 {
@@ -71,17 +73,23 @@ public class PlayCommandCardAction extends AbstractAction
 
     @Override
     public AbstractAction copy() {
-        return null;
+        return new PlayCommandCardAction(type, playerFaction, playerID);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayCommandCardAction)) return false;
+        PlayCommandCardAction that = (PlayCommandCardAction) o;
+        return type == that.type &&
+                playerID == that.playerID &&
+                playerFaction == that.playerFaction;
     }
 
     @Override
-    public int hashCode() {
-        return 0;
+    public int hashCode()
+    {
+        return Objects.hash(type, playerFaction, playerID);
     }
 
     @Override

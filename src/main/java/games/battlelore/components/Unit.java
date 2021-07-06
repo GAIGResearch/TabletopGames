@@ -100,7 +100,18 @@ public class Unit extends Component
     @Override
     public Component copy()
     {
-        return new Unit(type, id, name, moveRange, strength, health, faction, shortName, isMelee);//, unitCount);
+        Unit newUnit = new Unit(type, id, name, moveRange, strength, health, faction, shortName, isMelee);//, unitCount);
+        newUnit.id = id;
+        newUnit.name = name;
+        newUnit.shortName = shortName;
+        newUnit.faction = faction;
+        newUnit.moveRange = moveRange;
+        newUnit.strength = strength;
+        newUnit.health = health;
+        newUnit.canMove = canMove;
+        newUnit.canAttack = canAttack;
+        newUnit.isMelee = isMelee;
+        return newUnit;
     }
 
     @Override
@@ -120,6 +131,7 @@ public class Unit extends Component
         {
             return false;
         }
+
         Unit unit = (Unit) o;
         return id == unit.id &&
                 type == unit.type &&
@@ -129,8 +141,26 @@ public class Unit extends Component
                 health == unit.health &&
                 faction == unit.faction &&
                 isMelee == isMelee &&
-                shortName == shortName;
-                //unitCount == unit.unitCount;
+                shortName == shortName &&
+                canMove == unit.canMove &&
+                canAttack == unit.canAttack;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Unit: Name=");
+        sb.append(name.toString());
+        sb.append("; MoveRange=");
+        sb.append(moveRange);
+        sb.append("; CanMove=");
+        sb.append(canMove);
+        sb.append("; CanAttack=");
+        sb.append(canAttack);
+        sb.append("; Health=");
+        sb.append(health);
+
+        return sb.toString();
     }
 
     public static List<Unit> loadUnits(String filename)

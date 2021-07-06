@@ -2,6 +2,7 @@ package games.battlelore.cards;
 
 import core.components.Card;
 import games.battlelore.components.Unit;
+import games.coltexpress.cards.ColtExpressCard;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -58,7 +59,6 @@ public class CommandCard extends Card
         this.bonusAttackCount = bonusAttackCount;
         this.bonusLorePoints = bonusLorePoints;
         this.bonusMoveCount = bonusMoveCount;
-
     }
 
     public CommandCard()
@@ -68,8 +68,6 @@ public class CommandCard extends Card
         this.bonusAttackCount = 0;
         this.bonusLorePoints = 0;
         this.bonusMoveCount = 0;
-
-
     }
 
 
@@ -109,4 +107,25 @@ public class CommandCard extends Card
 
         parseComponent(this, unit);
     }
+
+    @Override
+    public Card copy()
+    {
+        return new CommandCard(title,explanation, orderCount, bonusAttackCount, bonusLorePoints, bonusMoveCount);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        CommandCard that = (CommandCard) o;
+        return title == that.title &&
+                explanation == that.explanation &&
+                orderCount == that.orderCount &&
+                hasCondition == that.hasCondition &&
+                bonusLorePoints == that.bonusLorePoints &&
+                bonusMoveCount == that.bonusMoveCount;
+    }
+
 }

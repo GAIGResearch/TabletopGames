@@ -186,8 +186,13 @@ public class MapTile extends Component
     @Override
     public MapTile copy()
     {
-        MapTile copy = new MapTile(locationX, locationY, units, terrain, componentID);
-        copyComponentTo(copy);
+        ArrayList<Unit> clonedUnits = new ArrayList<Unit>();
+        for (Unit i : units)
+        {
+            clonedUnits.add((Unit)i.copy());
+        }
+
+        MapTile copy = new MapTile(locationX, locationY, clonedUnits, terrain, componentID);
         return copy;
     }
 

@@ -36,8 +36,8 @@ public class BattleloreGameState extends AbstractGameState
     int playerCount;
     Random random;
     BattleloreGameParameters parameters;
-    PartialObservableDeck<CommandCard>[] playerHands;
-    Deck<CommandCard>[] playerDiscards;
+    //PartialObservableDeck<CommandCard>[] playerHands;
+    //Deck<CommandCard>[] playerDiscards;
     //Deck<CommandCard>[] playerActi;
 
     GridBoard<MapTile> gameBoard;
@@ -242,8 +242,24 @@ public class BattleloreGameState extends AbstractGameState
     @Override
     protected AbstractGameState _copy(int playerId)
     {
-        BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), 2);
-        state.gameBoard = gameBoard.copy();
+        BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
+        GridBoard<MapTile> clonedBoard = new GridBoard<MapTile>(gameBoard.getWidth(), gameBoard.getHeight());
+
+        for (int x = 0; x < gameBoard.getWidth(); x++)
+        {
+            for(int y = 0; y < gameBoard.getHeight(); y++)
+            {
+                clonedBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
+
+            }
+        }
+
+        state.gameBoard = clonedBoard;
+        state.playerCount = playerCount;
+        state.random = random;
+        state.parameters = parameters;
+        state.unitTypes = unitTypes;
+
         return state;
     }
 

@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.components.GridBoard;
 
 import core.interfaces.IGamePhase;
+import core.rules.Node;
 import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
@@ -242,7 +243,6 @@ public class BattleloreForwardModel extends AbstractForwardModel
         return new BattleloreForwardModel();
     }
 
-
     /**
      * Checks if the game ended.
      * @param gameState - game state to check game end.
@@ -251,6 +251,8 @@ public class BattleloreForwardModel extends AbstractForwardModel
     {
         return gameState.GetPlayerScore(playerId) > 5;
     }
+
+
 
     @Override
     protected void endGame(AbstractGameState gameState)
