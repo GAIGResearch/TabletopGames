@@ -35,7 +35,7 @@ public class MoveCubes extends UseMonk {
 
     @Override
     public int hashCode() {
-        return -1580077 + from.ordinal() * -1543 + to.ordinal() * 7883 * actionPoints * 7;
+        return -1580077 + from.ordinal() * -1543 + to.ordinal() * 7883 + actionPoints * 7 + resource.ordinal() - 115249;
     }
 
 

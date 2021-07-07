@@ -69,7 +69,7 @@ public class Advantage002 extends AbstractPlayer implements ToDoubleBiFunction<A
     @Override
     public double applyAsDouble(AbstractAction abstractAction, AbstractGameState gameState) {
         int hash = abstractAction.hashCode();
-        if (!unknownHashCodes.contains(hash)) {
+        if (!actionAdvantage.containsKey(hash) && !unknownHashCodes.contains(hash)) {
             unknownHashCodes.add(hash);
             System.out.println("Action not found : " + hash + " " + abstractAction + " " + abstractAction.toString());
         }

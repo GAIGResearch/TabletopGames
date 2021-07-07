@@ -36,11 +36,11 @@ public class MCTSParams extends PlayerParameters {
     public boolean useMAST = false;
     public double MASTBoltzmann = 0.0;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
-    public MCTSEnums.Strategies rolloutType = RANDOM;
+    public MCTSEnums.Strategies rolloutType, oppModelType = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
-    public String rolloutClass = "";
+    public String rolloutClass, oppModelClass = "";
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public boolean gatherExpertIterationData = false;
@@ -60,6 +60,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", MCTSEnums.Strategies.RANDOM);
+        addTunableParameter("oppModelType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("openLoop", false, Arrays.asList(false, true));
         addTunableParameter("redeterminise", false, Arrays.asList(false, true));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
@@ -70,6 +71,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
         addTunableParameter("rolloutClass", "");
+        addTunableParameter("oppModelClass", "");
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
         addTunableParameter("advantageFunction", "");
@@ -85,6 +87,7 @@ public class MCTSParams extends PlayerParameters {
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
+        oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
         openLoop = (boolean) getParameterValue("openLoop");
         redeterminise = (boolean) getParameterValue("redeterminise");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
@@ -95,6 +98,7 @@ public class MCTSParams extends PlayerParameters {
         MASTBoltzmann = (double) getParameterValue("boltzmannTemp");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         rolloutClass = (String) getParameterValue("rolloutClass");
+        oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
         expertIterationFileStem = (String) getParameterValue("expIterFile");
         advantageFunction = (String) getParameterValue("advantageFunction");
@@ -142,13 +146,17 @@ public class MCTSParams extends PlayerParameters {
      */
     public AbstractPlayer getRolloutStrategy() {
         // TODO: Cater for the rollout class being itself Tunable
-        switch (rolloutType) {
+        return constructStrategy(rolloutType, rolloutClass);
+    }
+
+    private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
+        switch (type) {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
             case MAST:
                 return new MASTPlayer(new Random(getRandomSeed()));
             case CLASS:
-                String[] classAndParams = rolloutClass.split(Pattern.quote("|"));
+                String[] classAndParams = details.split(Pattern.quote("|"));
                 if (classAndParams.length > 2)
                     throw new IllegalArgumentException("Only a single string parameter is currently supported");
                 try {
@@ -161,7 +169,7 @@ public class MCTSParams extends PlayerParameters {
                     e.printStackTrace();
                 }
             default:
-                throw new AssertionError("Unknown rollout type : " + rolloutType);
+                throw new AssertionError("Unknown strategy type : " + type);
         }
     }
 
@@ -187,7 +195,7 @@ public class MCTSParams extends PlayerParameters {
     }
 
     public AbstractPlayer getOpponentModel() {
-        return new RandomPlayer(new Random(getRandomSeed()));
+        return constructStrategy(oppModelType, oppModelClass);
     }
 
     public IStateHeuristic getHeuristic() {
