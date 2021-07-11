@@ -57,7 +57,7 @@ public class MCTSPlayer extends AbstractPlayer {
         root.mctsSearch(getStatsLogger());
         if (params.gatherExpertIterationData) {
             ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(params.expertIterationFileStem, Arrays.asList(DiceMonasteryStateAttributes.values()));
-            eidg.recordData(root);
+            eidg.recordData(root, getForwardModel());
         }
         if (debug)
             System.out.println(root.toString());

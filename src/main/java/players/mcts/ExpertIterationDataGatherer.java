@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.AbstractForwardModel;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
 
@@ -54,7 +55,7 @@ public class ExpertIterationDataGatherer {
         }
     }
 
-    public void recordData(SingleTreeNode root) {
+    public void recordData(SingleTreeNode root, AbstractForwardModel forwardModel) {
 
         // Now do our stuff, and trawl through the root to record data
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
@@ -63,15 +64,16 @@ public class ExpertIterationDataGatherer {
         try {
             while (!nodeQueue.isEmpty()) {
                 SingleTreeNode node = nodeQueue.poll();
-                // process this node
+                // process this nodes
                 // we record its depth, value, visits, and the full feature list
                 StringBuilder output = new StringBuilder();
                 StringBuilder coreData = new StringBuilder();
                 int player = node.getActor();
                 double stateValue = node.getTotValue()[player] / node.getVisits();
+                List<AbstractAction> actionsFromState = forwardModel.computeAvailableActions(node.getState());
                 output.append(String.format("%.3g\t%d\t%d", stateValue, node.depth, node.getVisits()));
-//                if (node.children.keySet().stream().anyMatch(a -> a instanceof SummerBid)) {
-//                    if ((int) DiceMonasteryStateAttributes.MONKS_IN_KITCHEN.get(node.getState(), player) > 0)
+//                if (actionsFromState.stream().anyMatch(a -> a instanceof KillMonk)) {
+//                    if ((boolean) DiceMonasteryStateAttributes.AUTUMN.get(node.getState(), player))
 //                        throw new AssertionError("???");
 //                }
                 for (IGameAttribute feature : features) {
@@ -81,7 +83,7 @@ public class ExpertIterationDataGatherer {
                 writerV.write(output.toString());
 
                 // then write action data : the core feature data is the same, but we write one row per action, and the value we reach for that action
-                for (AbstractAction action : node.children.keySet()) {
+                for (AbstractAction action : actionsFromState) {
                     output = new StringBuilder();
                     if (node.children.get(action) == null || node.children.get(action)[player] == null)
                         continue;

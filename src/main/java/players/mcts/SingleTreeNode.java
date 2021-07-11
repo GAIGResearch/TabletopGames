@@ -52,7 +52,7 @@ public class SingleTreeNode {
     private AbstractAction actionToReach;
     private final AbstractGameState state;
     private AbstractGameState openLoopState;
-    private List<AbstractAction> actionsFromState;
+    List<AbstractAction> actionsFromState;
 
     public AbstractGameState getState() {
         return state;

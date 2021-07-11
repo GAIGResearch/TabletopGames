@@ -11,6 +11,8 @@ public enum DiceMonasteryStateAttributes implements IGameAttribute {
 
     GAME_ID((s, p) -> s.getGameID()),
     SEASON((s, p) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason()),
+    SPRING((s, p) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason() == DiceMonasteryConstants.Season.SPRING),
+    AUTUMN((s, p) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason() == DiceMonasteryConstants.Season.AUTUMN),
     YEAR((s, p) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getYear()),
     TURN((s, p) -> {
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) s.getTurnOrder();
