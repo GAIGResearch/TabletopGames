@@ -1,6 +1,5 @@
 package games.tictactoe.gui;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -9,6 +8,7 @@ import core.actions.SetGridValueAction;
 import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
+import gui.AbstractGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Utils;
@@ -19,30 +19,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class TicTacToeGUI extends AbstractGUI {
+public class TicTacToeGUIManager extends AbstractGUIManager {
 
     TTTBoardView view;
 
-    public TicTacToeGUI(Game game, ActionController ac) {
-        super(ac, 1);
+    public TicTacToeGUIManager(Container parent, Game game, ActionController ac) {
+        super(parent, ac, 1);
         if (game == null) return;
 
         TicTacToeGameState gameState = (TicTacToeGameState) game.getGameState();
         view = new TTTBoardView(gameState.getGridBoard());
 
         // Set width/height of display
-        this.width = defaultItemSize * gameState.getGridBoard().getWidth();
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getGridBoard().getWidth());
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()},
                 width, defaultActionPanelHeight);
 
-        getContentPane().add(view, BorderLayout.CENTER);
-        getContentPane().add(infoPanel, BorderLayout.NORTH);
-        getContentPane().add(actionPanel, BorderLayout.SOUTH);
-
-        setFrameProperties();
+        parent.setLayout(new BorderLayout());
+        parent.add(view, BorderLayout.CENTER);
+        parent.add(infoPanel, BorderLayout.NORTH);
+        parent.add(actionPanel, BorderLayout.SOUTH);
+        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
     }
 
     /**
@@ -82,11 +85,6 @@ public class TicTacToeGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight*2 + defaultInfoPanelHeight);
+        parent.repaint();
     }
 }

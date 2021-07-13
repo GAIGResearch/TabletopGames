@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
-import static core.AbstractGUI.*;
+import static core.GUI.*;
 
 // TODO: snap component to deck (add component to deck + dependency) + remove on extract
 // Long press move deck/area, short press move component in deck/area

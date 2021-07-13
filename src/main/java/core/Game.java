@@ -6,6 +6,7 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import gui.AbstractGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
@@ -17,6 +18,7 @@ import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -174,21 +176,23 @@ public class Game {
         listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
+    public final void run(AbstractGUIManager gui) {
+        run(gui, null);
+    }
+
     /**
      * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
      *
      * @param gui - graphical user interface.
      */
-    public final void run(AbstractGUI gui) {
+    public final void run(AbstractGUIManager gui, GUI frame) {
 
         boolean firstEnd = true;
 
-        while (gameState.isNotTerminal() || gui != null && gui.isWindowOpen()) {
-            if (gui != null && !gui.isWindowOpen()) {
-                // Playing with GUI and closed window
-                terminate();
-                break;
-            }
+        // GUI update
+        updateGUI(gui, frame);
+
+        while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen())) {
 
             // Get player to ask for actions next
             boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
@@ -220,10 +224,8 @@ public class Game {
             actionComputeTime += (System.nanoTime() - s);
             actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 
-            // GUI update
-            updateGUI(gui);
-
             if (gameState.isNotTerminal()) {
+
                 if (VERBOSE) {
                     System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
                 }
@@ -246,7 +248,7 @@ public class Game {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
                             while (action == null && gui.isWindowOpen()) {
                                 action = currentPlayer.getAction(observation, observedActions);
-                                updateGUI(gui);
+                                updateGUI(gui, frame);
                             }
                         } else {
                             // Get action from player, and time it
@@ -287,6 +289,10 @@ public class Game {
                     forwardModel.next(gameState, action);
                     nextTime += (System.nanoTime() - s);
                 }
+                tick++;
+
+                // GUI update
+                updateGUI(gui, frame);
             } else {
                 if (firstEnd) {
                     if (VERBOSE) {
@@ -296,10 +302,9 @@ public class Game {
                     firstEnd = false;
                 }
             }
-            tick++;
         }
 
-        if (gui == null) {
+        if (firstEnd) {
             if (VERBOSE) {
                 System.out.println("Ended");
             }
@@ -309,7 +314,7 @@ public class Game {
 
     // Run function shortcut
     public final void run() {
-        run(null);
+        run(null, null);
     }
 
     /**
@@ -317,9 +322,10 @@ public class Game {
      *
      * @param gui - gui to update.
      */
-    private void updateGUI(AbstractGUI gui) {
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
         if (gui != null) {
             gui.update(currentPlayer, gameState);
+            frame.repaint();
             try {
                 Thread.sleep(FRAME_SLEEP_MS);
             } catch (Exception e) {
@@ -519,14 +525,16 @@ public class Game {
             // Reset game instance, passing the players for this game
             game.reset(players);
 
-            AbstractGUI gui = null;
+            GUI frame = new GUI();
+            AbstractGUIManager gui = null;
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
-                gui = gameToPlay.createGUI(game, ac);
+                gui = gameToPlay.createGUIManager(frame.getContentPane(), game, ac);
             }
+            frame.setFrameProperties();
 
             // Run!
-            game.run(gui);
+            game.run(gui, frame);
         } else {
             System.out.println("Error game: " + gameToPlay);
         }
@@ -716,7 +724,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(LoveLetter, players, seed, ac, false, null);
+        runOne(TicTacToe, players, seed, ac, false, null);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);

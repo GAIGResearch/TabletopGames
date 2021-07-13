@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import static core.CoreConstants.*;
 
-public class DominionGUI extends AbstractGUI {
+public class DominionGUI extends GUI {
     // Settings for display areas
     final static int playerAreaWidth = 360;
     final static int playerAreaHeight = 180;

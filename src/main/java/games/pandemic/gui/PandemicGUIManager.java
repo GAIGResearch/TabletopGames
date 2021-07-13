@@ -8,7 +8,6 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.AbstractGUI;
 import core.interfaces.IGamePhase;
 import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
@@ -16,6 +15,7 @@ import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
+import gui.AbstractGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Hash;
@@ -36,7 +36,7 @@ import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("rawtypes")
-public class PandemicGUI extends AbstractGUI {
+public class PandemicGUIManager extends AbstractGUIManager {
     PandemicCardView[] playerCards;
     ArrayList<PandemicCardView>[] playerHands;
     ArrayList<PandemicCardView> bufferDeck;
@@ -57,8 +57,8 @@ public class PandemicGUI extends AbstractGUI {
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUI(Game game, ActionController ac) {
-        super(ac, 721);
+    public PandemicGUIManager(Container parent, Game game, ActionController ac) {
+        super(parent, ac, 721);
         if (game == null || ac == null) return;
 
         this.game = game;
@@ -89,11 +89,20 @@ public class PandemicGUI extends AbstractGUI {
         side.add(playerAreas);
         side.add(actionPanel);
 
-        getContentPane().add(side, BorderLayout.EAST);
-        getContentPane().add(boardView, BorderLayout.CENTER);
-        getContentPane().add(counterArea, BorderLayout.SOUTH);
 
-        setFrameProperties();
+        parent.setLayout(new BorderLayout());
+        parent.add(side, BorderLayout.EAST);
+        parent.add(boardView, BorderLayout.CENTER);
+        parent.add(counterArea, BorderLayout.SOUTH);
+
+        Dimension boardSize = boardView.getPreferredSize();
+        parent.setPreferredSize(new Dimension((int)(boardSize.getWidth() + panelWidth),
+                Math.max((int)boardSize.getHeight(),
+                        defaultInfoPanelHeight*2+nPlayers*cardHeight+nPlayers*offset*4) + defaultItemSize + offset));
+
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
     }
 
     private JPanel createPlayerAreas() {
@@ -318,7 +327,7 @@ public class PandemicGUI extends AbstractGUI {
                 PropertyString playerLocationProperty = (PropertyString) this.gameState.getComponent(playerCardHash, activePlayer)
                         .getProperty(playerLocationHash);
                 String playerLocationName = playerLocationProperty.value;
-                JOptionPane.showMessageDialog(this, "It's your turn! You are in " + playerLocationName + ". Current game phase: " + this.gameState.getGamePhase());
+                JOptionPane.showMessageDialog(parent, "It's your turn! You are in " + playerLocationName + ". Current game phase: " + this.gameState.getGamePhase());
             }
         } else {
             // Clear all highlights if it's not human acting
@@ -326,7 +335,7 @@ public class PandemicGUI extends AbstractGUI {
             updateCardHighlightDisplay();
         }
 
-        repaint();
+        parent.repaint();
     }
 
     private void updateCardHighlightDisplay() {
@@ -584,11 +593,4 @@ public class PandemicGUI extends AbstractGUI {
         return false;
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        Dimension boardSize = boardView.getPreferredSize();
-        return new Dimension((int)(boardSize.getWidth() + panelWidth),
-                Math.max((int)boardSize.getHeight(),
-                        defaultInfoPanelHeight*2+nPlayers*cardHeight+nPlayers*offset*4) + defaultItemSize + offset);
-    }
 }

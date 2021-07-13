@@ -4,7 +4,7 @@ import core.components.Dice;
 
 import java.awt.*;
 
-import static core.AbstractGUI.defaultItemSize;
+import static core.GUI.defaultItemSize;
 
 public class DieView extends ComponentView {
 

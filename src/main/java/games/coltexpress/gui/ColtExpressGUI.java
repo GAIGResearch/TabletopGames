@@ -1,6 +1,6 @@
 package games.coltexpress.gui;
 
-import core.AbstractGUI;
+import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -25,7 +25,7 @@ import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 
-public class ColtExpressGUI extends AbstractGUI {
+public class ColtExpressGUI extends GUI {
     // Settings for display area sizes
     final static int playerAreaWidth = 470;
     final static int playerAreaWidthScroll = 290;

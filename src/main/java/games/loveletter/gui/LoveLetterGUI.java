@@ -1,6 +1,6 @@
 package games.loveletter.gui;
 
-import core.AbstractGUI;
+import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -31,7 +31,7 @@ import java.util.List;
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
-public class LoveLetterGUI extends AbstractGUI {
+public class LoveLetterGUI extends GUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 135;

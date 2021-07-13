@@ -1,6 +1,6 @@
 package games.explodingkittens.gui;
 
-import core.AbstractGUI;
+import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -19,7 +19,7 @@ import java.util.Collection;
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
-public class ExplodingKittensGUI extends AbstractGUI {
+public class ExplodingKittensGUI extends GUI {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 135;

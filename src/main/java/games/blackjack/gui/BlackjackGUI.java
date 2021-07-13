@@ -1,12 +1,11 @@
 package games.blackjack.gui;
 
-import core.AbstractGUI;
+import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
-import games.coltexpress.gui.ColtExpressGUI;
 import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -19,7 +18,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
-public class BlackjackGUI extends AbstractGUI {
+public class BlackjackGUI extends GUI {
     final static int playerWidth = 300;
     final static int playerHeight = 130;
     final static int cardWidth = 90;

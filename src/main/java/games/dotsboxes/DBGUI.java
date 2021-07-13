@@ -1,6 +1,6 @@
 package games.dotsboxes;
 
-import core.AbstractGUI;
+import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import gui.ScaledImage;
@@ -9,20 +9,14 @@ import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 import core.actions.AbstractAction;
-import gui.ScaledImage;
-import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Utils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
-public class DBGUI extends AbstractGUI {
+public class DBGUI extends GUI {
     DBGridBoardView view;
     int gapRight = 30;
 

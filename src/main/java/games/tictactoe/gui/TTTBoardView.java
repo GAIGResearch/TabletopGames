@@ -9,7 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import static core.AbstractGUI.defaultItemSize;
+import static core.GUI.defaultItemSize;
 
 public class TTTBoardView extends ComponentView {
 

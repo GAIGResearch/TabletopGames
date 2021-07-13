@@ -1,6 +1,6 @@
 package gui;
 
-import core.AbstractGUI;
+import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.components.Component;
@@ -16,7 +16,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
 
-public class PrototypeGUI extends AbstractGUI {
+public class PrototypeGUI extends GUI {
     JComponent view;
     int width, height;
 
