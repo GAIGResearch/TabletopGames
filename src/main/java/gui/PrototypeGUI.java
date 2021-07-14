@@ -1,6 +1,5 @@
 package gui;
 
-import core.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.components.Component;

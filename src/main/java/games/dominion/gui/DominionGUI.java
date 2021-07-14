@@ -2,6 +2,7 @@ package games.dominion.gui;
 
 import core.*;
 import games.dominion.*;
+import gui.GUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 

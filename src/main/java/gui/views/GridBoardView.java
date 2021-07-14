@@ -5,7 +5,7 @@ import core.components.GridBoard;
 
 import java.awt.*;
 
-import static core.GUI.defaultItemSize;
+import static gui.GUI.defaultItemSize;
 
 public class GridBoardView<T extends Component> extends ComponentView {
 

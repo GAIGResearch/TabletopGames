@@ -1,6 +1,6 @@
 package gui.views;
 
-import core.GUI;
+import gui.GUI;
 import core.components.Card;
 import org.davidmoten.text.utils.WordWrap;
 

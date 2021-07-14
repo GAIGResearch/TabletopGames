@@ -1,6 +1,6 @@
 package games.coltexpress.gui;
 
-import core.GUI;
+import gui.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;

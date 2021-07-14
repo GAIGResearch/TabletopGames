@@ -46,11 +46,11 @@ import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.dominion.*;
 import gui.AbstractGUIManager;
+import gui.GUI;
 import gui.PrototypeGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -212,7 +212,7 @@ public enum GameType {
             return null;
         }
 
-        params = (params == null) ? getDefaultParams(seed) : params;
+        params = (params == null) ? createParameterSet(seed) : params;
         AbstractForwardModel forwardModel;
         AbstractGameState gameState;
 
@@ -274,7 +274,7 @@ public enum GameType {
         return new Game(this, forwardModel, gameState);
     }
 
-    public AbstractParameters getDefaultParams(long seed) {
+    public AbstractParameters createParameterSet(long seed) {
         switch (this) {
             case Pandemic:
                 return new PandemicParameters("data/pandemic/", seed);
@@ -316,7 +316,7 @@ public enum GameType {
      * @param ac   - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    public GUI createGUI(Game game, ActionController ac) {
+    public GUI createGUIManager(Game game, ActionController ac) {
 
         GUI gui = null;
 
@@ -616,21 +616,25 @@ public enum GameType {
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), getDefaultParams(System.currentTimeMillis()));
+        return createGameInstance(nPlayers, System.currentTimeMillis(), createParameterSet(System.currentTimeMillis()));
     }
 
     public Game createGameInstance(int nPlayers, long seed) {
-        return createGameInstance(nPlayers, seed, getDefaultParams(seed));
+        return createGameInstance(nPlayers, seed, createParameterSet(seed));
     }
 
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
+        if (gameParams == null) {
+            return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
+        } else {
+            return createGameInstance(nPlayers, gameParams.getRandomSeed(), gameParams);
+        }
     }
 
     @Override
     public String toString() {
         boolean implemented = createGameInstance(minPlayers) != null;
-        GUI g = createGUI(null, null);
+        GUI g = createGUIManager(null, null);
         boolean gui = g != null;
         boolean prototypeGUI = g instanceof PrototypeGUI;
         return (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : implemented ? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +

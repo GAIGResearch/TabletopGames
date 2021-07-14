@@ -1,7 +1,8 @@
-package core;
+package gui;
 
+import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import gui.WindowInput;
 import players.human.ActionController;
 import utilities.Utils;
 
@@ -10,7 +11,6 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -56,7 +56,7 @@ public class GUI extends JFrame {
     public GUI() {
     }
 
-    protected void setFrameProperties() {
+    public void setFrameProperties() {
         // Frame properties
         this.wi = new WindowInput();
         addWindowListener(wi);
@@ -84,8 +84,8 @@ public class GUI extends JFrame {
      * @param gameState - current game state to be used in updating visuals.
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.gameStatus == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = player.forwardModel.computeAvailableActions(gameState);
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size(); i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
@@ -270,8 +270,4 @@ public class GUI extends JFrame {
         }
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
-    }
 }

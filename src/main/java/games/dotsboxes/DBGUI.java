@@ -1,6 +1,6 @@
 package games.dotsboxes;
 
-import core.GUI;
+import gui.GUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import gui.ScaledImage;

@@ -4,7 +4,7 @@ import core.components.Counter;
 
 import java.awt.*;
 
-import static core.GUI.defaultItemSize;
+import static gui.GUI.defaultItemSize;
 
 public class CounterView extends ComponentView {
 
