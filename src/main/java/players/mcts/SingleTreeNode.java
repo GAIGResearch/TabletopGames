@@ -49,10 +49,11 @@ public class SingleTreeNode {
     private final Random rnd;
 
     // State in this node (closed loop)
-    private AbstractAction actionToReach;
+    private final AbstractAction actionToReach;
     private final AbstractGameState state;
     private AbstractGameState openLoopState;
-    List<AbstractAction> actionsFromState;
+    List<AbstractAction> actionsFromOpenLoopState;
+    Map<AbstractAction, Double> advantagesOfActionsFromOLS;
 
     public AbstractGameState getState() {
         return state;
@@ -83,7 +84,7 @@ public class SingleTreeNode {
         }
 
 
-        setActionsFromState(state);
+        setActionsFromOpenLoopState(state);
         if (parent != null) {
             depth = parent.depth + 1;
         } else {
@@ -92,9 +93,14 @@ public class SingleTreeNode {
         this.rnd = rnd;
     }
 
-    private void setActionsFromState(AbstractGameState actionState) {
-        actionsFromState = player.getForwardModel().computeAvailableActions(actionState);
-        for (AbstractAction action : actionsFromState) {
+    private void setActionsFromOpenLoopState(AbstractGameState actionState) {
+        actionsFromOpenLoopState = player.getForwardModel().computeAvailableActions(actionState);
+        ToDoubleBiFunction<AbstractAction, AbstractGameState> advantagefunction = player.params.getAdvantageFunction();
+        if (advantagefunction != null) {
+            advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
+                    .collect(toMap(a -> a, a -> advantagefunction.applyAsDouble(a, actionState)));
+        }
+        for (AbstractAction action : actionsFromOpenLoopState) {
             if (!children.containsKey(action)) {
                 children.put(action, null); // mark a new node to be expanded
                 // This *does* rely on a good equals method being implemented for Actions
@@ -256,10 +262,11 @@ public class SingleTreeNode {
         Integer actingPlayer = cur.decisionPlayer;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.openLoopState.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromState.size() > 0) {
-            if (!cur.unexpandedActions().isEmpty()) {
+        while (cur.openLoopState.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromOpenLoopState.size() > 0) {
+            List<AbstractAction> unexpanded = cur.unexpandedActions();
+            if (!unexpanded.isEmpty()) {
                 // We have an unexpanded action
-                return cur.expand();
+                return cur.expand(unexpanded);
             } else {
                 // Move to next child given by UCT function
                 cur = cur.nextNodeInTree();
@@ -273,7 +280,17 @@ public class SingleTreeNode {
      * @return A list of the unexpanded Actions from this State
      */
     private List<AbstractAction> unexpandedActions() {
-        return actionsFromState.stream().filter(a -> children.get(a) == null).collect(toList());
+        List<AbstractAction> allUnexpanded = actionsFromOpenLoopState.stream().filter(a -> children.get(a) == null).collect(toList());
+        if (player.params.progressiveWideningConstant >= 1.0) {
+            int actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits + 1, player.params.progressiveWideningExponent));
+            int unexpandedActionsToConsider = actionsToConsider - actionsFromOpenLoopState.size() + allUnexpanded.size();
+            // takes account of the expanded actions
+            if (unexpandedActionsToConsider <= 0) return new ArrayList<>();
+            // sort in advantage order (descending)
+            allUnexpanded.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
+            allUnexpanded = allUnexpanded.subList(0, unexpandedActionsToConsider);
+        }
+        return allUnexpanded;
     }
 
     /**
@@ -281,15 +298,16 @@ public class SingleTreeNode {
      *
      * @return - new child node.
      */
-    private SingleTreeNode expand() {
+    private SingleTreeNode expand(List<AbstractAction> notChosen) {
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
-        List<AbstractAction> notChosen = unexpandedActions();
         Collections.shuffle(notChosen);
+
         AbstractAction chosen = null;
 
-        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = player.advantageFunction;
+        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = advantagesOfActionsFromOLS == null ? null :
+                (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
         if (player.params.expansionPolicy == MCTSEnums.Strategies.MAST) {
             valueFunction = (a, s) -> {
                 Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
@@ -304,7 +322,7 @@ public class SingleTreeNode {
         if (valueFunction != null) {
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : notChosen) {
-                double estimate = player.advantageFunction.applyAsDouble(action, state);
+                double estimate = valueFunction.applyAsDouble(action, state);
                 if (estimate > bestValue) {
                     bestValue = estimate;
                     chosen = action;
@@ -406,7 +424,7 @@ public class SingleTreeNode {
             } else {
                 // pick up the existing one, and set the state
                 nextNode.openLoopState = openLoopState;
-                nextNode.setActionsFromState(openLoopState);
+                nextNode.setActionsFromOpenLoopState(openLoopState);
             }
             // we also need to check to see if there are any new actions on this transition
             root.fmCallsCount++;
@@ -429,7 +447,13 @@ public class SingleTreeNode {
 
         double nodeValue = totValue[decisionPlayer] / nVisits;
 
-        for (AbstractAction action : actionsFromState) {
+        int actionsToConsider = actionsFromOpenLoopState.size();
+        if (player.params.progressiveWideningConstant >= 1.0) {
+            actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits, player.params.progressiveWideningExponent));
+            actionsFromOpenLoopState.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
+        }
+        int considered = 0;
+        for (AbstractAction action : actionsFromOpenLoopState) {
             SingleTreeNode[] childArray = children.get(action);
             if (childArray == null)
                 throw new AssertionError("Should not be here");
@@ -440,9 +464,9 @@ public class SingleTreeNode {
             double childValue = hvVal / (actionVisits + player.params.epsilon);
 
             // consider any progressive bias term
-            if (player.advantageFunction != null && player.params.biasVisits > 0) {
+            if (player.params.biasVisits > 0) {
                 double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits));
-                childValue = (1.0 - beta) * childValue + beta * (player.advantageFunction.applyAsDouble(action, state) + nodeValue);
+                childValue = (1.0 - beta) * childValue + beta * (advantagesOfActionsFromOLS.getOrDefault(action, 0.0) + nodeValue);
             }
 
             // default to standard UCB
@@ -465,6 +489,9 @@ public class SingleTreeNode {
                 bestAction = action;
                 bestValue = uctValue;
             }
+            considered++;
+            if (considered >= actionsToConsider)
+                break;
         }
 
         if (bestAction == null)
@@ -478,9 +505,9 @@ public class SingleTreeNode {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
         double meanAdvantageFromAction = (actionValue / actionVisits) - (totValue[decisionPlayer] / nVisits);
-        if (player.advantageFunction != null && player.params.biasVisits > 0) {
+        if (player.params.biasVisits > 0) {
             double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits));
-            meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * player.advantageFunction.applyAsDouble(action, state);
+            meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0);
         }
         return Math.exp(meanAdvantageFromAction);
     }
@@ -490,9 +517,9 @@ public class SingleTreeNode {
         // TODO: (see comment in checkActions() - to be enhanced to keep track of this at some future point)
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
-        if (player.advantageFunction != null && player.params.biasVisits > 0) {
+        if (player.params.biasVisits > 0) {
             double beta = Math.sqrt(player.params.biasVisits / (double) (player.params.biasVisits + 3 * actionVisits));
-            actionValue = (1.0 - beta) * actionValue + beta * ((totValue[decisionPlayer] / nVisits) + player.advantageFunction.applyAsDouble(action, state));
+            actionValue = (1.0 - beta) * actionValue + beta * ((totValue[decisionPlayer] / nVisits) + advantagesOfActionsFromOLS.getOrDefault(action, 0.0));
         }
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits / actionVisits;
@@ -514,7 +541,14 @@ public class SingleTreeNode {
                 throw new AssertionError("Should not be any other options!");
         }
 
-        Map<AbstractAction, Double> actionToValueMap = actionsFromState.stream().collect(toMap(Function.identity(), valueFn));
+        int actionsToConsider = actionsFromOpenLoopState.size();
+        if (player.params.progressiveWideningConstant >= 1.0) {
+            actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits+1, player.params.progressiveWideningExponent));
+            actionsFromOpenLoopState.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
+        }
+        List<AbstractAction> availableActions = actionsFromOpenLoopState.subList(0, actionsToConsider);
+
+        Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
 
         // then we normalise to a pdf
         actionToValueMap = Utils.normaliseMap(actionToValueMap);

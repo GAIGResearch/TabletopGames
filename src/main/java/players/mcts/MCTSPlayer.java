@@ -9,7 +9,6 @@ import games.dicemonastery.DiceMonasteryStateAttributes;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.function.ToDoubleBiFunction;
 
 public class MCTSPlayer extends AbstractPlayer {
 
@@ -21,7 +20,6 @@ public class MCTSPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
-    public ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
     protected boolean debug = false;
     protected SingleTreeNode root;
 
@@ -40,7 +38,6 @@ public class MCTSPlayer extends AbstractPlayer {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
-        advantageFunction = params.getAdvantageFunction();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
         setName(name);

@@ -47,6 +47,8 @@ public class MCTSParams extends PlayerParameters {
     public String expertIterationFileStem = "ExpertIterationData";
     public String advantageFunction = "";
     public int biasVisits = 0;
+    public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
+    public double progressiveWideningExponent = 0.0;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
