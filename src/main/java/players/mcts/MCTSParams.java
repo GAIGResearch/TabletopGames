@@ -78,6 +78,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expIterFile", "");
         addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0);
+        addTunableParameter("progressiveWideningConstant", 0.0);
+        addTunableParameter("progressiveWideningExponent", 0.0);
     }
 
     @Override
@@ -105,6 +107,8 @@ public class MCTSParams extends PlayerParameters {
         expertIterationFileStem = (String) getParameterValue("expIterFile");
         advantageFunction = (String) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
+        progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
+        progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
             useMAST = true;
         }

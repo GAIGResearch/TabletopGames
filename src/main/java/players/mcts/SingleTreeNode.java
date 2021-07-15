@@ -276,21 +276,25 @@ public class SingleTreeNode {
         return cur;
     }
 
+    private List<AbstractAction> actionsToConsider(List<AbstractAction> allAvailable, int usedElsewhere) {
+        if (!allAvailable.isEmpty() && player.params.progressiveWideningConstant >= 1.0) {
+            int actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits + 1, player.params.progressiveWideningExponent));
+            actionsToConsider = Math.min(actionsToConsider - usedElsewhere, allAvailable.size());
+            // takes account of the expanded actions
+            if (actionsToConsider <= 0) return new ArrayList<>();
+            // sort in advantage order (descending)
+            allAvailable.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
+            return allAvailable.subList(0, actionsToConsider);
+        }
+        return allAvailable;
+    }
+
     /**
      * @return A list of the unexpanded Actions from this State
      */
     private List<AbstractAction> unexpandedActions() {
         List<AbstractAction> allUnexpanded = actionsFromOpenLoopState.stream().filter(a -> children.get(a) == null).collect(toList());
-        if (player.params.progressiveWideningConstant >= 1.0) {
-            int actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits + 1, player.params.progressiveWideningExponent));
-            int unexpandedActionsToConsider = actionsToConsider - actionsFromOpenLoopState.size() + allUnexpanded.size();
-            // takes account of the expanded actions
-            if (unexpandedActionsToConsider <= 0) return new ArrayList<>();
-            // sort in advantage order (descending)
-            allUnexpanded.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
-            allUnexpanded = allUnexpanded.subList(0, unexpandedActionsToConsider);
-        }
-        return allUnexpanded;
+        return actionsToConsider(allUnexpanded, actionsFromOpenLoopState.size() - allUnexpanded.size());
     }
 
     /**
@@ -447,13 +451,8 @@ public class SingleTreeNode {
 
         double nodeValue = totValue[decisionPlayer] / nVisits;
 
-        int actionsToConsider = actionsFromOpenLoopState.size();
-        if (player.params.progressiveWideningConstant >= 1.0) {
-            actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits, player.params.progressiveWideningExponent));
-            actionsFromOpenLoopState.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
-        }
-        int considered = 0;
-        for (AbstractAction action : actionsFromOpenLoopState) {
+        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
+        for (AbstractAction action : availableActions) {
             SingleTreeNode[] childArray = children.get(action);
             if (childArray == null)
                 throw new AssertionError("Should not be here");
@@ -489,9 +488,6 @@ public class SingleTreeNode {
                 bestAction = action;
                 bestValue = uctValue;
             }
-            considered++;
-            if (considered >= actionsToConsider)
-                break;
         }
 
         if (bestAction == null)
@@ -499,7 +495,6 @@ public class SingleTreeNode {
 
         return bestAction;
     }
-
 
     public double exp3Value(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
@@ -541,12 +536,7 @@ public class SingleTreeNode {
                 throw new AssertionError("Should not be any other options!");
         }
 
-        int actionsToConsider = actionsFromOpenLoopState.size();
-        if (player.params.progressiveWideningConstant >= 1.0) {
-            actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits+1, player.params.progressiveWideningExponent));
-            actionsFromOpenLoopState.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
-        }
-        List<AbstractAction> availableActions = actionsFromOpenLoopState.subList(0, actionsToConsider);
+        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
 
         Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
 
