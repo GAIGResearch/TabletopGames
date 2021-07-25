@@ -115,4 +115,15 @@ public class ExpertIterationDataGatherer {
         }
     }
 
+    public void close() {
+        try {
+            if (writerQ != null)
+                writerQ.close();
+            if (writerV != null)
+                writerV.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

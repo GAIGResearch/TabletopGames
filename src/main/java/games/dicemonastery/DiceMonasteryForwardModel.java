@@ -106,9 +106,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         // and since this is core to the whole game loop, the muddying of responsibilities is acceptable
         if (action instanceof Pray)
             dmto.turnOwnerPrayed = true;
-        if (action instanceof TakeToken)
+        if (action instanceof TakeToken) {
             dmto.turnOwnerTakenReward = true;
-
+            if (((TakeToken) action).token == BONUS_TOKEN.DEVOTION)
+                dmto.turnOwnerPrayed = false; // in case they had none previously
+        }
         if (state.isActionInProgress())
             return;
 
@@ -159,6 +161,8 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             retValue.add(FORAGE_1);
                             if (turnOrder.getActionPointsLeft() >= 5)
                                 retValue.add(FORAGE_5);
+                            else if (turnOrder.getActionPointsLeft() > 1)
+                                retValue.add(new Forage(turnOrder.getActionPointsLeft()));
                             if (turnOrder.season == SPRING) {
                                 retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
@@ -199,11 +203,13 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             retValue.add(BEG_1);
                             if (turnOrder.getActionPointsLeft() >= 5)
                                 retValue.add(BEG_5);
+                            else if (turnOrder.getActionPointsLeft() > 1)
+                                retValue.add(new BegForAlms(turnOrder.getActionPointsLeft()));
                             retValue.add(new VisitMarket());
                             if (turnOrder.getActionPointsLeft() > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
                                 for (TREASURE item : TREASURE.values()) {
-                                    if (item.cost <= shillings && state.getNumberCommissioned(item) < item.limit)
+                                    if (item.buyable && item.vp * state.getParams().COST_PER_TREASURE_VP <= shillings && state.getNumberCommissioned(item) < item.limit)
                                         retValue.add(new BuyTreasure(item));
                                 }
                             }

@@ -1,53 +1,46 @@
 package games;
 
 import core.*;
-import games.dicemonastery.DiceMonasteryForwardModel;
-import games.dicemonastery.gui.DiceMonasteryGUI;
-import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryParams;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUI;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
-import games.diamant.DiamantParameters;
+import games.dicemonastery.DiceMonasteryForwardModel;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.gui.DiceMonasteryGUI;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGameState;
 import games.dominion.gui.DominionGUI;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUI;
 import games.dotsboxes.DBGameState;
-import games.dotsboxes.DBParameters;
-import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.gui.ExplodingKittensGUI;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
 import games.loveletter.gui.LoveLetterGUI;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUI;
 import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.gui.TicTacToeGUI;
 import games.uno.UnoForwardModel;
-import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
 import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
-import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
-import games.dominion.*;
 import gui.PrototypeGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static core.CoreConstants.*;
+import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 
@@ -230,36 +223,7 @@ public enum GameType {
     }
 
     public AbstractParameters getDefaultParams(long seed) {
-        switch (this) {
-            case Pandemic:
-                return new PandemicParameters("data/pandemic/", seed);
-            case TicTacToe:
-                return new TicTacToeGameParameters(seed);
-            case ExplodingKittens:
-                return new ExplodingKittensParameters(seed);
-            case LoveLetter:
-                return new LoveLetterParameters(seed);
-            case Uno:
-                return new UnoGameParameters(seed);
-            case Virus:
-                return new VirusGameParameters(seed);
-            case ColtExpress:
-                return new ColtExpressParameters(seed);
-            case DotsAndBoxes:
-                return new DBParameters(seed);
-            case Diamant:
-                return new DiamantParameters(seed);
-            case Dominion:
-                return DominionParameters.firstGame(seed);
-            case DominionSizeDistortion:
-                return DominionParameters.sizeDistortion(seed);
-            case DominionImprovements:
-                return DominionParameters.improvements(seed);
-            case DiceMonastery:
-                return new DiceMonasteryParams(seed);
-            default:
-                throw new AssertionError("No default Parameters specified for Game " + this);
-        }
+        return ParameterFactory.getDefaultParams(this, seed);
     }
 
     /**

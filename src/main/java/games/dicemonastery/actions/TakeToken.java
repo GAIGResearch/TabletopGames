@@ -35,7 +35,7 @@ public class TakeToken extends AbstractAction implements IExtendedSequence {
                 state.addResource(player, PRAYER, 1);
                 break;
             case PRESTIGE:
-                state.addVP(2, player);
+                state.addVP(1, player);
                 break;
             case DONATION:
                 state.addResource(player, SHILLINGS, 2);

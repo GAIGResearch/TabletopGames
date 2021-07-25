@@ -6,8 +6,8 @@ public class FileReducer {
 
     public static void main(String[] args) {
 
-        String filename = "D:\\DiceMonastery\\DM_EI_15s_A002_Q.txt";
-        String output = "D:\\DiceMonastery\\DM_EI_15s_A002_Q_V100.txt";
+        String filename = "D:\\DiceMonastery\\DM_EI_15s_OM_A002_0718_Q.txt";
+        String output = "D:\\DiceMonastery\\DM_EI_15s_OM_A002_0718_Q_V100.txt";
         int visitThreshold = 100;
 
         try {

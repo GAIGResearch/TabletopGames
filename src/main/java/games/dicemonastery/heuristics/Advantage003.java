@@ -74,6 +74,7 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
         double[] featureVal = features.stream().mapToDouble(f -> {
             Object obj = f.get(state, player);
             if (obj instanceof Number) return ((Number) obj).doubleValue();
+            if (obj instanceof Boolean) return (Boolean) obj ? 1.0 : 0.0;
             return 0.0;
         }).toArray();
 

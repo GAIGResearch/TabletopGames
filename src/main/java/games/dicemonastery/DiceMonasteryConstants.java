@@ -178,24 +178,28 @@ public class DiceMonasteryConstants {
     }
 
     public enum TREASURE {
-        CAPE(4, 1, 1),
-        ROBE(8, 2, 1),
-        CANDLESTICK(12, 3, 1),
-        LECTERN(16, 4, 1),
-        CHALICE(20, 5, 1),
-        MITRE(24, 6, 1),
-        PLATE(28, 7, 1),
-        ALTAR_CROSS(32, 8, 1),
-        RELIC(999, 3, 4);  // from Pilgrimages, not purchase
+        CAPE(1, 1),
+        ROBE(2, 1),
+        CANDLESTICK(3, 1),
+        LECTERN(4, 1),
+        CHALICE(5, 1),
+        MITRE(6, 1),
+        PLATE(7, 1),
+        ALTAR_CROSS(8, 1),
+        RELIC(false, 3, 4);  // from Pilgrimages, not purchase
 
-        public final int cost;
+        public final boolean buyable;
         public final int vp;
         public final int limit;
 
-        TREASURE(int cost, int vp, int limit) {
-            this.cost = cost;
+        TREASURE(int vp, int limit) {
+            this(true, vp, limit);
+        }
+
+        TREASURE(boolean buyable, int vp, int limit) {
+            this.buyable = buyable;
             this.vp = vp;
-            this.limit  = limit;
+            this.limit = limit;
         }
 
     }

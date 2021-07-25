@@ -136,6 +136,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
         addVP(-treasure.vp, player);
     }
 
+    public DiceMonasteryParams getParams() {
+        return (DiceMonasteryParams) gameParameters;
+    }
+
     public List<Integer> executeBids() {
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         if (dmto.season != SUMMER)
@@ -154,6 +158,18 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
         // contains the ordinality of the player bids, 0 = best bid (including joint equals) and so on.
         List<Integer> playerOrdinality = bidPerPlayer.stream().map(sortedBids::indexOf).collect(toList());
+        // we then modify this to take account of ties
+        int ordinality = 0;
+        do {
+            int currentOrdinality = ordinality;
+            int playersInPosition = (int) playerOrdinality.stream().filter(o -> o == currentOrdinality).count();
+            if (playersInPosition > 1) {
+                // all later players are moved on
+                // if two players, then all laters are incremented by 1 for example
+                playerOrdinality = playerOrdinality.stream().map(o -> (o <= currentOrdinality) ? o : o + (playersInPosition - 1)).collect(toList());
+            }
+            ordinality++;
+        } while (ordinality < playerOrdinality.size());
 
         List<Integer> retValue = new ArrayList<>();
         for (int player = 0; player < bidPerPlayer.size(); player++) {
@@ -165,7 +181,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
             } else {
                 // Gain VP
                 int vp = VIKING_REWARDS[bidPerPlayer.size() - 1][playerOrdinality.get(player)];
-                // TODO: Technically need to divide this among people with same ordinality
                 addVP(vp, player);
                 // and then lose stuff in Bid
                 treasury.merge(Resource.BEER, -playerBids.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);

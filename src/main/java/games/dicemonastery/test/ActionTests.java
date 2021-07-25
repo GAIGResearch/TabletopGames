@@ -898,7 +898,7 @@ public class ActionTests {
         state.putToken(DORMITORY, PRESTIGE, 0);
         assertEquals(0, state.getVictoryPoints(2));
         fm.next(state, new TakeToken(PRESTIGE, DORMITORY, 2));
-        assertEquals(2, state.getVictoryPoints(2));
+        assertEquals(1, state.getVictoryPoints(2));
 
         assertEquals(3, state.getCurrentPlayer());
         state.putToken(DORMITORY, PROMOTION, 0);

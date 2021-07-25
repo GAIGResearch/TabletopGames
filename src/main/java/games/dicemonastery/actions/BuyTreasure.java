@@ -31,7 +31,7 @@ public class BuyTreasure extends UseMonk{
     public boolean _execute(DiceMonasteryGameState state) {
         int player = state.getCurrentPlayer();
         state.acquireTreasure(treasure, player);
-        state.addResource(player, DiceMonasteryConstants.Resource.SHILLINGS, -treasure.cost);
+        state.addResource(player, DiceMonasteryConstants.Resource.SHILLINGS, -treasure.vp * state.getParams().COST_PER_TREASURE_VP);
         return true;
     }
 

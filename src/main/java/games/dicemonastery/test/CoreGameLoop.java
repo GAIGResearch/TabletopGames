@@ -839,4 +839,101 @@ public class CoreGameLoop {
         assertEquals(1, state.getTreasures(3).size());
     }
 
+    @Test
+    public void retiringLastMonkAllowsYouToUseActionPoints() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+        state.createMonk(6, 0); // create a 6-er for player 0
+        state.putToken(MEADOW, DiceMonasteryConstants.BONUS_TOKEN.PROMOTION, 0);
+        state.putToken(MEADOW, DiceMonasteryConstants.BONUS_TOKEN.PROMOTION, 1);
+        // and ensure that the MEADOW only has promotion options
+
+        // then we move monks to ensure that only player 0 and 1 are in the MEADOW, and that
+        // player 1 just has their level 6 monk
+        for (Monk monk : state.monksIn(DORMITORY, 0)) {
+            if (monk.getPiety() == 6)
+                state.moveMonk(monk.getComponentID(), DORMITORY, MEADOW);
+            else
+                state.moveMonk(monk.getComponentID(), DORMITORY, GATEHOUSE);
+        }
+        for (Monk monk : state.monksIn(DORMITORY, -1)) {
+            state.moveMonk(monk.getComponentID(), DORMITORY, GATEHOUSE);
+        }
+
+        fm.next(state, new DoNothing()); // this will move on phase and current player
+        assertEquals(USE_MONKS, state.getGamePhase());
+        assertEquals(MEADOW, turnOrder.getCurrentArea());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(0, turnOrder.nextPlayer(state));
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // take token
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new PromoteMonk(6, MEADOW), fm.computeAvailableActions(state).get(0));
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // promote monk
+
+        assertEquals(MEADOW, turnOrder.getCurrentArea());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(0, turnOrder.nextPlayer(state));
+        assertEquals(0, state.monksIn(MEADOW, 0).size());
+        assertEquals(6, turnOrder.getActionPointsLeft());
+    }
+
+    @Test
+    public void devotionTokenCanBeUsedImmediately() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+        state.putToken(MEADOW, DiceMonasteryConstants.BONUS_TOKEN.DEVOTION, 0);
+        state.putToken(MEADOW, DiceMonasteryConstants.BONUS_TOKEN.DEVOTION, 1);
+        // and ensure that the MEADOW only has devotion options
+
+
+        // place monks randomly
+        while (state.getGamePhase() == PLACE_MONKS) {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        }
+
+        assertEquals(USE_MONKS, state.getGamePhase());
+        assertEquals(MEADOW, turnOrder.getCurrentArea());
+        int currentPlayer = state.getCurrentPlayer();
+        assertEquals(1, state.getResource(currentPlayer, PRAYER, STOREROOM));
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // take token
+        assertEquals(2, state.getResource(currentPlayer, PRAYER, STOREROOM));
+
+        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pray(0)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Pray(1)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Pray(2)));
+    }
+
+    @Test
+    public void devotionTokenCanBeUsedImmediately2() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+        state.putToken(MEADOW, DiceMonasteryConstants.BONUS_TOKEN.DEVOTION, 0);
+        state.putToken(MEADOW, DiceMonasteryConstants.BONUS_TOKEN.DEVOTION, 1);
+        // and ensure that the MEADOW only has devotion options
+
+        for (int i = 0; i < 4; i++)
+            state.addResource(i, PRAYER, -1);
+
+
+        // place monks randomly
+        while (state.getGamePhase() == PLACE_MONKS) {
+            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        }
+
+        assertEquals(USE_MONKS, state.getGamePhase());
+        assertEquals(MEADOW, turnOrder.getCurrentArea());
+        int currentPlayer = state.getCurrentPlayer();
+        assertEquals(0, state.getResource(currentPlayer, PRAYER, STOREROOM));
+
+        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // take token
+        assertEquals(1, state.getResource(currentPlayer, PRAYER, STOREROOM));
+
+        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new Pray(0)));
+        assertTrue(fm.computeAvailableActions(state).contains(new Pray(1)));
+    }
+
 }

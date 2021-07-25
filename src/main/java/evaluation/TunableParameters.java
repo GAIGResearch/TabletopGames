@@ -69,7 +69,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * Use this to add a non-Tunable Parameter (i.e. one with a single value that does not change)
      * While this is not tuned, it means that a value for it can be defined in a JSON input file
      * <p>
-     * A tunable parameter can be any of Integer, Double, String, Enum, Boolean.
+     * A tunable parameter can be any of Integer, Double, String, Enum, Boolean, List
      *
      * @param name  The name of the parameter
      * @param value The value this should take
@@ -80,7 +80,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     /**
-     * Use this to add a Tunable Parameter. Parameters added using this method iwhen instantiating a Params object
+     * Use this to add a Tunable Parameter. Parameters added using this method when instantiating a Params object
      * will be the default search dimensions used in optimisation.
      * Note however, that these values are not exclusive.
      * ParameterSearch permits a JSON file to be specified that provides a way of overriding (adding to and/or

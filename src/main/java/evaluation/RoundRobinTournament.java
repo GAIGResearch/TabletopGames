@@ -195,19 +195,21 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int agentID : agentIDs)
             matchUpPlayers.add(this.agents.get(agentID));
 
+        List<IGameListener> gameTrackers = new ArrayList<>();
+        for (int l = 0; l < listenerClasses.size(); l++) {
+            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
+            IStatisticLogger logger = new FileStatsLogger(logFile);
+            String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(l);
+            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
+            games.get(gameIdx).addListener(gameTracker);
+            gameTrackers.add(gameTracker);
+        }
+
         // Run the game N = gamesPerMatchUp times with these players
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
             gameCounter++;
             games.get(gameIdx).reset(matchUpPlayers);
-            List<IGameListener> gameTrackers = new ArrayList<>();
-            for (int l = 0; l < listenerClasses.size(); l++) {
-                String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
-                String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(l);
-                IStatisticLogger logger = new FileStatsLogger(logFile);
-                IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
-                games.get(gameIdx).addListener(gameTracker);
-                gameTrackers.add(gameTracker);
-            }
+
 
             games.get(gameIdx).run(null);  // Always running tournaments without visuals
 
@@ -231,6 +233,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     data.put("Score", g.getGameState().getHeuristicScore(p));
                     data.put("Result", g.getGameState().getPlayerResults()[p].toString());
                     dataLogger.record(data);
+                    dataLogger.flush();
                 }
             }
         }

@@ -91,16 +91,17 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                         turnOwner = nextPlayer(state);
                         initialiseUseMonkBooleans(state);
                         actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
-                    }
-                    if (state.monksIn(currentAreaBeingExecuted, -1).isEmpty()) {
-                        // we have completed all actions for that area
-                        if (setUpPlayerOrderForCurrentArea(state)) {
-                            turnOwner = playerOrderForCurrentArea.get(0);
-                            actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
-                            initialiseUseMonkBooleans(state);
-                        } else {
-                            // we have completed this phase
-                            endRound(state);
+
+                        if (state.monksIn(currentAreaBeingExecuted, -1).isEmpty()) {
+                            // we have completed all actions for that area
+                            if (setUpPlayerOrderForCurrentArea(state)) {
+                                turnOwner = playerOrderForCurrentArea.get(0);
+                                actionPointsLeftForCurrentPlayer = actionPoints(state, currentAreaBeingExecuted, turnOwner);
+                                initialiseUseMonkBooleans(state);
+                            } else {
+                                // we have completed this phase
+                                endRound(state);
+                            }
                         }
                     }
                 }

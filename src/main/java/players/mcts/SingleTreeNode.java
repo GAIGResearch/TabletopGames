@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.Strategies.MAST;
 import static players.mcts.MCTSEnums.TreePolicy.AlphaGo;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
@@ -53,7 +54,10 @@ public class SingleTreeNode {
     private final AbstractGameState state;
     private AbstractGameState openLoopState;
     List<AbstractAction> actionsFromOpenLoopState;
-    Map<AbstractAction, Double> advantagesOfActionsFromOLS;
+    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
+
+    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
+    ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
 
     public AbstractGameState getState() {
         return state;
@@ -73,6 +77,15 @@ public class SingleTreeNode {
         }
         this.actionToReach = actionToReach;
         decisionPlayer = state.getCurrentPlayer();
+        MASTFunction = (a, s) -> {
+            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
+            if (MAST.containsKey(a)) {
+                Pair<Integer, Double> stats = MAST.get(a);
+                return stats.b / stats.a;
+            }
+            return 0.0;
+        };
+
         totValue = new double[state.getNPlayers()];
         openLoopState = state;
         if (player.params.openLoop) {
@@ -82,7 +95,6 @@ public class SingleTreeNode {
         } else {
             this.state = state;
         }
-
 
         setActionsFromOpenLoopState(state);
         if (parent != null) {
@@ -95,10 +107,14 @@ public class SingleTreeNode {
 
     private void setActionsFromOpenLoopState(AbstractGameState actionState) {
         actionsFromOpenLoopState = player.getForwardModel().computeAvailableActions(actionState);
-        ToDoubleBiFunction<AbstractAction, AbstractGameState> advantagefunction = player.params.getAdvantageFunction();
-        if (advantagefunction != null) {
+        if (player.params.expansionPolicy == MAST) {
             advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                    .collect(toMap(a -> a, a -> advantagefunction.applyAsDouble(a, actionState)));
+                    .collect(toMap(a -> a, a -> MASTFunction.applyAsDouble(a, actionState)));
+        } else {
+            ToDoubleBiFunction<AbstractAction, AbstractGameState> advantagefunction = player.params.getAdvantageFunction();
+            if (advantagefunction != null)
+                advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
+                        .collect(toMap(a -> a, a -> advantagefunction.applyAsDouble(a, actionState)));
         }
         for (AbstractAction action : actionsFromOpenLoopState) {
             if (!children.containsKey(action)) {
@@ -283,6 +299,8 @@ public class SingleTreeNode {
             // takes account of the expanded actions
             if (actionsToConsider <= 0) return new ArrayList<>();
             // sort in advantage order (descending)
+            ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = player.params.expansionPolicy == MAST ? MASTFunction : advantageFunction;
+
             allAvailable.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
             return allAvailable.subList(0, actionsToConsider);
         }
@@ -293,8 +311,14 @@ public class SingleTreeNode {
      * @return A list of the unexpanded Actions from this State
      */
     private List<AbstractAction> unexpandedActions() {
-        List<AbstractAction> allUnexpanded = actionsFromOpenLoopState.stream().filter(a -> children.get(a) == null).collect(toList());
-        return actionsToConsider(allUnexpanded, actionsFromOpenLoopState.size() - allUnexpanded.size());
+        // first cater for an edge case with progressive widening
+        // where the expanded children may include available actions not in the current pruning width
+        // this can occur where we have different available actions (actionsFromOpenLoopState) on each iteration
+        List<AbstractAction> topActions = player.params.progressiveWideningConstant >= 1.0
+                ? actionsToConsider(actionsFromOpenLoopState, 0)
+                : actionsFromOpenLoopState;
+        List<AbstractAction> allUnexpanded = topActions.stream().filter(a -> children.get(a) == null).collect(toList());
+        return actionsToConsider(allUnexpanded, topActions.size() - allUnexpanded.size());
     }
 
     /**
@@ -310,19 +334,7 @@ public class SingleTreeNode {
 
         AbstractAction chosen = null;
 
-        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = advantagesOfActionsFromOLS == null ? null :
-                (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
-        if (player.params.expansionPolicy == MCTSEnums.Strategies.MAST) {
-            valueFunction = (a, s) -> {
-                Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
-                if (MAST.containsKey(a)) {
-                    Pair<Integer, Double> stats = MAST.get(a);
-                    return stats.b / stats.a;
-                }
-                return 0.0;
-            };
-        }
-
+        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = player.params.expansionPolicy == MAST ? MASTFunction : advantageFunction;
         if (valueFunction != null) {
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : notChosen) {
