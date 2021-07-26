@@ -61,6 +61,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         tunable.possibleValues = new HashMap<>(possibleValues);
         tunable.defaultValues = new HashMap<>(defaultValues);
         tunable.parameterTypes = new HashMap<>(parameterTypes);
+        for (String name : parameterNames) {
+            tunable.setParameterValue(name, getParameterValue(name));
+        }
         tunable._reset();
         return tunable;
     }

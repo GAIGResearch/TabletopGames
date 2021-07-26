@@ -7,30 +7,32 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
 public class HarvestWheat extends UseMonk {
 
-    public HarvestWheat() {
-        super(1);
+    public HarvestWheat(int count) {
+        super(count);
     }
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
-        state.moveCube(state.getCurrentPlayer(), Resource.GRAIN, MEADOW, STOREROOM);
-        state.moveCube(state.getCurrentPlayer(), Resource.GRAIN, SUPPLY, STOREROOM);
+        for (int i = 0; i < actionPoints; i++) {
+            state.moveCube(state.getCurrentPlayer(), Resource.GRAIN, MEADOW, STOREROOM);
+            state.moveCube(state.getCurrentPlayer(), Resource.GRAIN, SUPPLY, STOREROOM);
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "Harvest Wheat";
+        return "Harvest Wheat " + actionPoints + " times";
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof HarvestWheat;
+        return obj instanceof HarvestWheat && ((HarvestWheat) obj).actionPoints == actionPoints;
     }
 
     @Override
     public int hashCode() {
-        return 398321;
+        return 398321 + actionPoints;
     }
 
 }

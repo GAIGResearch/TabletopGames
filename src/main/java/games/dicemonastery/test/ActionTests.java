@@ -83,7 +83,8 @@ public class ActionTests {
         startOfUseMonkPhaseForAreaAfterBonusToken(MEADOW, SPRING);
         int ap = turnOrder.getActionPointsLeft();
 
-        assertEquals(ap >= 5 ? 5 : 4, fm.computeAvailableActions(state).size());
+        int expectedActions = ap >= 2 ? 5 : 4;
+        assertEquals(expectedActions, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
         assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
@@ -109,7 +110,7 @@ public class ActionTests {
 
         // Now check we move straight on to actions
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PRAYER, STOREROOM));
-        assertEquals(ap >= 5 ? 5 : 4, fm.computeAvailableActions(state).size());
+        assertEquals(ap >= 2 ? 5 : 4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new SowWheat()));
         assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
@@ -188,20 +189,31 @@ public class ActionTests {
             state.moveCube(state.getCurrentPlayer(), SKEP, MEADOW, SUPPLY);
 
         int ap = turnOrder.getActionPointsLeft();
+        int grain = state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW);
+        int skeps = state.getResource(state.getCurrentPlayer(), SKEP, MEADOW);
 
-        assertEquals(ap >= 5 ? 3 : 2, fm.computeAvailableActions(state).size());
+        int expectedActions = ap >= 5 ? 3 : 2;
+        expectedActions += Math.min(grain, 2);
+        expectedActions += Math.min(skeps, 2);
+
+        assertEquals(expectedActions, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
         if (ap >= 5)
             assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
 
         state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
+        grain = state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW);
+        skeps = state.getResource(state.getCurrentPlayer(), SKEP, MEADOW);
+        int piety = state.getAPLeft();
         assertEquals(ap >= 5 ? 4 : 3, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
         assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
         if (ap >= 5)
             assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
-        assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat()));
+        assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat(1)));
+        if (grain > 1)
+            assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat(Math.min(grain, piety))));
 
         state.moveCube(state.getCurrentPlayer(), SKEP, SUPPLY, MEADOW);
         assertEquals(ap >= 5 ? 5 : 4, fm.computeAvailableActions(state).size());
@@ -209,8 +221,10 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).contains(new Forage(1)));
         if (ap >= 5)
             assertTrue(fm.computeAvailableActions(state).contains(new Forage(5)));
-        assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat()));
-        assertTrue(fm.computeAvailableActions(state).contains(new CollectSkep()));
+        assertTrue(fm.computeAvailableActions(state).contains(new HarvestWheat(1)));
+        assertTrue(fm.computeAvailableActions(state).contains(new CollectSkep(1)));
+        if (skeps > 1)
+            assertTrue(fm.computeAvailableActions(state).contains(new CollectSkep(Math.min(skeps, piety))));
     }
 
     @Test
@@ -229,10 +243,24 @@ public class ActionTests {
         assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
         assertEquals(2, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
         state.useAP(-1);
-        (new HarvestWheat()).execute(state);
+        (new HarvestWheat(1)).execute(state);
         assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
         assertEquals(4, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
     }
+
+    @Test
+    public void harvestAllGrain() {
+        state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
+        state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
+        state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, MEADOW);
+        assertEquals(3, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+        state.useAP(-3);
+        (new HarvestWheat(3)).execute(state);
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), GRAIN, MEADOW));
+        assertEquals(8, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
+    }
+
 
     @Test
     public void placeSkep() {
@@ -246,17 +274,18 @@ public class ActionTests {
 
     @Test
     public void collectSkep() {
-        state.useAP(-2);
+        state.useAP(-4);
         (new PlaceSkep()).execute(state);
-        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
-        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+        (new PlaceSkep()).execute(state);
+        assertEquals(2, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
         assertEquals(2, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
         assertEquals(2, state.getResource(state.getCurrentPlayer(), WAX, STOREROOM));
-        (new CollectSkep()).execute(state);
+        (new CollectSkep(2)).execute(state);
         assertEquals(0, state.getResource(state.getCurrentPlayer(), SKEP, MEADOW));
-        assertEquals(1, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
-        assertEquals(3, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
-        assertEquals(3, state.getResource(state.getCurrentPlayer(), WAX, STOREROOM));
+        assertEquals(0, state.getResource(state.getCurrentPlayer(), SKEP, STOREROOM));
+        assertEquals(4, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
+        assertEquals(4, state.getResource(state.getCurrentPlayer(), WAX, STOREROOM));
     }
 
     @Test
@@ -508,18 +537,19 @@ public class ActionTests {
 
         state.useAP(-1);
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 6 - state.getResource(state.getCurrentPlayer(), SHILLINGS, STOREROOM));
-        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertEquals(5, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
+        assertTrue(fm.computeAvailableActions(state).contains(new BegForAlms(2)));
 
         state.acquireTreasure(TREASURE.CAPE, state.getCurrentPlayer());
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(4, fm.computeAvailableActions(state).size());
         assertFalse(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
 
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 8);
-        assertEquals(5, fm.computeAvailableActions(state).size());  // Two more Treasures in price range
+        assertEquals(6, fm.computeAvailableActions(state).size());  // Two more Treasures in price range
 
         state.useAP(-1);
-        assertEquals(6, fm.computeAvailableActions(state).size());
+        assertEquals(7, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new HireNovice()));
     }
 

@@ -26,9 +26,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     public final AbstractAction FORAGE_1 = new Forage(1);
     public final AbstractAction FORAGE_5 = new Forage(5);
     public final AbstractAction SOW_WHEAT = new SowWheat();
-    public final AbstractAction HARVEST_WHEAT = new HarvestWheat();
+    public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);
     public final AbstractAction PLACE_SKEP = new PlaceSkep();
-    public final AbstractAction COLLECT_SKEP = new CollectSkep();
+    public final AbstractAction COLLECT_SKEP = new CollectSkep(1);
     public final AbstractAction PASS = new Pass();
     public final AbstractAction BAKE_BREAD = new BakeBread();
     public final AbstractAction BREW_BEER = new BrewBeer();
@@ -168,10 +168,18 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
                                     retValue.add(PLACE_SKEP);
                             } else {
-                                if (state.actionAreas.get(MEADOW).count(GRAIN, currentPlayer) > 0)
+                                int grainInField = state.actionAreas.get(MEADOW).count(GRAIN, currentPlayer);
+                                if (grainInField > 0) {
                                     retValue.add(HARVEST_WHEAT);
-                                if (state.actionAreas.get(MEADOW).count(SKEP, currentPlayer) > 0)
+                                    if (grainInField > 1 && turnOrder.getActionPointsLeft() > 1)
+                                        retValue.add(new HarvestWheat(Math.min(grainInField, turnOrder.getActionPointsLeft())));
+                                }
+                                int skepsOut = state.actionAreas.get(MEADOW).count(SKEP, currentPlayer);
+                                if (skepsOut > 0) {
                                     retValue.add(COLLECT_SKEP);
+                                    if (skepsOut > 1 && turnOrder.getActionPointsLeft() > 1)
+                                        retValue.add(new CollectSkep(Math.min(skepsOut, turnOrder.getActionPointsLeft())));
+                                }
                             }
                             break;
                         case KITCHEN:
@@ -280,10 +288,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     // we generate up to 16 SummerBids for every possibility of 0% to 100% of total stuff in 33% increments
                     // taking each of beer and mead independently
                     //  (removing any duplicate bids, so in practise the actual number will be rather lower)
+                    // to avoid silliness, we also remove any bid of 10VP or higher
                     int totalBeer = state.getResource(currentPlayer, BEER, STOREROOM);
                     int totalMead = state.getResource(currentPlayer, MEAD, STOREROOM);
                     return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
-                            .distinct().collect(toList());
+                            .distinct().filter(bid -> bid.beer + bid.mead * 2 < 10).collect(toList());
                 }
             case WINTER:
                 List<AbstractAction> retValue = state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()

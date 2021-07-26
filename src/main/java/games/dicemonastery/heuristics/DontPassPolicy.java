@@ -7,6 +7,7 @@ import core.actions.DoNothing;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.actions.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -17,7 +18,6 @@ public class DontPassPolicy extends AbstractPlayer {
 
     Random rnd = new Random(System.currentTimeMillis());
     AbstractAction vellum = new PrepareVellum();
-    AbstractAction harvest = new HarvestWheat();
     AbstractAction bakeBread = new BakeBread();
 
     @Override
@@ -30,8 +30,8 @@ public class DontPassPolicy extends AbstractPlayer {
         if (possibleActions.contains(vellum))
             return vellum;
 
-        if (possibleActions.contains(harvest))
-            return harvest;
+        if (possibleActions.stream().anyMatch(a -> a instanceof HarvestWheat))
+            return possibleActions.stream().filter(a -> a instanceof HarvestWheat).max(Comparator.comparingInt(hw -> ((HarvestWheat) hw).getActionPoints())).get();
 
         if (possibleActions.contains(bakeBread)) {
             int berries = state.getResource(player, BERRIES, STOREROOM);
