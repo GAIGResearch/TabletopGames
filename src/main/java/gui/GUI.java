@@ -17,8 +17,6 @@ import static java.util.stream.Collectors.*;
 
 @SuppressWarnings("rawtypes")
 public class GUI extends JFrame {
-    JPanel gamePanel;
-
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
     public static int defaultInfoPanelHeight = 180;

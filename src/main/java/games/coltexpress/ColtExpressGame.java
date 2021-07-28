@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
-import games.coltexpress.gui.ColtExpressGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;

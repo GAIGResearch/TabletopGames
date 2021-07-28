@@ -1,7 +1,7 @@
 package gui.views;
 
-import gui.GUI;
 import core.components.Card;
+import gui.GUI;
 import org.davidmoten.text.utils.WordWrap;
 
 import java.awt.*;

@@ -7,9 +7,9 @@ import java.awt.*;
 public class ScaledImage extends JPanel {
     Image img;
     int w, h;
-    JFrame frame;
+    Container frame;
 
-    public ScaledImage(Image img, int w, int h, JFrame frame) {
+    public ScaledImage(Image img, int w, int h, Container frame) {
         this.img = img;
         this.w = w;
         this.h = h;

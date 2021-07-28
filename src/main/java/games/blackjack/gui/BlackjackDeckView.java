@@ -13,7 +13,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static games.blackjack.gui.BlackjackGUI.*;
+import static games.blackjack.gui.BlackjackGUIManager.*;
 
 public class BlackjackDeckView extends ComponentView {
 

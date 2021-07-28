@@ -208,7 +208,7 @@ public class Frontend extends GUI {
 
         // Empty panel to hold game when play button is pressed
 
-        JPanel gamePanel = new JPanel();
+        GamePanel gamePanel = new GamePanel();
         gamePanel.setVisible(false);
 
         // Play button, runs game in separate thread to allow for proper updates

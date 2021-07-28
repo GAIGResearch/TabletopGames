@@ -16,6 +16,7 @@ import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
 import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Hash;
@@ -57,7 +58,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUIManager(Container parent, Game game, ActionController ac) {
+    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 721);
         if (game == null || ac == null) return;
 

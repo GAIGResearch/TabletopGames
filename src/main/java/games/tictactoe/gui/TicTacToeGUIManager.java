@@ -9,6 +9,7 @@ import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Utils;
@@ -23,7 +24,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
 
     TTTBoardView view;
 
-    public TicTacToeGUIManager(Container parent, Game game, ActionController ac) {
+    public TicTacToeGUIManager(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 1);
         if (game == null) return;
 

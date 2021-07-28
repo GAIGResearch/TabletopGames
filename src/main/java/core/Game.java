@@ -7,6 +7,7 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import gui.AbstractGUIManager;
+import gui.GamePanel;
 import gui.GUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -526,7 +527,9 @@ public class Game {
             AbstractGUIManager gui = null;
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
-                gui = gameToPlay.createGUIManager(frame.getContentPane(), game, ac);
+                GamePanel gamePanel = new GamePanel();
+                frame.setContentPane(gamePanel);
+                gui = gameToPlay.createGUIManager(gamePanel, game, ac);
             }
             frame.setFrameProperties();
 

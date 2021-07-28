@@ -1,6 +1,7 @@
 package games.loveletter.gui;
 
-import gui.GUI;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -11,7 +12,6 @@ import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
-import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -31,7 +31,7 @@ import java.util.List;
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
-public class LoveLetterGUI extends GUI {
+public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 135;
@@ -60,8 +60,8 @@ public class LoveLetterGUI extends GUI {
     LoveLetterGameState llgs;
     LoveLetterForwardModel fm;
 
-    public LoveLetterGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 50);
+    public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 50);
         this.humanID = humanID;
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -94,8 +94,7 @@ public class LoveLetterGUI extends GUI {
                 this.height = (int) (playerAreaHeight * nVertAreas);
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/loveletter/bg.png"), width, height, this);
-                setContentPane(backgroundImage);
+                parent.setBackground(ImageIO.GetInstance().getImage("data/loveletter/bg.png"));
 
                 LoveLetterGameState llgs = (LoveLetterGameState) gameState;
                 LoveLetterParameters llp = (LoveLetterParameters) gameState.getGameParameters();
@@ -184,11 +183,15 @@ public class LoveLetterGUI extends GUI {
                 main.add(mainGameArea, BorderLayout.CENTER);
                 main.add(actionPanel, BorderLayout.SOUTH);
 
-                getContentPane().add(pane, BorderLayout.CENTER);
+                parent.setLayout(new BorderLayout());
+                parent.add(pane, BorderLayout.CENTER);
+                parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+                parent.revalidate();
+                parent.setVisible(true);
+                parent.repaint();
             }
         }
 
-        setFrameProperties();
     }
 
 
@@ -331,10 +334,10 @@ public class LoveLetterGUI extends GUI {
                     playerHands[i].update(llgs, true);
                 }
                 // Repaint
-                repaint();
+                parent.repaint();
 
                 // Message for pause and clarity
-                JOptionPane.showMessageDialog(this, "Round over! Winners: " + winners.toString() + ". Next round begins!");
+                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
             }
             
             if (gameState.getCurrentPlayer() != activePlayer) {
@@ -369,12 +372,7 @@ public class LoveLetterGUI extends GUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+        parent.repaint();
     }
 
     private String getRuleText() {

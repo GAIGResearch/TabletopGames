@@ -16,8 +16,8 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.joining;
 
 @SuppressWarnings("rawtypes")
-public class AbstractGUIManager {
-    protected Container parent;
+public abstract class AbstractGUIManager {
+    protected GamePanel parent;
 
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
@@ -37,7 +37,7 @@ public class AbstractGUIManager {
 
     protected int width, height;
 
-    public AbstractGUIManager(Container parent, ActionController ac, int maxActionSpace) {
+    public AbstractGUIManager(GamePanel parent, ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
         this.parent = parent;

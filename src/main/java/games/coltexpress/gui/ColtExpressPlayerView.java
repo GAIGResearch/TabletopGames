@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
 import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
-import static games.coltexpress.gui.ColtExpressGUI.*;
+import static games.coltexpress.gui.ColtExpressGUIManager.*;
 
 public class ColtExpressPlayerView extends JComponent {
 

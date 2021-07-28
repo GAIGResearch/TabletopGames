@@ -4,27 +4,27 @@ import core.*;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
-import games.blackjack.gui.BlackjackGUI;
+import games.blackjack.gui.BlackjackGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
-import games.coltexpress.gui.ColtExpressGUI;
+import games.coltexpress.gui.ColtExpressGUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
-import games.dominion.gui.DominionGUI;
+import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
-import games.dotsboxes.DBGUI;
+import games.dotsboxes.DBGUIManager;
 import games.dotsboxes.DBGameState;
 import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.gui.ExplodingKittensGUI;
+import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
-import games.loveletter.gui.LoveLetterGUI;
+import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
@@ -32,7 +32,7 @@ import games.pandemic.gui.PandemicGUIManager;
 import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
-import games.poker.gui.PokerGUI;
+import games.poker.gui.PokerGUIManager;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -40,18 +40,17 @@ import games.tictactoe.gui.TicTacToeGUIManager;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
-import games.uno.gui.UnoGUI;
+import games.uno.gui.UnoGUIManager;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.dominion.*;
 import gui.AbstractGUIManager;
-import gui.GUI;
-import gui.PrototypeGUI;
+import gui.GamePanel;
+import gui.PrototypeGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -316,73 +315,7 @@ public enum GameType {
      * @param ac   - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    public GUI createGUIManager(Game game, ActionController ac) {
-
-        GUI gui = null;
-
-        // Find ID of human player, if any (-1 if none)
-        int human = -1;
-        if (game != null && game.getPlayers() != null) {
-            for (int i = 0; i < game.getPlayers().size(); i++) {
-                if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
-                    human = i;
-                    break;
-                }
-            }
-        }
-
-        switch (this) {
-//            case Pandemic:
-//                gui = new PandemicGUIManager(game, ac);
-//                break;
-            case Uno:
-                gui = new UnoGUI(game, ac, human);
-                break;
-            case Blackjack:
-                gui = new BlackjackGUI(game, ac, human);
-                break;
-            case Poker:
-                gui = new PokerGUI(game, ac, human);
-                break;
-            case ColtExpress:
-                gui = new ColtExpressGUI(game, ac, human);
-                break;
-            case ExplodingKittens:
-                gui = new ExplodingKittensGUI(game, ac, human);
-                break;
-            case LoveLetter:
-                gui = new LoveLetterGUI(game, ac, human);
-                break;
-            case TicTacToe:
-//                gui = new TicTacToeGUIManager(game, ac);
-                break;
-            case DotsAndBoxes:
-                if (game != null) {
-                    gui = new DBGUI(game.getGameState(), ac);
-                } else {
-                    gui = new PrototypeGUI(null, null, ac, 100);
-                }
-                break;
-            case Dominion:
-            case DominionImprovements:
-            case DominionSizeDistortion:
-                gui = new DominionGUI(game, ac, human);
-                break;
-            // TODO: Diamant GUI
-        }
-
-        return gui;
-    }
-
-
-    /**
-     * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
-     *
-     * @param game - game to create a GUI for.
-     * @param ac   - ActionController object allowing for user interaction with the GUI.
-     * @return - GUI for the given game type.
-     */
-    public AbstractGUIManager createGUIManager(Container parent, Game game, ActionController ac) {
+    public AbstractGUIManager createGUIManager(GamePanel parent, Game game, ActionController ac) {
 
         AbstractGUIManager gui = null;
 
@@ -401,39 +334,39 @@ public enum GameType {
             case Pandemic:
                 gui = new PandemicGUIManager(parent, game, ac);
                 break;
-//            case Uno:
-//                gui = new UnoGUI(game, ac, human);
-//                break;
-//            case Blackjack:
-//                gui = new BlackjackGUI(game, ac, human);
-//                break;
-//            case Poker:
-//                gui = new PokerGUI(game, ac, human);
-//                break;
-//            case ColtExpress:
-//                gui = new ColtExpressGUI(game, ac, human);
-//                break;
-//            case ExplodingKittens:
-//                gui = new ExplodingKittensGUI(game, ac, human);
-//                break;
-//            case LoveLetter:
-//                gui = new LoveLetterGUI(game, ac, human);
-//                break;
+            case Uno:
+                gui = new UnoGUIManager(parent, game, ac, human);
+                break;
+            case Blackjack:
+                gui = new BlackjackGUIManager(parent, game, ac, human);
+                break;
+            case Poker:
+                gui = new PokerGUIManager(parent, game, ac, human);
+                break;
+            case ColtExpress:
+                gui = new ColtExpressGUIManager(parent, game, ac, human);
+                break;
+            case ExplodingKittens:
+                gui = new ExplodingKittensGUIManager(parent, game, ac, human);
+                break;
+            case LoveLetter:
+                gui = new LoveLetterGUIManager(parent, game, ac, human);
+                break;
             case TicTacToe:
                 gui = new TicTacToeGUIManager(parent, game, ac);
                 break;
-//            case DotsAndBoxes:
-//                if (game != null) {
-//                    gui = new DBGUI(game.getGameState(), ac);
-//                } else {
-//                    gui = new PrototypeGUI(null, null, ac, 100);
-//                }
-//                break;
-//            case Dominion:
-//            case DominionImprovements:
-//            case DominionSizeDistortion:
-//                gui = new DominionGUI(game, ac, human);
-//                break;
+            case DotsAndBoxes:
+                if (game != null) {
+                    gui = new DBGUIManager(parent, game.getGameState(), ac);
+                } else {
+                    gui = new PrototypeGUIManager(parent, null, null, ac, 100);
+                }
+                break;
+            case Dominion:
+            case DominionImprovements:
+            case DominionSizeDistortion:
+                gui = new DominionGUIManager(parent, game, ac, human);
+                break;
             // TODO: Diamant GUI
         }
 
@@ -634,9 +567,9 @@ public enum GameType {
     @Override
     public String toString() {
         boolean implemented = createGameInstance(minPlayers) != null;
-        GUI g = createGUIManager(null, null);
+        AbstractGUIManager g = createGUIManager(null,null, null);
         boolean gui = g != null;
-        boolean prototypeGUI = g instanceof PrototypeGUI;
+        boolean prototypeGUI = g instanceof PrototypeGUIManager;
         return (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : implemented ? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
                 "\n\tminPlayers = " + minPlayers +
                 "\n\tmaxPlayers = " + maxPlayers +

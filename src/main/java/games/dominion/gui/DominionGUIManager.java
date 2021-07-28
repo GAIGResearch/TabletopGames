@@ -2,7 +2,8 @@ package games.dominion.gui;
 
 import core.*;
 import games.dominion.*;
-import gui.GUI;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
 
 import static core.CoreConstants.*;
 
-public class DominionGUI extends GUI {
+public class DominionGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 360;
     final static int playerAreaHeight = 180;
@@ -32,8 +33,8 @@ public class DominionGUI extends GUI {
     DominionDeckView trashPile;
     DominionMarketView marketView;
 
-    public DominionGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 20);
+    public DominionGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 20);
         this.humanId = humanID;
         // Now we set up the GUI
 
@@ -102,12 +103,15 @@ public class DominionGUI extends GUI {
             JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
             // Add all views to frame
-            getContentPane().add(mainGameArea, BorderLayout.CENTER);
-            getContentPane().add(infoPanel, BorderLayout.NORTH);
-            getContentPane().add(actionPanel, BorderLayout.SOUTH);
+            parent.setLayout(new BorderLayout());
+            parent.add(mainGameArea, BorderLayout.CENTER);
+            parent.add(infoPanel, BorderLayout.NORTH);
+            parent.add(actionPanel, BorderLayout.SOUTH);
+            parent.revalidate();
+            parent.setVisible(true);
+            parent.repaint();
         }
 
-        setFrameProperties();
     }
 
     /**
@@ -158,6 +162,6 @@ public class DominionGUI extends GUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
+        parent.repaint();
     }
 }

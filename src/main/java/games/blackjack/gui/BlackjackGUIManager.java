@@ -1,12 +1,11 @@
 package games.blackjack.gui;
 
-import gui.GUI;
+import gui.*;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
-import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -18,7 +17,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
-public class BlackjackGUI extends GUI {
+public class BlackjackGUIManager extends AbstractGUIManager {
     final static int playerWidth = 300;
     final static int playerHeight = 130;
     final static int cardWidth = 90;
@@ -33,8 +32,8 @@ public class BlackjackGUI extends GUI {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220), 3);
     Border[] playerViewBorders;
 
-    public BlackjackGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 15);
+    public BlackjackGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 15);
         this.humanID = humanID;
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -67,8 +66,7 @@ public class BlackjackGUI extends GUI {
                 BlackjackGameState bjgs = (BlackjackGameState) gameState;
                 BlackjackParameters bjgp = (BlackjackParameters) gameState.getGameParameters();
 
-                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"), width, height, this);
-                setContentPane(backgroundImage);
+                parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
 
                 playerHands = new BlackjackPlayerView[nPlayers];
                 playerViewBorders = new Border[nPlayers];
@@ -123,11 +121,15 @@ public class BlackjackGUI extends GUI {
 
                 pane.add("Main", main);
                 pane.add("Rules", rules);
-                setLayout(new BorderLayout());
-                getContentPane().add(pane, BorderLayout.CENTER);
+
+                parent.setLayout(new BorderLayout());
+                parent.add(pane, BorderLayout.CENTER);
+                parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+                parent.revalidate();
+                parent.setVisible(true);
+                parent.repaint();
             }
         }
-        setFrameProperties();
     }
 
 
@@ -207,7 +209,7 @@ public class BlackjackGUI extends GUI {
             // Update decks and visibility
             BlackjackGameState bjgs = (BlackjackGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update((BlackjackGameState) gameState);
+                playerHands[i].update(bjgs);
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {
@@ -224,12 +226,7 @@ public class BlackjackGUI extends GUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+        parent.repaint();
     }
 
     private String getRuleText() {

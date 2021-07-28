@@ -7,7 +7,7 @@ import games.poker.PokerTurnOrder;
 
 import java.awt.*;
 
-import static games.poker.gui.PokerGUI.*;
+import static games.poker.gui.PokerGUIManager.*;
 
 public class PokerPlayerView extends PokerDeckView {
 
