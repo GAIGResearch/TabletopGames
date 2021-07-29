@@ -5,9 +5,11 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import games.dicemonastery.DiceMonasteryStateAttributes;
+import utilities.Pair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MCTSPlayer extends AbstractPlayer {
@@ -22,6 +24,7 @@ public class MCTSPlayer extends AbstractPlayer {
     AbstractPlayer opponentModel;
     protected boolean debug = false;
     protected SingleTreeNode root;
+    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -47,6 +50,9 @@ public class MCTSPlayer extends AbstractPlayer {
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
         root = new SingleTreeNode(this, null, null, gameState, rnd);
+        if (MASTStats != null)
+            root.MASTStatistics = decay(MASTStats);
+
         if (rolloutStrategy instanceof MASTPlayer) {
             ((MASTPlayer) rolloutStrategy).setRoot(root);
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
@@ -60,8 +66,25 @@ public class MCTSPlayer extends AbstractPlayer {
         if (debug)
             System.out.println(root.toString());
 
+        MASTStats = root.MASTStatistics;
         // Return best action
         return root.bestAction();
+    }
+
+    private List<Map<AbstractAction, Pair<Integer, Double>>> decay(List<Map<AbstractAction, Pair<Integer, Double>>> stats) {
+        if (params.MASTGamma > 0.0)
+            for (Map<AbstractAction, Pair<Integer, Double>> map : stats) {
+                if (map != null) {
+                    for (Pair<Integer, Double> pair : map.values()) {
+                        if (pair.a == 0) continue;
+                        double old = pair.a;
+                        pair.a = (int) (pair.a * params.MASTGamma);
+                        pair.b = pair.b * pair.a / old;
+                        if (pair.a == 0) pair.b = 0.0;
+                    }
+                }
+            }
+        return stats;
     }
 
     public AbstractPlayer getOpponentModel(int playerID) {

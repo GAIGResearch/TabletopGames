@@ -1,6 +1,7 @@
 package games.dicemonastery.heuristics;
 
 import evaluation.TunableParameters;
+import players.heuristics.ActionAdvantageHeuristic;
 
 public class AdvantageParams extends TunableParameters {
 
@@ -24,8 +25,8 @@ public class AdvantageParams extends TunableParameters {
     }
 
     @Override
-    public Advantage002 instantiate() {
-        return new Advantage002();
+    public ActionAdvantageHeuristic instantiate() {
+        return new ActionAdvantageHeuristic();
     }
 
     @Override

@@ -32,7 +32,7 @@ public class MASTPlayer extends AbstractPlayer {
             int p = gameState.getCurrentPlayer();
             if (root.MASTStatistics.get(p).containsKey(a)) {
                 Pair<Integer, Double> stats = root.MASTStatistics.get(p).get(a);
-                actionValue = stats.b / stats.a;
+                actionValue = stats.a > 0 ? stats.b / stats.a : 0.0;
             }
             pdf[i] = actionValue;
         }

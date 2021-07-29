@@ -34,6 +34,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean redeterminise = false;
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
+    public double MASTGamma = 0.0;
     public double MASTBoltzmann = 0.0;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.Strategies rolloutType, oppModelType = RANDOM;
@@ -72,6 +73,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
+        addTunableParameter("MASTGamma", 0.0);
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
         addTunableParameter("expertIteration", false);
@@ -101,6 +103,7 @@ public class MCTSParams extends PlayerParameters {
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
         MASTBoltzmann = (double) getParameterValue("boltzmannTemp");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
+        MASTGamma = (double) getParameterValue("MASTGamma");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");

@@ -117,13 +117,6 @@ public class DiceMonasteryConstants {
 
     public final static int[] RETIREMENT_REWARDS = {5, 4, 4, 3, 3, 2, 2, 2};
 
-    public final static Resource[][] gospelInks = {
-            {VIVID_GREEN_INK, VIVID_BLUE_INK},
-            {VIVID_RED_INK, VIVID_BLUE_INK},
-            {VIVID_RED_INK, VIVID_PURPLE_INK},
-            {VIVID_GREEN_INK, VIVID_PURPLE_INK}
-    };
-
     // rows are number of players; columns are ordinal position in bidding
     public final static int[][] VIKING_REWARDS = {
             {0, 0, 0, 0},

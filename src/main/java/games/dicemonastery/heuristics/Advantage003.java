@@ -53,6 +53,7 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
                 nextLine = reader.readLine();
             }
 
+            reader.close();
 
         } catch (Exception e) {
             e.printStackTrace();

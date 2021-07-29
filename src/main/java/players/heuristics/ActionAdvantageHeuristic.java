@@ -1,4 +1,4 @@
-package games.dicemonastery.heuristics;
+package players.heuristics;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -11,7 +11,7 @@ import java.util.function.ToDoubleBiFunction;
 
 import static java.util.stream.Collectors.toList;
 
-public class Advantage002 extends AbstractPlayer implements ToDoubleBiFunction<AbstractAction, AbstractGameState> {
+public class ActionAdvantageHeuristic extends AbstractPlayer implements ToDoubleBiFunction<AbstractAction, AbstractGameState> {
 
     Random rnd = new Random(System.currentTimeMillis());
 
@@ -19,11 +19,16 @@ public class Advantage002 extends AbstractPlayer implements ToDoubleBiFunction<A
 
     Map<Integer, Double> actionAdvantage = new HashMap<>();
 
-    public Advantage002() {
+    public ActionAdvantageHeuristic() {
         this("Advantage002.csv");
     }
 
-    public Advantage002(String filename) {
+    public ActionAdvantageHeuristic(Map<Integer, Double> advantages, double rndWeight) {
+        actionAdvantage = advantages;
+        RND_WEIGHT = rndWeight;
+    }
+
+    public ActionAdvantageHeuristic(String filename) {
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -43,6 +48,7 @@ public class Advantage002 extends AbstractPlayer implements ToDoubleBiFunction<A
                 nextLine = reader.readLine();
             }
 
+            reader.close();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -32,7 +32,7 @@ public class SingleTreeNode {
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
-    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics;
+    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     // Depth of this node
     final int depth;
 
@@ -71,7 +71,7 @@ public class SingleTreeNode {
         this.root = parent == null ? this : parent.root;
         MASTStatistics = new ArrayList<>();
         if (root == this) {
-            // Root node maintains MAST statistics
+            // only root node maintains MAST statistics
             for (int i = 0; i < state.getNPlayers(); i++)
                 MASTStatistics.add(new HashMap<>());
         }
