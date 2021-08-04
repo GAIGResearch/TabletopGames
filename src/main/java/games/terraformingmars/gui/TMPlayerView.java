@@ -80,7 +80,8 @@ public class TMPlayerView extends ComponentView {
                         new Rectangle(offsetX + spacing / 5 + defaultItemSize + k * defaultItemSize * 2, offsetX + spacing / 5, defaultItemSize, defaultItemSize));
                 drawImage(g, production, offsetX + spacing / 5 + defaultItemSize / 2 + k * defaultItemSize * 2, offsetX + spacing / 5 + defaultItemSize, defaultItemSize, defaultItemSize);
                 drawShadowStringCentered(g, "" + gs.getPlayerProduction()[focusPlayer].get(res).getValue(),
-                        new Rectangle(offsetX + spacing / 5 + defaultItemSize / 2 + k * defaultItemSize * 2, offsetX + spacing / 5 + defaultItemSize, defaultItemSize, defaultItemSize));
+                        new Rectangle(offsetX + spacing / 5 + defaultItemSize / 2 + k * defaultItemSize * 2, offsetX + spacing / 5 + defaultItemSize, defaultItemSize, defaultItemSize),
+                        Color.white, Color.black);
 
                 g.setColor(playerColors[focusPlayer]);
                 g.drawRect(offsetX + k * defaultItemSize * 2, offsetX, defaultItemSize * 2, defaultItemSize * 2);
@@ -147,7 +148,7 @@ public class TMPlayerView extends ComponentView {
         drawShadowStringCentered(g, text, new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize/3), null, null, 12);
         startX += metrics.stringWidth(text) + spacing;
         for (Milestone m: gs.getMilestones()) {
-            Color color = Color.white;
+            Color color = TMGUI.fontColor;
             if (m.isClaimed()) color = playerColors[m.claimed];
 
             int progress = m.checkProgress(gs, focusPlayer);
@@ -166,7 +167,7 @@ public class TMPlayerView extends ComponentView {
         drawShadowStringCentered(g, text, new Rectangle(startX, startY, metrics.stringWidth(text), defaultItemSize/3), null, null, 12);
         startX += metrics.stringWidth(text) + spacing;
         for (Award a: gs.getAwards()) {
-            Color color = Color.white;
+            Color color = TMGUI.fontColor;
             if (a.isClaimed()) color = playerColors[a.claimed];
 
             int progress = a.checkProgress(gs, focusPlayer);

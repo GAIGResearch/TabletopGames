@@ -31,19 +31,10 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         rnd = new Random(seed);
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
-        this.params.K = Math.sqrt(2);
-        this.params.rolloutLength = 10;
-        this.params.maxTreeDepth = 5;
-        this.params.epsilon = 1e-6;
-
-        // These parameters are ignored by BasicMCTS - if you want to play with these, you'll
-        // need to upgrade to MCTSPlayer
-        this.params.openLoop = false;
-        this.params.redeterminise = false;
-        this.params.rolloutType = RANDOM;
-        this.params.selectionPolicy = ROBUST;
-        this.params.opponentTreePolicy = Paranoid;
-        this.params.treePolicy = UCB;
+//        this.params.K = Math.sqrt(2);
+//        this.params.rolloutLength = 10;
+//        this.params.maxTreeDepth = 5;
+//        this.params.epsilon = 1e-6;
     }
 
     @Override

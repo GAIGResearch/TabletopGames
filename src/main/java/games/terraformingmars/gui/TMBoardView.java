@@ -114,7 +114,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
             Rectangle r = drawImage(g, tr, offsetX + i*defaultItemSize*3, offsetY, defaultItemSize);
             drawShadowStringCentered(g, "p" + i + ": " +gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue(),
                     new Rectangle(offsetX + i*defaultItemSize*3 + defaultItemSize, offsetY, defaultItemSize*2, r.height),
-                    playerColors[i], Color.darkGray);
+                    playerColors[i], TMGUI.darkGrayColor);
             if (i == 0) {
                 height += spacing + r.getHeight() + spacing;
             }
@@ -236,7 +236,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
             // Draw city name
             drawShadowStringCentered(g, element.getComponentName(),
                     new Rectangle(x-defaultItemSize/2, y-defaultItemSize/2, defaultItemSize, defaultItemSize),
-                    Color.lightGray, null, 10);
+                    TMGUI.lightGrayColor, null, 10);
             return true;
         }
         return false;
@@ -254,7 +254,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
                 // Draw symbol and value
                 drawImage(g, p.getImagePath(), x, y, counterWidth, counterWidth);
                 String text = "" + c.getValue() + "/" + c.getMaximum();
-                drawShadowStringCentered(g, text, new Rectangle(x, y, counterWidth, counterWidth), Color.yellow);
+                drawShadowStringCentered(g, text, new Rectangle(x, y, counterWidth, counterWidth), Color.yellow, Color.black);
                 rect.setRect(x, y, counterWidth, counterWidth);
             } else {
                 // Some vars
@@ -289,7 +289,7 @@ public class TMBoardView extends ComponentView implements ScreenHighlight {
                     FontMetrics metrics = g.getFontMetrics(g.getFont());
                     // Determine the X coordinate for the text
                     int xText = x + (counterWidth - metrics.stringWidth(text)) / 2;
-                    drawShadowString(g, text, xText, (int)(yStep + stepSize*0.8));
+                    drawShadowString(g, text, xText, (int)(yStep + stepSize*0.8), Color.white, Color.black);
                 }
 
                 // Draw symbol

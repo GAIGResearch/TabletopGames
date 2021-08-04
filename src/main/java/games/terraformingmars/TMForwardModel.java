@@ -388,6 +388,7 @@ public class TMForwardModel extends AbstractForwardModel {
             if (cardChoice.getSize() == 0) {
                 possibleActions.add(new TMAction(player));  // Pass
             } else {
+                cardChoice.get(0).actionPlayed = false;
                 BuyCard a = new BuyCard(player, cardChoice.get(0).getComponentID(), params.getProjectPurchaseCost());
                 if (a.canBePlayed(gs)) {
                     possibleActions.add(a);
@@ -414,9 +415,9 @@ public class TMForwardModel extends AbstractForwardModel {
 
             // Buy a standard project
             // - Discard cards for MC
-            if (gs.playerHands[player].getSize() > 0) {
-                possibleActions.add(new SellProjects(player));
-            }
+//            if (gs.playerHands[player].getSize() > 0) {
+//                possibleActions.add(new SellProjects(player));
+//            }
 
             // - Increase energy production 1 step for 11 MC
             possibleActions.add(new ModifyPlayerResource(PowerPlant, params.getnCostSPEnergy(), player, 1, TMTypes.Resource.Energy));

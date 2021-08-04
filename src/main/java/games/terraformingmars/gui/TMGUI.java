@@ -44,6 +44,11 @@ public class TMGUI extends AbstractGUI {
 
     static int fontSize = 16;
     static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
+    static Color fontColor = Color.black;
+    static Color bgColor = Color.white;
+    static Color grayColor = Color.gray;
+    static Color lightGrayColor = Color.darkGray;
+    static Color darkGrayColor = Color.lightGray;
     static int focusPlayer = 0;
 
     int currentPlayerIdx = 0;
@@ -58,11 +63,13 @@ public class TMGUI extends AbstractGUI {
         super(ac, 500);
         if (game == null) return;
 
-        BufferedImage bg = (BufferedImage) ImageIO.GetInstance().getImage("data/terraformingmars/images/stars.jpg");
-        TexturePaint space = new TexturePaint(bg, new Rectangle2D.Float(0,0, bg.getWidth(), bg.getHeight()));
-        TiledImage backgroundImage = new TiledImage(space);
         // Make backgroundImage the content pane.
-        setContentPane(backgroundImage);
+//        BufferedImage bg = (BufferedImage) ImageIO.GetInstance().getImage("data/terraformingmars/images/stars.jpg");
+//        TexturePaint space = new TexturePaint(bg, new Rectangle2D.Float(0,0, bg.getWidth(), bg.getHeight()));
+//        TiledImage backgroundImage = new TiledImage(space);
+//        setContentPane(backgroundImage);
+        setBackground(Color.white);
+
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
         UIManager.put("TabbedPane.tabsOpaque", false);
@@ -78,14 +85,14 @@ public class TMGUI extends AbstractGUI {
 
         actionMenus = new HashMap<>();
         JMenuBar menuBar = new JMenuBar();
-        menuBar.setBackground(Color.black);
+        menuBar.setBackground(bgColor);
         int mnemonicStart = KeyEvent.VK_A;
         for (TMTypes.ActionType t : TMTypes.ActionType.values()) {
             if (t == TMTypes.ActionType.BuyProject) continue;
             JMenu menu = new JMenu(t.name());
             menu.setMnemonic(mnemonicStart++);
             menu.getAccessibleContext().setAccessibleDescription("Choose an action of type " + t.name());
-            menu.setForeground(Color.white);
+            menu.setForeground(fontColor);
             menu.setFont(defaultFont);
             actionMenus.put(t, menu);
             menuBar.add(menu);
@@ -102,14 +109,14 @@ public class TMGUI extends AbstractGUI {
 
         createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2);
         historyInfo.setFont(defaultFont);
-        historyInfo.setForeground(Color.white);
+        historyInfo.setForeground(fontColor);
         JPanel historyWrapper = new JPanel();
         JLabel historyText = new JLabel("Action history:");
         historyText.setFont(defaultFont);
-        historyText.setForeground(Color.white);
+        historyText.setForeground(fontColor);
         historyWrapper.add(historyText);
         historyWrapper.add(historyContainer);
-        historyContainer.setBackground(Color.black);
+        historyContainer.setBackground(bgColor);
 
         playerView = new TMPlayerView(gameState, focusPlayer);
 
@@ -129,7 +136,7 @@ public class TMGUI extends AbstractGUI {
         lastCardPlayed = new TMCardView(gameState, null, -1, TMDeckDisplay.cardWidth, TMDeckDisplay.cardHeight);
         JLabel label = new JLabel("Last card played:");
         label.setFont(defaultFont);
-        label.setForeground(Color.white);
+        label.setForeground(fontColor);
         label.setOpaque(false);
         JPanel wrap = new JPanel();
         wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));
@@ -168,8 +175,8 @@ public class TMGUI extends AbstractGUI {
         generationCount = new JLabel("Generation: 1");
         gamePhase.setFont(defaultFont);
         generationCount.setFont(defaultFont);
-        gamePhase.setForeground(Color.white);
-        generationCount.setForeground(Color.white);
+        gamePhase.setForeground(fontColor);
+        generationCount.setForeground(fontColor);
         JPanel infoWrapper = new JPanel();
         infoWrapper.setLayout(new BoxLayout(infoWrapper, BoxLayout.Y_AXIS));
         infoWrapper.add(generationCount);
@@ -178,14 +185,14 @@ public class TMGUI extends AbstractGUI {
         JPanel playerFlipButtons = new JPanel();
         JLabel jLabel1 = new JLabel("Change player display:");
         jLabel1.setFont(defaultFont);
-        jLabel1.setForeground(Color.white);
+        jLabel1.setForeground(fontColor);
         playerFlipButtons.add(jLabel1);
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             String text = "p" + i;
             JButton jb = new JButton(text);
             jb.setFont(defaultFont);
-            jb.setForeground(Color.white);
-            jb.setBackground(Color.darkGray);
+            jb.setForeground(fontColor);
+            jb.setBackground(darkGrayColor);
             jb.addActionListener(e -> {
                 focusPlayer = Integer.parseInt(jb.getText().replace("p",""));
                 focusCurrentPlayer = false;
@@ -194,15 +201,15 @@ public class TMGUI extends AbstractGUI {
         }
         focusPlayerButton = new JButton("Current player: " + currentPlayerIdx);
         focusPlayerButton.setFont(defaultFont);
-        focusPlayerButton.setForeground(Color.white);
-        focusPlayerButton.setBackground(Color.darkGray);
+        focusPlayerButton.setForeground(fontColor);
+        focusPlayerButton.setBackground(darkGrayColor);
         focusPlayerButton.addActionListener(e -> focusCurrentPlayer = true);
         playerFlipButtons.add(focusPlayerButton);
 
         JButton jb2 = new JButton("Pause/Resume");
         jb2.setFont(defaultFont);
-        jb2.setForeground(Color.white);
-        jb2.setBackground(Color.gray);
+        jb2.setForeground(fontColor);
+        jb2.setBackground(grayColor);
         jb2.addActionListener(e -> game.flipPaused());
         playerFlipButtons.add(jb2);
 
@@ -213,7 +220,7 @@ public class TMGUI extends AbstractGUI {
 
         JLabel actionLabel = new JLabel("Actions: ");
         actionLabel.setFont(defaultFont);
-        actionLabel.setForeground(Color.white);
+        actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
         JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
         JPanel actionWrapper = new JPanel();
@@ -246,7 +253,7 @@ public class TMGUI extends AbstractGUI {
         generationCount.setOpaque(false);
 
         JTabbedPane tabs = new JTabbedPane();
-        tabs.setForeground(Color.white);
+        tabs.setForeground(fontColor);
         tabs.setFont(defaultFont);
 
         JPanel gameWrap = new JPanel();
@@ -262,13 +269,13 @@ public class TMGUI extends AbstractGUI {
         tabs.add("Game", gameWrap);
 
         JPanel instructionsPanel = new JPanel();
-        instructionsPanel.setBackground(Color.black);
+        instructionsPanel.setBackground(bgColor);
         instructionsPanel.setLayout(new BoxLayout(instructionsPanel, BoxLayout.Y_AXIS));
         JTextPane textPane = new JTextPane();
         textPane.setOpaque(false);
         textPane.setBorder(new EmptyBorder(20, 20, 20, 20));
         textPane.setFont(new Font("Prototype", Font.BOLD, 22));
-        textPane.setForeground(Color.lightGray);
+        textPane.setForeground(lightGrayColor);
         textPane.setEditable(false);
         textPane.setFocusable(false);
         textPane.setPreferredSize(new Dimension(defaultDisplayWidth*2,defaultDisplayHeight*2));
@@ -316,15 +323,15 @@ public class TMGUI extends AbstractGUI {
                             JMenuItem menuItem;
                             if (fullLegalAction != null) {
                                 menuItem = new JMenuItem(a.getString(gs));
-                                menuItem.setForeground(Color.white);
+                                menuItem.setForeground(fontColor);
                                 menuItem.addActionListener(e -> ac.addAction(fullLegalAction));
                             } else {
                                 menuItem = new JMenuItem("<html><strike>" + a.getString(gs) + "</strike><html>");
-                                menuItem.setForeground(Color.darkGray);
+                                menuItem.setForeground(darkGrayColor);
                                 menuItem.setToolTipText(getInvalidActionReason(a, gs));
                             }
                             menuItem.setFont(defaultFont);
-                            menuItem.setBackground(Color.black);
+                            menuItem.setBackground(bgColor);
                             menu.add(menuItem);
                         }
                     }

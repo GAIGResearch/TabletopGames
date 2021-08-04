@@ -115,4 +115,9 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
     public int hashCode() {
         return Objects.hash(super.hashCode(), cardChoice);
     }
+
+    @Override
+    public boolean canBePlayed(TMGameState gs) {
+        return true;
+    }
 }
