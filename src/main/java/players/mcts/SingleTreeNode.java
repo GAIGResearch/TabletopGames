@@ -111,10 +111,9 @@ public class SingleTreeNode {
             advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                     .collect(toMap(a -> a, a -> MASTFunction.applyAsDouble(a, actionState)));
         } else {
-            ToDoubleBiFunction<AbstractAction, AbstractGameState> advantagefunction = player.params.getAdvantageFunction();
-            if (advantagefunction != null)
+            if (player.advantageFunction != null)
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                        .collect(toMap(a -> a, a -> advantagefunction.applyAsDouble(a, actionState)));
+                        .collect(toMap(a -> a, a -> player.advantageFunction.applyAsDouble(a, actionState)));
         }
         for (AbstractAction action : actionsFromOpenLoopState) {
             if (!children.containsKey(action)) {

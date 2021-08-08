@@ -2,15 +2,21 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.actions.AbstractAction;
+import core.interfaces.IGameAttribute;
+import core.interfaces.IGameListener;
 import core.interfaces.IStateHeuristic;
 import games.dicemonastery.DiceMonasteryStateAttributes;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.ToDoubleBiFunction;
+import java.util.stream.Collectors;
 
 public class MCTSPlayer extends AbstractPlayer {
 
@@ -22,6 +28,7 @@ public class MCTSPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
     AbstractPlayer rolloutStrategy;
     AbstractPlayer opponentModel;
+    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
     protected boolean debug = false;
     protected SingleTreeNode root;
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
@@ -37,13 +44,23 @@ public class MCTSPlayer extends AbstractPlayer {
     public MCTSPlayer(MCTSParams params) {
         this(params, "MCTSPlayer");
     }
+
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
+        advantageFunction = params.getAdvantageFunction();
         setName(name);
+    }
+
+    @Override
+    public void initializePlayer(AbstractGameState state) {
+        rolloutStrategy.initializePlayer(state);
+        opponentModel.initializePlayer(state);
+        if (advantageFunction instanceof AbstractPlayer)
+            ((AbstractPlayer) advantageFunction).initializePlayer(state);
     }
 
     @Override
@@ -51,7 +68,9 @@ public class MCTSPlayer extends AbstractPlayer {
         // Search for best action from the root
         root = new SingleTreeNode(this, null, null, gameState, rnd);
         if (MASTStats != null)
-            root.MASTStatistics = decay(MASTStats);
+            root.MASTStatistics = MASTStats.stream()
+                    .map(m -> Utils.decay(m, params.MASTGamma))
+                    .collect(Collectors.toList());
 
         if (rolloutStrategy instanceof MASTPlayer) {
             ((MASTPlayer) rolloutStrategy).setRoot(root);
@@ -63,6 +82,15 @@ public class MCTSPlayer extends AbstractPlayer {
             eidg.recordData(root, getForwardModel());
             eidg.close();
         }
+        if (advantageFunction instanceof ITreeProcessor)
+            ((ITreeProcessor) advantageFunction).process(root);
+        if (rolloutStrategy instanceof ITreeProcessor)
+            ((ITreeProcessor) rolloutStrategy).process(root);
+        if (heuristic instanceof ITreeProcessor)
+            ((ITreeProcessor) heuristic).process(root);
+        if (opponentModel instanceof ITreeProcessor)
+            ((ITreeProcessor) opponentModel).process(root);
+
         if (debug)
             System.out.println(root.toString());
 
@@ -71,24 +99,22 @@ public class MCTSPlayer extends AbstractPlayer {
         return root.bestAction();
     }
 
-    private List<Map<AbstractAction, Pair<Integer, Double>>> decay(List<Map<AbstractAction, Pair<Integer, Double>>> stats) {
-        if (params.MASTGamma > 0.0)
-            for (Map<AbstractAction, Pair<Integer, Double>> map : stats) {
-                if (map != null) {
-                    for (Pair<Integer, Double> pair : map.values()) {
-                        if (pair.a == 0) continue;
-                        double old = pair.a;
-                        pair.a = (int) (pair.a * params.MASTGamma);
-                        pair.b = pair.b * pair.a / old;
-                        if (pair.a == 0) pair.b = 0.0;
-                    }
-                }
-            }
-        return stats;
-    }
 
     public AbstractPlayer getOpponentModel(int playerID) {
         return opponentModel;
+    }
+
+    @Override
+    public void finalizePlayer(AbstractGameState state) {
+        if (rolloutStrategy instanceof IGameListener)
+            ((IGameListener) rolloutStrategy).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+        if (opponentModel instanceof IGameListener)
+            ((IGameListener) opponentModel).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+        if (heuristic instanceof IGameListener)
+            ((IGameListener) heuristic).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+        if (advantageFunction instanceof IGameListener)
+            ((IGameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+
     }
 
 }

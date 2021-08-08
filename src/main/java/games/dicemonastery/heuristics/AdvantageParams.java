@@ -26,7 +26,7 @@ public class AdvantageParams extends TunableParameters {
 
     @Override
     public ActionAdvantageHeuristic instantiate() {
-        return new ActionAdvantageHeuristic();
+        throw new IllegalArgumentException("Not yet implemented");
     }
 
     @Override

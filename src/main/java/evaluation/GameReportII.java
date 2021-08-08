@@ -125,13 +125,12 @@ public class GameReportII {
                     gameTrackers.add(gameTracker);
                 }
 
+                List<AbstractPlayer> allPlayers = new ArrayList<>();
+                for (int j = 0; j < playerCount; j++) {
+                    allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
+                }
                 for (int i = 0; i < nGames; i++) {
-                    List<AbstractPlayer> allPlayers = new ArrayList<>();
-                    for (int j = 0; j < playerCount; j++) {
-                        allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
-                    }
                     // Run games, resetting the player each time
-
                     game.reset(allPlayers);
                     game.run();
                 }
