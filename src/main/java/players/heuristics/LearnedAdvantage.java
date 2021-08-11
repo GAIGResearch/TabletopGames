@@ -26,8 +26,10 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
     int count = 0;
     int threshold = 50;
     double gameGamma = 1.0;
+    long timestamp;
     ActionAdvantageHeuristic advantageHeuristic;
     Map<Integer, Pair<Integer, Double>> statsByHash = new HashMap<>();
+    Map<Integer, Pair<Integer, Double>> newData = new HashMap<>();
 
     public LearnedAdvantage(String constructionString) {
 
@@ -40,15 +42,16 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
         if (stuff.length > 3)
             gameGamma = Double.parseDouble(stuff[3]);
 
-        initialiseFromFile();
+        timestamp = initialiseFromFile();
         statsByHash = Utils.decay(statsByHash, gameGamma);
         advantageHeuristic = new ActionAdvantageHeuristic(getAdvantages(), RND_WEIGHT);
     }
 
     @Override
     public void initializePlayer(AbstractGameState state) {
-        initialiseFromFile();
+        timestamp = initialiseFromFile();
         statsByHash = Utils.decay(statsByHash, gameGamma);
+        newData = new HashMap<>();
         advantageHeuristic = new ActionAdvantageHeuristic(getAdvantages(), advantageHeuristic.RND_WEIGHT);
     }
 
@@ -57,15 +60,15 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
         return advantageHeuristic.getAction(gameState, possibleActions);
     }
 
-    private void initialiseFromFile() {
+    private long initialiseFromFile() {
 
         File file = new File(filename + "_Stats." + suffix);
 
         try {
             if (file.exists()) {
+                long retValue = file.lastModified();
 
                 BufferedReader reader = new BufferedReader(new FileReader(file));
-
 
                 // we expect three columns; hash, visits, totAdvantage
                 String nextLine = reader.readLine();
@@ -79,20 +82,34 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
                 }
 
                 reader.close();
+
+                return retValue;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return -1;
     }
 
     private void mergeWithAndWriteToFile() {
-        Map<Integer, Pair<Integer, Double>> currentData = statsByHash;
-        statsByHash = new HashMap<>();
-        initialiseFromFile(); // pick up latest data
-    //    System.out.printf("%d into %d %n", currentData.size(), statsByHash.size());
-        for (Integer key : currentData.keySet()) {
-            statsByHash.merge(key, currentData.get(key),
+        // the file may have been updated since we read it in
+
+        statsByHash = new HashMap<>(); // clear data (but keep newData)
+        long newTimestamp = initialiseFromFile(); // pick up latest data
+        //    System.out.printf("%d into %d %n", currentData.size(), statsByHash.size());
+        //      System.out.printf("Writing file - from TS %d to %d%n", timestamp, newTimestamp);
+        if (newTimestamp == timestamp) {
+            // file has not been changed, so we are responsible for decaying the current file contents before writing
+            statsByHash = Utils.decay(statsByHash, gameGamma);
+            //         System.out.printf("\tWriting all data : %d%n", newData.size());
+        } else {
+            // we do not decay the current file contents, as that has been done already
+            //         System.out.printf("\tWriting only newData : %d%n", newData.size());
+        }
+
+        for (Integer key : statsByHash.keySet()) {
+            newData.merge(key, statsByHash.get(key),
                     (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
         }
 
@@ -121,15 +138,15 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
 
 
             Map<Integer, Double> actionAdvantage = getAdvantages();
-            for (Integer hash : statsByHash.keySet()) {
+            for (Integer hash : newData.keySet()) {
                 advWriter.write(String.format("%d, %.3f", hash, actionAdvantage.getOrDefault(hash, 0.0)));
                 advWriter.newLine();
                 advWriter2.write(String.format("%d, %.3f", hash, actionAdvantage.getOrDefault(hash, 0.0)));
                 advWriter2.newLine();
 
-                statsWriter.write(String.format("%d, %d, %.6f", hash, statsByHash.get(hash).a, statsByHash.get(hash).b));
+                statsWriter.write(String.format("%d, %d, %.6f", hash, newData.get(hash).a, newData.get(hash).b));
                 statsWriter.newLine();
-                statsWriter2.write(String.format("%d, %d, %.6f", hash, statsByHash.get(hash).a, statsByHash.get(hash).b));
+                statsWriter2.write(String.format("%d, %d, %.6f", hash, newData.get(hash).a, newData.get(hash).b));
                 statsWriter2.newLine();
             }
 
@@ -179,9 +196,11 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
                     .map(action -> new Pair<>(action, n.getChildren().get(action)[actor]))
                     .collect(toMap(p -> p.a.hashCode(),
                             p -> new Pair<>(p.b.getVisits(),
-                                    p.b.getTotValue()[actor] / p.b.getVisits() - meanValue)));
+                                    p.b.getTotValue()[actor] - meanValue * p.b.getVisits())));
             // now we merge this data into the existing map
             for (Integer hash : data.keySet()) {
+                newData.merge(hash, data.get(hash),
+                        (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
                 statsByHash.merge(hash, data.get(hash),
                         (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
             }
@@ -196,7 +215,10 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
     private Map<Integer, Double> getAdvantages() {
         return statsByHash.keySet().stream().collect(toMap(
                 key -> key,
-                key -> statsByHash.get(key).b / (double) statsByHash.get(key).a
+                key -> {
+                    int visits = statsByHash.get(key).a;
+                    return visits == 0 ? 0.0 : statsByHash.get(key).b / (double) visits;
+                }
         ));
     }
 }

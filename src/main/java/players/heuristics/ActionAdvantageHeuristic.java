@@ -89,7 +89,7 @@ public class ActionAdvantageHeuristic extends AbstractPlayer implements ToDouble
         int hash = abstractAction.hashCode();
         if (!actionAdvantage.isEmpty() && !actionAdvantage.containsKey(hash) && !unknownHashCodes.contains(hash)) {
             unknownHashCodes.add(hash);
-            System.out.println("Action not found : " + hash + " " + abstractAction + " " + abstractAction.toString());
+            System.out.println("Action not found : " + hash + " " + abstractAction.toString());
         }
         return actionAdvantage.getOrDefault(abstractAction.hashCode(), 0.0);
     }
