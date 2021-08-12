@@ -31,7 +31,7 @@ public class PilgrimageTests {
 
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
-        assertEquals(1, state.getVictoryPoints(0));
+        assertEquals(0, state.getVictoryPoints(0));
         assertEquals(0, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
         assertEquals(3, state.getResource(0, SHILLINGS, STOREROOM));
 
@@ -39,13 +39,15 @@ public class PilgrimageTests {
         p.advance(state);
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
-        assertEquals(3, state.getVictoryPoints(0));
-        assertEquals(1, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
+        assertEquals(1, state.getVictoryPoints(0));
+        assertEquals(0, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
 
         // the monk returns
         p.advance(state);
         assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(6, pilgrim.getPiety());
+        assertEquals(3, state.getVictoryPoints(0));
+        assertEquals(1, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
     }
 
     @Test
@@ -60,9 +62,15 @@ public class PilgrimageTests {
 
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
-        assertEquals(1, state.getVictoryPoints(0));
+        assertEquals(0, state.getVictoryPoints(0));
         assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
         assertEquals(0, state.getResource(0, SHILLINGS, STOREROOM));
+
+        p.advance(state);
+        assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
+        assertEquals(5, pilgrim.getPiety());
+        assertEquals(1, state.getVictoryPoints(0));
+        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
 
         p.advance(state);
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
@@ -70,16 +78,12 @@ public class PilgrimageTests {
         assertEquals(2, state.getVictoryPoints(0));
         assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
 
-        p.advance(state);
-        assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
-        assertEquals(5, pilgrim.getPiety());
-        assertEquals(7, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
-
         // the monk returns
         p.advance(state);
         assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(6, pilgrim.getPiety());
+        assertEquals(7, state.getVictoryPoints(0));
+        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
     }
 
     @Test
@@ -171,14 +175,14 @@ public class PilgrimageTests {
         Pilgrimage p1 = state.startPilgrimage(JERUSALEM, pilgrim1);
 
         assertTrue(p1.isActive());
-        assertEquals(1, state.getVictoryPoints(0));
+        assertEquals(0, state.getVictoryPoints(0));
 
         pilgrim1.promote(state);
-        assertEquals(6, state.getVictoryPoints(0)); // retirement benefit
+        assertEquals(5, state.getVictoryPoints(0)); // retirement benefit
         assertTrue(p1.isActive());
         assertEquals(RETIRED, state.getMonkLocation(pilgrim1.getComponentID()));
         turnOrder.endRound(state);  // SPRING -> SUMMER
         assertFalse(p1.isActive());
-        assertEquals(6, state.getVictoryPoints(0)); // no change
+        assertEquals(5, state.getVictoryPoints(0)); // no change
     }
 }

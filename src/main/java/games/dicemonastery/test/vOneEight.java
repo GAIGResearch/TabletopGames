@@ -72,4 +72,26 @@ public class vOneEight {
         }
     }
 
+    @Test
+    public void gameScoreCorrectForBeerAndMead() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
+        assertEquals(0.0, state.getGameScore(0), 0.001);
+        assertEquals(0.0, state.getGameScore(1), 0.001);
+        assertEquals(0.0, state.getGameScore(2), 0.001);
+
+        state.addResource(2, DiceMonasteryConstants.Resource.BEER, 5);
+        state.addResource(1, DiceMonasteryConstants.Resource.MEAD, 2);
+        state.addResource(0, DiceMonasteryConstants.Resource.BEER, 2);
+        state.addResource(1, DiceMonasteryConstants.Resource.BEER, 1);
+
+        state.addVP(2, 0);
+        state.addVP(1, 2);
+
+        assertEquals(3.0, state.getGameScore(0), 0.001);
+        assertEquals(2.0, state.getGameScore(1), 0.001);
+        assertEquals(3.0, state.getGameScore(2), 0.001);
+
+    }
 }

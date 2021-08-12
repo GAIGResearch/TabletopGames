@@ -14,7 +14,7 @@ public class DiceMonasteryConstants {
 
     public enum ActionArea {
         MEADOW(1), KITCHEN(2), WORKSHOP(3),
-        GATEHOUSE(1), LIBRARY(4), CHAPEL(1),
+        GATEHOUSE(1), LIBRARY(3), CHAPEL(1),
         DORMITORY(0), STOREROOM(0), SUPPLY(0),
         PILGRIMAGE(0), RETIRED(0), GRAVEYARD(0);
 
@@ -141,8 +141,8 @@ public class DiceMonasteryConstants {
 
     public final static int[] PSALM_REWARDS = {4, 3, 3, 2, 2, 2};
     public final static int[] EPISTLE_REWARDS = {5, 4, 4, 3, 3};
-    public final static int[] LITURGY_REWARDS = {6, 5, 5, 4};
-    public final static int GOSPEL_REWARD = 8;
+    public final static int[] LITURGY_REWARDS = {7, 6, 6, 5};
+    public final static int GOSPEL_REWARD = 11;
 
     public enum ILLUMINATED_TEXT {
         PSALM(3, 1, 1, 1, new Resource[]{}, PSALM_REWARDS),

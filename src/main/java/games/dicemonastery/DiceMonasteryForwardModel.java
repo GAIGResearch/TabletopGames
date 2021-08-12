@@ -292,7 +292,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     int totalBeer = state.getResource(currentPlayer, BEER, STOREROOM);
                     int totalMead = state.getResource(currentPlayer, MEAD, STOREROOM);
                     return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
-                            .distinct().filter(bid -> bid.beer + bid.mead * 2 < 10).collect(toList());
+                            .distinct().filter(bid -> bid.beer + bid.mead * 2 < 20).collect(toList());
                 }
             case WINTER:
                 List<AbstractAction> retValue = state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()

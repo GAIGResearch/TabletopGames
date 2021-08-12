@@ -25,11 +25,11 @@ public class Pilgrimage extends Component {
             if (longPilgrimage) {
                 minPiety = 5;
                 cost = 6;
-                vpPerStep = new int[]{1, 1, 2, 0};
+                vpPerStep = new int[]{0, 1, 1, 2};
             } else {
                 minPiety = 3;
                 cost = 3;
-                vpPerStep = new int[]{1, 2, 0};
+                vpPerStep = new int[]{0, 1, 2};
             }
             finalReward = reward;
         }
@@ -79,7 +79,7 @@ public class Pilgrimage extends Component {
         }
         progress++;
         state.addVP(destination.vpPerStep[progress], player);
-        if (progress == destination.vpPerStep.length - 2) {
+        if (progress == destination.vpPerStep.length - 1) {
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) state.getTurnOrder();
             dmto.logEvent(String.format("Monk reaches %s and gains %s", destination, isRelic ? "RELIC" : destination.finalReward), state);
 
@@ -88,8 +88,7 @@ public class Pilgrimage extends Component {
             } else {
                 state.addResource(player, destination.finalReward, 1);
             }
-        } else if (progress == destination.vpPerStep.length - 1)  {
-            DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) state.getTurnOrder();
+
             dmto.logEvent(String.format("Monk returns from %s and is promoted", destination), state);
             Monk pilgrim  = state.getMonkById(pilgrimId);
             state.moveMonk(pilgrimId, PILGRIMAGE, DORMITORY);

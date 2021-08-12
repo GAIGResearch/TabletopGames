@@ -68,7 +68,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             treasuresCommissioned.put(item, 0);
         pilgrimageDecks = new HashMap<>();
         for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values())
-            pilgrimageDecks.put(destination, new Deck<>("Pilgrimages to "+destination.name(), FIRST_VISIBLE_TO_ALL));
+            pilgrimageDecks.put(destination, new Deck<>("Pilgrimages to " + destination.name(), FIRST_VISIBLE_TO_ALL));
         pilgrimagesStarted = new ArrayList<>();
     }
 
@@ -83,7 +83,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public void moveMonk(int id, ActionArea from, ActionArea to) {
         Monk movingMonk = allMonks.get(id);
-    //    System.out.printf("\tMoving Monk %s%n", movingMonk);
+        //    System.out.printf("\tMoving Monk %s%n", movingMonk);
         if (movingMonk == null)
             throw new IllegalArgumentException("Monk does not exist : " + id);
         if (movingMonk.piety < to.dieMinimum)
@@ -437,8 +437,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
             addResource(player, Resource.CALF_SKIN, -getResource(player, Resource.CALF_SKIN, STOREROOM));
             int unharvestedWheat = getResource(player, Resource.GRAIN, MEADOW);
             for (int i = 0; i < unharvestedWheat; i++)
-                 moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
-         }
+                moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
+        }
         // Deliberately do not check monks here...that is done afterwards...Winter housekeeping is done before winter actions
     }
 
@@ -532,8 +532,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return playerTreasuries.get(playerId).getOrDefault(Resource.BEER, 0) +
-                playerTreasuries.get(playerId).getOrDefault(Resource.MEAD, 0) * 2 +
+        return (double) (playerTreasuries.get(playerId).getOrDefault(Resource.BEER, 0) / 2) +
+                playerTreasuries.get(playerId).getOrDefault(Resource.MEAD, 0) +
                 getVictoryPoints(playerId);
     }
 
