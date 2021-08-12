@@ -13,8 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 import static games.coltexpress.gui.ColtExpressGUIManager.*;
 
 public class ColtExpressPlayerView extends JComponent {
@@ -134,12 +132,8 @@ public class ColtExpressPlayerView extends JComponent {
         }
         bulletsLeft = gameState.getBulletsLeft()[playerId];
 
-        if (playerId == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+        playerHand.setFront(playerId == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                 || playerId == humanID
-                || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-            playerHand.setFront(true);
-        } else {
-            playerHand.setFront(false);
-        }
+                || gameState.getCoreGameParameters().alwaysDisplayFullObservable);
     }
 }

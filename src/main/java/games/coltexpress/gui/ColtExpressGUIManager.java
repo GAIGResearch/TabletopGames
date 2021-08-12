@@ -21,8 +21,6 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.List;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 
 public class ColtExpressGUIManager extends AbstractGUIManager {
@@ -252,8 +250,8 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 }
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
-            int activePlayer = (ALWAYS_DISPLAY_CURRENT_PLAYER || ALWAYS_DISPLAY_FULL_OBSERVABLE? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1);
-            plannedActions.informActivePlayer(player.getPlayerID());
+            int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1) : -1;
+            plannedActions.informActivePlayer(activePlayer);
 
             // Show planned actions from the first played
             if (gameState.getGamePhase() == ExecuteActions) {

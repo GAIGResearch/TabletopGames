@@ -1,5 +1,6 @@
 package games.poker.gui;
 
+import core.CoreParameters;
 import gui.AbstractGUIManager;
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -24,9 +25,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class PokerGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -64,6 +62,7 @@ public class PokerGUIManager extends AbstractGUIManager {
 
     PokerGameState pgs;
     PokerForwardModel pfm;
+    CoreParameters coreParameters;
 
     public PokerGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
         super(parent, ac, 15);
@@ -74,6 +73,7 @@ public class PokerGUIManager extends AbstractGUIManager {
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
+            coreParameters = game.getCoreParameters();
             if (gameState != null) {
                 JTabbedPane pane = new JTabbedPane();
                 JPanel main = new JPanel();
@@ -328,9 +328,9 @@ public class PokerGUIManager extends AbstractGUIManager {
             pgs = (PokerGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(pgs);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                if (i == gameState.getCurrentPlayer() && coreParameters.alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                        || coreParameters.alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {

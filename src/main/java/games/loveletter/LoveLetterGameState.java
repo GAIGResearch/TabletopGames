@@ -13,7 +13,6 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 public class LoveLetterGameState extends AbstractGameState implements IPrintable {
@@ -70,7 +69,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         llgs.effectProtection = effectProtection.clone();
         llgs.affectionTokens = affectionTokens.clone();
 
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
             HashSet<Integer>[] cardsNotVisible = new HashSet[getNPlayers()];
             for (int i = 0; i < getNPlayers(); i++) {
@@ -252,7 +251,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ": ");
-            System.out.print(playerHandCards.get(i).toString(getCurrentPlayer()));
+            System.out.print(playerHandCards.get(i).toString(this, getCurrentPlayer()));
             System.out.print(";\t Discarded: ");
             System.out.print(playerDiscardCards.get(i));
 
@@ -264,8 +263,8 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             System.out.println(playerResults[i]);
         }
 
-        System.out.println("\nDrawPile" + ":" + drawPile.toString(getCurrentPlayer()));
-        System.out.println("ReserveCards" + ":" + reserveCards.toString(getCurrentPlayer()));
+        System.out.println("\nDrawPile" + ":" + drawPile.toString(this, getCurrentPlayer()));
+        System.out.println("ReserveCards" + ":" + reserveCards.toString(this, getCurrentPlayer()));
 
         System.out.println("Current GamePhase: " + gamePhase);
         System.out.println("======================");

@@ -2,6 +2,7 @@ package gui;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import core.CoreParameters;
 import core.Game;
 import evaluation.TunableParameters;
 import games.GameType;
@@ -19,8 +20,21 @@ import java.util.List;
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
+    private Thread gameThread;
+    private Game gameRunning;
 
     public Frontend() {
+
+        // Number of players selection
+
+        JPanel playerSelect = new JPanel();
+        playerSelect.setLayout(new BoxLayout(playerSelect, BoxLayout.Y_AXIS));
+        JPanel nPlayers = new JPanel();
+        playerSelect.add(nPlayers);
+        JLabel nPlayersText = new JLabel("# players (max " + nMaxPlayers + "):");
+        nPlayers.add(nPlayersText);
+        JTextField nPlayerField = new JTextField(""+defaultNPlayers, 10);  // integer of this is n players
+        nPlayers.add(nPlayerField);
 
         // Game type and parameters selection
 
@@ -62,6 +76,9 @@ public class Frontend extends GUI {
                 gameParameterEditWindow[i].getContentPane().add(buttons);
             }
         }
+        GameType firstGameType = GameType.valueOf(gameNames[0]);
+        nPlayersText.setText("# players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
+
         JComboBox<String> gameOptions = new JComboBox<>(gameNames);  // index of this selection is game
         gameSelect.add(gameOptions);
         JButton gameParameterEdit = new JButton("Edit");
@@ -69,6 +86,10 @@ public class Frontend extends GUI {
         gameOptions.addActionListener(e -> {
             int idx = gameOptions.getSelectedIndex();
             gameParameterEdit.setVisible(gameParameterEditWindow[idx] != null);
+
+            GameType gameType = GameType.valueOf((String) gameOptions.getSelectedItem());
+            nPlayersText.setText("# players (min " + gameType.getMinPlayers() + ", max " + gameType.getMaxPlayers() + "):");
+            pack();
         });
         gameSelect.add(gameParameterEdit);
         gameParameterEdit.addActionListener(e -> {
@@ -80,16 +101,6 @@ public class Frontend extends GUI {
                 gameParameterEditWindow[idx].setVisible(true);
             }
         });
-
-        // Number of players selection
-
-        JPanel playerSelect = new JPanel();
-        playerSelect.setLayout(new BoxLayout(playerSelect, BoxLayout.Y_AXIS));
-        JPanel nPlayers = new JPanel();
-        playerSelect.add(nPlayers);
-        nPlayers.add(new JLabel("# players (max " + nMaxPlayers + "):"));
-        JTextField nPlayerField = new JTextField(""+defaultNPlayers, 10);  // integer of this is n players
-        nPlayers.add(nPlayerField);
 
         // For each player, select type and parameters
 
@@ -197,14 +208,21 @@ public class Frontend extends GUI {
         seedSelect.add(seedOption);
         seedSelect.add(seedRefresh);
 
-        // Put all together
-
-        JPanel gameOptionFullPanel = new JPanel();
-        gameOptionFullPanel.setLayout(new BoxLayout(gameOptionFullPanel, BoxLayout.Y_AXIS));
-        gameOptionFullPanel.add(gameSelect);
-        gameOptionFullPanel.add(playerSelect);
-        gameOptionFullPanel.add(visualSelect);
-        gameOptionFullPanel.add(seedSelect);
+        // Game run core parameters select
+        CoreParameters coreParameters = new CoreParameters();
+        JPanel gameRunParamSelect = new JPanel();
+        gameRunParamSelect.setLayout(new BoxLayout(gameRunParamSelect, BoxLayout.Y_AXIS));
+        HashMap<String, JComboBox<Object>> coreParameterValueOptions = new HashMap<>();
+        for (String param: coreParameters.getParameterNames()) {
+            JPanel paramPanel = new JPanel();
+            paramPanel.add(new JLabel(param));
+            List<Object> values = coreParameters.getPossibleValues(param);
+            JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
+            valueOptions.setSelectedItem(coreParameters.getDefaultParameterValue(param));
+            coreParameterValueOptions.put(param, valueOptions);
+            paramPanel.add(valueOptions);
+            gameRunParamSelect.add(paramPanel);
+        }
 
         // Empty panel to hold game when play button is pressed
 
@@ -239,35 +257,81 @@ public class Frontend extends GUI {
                 if (params != null) {
                     params.setRandomSeed(seed);
                 }
-                Game game = gameType.createGameInstance(players.size(), params);
-                if (game != null) {
+                gameRunning = gameType.createGameInstance(players.size(), params);
+                if (gameRunning != null) {
 
                     // Reset game instance, passing the players for this game
-                    game.reset(players);
+                    gameRunning.reset(players);
+
+                    // Find core parameters
+                    for (String param: coreParameterValueOptions.keySet()) {
+                        coreParameters.setParameterValue(param, coreParameterValueOptions.get(param).getSelectedItem());
+                    }
+                    gameRunning.setCoreParameters(coreParameters);
 
                     AbstractGUIManager gui = null;
                     if (ac != null) {
                         // Create GUI (null if not implemented; running without visuals)
-                        gui = gameType.createGUIManager(gamePanel, game, ac);
+                        gui = gameType.createGUIManager(gamePanel, gameRunning, ac);
                     }
                     revalidate();
                     pack();
-                    game.run(gui, frame);
-                    System.out.println("Game over: " + Arrays.toString(game.getGameState().getPlayerResults()));
+                    gameRunning.run(gui, frame);
+                    System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
 
                 }
             };
 
-            Thread thread = new Thread(runnable);
-            thread.start();
+            gameThread = new Thread(runnable);
+            gameThread.start();
         });
         gameControlButtons.add(startGame);
-        // todo stop game
+
+        // Stop game button
+        JButton stopGame = new JButton("Stop");
+        stopGame.addActionListener(e -> {
+            if (gameRunning != null) {
+                gameRunning.setStopped(true);
+                gameThread.interrupt();
+            }
+        });
+        gameControlButtons.add(stopGame);
+        gameControlButtons.add(new JSeparator());
+
+        // Pause game button
+        JButton pauseGame = new JButton("Pause");
+        pauseGame.addActionListener(e -> {
+            if (gameRunning != null) {
+                gameRunning.setPaused(true);
+            }
+        });
+        gameControlButtons.add(pauseGame);
+        // Resume game button
+        JButton resumeGame = new JButton("Resume");
+        resumeGame.addActionListener(e -> {
+            if (gameRunning != null) {
+                gameRunning.setPaused(false);
+            }
+        });
+        gameControlButtons.add(resumeGame);
+
         // todo tournaments, game report, player report etc
+
+        // Put all together
+
+        JPanel gameOptionFullPanel = new JPanel();
+        gameOptionFullPanel.setLayout(new BoxLayout(gameOptionFullPanel, BoxLayout.Y_AXIS));
+        gameOptionFullPanel.add(gameSelect);
+        gameOptionFullPanel.add(playerSelect);
+        gameOptionFullPanel.add(visualSelect);
+        gameOptionFullPanel.add(seedSelect);
+        gameOptionFullPanel.add(new JSeparator());
+        gameOptionFullPanel.add(gameRunParamSelect);
+        gameOptionFullPanel.add(new JSeparator());
+        gameOptionFullPanel.add(gameControlButtons);
 
         // Collapse run settings panel
 
-        gameOptionFullPanel.add(gameControlButtons);
         JButton toggleButton = new JButton("<<");
         toggleButton.addActionListener(e -> {
             boolean visible = gameOptionFullPanel.isVisible();
@@ -303,6 +367,7 @@ public class Frontend extends GUI {
             paramPanel.add(new JLabel(param));
             List<Object> values = pp.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
+            valueOptions.setSelectedItem(pp.getDefaultParameterValue(param));
             paramValueOptions.put(param, valueOptions);
             paramPanel.add(valueOptions);
             frame.getContentPane().add(paramPanel);

@@ -17,8 +17,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class UnoGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -100,7 +98,7 @@ public class UnoGUIManager extends AbstractGUIManager {
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 discardPile = new UnoDeckView(-1, ugs.getDiscardDeck(), true, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
-                drawPile = new UnoDeckView(-1, ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
+                drawPile = new UnoDeckView(-1, ugs.getDrawDeck(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 JPanel jp = new JPanel();
@@ -137,9 +135,9 @@ public class UnoGUIManager extends AbstractGUIManager {
             UnoGameState ugs = (UnoGameState)gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update((UnoGameState) gameState);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
@@ -158,7 +156,7 @@ public class UnoGUIManager extends AbstractGUIManager {
             discardPile.updateComponent(ugs.getDiscardDeck());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ugs.getDrawDeck());
-            if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                 drawPile.setFront(true);
             }
 

@@ -17,7 +17,6 @@ import games.GameType;
 import games.poker.components.MoneyPot;
 import utilities.Pair;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static utilities.Utils.generateCombinations;
 
 
@@ -187,7 +186,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             copy.playerBet[i] = playerBet[i].copy();
         }
         copy.drawDeck = drawDeck.copy();
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     copy.drawDeck.add(copy.playerDecks.get(i));

@@ -83,7 +83,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             // new game set up
             for (int i = 0; i < llgs.getNPlayers(); i++) {
                 boolean[] visible = new boolean[llgs.getNPlayers()];
-                if (PARTIAL_OBSERVABLE) {
+                if (llgs.getCoreGameParameters().partialObservable) {
                     visible[i] = true;
                 } else {
                     Arrays.fill(visible, true);
@@ -286,7 +286,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     @Override
     protected void endGame(AbstractGameState gameState) {
         // Print game result
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++) {

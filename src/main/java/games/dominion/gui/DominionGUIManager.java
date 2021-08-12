@@ -12,8 +12,6 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.util.Collection;
 
-import static core.CoreConstants.*;
-
 public class DominionGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 360;
@@ -132,9 +130,9 @@ public class DominionGUIManager extends AbstractGUIManager {
             DominionGameState state = (DominionGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerViews[i].update(state);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanId
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerViews[i].playerHand.setFront(true);
                     playerViews[i].playerHand.setFocusable(true);
                 } else {

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
@@ -102,7 +101,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.playerInCave.addAll(playerInCave);
 
         // mainDeck and is actionsPlayed are hidden.
-        if (PARTIAL_OBSERVABLE && playerId != -1)
+        if (getCoreGameParameters().partialObservable && playerId != -1)
         {
             dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
 

@@ -17,8 +17,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
 public class ExplodingKittensGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -98,7 +96,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 discardPile = new ExplodingKittensDiscardView(ekgs.getDiscardPile(), ekgs.getActionStack(), true, ekgp.getDataPath());
-                drawPile = new ExplodingKittensDeckView(-1, ekgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ekgp.getDataPath());
+                drawPile = new ExplodingKittensDeckView(-1, ekgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, ekgp.getDataPath());
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 JPanel jp = new JPanel();
@@ -137,9 +135,9 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
@@ -158,7 +156,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ekgs.getDrawPile());
-            if (activePlayer == humanID || ALWAYS_DISPLAY_FULL_OBSERVABLE)
+            if (activePlayer == humanID || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
                 drawPile.setFront(true);
 
             // Update actions

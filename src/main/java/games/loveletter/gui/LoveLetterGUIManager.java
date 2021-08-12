@@ -28,9 +28,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
-
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
@@ -143,7 +140,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                 if (gameState.getNPlayers() == 2) {
                     // Add reserve
                     JLabel label = new JLabel("Reserve cards:");
-                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
+                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, llp.getDataPath(),
                             new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                     JPanel wrap = new JPanel();
                     wrap.setOpaque(false);
@@ -162,7 +159,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                 JPanel centerArea = new JPanel();
                 centerArea.setOpaque(false);
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
+                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, llp.getDataPath(),
                         new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                 centerArea.add(new JLabel("Draw pile:"));
                 centerArea.add(drawPile);
@@ -348,9 +345,9 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             // Update decks and visibility
             llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                boolean front = i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE;
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(llgs, front);
 
                 // Highlight active player
@@ -362,7 +359,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             }
             reserve.updateComponent(llgs.getReserveCards());
             drawPile.updateComponent(llgs.getDrawPile());
-            if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                 drawPile.setFront(true);
                 reserve.setFront(true);
             }
