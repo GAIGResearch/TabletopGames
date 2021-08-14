@@ -5,8 +5,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.battlelore.BattleloreGameState;
-import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.gui.TTTBoardView;
+
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -19,7 +18,7 @@ public class BattleloreGUI extends AbstractGUI
 
     public BattleloreGUI(Game game, ActionController ac)
     {
-        super(ac, 1);
+        super(ac, 25);
         if (game == null)
         {
             return;

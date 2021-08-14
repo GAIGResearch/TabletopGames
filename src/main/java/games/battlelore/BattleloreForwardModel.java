@@ -71,10 +71,10 @@ public class BattleloreForwardModel extends AbstractForwardModel
         gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
 
 
-//        gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.OrderStep);
+        //gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.OrderStep);
 
-  //      gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
-    //    gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
+        //gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
+        //gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
     }
 
     @Override
@@ -146,7 +146,6 @@ public class BattleloreForwardModel extends AbstractForwardModel
         gameState.gameBoard.getElement(7, 1).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
         gameState.gameBoard.getElement(8, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
         gameState.gameBoard.getElement(10, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
-
 
         gameState.gameBoard.getElement(1, 6).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
         gameState.gameBoard.getElement(3, 7).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
@@ -285,7 +284,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
      */
     private boolean checkGameEnd(BattleloreGameState gameState, int playerId)
     {
-        int WIN_SCORE = 5;
+        int WIN_SCORE = 4;
         return gameState.GetPlayerScore(playerId) >= WIN_SCORE;
     }
 

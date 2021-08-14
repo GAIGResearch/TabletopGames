@@ -89,11 +89,28 @@ public class AttackUnitsAction extends AbstractAction
                 unit.SetCanAttack(false);
             }
 
+            // check if defender strikes back.
+
             return true;
 
 
         }
 
+    }
+
+    public MapTile GetAttacker()
+    {
+        return attacker;
+    }
+
+    public MapTile GetDefender()
+    {
+        return attacker;
+    }
+
+    public Unit.Faction GetFaction()
+    {
+        return playerFaction;
     }
 
     @Override
