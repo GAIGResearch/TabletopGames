@@ -8,7 +8,9 @@ import games.battlelore.player.RuleBasedPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.BasicMCTSPlayer;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
@@ -33,6 +35,14 @@ public class BattleloreGame extends Game
         super(GameType.Battlelore, agents, new BattleloreForwardModel(), new BattleloreGameState(params, agents.size()));
     }
 
+    public static void generateNewSeeds(long[] arr, int repetitions)
+    {
+        for (int i = 0; i < repetitions; i++)
+        {
+            arr[i] = new Random().nextInt();
+        }
+    }
+
     public static void main(String[] args)
     {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
@@ -47,35 +57,63 @@ public class BattleloreGame extends Game
         MCTSParams params1 = new MCTSParams();
         RMHCParams params2 = new RMHCParams();
 
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
+
+
+        players.add(new RandomPlayer());
         players.add(new OSLAPlayer());
-        //players.add(new RuleBasedPlayer());
-        //players.add(new HumanGUIPlayer(ac));
+        players.add(new RuleBasedPlayer());
+        players.add(new BasicMCTSPlayer(new Random().nextLong()));
         players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
+        //players.add(new MCTSPlayer(new Random().nextLong()));
+
+
         //players.add(new HumanConsolePlayer());
-
+        //players.add(new HumanGUIPlayer(ac));
         /* 4. Run! */
-        runOne(Battlelore, players, seed, ac, false, null);
+        //------------------------DEBUG----------------------------------------//
+        //players.clear();
+        //players.add(new BasicMCTSPlayer(new Random().nextLong()));
+        //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
+        //runOne(Battlelore, players, seed, ac, false, null);
 
+        //------------------------DEBUG----------------------------------------//
         List<GameType> games = new ArrayList<GameType>();
 
         games.add(Battlelore);
-        long[] seeds = new long[100];
-        for (int i = 0; i < 100; i++)
+
+        final int repetitions = 10;
+        long[] seeds = new long[repetitions];
+
+        for (int i = 0; i < players.size(); i++)
         {
-            seeds[i] = i;
+            for (int k = 0; k < players.size(); k++)
+            {
+                if (i != k)
+                {
+                    generateNewSeeds(seeds, repetitions);
+                    System.out.println(players.get(i).toString() + " vs " + players.get(k).toString() + ":");
+                    ArrayList<AbstractPlayer> currentPlayers = new ArrayList<AbstractPlayer>();
+                    currentPlayers.add(players.get(i));
+                    currentPlayers.add(players.get(k));
+                    runMany(games, currentPlayers, repetitions, seeds, null, false, null);
+                }
+            }
         }
-        //runMany(games, players, 2, seeds, null, false, null);
+        //generateNewSeeds(seeds, repetitions);
+        //System.out.println(players.get(0).toString() + " vs " + players.get(1).toString() + ":");
+        //runMany(games, players, repetitions, seeds, null, false, null);
+
+
+
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
 
-        LinkedList<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
+        /*LinkedList<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
         for (AbstractPlayer agent : players)
         {
             agents.add(agent);
-        }
+        }*/
 
-        RoundRobinTournament tournament = new RoundRobinTournament(agents, Battlelore, 2, 100, true);
-        tournament.runTournament();
+        //RoundRobinTournament tournament = new RoundRobinTournament(agents, Battlelore, 2, 100, true);
+        //tournament.runTournament();
     }
 }

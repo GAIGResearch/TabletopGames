@@ -11,6 +11,7 @@ import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
 import games.battlelore.actions.SkipTurnAction;
+import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
@@ -39,6 +40,9 @@ public class RuleBasedPlayer extends AbstractPlayer
         GridBoard<MapTile> board = state.getBoard();
         float playerUnitPower = 0.f;
         float enemyUnitPower = 0.f;
+        int leftAreaPower = 0;
+        int middleAreaPower = 0;
+        int rightAreaPower = 0;
 
         for (int x = 0; x < board.getWidth(); x++)
         {
@@ -50,6 +54,20 @@ public class RuleBasedPlayer extends AbstractPlayer
                 {
                     if (tile.GetFaction() == playerFaction)
                     {
+                        if(tile.IsInArea(MapTile.TileArea.left))
+                        {
+                            leftAreaPower += tile.GetUnits().get(0).getTotalStrength();
+                        }
+                        else if (tile.IsInArea(MapTile.TileArea.mid))
+                        {
+                            middleAreaPower += tile.GetUnits().get(0).getTotalStrength();
+                        }
+                        if (tile.IsInArea(MapTile.TileArea.right))
+                        {
+                            rightAreaPower += tile.GetUnits().get(0).getTotalStrength();
+                        }
+
+
                         BattleloreGameState.BattleloreGamePhase a = (BattleloreGameState.BattleloreGamePhase)state.getGamePhase();
                         playerUnitPower += tile.GetUnits().size() * tile.GetUnits().get(0).getTotalStrength() * tile.GetUnits().get(0).getTotalHealth();
                         if ((BattleloreGameState.BattleloreGamePhase)state.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep)//Checking the next step for result
@@ -66,16 +84,18 @@ public class RuleBasedPlayer extends AbstractPlayer
         }
 
         AbstractAction selectedAction;
-        if (playerUnitPower > enemyUnitPower) // Aggressive Gameplay
-        {
+
             for (AbstractAction action : actions)
             {
                 if (action instanceof AttackUnitsAction)
                 {
-                    AttackUnitsAction act = (AttackUnitsAction) action;
-                    if (act.GetAttacker().GetUnits().get(0).getTotalStrength() > act.GetDefender().GetUnits().get(0).getTotalStrength())
+                    if (playerUnitPower > enemyUnitPower) // Aggressive Gameplay
                     {
-                        return action;
+                        AttackUnitsAction act = (AttackUnitsAction) action;
+                        if (act.GetAttacker().GetUnits().get(0).getTotalStrength() > act.GetDefender().GetUnits().get(0).getTotalStrength())
+                        {
+                            return action;
+                        }
                     }
                 }
 
@@ -92,12 +112,23 @@ public class RuleBasedPlayer extends AbstractPlayer
                 if (action instanceof PlayCommandCardAction)
                 {
                     PlayCommandCardAction act = (PlayCommandCardAction) action;
-
+                    if(leftAreaPower >= rightAreaPower && leftAreaPower >= middleAreaPower && act.GetCommandType() == CommandCard.CommandType.PatrolLeft)
+                    {
+                        return action;
+                    }
+                    if (middleAreaPower >= rightAreaPower && middleAreaPower >= leftAreaPower && act.GetCommandType() == CommandCard.CommandType.BattleMarch)
+                    {
+                        return action;
+                    }
+                    if (rightAreaPower >= middleAreaPower && rightAreaPower >= leftAreaPower && act.GetCommandType() == CommandCard.CommandType.AttackRight)
+                    {
+                        return action;
+                    }
 
                 }
 
             }
-        }
+
 
        // double playerScore = playerUnitPower * FACTOR_PLAYER_POWER + orderableUnitCount * FACTOR_ORDERABLE_UNITS;
        // double enemyPower = enemyUnitPower * FACTOR_ENEMY_POWER;

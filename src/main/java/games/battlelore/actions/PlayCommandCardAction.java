@@ -27,12 +27,16 @@ public class PlayCommandCardAction extends AbstractAction
         //this.orderedTiles = orderedTiles;
     }
 
-
+    public CommandCard.CommandType GetCommandType()
+    {
+        return type;
+    }
 
     @Override
     public boolean execute(AbstractGameState gameState)
     {
         BattleloreGameState state = (BattleloreGameState) gameState;
+
         if (this.playerFaction == Unit.Faction.NA)
         {
             System.out.println("Wrong player id'");
@@ -65,6 +69,8 @@ public class PlayCommandCardAction extends AbstractAction
             }
 
             //state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
+            state.AddToRounds();
+            state.IncrementTurn(playerID);
             return true;
         }
 

@@ -123,11 +123,21 @@ public class BattleloreForwardModel extends AbstractForwardModel
 
         if (checkGameEnd((BattleloreGameState) currentState, playerId))
         {
-
             currentState.setGameStatus(Utils.GameResult.GAME_END);
             //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
             registerWinner(state, playerId);
             return;
+        }
+
+        int roundExceedThreshold = 100;
+        if (state.getNumberOfRounds() > roundExceedThreshold)
+        {
+            state.setGameStatus(Utils.GameResult.DRAW);
+            //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
+            state.setGameStatus(Utils.GameResult.DRAW);
+            //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
+            state.setPlayerResult(Utils.GameResult.DRAW, 0);
+            state.setPlayerResult(Utils.GameResult.DRAW, 1);
         }
 
         //currentState.getTurnOrder().endPlayerTurn(currentState);
@@ -198,12 +208,12 @@ public class BattleloreForwardModel extends AbstractForwardModel
                     {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1)
                         {
-                            actions.add(new MoveUnitsAction(tile, playerFaction, possibleLocations[i][0], possibleLocations[i][1]));
+                            actions.add(new MoveUnitsAction(tile, playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
                         }
                     }
                     if (actions.isEmpty())
                     {
-                        actions.add(new SkipTurnAction(tile, playerFaction, true, false));
+                        actions.add(new SkipTurnAction(tile, playerFaction, true, false, player));
                     }
                 }
             }
@@ -230,18 +240,18 @@ public class BattleloreForwardModel extends AbstractForwardModel
                     }
                     if (actions.isEmpty())
                     {
-                        actions.add(new SkipTurnAction(attacker, playerFaction, false, true));
+                        actions.add(new SkipTurnAction(attacker, playerFaction, false, true, player));
                     }
                 }
             }
         }
 
         //registerWinner(state, new Token("winner is: " + player));
-    if (actions.isEmpty())
-    {
-        int i = 0;
-        actions.add(new SkipTurnAction());
-    }
+        if (actions.isEmpty())
+        {
+            int i = 0;
+            actions.add(new SkipTurnAction());
+        }
         return actions;
     }
 
@@ -286,6 +296,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
     {
         int WIN_SCORE = 4;
         return gameState.GetPlayerScore(playerId) >= WIN_SCORE;
+
     }
 
 

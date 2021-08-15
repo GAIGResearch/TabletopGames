@@ -16,14 +16,16 @@ public class SkipTurnAction extends AbstractAction
     private MapTile units;
     private boolean skipAttack;
     private boolean skipMove;
+    private int playerID;
 
 
-    public SkipTurnAction(MapTile tile, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack)
+    public SkipTurnAction(MapTile tile, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack, int playerID)
     {
         this.units = tile;
         this.playerFaction = faction;
         skipAttack = doesSkipAttack;
         skipMove = doesSkipMove;
+        this.playerID = playerID;
     }
 
     public SkipTurnAction()
@@ -35,14 +37,19 @@ public class SkipTurnAction extends AbstractAction
     @Override
     public boolean execute(AbstractGameState gameState)
     {
-        BattleloreGameState state = (BattleloreGameState) gameState;
-
         if (this.playerFaction == Unit.Faction.NA)
         {
             System.out.println("Wrong player id'");
             return false;
         }
-        else if (units != null)
+
+        BattleloreGameState state = (BattleloreGameState) gameState;
+
+        state.AddToRounds();
+        state.IncrementTurn(playerID);
+
+
+        if (units != null)
         {
             for (Unit unit : units.GetUnits())
             {
@@ -63,7 +70,7 @@ public class SkipTurnAction extends AbstractAction
     @Override
     public AbstractAction copy()
     {
-        return new SkipTurnAction(units.copy(), playerFaction, skipMove, skipAttack);
+        return new SkipTurnAction(units.copy(), playerFaction, skipMove, skipAttack, playerID);
     }
 
     @Override
@@ -76,7 +83,8 @@ public class SkipTurnAction extends AbstractAction
         return Objects.equals(playerFaction, that.playerFaction) &&
                 Objects.equals(units, that.units) &&
                 skipAttack == that.skipAttack &&
-                skipMove == that.skipMove;
+                skipMove == that.skipMove &&
+                playerID == that.playerID;
     }
 
     @Override

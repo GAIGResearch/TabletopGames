@@ -25,13 +25,15 @@ public class MoveUnitsAction extends AbstractAction
     private MapTile tile;
     private int locationX;
     private int locationY;
+    private int playerID;
 
-    public MoveUnitsAction(MapTile tile, Unit.Faction faction, int locX, int locY)
+    public MoveUnitsAction(MapTile tile, Unit.Faction faction, int locX, int locY, int playerID)
     {
         this.tile = tile;
         this.playerFaction = faction;
         this.locationX = locX;
         this.locationY = locY;
+        this.playerID = playerID;
     }
 
 
@@ -52,8 +54,8 @@ public class MoveUnitsAction extends AbstractAction
             if (units == null)
             {
                 state.getBoard().getElement(locationX, locationY);
-
             }
+
             for(Unit unit : units)
             {
                 state.getBoard().getElement(locationX, locationY).AddUnit(unit);
@@ -63,6 +65,8 @@ public class MoveUnitsAction extends AbstractAction
 
             // state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
 
+            state.AddToRounds();
+            state.IncrementTurn(playerID);
             return true;
         }
 
@@ -71,7 +75,7 @@ public class MoveUnitsAction extends AbstractAction
     @Override
     public AbstractAction copy()
     {
-        return new MoveUnitsAction(tile.copy(), playerFaction, locationX, locationY);
+        return new MoveUnitsAction(tile.copy(), playerFaction, locationX, locationY, playerID);
     }
 
     @Override
@@ -83,7 +87,8 @@ public class MoveUnitsAction extends AbstractAction
         return Objects.equals(tile, that.tile) &&
                 playerFaction == that.playerFaction &&
                 locationX == that.locationX &&
-                locationY == that.locationY;
+                locationY == that.locationY &&
+                playerID == that.playerID;
     }
 
     public int hashCode()

@@ -91,9 +91,10 @@ public class AttackUnitsAction extends AbstractAction
 
             // check if defender strikes back.
 
+
+            state.AddToRounds();
+            state.IncrementTurn(playerID);
             return true;
-
-
         }
 
     }
