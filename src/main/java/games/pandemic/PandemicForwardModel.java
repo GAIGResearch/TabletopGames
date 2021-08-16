@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.VisibilityMode.*;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
@@ -112,7 +111,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         nextRule = root;
 
         // Draw game tree from root
-        new GameFlowDiagram(root);
+//        new GameFlowDiagram(root);
     }
 
     /**
@@ -311,7 +310,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             gameState.setPlayerResult(gameState.getGameStatus(), i);
         }
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(gameState.getGameStatus());
         }
     }

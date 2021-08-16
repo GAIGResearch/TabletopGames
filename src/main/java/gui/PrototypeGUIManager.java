@@ -1,6 +1,5 @@
 package gui;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.components.Component;
@@ -16,20 +15,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
 
-public class PrototypeGUI extends AbstractGUI {
+public class PrototypeGUIManager extends AbstractGUIManager {
     JComponent view;
     int width, height;
 
     protected ComponentView[] componentViews;
     protected int maxComponentsInDeck = 100;
 
-    public PrototypeGUI(GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace) {
-        this(game, gameState, ac, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
+    public PrototypeGUIManager(GamePanel parent, GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace) {
+        this(parent, game, gameState, ac, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
     }
 
-    public PrototypeGUI(GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace,
-                        int displayWidth, int displayHeight) {
-        super(ac, maxActionSpace);
+    public PrototypeGUIManager(GamePanel parent, GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace,
+                               int displayWidth, int displayHeight) {
+        super(parent, ac, maxActionSpace);
         this.width = displayWidth;
         this.height = displayHeight;
 
@@ -78,11 +77,14 @@ public class PrototypeGUI extends AbstractGUI {
         north.add(deckScroll);
         north.add(expandDeckButton);
 
-        getContentPane().add(view, BorderLayout.CENTER);
-        getContentPane().add(north, BorderLayout.NORTH);
-        getContentPane().add(actionPanel, BorderLayout.SOUTH);
-
-        setFrameProperties();
+        parent.setLayout(new BorderLayout());
+        parent.add(view, BorderLayout.CENTER);
+        parent.add(north, BorderLayout.NORTH);
+        parent.add(actionPanel, BorderLayout.SOUTH);
+        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
     }
 
     @Override
@@ -97,11 +99,7 @@ public class PrototypeGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
+        parent.repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
-    }
 }

@@ -1,6 +1,7 @@
 package games.loveletter.gui;
 
-import core.AbstractGUI;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -11,7 +12,6 @@ import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
-import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -28,10 +28,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
-
-public class LoveLetterGUI extends AbstractGUI {
+public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 135;
@@ -60,8 +57,8 @@ public class LoveLetterGUI extends AbstractGUI {
     LoveLetterGameState llgs;
     LoveLetterForwardModel fm;
 
-    public LoveLetterGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 50);
+    public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 50);
         this.humanID = humanID;
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -94,8 +91,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 this.height = (int) (playerAreaHeight * nVertAreas);
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/loveletter/bg.png"), width, height, this);
-                setContentPane(backgroundImage);
+                parent.setBackground(ImageIO.GetInstance().getImage("data/loveletter/bg.png"));
 
                 LoveLetterGameState llgs = (LoveLetterGameState) gameState;
                 LoveLetterParameters llp = (LoveLetterParameters) gameState.getGameParameters();
@@ -144,7 +140,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 if (gameState.getNPlayers() == 2) {
                     // Add reserve
                     JLabel label = new JLabel("Reserve cards:");
-                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
+                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, llp.getDataPath(),
                             new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                     JPanel wrap = new JPanel();
                     wrap.setOpaque(false);
@@ -163,7 +159,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 JPanel centerArea = new JPanel();
                 centerArea.setOpaque(false);
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), ALWAYS_DISPLAY_FULL_OBSERVABLE, llp.getDataPath(),
+                drawPile = new LoveLetterDeckView(-1, llgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, llp.getDataPath(),
                         new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                 centerArea.add(new JLabel("Draw pile:"));
                 centerArea.add(drawPile);
@@ -184,11 +180,15 @@ public class LoveLetterGUI extends AbstractGUI {
                 main.add(mainGameArea, BorderLayout.CENTER);
                 main.add(actionPanel, BorderLayout.SOUTH);
 
-                getContentPane().add(pane, BorderLayout.CENTER);
+                parent.setLayout(new BorderLayout());
+                parent.add(pane, BorderLayout.CENTER);
+                parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+                parent.revalidate();
+                parent.setVisible(true);
+                parent.repaint();
             }
         }
 
-        setFrameProperties();
     }
 
 
@@ -331,10 +331,10 @@ public class LoveLetterGUI extends AbstractGUI {
                     playerHands[i].update(llgs, true);
                 }
                 // Repaint
-                repaint();
+                parent.repaint();
 
                 // Message for pause and clarity
-                JOptionPane.showMessageDialog(this, "Round over! Winners: " + winners.toString() + ". Next round begins!");
+                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
             }
             
             if (gameState.getCurrentPlayer() != activePlayer) {
@@ -345,9 +345,9 @@ public class LoveLetterGUI extends AbstractGUI {
             // Update decks and visibility
             llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                boolean front = i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE;
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(llgs, front);
 
                 // Highlight active player
@@ -359,7 +359,7 @@ public class LoveLetterGUI extends AbstractGUI {
             }
             reserve.updateComponent(llgs.getReserveCards());
             drawPile.updateComponent(llgs.getDrawPile());
-            if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                 drawPile.setFront(true);
                 reserve.setFront(true);
             }
@@ -369,12 +369,7 @@ public class LoveLetterGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
+        parent.repaint();
     }
 
     private String getRuleText() {

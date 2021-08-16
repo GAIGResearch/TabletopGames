@@ -1,6 +1,7 @@
 package games.poker.gui;
 
-import core.AbstractGUI;
+import core.CoreParameters;
+import gui.AbstractGUIManager;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -8,7 +9,7 @@ import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
 import games.poker.components.MoneyPot;
-import gui.ScaledImage;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -25,10 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
-
-public class PokerGUI extends AbstractGUI {
+public class PokerGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 130;
@@ -64,9 +62,10 @@ public class PokerGUI extends AbstractGUI {
 
     PokerGameState pgs;
     PokerForwardModel pfm;
+    CoreParameters coreParameters;
 
-    public PokerGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 15);
+    public PokerGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 15);
         this.humanID = humanID;
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -74,6 +73,7 @@ public class PokerGUI extends AbstractGUI {
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
+            coreParameters = game.getCoreParameters();
             if (gameState != null) {
                 JTabbedPane pane = new JTabbedPane();
                 JPanel main = new JPanel();
@@ -104,8 +104,7 @@ public class PokerGUI extends AbstractGUI {
                 PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"), width, height, this);
-                setContentPane(backgroundImage);
+                parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
 
                 // Create main game area that will hold all game views
                 playerHands = new PokerPlayerView[nPlayers];
@@ -188,12 +187,15 @@ public class PokerGUI extends AbstractGUI {
 
                 pane.add("Main", main);
                 pane.add("Rules", rules);
-                setLayout(new BorderLayout());
-                getContentPane().add(pane, BorderLayout.CENTER);
+
+                parent.setLayout(new BorderLayout());
+                parent.add(pane, BorderLayout.CENTER);
+                parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 35));
+                parent.revalidate();
+                parent.setVisible(true);
+                parent.repaint();
             }
         }
-
-        setFrameProperties();
     }
 
     @Override
@@ -292,7 +294,7 @@ public class PokerGUI extends AbstractGUI {
                         playerHands[i].setBorder(playerViewBorders[i]);
                     }
                 }
-                repaint();
+                parent.repaint();
 
                 Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translated = pfm.translatePokerHands(pgs);
                 HashMap<Integer, Integer> ranks = translated.a;
@@ -313,7 +315,7 @@ public class PokerGUI extends AbstractGUI {
                     }
                 }
                 winnerString = winnerString.replace(",}", "}");
-                JOptionPane.showMessageDialog(this, "Round over! Winners: " + winnerString + ". Next round begins!");
+                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winnerString + ". Next round begins!");
             }
 
             // Update player
@@ -326,9 +328,9 @@ public class PokerGUI extends AbstractGUI {
             pgs = (PokerGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(pgs);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                if (i == gameState.getCurrentPlayer() && coreParameters.alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                        || coreParameters.alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
@@ -356,12 +358,7 @@ public class PokerGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 35);
+        parent.repaint();
     }
 
 

@@ -12,8 +12,6 @@ import games.GameType;
 import java.util.ArrayList;
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
-
 public class BlackjackGameState extends AbstractGameState implements IPrintable {
     List<PartialObservableDeck<FrenchCard>>  playerDecks;
     Deck<FrenchCard>        drawDeck;
@@ -95,7 +93,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             // some cards in dealer's deck are hidden
             for (int i = 0; i < copy.playerDecks.get(dealerPlayer).getSize(); i++) {
                 if (!copy.playerDecks.get(dealerPlayer).getVisibilityForPlayer(i, playerId)) {

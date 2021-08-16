@@ -231,7 +231,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
                 a = new Area(key, "Game area");
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponentsMap();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
-                    if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                    if (gs.getCoreGameParameters().partialObservable && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
                         Random r = new Random(gs.getGameParameters().getRandomSeed());
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {

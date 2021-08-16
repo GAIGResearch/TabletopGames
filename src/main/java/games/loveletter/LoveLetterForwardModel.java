@@ -83,7 +83,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             // new game set up
             for (int i = 0; i < llgs.getNPlayers(); i++) {
                 boolean[] visible = new boolean[llgs.getNPlayers()];
-                if (PARTIAL_OBSERVABLE) {
+                if (llgs.getCoreGameParameters().partialObservable) {
                     visible[i] = true;
                 } else {
                     Arrays.fill(visible, true);
@@ -190,8 +190,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         LoveLetterParameters llp = (LoveLetterParameters) llgs.getGameParameters();
 
         // Required tokens from parameters; if more players in the game, use the last value in the array
-        int nRequiredTokens = (llgs.getNPlayers()-1 < llp.nTokensWin.length ? llp.nTokensWin[llgs.getNPlayers()-1] :
-                llp.nTokensWin[llp.nTokensWin.length-1]);
+        double nRequiredTokens = (llgs.getNPlayers() == 2? llp.nTokensWin2 : llgs.getNPlayers() == 3? llp.nTokensWin3 : llp.nTokensWin4);
 
         // Find players with highest number of tokens above the required number
         HashSet<Integer> bestPlayers = new HashSet<>();
@@ -287,7 +286,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     @Override
     protected void endGame(AbstractGameState gameState) {
         // Print game result
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++) {

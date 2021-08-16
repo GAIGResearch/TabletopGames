@@ -1,11 +1,12 @@
-package games.uno.gui;
+package games.explodingkittens.gui;
 
-import core.AbstractGUI;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import games.uno.UnoGameParameters;
-import games.uno.UnoGameState;
+import games.explodingkittens.ExplodingKittensParameters;
+import games.explodingkittens.ExplodingKittensGameState;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -16,34 +17,31 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 
-public class UnoGUI extends AbstractGUI {
+public class ExplodingKittensGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
-    final static int playerAreaHeight = 130;
-    final static int unoCardWidth = 90;
-    final static int unoCardHeight = 115;
+    final static int playerAreaHeight = 135;
+    final static int ekCardWidth = 90;
+    final static int ekCardHeight = 110;
 
     // List of player hand views
-    UnoPlayerView[] playerHands;
+    ExplodingKittensDeckView[] playerHands;
     // Discard pile view
-    UnoDeckView discardPile;
+    ExplodingKittensDiscardView discardPile;
     // Draw pile view
-    UnoDeckView drawPile;
+    ExplodingKittensDeckView drawPile;
 
     // Currently active player
     int activePlayer = -1;
     // ID of human player
     int humanID;
-
     // Border highlight of active player
-    Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
+    Border highlightActive = BorderFactory.createLineBorder(new Color(220, 169, 11), 3);
     Border[] playerViewBorders;
 
-    public UnoGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 15);
+    public ExplodingKittensGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 25);
         this.humanID = humanID;
 
         if (game != null) {
@@ -55,15 +53,15 @@ public class UnoGUI extends AbstractGUI {
                 // Find required size of window
                 int nPlayers = gameState.getNPlayers();
                 int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-                double nVertAreas = 3.5;
+                double nVertAreas = 5;
                 this.width = playerAreaWidth * nHorizAreas;
-                this.height = (int) (playerAreaHeight * nVertAreas);
+                this.height = (int) (playerAreaHeight * nVertAreas) + 20;
 
-                UnoGameState ugs = (UnoGameState) gameState;
-                UnoGameParameters ugp = (UnoGameParameters) gameState.getGameParameters();
+                ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
+                ExplodingKittensParameters ekgp = (ExplodingKittensParameters) gameState.getGameParameters();
 
                 // Create main game area that will hold all game views
-                playerHands = new UnoPlayerView[nPlayers];
+                playerHands = new ExplodingKittensDeckView[nPlayers];
                 playerViewBorders = new Border[nPlayers];
                 JPanel mainGameArea = new JPanel();
                 mainGameArea.setLayout(new BorderLayout());
@@ -73,7 +71,7 @@ public class UnoGUI extends AbstractGUI {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    UnoPlayerView playerHand = new UnoPlayerView(ugs.getPlayerDecks().get(i), i, humanID, ugp.getDataPath());
+                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(humanID, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -85,7 +83,6 @@ public class UnoGUI extends AbstractGUI {
                             TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
                     playerViewBorders[i] = title;
                     playerHand.setBorder(title);
-
                     sides[next].add(playerHand);
                     sides[next].setLayout(new GridBagLayout());
                     next = (next + 1) % (locations.length);
@@ -98,8 +95,8 @@ public class UnoGUI extends AbstractGUI {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                discardPile = new UnoDeckView(-1, ugs.getDiscardDeck(), true, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
-                drawPile = new UnoDeckView(-1, ugs.getDrawDeck(), ALWAYS_DISPLAY_FULL_OBSERVABLE, ugp.getDataPath(), new Rectangle(0, 0, unoCardWidth, unoCardHeight));
+                discardPile = new ExplodingKittensDiscardView(ekgs.getDiscardPile(), ekgs.getActionStack(), true, ekgp.getDataPath());
+                drawPile = new ExplodingKittensDeckView(-1, ekgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, ekgp.getDataPath());
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 JPanel jp = new JPanel();
@@ -108,39 +105,43 @@ public class UnoGUI extends AbstractGUI {
                 mainGameArea.add(jp, BorderLayout.CENTER);
 
                 // Top area will show state information
-                JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
+                JPanel infoPanel = createGameStateInfoPanel("Exploding Kittens", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
-                getContentPane().add(mainGameArea, BorderLayout.CENTER);
-                getContentPane().add(infoPanel, BorderLayout.NORTH);
-                getContentPane().add(actionPanel, BorderLayout.SOUTH);
+                parent.setLayout(new BorderLayout());
+                parent.add(mainGameArea, BorderLayout.CENTER);
+                parent.add(infoPanel, BorderLayout.NORTH);
+                parent.add(actionPanel, BorderLayout.SOUTH);
+
+                parent.revalidate();
+                parent.setVisible(true);
+                parent.repaint();
             }
         }
 
-        setFrameProperties();
     }
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
-                playerHands[activePlayer].playerHandView.setCardHighlight(-1);
+                playerHands[activePlayer].setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
             }
 
             // Update decks and visibility
-            UnoGameState ugs = (UnoGameState)gameState;
+            ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update((UnoGameState) gameState);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
+                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
-                    playerHands[i].playerHandView.setFront(true);
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+                    playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
-                    playerHands[i].playerHandView.setFront(false);
+                    playerHands[i].setFront(false);
                 }
 
                 // Highlight active player
@@ -152,19 +153,18 @@ public class UnoGUI extends AbstractGUI {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
-            discardPile.updateComponent(ugs.getDiscardDeck());
+            discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
-            drawPile.updateComponent(ugs.getDrawDeck());
-            if (ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+            drawPile.updateComponent(ekgs.getDrawPile());
+            if (activePlayer == humanID || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
                 drawPile.setFront(true);
-            }
 
             // Update actions
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
+        parent.repaint();
     }
 
 }

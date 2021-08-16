@@ -1,6 +1,6 @@
 package games.coltexpress.gui;
 
-import core.AbstractGUI;
+import gui.AbstractGUIManager;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -8,7 +8,7 @@ import core.interfaces.IGamePhase;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
-import gui.ScaledImage;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -21,11 +21,9 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.List;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 
-public class ColtExpressGUI extends AbstractGUI {
+public class ColtExpressGUIManager extends AbstractGUIManager {
     // Settings for display area sizes
     final static int playerAreaWidth = 470;
     final static int playerAreaWidthScroll = 290;
@@ -56,8 +54,8 @@ public class ColtExpressGUI extends AbstractGUI {
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 169, 11), 3);
     Border[] playerViewBorders;
 
-    public ColtExpressGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 25);
+    public ColtExpressGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 25);
         this.humanID = humanID;
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -94,8 +92,7 @@ public class ColtExpressGUI extends AbstractGUI {
                 this.height = Math.max(playerAreaHeight * (nPlayers+1), trainView.height + ceCardHeight + 50 + roundView.height) + defaultInfoPanelHeight + defaultActionPanelHeight;
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                ScaledImage backgroundImage = new ScaledImage(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"), width, height, this);
-                setContentPane(backgroundImage);
+                parent.setBackground(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"));
 
                 // Create main game area that will hold all game views
                 JPanel mainGameArea = new JPanel();
@@ -148,11 +145,15 @@ public class ColtExpressGUI extends AbstractGUI {
                 main.add(mainGameArea, BorderLayout.CENTER);
                 main.add(actionPanel, BorderLayout.SOUTH);
 
-                getContentPane().add(pane, BorderLayout.CENTER);
+                parent.setLayout(new BorderLayout());
+                parent.add(pane, BorderLayout.CENTER);
+                parent.setPreferredSize(new Dimension(width, height));
+                parent.revalidate();
+                parent.setVisible(true);
+                parent.repaint();
             }
         }
 
-        setFrameProperties();
     }
 
     @Override
@@ -227,9 +228,9 @@ public class ColtExpressGUI extends AbstractGUI {
             }
             if (currentGamePhase == null || currentGamePhase != gameState.getGamePhase()) {
                 if (gameState.getGamePhase() == ExecuteActions) {
-                    JOptionPane.showMessageDialog(this, "Planning phase over, execute actions!");
+                    JOptionPane.showMessageDialog(parent, "Planning phase over, execute actions!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "New round! Time to plan actions!");
+                    JOptionPane.showMessageDialog(parent, "New round! Time to plan actions!");
                 }
             }
             currentGamePhase = gameState.getGamePhase();
@@ -249,8 +250,8 @@ public class ColtExpressGUI extends AbstractGUI {
                 }
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
-            int activePlayer = (ALWAYS_DISPLAY_CURRENT_PLAYER || ALWAYS_DISPLAY_FULL_OBSERVABLE? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1);
-            plannedActions.informActivePlayer(player.getPlayerID());
+            int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID(): player.getPlayerID()==humanID? player.getPlayerID():-1) : -1;
+            plannedActions.informActivePlayer(activePlayer);
 
             // Show planned actions from the first played
             if (gameState.getGamePhase() == ExecuteActions) {
@@ -268,12 +269,7 @@ public class ColtExpressGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height);
+        parent.repaint();
     }
 
     private String getRuleText() {

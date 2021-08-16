@@ -1,38 +1,32 @@
 package games.dotsboxes;
 
-import core.AbstractGUI;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import gui.ScaledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 import core.actions.AbstractAction;
-import gui.ScaledImage;
-import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Utils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
-public class DBGUI extends AbstractGUI {
+public class DBGUIManager extends AbstractGUIManager {
     DBGridBoardView view;
     int gapRight = 30;
 
-    public DBGUI(AbstractGameState gameState, ActionController ac) {
-        this(gameState, ac, defaultDisplayWidth, defaultDisplayHeight);
+    public DBGUIManager(GamePanel parent, AbstractGameState gameState, ActionController ac) {
+        this(parent, gameState, ac, defaultDisplayWidth, defaultDisplayHeight);
     }
 
-    public DBGUI(AbstractGameState gameState, ActionController ac,
-                 int displayWidth, int displayHeight) {
-        super(ac, 100);
+    public DBGUIManager(GamePanel parent, AbstractGameState gameState, ActionController ac,
+                        int displayWidth, int displayHeight) {
+        super(parent, ac, 100);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -40,7 +34,7 @@ public class DBGUI extends AbstractGUI {
 
         this.width = gapRight + displayWidth;
         this.height = displayHeight;
-        setContentPane(new ScaledImage(ImageIO.GetInstance().getImage("data/dotsboxes/bg.png"), width, height, this));
+        parent.setBackground(ImageIO.GetInstance().getImage("data/dotsboxes/bg.png"));
 
         JTabbedPane pane = new JTabbedPane();
         JPanel main = new JPanel();
@@ -63,7 +57,7 @@ public class DBGUI extends AbstractGUI {
 
         pane.add("Main", main);
         pane.add("Rules", rules);
-        setLayout(new BorderLayout());
+        parent.setLayout(new BorderLayout());
 
         JPanel wrapper = new JPanel();
         wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.X_AXIS));
@@ -71,9 +65,11 @@ public class DBGUI extends AbstractGUI {
         wrapper.add(Box.createRigidArea(new Dimension(gapRight,height)));
         wrapper.add(pane);
 
-        getContentPane().add(wrapper, BorderLayout.CENTER);
-
-        setFrameProperties();
+        parent.add(wrapper, BorderLayout.CENTER);
+        parent.setPreferredSize(new Dimension(Math.max(width,view.getPreferredSize().width), view.getPreferredSize().height + defaultInfoPanelHeight));
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
     }
 
     @Override
@@ -138,12 +134,7 @@ public class DBGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(Math.max(width,view.getPreferredSize().width), view.getPreferredSize().height + defaultInfoPanelHeight);
+        parent.repaint();
     }
 
     private String getRuleText() {

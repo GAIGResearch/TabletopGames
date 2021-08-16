@@ -1,12 +1,15 @@
 package games.poker;
 
 import core.AbstractParameters;
+import core.Game;
+import evaluation.TunableParameters;
+import games.GameType;
 //import games.uno.UnoGameParameters;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public class PokerGameParameters extends AbstractParameters {
+public class PokerGameParameters extends TunableParameters {
     public String dataPath = "data/FrenchCards/";
 
     // Game over condition parameters
@@ -27,6 +30,32 @@ public class PokerGameParameters extends AbstractParameters {
 
     public PokerGameParameters(long seed) {
         super(seed);
+        addTunableParameter("maxRounds", 10, Arrays.asList(1, 5, 10, 15, 20));
+        addTunableParameter("endMinMoney", false, Arrays.asList(false, true));
+        addTunableParameter("nWinMoney", 80, Arrays.asList(50, 80, 100, 200, 500, 1000));
+        addTunableParameter("nStartingMoney", 50, Arrays.asList(20, 50, 80, 100, 200, 500));
+        addTunableParameter("nFlopCards", 3, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nTurnCards", 1, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nRiverCards", 1, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nCardsPerPlayer", 2, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("smallBlind", 5, Arrays.asList(1, 5, 10, 15, 20));
+        addTunableParameter("bigBlind", 10, Arrays.asList(2, 10, 20, 30, 40));
+        addTunableParameter("bet", 5, Arrays.asList(1, 5, 10, 15, 20));
+    }
+
+    @Override
+    public void _reset() {
+        maxRounds = (int) getParameterValue("maxRounds");
+        endMinMoney = (boolean) getParameterValue("endMinMoney");
+        nWinMoney = (int) getParameterValue("nWinMoney");
+        nStartingMoney = (int) getParameterValue("nStartingMoney");
+        nFlopCards = (int) getParameterValue("nFlopCards");
+        nTurnCards = (int) getParameterValue("nTurnCards");
+        nRiverCards = (int) getParameterValue("nRiverCards");
+        nCardsPerPlayer = (int) getParameterValue("nCardsPerPlayer");
+        smallBlind = (int) getParameterValue("smallBlind");
+        bigBlind = (int) getParameterValue("bigBlind");
+        bet = (int) getParameterValue("bet");
     }
 
     public String getDataPath() {
@@ -67,5 +96,10 @@ public class PokerGameParameters extends AbstractParameters {
         int result = Objects.hash(super.hashCode(), dataPath, nStartingMoney, nWinMoney, nFlopCards, nTurnCards, nRiverCards, nCardsPerPlayer, smallBlind, bigBlind, bet, endMinMoney);
         result = 31 * result + Arrays.hashCode(raiseMultipliers);
         return result;
+    }
+
+    @Override
+    public Object instantiate() {
+        return new Game(GameType.Poker, new PokerForwardModel(), new PokerGameState(this, GameType.Poker.getMinPlayers()));
     }
 }

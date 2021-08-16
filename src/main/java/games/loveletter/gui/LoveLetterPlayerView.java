@@ -1,7 +1,6 @@
 package games.loveletter.gui;
 
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.cards.LoveLetterCard;
@@ -9,7 +8,7 @@ import games.loveletter.cards.LoveLetterCard;
 import javax.swing.*;
 import java.awt.*;
 
-import static games.loveletter.gui.LoveLetterGUI.*;
+import static games.loveletter.gui.LoveLetterGUIManager.*;
 
 
 public class LoveLetterPlayerView extends JPanel {
@@ -115,7 +114,7 @@ public class LoveLetterPlayerView extends JPanel {
         discardCards.setToolTipText(text);
 
         nPoints = gameState.getAffectionTokens()[playerId];
-        nPointsWin = (gameState.getNPlayers()-1 < params.nTokensWin.length ? params.nTokensWin[gameState.getNPlayers()-1] :
-                params.nTokensWin[params.nTokensWin.length-1]);
+        nPointsWin = (gameState.getNPlayers() == 2? params.nTokensWin2 : gameState.getNPlayers() == 3? params.nTokensWin3 : params.nTokensWin4);
+
     }
 }

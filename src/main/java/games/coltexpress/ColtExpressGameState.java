@@ -2,7 +2,6 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -19,7 +18,6 @@ import utilities.Pair;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VisibilityMode;
 import static java.util.stream.Collectors.toList;
 
@@ -100,7 +98,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             copy.trainCompartments.add((Compartment) d.copy());
         }
 
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // Other player hands are hidden, but it's known what's in a player's deck

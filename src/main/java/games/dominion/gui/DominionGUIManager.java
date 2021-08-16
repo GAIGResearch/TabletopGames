@@ -2,6 +2,8 @@ package games.dominion.gui;
 
 import core.*;
 import games.dominion.*;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -10,9 +12,7 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.util.Collection;
 
-import static core.CoreConstants.*;
-
-public class DominionGUI extends AbstractGUI {
+public class DominionGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 360;
     final static int playerAreaHeight = 180;
@@ -31,8 +31,8 @@ public class DominionGUI extends AbstractGUI {
     DominionDeckView trashPile;
     DominionMarketView marketView;
 
-    public DominionGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 20);
+    public DominionGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 20);
         this.humanId = humanID;
         // Now we set up the GUI
 
@@ -101,12 +101,15 @@ public class DominionGUI extends AbstractGUI {
             JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
             // Add all views to frame
-            getContentPane().add(mainGameArea, BorderLayout.CENTER);
-            getContentPane().add(infoPanel, BorderLayout.NORTH);
-            getContentPane().add(actionPanel, BorderLayout.SOUTH);
+            parent.setLayout(new BorderLayout());
+            parent.add(mainGameArea, BorderLayout.CENTER);
+            parent.add(infoPanel, BorderLayout.NORTH);
+            parent.add(actionPanel, BorderLayout.SOUTH);
+            parent.revalidate();
+            parent.setVisible(true);
+            parent.repaint();
         }
 
-        setFrameProperties();
     }
 
     /**
@@ -127,9 +130,9 @@ public class DominionGUI extends AbstractGUI {
             DominionGameState state = (DominionGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerViews[i].update(state);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
+                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || i == humanId
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerViews[i].playerHand.setFront(true);
                     playerViews[i].playerHand.setFocusable(true);
                 } else {
@@ -157,6 +160,6 @@ public class DominionGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
+        parent.repaint();
     }
 }

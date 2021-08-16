@@ -7,7 +7,6 @@ import core.rules.GameOverCondition;
 import games.pandemic.PandemicGameState;
 import utilities.Utils;
 
-import static core.CoreConstants.VERBOSE;
 import static games.pandemic.PandemicConstants.playerDeckHash;
 import static utilities.Utils.GameResult.LOSE;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -21,7 +20,7 @@ public class GameOverDrawCards extends GameOverCondition {
 
         // if the deck is empty -> GAME OVER
         if (!canDraw){
-            if (VERBOSE) {
+            if (gs.getCoreGameParameters().verbose) {
                 System.out.println("No more cards to draw");
             }
             return LOSE;

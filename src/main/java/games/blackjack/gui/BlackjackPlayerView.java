@@ -6,7 +6,7 @@ import core.components.FrenchCard;
 
 import java.awt.*;
 
-import static games.blackjack.gui.BlackjackGUI.*;
+import static games.blackjack.gui.BlackjackGUIManager.*;
 
 public class BlackjackPlayerView extends BlackjackDeckView{
     int playerID;

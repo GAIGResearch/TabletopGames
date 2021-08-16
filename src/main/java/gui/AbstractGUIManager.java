@@ -1,7 +1,8 @@
-package core;
+package gui;
 
+import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import gui.WindowInput;
 import players.human.ActionController;
 import utilities.Utils;
 
@@ -10,13 +11,14 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 
 @SuppressWarnings("rawtypes")
-public abstract class AbstractGUI extends JFrame {
+public abstract class AbstractGUIManager {
+    protected GamePanel parent;
+
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
     public static int defaultInfoPanelHeight = 180;
@@ -35,9 +37,11 @@ public abstract class AbstractGUI extends JFrame {
 
     protected int width, height;
 
-    public AbstractGUI(ActionController ac, int maxActionSpace) {
+    public AbstractGUIManager(GamePanel parent, ActionController ac, int maxActionSpace) {
         this.ac = ac;
         this.maxActionSpace = maxActionSpace;
+        this.parent = parent;
+
         gameStatus = new JLabel();
         playerStatus = new JLabel();
         playerScores = new JLabel();
@@ -46,18 +50,6 @@ public abstract class AbstractGUI extends JFrame {
         turn = new JLabel();
         currentPlayer = new JLabel();
         historyInfo = new JTextPane();
-
-        this.wi = new WindowInput();
-        addWindowListener(wi);
-    }
-
-    protected void setFrameProperties() {
-        // Frame properties
-        pack();
-        this.setVisible(true);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-//        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        repaint();
     }
 
     /* Methods that should/can be implemented by subclass */
@@ -67,7 +59,7 @@ public abstract class AbstractGUI extends JFrame {
      * @param player - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected abstract void _update(AbstractPlayer player, AbstractGameState gameState);
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {}
 
     /**
      * Updates which action buttons should be visible to the players, and which should not.
@@ -76,8 +68,8 @@ public abstract class AbstractGUI extends JFrame {
      * @param gameState - current game state to be used in updating visuals.
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.gameStatus == Utils.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = player.forwardModel.computeAvailableActions(gameState);
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size(); i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
@@ -210,7 +202,8 @@ public abstract class AbstractGUI extends JFrame {
      * @return true if open, false otherwise
      */
     public final boolean isWindowOpen() {
-        return !wi.windowClosed;
+        return true;  // TODO
+//        return !wi.windowClosed;
     }
 
     /* Helper class */
@@ -260,10 +253,5 @@ public abstract class AbstractGUI extends JFrame {
                 actionButton.setButtonAction(null, "");
             }
         }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20);
     }
 }

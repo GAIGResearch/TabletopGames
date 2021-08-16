@@ -13,7 +13,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
 
-import static games.coltexpress.gui.ColtExpressGUI.*;
+import static games.coltexpress.gui.ColtExpressGUIManager.*;
 
 public class ColtExpressTrainView extends JComponent {
 
