@@ -1,24 +1,18 @@
 package games.explodingkittens.gui;
 
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import gui.views.CardView;
-import gui.views.ComponentView;
 import gui.views.DeckView;
 import utilities.ImageIO;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static games.explodingkittens.gui.ExplodingKittensGUI.*;
+import static games.explodingkittens.gui.ExplodingKittensGUIManager.*;
 
 
 public class ExplodingKittensDeckView extends DeckView<ExplodingKittensCard> {

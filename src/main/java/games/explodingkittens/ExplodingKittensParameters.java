@@ -1,12 +1,17 @@
 package games.explodingkittens;
 
 import core.AbstractParameters;
+import core.Game;
+import evaluation.TunableParameters;
+import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
+import games.loveletter.cards.LoveLetterCard;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class ExplodingKittensParameters extends AbstractParameters {
+public class ExplodingKittensParameters extends TunableParameters {
 
     String dataPath = "data/explodingkittens/";
 
@@ -32,6 +37,23 @@ public class ExplodingKittensParameters extends AbstractParameters {
 
     public ExplodingKittensParameters(long seed) {
         super(seed);
+        addTunableParameter("nCardsPerPlayer", 7, Arrays.asList(3,5,7,10,15));
+        addTunableParameter("nDefuseCards", 6, Arrays.asList(1,2,3,6,9));
+        addTunableParameter("nSeeFutureCards", 3, Arrays.asList(1,3,5,7));
+        addTunableParameter("nopeOwnCards", true, Arrays.asList(false, true));
+        for (ExplodingKittensCard.CardType c: cardCounts.keySet()) {
+            if (c == ExplodingKittensCard.CardType.EXPLODING_KITTEN) addTunableParameter(c.name() + " count", -1);
+            else addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
+        }
+    }
+
+    @Override
+    public void _reset() {
+        nCardsPerPlayer = (int) getParameterValue("nCardsPerPlayer");
+        nDefuseCards = (int) getParameterValue("nDefuseCards");
+        nSeeFutureCards = (int) getParameterValue("nSeeFutureCards");
+        nopeOwnCards = (boolean) getParameterValue("nopeOwnCards");
+        cardCounts.replaceAll((c, v) -> (Integer) getParameterValue(c.name() + " count"));
     }
 
     public String getDataPath() {
@@ -64,5 +86,10 @@ public class ExplodingKittensParameters extends AbstractParameters {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), dataPath, cardCounts, nCardsPerPlayer, nDefuseCards, nSeeFutureCards);
+    }
+
+    @Override
+    public Object instantiate() {
+        return new Game(GameType.ExplodingKittens, new ExplodingKittensForwardModel(), new ExplodingKittensGameState(this, GameType.ExplodingKittens.getMinPlayers()));
     }
 }

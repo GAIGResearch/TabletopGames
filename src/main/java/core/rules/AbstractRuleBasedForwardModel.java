@@ -3,6 +3,11 @@ package core.rules;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.rules.nodetypes.BranchingRuleNode;
+import core.rules.nodetypes.ConditionNode;
+import core.rules.nodetypes.RuleNode;
+
+import java.util.HashMap;
 
 public abstract class AbstractRuleBasedForwardModel extends AbstractForwardModel {
 
@@ -73,5 +78,51 @@ public abstract class AbstractRuleBasedForwardModel extends AbstractForwardModel
         } while (nextRule != null);
 
         nextRule = lastRule.getNext();  // Go back to parent, skip it and go to next rule
+    }
+
+    /**
+     * Copy root node with rule graph.
+     * @return - New copy of root
+     */
+    protected Node copyRoot() {
+        return copyNodeGraph(new HashMap<>(), root);
+    }
+
+    /**
+     * Recursive copy of nodes in rule graph
+     * @param visitedNodes - Map keeping track of visited nodes
+     * @param node - Original node
+     * @return - Node with copy of rule graph
+     */
+    private Node copyNodeGraph(HashMap<Integer, Node> visitedNodes, Node node) {
+
+        if(node == null) {
+            throw new AssertionError("Can't copy rule graph containing null nodes!");
+        }
+        if(visitedNodes.containsKey(node.getId())) {
+            return visitedNodes.get(node.getId());
+        }
+
+        Node copy = node.copy();
+        visitedNodes.put(node.getId(), copy);
+
+        if(node instanceof RuleNode) {
+            if(node instanceof BranchingRuleNode) {
+                Node[] children = ((BranchingRuleNode) node).getChildren();
+                Node[] copies = new Node[children.length];
+                for (int j = 0; j < copies.length; j++) {
+                    copies[j] = copyNodeGraph(visitedNodes, children[j].getNext());
+                }
+                ((BranchingRuleNode) copy).setNext(copies);
+            } else {
+                ((RuleNode) copy).setNext(copyNodeGraph(visitedNodes, node.getNext()));
+            }
+
+        } else if(node instanceof ConditionNode) {
+            ((ConditionNode) copy).setYesNo(
+                    copyNodeGraph(visitedNodes, ((ConditionNode) node).getYesNo()[0]),
+                    copyNodeGraph(visitedNodes, ((ConditionNode) node).getYesNo()[1]));
+        }
+        return copy;
     }
 }

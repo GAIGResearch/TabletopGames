@@ -13,7 +13,6 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 public class LoveLetterGameState extends AbstractGameState implements IPrintable {
@@ -70,13 +69,22 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         llgs.effectProtection = effectProtection.clone();
         llgs.affectionTokens = affectionTokens.clone();
 
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
+            HashSet<Integer>[] cardsNotVisible = new HashSet[getNPlayers()];
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
-                    // Hide!
-                    llgs.drawPile.add(llgs.playerHandCards.get(i));
-                    llgs.playerHandCards.get(i).clear();
+                if (i != playerId) {
+                    PartialObservableDeck<LoveLetterCard> deck = llgs.playerHandCards.get(i);
+                    cardsNotVisible[i] = new HashSet<>();
+                    for (int j = 0; j < deck.getSize(); j++) {
+                        if (!deck.getVisibilityForPlayer(j, playerId)) {
+                            // Hide!
+                            cardsNotVisible[i].add(j);
+                        }
+                    }
+                    for (int j: cardsNotVisible[i]) {
+                        llgs.drawPile.add(llgs.playerHandCards.get(i).pick(j));
+                    }
                 }
             }
             for (int i = 0; i < llgs.reserveCards.getSize(); i++) {
@@ -88,9 +96,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             Random r = new Random(llgs.getGameParameters().getRandomSeed());
             llgs.drawPile.shuffle(r);
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId && llgs.playerHandCards.get(i).getDeckVisibility()[playerId]) {
+                if (i != playerId) {
                     // New random cards
-                    for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
+                    for (int j = 0; j < cardsNotVisible[i].size(); j++) {
                         llgs.playerHandCards.get(i).add(llgs.drawPile.draw());
                     }
                 }
@@ -205,6 +213,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     public LoveLetterCard getReserveCard(){
         return reserveCards.draw();
     }
+    public PartialObservableDeck<LoveLetterCard> getReserveCards() {
+        return reserveCards;
+    }
     public boolean isNotProtected(int playerID){
         return !effectProtection[playerID];
     }
@@ -240,7 +251,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                 System.out.print(">>> Player " + i + ":");
             else
                 System.out.print("Player " + i + ": ");
-            System.out.print(playerHandCards.get(i).toString(getCurrentPlayer()));
+            System.out.print(playerHandCards.get(i).toString(this, getCurrentPlayer()));
             System.out.print(";\t Discarded: ");
             System.out.print(playerDiscardCards.get(i));
 
@@ -252,8 +263,8 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             System.out.println(playerResults[i]);
         }
 
-        System.out.println("\nDrawPile" + ":" + drawPile.toString(getCurrentPlayer()));
-        System.out.println("ReserveCards" + ":" + reserveCards.toString(getCurrentPlayer()));
+        System.out.println("\nDrawPile" + ":" + drawPile.toString(this, getCurrentPlayer()));
+        System.out.println("ReserveCards" + ":" + reserveCards.toString(this, getCurrentPlayer()));
 
         System.out.println("Current GamePhase: " + gamePhase);
         System.out.println("======================");

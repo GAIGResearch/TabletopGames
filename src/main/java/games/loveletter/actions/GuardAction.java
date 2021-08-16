@@ -13,7 +13,7 @@ import java.util.Objects;
  * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
  * is removed from the game.
  */
-public class GuardAction extends DrawCard implements IPrintable {
+public class GuardAction extends core.actions.DrawCard implements IPrintable {
 
     private final int opponentID;
     private final LoveLetterCard.CardType cardType;
@@ -72,5 +72,9 @@ public class GuardAction extends DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new GuardAction(deckFrom, deckTo, fromIndex, opponentID, cardType);
+    }
+
+    public int getOpponentID() {
+        return opponentID;
     }
 }

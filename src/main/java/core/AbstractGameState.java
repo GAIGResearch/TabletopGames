@@ -59,6 +59,7 @@ public abstract class AbstractGameState {
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
 
     private int gameID;
+    CoreParameters coreGameParameters;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -69,6 +70,7 @@ public abstract class AbstractGameState {
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
         this.gameType = gameType;
+        this.coreGameParameters = new CoreParameters();
     }
 
     /**
@@ -165,7 +167,7 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.data = data;  // Should never be modified
 
-        if (!CoreConstants.COMPETITION_MODE) {
+        if (coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
             s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
@@ -243,7 +245,6 @@ public abstract class AbstractGameState {
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
-     *
      * @param playerId - player observing the state.
      * @return - double, score of current state
      */
@@ -420,6 +421,12 @@ public abstract class AbstractGameState {
 
     void setGameID(int id) {gameID = id;} // package level deliberately
     public int getGameID() {return gameID;}
+    void setCoreGameParameters(CoreParameters coreGameParameters) {
+        this.coreGameParameters = coreGameParameters;
+    }
+    public CoreParameters getCoreGameParameters() {
+        return coreGameParameters;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -50,10 +50,7 @@ public class AddResearchStationFrom extends AddResearchStation {
 
     @Override
     public String toString() {
-        return "AddResearchStationFrom{" +
-                "fromCity='" + fromCity + '\'' +
-                ", toCity='" + city + '\'' +
-                '}';
+        return "Add Research Station in " + city + " from " + fromCity;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package core.components;
 
+import core.AbstractGameState;
 import core.CoreConstants.VisibilityMode;
 import utilities.Pair;
 
@@ -7,9 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
-
 
 public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
@@ -345,10 +343,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         return dp;
     }
 
-    public String toString(int playerID) {
+    public String toString(AbstractGameState gs, int playerID) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < components.size(); i++) {
-            if (!isComponentVisible(i, playerID) && PARTIAL_OBSERVABLE)
+            if (!isComponentVisible(i, playerID) && gs.getCoreGameParameters().partialObservable)
                 sb.append("UNKNOWN");
             else
                 sb.append(components.get(i).toString());
