@@ -195,7 +195,7 @@ public enum GameType {
             return null;
         }
 
-        params = (params == null) ? createParameterSet(seed) : params;
+        params = (params == null) ? ParameterFactory.getDefaultParams(this, seed) : params;
         AbstractForwardModel forwardModel;
         AbstractGameState gameState;
 
@@ -261,10 +261,6 @@ public enum GameType {
         return new Game(this, forwardModel, gameState);
     }
 
-    public AbstractParameters getDefaultParams(long seed) {
-        return ParameterFactory.getDefaultParams(this, seed);
-    }
-
     /**
      * Creates a graphical user interface for the given game type. Add here all games with a GUI available.
      *
@@ -325,8 +321,7 @@ public enum GameType {
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
             case DiceMonastery:
-           //     gui = new DiceMonasteryGUI(game, ac, human);
-                // TODO: DiceMonastery GUI to be converted to new framework
+                gui = new DiceMonasteryGUI(parent, game, ac, human);
                 break;
         }
 
@@ -506,11 +501,11 @@ public enum GameType {
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), createParameterSet(System.currentTimeMillis()));
+        return createGameInstance(nPlayers, System.currentTimeMillis(), ParameterFactory.getDefaultParams(this, System.currentTimeMillis()));
     }
 
     public Game createGameInstance(int nPlayers, long seed) {
-        return createGameInstance(nPlayers, seed, createParameterSet(seed));
+        return createGameInstance(nPlayers, seed, ParameterFactory.getDefaultParams(this, seed));
     }
 
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {

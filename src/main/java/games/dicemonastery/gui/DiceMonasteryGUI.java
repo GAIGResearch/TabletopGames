@@ -1,10 +1,11 @@
 package games.dicemonastery.gui;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.dicemonastery.DiceMonasteryGameState;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -20,13 +21,11 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
-public class DiceMonasteryGUI extends AbstractGUI {
+public class DiceMonasteryGUI extends AbstractGUIManager {
 
     // Settings for display areas
     final static int playerAreaWidth = 360;
     final static int playerAreaHeight = 180;
-    final static int cardWidth = 90;
-    final static int cardHeight = 60;
 
     // Currently active player
     int activePlayer = -1;
@@ -38,8 +37,8 @@ public class DiceMonasteryGUI extends AbstractGUI {
     List<PlayerBoard> playerBoards;
     MainBoard mainBoard;
 
-    public DiceMonasteryGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 20);
+    public DiceMonasteryGUI(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 20);
         this.humanId = humanID;
 
         if (game != null && game.getGameState() != null) {
@@ -94,13 +93,16 @@ public class DiceMonasteryGUI extends AbstractGUI {
             JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
             // Add all views to frame
-            getContentPane().add(mainGameArea, BorderLayout.CENTER);
-            getContentPane().add(infoPanel, BorderLayout.NORTH);
-            getContentPane().add(actionPanel, BorderLayout.SOUTH);
+            parent.add(mainGameArea, BorderLayout.CENTER);
+            parent.add(infoPanel, BorderLayout.NORTH);
+            parent.add(actionPanel, BorderLayout.SOUTH);
+
+            parent.revalidate();
+            parent.setVisible(true);
+            parent.repaint();
         }
 
-        setFrameProperties();
-        }
+    }
 
 
     @Override
@@ -132,6 +134,6 @@ public class DiceMonasteryGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
+        parent.repaint();
     }
 }
