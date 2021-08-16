@@ -1,47 +1,40 @@
 package games;
 
 import core.*;
-import games.blackjack.BlackjackForwardModel;
-import games.blackjack.BlackjackGameState;
-import games.blackjack.BlackjackParameters;
-import games.blackjack.gui.BlackjackGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
-import games.diamant.DiamantParameters;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUIManager;
 import games.dotsboxes.DBGameState;
-import games.dotsboxes.DBParameters;
-import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
-import games.pandemic.gui.PandemicGUI;
+import games.pandemic.gui.*;
+import games.poker.*;
+import games.blackjack.*;
+import games.blackjack.gui.*;
+import games.poker.gui.*;
+import games.dicemonastery.gui.*;
 import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.gui.TicTacToeGUI;
+import games.tictactoe.gui.*;
 import games.uno.UnoForwardModel;
-import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
-import games.uno.gui.UnoGUI;
+import games.uno.gui.*;
 import games.virus.VirusForwardModel;
-import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
+import games.dicemonastery.*;
 import games.dominion.*;
-import gui.PrototypeGUI;
+import gui.*;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -331,9 +324,9 @@ public enum GameType {
             case DominionSizeDistortion:
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
-            // TODO: Diamant GUI
             case DiceMonastery:
-                gui = new DiceMonasteryGUI(game, ac, human);
+           //     gui = new DiceMonasteryGUI(game, ac, human);
+                // TODO: DiceMonastery GUI to be converted to new framework
                 break;
         }
 
